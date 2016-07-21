@@ -11,6 +11,8 @@ as well as for open-source software distribution.
 
 from __future__ import absolute_import, division, print_function
 import datetime
+from niworkflows import anat, common, dwi, func
+
 
 __version__ = '0.0.1'
 
