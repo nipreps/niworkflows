@@ -10,20 +10,21 @@ as well as for open-source software distribution.
 """
 
 from __future__ import absolute_import, division, print_function
+import datetime
 
 __version__ = '0.0.1'
 
-
+__packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
-__copyright__ = 'Copyright 2016, Center for Reproducible Neuroscience, Stanford University'
+__copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
+    datetime.datetime.now().year)
 __credits__ = ['Oscar Esteban', 'Ross Blair', 'Shoshana L. Berleant', 'Chris F. Gorgolewski',
                'Russell A. Poldrack']
 __license__ = '3-clause BSD'
-__maintainer__ = 'Ross Blair'
+__maintainer__ = 'Oscar Esteban'
 __email__ = 'crn.poldracklab@gmail.com'
 __status__ = 'Prototype'
-__url__ = 'https://github.com/poldracklab/preprocessing-workflow'
-__packagename__ = 'niworkflows'
+__url__ = 'https://github.com/poldracklab/{}'.format(__packagename__)
 
 __description__ = """NIworkflows provides processing workflows for magnetic resonance images
 of the brain."""

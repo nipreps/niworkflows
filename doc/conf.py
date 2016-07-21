@@ -15,20 +15,16 @@
 
 import sys
 import os
+import buildmodref
+from niworkflows import __version__, __copyright__, __packagename__
 
 # General information about the project.
-project = 'niworkflows'
-copyright = '2015, Ariel Rokem'
-
-currentdir = os.path.abspath(os.path.dirname(__file__))
-ver_file = os.path.join(currentdir, '..', project, 'version.py')
-with open(ver_file) as f:
-    exec(f.read())
+project = __packagename__
+copyright = __copyright__
 source_version = __version__
 
 currentdir = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(currentdir, 'tools'))
-import buildmodref
 
 # autogenerate api documentation
 # (see https://github.com/rtfd/readthedocs.org/issues/1139)
