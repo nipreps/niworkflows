@@ -3,7 +3,7 @@
 # @Author: oesteban
 # @Date:   2015-11-19 16:44:27
 # @Last Modified by:   oesteban
-# @Last Modified time: 2016-07-21 10:46:41
+# @Last Modified time: 2016-07-21 13:49:24
 """ fmriprep setup script """
 import os
 import sys
@@ -41,7 +41,7 @@ def main():
         maintainer_email=__email__,
         url=__url__,
         download_url='https://pypi.python.org/packages/source/n/niworkflows/'
-                     'niworkflows-%s.tar.gz' % __version__,
+                     'niworkflows-{}.tar.gz'.format(__version__),
         license=__license__,
         packages=['niworkflows', 'niworkflows.anat', 'niworkflows.func', 'niworkflows.dwi', 'niworkflows.common'],
         # entry_points={'console_scripts': ['niworkflows=niworkflows.run_workflow:main',]},
@@ -51,9 +51,9 @@ def main():
         zip_safe=False,
         classifiers=[
             'Development Status :: 3 - Alpha',
-            'Intended Audience :: MRI processing',
-            'Topic :: Scientific/Engineering :: Biomedical Imaging',
-            'License :: OSI Approved :: 3-clause BSD License',
+            'Intended Audience :: Science/Research',
+            'Topic :: Scientific/Engineering',
+            'License :: OSI Approved :: BSD License',
             'Programming Language :: Python :: 2.7',
             'Programming Language :: Python :: 3.5'
         ],
