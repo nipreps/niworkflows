@@ -14,7 +14,7 @@ import datetime
 from niworkflows import anat, common, dwi, func
 
 
-__version__ = '0.0.2a1'
+__version__ = '0.0.3a1'
 
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
