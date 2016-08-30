@@ -3,18 +3,23 @@
 # @Author: oesteban
 # @Date:   2015-11-19 16:44:27
 # @Last Modified by:   oesteban
-# @Last Modified time: 2016-08-16 08:58:05
+# @Last Modified time: 2016-08-29 18:29:24
 """ fmriprep setup script """
+from __future__ import absolute_import
 import os
 import sys
-
-from niworkflows import (__version__, __email__, __url__, __packagename__, __license__,
-                         __description__, __longdesc__, __maintainer__, __author__)
 
 def main():
     """ Install entry-point """
     from glob import glob
+    import inspect
     from setuptools import setup, find_packages
+
+    this_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    # Read vars from info file
+    module_file =os.path.join(this_path, 'niworkflows', 'info.py')
+    with open(module_file) as fvars:
+        exec(compile(fvars.read(), module_file, 'exec'))
 
     setup(
         name=__packagename__,
