@@ -12,7 +12,7 @@ from __future__ import absolute_import, division, print_function
 import datetime
 
 
-__version__ = '0.0.3a4'
+__version__ = '0.0.3a5'
 
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'

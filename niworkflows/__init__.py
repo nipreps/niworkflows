@@ -11,6 +11,6 @@ as well as for open-source software distribution.
 from niworkflows.info import(
     __version__, __packagename__, __author__, __copyright__,
     __credits__, __license__, __maintainer__, __email__, __status__,
-    __url__, __description__, __longdesc__)
+    __description__, __longdesc__)
 
 from niworkflows import anat, common, dwi, func
