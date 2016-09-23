@@ -12,7 +12,7 @@ from nipype.interfaces.base import (traits, isdefined, BaseInterface, BaseInterf
                                     File, InputMultiPath)
 
 from niworkflows import __packagename__, NIWORKFLOWS_LOG
-from niworkflows.data.getters import get_mni_template
+from niworkflows.data.getters import get_mni_template, get_mni_template_ras
 
 MAX_RETRIES = 3
 
@@ -24,6 +24,8 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     num_threads = traits.Int(1, usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
     testing = traits.Bool(False, usedefault=True, desc='use testing settings')
+    orientation = traits.Enum('LAS', 'RAS', mandatory=True, usedefault=True,
+                              desc='modify template orientation (should match input image)')
 
 
 class RobustMNINormalization(BaseInterface):
@@ -76,13 +78,18 @@ class RobustMNINormalization(BaseInterface):
         if isdefined(self.inputs.moving_mask):
             norm.inputs.moving_image_mask = self.inputs.moving_mask
 
+        mni_template = get_mni_template()
+
+        if self.inputs.orientation == 'RAS':
+            template = get_mni_template_ras()
+
         if self.inputs.testing:
-            norm.inputs.fixed_image = op.join(get_mni_template(), 'MNI152_T1_2mm.nii.gz')
-            norm.inputs.fixed_image_mask = op.join(get_mni_template(),
+            norm.inputs.fixed_image = op.join(mni_template, 'MNI152_T1_2mm.nii.gz')
+            norm.inputs.fixed_image_mask = op.join(mni_template,
                                                    'MNI152_T1_2mm_brain_mask.nii.gz')
         else:
-            norm.inputs.fixed_image = op.join(get_mni_template(), 'MNI152_T1_1mm.nii.gz')
-            norm.inputs.fixed_image_mask = op.join(get_mni_template(),
+            norm.inputs.fixed_image = op.join(mni_template, 'MNI152_T1_1mm.nii.gz')
+            norm.inputs.fixed_image_mask = op.join(mni_template,
                                                    'MNI152_T1_1mm_brain_mask.nii.gz')
 
         return norm
