@@ -43,6 +43,7 @@ def main():
         classifiers=ldict['CLASSIFIERS'],
         packages=find_packages(),
         zip_safe=False,
+        package_data={'niworkflows': ['data/t1-mni_registration*.json']},
         # Dependencies handling
         setup_requires=[],
         install_requires=ldict['REQUIRES'],
