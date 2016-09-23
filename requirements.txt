@@ -1,3 +1,2 @@
---index-url https://pypi.python.org/simple/
--e git+https://github.com/poldracklab/nipype#egg=nipype
+-e git+https://github.com/nipy/nipype#egg=nipype
 -e .
