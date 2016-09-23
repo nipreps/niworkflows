@@ -8,9 +8,16 @@ These pipelines are developed by the Poldrack lab at Stanford University
 the Center for Reproducible Neuroscience (http://reproducibility.stanford.edu/),
 as well as for open-source software distribution.
 """
+from __future__ import print_function, division, absolute_import, unicode_literals
+
+import logging
+
 from niworkflows.info import(
     __version__, __packagename__, __author__, __copyright__,
     __credits__, __license__, __maintainer__, __email__, __status__,
     __description__, __longdesc__)
 
 from niworkflows import anat, common, dwi, func
+
+NIWORKFLOWS_LOG = logging.getLogger(__packagename__)
+NIWORKFLOWS_LOG.setLevel(logging.INFO)
