@@ -3,9 +3,7 @@
 # @Author: oesteban
 # @Date:   2015-11-19 16:44:27
 # @Last Modified by:   oesteban
-# @Last Modified time: 2016-09-23 11:19:10
-""" fmriprep setup script """
-from __future__ import absolute_import
+""" niworkflows setup script """
 
 PACKAGE_NAME = 'niworkflows'
 
@@ -16,16 +14,18 @@ def main():
     from inspect import getfile, currentframe
     from setuptools import setup, find_packages
     from io import open  # pylint: disable=W0622
+
     this_path = op.dirname(op.abspath(getfile(currentframe())))
 
     # Python 3: use a locals dictionary
     # http://stackoverflow.com/a/1463370/6820620
     ldict = locals()
-    # Get version and release info, which is all stored in mriqc/info.py
+
+    # Get version and release info, which is all stored in niworkflows/info.py
     module_file = op.join(this_path, PACKAGE_NAME, 'info.py')
     with open(module_file) as infofile:
         pythoncode = [line for line in infofile.readlines() if not line.strip().startswith('#')]
-        exec('\n'.join(pythoncode), globals(), ldict)  # pylint: disable=W0122
+        exec('\n'.join(pythoncode), globals(), ldict)
 
     setup(
         name=PACKAGE_NAME,
@@ -37,8 +37,8 @@ def main():
         email=ldict['__email__'],
         maintainer=ldict['__maintainer__'],
         maintainer_email=ldict['__email__'],
-        url=ldict['__url__'],
         license=ldict['__license__'],
+        url=ldict['URL'],
         download_url=ldict['DOWNLOAD_URL'],
         classifiers=ldict['CLASSIFIERS'],
         packages=find_packages(),

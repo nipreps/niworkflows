@@ -11,7 +11,7 @@ as well as for open-source software distribution.
 from __future__ import absolute_import, division, print_function
 import datetime
 
-__version__ = '0.0.3a4'
+__version__ = '0.0.3a6'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
@@ -22,7 +22,6 @@ __license__ = '3-clause BSD'
 __maintainer__ = 'Oscar Esteban'
 __email__ = 'crn.poldracklab@gmail.com'
 __status__ = 'Prototype'
-__url__ = 'https://github.com/poldracklab/{}'.format(__packagename__)
 
 __description__ = """\
 NeuroImaging Workflows provides processing tools for magnetic resonance images
@@ -40,6 +39,7 @@ the MRI image analysis and reproducibility platform offered by the CRN.
 DOWNLOAD_URL = (
     'https://pypi.python.org/packages/source/{name[0]}/{name}/{name}-{ver}.tar.gz'.format(
         name=__packagename__, ver=__version__))
+URL = 'https://github.com/poldracklab/{}'.format(__packagename__)
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Science/Research',
@@ -49,10 +49,9 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.5',
 ]
 
-REQUIRES = ['nipype',]
-LINKS_REQUIRES = ['git+https://github.com/nipy/nipype.git#egg=nipype',]
+REQUIRES = ['future', 'nipype',]
+LINKS_REQUIRES = ['git+https://github.com/oesteban/nipype.git#egg=nipype',]
 TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist']
-
 EXTRA_REQUIRES = {
     'doc': ['sphinx'],
     'tests': TESTS_REQUIRES,
