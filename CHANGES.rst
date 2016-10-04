@@ -1,6 +1,7 @@
 Version 0.0.3
 -------------
 
+  * Switch data downloads from GDrive to OSF
   * Fixed installer, now compatible with python 3
 
 Version 0.0.2
