@@ -15,8 +15,36 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 from niworkflows.data.utils import _get_dataset_dir, _fetch_file
 
-GOOGLEDRIVE_URL = ('https://3552243d5be815c1b09152da6525cb8fe7b900a6.googledrive.com/'
-                   'host/0BxI12kyv2olZVUswazA3NkFvOXM')
+OSF_PROJECT_URL = ('https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/')
+OSF_RESOURCES = {
+    'brainweb': ('57f32b96b83f6901f194c3ca', '384263fbeadc8e2cca92ced98f224c4b'),
+    'ds003_downsampled': ('57f328f6b83f6901ef94cf70', '5a558961c1eb5e5f162696d8afa956e8'),
+    'mni_template': ('57f32ab29ad5a101fb77fd89', 'debfa882b8c301cd6d75dd769e73f727'),
+    'mni_template_RAS': ('57f32a799ad5a101f977eb77', 'a4669f0e7acceae148bb39450b2b21b4'),
+    'ants_oasis_template': ('57f32ae89ad5a101f977eb79', '34d39070b541c416333cc8b6c2fe993c'),
+    'ants_oasis_template_ras': ('57f32af06c613b01ed13d5fb', '74b2f126d59ddc8a55d76cd5af4774f7'),
+}
+
+def get_dataset(dataset_name, data_dir=None, url=None, resume=True, verbose=1):
+    """Download and load the BIDS-fied brainweb 1mm normal
+
+
+    :param str data_dir: path of the data directory. Used to force data storage
+        in a non-standard location.
+    :param str url: download URL of the dataset. Overwrite the default URL.
+
+    """
+    file_id, md5 = OSF_RESOURCES[dataset_name]
+    if url is None:
+        url = '{}/{}'.format(OSF_PROJECT_URL, file_id)
+
+    data_dir = _get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
+
+    if _fetch_file(url, data_dir, filetype='tar', resume=resume, verbose=verbose,
+                   md5sum=md5):
+        return data_dir
+    else:
+        return None
 
 def get_brainweb_1mm_normal(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the BIDS-fied brainweb 1mm normal
@@ -27,17 +55,7 @@ def get_brainweb_1mm_normal(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
 
     """
-    dataset_name = 'brainweb'
-    if url is None:
-        url = '{}/{}.tar'.format(GOOGLEDRIVE_URL, dataset_name)
-
-    data_dir = _get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
-
-    if _fetch_file(url, data_dir, filetype='tar', resume=resume, verbose=verbose,
-                   md5sum='384263fbeadc8e2cca92ced98f224c4b'):
-        return data_dir
-    else:
-        return None
+    return get_dataset('brainweb', data_dir, url, resume, verbose)
 
 def get_ds003_downsampled(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the BIDS-fied ds003_downsampled
@@ -48,17 +66,7 @@ def get_ds003_downsampled(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
 
     """
-
-    dataset_name = 'ds003_downsampled'
-    if url is None:
-        url = '{}/{}.tar.gz'.format(GOOGLEDRIVE_URL, dataset_name)
-
-    data_dir = _get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
-
-    if _fetch_file(url, data_dir, filetype='tar.gz', resume=resume, verbose=verbose):
-        return data_dir
-    else:
-        return None
+    return get_dataset('ds003_downsampled', data_dir, url, resume, verbose)
 
 def get_mni_template(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
@@ -69,17 +77,7 @@ def get_mni_template(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
 
     """
-    dataset_name = 'mni_template'
-    if url is None:
-        url = '{}/{}.tar'.format(GOOGLEDRIVE_URL, dataset_name)
-
-    data_dir = _get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
-
-    if _fetch_file(url, data_dir, filetype='tar', resume=resume, verbose=verbose,
-                   md5sum='debfa882b8c301cd6d75dd769e73f727'):
-        return data_dir
-    else:
-        return None
+    return get_dataset('mni_template', data_dir, url, resume, verbose)
 
 def get_mni_template_ras(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
@@ -87,18 +85,7 @@ def get_mni_template_ras(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-
-    dataset_name = 'mni_template_RAS'
-    if url is None:
-        url = '{}/{}.tar'.format(GOOGLEDRIVE_URL, dataset_name)
-
-    data_dir = _get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
-
-    if _fetch_file(url, data_dir, filetype='tar', resume=resume, verbose=verbose,
-                   md5sum='a4669f0e7acceae148bb39450b2b21b4'):
-        return data_dir
-    else:
-        return None
+    return get_dataset('mni_template_RAS', data_dir, url, resume, verbose)
 
 def get_ants_oasis_template(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the ANTs template of the OASIS dataset.
@@ -106,17 +93,7 @@ def get_ants_oasis_template(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    dataset_name = 'ants_oasis_template'
-    if url is None:
-        url = '{}/{}.tar'.format(GOOGLEDRIVE_URL, dataset_name)
-
-    data_dir = _get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
-
-    if _fetch_file(url, data_dir, filetype='tar', resume=resume, verbose=verbose,
-                   md5sum='34d39070b541c416333cc8b6c2fe993c'):
-        return data_dir
-    else:
-        return None
+    return get_dataset('ants_oasis_template', data_dir, url, resume, verbose)
 
 def get_ants_oasis_template_ras(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the ANTs template of the OASIS dataset.
@@ -124,14 +101,4 @@ def get_ants_oasis_template_ras(data_dir=None, url=None, resume=True, verbose=1)
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    dataset_name = 'ants_oasis_template_ras'
-    if url is None:
-        url = '{}/{}.tar'.format(GOOGLEDRIVE_URL, dataset_name)
-
-    data_dir = _get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
-
-    if _fetch_file(url, data_dir, filetype='tar', resume=resume, verbose=verbose,
-                   md5sum='74b2f126d59ddc8a55d76cd5af4774f7'):
-        return data_dir
-    else:
-        return None
+    return get_dataset('ants_oasis_template_ras', data_dir, url, resume, verbose)
