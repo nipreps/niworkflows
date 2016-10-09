@@ -23,6 +23,7 @@ OSF_RESOURCES = {
     'mni_template_RAS': ('57f32a799ad5a101f977eb77', 'a4669f0e7acceae148bb39450b2b21b4'),
     'ants_oasis_template': ('57f32ae89ad5a101f977eb79', '34d39070b541c416333cc8b6c2fe993c'),
     'ants_oasis_template_ras': ('57f32af06c613b01ed13d5fb', '74b2f126d59ddc8a55d76cd5af4774f7'),
+    'mni_epi': ('57fa09cdb83f6901d93623a0', '9df727e1f742ec55213480434b4c4811'),
 }
 
 def get_dataset(dataset_name, data_dir=None, url=None, resume=True, verbose=1):
@@ -86,6 +87,14 @@ def get_mni_template_ras(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset('mni_template_RAS', data_dir, url, resume, verbose)
+
+def get_mni_epi(data_dir=None, url=None, resume=True, verbose=1):
+    """Download and load the necessary files from the mni template
+    :param str data_dir: path of the data directory. Used to force data storage
+        in a non-standard location.
+    :param str url: download URL of the dataset. Overwrite the default URL.
+    """
+    return get_dataset('mni_epi', data_dir, url, resume, verbose)
 
 def get_ants_oasis_template(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the ANTs template of the OASIS dataset.
