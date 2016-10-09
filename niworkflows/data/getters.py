@@ -26,6 +26,8 @@ OSF_RESOURCES = {
     'mni_epi': ('57fa09cdb83f6901d93623a0', '9df727e1f742ec55213480434b4c4811'),
     'mni152_nlin_sym_las': ('57fa7fc89ad5a101e635eeef', '9c4c0cad2a2e99d6799f01abf4107f5a'),
     'mni152_nlin_sym_ras': ('57fa7fd09ad5a101df35eed0', '65d64ad5a980da86e7d07d95b3ed2ccb'),
+    'mni_icbm152_nlin_sym_09c_las': ('57fa9f976c613b01cfab3422',
+                                     '837a7b3109b4bcae0a025e4762015278'),
 }
 
 def get_dataset(dataset_name, data_dir=None, url=None, resume=True, verbose=1):
@@ -129,3 +131,11 @@ def get_mni152_nlin_sym_ras(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset('mni152_nlin_sym_ras', data_dir, url, resume, verbose)
+
+def get_mni_icbm152_nlin_sym_09c_las(data_dir=None, url=None, resume=True, verbose=1):
+    """Download and load the necessary files from the mni template
+    :param str data_dir: path of the data directory. Used to force data storage
+        in a non-standard location.
+    :param str url: download URL of the dataset. Overwrite the default URL.
+    """
+    return get_dataset('mni_icbm152_nlin_sym_09c_las', data_dir, url, resume, verbose)
