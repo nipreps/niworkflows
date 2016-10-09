@@ -1,6 +1,7 @@
 Version 0.0.3
 -------------
 
+  * Add MNI152 nonlinear-symmetric template
   * Add MNI EPI template and parcellation
   * Switch data downloads from GDrive to OSF
   * Fixed installer, now compatible with python 3
