@@ -113,3 +113,19 @@ def get_ants_oasis_template_ras(data_dir=None, url=None, resume=True, verbose=1)
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset('ants_oasis_template_ras', data_dir, url, resume, verbose)
+
+def get_mni152_nlin_sym_las(data_dir=None, url=None, resume=True, verbose=1):
+    """Download and load the necessary files from the mni template
+    :param str data_dir: path of the data directory. Used to force data storage
+        in a non-standard location.
+    :param str url: download URL of the dataset. Overwrite the default URL.
+    """
+    return get_dataset('mni152_nlin_sym_las', data_dir, url, resume, verbose)
+
+def get_mni152_nlin_sym_ras(data_dir=None, url=None, resume=True, verbose=1):
+    """Download and load the necessary files from the mni template
+    :param str data_dir: path of the data directory. Used to force data storage
+        in a non-standard location.
+    :param str url: download URL of the dataset. Overwrite the default URL.
+    """
+    return get_dataset('mni152_nlin_sym_ras', data_dir, url, resume, verbose)

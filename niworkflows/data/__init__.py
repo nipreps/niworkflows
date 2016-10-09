@@ -13,4 +13,7 @@ from .getters import (get_brainweb_1mm_normal,
                       get_mni_template,
                       get_mni_template_ras,
                       get_ants_oasis_template,
-                      get_ants_oasis_template_ras,)
+                      get_ants_oasis_template_ras,
+                      get_mni_epi,
+                      get_mni152_nlin_sym_las,
+                      get_mni152_nlin_sym_ras)
