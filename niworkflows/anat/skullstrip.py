@@ -6,7 +6,7 @@
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces import fsl
-from nipype.interfaces.afni import preprocess as afp
+from nipype.interfaces import afni
 
 def afni_wf(name='AFNISkullStripWorkflow'):
     """
@@ -25,8 +25,8 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105
     outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_mask']),
                          name='outputnode')
 
-    sstrip = pe.Node(afp.SkullStrip(outputtype='NIFTI_GZ'), name='skullstrip')
-    sstrip_orig_vol = pe.Node(afp.Calc(
+    sstrip = pe.Node(afni.SkullStrip(outputtype='NIFTI_GZ'), name='skullstrip')
+    sstrip_orig_vol = pe.Node(afni.Calc(
         expr='a*step(b)', outputtype='NIFTI_GZ'), name='sstrip_orig_vol')
     binarize = pe.Node(fsl.Threshold(args='-bin', thresh=1.e-3), name='binarize')
 

@@ -5,7 +5,7 @@
 # @Last Modified time: 2016-07-21 14:13:09
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
-from nipype.interfaces.afni import preprocess as afp
+from nipype.interfaces import afni
 
 def reorient_wf(name='ReorientWorkflow'):
     """A workflow to reorient images to 'RPI' orientation"""
@@ -16,8 +16,8 @@ def reorient_wf(name='ReorientWorkflow'):
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['out_file']), name='outputnode')
 
-    deoblique = pe.Node(afp.Refit(deoblique=True), name='deoblique')
-    reorient = pe.Node(afp.Resample(
+    deoblique = pe.Node(afni.Refit(deoblique=True), name='deoblique')
+    reorient = pe.Node(afni.Resample(
         orientation='RPI', outputtype='NIFTI_GZ'), name='reorient')
     workflow.connect([
         (inputnode, deoblique, [('in_file', 'in_file')]),
