@@ -49,7 +49,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.5',
 ]
 
-REQUIRES = ['future', 'matplotlib', 'nipype', 'nibabel', 'numpy', 'pandas', 'seaborn']
+REQUIRES = ['future', 'matplotlib', 'nipype', 'nibabel', 'numpy', 'pandas', 'seaborn', 'sklearn']
 LINKS_REQUIRES = ['git+https://github.com/oesteban/nipype.git#egg=nipype',]
 TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist']
 EXTRA_REQUIRES = {
