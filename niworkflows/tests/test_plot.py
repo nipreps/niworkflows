@@ -21,5 +21,6 @@ def test_plot_segmentation():
     nib.save(new_image, new_image_filename)
     plot_segmentation(anat_file, new_image_filename, plot_filename,
                       cut_coords=None)
+    assert os.path.isfile(new_image_filename) == True
     os.remove(new_image_filename)
     os.remove(plot_filename)
