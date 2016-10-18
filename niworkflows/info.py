@@ -11,7 +11,7 @@ as well as for open-source software distribution.
 from __future__ import absolute_import, division, print_function
 import datetime
 
-__version__ = '0.0.3a12'
+__version__ = '0.0.3a13'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
@@ -49,7 +49,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.5',
 ]
 
-REQUIRES = ['future', 'nipype',]
+REQUIRES = ['future', 'matplotlib', 'nipype', 'nibabel', 'numpy', 'pandas', 'seaborn', 'sklearn']
 LINKS_REQUIRES = ['git+https://github.com/oesteban/nipype.git#egg=nipype',]
 TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist']
 EXTRA_REQUIRES = {
