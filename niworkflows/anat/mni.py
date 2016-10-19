@@ -11,8 +11,8 @@ from nipype.interfaces.ants.registration import Registration, RegistrationOutput
 from nipype.interfaces.base import (traits, isdefined, BaseInterface, BaseInterfaceInputSpec,
                                     File, InputMultiPath)
 
+from niworkflows.data import getters
 from niworkflows import __packagename__, NIWORKFLOWS_LOG
-from niworkflows.data.getters import get_mni_template, get_mni_template_ras
 
 MAX_RETRIES = 3
 
@@ -24,11 +24,11 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     num_threads = traits.Int(1, usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
     testing = traits.Bool(False, usedefault=True, desc='use testing settings')
-    orientation = traits.Enum('LAS', 'RAS', mandatory=True, usedefault=True,
+    orientation = traits.Enum('RAS', 'LAS', mandatory=True, usedefault=True,
                               desc='modify template orientation (should match input image)')
     template = traits.Enum(
-        'mni_icbm152_linear_ras',
-        'mni_icbm152_nonlinear_asym_2009c',
+        'mni_icbm152_linear',
+        'mni_icbm152_nlin_asym_09c',
         usedefault=True, desc='define the template to be used')
 
 
@@ -82,19 +82,18 @@ class RobustMNINormalization(BaseInterface):
         if isdefined(self.inputs.moving_mask):
             norm.inputs.moving_image_mask = self.inputs.moving_mask
 
-        if self.inputs.template == 'icbm_mni152_linear':
-        mni_template = get_mni_template()
+        get_template = getattr(getters, 'get_{}'.format(self.inputs.template))
+        mni_template = get_template()
 
-        if self.inputs.orientation == 'RAS':
-            template = get_mni_template_ras()
+        if self.inputs.orientation == 'LAS':
+            raise NotImplementedError
 
+        resolution = 1
         if self.inputs.testing:
-            norm.inputs.fixed_image = op.join(mni_template, 'MNI152_T1_2mm.nii.gz')
-            norm.inputs.fixed_image_mask = op.join(mni_template,
-                                                   'MNI152_T1_2mm_brain_mask.nii.gz')
-        else:
-            norm.inputs.fixed_image = op.join(mni_template, 'MNI152_T1_1mm.nii.gz')
-            norm.inputs.fixed_image_mask = op.join(mni_template,
-                                                   'MNI152_T1_1mm_brain_mask.nii.gz')
+            resolution = 2
 
+        norm.inputs.fixed_image = op.join(mni_template,
+                                          '%dmm_T1.nii.gz' % resolution)
+        norm.inputs.fixed_image_mask = op.join(mni_template,
+                                               '%dmm_brainmask.nii.gz' % resolution)
         return norm
