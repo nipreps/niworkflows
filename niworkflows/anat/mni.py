@@ -26,6 +26,10 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     testing = traits.Bool(False, usedefault=True, desc='use testing settings')
     orientation = traits.Enum('LAS', 'RAS', mandatory=True, usedefault=True,
                               desc='modify template orientation (should match input image)')
+    template = traits.Enum(
+        'mni_icbm152_linear_ras',
+        'mni_icbm152_nonlinear_asym_2009c',
+        usedefault=True, desc='define the template to be used')
 
 
 class RobustMNINormalization(BaseInterface):
@@ -78,6 +82,7 @@ class RobustMNINormalization(BaseInterface):
         if isdefined(self.inputs.moving_mask):
             norm.inputs.moving_image_mask = self.inputs.moving_mask
 
+        if self.inputs.template == 'icbm_mni152_linear':
         mni_template = get_mni_template()
 
         if self.inputs.orientation == 'RAS':
