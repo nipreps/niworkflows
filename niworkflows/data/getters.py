@@ -132,13 +132,13 @@ def get_mni152_nlin_sym_ras(data_dir=None, url=None, resume=True, verbose=1):
     """
     return get_dataset('mni152_nlin_sym_ras', data_dir, url, resume, verbose)
 
-def get_mni_icbm152_nlin_sym_09c(data_dir=None, url=None, resume=True, verbose=1):
+def get_mni_icbm152_nlin_asym_09c(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
     :param str data_dir: path of the data directory. Used to force data storage
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('mni_icbm152_nlin_sym_09c', data_dir, url, resume, verbose)
+    return get_dataset('mni_icbm152_nlin_asym_09c', data_dir, url, resume, verbose)
 
 def get_mni_icbm152_linear(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template

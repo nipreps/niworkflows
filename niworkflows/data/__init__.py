@@ -18,4 +18,4 @@ from .getters import (get_brainweb_1mm_normal,
                       get_mni152_nlin_sym_las,
                       get_mni152_nlin_sym_ras,
                       get_mni_icbm152_linear,
-                      get_mni_icbm152_nlin_sym_09c)
+                      get_mni_icbm152_nlin_asym_09c)
