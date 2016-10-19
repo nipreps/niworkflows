@@ -1,6 +1,7 @@
 Version 0.0.3
 -------------
 
+  * Update MNI ICBM152 templates (linear and nonlinear-asym)
   * Add MNI152 2009c nonlinear-symetric template (LAS)
   * Add MNI152 nonlinear-symmetric template
   * Add MNI EPI template and parcellation
