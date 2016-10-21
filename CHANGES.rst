@@ -1,6 +1,8 @@
 Version 0.0.3
 -------------
 
+  * Add parcellation derived from Harvard-Oxford template, to be
+    used with the nonlinear-asym-09c template for the carpetplot
   * Add headmask and normalize tpms in mni_icbm152_nlin_asym_09c
   * Update MNI ICBM152 templates (linear and nonlinear-asym)
   * Add MNI152 2009c nonlinear-symetric template (LAS)
