@@ -52,5 +52,32 @@ def main():
         extras_require=ldict['EXTRA_REQUIRES'],
     )
 
+    from niworkflows.data import get_mni_template
+    from niworkflows.data.getters import (
+        get_brainweb_1mm_normal,
+        get_ds003_downsampled,
+        get_mni_template,
+        get_mni_template_ras,
+        get_ants_oasis_template,
+        get_ants_oasis_template_ras,
+        get_mni_epi,
+        get_mni152_nlin_sym_las,
+        get_mni152_nlin_sym_ras,
+        get_mni_icbm152_linear,
+        get_mni_icbm152_nlin_asym_09c
+    )
+    get_brainweb_1mm_normal()
+    get_ds003_downsampled()
+    get_mni_template()
+    get_mni_template_ras()
+    get_ants_oasis_template()
+    get_ants_oasis_template_ras()
+    get_mni_epi()
+    get_mni152_nlin_sym_las()
+    get_mni152_nlin_sym_ras()
+    get_mni_icbm152_linear()
+    get_mni_icbm152_nlin_asym_09c()
+
+
 if __name__ == '__main__':
     main()
