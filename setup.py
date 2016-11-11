@@ -43,7 +43,8 @@ def main():
         classifiers=ldict['CLASSIFIERS'],
         packages=find_packages(),
         zip_safe=False,
-        package_data={'niworkflows': ['data/t1-mni_registration*.json']},
+        package_data={'niworkflows': ['data/t1-mni_registration*.json'],
+                      'niworkflows.data': ['templates/mni_icbm152_nlin_asym_09c/*.nii.gz']},
         # Dependencies handling
         setup_requires=ldict['SETUP_REQUIRES'],
         install_requires=list(set(ldict['REQUIRES'])),
@@ -51,37 +52,6 @@ def main():
         tests_require=ldict['TESTS_REQUIRES'],
         extras_require=ldict['EXTRA_REQUIRES'],
     )
-    download_data()
-
-
-def download_data():
-    """Download all templates"""
-    from niworkflows.data import get_mni_template
-    from niworkflows.data.getters import (
-        get_brainweb_1mm_normal,
-        get_ds003_downsampled,
-        get_mni_template,
-        get_mni_template_ras,
-        get_ants_oasis_template,
-        get_ants_oasis_template_ras,
-        get_mni_epi,
-        get_mni152_nlin_sym_las,
-        get_mni152_nlin_sym_ras,
-        get_mni_icbm152_linear,
-        get_mni_icbm152_nlin_asym_09c
-    )
-    get_brainweb_1mm_normal()
-    get_ds003_downsampled()
-    get_mni_template()
-    get_mni_template_ras()
-    get_ants_oasis_template()
-    get_ants_oasis_template_ras()
-    get_mni_epi()
-    get_mni152_nlin_sym_las()
-    get_mni152_nlin_sym_ras()
-    get_mni_icbm152_linear()
-    get_mni_icbm152_nlin_asym_09c()
-
 
 if __name__ == '__main__':
     main()

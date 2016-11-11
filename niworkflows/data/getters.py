@@ -7,7 +7,7 @@
 # @Date:   2016-01-05 11:29:40
 # @Email:  code@oscaresteban.es
 # @Last modified by:   oesteban
-# @Last Modified time: 2016-10-19 09:29:52
+# @Last Modified time: 2016-11-11 14:34:29
 """
 Data grabbers
 """
@@ -27,7 +27,7 @@ OSF_RESOURCES = {
     'mni152_nlin_sym_las': ('57fa7fc89ad5a101e635eeef', '9c4c0cad2a2e99d6799f01abf4107f5a'),
     'mni152_nlin_sym_ras': ('57fa7fd09ad5a101df35eed0', '65d64ad5a980da86e7d07d95b3ed2ccb'),
     'mni_icbm152_linear': ('580705eb594d9001ed622649', '72be639e92532def7caad75cb4058e83'),
-    'mni_icbm152_nlin_asym_09c': ('580705089ad5a101f17944a9', '002f9bf24dc5c32de50c03f01fa539ec')
+    # 'mni_icbm152_nlin_asym_09c': ('580705089ad5a101f17944a9', '002f9bf24dc5c32de50c03f01fa539ec')
 }
 
 def get_dataset(dataset_name, data_dir=None, url=None, resume=True, verbose=1):
@@ -133,12 +133,8 @@ def get_mni152_nlin_sym_ras(data_dir=None, url=None, resume=True, verbose=1):
     return get_dataset('mni152_nlin_sym_ras', data_dir, url, resume, verbose)
 
 def get_mni_icbm152_nlin_asym_09c(data_dir=None, url=None, resume=True, verbose=1):
-    """Download and load the necessary files from the mni template
-    :param str data_dir: path of the data directory. Used to force data storage
-        in a non-standard location.
-    :param str url: download URL of the dataset. Overwrite the default URL.
-    """
-    return get_dataset('mni_icbm152_nlin_asym_09c', data_dir, url, resume, verbose)
+    from pkg_resources import resource_filename as get_resource
+    return get_resource('niworkflows.data', 'templates/mni_icbm152_nlin_asym_09c')
 
 def get_mni_icbm152_linear(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
