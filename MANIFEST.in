@@ -1,6 +1,3 @@
-#documentation
-recursive-include docs/_build/html *
-
 # data
 include niworkflows/data/*.json
 recursive-include niworkflows/data/templates *

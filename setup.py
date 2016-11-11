@@ -45,6 +45,7 @@ def main():
         zip_safe=False,
         package_data={'niworkflows': ['data/t1-mni_registration*.json'],
                       'niworkflows.data': ['templates/mni_icbm152_nlin_asym_09c/*.nii.gz']},
+        include_package_data=True,
         # Dependencies handling
         setup_requires=ldict['SETUP_REQUIRES'],
         install_requires=list(set(ldict['REQUIRES'])),
