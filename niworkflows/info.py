@@ -11,7 +11,7 @@ as well as for open-source software distribution.
 from __future__ import absolute_import, division, print_function
 import datetime
 
-__version__ = '0.0.3a16'
+__version__ = '0.0.3a17'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
@@ -49,7 +49,10 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.5',
 ]
 
-REQUIRES = ['future', 'nipype',]
+REQUIRES = ['nipype']
+SETUP_REQUIRES = ['future']
+REQUIRES += SETUP_REQUIRES
+
 LINKS_REQUIRES = ['git+https://github.com/oesteban/nipype.git#egg=nipype',]
 TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist']
 EXTRA_REQUIRES = {
@@ -59,4 +62,4 @@ EXTRA_REQUIRES = {
 }
 
 # Enable a handle to install all extra dependencies at once
-EXTRA_REQUIRES['all'] = [val for _, val in list(EXTRA_REQUIRES.items())]
+EXTRA_REQUIRES['all'] = list(set([val for _, val in list(EXTRA_REQUIRES.items())]))
