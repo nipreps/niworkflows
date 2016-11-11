@@ -26,6 +26,8 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     testing = traits.Bool(False, usedefault=True, desc='use testing settings')
     orientation = traits.Enum('RAS', 'LAS', mandatory=True, usedefault=True,
                               desc='modify template orientation (should match input image)')
+    reference = traits.Enum('T1', 'T2', 'PD', mandatory=True, usedefault=True,
+                            desc='set the reference modality for registration')
     template = traits.Enum(
         'mni_icbm152_linear',
         'mni_icbm152_nlin_asym_09c',
@@ -92,8 +94,8 @@ class RobustMNINormalization(BaseInterface):
         if self.inputs.testing:
             resolution = 2
 
-        norm.inputs.fixed_image = op.join(mni_template,
-                                          '%dmm_T1.nii.gz' % resolution)
+        norm.inputs.fixed_image = op.join(
+            mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
         norm.inputs.fixed_image_mask = op.join(mni_template,
                                                '%dmm_brainmask.nii.gz' % resolution)
         return norm
