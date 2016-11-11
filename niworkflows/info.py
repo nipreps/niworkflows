@@ -62,4 +62,4 @@ EXTRA_REQUIRES = {
 }
 
 # Enable a handle to install all extra dependencies at once
-EXTRA_REQUIRES['all'] = list(set([val for _, val in list(EXTRA_REQUIRES.items())]))
+EXTRA_REQUIRES['all'] = [val for _, val in list(EXTRA_REQUIRES.items())]

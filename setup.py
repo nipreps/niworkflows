@@ -46,12 +46,16 @@ def main():
         package_data={'niworkflows': ['data/t1-mni_registration*.json']},
         # Dependencies handling
         setup_requires=ldict['SETUP_REQUIRES'],
-        install_requires=ldict['REQUIRES'],
+        install_requires=list(set(ldict['REQUIRES'])),
         dependency_links=ldict['LINKS_REQUIRES'],
         tests_require=ldict['TESTS_REQUIRES'],
         extras_require=ldict['EXTRA_REQUIRES'],
     )
+    download_data()
 
+
+def download_data():
+    """Download all templates"""
     from niworkflows.data import get_mni_template
     from niworkflows.data.getters import (
         get_brainweb_1mm_normal,
