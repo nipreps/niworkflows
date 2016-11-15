@@ -1,4 +1,5 @@
 import os
+from abc import abstractmethod
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 
