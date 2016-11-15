@@ -1,9 +1,16 @@
+''' class mixin and utilities for enabling reports for nipype interfaces '''
+
+from __future__ import absolute_import, division, print_function
+from io import open
+
 import os
 from abc import abstractmethod
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 
 class ReportCapableInterface(object):
+    ''' temporary mixin to enable reports for nipype interfaces '''
+
     # constants
     ERROR_REPORT = 'error'
     SUCCESS_REPORT = 'success'
@@ -59,7 +66,7 @@ class ReportCapableInterface(object):
 def save_html(template, report_file_name, unique_string, **kwargs):
     ''' save an actual html file with name report_file_name. unique_string is
     used to uniquely identify the html/css/js/etc generated for this report. For
-    limitations on unique_string, check 
+    limitations on unique_string, check
     http://stackoverflow.com/questions/70579/what-are-valid-values-for-the-id-attribute-in-html '''
 
     searchpath = pkgrf('niworkflows', '/')
@@ -74,7 +81,7 @@ def save_html(template, report_file_name, unique_string, **kwargs):
     with open(report_file_name, 'w') as handle:
         handle.write(report_render)
 
-def as_svg(image, **kwargs):
+def as_svg(image):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
     A bit hacky. '''
     filename = 'temp.svg'
