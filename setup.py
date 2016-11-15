@@ -44,6 +44,7 @@ def main():
         packages=find_packages(),
         zip_safe=False,
         package_data={'niworkflows': ['data/t1-mni_registration*.json'],
+                      'niworkflows.viz': ['viz/overlay_3d_report.tpl'],
                       'niworkflows.data': ['templates/mni_icbm152_nlin_asym_09c/*.nii.gz']},
         include_package_data=True,
         # Dependencies handling
