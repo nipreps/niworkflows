@@ -19,7 +19,6 @@ clean-build:
 tag:
 		git tag -a $(VERSION) -m "Version ${VERSION}"
 		git push origin $(VERSION)
-		git push upstream $(VERSION)
 
 .PHONY: test
 test: clean-pyc
