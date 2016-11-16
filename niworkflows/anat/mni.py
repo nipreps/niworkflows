@@ -21,7 +21,10 @@ MAX_RETRIES = 3
 class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     moving_image = InputMultiPath(
         File(exists=True), mandatory=True, desc='image to apply transformation to')
+    reference_image = InputMultiPath(
+        File(exists=True), desc='override the reference image')
     moving_mask = File(exists=True, desc='moving image mask')
+    reference_mask = File(exists=True, desc='reference image mask')
     num_threads = traits.Int(1, usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
     testing = traits.Bool(False, usedefault=True, desc='use testing settings')
@@ -118,6 +121,12 @@ class RobustMNINormalization(BaseInterface):
         )
         if isdefined(self.inputs.moving_mask):
             norm.inputs.moving_image_mask = self.inputs.moving_mask
+
+        if isdefined(self.inputs.reference_image):
+            norm.inputs.fixed_image = self.inputs.reference_image
+            if isdefined(self.inputs.reference_mask):
+                norm.inputs.fixed_image_mask = self.inputs.reference_mask
+            return norm
 
         get_template = getattr(getters, 'get_{}'.format(self.inputs.template))
         mni_template = get_template()
