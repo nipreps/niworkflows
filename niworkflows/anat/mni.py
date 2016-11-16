@@ -36,7 +36,8 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
         'mni_icbm152_nlin_asym_09c',
         usedefault=True, desc='define the template to be used')
     settings = traits.List(File(exists=True), desc='pass on the list of settings files')
-
+    template_resolution = traits.Enum(1, 2, mandatory=True, usedefault=True,
+                                      desc='template resolution')
 
 class RobustMNINormalization(BaseInterface):
     """
@@ -83,8 +84,15 @@ class RobustMNINormalization(BaseInterface):
             try:
                 interface_result = norm.run()
             except Exception as exc:
+                if 'Too many samples map outside' in exc:
+                    reason = ('too many samples mapped outside '
+                              'the moving image')
+                else:
+                    reason = ('unknown reasons')
+
                 NIWORKFLOWS_LOG.warn(
-                    'Retry #%d failed. Reason:\n%s', self.retry, exc)
+                        'Retry #%d failed: %s.', self.retry, exc)
+
 
             errfile = op.join(runtime.cwd, 'stderr.nipype')
             outfile = op.join(runtime.cwd, 'stdout.nipype')
@@ -100,8 +108,7 @@ class RobustMNINormalization(BaseInterface):
             self.retry += 1
 
         raise RuntimeError(
-            'Robust spatial normalization failed after %d retries.' % self.retry - 1)
-
+            'Robust spatial normalization failed after %d retries.' % (self.retry - 1))
 
     def _config_ants(self, ants_settings):
         norm = Registration(
@@ -118,7 +125,7 @@ class RobustMNINormalization(BaseInterface):
         if self.inputs.orientation == 'LAS':
             raise NotImplementedError
 
-        resolution = 1
+        resolution = self.inputs.template_resolution
         if self.inputs.testing:
             resolution = 2
 
