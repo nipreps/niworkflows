@@ -22,6 +22,5 @@
     "collapse_output_transforms": true,
     "write_composite_transform": false,
     "output_transform_prefix": "ants_t1_to_mni",
-    "output_warped_image": true,
-    "terminal_output": "file"
+    "output_warped_image": true
 }

@@ -7,7 +7,7 @@
     "metric_weight": [ 1, 1, 1 ],
     "radius_or_number_of_bins": [ 56, 56, 4 ],
     "transforms": [ "Rigid", "Affine", "SyN" ],
-    "transform_parameters": [ [ 0.1 ], [ 0.08 ], [ 0.1, 3.0, 0.0 ] ],
+    "transform_parameters": [ [ 0.05 ], [ 0.08 ], [ 0.1, 3.0, 0.0 ] ],
     "initial_moving_transform_com": true,
     "number_of_iterations": [ [ 10000, 1000, 100 ], [1000, 500, 250, 100], [100, 70, 50, 20] ],
     "sampling_strategy": [ "Regular", "Regular", "None" ],
@@ -22,6 +22,5 @@
     "collapse_output_transforms": true,
     "write_composite_transform": false,
     "output_transform_prefix": "ants_t1_to_mni",
-    "output_warped_image": true,
-    "terminal_output": "file"
+    "output_warped_image": true
 }
