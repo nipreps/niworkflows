@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import, division, print_function
 from io import open
-
+import uuid
 import os
 from abc import abstractmethod
 import jinja2
@@ -63,11 +63,14 @@ class ReportCapableInterface(object):
         # as of now we think this will be the same for every interface
 
 
-def save_html(template, report_file_name, unique_string, **kwargs):
-    ''' save an actual html file with name report_file_name. unique_string is
-    used to uniquely identify the html/css/js/etc generated for this report. For
-    limitations on unique_string, check
-    http://stackoverflow.com/questions/70579/what-are-valid-values-for-the-id-attribute-in-html '''
+def save_html(template, interface_prefix, **kwargs):
+    ''' save an actual html file with name report_file_name. interface_prefix must be lowercase alphabetical.
+    kwargs should all contain valid html that  will be sent to the jinja2 renderer '''
+
+    if not interface_prefix.isalpha():
+        raise ValueError("interface_prefix must use alphabetical characters and have length at least 1")
+
+    validate_html(' '.join(kwargs.values()))
 
     searchpath = pkgrf('niworkflows', '/')
     env = jinja2.Environment(
@@ -75,11 +78,31 @@ def save_html(template, report_file_name, unique_string, **kwargs):
         trim_blocks=True, lstrip_blocks=True
     )
     report_tpl = env.get_template('viz/' + template)
-    kwargs['unique_string'] = unique_string
+    kwargs['unique_string'] = interface_prefix + uuid.uuid4()
     report_render = report_tpl.render(kwargs)
 
     with open(report_file_name, 'w') as handle:
         handle.write(report_render)
+
+def validate_html(html)
+    ''' There are limitations on the html passed to save_html because
+    save_html's result will be concatenated with other html strings
+
+    html may not contain 'id=', '<head', '<body', '<header', '<footer', '<main',
+    because those elements are supposed to be unique. it also should not contain
+    '<style' because selectors/@keyframes, etc. in embedded CSS may conflict in
+    unpredictable ways. '''
+
+    bad_strings=['id=', '<head', '<body', '<header', '<footer', '<main', '<style']
+    found_strings = []
+    for bad_string in bad_strings:
+        if html.find(bad_string) != -1: # the bad_string is found in html
+            found_strings.append(bad_string)
+
+    if len(found_strings) > 0:
+        raise ValueError('Found the following illegal strings in html ({}...{}): {}'
+                         .format(html[:5], html[-5:], found_strings))
+
 
 def as_svg(image):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
