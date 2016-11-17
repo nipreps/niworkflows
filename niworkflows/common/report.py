@@ -9,13 +9,6 @@ import jinja2
 from pkg_resources import resource_filename as pkgrf
 from abc import abstractmethod
 
-import nibabel as nb
-from nilearn import plotting
-from nipype import logging
-from nipype.interfaces import ants, fsl
-from nipype.interfaces.base import File, traits
-from nipype.utils import filemanip
-
 
 class ReportCapableInterface(object):
     ''' temporary mixin to enable reports for nipype interfaces '''
