@@ -1,7 +1,7 @@
 <div id='{{unique_string}}'>
     <h4>{{title}}</h4>
     <style type='text/css'>
-    @keyframes flickerAnimation {
+    @keyframes flickerAnimation{{unique_string}} {
         0% {
             opacity: 1;
         }
@@ -19,7 +19,7 @@
             top: 0;
             let: 0;
         background-size: 100%;
-        animation: 1s ease-in-out 0s alternate none infinite running flickerAnimation;
+        animation: 1s ease-in-out 0s alternate none infinite running flickerAnimation{{unique_string}};
     }
 
     #{{unique_string}} .image_container .overlay_image:hover {
