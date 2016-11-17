@@ -3,4 +3,4 @@ dependencies:
     - "~/.cache/stanford-crn"
 test:
   override:
-    - nosetests -vv --collect-only
+    - nosetests -vv 
