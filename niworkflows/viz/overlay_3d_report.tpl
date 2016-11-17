@@ -21,6 +21,10 @@
         background-size: 100%;
         animation: 1s ease-in-out 0s alternate none infinite running flickerAnimation;
     }
+
+    #{{unique_string}} .image_container .overlay_image:hover {
+        animation-play-state: paused;
+    }
     </style>
     <div class='image_container'>
         <div class='base_image'>{{base_image}}</div>
