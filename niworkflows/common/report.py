@@ -84,7 +84,7 @@ def save_html(template, interface_prefix, **kwargs):
     with open(report_file_name, 'w') as handle:
         handle.write(report_render)
 
-def validate_html(html)
+def validate_html(html):
     ''' There are limitations on the html passed to save_html because
     save_html's result will be concatenated with other html strings
 
