@@ -4,9 +4,11 @@ from __future__ import absolute_import, division, print_function
 from io import open
 
 import os
-from abc import abstractmethod
+import uuid
 import jinja2
 from pkg_resources import resource_filename as pkgrf
+from abc import abstractmethod
+
 
 class ReportCapableInterface(object):
     ''' temporary mixin to enable reports for nipype interfaces '''
@@ -14,10 +16,11 @@ class ReportCapableInterface(object):
     # constants
     ERROR_REPORT = 'error'
     SUCCESS_REPORT = 'success'
+    html_report = None
 
     def _run_interface(self, runtime):
         ''' delegates to base interface run method, then attempts to generate reports '''
-        self.html_report = os.path.join(os.getcwd(), 'report.html')
+        self.html_report = os.path.join(runtime.cwd, 'report.html')
         try:
             runtime = super(ReportCapableInterface, self)._run_interface(runtime)
             #  command line interfaces might not raise an exception, check return_code
