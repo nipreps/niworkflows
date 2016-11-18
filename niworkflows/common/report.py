@@ -8,6 +8,8 @@ from abc import abstractmethod
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 
+from nipype.interfaces.base import File, traits
+
 class ReportCapableInputSpec(object):
     generate_report = traits.Bool(
         desc="Set to true to enable report generation for node"
