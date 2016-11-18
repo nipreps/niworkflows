@@ -261,7 +261,7 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
 
             # Replace header (get rid of height, width and viewBox) and add custom stylesheet
             svg[1] = ('<svg xmlns:xlink="http://www.w3.org/1999/xlink" '
-                      'xmlns="http://www.w3.org/2000/svg" version="1.1">')
+                      'xmlns="http://www.w3.org/2000/svg" version="1.1" class="flickering">')
             svg.insert(2, """\
   <style type="text/css">
   @keyframes flickerAnimation { 0% {opacity: 1;} 100% { opacity: 0; }}
