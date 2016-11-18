@@ -7,7 +7,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 from os import path as op
 import shutil
 import pkg_resources as pkgr
-
+from uuid import uuid4
 import numpy as np
 from lxml import etree
 from nilearn.plotting import plot_anat
@@ -206,7 +206,7 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
                 # Find and replace the figure_1 id.
                 xml_data = etree.fromstring(svg)
                 find_text = etree.ETXPath("//{%s}g[@id='figure_1']" % (SVGNS))
-                find_text(xml_data)[0].set('id', '%s-%s' % (div_id, mode))
+                find_text(xml_data)[0].set('id', '%s-%s-%s' % (div_id, mode, uuid4()))
 
                 with open(out_file, 'wb') as f:
                     f.write(etree.tostring(xml_data))
