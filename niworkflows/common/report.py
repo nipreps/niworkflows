@@ -63,14 +63,14 @@ class ReportCapableInterface(object):
         # as of now we think this will be the same for every interface
 
 
-def save_html(template, interface_prefix, **kwargs):
+def save_html(template, report_file_name, interface_prefix, **kwargs):
     ''' save an actual html file with name report_file_name. interface_prefix must be lowercase alphabetical.
     kwargs should all contain valid html that  will be sent to the jinja2 renderer '''
 
     if not interface_prefix.isalpha():
         raise ValueError("interface_prefix must use alphabetical characters and have length at least 1")
 
-    validate_html(' '.join(kwargs.values()))
+    #[validate_html(html) for html in kwargs.values()]
 
     searchpath = pkgrf('niworkflows', '/')
     env = jinja2.Environment(
@@ -78,7 +78,7 @@ def save_html(template, interface_prefix, **kwargs):
         trim_blocks=True, lstrip_blocks=True
     )
     report_tpl = env.get_template('viz/' + template)
-    kwargs['unique_string'] = interface_prefix + uuid.uuid4()
+    kwargs['unique_string'] = interface_prefix + str(uuid.uuid4())
     report_render = report_tpl.render(kwargs)
 
     with open(report_file_name, 'w') as handle:
