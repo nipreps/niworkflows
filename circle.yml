@@ -1,8 +1,3 @@
-dependencies:
-  cache_directories:
-    - "~/.cache/stanford-crn"
-  pre:
-    - sudo apt-get update && sudo apt-get install python-tk
 test:
   override:
     - nosetests -vv 
