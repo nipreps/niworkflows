@@ -49,7 +49,8 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.5',
 ]
 
-REQUIRES = ['nipype', 'future']
+REQUIRES = ['nipype', 'future', 'nilearn', 'sklearn', 'pandas', 'matplotlib',
+            'jinja2']
 SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 
