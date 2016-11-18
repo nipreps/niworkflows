@@ -7,4 +7,4 @@ dependencies:
     - docker build --rm=false -t rwblair/niworkflows .
 test:
   override:
-    - docker run -ti --rm --entrypoint=/usr/local/miniconda/bin/nosetests rwblair/niworkflows /root/niworkflows/niworkflows
+    - docker run -ti --rm --entrypoint=/usr/local/miniconda/bin/nosetests rwblair/niworkflows /root/niworkflows
