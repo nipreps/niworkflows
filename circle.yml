@@ -1,0 +1,10 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  override:
+    - docker build --rm=false -t rwblair/niworkflows .
+test:
+  override:
+    - docker run -ti --rm --entrypoint=/usr/local/miniconda/bin/nosetests rwblair/niworkflows /root/niworkflows
