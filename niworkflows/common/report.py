@@ -119,23 +119,28 @@ class HTMLValidator(HTMLParser):
         self.unique_string = unique_string
         self.bad_tags = []
         self.bad_ids = []
+        self.taken_ids = [unique_string] # in template
 
     def handle_starttag(self, tag, attrs):
         if tag in ['head', 'body', 'header', 'footer', 'main']:
             self.bad_tags.append(tag)
         for attr, value in attrs:
             if attr=='id':
-                # if unique_string is not found in the id name or id_name equals unique_string
-                if value.find(self.unique_string) == -1 or value == self.unique_string:
+                # if unique_string is not found in the id name
+                if value.find(self.unique_string) == -1:
+                    self.bad_ids.append(value)
+                elif value in self.taken_ids: # the value is already being used as an id
                     self.bad_ids.append(value)
 
     def close(self):
         super(HTMLValidator, self).close()
         error_string = ''
         if len(self.bad_tags) > 0:
-            error_string = "Found the following illegal tags: {}.\n".format(self.bad_tags)
+            error_string = 'Found the following illegal tags: {}.\n'.format(self.bad_tags)
         if len(self.bad_ids) > 0:
-            error_string = error_string + "Found the following illegal ids: {}.\n ids must contain unique_string ({}) and not be equal to unique_string.\n".format(self.bad_ids, self.unique_string)
+            error_string = error_string + 'Found the following illegal ids: {}.\n ids must '
+            'contain unique_string ({}) and be unique from each other.\n'.format(
+                self.bad_ids, self.unique_string)
         if len(error_string) > 0:
             raise ValueError(error_string)
 
