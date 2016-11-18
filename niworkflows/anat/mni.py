@@ -8,7 +8,11 @@ from os import path as op
 import shutil
 import pkg_resources as pkgr
 
+import numpy as np
+from lxml import etree
 from nilearn.plotting import plot_anat
+
+from io import open
 from nipype.interfaces.ants.registration import Registration, RegistrationOutputSpec
 from nipype.interfaces.base import (traits, isdefined, BaseInterface, BaseInterfaceInputSpec,
                                     File, InputMultiPath)
@@ -22,6 +26,8 @@ DEFAULT_CUTS = {
     'y': [-20, 0, 20],
     'z': [-10, 0, 10]
 }
+
+SVGNS = "http://www.w3.org/2000/svg"
 
 class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     moving_image = InputMultiPath(
@@ -48,7 +54,7 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
                                       desc='template resolution')
     generate_report = traits.Bool(
         False, usedefault=True, desc='enable report generation')
-    html_report = File('viz-report.html', usedefault=True, desc='visual report file')
+    html_report = File('viz-report.svg', usedefault=True, desc='visual report file')
 
 
 class RobustMNINormalizationOutputSpec(RegistrationOutputSpec):
@@ -120,8 +126,8 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
                 if self.inputs.generate_report:
                     try:
                         self._generate_report()
-                    except:
-                        pass
+                    except Exception as reason:
+                        NIWORKFLOWS_LOG.warn('Report was not generated, reason: %s', reason)
 
                 return runtime
             self.retry += 1
@@ -164,35 +170,115 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
 
     def _generate_report(self):
         """ Generates the visual report """
-        NIWORKFLOWS_LOG.debug('Generating visual report')
+        NIWORKFLOWS_LOG.info('Generating visual report')
 
-        def _plot_xyz(anat_img, plot_params, div_id):
+        def _plot_xyz(anat_img, div_id, plot_params=None,
+                      order=('z', 'x', 'y'), cuts=None):
             """
-
+            Plots the foreground and background views
+            Default order is: axial, coronal, sagittal
             """
-            NIWORKFLOWS_LOG.info('Plotting %s', str(anat_img))
-            svgs = []
+            if plot_params is None:
+                plot_params = {}
 
-            for mode, cuts in list(DEFAULT_CUTS.items()):
+            # Use default MNI cuts if none defined
+            if cuts is None:
+                cuts = DEFAULT_CUTS.copy()
+
+            NIWORKFLOWS_LOG.debug('Plotting %s for interface report.', anat_img)
+            out_files = []
+
+            # Plot each cut axis
+            for mode in list(order):
+                out_file = '{}_{}.svg'.format(div_id, mode)
                 plot_params['display_mode'] = mode
-                plot_params['cut_coords'] = cuts
-                image = plot_anat(anat_img, **plot_params)
-                svgs.append('<div id="{0}-{1}" class="{0}">{2}</div>'.format(
-                    div_id, mode, report.as_svg(image)))
-                image.close()
-            return '\n'.join(svgs)
+                plot_params['cut_coords'] = cuts[mode]
+                plot_params['output_file'] = out_file
 
-        plot_params = {'cut_coords': 3}
-        report.save_html(
-            template='overlay_3d_report.tpl',
-            report_file_name=self._results['html_report'],
-            unique_string='antsRegistration',
-            base_image=_plot_xyz(self.norm.inputs.fixed_image[0],
-                                 plot_params, 'fixed-image'),
-            overlay_image=_plot_xyz(self._results['warped_image'],
-                                    plot_params, 'moving-image'),
-            title="Spatial Normalization to MNI"
-        )
+                # Generate nilearn figure
+                plot_anat(anat_img, **plot_params)
+                out_files.append(out_file)
+
+                # Open generated svg file and fix id
+                with open(out_file, 'rb') as f:
+                    svg = f.read()
+
+                # Find and replace the figure_1 id.
+                xml_data = etree.fromstring(svg)
+                find_text = etree.ETXPath("//{%s}g[@id='figure_1']" % (SVGNS))
+                find_text(xml_data)[0].set('id', '%s-%s' % (div_id, mode))
+
+                with open(out_file, 'wb') as f:
+                    f.write(etree.tostring(xml_data))
+            return out_files
+
+        def _compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
+            import svgutils.transform as svgt
+            import svgutils.compose as svgc
+
+            # Read all svg files and get roots
+            svgs = [svgt.fromfile(f) for f in bg_svgs + fg_svgs]
+            roots = [f.getroot() for f in svgs]
+            nsvgs = len(svgs) // 2
+            # Query the size of each
+            sizes = [(int(f.width[:-2]), int(f.height[:-2])) for f in svgs]
+
+            # Calculate the scale to fit all widths
+            scales = [1.0] * len(svgs)
+            if not all([width[0] == sizes[0][0] for width in sizes[1:]]):
+                ref_size = sizes[ref]
+                for i, els in enumerate(sizes):
+                    scales[i] = ref_size[0]/els[0]
+
+            newsizes = [tuple(size)
+                        for size in np.array(sizes) * np.array(scales)[..., np.newaxis]]
+
+            # Compose the views panel
+            totalsize = np.sum(newsizes, axis=0)
+            fig = svgt.SVGFigure(svgc.Unit(totalsize[0]).to('cm'),
+                                 svgc.Unit(totalsize[1]).to('cm'))
+
+            yoffset = 0
+            for i, r in enumerate(roots):
+                size = newsizes[i]
+                r.moveto(0, yoffset, scale=scales[i])
+                yoffset += size[1]
+                if i == (nsvgs - 1):
+                    yoffset = 0
+
+            # Group background and foreground in groups
+            newroots = [
+                svgt.GroupElement(roots[:3], {'class': 'background-svg'}),
+                svgt.GroupElement(roots[3:], {'class': 'foreground-svg'})
+            ]
+            fig.append(newroots)
+            out_file = op.abspath(out_file)
+            fig.save(out_file)
+
+            # Add styles for the flicker animation
+            with open(out_file, 'rb') as f:
+                svg = f.read()
+
+            # Find and replace the figure_1 id.
+            xml_data = etree.fromstring(svg)
+            find_text = etree.ETXPath("//{%s}style" % (SVGNS))
+            find_text(xml_data)[0].text += ('\n@keyframes flickerAnimation { 0% {opacity: 1;} '
+                                            '100% { opacity: 0; }}')
+            find_text(xml_data)[0].text += ('\n.foreground-svg { animation: 1s ease-in-out 0s '
+                                            'alternate none infinite running flickerAnimation;}')
+            find_text(xml_data)[0].text += ('\n.foreground-svg:hover '
+                                            '{ animation-play-state: paused;}')
+
+            with open(out_file, 'wb') as f:
+                f.write(etree.tostring(xml_data))
+            return out_file
+
+        # Call composer
+        _compose_view(
+            _plot_xyz(self.norm.inputs.fixed_image[0], 'fixed-image'),
+            _plot_xyz(self._results['warped_image'], 'moving-image'),
+            out_file=self._results['html_report'])
+
 
     def _generate_error_report(self):
         pass
