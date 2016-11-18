@@ -246,7 +246,7 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
                 if i == (nsvgs - 1):
                     yoffset = 0
 
-            # Group background and foreground in groups
+            # Group background and foreground panels in two groups
             newroots = [
                 svgt.GroupElement(roots[:3], {'class': 'background-svg'}),
                 svgt.GroupElement(roots[3:], {'class': 'foreground-svg'})
@@ -257,20 +257,19 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
 
             # Add styles for the flicker animation
             with open(out_file, 'rb') as f:
-                svg = f.read()
+                svg = f.read().split('\n')
 
-            # Find and replace the figure_1 id.
-            xml_data = etree.fromstring(svg)
-            find_text = etree.ETXPath("//{%s}style" % (SVGNS))
-            find_text(xml_data)[0].text += ('\n@keyframes flickerAnimation { 0% {opacity: 1;} '
-                                            '100% { opacity: 0; }}')
-            find_text(xml_data)[0].text += ('\n.foreground-svg { animation: 1s ease-in-out 0s '
-                                            'alternate none infinite running flickerAnimation;}')
-            find_text(xml_data)[0].text += ('\n.foreground-svg:hover '
-                                            '{ animation-play-state: paused;}')
-
+            # Replace header (get rid of height, width and viewBox) and add custom stylesheet
+            svg[1] = ('<svg xmlns:xlink="http://www.w3.org/1999/xlink" '
+                      'xmlns="http://www.w3.org/2000/svg" version="1.1">')
+            svg.insert(2, """\
+  <style type="text/css">
+  @keyframes flickerAnimation { 0% {opacity: 1;} 100% { opacity: 0; }}
+  .foreground-svg { animation: 1s ease-in-out 0s alternate none infinite running flickerAnimation;}
+  .foreground-svg:hover { animation-play-state: paused;}
+  </style>""")
             with open(out_file, 'wb') as f:
-                f.write(etree.tostring(xml_data))
+                f.write('\n'.join(svg))
             return out_file
 
         # Call composer
