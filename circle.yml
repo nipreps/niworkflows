@@ -4,4 +4,4 @@ machine:
 
 test:
   override:
-    - docker run -ti --rm --entrypoint="/usr/local/miniconda/bin/nosetests /root/niworkflows/niworkflows" poldracklab/niworkflows:latest
+    - docker run -ti --rm --entrypoint="/usr/local/miniconda/bin/nosetests /root/niworkflows/niworkflows" rwblair/niworkflows:latest
