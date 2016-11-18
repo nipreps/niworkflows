@@ -27,8 +27,8 @@ class TestFLIRTRPT(unittest.TestCase):
             self.assertTrue(os.path.isfile(html_report), 'HTML report exists at {}'
                             .format(html_report))
 
-    def test_applyxfm_wrapper(self):
-        self.test_known_file_out(ApplyXFMRPT)
+    #def test_applyxfm_wrapper(self):
+    #    self.test_known_file_out(ApplyXFMRPT)
 
 
 class TestBETRPT(unittest.TestCase):
