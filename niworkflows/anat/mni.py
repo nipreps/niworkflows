@@ -21,10 +21,10 @@ from niworkflows.data import getters
 from niworkflows.common import report
 from niworkflows import __packagename__, NIWORKFLOWS_LOG
 
-DEFAULT_CUTS = {
-    'x': [-30, 0, 30],
-    'y': [-20, 0, 20],
-    'z': [-10, 0, 10]
+DEFAULT_MNI_CUTS = {
+    'x': [-25, -20, -10, 0, 10, 20, 25],
+    'y': [-25, -20, -10, 0, 10, 20, 25],
+    'z': [-15, -10, -5, 0, 5, 10, 15]
 }
 
 SVGNS = "http://www.w3.org/2000/svg"
@@ -183,7 +183,7 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
 
             # Use default MNI cuts if none defined
             if cuts is None:
-                cuts = DEFAULT_CUTS.copy()
+                cuts = DEFAULT_MNI_CUTS.copy()
 
             NIWORKFLOWS_LOG.debug('Plotting %s for interface report.', anat_img)
             out_files = []
@@ -233,10 +233,10 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
             newsizes = [tuple(size)
                         for size in np.array(sizes) * np.array(scales)[..., np.newaxis]]
 
-            # Compose the views panel
-            totalsize = np.sum(newsizes, axis=0)
-            fig = svgt.SVGFigure(svgc.Unit(totalsize[0]).to('cm'),
-                                 svgc.Unit(totalsize[1]).to('cm'))
+            # Compose the views panel: total size is the width of
+            # any element (used the first here) and the sum of heights
+            totalsize = [newsizes[0][0], np.sum(newsizes[:3], axis=0)[1]]
+            fig = svgt.SVGFigure(totalsize[0], totalsize[1])
 
             yoffset = 0
             for i, r in enumerate(roots):
@@ -260,8 +260,9 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
                 svg = f.read().split('\n')
 
             # Replace header (get rid of height, width and viewBox) and add custom stylesheet
-            svg[1] = ('<svg xmlns:xlink="http://www.w3.org/1999/xlink" '
-                      'xmlns="http://www.w3.org/2000/svg" version="1.1" class="flickering">')
+            # svg[1] = ('<svg xmlns:xlink="http://www.w3.org/1999/xlink" '
+            #           'xmlns="http://www.w3.org/2000/svg" version="1.1" class="flickering" '
+            #           'viewBox="0 0 %0.2f %0.2f">' % tuple(totalsize))
             svg.insert(2, """\
   <style type="text/css">
   @keyframes flickerAnimation { 0% {opacity: 1;} 100% { opacity: 0; }}
