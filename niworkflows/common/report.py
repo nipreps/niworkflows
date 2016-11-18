@@ -4,7 +4,10 @@ from __future__ import absolute_import, division, print_function
 from io import open
 import uuid
 import os
+import string
 from abc import abstractmethod
+from html.parser import HTMLParser
+
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 
@@ -16,7 +19,8 @@ class ReportCapableInterface(object):
     SUCCESS_REPORT = 'success'
 
     def _run_interface(self, runtime):
-        ''' delegates to base interface run method, then attempts to generate reports '''
+        ''' delegates to base interface run method, then attempts to generate reports;
+        may need to be changed completely and added instead to Node.write_report() '''
         self.html_report = os.path.join(os.getcwd(), 'report.html')
         try:
             runtime = super(ReportCapableInterface, self)._run_interface(runtime)
@@ -63,14 +67,22 @@ class ReportCapableInterface(object):
         # as of now we think this will be the same for every interface
 
 
-def save_html(template, report_file_name, interface_prefix, **kwargs):
-    ''' save an actual html file with name report_file_name. interface_prefix must be lowercase alphabetical.
-    kwargs should all contain valid html that  will be sent to the jinja2 renderer '''
+def save_html(template, report_file_name, unique_string, **kwargs):
+    ''' save an actual html file with name report_file_name. unique_string's
+    first character must be alphabetical; every call to save_html must have a
+    unique unique_string. kwargs should all contain valid html that will be sent
+    to the jinja2 renderer '''
 
-    if not interface_prefix.isalpha():
-        raise ValueError("interface_prefix must use alphabetical characters and have length at least 1")
+    if not unique_string[0].isalpha():
+        raise ValueError('unique_string must be a valid id value in html; '
+                         'the first character must be alphabetical. Received unique_string={}'
+                         .format(unique_string))
 
-    #[validate_html(html) for html in kwargs.values()]
+    # validate html
+    validator = HTMLValidator(unique_string=unique_string)
+    for html in kwargs.values():
+        validator.feed(html)
+        validator.close()
 
     searchpath = pkgrf('niworkflows', '/')
     env = jinja2.Environment(
@@ -84,25 +96,48 @@ def save_html(template, report_file_name, interface_prefix, **kwargs):
     with open(report_file_name, 'w') as handle:
         handle.write(report_render)
 
-def validate_html(html):
+class HTMLValidator(HTMLParser):
     ''' There are limitations on the html passed to save_html because
     save_html's result will be concatenated with other html strings
 
-    html may not contain 'id=', '<head', '<body', '<header', '<footer', '<main',
-    because those elements are supposed to be unique. it also should not contain
-    '<style' because selectors/@keyframes, etc. in embedded CSS may conflict in
-    unpredictable ways. '''
+    html may not contain the tags 'head', 'body', 'header', 'footer', 'main',
+    because those elements are supposed to be unique.
 
-    bad_strings=['id=', '<head', '<body', '<header', '<footer', '<main', '<style']
-    found_strings = []
-    for bad_string in bad_strings:
-        if html.find(bad_string) != -1: # the bad_string is found in html
-            found_strings.append(bad_string)
+    html should also not contain '<style' because selectors/@keyframes, etc. in
+    embedded CSS may conflict in unpredictable ways. However, due to lack of
+    control over svg creation, this is not checked for.
 
-    if len(found_strings) > 0:
-        raise ValueError('Found the following illegal strings in html ({}...{}): {}'
-                         .format(html[:5], html[-5:], found_strings))
+    If the html contains a tag with the id attribute, the value of id must
+    contain unique_string and not be equal to unique_string. In addition, all
+    id's within any one save_html call are also unique from each other.
 
+    html is assumed to be complete, valid html
+    '''
+
+    def __init__(self, unique_string):
+        super(HTMLValidator, self).__init__()
+        self.unique_string = unique_string
+        self.bad_tags = []
+        self.bad_ids = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag in ['head', 'body', 'header', 'footer', 'main']:
+            self.bad_tags.append(tag)
+        for attr, value in attrs:
+            if attr=='id':
+                # if unique_string is not found in the id name or id_name equals unique_string
+                if value.find(self.unique_string) == -1 or value == self.unique_string:
+                    self.bad_ids.append(value)
+
+    def close(self):
+        super(HTMLValidator, self).close()
+        error_string = ''
+        if len(self.bad_tags) > 0:
+            error_string = "Found the following illegal tags: {}.\n".format(self.bad_tags)
+        if len(self.bad_ids) > 0:
+            error_string = error_string + "Found the following illegal ids: {}.\n ids must contain unique_string ({}) and not be equal to unique_string.\n".format(self.bad_ids, self.unique_string)
+        if len(error_string) > 0:
+            raise ValueError(error_string)
 
 def as_svg(image):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
