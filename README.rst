@@ -5,8 +5,8 @@ These pipelines are developed by the `Poldrack lab at Stanford University <https
 for use at the `Center for Reproducible Neuroscience <http://reproducibility.stanford.edu/>`_,
 as well as for open-source software distribution.
 
-.. image:: https://circleci.com/gh/poldracklab/nipype-workflows/tree/master.svg?style=shield
-  :target: https://circleci.com/gh/poldracklab/nipype-workflows/tree/master
+.. image:: https://circleci.com/gh/poldracklab/niworkflows/tree/master.svg?style=shield
+  :target: https://circleci.com/gh/poldracklab/niworkflows/tree/master
   
 .. image:: https://readthedocs.org/projects/nipype-workflows/badge/?version=latest
   :target: http://nipype-workflows.readthedocs.io/en/latest/?badge=latest
