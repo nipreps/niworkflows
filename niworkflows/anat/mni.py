@@ -122,7 +122,16 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
                 self._results.update(interface_result.outputs.get())
                 NIWORKFLOWS_LOG.info(
                     'Successful spatial normalization (retry #%d).', self.retry)
-                return super(RobustMNINormalization, self)._run_interface(runtime)
+
+                # Roll back till implemented
+                # return super(RobustMNINormalization, self)._run_interface(runtime)
+
+                if self.inputs.generate_report:
+                    try:
+                        self._generate_report()
+                    except Exception as reason:
+                        NIWORKFLOWS_LOG.warn('Report was not generated, reason: %s', reason)
+                return runtime
 
             self.retry += 1
 
@@ -253,7 +262,7 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
 
             svg.insert(2, """\
   <style type="text/css">
-  @keyframes flickerAnimation%s { 0% {opacity: 1;} 100% { opacity: 0; }}
+  @keyframes flickerAnimation%s { 0%% {opacity: 1;} 100%% { opacity: 0; }}
   .foreground-svg { animation: 1s ease-in-out 0s alternate none infinite running flickerAnimation%s;}
   .foreground-svg:hover { animation-play-state: paused;}
   </style>""" % tuple([uuid4()] * 2))
