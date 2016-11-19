@@ -122,14 +122,8 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
                 self._results.update(interface_result.outputs.get())
                 NIWORKFLOWS_LOG.info(
                     'Successful spatial normalization (retry #%d).', self.retry)
+                return super(RobustMNINormalization, self)._run_interface(runtime)
 
-                if self.inputs.generate_report:
-                    try:
-                        self._generate_report()
-                    except Exception as reason:
-                        NIWORKFLOWS_LOG.warn('Report was not generated, reason: %s', reason)
-
-                return runtime
             self.retry += 1
 
         raise RuntimeError(
@@ -178,12 +172,10 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
             Plots the foreground and background views
             Default order is: axial, coronal, sagittal
             """
-            if plot_params is None:
-                plot_params = {}
+            plot_params = {} if plot_params is None else plot_params
 
             # Use default MNI cuts if none defined
-            if cuts is None:
-                cuts = DEFAULT_MNI_CUTS.copy()
+            cuts = DEFAULT_MNI_CUTS.copy() if cuts is None else cuts
 
             NIWORKFLOWS_LOG.debug('Plotting %s for interface report.', anat_img)
             out_files = []
@@ -265,10 +257,10 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
             #           'viewBox="0 0 %0.2f %0.2f">' % tuple(totalsize))
             svg.insert(2, """\
   <style type="text/css">
-  @keyframes flickerAnimation { 0% {opacity: 1;} 100% { opacity: 0; }}
-  .foreground-svg { animation: 1s ease-in-out 0s alternate none infinite running flickerAnimation;}
+  @keyframes flickerAnimation%s { 0% {opacity: 1;} 100% { opacity: 0; }}
+  .foreground-svg { animation: 1s ease-in-out 0s alternate none infinite running flickerAnimation%s;}
   .foreground-svg:hover { animation-play-state: paused;}
-  </style>""")
+  </style>""" % tuple([uuid4()] * 2))
             with open(out_file, 'wb') as f:
                 f.write('\n'.join(svg))
             return out_file
