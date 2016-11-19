@@ -251,10 +251,6 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
             with open(out_file, 'rb') as f:
                 svg = f.read().split('\n')
 
-            # Replace header (get rid of height, width and viewBox) and add custom stylesheet
-            # svg[1] = ('<svg xmlns:xlink="http://www.w3.org/1999/xlink" '
-            #           'xmlns="http://www.w3.org/2000/svg" version="1.1" class="flickering" '
-            #           'viewBox="0 0 %0.2f %0.2f">' % tuple(totalsize))
             svg.insert(2, """\
   <style type="text/css">
   @keyframes flickerAnimation%s { 0% {opacity: 1;} 100% { opacity: 0; }}
