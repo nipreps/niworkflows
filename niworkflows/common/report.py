@@ -80,7 +80,7 @@ def save_html(template, report_file_name, unique_string, **kwargs):
 
     # validate html
     validator = HTMLValidator(unique_string=unique_string)
-    for html in kwargs.values():
+    for key, html in enumerate(kwargs.keys()):
         validator.feed(html)
         validator.close()
 
@@ -90,7 +90,7 @@ def save_html(template, report_file_name, unique_string, **kwargs):
         trim_blocks=True, lstrip_blocks=True
     )
     report_tpl = env.get_template('viz/' + template)
-    kwargs['unique_string'] = interface_prefix + str(uuid.uuid4())
+    kwargs['unique_string'] = unique_string
     report_render = report_tpl.render(kwargs)
 
     with open(report_file_name, 'w') as handle:
