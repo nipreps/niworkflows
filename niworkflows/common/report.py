@@ -1,106 +1,67 @@
-''' class mixin and utilities for enabling reports for nipype interfaces '''
+# -*- coding: utf-8 -*-
+# @Author: shoshber
+""" class mixin and utilities for enabling reports for nipype interfaces """
 
 from __future__ import absolute_import, division, print_function
-from io import open
 
 import os
-import uuid
-import jinja2
-from pkg_resources import resource_filename as pkgrf
 from abc import abstractmethod
-
-
 from nipype.interfaces.base import File, traits
+from niworkflows import NIWORKFLOWS_LOG
 
 class ReportCapableInputSpec(object):
     generate_report = traits.Bool(
-        desc="Set to true to enable report generation for node"
-    )
+        False, usedefault=True, desc="Set to true to enable report generation for node")
+
+    out_report = File(
+        'report.html', usedefault=True, desc='filename for the visual report')
 
 class ReportCapableInterface(object):
-    ''' temporary mixin to enable reports for nipype interfaces '''
+    """ temporary mixin to enable reports for nipype interfaces """
 
-    # constants
-    ERROR_REPORT = 'error'
-    SUCCESS_REPORT = 'success'
-    html_report = None
+    def __init__(self, **inputs):
+        self._out_report = None
+        super(ReportCapableInterface, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
-        ''' delegates to base interface run method, then attempts to generate reports '''
-        self.html_report = os.path.join(runtime.cwd, 'report.html')
-        try:
-            runtime = super(ReportCapableInterface, self)._run_interface(runtime)
-            #  command line interfaces might not raise an exception, check return_code
-            if runtime.returncode and runtime.returncode != 0:
-                self._conditionally_generate_report(self.ERROR_REPORT)
-            else:
-                self._conditionally_generate_report(self.SUCCESS_REPORT)
+        """ delegates to base interface run method, then attempts to generate reports """
+        # make this _run_interface seamless (avoid wrap it into try..except)
+        runtime = super(ReportCapableInterface, self)._run_interface(runtime)
+
+        # leave early if there's nothing to do
+        if not self.inputs.generate_report:
             return runtime
-        except:
-            self._conditionally_generate_report(self.ERROR_REPORT)
-            raise
+
+        # check exit code and act consequently
+        NIWORKFLOWS_LOG.debug('Running report generation code')
+        if hasattr(runtime, 'returncode') and runtime.returncode == 0:
+            self._out_report = self._generate_report()
+
+        if self._out_report is not None:
+            NIWORKFLOWS_LOG.info('Successfully created report (%s)', self._out_report)
+        else:
+            NIWORKFLOWS_LOG.warn('Interface did not exit gracefully (exit_code=%s)',
+                                 runtime.get('returncode', 'None'))
+            self._out_report = self._generate_error_report(
+                errno=runtime.get('returncode', None))
+
+        return runtime
 
     def _list_outputs(self):
         outputs = super(ReportCapableInterface, self)._list_outputs()
-        if self.inputs.generate_report:
-            outputs['html_report'] = self.html_report
+        if self._out_report is not None:
+            outputs['html_report'] = self._out_report
         return outputs
-
-    def _conditionally_generate_report(self, flag):
-        ''' Do nothing if generate_report is not True.
-        Otherwise delegate to a report generating method  '''
-
-        # don't do anything unless the generate_report boolean is set to True
-        if not self.inputs.generate_report:
-            return
-
-        if flag == self.SUCCESS_REPORT:
-            self._generate_report()
-        elif flag == self.ERROR_REPORT:
-            self._generate_error_report()
-        else:
-            raise ValueError("Cannot generate report with flag {}. "
-                             "Use constants SUCCESS_REPORT and ERROR_REPORT."
-                             .format(flag))
 
     @abstractmethod
     def _generate_report(self):
-        ''' Saves an html snippet '''
+        """
+        Saves an html object - returns the path to the generated
+        snippet or None if there was an error.
+        """
 
     @abstractmethod
-    def _generate_error_report(self):
-        ''' Saves an html snippet '''
+    def _generate_error_report(self, errno=None):
+        """ Saves an html snippet """
         # as of now we think this will be the same for every interface
 
-
-def save_html(template, report_file_name, unique_string, **kwargs):
-    ''' save an actual html file with name report_file_name. unique_string is
-    used to uniquely identify the html/css/js/etc generated for this report. For
-    limitations on unique_string, check
-    http://stackoverflow.com/questions/70579/what-are-valid-values-for-the-id-attribute-in-html '''
-
-    searchpath = pkgrf('niworkflows', '/')
-    env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(searchpath=searchpath),
-        trim_blocks=True, lstrip_blocks=True
-    )
-    report_tpl = env.get_template('viz/' + template)
-    kwargs['unique_string'] = unique_string
-    report_render = report_tpl.render(kwargs)
-
-    with open(report_file_name, 'w') as handle:
-        handle.write(report_render)
-
-def as_svg(image):
-    ''' takes an image as created by nilearn.plotting and returns a blob svg.
-    A bit hacky. '''
-    filename = 'temp.svg'
-
-    image.savefig(filename)
-
-    with open(filename, 'r') as file_obj:
-        image_svg = file_obj.readlines()
-    image_svg = image_svg[4:] # strip out extra DOCTYPE, etc headers
-    image_svg = ''.join(image_svg) # straight up giant string
-
-    return image_svg
