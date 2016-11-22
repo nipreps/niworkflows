@@ -176,7 +176,8 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
         NIWORKFLOWS_LOG.info('Generating visual report')
 
         def _plot_xyz(anat_img, div_id, plot_params=None,
-                      order=('z', 'x', 'y'), cuts=None):
+                      order=('z', 'x', 'y'), cuts=None,
+                      estimate_brightness=False):
             """
             Plots the foreground and background views
             Default order is: axial, coronal, sagittal
@@ -188,6 +189,16 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
 
             NIWORKFLOWS_LOG.debug('Plotting %s for interface report.', anat_img)
             out_files = []
+
+
+            if estimate_brightness:
+                from nibabel import load as loadnii
+                data = loadnii(anat_img).get_data().reshape(-1)
+                vmin = np.percentile(data, 15)
+                if plot_params.get('vmin', None) is None:
+                    plot_params['vmin'] = vmin
+                if plot_params.get('vmax', None) is None:
+                    plot_params['vmax'] = np.percentile(data[data > vmin], 99.8)
 
             # Plot each cut axis
             for mode in list(order):
@@ -272,8 +283,10 @@ class RobustMNINormalization(report.ReportCapableInterface, BaseInterface):
 
         # Call composer
         _compose_view(
-            _plot_xyz(self.norm.inputs.fixed_image[0], 'fixed-image'),
-            _plot_xyz(self._results['warped_image'], 'moving-image'),
+            _plot_xyz(self.norm.inputs.fixed_image[0], 'fixed-image',
+                      estimate_brightness=True),
+            _plot_xyz(self._results['warped_image'], 'moving-image',
+                      estimate_brightness=True),
             out_file=self._results['html_report'])
 
 
