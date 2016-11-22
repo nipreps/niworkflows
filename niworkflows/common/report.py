@@ -6,16 +6,19 @@ from __future__ import absolute_import, division, print_function
 
 import os
 from abc import abstractmethod
+from io import open
+
 from nipype.interfaces.base import File, traits, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
 
-class ReportCapableInputSpec(BaseInterfaceInputSpec):
+
+class ReportCapableInputSpec(object):
     generate_report = traits.Bool(
         False, usedefault=True, desc="Set to true to enable report generation for node")
     out_report = File(
         'report.html', usedefault=True, desc='filename for the visual report')
 
-class ReportCapableOutputSpec(TraitedSpec):
+class ReportCapableOutputSpec(object):
     out_report = File(desc='filename for the visual report')
 
 class ReportCapableInterface(object):
@@ -69,9 +72,50 @@ class ReportCapableInterface(object):
         """
         Saves an html object.
         """
+        raise NotImplementedError
 
-    @abstractmethod
     def _generate_error_report(self, errno=None):
         """ Saves an html snippet """
         # as of now we think this will be the same for every interface
+        errorstr = '<div><span class="error">Failed to generate report!</span>.\n'
+        if errno:
+            errorstr += (' <span class="error">Interface returned exit '
+                         'code %d</span>\n') % errno
+        errorstr += '</div>\n'
+        with open(self._out_report, 'w') as outfile:
+            outfile.write(errorstr)
+
+
+class RegistrationRCInputSpec(ReportCapableInputSpec):
+    out_report = File(
+        'report.svg', usedefault=True, desc='filename for the visual report')
+
+class RegistrationRC(ReportCapableInterface):
+    """ An abstract mixin to registration nipype interfaces """
+
+    def __init__(self, **inputs):
+        self._fixed_image = None
+        self._moving_image = None
+        super(RegistrationRC, self).__init__(**inputs)
+
+    DEFAULT_MNI_CUTS = {
+        'x': [-25, -20, -10, 0, 10, 20, 25],
+        'y': [-25, -20, -10, 0, 10, 20, 25],
+        'z': [-15, -10, -5, 0, 5, 10, 15]
+    }
+
+    def _generate_report(self):
+        """ Generates the visual report """
+        from niworkflows.viz.utils import compose_view, plot_xyz
+        NIWORKFLOWS_LOG.info('Generating visual report')
+
+        # Call composer
+        compose_view(
+            plot_xyz(self._fixed_image, 'fixed-image',
+                     estimate_brightness=True,
+                     cuts=self.DEFAULT_MNI_CUTS),
+            plot_xyz(self._moving_image, 'moving-image',
+                     estimate_brightness=True,
+                     cuts=self.DEFAULT_MNI_CUTS),
+            out_file=self._out_report)
 
