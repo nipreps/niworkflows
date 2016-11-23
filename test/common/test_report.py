@@ -7,6 +7,9 @@ from niworkflows.common import report
 
 class TestHTMLValidator(unittest.TestCase):
 
+    def test_css_validator(self):
+        pass
+
     def test_html_validator(self):
         unique_string = 'lala'
         valid_htmls = ['<super></super>', 'id=la' + unique_string,

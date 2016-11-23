@@ -8,6 +8,7 @@ import os
 import string
 from abc import abstractmethod
 from html.parser import HTMLParser
+import tinycss
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 
@@ -145,13 +146,11 @@ class HTMLValidator(HTMLParser):
     html may not contain the tags 'head', 'body', 'header', 'footer', 'main',
     because those elements are supposed to be unique.
 
-    html should also not contain '<style' because selectors/@keyframes, etc. in
-    embedded CSS may conflict in unpredictable ways. However, due to lack of
-    control over svg creation, this is not checked for.
-
     If the html contains a tag with the id attribute, the value of id must
     contain unique_string and not be equal to unique_string. In addition, all
     id's within any one save_html call are also unique from each other.
+
+    If appropriate, invokes CSSValidator.
 
     html is assumed to be complete, valid html
     '''
@@ -185,3 +184,63 @@ class HTMLValidator(HTMLParser):
                 self.bad_ids, self.unique_string)
         if len(error_string) > 0:
             raise ValueError(error_string)
+
+class CSSValidator():
+    ''' CSS embedded in HTML snippets must follow the following guidelines:
+            * selectors must be @keyframe, '*', or begin with '#unique_string'
+            * keyframe names must contain the unique string
+            * counter names must contain the unique string
+            * position may not be fixed
+
+    Like HTML Validator, valid CSS is assumed and not checked.'''
+
+    def __init__(self, unique_string):
+        self.unique_string = unique_string
+        self.parser = tinycss.make_parser()
+
+    def validate(self, css):
+        stylesheet = self.parser.parse_stylesheet(css)
+        for rule in stylesheet.rules:
+            self.validate_selector(rule)
+            self.validate_block(rule)
+        if len(parser.errors) > 0:
+            warnings.warn('CSS Validator encountered the following parser errors. '
+                          'CSS may not be syntactically correct, and CSS Validator may not have '
+                          'been able to do its job. \n{}'.format(parser.errors))
+
+    def validate_selectors(self, rule):
+        ''' Checks for at-rules that are not keyframes, invalid keyframe names, and selectors
+        that do not start with the id unique_string'''
+        if rule.at_keyword is not None:
+            if rule.at_keyword != 'keyframe':
+                raise ValueError('Found invalid @-rule {} in CSS.'.format(rule))
+                keyframe_name = rule.head[0]
+            if not self.unique_string in keyframe_name:
+                raise ValueError('Found invalid @keyframe name {} in CSS. '
+                                 'Keyframe names must contain the unique id {}'.
+                                 format(keyframe_name, self.unique_string))
+        else: # not an at-rule
+            biggest_selector = rule.selector[0]
+            if biggest_selector[-len(self.unique_string):] != '#' + self.unique_string: # first selector must specify id unique_string
+                raise ValueError('Found an invalid rule set in CSS. First selector in {} is not *#{}'.format(rule, self.unique_string))
+            elif biggest_selector != '*':
+                raise ValueError('Found an invalid rule set in CSS. Selector {} is not '
+                                 '@keyframe, "*", or start with id unique_string {}'.
+                                 format(rule.selector, self.unique_string))
+
+    def validate_blocks(self, rule):
+        ''' checks counter names and position values '''
+        if rule.at_keyword is not None:
+            declarations = parser.parse_declaration_list(rule.body):
+        else: # not an at-rule
+            declarations = rule.declarations
+
+        for declaration in declarations:
+            if declaration.name = 'position':
+                if 'fixed' in declaration.value:
+                    raise ValueError('Found illegal position `fixed` in CSS.')
+            elif 'counter' in declaration.name:
+                if not self.unique_string in declaration.value[0]: # there will always be one token
+                    raise ValueError('Found illegal counter name {} in CSS. Counter names must '
+                                     'contain a unique_string {}'.
+                                     format(declaration.value[0], self.unique_string())
