@@ -1,5 +1,6 @@
 import uuid
 
+import nibabel as nb
 from nilearn import plotting, image as nlimage
 from nipype.interfaces import ants, fsl
 from nipype.interfaces.base import File, traits
@@ -52,6 +53,8 @@ class BETRPT(report.ReportCapableInterface, fsl.BET):
     input_spec = BETInputSpecRPT
     output_spec = BETOutputSpecRPT
 
+    N_SLICES = 3 # number of slices to display per dimension
+
     def _overlay_file_name(self):
         ''' returns an overlay, in this order of preference: mask_file, outline_file,
         out_file, and the name of the output'''
@@ -73,12 +76,16 @@ class BETRPT(report.ReportCapableInterface, fsl.BET):
         ''' generates a report showing three orthogonal slices of an arbitrary
         volume of in_file, with the resulting binary brain mask overlaid '''
 
-        def _xyz_svgs(plot_func, plot_params):
+        def _xyz_svgs(plot_func, cut_coord_basis, cut_coords_num, plot_params):
             ''' plot_func: function that returns an image like nilearn's plotting functions
+                cut_coord_basis: nii image for which to calculate cut coords
                 plot_params: dict of common parameters to plot_func
             returns a string of html containing svgs'''
             svgs = []
             for display_mode in 'x', 'y', 'z':
+                plot_params['cut_coords'] = plotting.find_cut_slices(nb.load(cut_coord_basis),
+                                                                     direction=display_mode,
+                                                                     n_cuts=cut_coords_num)
                 plot_params['display_mode'] = display_mode
                 image = plot_func(**plot_params)
                 svgs.append(report.as_svg(image))
@@ -88,7 +95,7 @@ class BETRPT(report.ReportCapableInterface, fsl.BET):
         def _plot_overlay_over_anat(**plot_params):
             ''' plot_params: dict of params for plot_func '''
             image = plotting.plot_anat(**plot_params)
-            image.add_contours(self._overlay_file_name()[0], filled=True, colors='b', levels=[0.5],
+            image.add_contours(self._overlay_file_name()[0], filled=False, colors='r', levels=[0.5],
                                alpha=1)
             return image
 
@@ -98,50 +105,36 @@ class BETRPT(report.ReportCapableInterface, fsl.BET):
             in_file = nlimage.concat_imgs(self.inputs.in_file) # result is always "4d"
             return nlimage.index_img(in_file, 0)
 
-        try:
-            # most of the time just do simple semi-transparent overlay of brain mask over input
-            plot_params = {'roi_img': self.aggregate_outputs().mask_file,
-                           'bg_img': _3d_in_file(),
-                           'alpha': 0.6,
-                           'cut_coords': 3}
-            svgs = _xyz_svgs(plotting.plot_roi, plot_params)
+        overlay_file_name, overlay_label = self._overlay_file_name()
+        if overlay_file_name:
+            background_params = {'anat_img': _3d_in_file(),
+                                 'cmap': 'gray'}
+            base_svgs = _xyz_svgs(plotting.plot_anat, overlay_file_name, self.N_SLICES,
+                                  background_params)
+            overlay_svgs = _xyz_svgs(_plot_overlay_over_anat, overlay_file_name, self.N_SLICES,
+                                     background_params)
+
             report.save_html(template='overlay_3d_report.tpl',
                              report_file_name=self.html_report,
                              unique_string='bet' + str(uuid.uuid4()),
-                             base_image=svgs,
-                             title="BET: brain mask over anatomical input",
+                             base_image=base_svgs,
+                             overlay_image=overlay_svgs,
+                             inputs=self.inputs,
+                             outputs=self.aggregate_outputs(),
+                             title='BET: Outline (calculated from ({}) over the input '
+                             '(anatomical)'.format(overlay_label))
+        else: # just print an output (no overlay)
+            file_name = self._pick_output_file()
+            image = plotting.plot_img(file_name)
+
+            report.save_html(template='overlay_3d_report.tpl',
+                             report_file_name=self.html_report,
+                             unique_string='bet' + str(uuid.uuid4()),
+                             base_image=report.as_svg(image),
+                             title="BET: " + file_name,
                              inputs=self.inputs,
                              outputs=self.aggregate_outputs())
-        except TypeError: # in case of weird outputs
-            overlay_file_name, overlay_label = self._overlay_file_name()
-            if overlay_file_name:
-                background_params = {'anat_img': _3d_in_file(),
-                                     'cut_coords': 3,
-                                     'cmap': 'gray'}
-                base_svgs = _xyz_svgs(plotting.plot_anat, background_params)
-                overlay_svgs = _xyz_svgs(_plot_overlay_over_anat, background_params)
-
-                report.save_html(template='overlay_3d_report.tpl',
-                                 report_file_name=self.html_report,
-                                 unique_string='bet' + str(uuid.uuid4()),
-                                 base_image=base_svgs,
-                                 overlay_image=overlay_svgs,
-                                 inputs=self.inputs,
-                                 outputs=self.aggregate_outputs(),
-                                 title="BET: " + overlay_label + " over the input (anatomical)")
-
-            else: # just print an output (no overlay)
-                file_name = self._pick_output_file()
-                image = plotting.plot_img(file_name)
-
-                report.save_html(template='overlay_3d_report.tpl',
-                                 report_file_name=self.html_report,
-                                 unique_string='bet' + str(uuid.uuid4()),
-                                 base_image=report.as_svg(image),
-                                 title="BET: " + file_name,
-                                 inputs=self.inputs,
-                                 outputs=self.aggregate_outputs())
-                image.close()
+            image.close()
 
     def _generate_error_report(self):
         pass
