@@ -65,10 +65,10 @@ class TestBETRPT(unittest.TestCase):
         with InTemporaryDirectory():
             out_report = bet_interface.run().outputs.out_report
             if os.getenv('SAVE_CIRCLE_ARTIFACTS', False) == "1":
-                artifact = os.path.join('/scratch', 'testBET_000.svg')
+                artifact = os.path.join('/scratch', 'testBET_000.html')
                 i = 1
                 while os.path.isfile(artifact):
-                    artifact = os.path.join('/scratch', 'testBET_%03d.svg' % i)
+                    artifact = os.path.join('/scratch', 'testBET_%03d.html' % i)
                     i += 1
                 copy(out_report, artifact)
 
