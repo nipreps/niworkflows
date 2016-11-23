@@ -5,17 +5,19 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import unittest
+from shutil import copy
 
 import nibabel as nb
 from nilearn import image
 from nipype.utils.tmpdirs import InTemporaryDirectory
 
-from niworkflows.data.getters import get_mni_template_ras
+from niworkflows.data.getters import get_mni_template_ras, get_ds003_downsampled
 
 from niworkflows.interfaces.registration import FLIRTRPT
 from niworkflows.interfaces.segmentation import BETRPT
 
 MNI_DIR = get_mni_template_ras()
+DS003_DIR = get_ds003_downsampled()
 
 class TestFLIRTRPT(unittest.TestCase):
     def setUp(self):
@@ -24,11 +26,15 @@ class TestFLIRTRPT(unittest.TestCase):
     def test_known_file_out(self, flirt=FLIRTRPT):
         with InTemporaryDirectory():
             reference = os.path.join(MNI_DIR, 'MNI152_T1_1mm.nii.gz')
-            moving = os.path.join(MNI_DIR, 'MNI152_T2_1mm.nii.gz')
-            flirt_rpt = flirt(generate_report=True, in_file=template,
-                              reference=template)
+            moving = os.path.join(DS003_DIR, 'sub-01/anat/sub-01_T1w.nii.gz')
+            flirt_rpt = flirt(generate_report=True, in_file=moving,
+                              reference=reference)
             res = flirt_rpt.run()
             out_report = res.outputs.out_report
+
+            if os.getenv('SAVE_CIRCLE_ARTIFACTS', False) == "1":
+                copy(out_report, os.path.join('/scratch', 'testFLIRT.svg'))
+
             self.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
                             .format(out_report))
 
@@ -58,5 +64,13 @@ class TestBETRPT(unittest.TestCase):
     def _smoke(self, bet_interface):
         with InTemporaryDirectory():
             out_report = bet_interface.run().outputs.out_report
+            if os.getenv('SAVE_CIRCLE_ARTIFACTS', False) == "1":
+                artifact = os.path.join('/scratch', 'testBET_000.svg')
+                i = 1
+                while os.path.isfile(artifact):
+                    artifact = os.path.join('/scratch', 'testBET_%03d.svg' % i)
+                    i += 1
+                copy(out_report, artifact)
+
             self.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
                             .format(out_report))

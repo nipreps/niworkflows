@@ -49,4 +49,5 @@ WORKDIR /root/
 COPY . niworkflows/
 RUN cd niworkflows && \
     pip install -e .[all] && \
-    python -c 'from niworkflows.data.getters import get_mni_template_ras; get_mni_template_ras()'
+    python -c 'from niworkflows.data.getters import get_mni_template_ras; get_mni_template_ras()' && \
+    python -c 'from niworkflows.data.getters import get_ds003_downsampled; get_ds003_downsampled()'
