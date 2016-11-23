@@ -39,6 +39,12 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
     input_spec = BETInputSpecRPT
     output_spec = BETOutputSpecRPT
 
+    def _run_interface(self, runtime):
+        if self.inputs.generate_report:
+            self.inputs.mask = False
+
+        return super(BETRPT, self)._run_interface(runtime)
+
     def _generate_report(self):
         ''' generates a report showing three orthogonal slices of an arbitrary
         volume of in_file, with the resulting binary brain mask overlaid '''
