@@ -2,6 +2,8 @@
 """Helper tools for visualization purposes"""
 from __future__ import absolute_import, division, print_function
 import os.path as op
+from sys import version_info
+
 from uuid import uuid4
 import numpy as np
 from lxml import etree
@@ -14,6 +16,7 @@ import jinja2
 from pkg_resources import resource_filename as pkgrf
 
 SVGNS = "http://www.w3.org/2000/svg"
+PY3 = version_info[0] > 2
 
 def save_html(template, report_file_name, unique_string, **kwargs):
     ''' save an actual html file with name report_file_name. unique_string is
@@ -30,7 +33,7 @@ def save_html(template, report_file_name, unique_string, **kwargs):
     kwargs['unique_string'] = unique_string
     report_render = report_tpl.render(kwargs)
 
-    with open(report_file_name, 'w') as handle:
+    with open(report_file_name, 'w' if PY3 else 'wb') as handle:
         handle.write(report_render)
 
 def as_svg(image):
@@ -39,7 +42,7 @@ def as_svg(image):
     filename = 'temp.svg'
 
     image.savefig(filename)
-    with open(filename, 'r') as file_obj:
+    with open(filename, 'r' if PY3 else 'rb') as file_obj:
         image_svg = file_obj.readlines()
 
     svg_start = 0
@@ -242,7 +245,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     fig.save(out_file)
 
     # Add styles for the flicker animation
-    with open(out_file, 'rb') as f:
+    with open(out_file, 'r' if PY3 else 'rb') as f:
         svg = f.read().split('\n')
 
     svg.insert(2, """\
@@ -251,6 +254,6 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
 .foreground-svg { animation: 1s ease-in-out 0s alternate none infinite running flickerAnimation%s;}
 .foreground-svg:hover { animation-play-state: paused;}
 </style>""" % tuple([uuid4()] * 2))
-    with open(out_file, 'wb') as f:
+    with open(out_file, 'w' if PY3 else 'wb') as f:
         f.write('\n'.join(svg))
     return out_file
