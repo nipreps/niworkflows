@@ -81,7 +81,7 @@ class ReportCapableInterface(object):
             errorstr += (' <span class="error">Interface returned exit '
                          'code %d</span>\n') % errno
         errorstr += '</div>\n'
-        with open(self._out_report, 'w') as outfile:
+        with open(self._out_report, 'wb') as outfile:
             outfile.write(errorstr)
 
 
