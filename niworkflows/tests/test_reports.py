@@ -17,19 +17,20 @@ from niworkflows.interfaces.segmentation import BETRPT
 
 MNI_DIR = get_mni_template_ras()
 
-# Disabled FLIRT test: not ready yet.
-# class TestFLIRTRPT(unittest.TestCase):
-#     def setUp(self):
-#         self.out_file = "test_flirt.nii.gz"
+class TestFLIRTRPT(unittest.TestCase):
+    def setUp(self):
+        self.out_file = "test_flirt.nii.gz"
 
-#     def test_known_file_out(self, flirt=FLIRTRPT):
-#         with InTemporaryDirectory():
-#             template = os.path.join(MNI_DIR, 'MNI152_T1_1mm.nii.gz')
-#             flirt_rpt = flirt(generate_report=True, in_file=template,
-#                               reference=template, out_file=self.out_file)
-#             flirt_rpt.run()
-#             self.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
-#                             .format(out_report))
+    def test_known_file_out(self, flirt=FLIRTRPT):
+        with InTemporaryDirectory():
+            reference = os.path.join(MNI_DIR, 'MNI152_T1_1mm.nii.gz')
+            moving = os.path.join(MNI_DIR, 'MNI152_T2_1mm.nii.gz')
+            flirt_rpt = flirt(generate_report=True, in_file=template,
+                              reference=template)
+            res = flirt_rpt.run()
+            out_report = res.outputs.out_report
+            self.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
+                            .format(out_report))
 
 #     #def test_applyxfm_wrapper(self):
 #     #    self.test_known_file_out(ApplyXFMRPT)
