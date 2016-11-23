@@ -39,13 +39,37 @@ def as_svg(image):
     filename = 'temp.svg'
 
     image.savefig(filename)
-
     with open(filename, 'r') as file_obj:
         image_svg = file_obj.readlines()
-    image_svg = image_svg[4:] # strip out extra DOCTYPE, etc headers
-    image_svg = ''.join(image_svg) # straight up giant string
 
-    return image_svg
+    svg_start = 0
+    for i, line in enumerate(image_svg):
+        if '<svg ' in line:
+            svg_start = i
+            continue
+
+    image_svg = image_svg[svg_start:] # strip out extra DOCTYPE, etc headers
+    return '\n'.join(image_svg) # straight up giant string
+
+def cuts_from_bbox(mask_nii, cuts=3):
+    from nibabel.affines import apply_affine
+    imnii = nb.load(mask_nii)
+    mask_data = imnii.get_data()
+    B = np.argwhere(mask_data > 0)
+    start_coords = B.min(0)
+    stop_coords = B.max(0) + 1
+
+    vox_coords = []
+    for start, stop in zip(start_coords, stop_coords):
+        inc = abs(stop - start) / (cuts + 1)
+        vox_coords.append([start + (i + 1) * inc for i in range(cuts)])
+
+    ras_coords = []
+    for cross in np.array(vox_coords).T:
+        ras_coords.append(apply_affine(imnii.affine, cross).tolist())
+
+    ras_cuts = [list(coords) for coords in np.transpose(ras_coords)]
+    return {k: v for k, v in zip(['x', 'y', 'z'], ras_cuts)}
 
 
 def _3d_in_file(in_file):
@@ -61,35 +85,32 @@ def plot_mask(image_nii, mask_nii, masked=False, out_file=None, ifinputs=None, i
     if not masked:
         mask_nii = nlimage.threshold_img(mask_nii, 1e-3)
 
+    cuts = cuts_from_bbox(mask_nii)
     plot_params = {
         'anat_img': _3d_in_file(image_nii),
-        'alpha': 0.6,
-        'cut_coords': 3
+        'alpha': 0.6
     }
 
     contour_params = {
         'colors': 'b',
-        'levels': [1],
+        'levels': [0.5],
         'alpha': 1
     }
 
-
-    print(mask_nii, image_nii)
-    svgs = []
+    svgs_list = []
     for display_mode in 'x', 'y', 'z':
         plot_params['display_mode'] = display_mode
-        image = plot_anat(**plot_params)
-        image.add_contours(mask_nii, **contour_params)
-        image.close()
-        svgs.append(as_svg(image))
+        plot_params['cut_coords'] = cuts[display_mode]
+        svg = plot_anat(**plot_params)
+        svg.add_contours(mask_nii, **contour_params)
+        svg.close()
+        svgs_list.append(as_svg(svg))
 
     save_html(template='segmentation.tpl',
               report_file_name=out_file,
               unique_string='bet' + str(uuid4()),
-              base_image='<br />'.join(svgs),
-              title="BET: brain mask over anatomical input",
-              inputs=ifinputs,
-              outputs=ifoutputs)
+              base_image='<br />'.join(svgs_list),
+              title="BET: brain mask over anatomical input")
 
     # Let's just fail miserably if something goes wrong
     # I keep this code here until we are sure there are no weird outputs
