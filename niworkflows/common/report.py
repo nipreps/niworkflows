@@ -12,13 +12,13 @@ from nipype.interfaces.base import File, traits, BaseInterfaceInputSpec, Traited
 from niworkflows import NIWORKFLOWS_LOG
 
 
-class ReportCapableInputSpec(object):
+class ReportCapableInputSpec(BaseInterfaceInputSpec):
     generate_report = traits.Bool(
         False, usedefault=True, desc="Set to true to enable report generation for node")
     out_report = File(
         'report.html', usedefault=True, desc='filename for the visual report')
 
-class ReportCapableOutputSpec(object):
+class ReportCapableOutputSpec(TraitedSpec):
     out_report = File(desc='filename for the visual report')
 
 class ReportCapableInterface(object):

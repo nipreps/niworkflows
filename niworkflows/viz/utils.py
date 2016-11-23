@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-# @Author: shoshber
 """Helper tools for visualization purposes"""
 
 from __future__ import absolute_import, division, print_function
 from uuid import uuid4
 import numpy as np
 from lxml import etree
-from nilearn.plotting import plot_anat
-
+from nilearn.plotting import plot_anat, plot_roi
+from nilearn import image as nlimage
 
 from io import open
 import jinja2
@@ -46,6 +45,89 @@ def as_svg(image):
     image_svg = ''.join(image_svg) # straight up giant string
 
     return image_svg
+
+
+def _xyz_svgs(plot_func, plot_params):
+    ''' plot_func: function that returns an image like nilearn's plotting functions
+        plot_params: dict of common parameters to plot_func
+    returns a string of html containing svgs'''
+    svgs = []
+    for display_mode in 'x', 'y', 'z':
+        plot_params['display_mode'] = display_mode
+        image = plot_func(**plot_params)
+        svgs.append(as_svg(image))
+        image.close()
+    return '<br />'.join(svgs)
+
+
+def _plot_overlay_over_anat(mask_nii, contour_params=None, **plot_params):
+    ''' plot_params: dict of params for plot_func '''
+
+    image = plot_anat(**plot_params)
+
+    if contour_params is None:
+        contour_params = {
+            'filled':True,
+            'colors': 'b',
+            'levels': [0.5],
+            'alpha': 1
+        }
+
+    image.add_contours(mask_nii, **contour_params)
+    return image
+
+def _3d_in_file(in_file):
+    ''' if self.inputs.in_file is 3d, return it.
+    if 4d, pick an arbitrary volume and return that '''
+    return nlimage.index_img(nlimage.concat_imgs(in_file), 0)
+
+def plot_mask(image_nii, mask_nii, out_file, ifinputs=None, ifoutputs=None):
+    # most of the time just do simple semi-transparent overlay of brain mask over input
+    plot_params = {'roi_img': mask_nii,
+                   'bg_img': _3d_in_file(image_nii),
+                   'alpha': 0.6,
+                   'cut_coords': 3}
+    svgs = _xyz_svgs(plot_roi, plot_params)
+    save_html(template='overlay_3d_nrc.tpl',
+              report_file_name=out_file,
+              unique_string='bet' + str(uuid4()),
+              base_image=svgs,
+              title="BET: brain mask over anatomical input",
+              inputs=ifinputs,
+              outputs=ifoutputs)
+
+    # Let's just fail miserably if something goes wrong
+    # I keep this code here until we are sure there are no weird outputs
+    # except TypeError: # in case of weird outputs
+    #     overlay_file_name, overlay_label = self._overlay_file_name()
+    #     if overlay_file_name:
+    #         background_params = {'anat_img': _3d_in_file(),
+    #                              'cut_coords': 3,
+    #                              'cmap': 'gray'}
+    #         base_svgs = _xyz_svgs(plot_anat, background_params)
+    #         overlay_svgs = _xyz_svgs(_plot_overlay_over_anat, background_params)
+
+    #         save_html(template='overlay_3d_nrc.tpl',
+    #                   report_file_name=self.html_report,
+    #                   unique_string='bet' + str(uuid.uuid4()),
+    #                   base_image=base_svgs,
+    #                   overlay_image=overlay_svgs,
+    #                   inputs=self.inputs,
+    #                   outputs=self.aggregate_outputs(),
+    #                   title="BET: " + overlay_label + " over the input (anatomical)")
+
+    #     else: # just print an output (no overlay)
+    #         file_name = self._pick_output_file()
+    #         image = plotting.plot_img(file_name)
+
+    #         save_html(template='overlay_3d_nrc.tpl',
+    #                   report_file_name=self.html_report,
+    #                   unique_string='bet' + str(uuid.uuid4()),
+    #                   base_image=as_svg(image),
+    #                   title="BET: " + file_name,
+    #                   inputs=self.inputs,
+    #                   outputs=self.aggregate_outputs())
+    #         image.close()
 
 
 def plot_xyz(anat_img, div_id, plot_params=None,
