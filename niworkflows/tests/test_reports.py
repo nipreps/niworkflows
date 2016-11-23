@@ -59,11 +59,3 @@ class TestBETRPT(unittest.TestCase):
             out_report = bet_interface.run().outputs.out_report
             self.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
                             .format(out_report))
-
-    # @oesteban: I don't fully understand this test, I'll reenable when we
-    # know what it exactly does.
-    # def test_cannot_generate_report(self):
-    #     ''' Can't generate a report if there are no nifti outputs. '''
-    #     with self.assertRaises(Warning):
-    #         self._smoke(BETRPT(in_file=os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz'),
-    #                            generate_report=True, mask=True))
