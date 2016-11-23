@@ -6,9 +6,12 @@ ReportCapableInterfaces for segmentation tools
 """
 from __future__ import absolute_import, division, print_function
 
+
 from nipype.interfaces import fsl
+from nipype.interfaces.base import traits, isdefined
 from niworkflows.common import report as nrc
 from niworkflows.viz.utils import plot_mask
+from niworkflows import NIWORKFLOWS_LOG
 
 class FASTInputSpecRPT(nrc.ReportCapableInputSpec,
                        fsl.preprocess.FASTInputSpec):
@@ -41,7 +44,7 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
 
     def _run_interface(self, runtime):
         if self.inputs.generate_report:
-            self.inputs.mask = False
+            self.inputs.mask = True
 
         return super(BETRPT, self)._run_interface(runtime)
 
@@ -49,10 +52,13 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
         ''' generates a report showing three orthogonal slices of an arbitrary
         volume of in_file, with the resulting binary brain mask overlaid '''
 
+        mask_file = self.aggregate_outputs().out_file
+        if self.inputs.mask:
+            mask_file = self.aggregate_outputs().mask_file
+
+        NIWORKFLOWS_LOG.info('Generating report for file "%s", and mask file "%s"',
+                             self.inputs.in_file, mask_file)
         plot_mask(
-            self.inputs.in_file,
-            self.aggregate_outputs().mask_file,
-            out_file=self._out_report,
-            ifinputs=self.inputs.get(),
-            ifoutputs=self.aggregate_outputs()
+            self.inputs.in_file, mask_file,
+            out_file=self._out_report, masked=self.inputs.mask
         )

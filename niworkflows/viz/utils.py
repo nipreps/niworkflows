@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """Helper tools for visualization purposes"""
 from __future__ import absolute_import, division, print_function
-
+import os.path as op
 from uuid import uuid4
 import numpy as np
 from lxml import etree
+import nibabel as nb
 from nilearn.plotting import plot_anat, plot_roi
 from nilearn import image as nlimage
 
@@ -47,51 +48,45 @@ def as_svg(image):
     return image_svg
 
 
-def _xyz_svgs(plot_func, plot_params):
-    ''' plot_func: function that returns an image like nilearn's plotting functions
-        plot_params: dict of common parameters to plot_func
-    returns a string of html containing svgs'''
-    svgs = []
-    for display_mode in 'x', 'y', 'z':
-        plot_params['display_mode'] = display_mode
-        image = plot_func(**plot_params)
-        svgs.append(as_svg(image))
-        image.close()
-    return '<br />'.join(svgs)
-
-
-def _plot_overlay_over_anat(mask_nii, contour_params=None, **plot_params):
-    ''' plot_params: dict of params for plot_func '''
-
-    image = plot_anat(**plot_params)
-
-    if contour_params is None:
-        contour_params = {
-            'filled':True,
-            'colors': 'b',
-            'levels': [0.5],
-            'alpha': 1
-        }
-
-    image.add_contours(mask_nii, **contour_params)
-    return image
-
 def _3d_in_file(in_file):
     ''' if self.inputs.in_file is 3d, return it.
     if 4d, pick an arbitrary volume and return that '''
-    return nlimage.index_img(nlimage.concat_imgs(in_file), 0)
+    if nb.load(in_file).get_data().ndim == 3:
+        return in_file
 
-def plot_mask(image_nii, mask_nii, out_file, ifinputs=None, ifoutputs=None):
+    return nlimage.index_img(in_file, 0)
+
+def plot_mask(image_nii, mask_nii, masked=False, out_file=None, ifinputs=None, ifoutputs=None):
     # most of the time just do simple semi-transparent overlay of brain mask over input
-    plot_params = {'roi_img': mask_nii,
-                   'bg_img': _3d_in_file(image_nii),
-                   'alpha': 0.6,
-                   'cut_coords': 3}
-    svgs = _xyz_svgs(plot_roi, plot_params)
-    save_html(template='overlay_3d_nrc.tpl',
+    if not masked:
+        mask_nii = nlimage.threshold_img(mask_nii, 1e-3)
+
+    plot_params = {
+        'anat_img': _3d_in_file(image_nii),
+        'alpha': 0.6,
+        'cut_coords': 3
+    }
+
+    contour_params = {
+        'colors': 'b',
+        'levels': [1],
+        'alpha': 1
+    }
+
+
+    print(mask_nii, image_nii)
+    svgs = []
+    for display_mode in 'x', 'y', 'z':
+        plot_params['display_mode'] = display_mode
+        image = plot_anat(**plot_params)
+        image.add_contours(mask_nii, **contour_params)
+        image.close()
+        svgs.append(as_svg(image))
+
+    save_html(template='segmentation.tpl',
               report_file_name=out_file,
               unique_string='bet' + str(uuid4()),
-              base_image=svgs,
+              base_image='<br />'.join(svgs),
               title="BET: brain mask over anatomical input",
               inputs=ifinputs,
               outputs=ifoutputs)

@@ -4,12 +4,14 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+from sys import version_info
 from abc import abstractmethod
 from io import open
 
-from nipype.interfaces.base import File, traits, BaseInterfaceInputSpec, TraitedSpec
+from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
 
+PY3 = version_info[0] > 2
 
 class ReportCapableInputSpec(BaseInterfaceInputSpec):
     generate_report = traits.Bool(
@@ -20,7 +22,7 @@ class ReportCapableInputSpec(BaseInterfaceInputSpec):
 class ReportCapableOutputSpec(TraitedSpec):
     out_report = File(desc='filename for the visual report')
 
-class ReportCapableInterface(object):
+class ReportCapableInterface(BaseInterface):
     """ temporary mixin to enable reports for nipype interfaces """
 
     def __init__(self, **inputs):
@@ -45,17 +47,13 @@ class ReportCapableInterface(object):
 
         _report_ok = False
         if hasattr(runtime, 'returncode') and runtime.returncode == 0:
-            try:
-                self._generate_report(self._out_report)
-                _report_ok = True
-                NIWORKFLOWS_LOG.info('Successfully created report (%s)',
-                                     self._out_report)
-            except Exception as excp:
-                NIWORKFLOWS_LOG.warn('Report generation failed, reason: %s',
-                                     excp)
+            self._generate_report()
+            _report_ok = True
+            NIWORKFLOWS_LOG.info('Successfully created report (%s)',
+                                 self._out_report)
 
         if not _report_ok:
-            self._out_report = self._generate_error_report(
+            self._generate_error_report(
                 errno=runtime.get('returncode', None))
 
         return runtime
@@ -81,7 +79,7 @@ class ReportCapableInterface(object):
             errorstr += (' <span class="error">Interface returned exit '
                          'code %d</span>\n') % errno
         errorstr += '</div>\n'
-        with open(self._out_report, 'wb') as outfile:
+        with open(self._out_report, 'w' if PY3 else 'wb') as outfile:
             outfile.write(errorstr)
 
 

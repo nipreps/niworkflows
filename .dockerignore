@@ -1,0 +1,24 @@
+# python cache
+__pycache__/**/*
+__pycache__
+*.pyc
+
+# python distribution
+build/**/*
+build
+dist/**/*
+dist
+niworkflows.egg-info/**/*
+niworkflows.egg-info
+.eggs/**/*
+.eggs
+src/**/*
+src/
+
+# git
+.gitignore
+.git/**/*
+.git
+
+docs/**/*
+docs/
