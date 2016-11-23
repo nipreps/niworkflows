@@ -11,6 +11,7 @@ as well as for open-source software distribution.
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import logging
+import matplotlib
 
 from niworkflows.info import(
     __version__, __packagename__, __author__, __copyright__,
@@ -19,3 +20,5 @@ from niworkflows.info import(
 
 NIWORKFLOWS_LOG = logging.getLogger(__packagename__)
 NIWORKFLOWS_LOG.setLevel(logging.INFO)
+
+matplotlib.use('Agg')

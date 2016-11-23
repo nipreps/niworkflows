@@ -5,6 +5,7 @@
 
 from __future__ import print_function, division, absolute_import, unicode_literals
 from os import path as op
+import shutil
 import pkg_resources as pkgr
 
 from nipype.interfaces.ants.registration import Registration, RegistrationOutputSpec
@@ -20,7 +21,10 @@ MAX_RETRIES = 3
 class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     moving_image = InputMultiPath(
         File(exists=True), mandatory=True, desc='image to apply transformation to')
+    reference_image = InputMultiPath(
+        File(exists=True), desc='override the reference image')
     moving_mask = File(exists=True, desc='moving image mask')
+    reference_mask = File(exists=True, desc='reference image mask')
     num_threads = traits.Int(1, usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
     testing = traits.Bool(False, usedefault=True, desc='use testing settings')
@@ -28,11 +32,15 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
                               desc='modify template orientation (should match input image)')
     reference = traits.Enum('T1', 'T2', 'PD', mandatory=True, usedefault=True,
                             desc='set the reference modality for registration')
+    moving = traits.Enum('T1', 'EPI', usedefault=True, mandatory=True,
+                         desc='registration type')
     template = traits.Enum(
         'mni_icbm152_linear',
         'mni_icbm152_nlin_asym_09c',
         usedefault=True, desc='define the template to be used')
-
+    settings = traits.List(File(exists=True), desc='pass on the list of settings files')
+    template_resolution = traits.Enum(1, 2, mandatory=True, usedefault=True,
+                                      desc='template resolution')
 
 class RobustMNINormalization(BaseInterface):
     """
@@ -50,30 +58,60 @@ class RobustMNINormalization(BaseInterface):
         self._results = {}
         super(RobustMNINormalization, self).__init__(**inputs)
 
+    def _get_settings(self):
+        if isdefined(self.inputs.settings):
+            NIWORKFLOWS_LOG.info('User-defined settings, overriding defaults')
+            return self.inputs.settings
+
+        filestart = '{}-mni_registration_'.format(self.inputs.moving.lower())
+        if self.inputs.testing:
+            filestart += 'testing_'
+
+        filenames = [i for i in pkgr.resource_listdir('niworkflows', 'data')
+                     if i.startswith(filestart) and i.endswith('.json')]
+        return [pkgr.resource_filename('niworkflows.data', f)
+                for f in sorted(filenames)]
+
     def _run_interface(self, runtime):
-        settings_file = ''.join(['data/t1-mni_registration',
-                                 '_testing' if self.inputs.testing else '',
-                                 '_{0:03d}.json']).format
+        settings_files = self._get_settings()
 
+        for ants_settings in settings_files:
+            interface_result = None
 
-        while True:
-            ants_settings = pkgr.resource_filename(
-                'niworkflows', settings_file(self.retry))
-            NIWORKFLOWS_LOG.info('Retry #%d, settings file "%s"', self.retry,
-                                 ants_settings)
             norm = self._config_ants(ants_settings)
+            norm.inputs.terminal_output = 'file'
+
+            NIWORKFLOWS_LOG.info(
+                'Retry #%d, settings file "%s", commandline: \n%s',
+                self.retry, ants_settings, norm.cmdline)
             try:
                 interface_result = norm.run()
-                break
             except Exception as exc:
-                NIWORKFLOWS_LOG.warn('Retry #%d failed. Reason:\n%s', self.retry,
-                                     exc)
-                self.retry += 1
-                if self.retry > MAX_RETRIES:
-                    raise
+                if 'Too many samples map outside' in exc:
+                    reason = ('too many samples mapped outside '
+                              'the moving image')
+                else:
+                    reason = ('unknown reasons')
 
-        self._results.update(interface_result.outputs.get())
-        return runtime
+                NIWORKFLOWS_LOG.warn(
+                        'Retry #%d failed: %s.', self.retry, exc)
+
+
+            errfile = op.join(runtime.cwd, 'stderr.nipype')
+            outfile = op.join(runtime.cwd, 'stdout.nipype')
+
+            shutil.move(errfile, errfile + '.%03d' % self.retry)
+            shutil.move(outfile, outfile + '.%03d' % self.retry)
+
+            if interface_result is not None:
+                self._results.update(interface_result.outputs.get())
+                NIWORKFLOWS_LOG.info(
+                    'Successful spatial normalization (retry #%d).', self.retry)
+                return runtime
+            self.retry += 1
+
+        raise RuntimeError(
+            'Robust spatial normalization failed after %d retries.' % (self.retry - 1))
 
     def _config_ants(self, ants_settings):
         norm = Registration(
@@ -84,13 +122,19 @@ class RobustMNINormalization(BaseInterface):
         if isdefined(self.inputs.moving_mask):
             norm.inputs.moving_image_mask = self.inputs.moving_mask
 
+        if isdefined(self.inputs.reference_image):
+            norm.inputs.fixed_image = self.inputs.reference_image
+            if isdefined(self.inputs.reference_mask):
+                norm.inputs.fixed_image_mask = self.inputs.reference_mask
+            return norm
+
         get_template = getattr(getters, 'get_{}'.format(self.inputs.template))
         mni_template = get_template()
 
         if self.inputs.orientation == 'LAS':
             raise NotImplementedError
 
-        resolution = 1
+        resolution = self.inputs.template_resolution
         if self.inputs.testing:
             resolution = 2
 
