@@ -7,7 +7,7 @@ from nipype.interfaces import ants, fsl
 from niworkflows.common import report as nrc
 
 
-class FLIRTInputSpecRPT(nrc.ReportCapableInputSpec,
+class FLIRTInputSpecRPT(nrc.RegistrationRCInputSpec,
                         fsl.preprocess.FLIRTInputSpec):
     pass
 
@@ -15,7 +15,7 @@ class FLIRTOutputSpecRPT(nrc.ReportCapableOutputSpec,
                          fsl.preprocess.FLIRTOutputSpec):
     pass
 
-class FLIRTRPT(nrc.ReportCapableInterface, fsl.FLIRT):
+class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
     input_spec = FLIRTInputSpecRPT
     output_spec = FLIRTOutputSpecRPT
 
@@ -47,7 +47,7 @@ class FLIRTRPT(nrc.ReportCapableInterface, fsl.FLIRT):
     #         title="FLIRT: Overlay of registered image on top of reference file"
     #     )
 
-class ApplyXFMInputSpecRPT(nrc.ReportCapableInputSpec,
+class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
                            fsl.preprocess.ApplyXfmInputSpec):
     pass
 

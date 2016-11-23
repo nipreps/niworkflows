@@ -119,3 +119,7 @@ class RegistrationRC(ReportCapableInterface):
                      cuts=self.DEFAULT_MNI_CUTS),
             out_file=self._out_report)
 
+
+class SegmentationRC(ReportCapableInterface):
+    """ An abstract mixin to registration nipype interfaces """
+    pass
