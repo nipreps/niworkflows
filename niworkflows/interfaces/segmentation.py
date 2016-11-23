@@ -16,7 +16,8 @@ class FASTOutputSpecRPT(nrc.ReportCapableOutputSpec,
                         fsl.preprocess.FASTOutputSpec):
     pass
 
-class FASTRPT(nrc.ReportCapableInterface, fsl.FAST):
+class FASTRPT(nrc.ReportCapableInterface,
+              fsl.FAST):
     input_spec = FASTInputSpecRPT
     output_spec = FASTOutputSpecRPT
 

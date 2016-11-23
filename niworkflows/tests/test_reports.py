@@ -2,14 +2,13 @@ import os
 import unittest
 
 import nibabel as nb
-import numpy as np
 from nilearn import image
 from nipype.utils.tmpdirs import InTemporaryDirectory
 
 from niworkflows.data.getters import get_mni_template_ras
 
-from niworkflows.common.report_interfaces import (BETRPT, FLIRTRPT, 
-    RegistrationRPT, ApplyXFMRPT)
+from niworkflows.interfaces.registration import FLIRTRPT
+from niworkflows.interfaces.segmentation import BETRPT
 
 MNI_DIR = get_mni_template_ras()
 
