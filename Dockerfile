@@ -30,14 +30,23 @@
 # not for distribution within Docker hub.
 # For that purpose, the Dockerfile is found in build/Dockerfile.
 
-FROM oesteban/crn_nipype:freesurfer
+FROM poldracklab/neuroimaging-core:base-0.0.2
 
-RUN mkdir -p /opt/c3d && \
-    curl -sSL "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f341d6594d9001f591bac2" \
-    | tar -xzC /opt/c3d --strip-components 1
-ENV C3DPATH /opt/c3d
-ENV PATH $C3DPATH:$PATH
+# Install miniconda
+RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    /bin/bash Miniconda3-latest-Linux-x86_64.sh -b -p /usr/local/miniconda && \
+    rm Miniconda3-latest-Linux-x86_64.sh
+ENV PATH=/usr/local/miniconda/bin:$PATH \
+	LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
 
+# Create conda environment
+RUN conda config --add channels conda-forge && \
+    conda install -y numpy scipy matplotlib && \
+    python -c "from matplotlib import font_manager"
+
+WORKDIR /root/
 COPY . niworkflows/
 RUN cd niworkflows && \
-    pip install -e .[all]
+    pip install -e .[all] && \
+    python -c 'from niworkflows.data.getters import get_mni_template_ras; get_mni_template_ras()'

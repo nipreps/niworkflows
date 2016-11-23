@@ -3,8 +3,17 @@ machine:
     - docker
 
 dependencies:
+  cache_directories:
+    - "~/docker"
+    - "~/data"
+
+  pre:
+    - mkdir -p ~/data/ ~/docker
+
   override:
-    - docker build --rm=false -t rwblair/niworkflows .
+    - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
+    - docker build --rm=false -t niworkflows:py35 .
+    - docker save niworkflows:py35 > ~/docker/image.tar
 test:
   override:
-    - docker run -ti --rm --entrypoint=/usr/local/miniconda/bin/nosetests rwblair/niworkflows /root/niworkflows
+    - docker run -ti --rm --entrypoint=/usr/local/miniconda/bin/nosetests niworkflows:py35 /root/niworkflows
