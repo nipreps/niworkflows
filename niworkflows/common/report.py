@@ -41,6 +41,8 @@ class ReportCapableInterface(BaseInterface):
         if not self.inputs.generate_report:
             return runtime
 
+        self._post_run_hook(runtime)
+
         # check exit code and act consequently
         NIWORKFLOWS_LOG.debug('Running report generation code')
         self._out_report = os.path.abspath(self.inputs.out_report)
@@ -63,6 +65,12 @@ class ReportCapableInterface(BaseInterface):
         if self._out_report is not None:
             outputs['out_report'] = self._out_report
         return outputs
+
+    @abstractmethod
+    def _post_run_hook(self, runtime):
+        """ A placeholder to run stuff after the normal execution of the
+        interface (i.e. assign proper inputs to reporting functions) """
+        pass
 
     @abstractmethod
     def _generate_report(self):
