@@ -27,9 +27,8 @@ class TestFLIRTRPT(unittest.TestCase):
             flirt_rpt = flirt(generate_report=True, in_file=template,
                               reference=template, out_file=self.out_file)
             flirt_rpt.run()
-            html_report = flirt_rpt.aggregate_outputs().html_report
-            self.assertTrue(os.path.isfile(html_report), 'HTML report exists at {}'
-                            .format(html_report))
+            self.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
+                            .format(out_report))
 
     #def test_applyxfm_wrapper(self):
     #    self.test_known_file_out(ApplyXFMRPT)
@@ -41,13 +40,13 @@ class TestBETRPT(unittest.TestCase):
     def test_generate_report(self):
         ''' test of BET's report under basic (output binary mask) conditions '''
         self._smoke(BETRPT(in_file=os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz'),
-                           generate_report=True, mask=True))
+                           generate_report=True))
 
     def test_cannot_generate_report(self):
         ''' Can't generate a report if there are no nifti outputs. '''
         with self.assertRaises(Warning):
             self._smoke(BETRPT(in_file=os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz'),
-                               generate_report=True, outline=False, mask=False, no_output=True))
+                               generate_report=True, outline=False))
 
     def test_generate_report_from_4d(self):
         ''' if the in_file was 4d, it should be able to produce the same report
@@ -58,12 +57,12 @@ class TestBETRPT(unittest.TestCase):
         mni_4d_file = os.path.join(os.getcwd(), 'mni_4d.nii.gz')
         nb.save(mni_4d, mni_4d_file)
 
-        self._smoke(BETRPT(in_file=mni_4d_file, generate_report=True, mask=True))
+        self._smoke(BETRPT(in_file=mni_4d_file, generate_report=True))
 
     def _smoke(self, bet_interface):
         with InTemporaryDirectory():
             bet_interface.run()
 
-            html_report = bet_interface.aggregate_outputs().html_report
-            self.assertTrue(os.path.isfile(html_report), 'HTML report exists at {}'
-                            .format(html_report))
+            out_report = bet_interface.aggregate_outputs().out_report
+            self.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
+                            .format(out_report))
