@@ -41,7 +41,7 @@ def main():
         url=ldict['URL'],
         download_url=ldict['DOWNLOAD_URL'],
         classifiers=ldict['CLASSIFIERS'],
-        packages=find_packages(),
+        packages=find_packages(exclude=['*.tests']),
         zip_safe=False,
         package_data={'niworkflows': ['data/t1-mni_registration*.json'],
                       'niworkflows.viz': ['viz/overlay_3d_report.tpl'],

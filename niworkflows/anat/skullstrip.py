@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-# @Author: oesteban
-# @Date:   2016-07-21 11:28:52
-# @Last Modified by:   oesteban
-# @Last Modified time: 2016-07-21 11:41:15
+from __future__ import absolute_import, division, print_function
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces import fsl
