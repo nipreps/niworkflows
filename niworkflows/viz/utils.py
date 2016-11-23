@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Helper tools for visualization purposes"""
-
 from __future__ import absolute_import, division, print_function
+
 from uuid import uuid4
 import numpy as np
 from lxml import etree

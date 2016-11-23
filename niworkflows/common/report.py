@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # @Author: shoshber
 """ class mixin and utilities for enabling reports for nipype interfaces """
-
 from __future__ import absolute_import, division, print_function
 
 import os
