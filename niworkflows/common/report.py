@@ -4,7 +4,6 @@ from __future__ import absolute_import, division, print_function
 from io import open
 
 import os
-import uuid
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 from abc import abstractmethod

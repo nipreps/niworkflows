@@ -39,12 +39,6 @@ class TestBETRPT(unittest.TestCase):
         self._smoke(BETRPT(in_file=os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz'),
                            generate_report=True, mask=True))
 
-    def test_cannot_generate_report(self):
-        ''' Can't generate a report if there are no nifti outputs. '''
-        with self.assertRaises(Warning):
-            self._smoke(BETRPT(in_file=os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz'),
-                               generate_report=True, outline=False, mask=False, no_output=True))
-
     def test_generate_report_from_4d(self):
         ''' if the in_file was 4d, it should be able to produce the same report
         anyway (using arbitrary volume) '''

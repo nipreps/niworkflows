@@ -55,23 +55,6 @@ class BETRPT(report.ReportCapableInterface, fsl.BET):
 
     N_SLICES = 3 # number of slices to display per dimension
 
-    def _overlay_file_name(self):
-        ''' returns an overlay, in this order of preference: mask_file, outline_file,
-        out_file, and the name of the output'''
-        outputs = self.aggregate_outputs().get()
-
-        for output_name in ['mask_file', 'outline_file', 'out_file']:
-            if output_name:
-                return outputs[output_name], output_name
-        return None, None
-
-    def _pick_output_file(self):
-        for _, file_name in self.aggregate_outputs().get().items():
-            if file_name and file_name.find('.nii') != -1: # rough check for nifti format
-                return file_name
-        raise Warning('Could not find outputs for BET; cannot generate report. Inputs are {} and'
-                      ' outputs are {}.'.format(self.inputs, self.aggregate_outputs()))
-
     def _generate_report(self):
         ''' generates a report showing three orthogonal slices of an arbitrary
         volume of in_file, with the resulting binary brain mask overlaid '''
@@ -95,8 +78,8 @@ class BETRPT(report.ReportCapableInterface, fsl.BET):
         def _plot_overlay_over_anat(**plot_params):
             ''' plot_params: dict of params for plot_func '''
             image = plotting.plot_anat(**plot_params)
-            image.add_contours(self._overlay_file_name()[0], filled=False, colors='r', levels=[0.5],
-                               alpha=1)
+            image.add_contours(self.aggregate_outputs().mask_file, filled=False, colors='r',
+                               levels=[0.5], alpha=1)
             return image
 
         def _3d_in_file():
@@ -105,36 +88,23 @@ class BETRPT(report.ReportCapableInterface, fsl.BET):
             in_file = nlimage.concat_imgs(self.inputs.in_file) # result is always "4d"
             return nlimage.index_img(in_file, 0)
 
-        overlay_file_name, overlay_label = self._overlay_file_name()
-        if overlay_file_name:
-            background_params = {'anat_img': _3d_in_file(),
-                                 'cmap': 'gray'}
-            base_svgs = _xyz_svgs(plotting.plot_anat, overlay_file_name, self.N_SLICES,
-                                  background_params)
-            overlay_svgs = _xyz_svgs(_plot_overlay_over_anat, overlay_file_name, self.N_SLICES,
-                                     background_params)
+        background_params = {'anat_img': _3d_in_file(),
+                             'cmap': 'gray'}
+        base_svgs = _xyz_svgs(plotting.plot_anat, self.aggregate_outputs().mask_file,
+                              self.N_SLICES, background_params)
+        overlay_svgs = _xyz_svgs(_plot_overlay_over_anat,
+                                 self.aggregate_outputs().mask_file,
+                                 self.N_SLICES, background_params)
 
-            report.save_html(template='overlay_3d_report.tpl',
-                             report_file_name=self.html_report,
-                             unique_string='bet' + str(uuid.uuid4()),
-                             base_image=base_svgs,
-                             overlay_image=overlay_svgs,
-                             inputs=self.inputs,
-                             outputs=self.aggregate_outputs(),
-                             title='BET: Outline (calculated from ({}) over the input '
-                             '(anatomical)'.format(overlay_label))
-        else: # just print an output (no overlay)
-            file_name = self._pick_output_file()
-            image = plotting.plot_img(file_name)
-
-            report.save_html(template='overlay_3d_report.tpl',
-                             report_file_name=self.html_report,
-                             unique_string='bet' + str(uuid.uuid4()),
-                             base_image=report.as_svg(image),
-                             title="BET: " + file_name,
-                             inputs=self.inputs,
-                             outputs=self.aggregate_outputs())
-            image.close()
+        report.save_html(template='overlay_3d_report.tpl',
+                         report_file_name=self.html_report,
+                         unique_string='bet' + str(uuid.uuid4()),
+                         base_image=base_svgs,
+                         overlay_image=overlay_svgs,
+                         inputs=self.inputs,
+                         outputs=self.aggregate_outputs(),
+                         title='BET: Outline (calculated from brain mask) over the input '
+                         '(anatomical)')
 
     def _generate_error_report(self):
         pass
@@ -179,7 +149,7 @@ class FLIRTRPT(report.ReportCapableInterface, fsl.FLIRT):
             title="FLIRT: Overlay of registered image on top of reference file"
         )
 
-class ApplyXFMInputSpecRPT(fsl.preprocess.ApplyXfmInputSpec):
+class ApplyXFMInputSpecRPT(fsl.preprocess.ApplyXFMInputSpec):
     generate_report = traits.Bool(
         desc="Set to true to enable report generation for node"
     )
