@@ -187,12 +187,11 @@ class HTMLValidator(HTMLParser):
 
 class CSSValidator():
     ''' CSS embedded in HTML snippets must follow the following guidelines:
-            * selectors must be @keyframe, '*', or begin with '#unique_string'
-            * keyframe names must contain the unique string
-            * counter names must contain the unique string
-            * position may not be fixed
+    * selectors must be '*', or begin with '#unique_string' or '@keyframe'
+    * keyframe names and counter names must contain, but not be equal to, the unique string
+    * position may not be fixed
 
-    Like HTML Validator, valid CSS is assumed and not checked.'''
+    Similar to  HTMLValidator, valid CSS is assumed and not checked.'''
 
     def __init__(self, unique_string):
         self.unique_string = unique_string
@@ -214,15 +213,11 @@ class CSSValidator():
         if rule.at_keyword is not None:
             if rule.at_keyword != 'keyframe':
                 raise ValueError('Found invalid @-rule {} in CSS.'.format(rule))
-                keyframe_name = rule.head[0]
-            if not self.unique_string in keyframe_name:
-                raise ValueError('Found invalid @keyframe name {} in CSS. '
-                                 'Keyframe names must contain the unique id {}'.
-                                 format(keyframe_name, self.unique_string))
+            validate_unique_name(rule.head[0], '@keyframe')
         else: # not an at-rule
             biggest_selector = rule.selector[0]
             if biggest_selector[-len(self.unique_string):] != '#' + self.unique_string: # first selector must specify id unique_string
-                raise ValueError('Found an invalid rule set in CSS. First selector in {} is not *#{}'.format(rule, self.unique_string))
+                raise ValueError('Found an invalid rule set in CSS. First selector in {} is not anything#{}'.format(rule, self.unique_string))
             elif biggest_selector != '*':
                 raise ValueError('Found an invalid rule set in CSS. Selector {} is not '
                                  '@keyframe, "*", or start with id unique_string {}'.
@@ -240,7 +235,10 @@ class CSSValidator():
                 if 'fixed' in declaration.value:
                     raise ValueError('Found illegal position `fixed` in CSS.')
             elif 'counter' in declaration.name:
-                if not self.unique_string in declaration.value[0]: # there will always be one token
-                    raise ValueError('Found illegal counter name {} in CSS. Counter names must '
-                                     'contain a unique_string {}'.
-                                     format(declaration.value[0], self.unique_string()))
+                for value in declaration.value:
+                    if value.type == tinycss.IDENT:
+                        validate_unique_name(value, 'counter')
+
+    def validate_unique_name(self, name, title):
+        if not (self.unique_string in name and self.unique_string != name):
+            raise ValueError('Found illegal {} name {} in CSS. {} names must contain the unique id {}'.format(title, name, title, unique_string))
