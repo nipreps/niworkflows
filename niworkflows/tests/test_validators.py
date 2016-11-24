@@ -13,20 +13,20 @@ class TestValidator(unittest.TestCase):
             validator.feed(html)
             validator.close()
 
+        valid_htmls = self._string_formatter(self.unique_string,
+                                             ['<super></super>', 'id=la{}', 'id={}{}', 'id = a{}',
+                                              '', '<div class=heya id =yall{}', '{}', 'ID=what{}',
+                                              'id=id{}', 'Id=a{}', 'iD=a{}'])
+        invalid_htmls = self._string_formatter(self.unique_string,
+                                               ['<body>', '<head id={}x', '<header', '<footer',
+                                                '<mainlandchina', 'id = {}', 'id=wassup',
+                                                'id=s {}', 'id={}s', '  ID =x {}x',
+                                                '<p id=a{}></p><p id=a{}>'])
+        invalid_htmls = invalid_htmls + ['id=' + self.unique_string[1:]]
+
         self._tester(
-            valid_strings=['<super></super>', 'id=la' + self.unique_string,
-                           'id=' + self.unique_string + self.unique_string,
-                           'id = a' + self.unique_string, '',
-                           '<div class=heya id =yall' + self.unique_string, self.unique_string,
-                           'ID=what' + self.unique_string, 'id=id' + self.unique_string,
-                           'Id=a' + self.unique_string, 'iD=a' + self.unique_string],
-            invalid_strings=['<body>', '<head id=' + self.unique_string + 'x', '<header',
-                             '<footer', '<mainlandchina', 'id = ' + self.unique_string,
-                             'id=wassup', 'id=s ' + self.unique_string,
-                             'id=' + self.unique_string + ' s', 'id=' + self.unique_string[1:],
-                             '  ID =x ' + self.unique_string + 'x',
-                             '<p id=a' + self.unique_string + '></p><p id=a' +
-                             self.unique_string + '>'],
+            valid_strings=valid_htmls,
+            invalid_strings=invalid_htmls,
             validator = report.HTMLValidator(unique_string=self.unique_string),
             func=_use_validator)
 
@@ -37,3 +37,16 @@ class TestValidator(unittest.TestCase):
         for string in invalid_strings:
             with self.assertRaises(ValueError):
                 func(validator, string)
+
+    def _string_formatter(self, unique_string, strings):
+        new_strings = []
+        for string in strings:
+            try:
+                new_strings.append(string.format(unique_string))
+            except IndexError:
+                pass
+
+        if new_strings != strings:
+            self._string_formatter(new_strings, unique_string)
+
+        return new_strings
