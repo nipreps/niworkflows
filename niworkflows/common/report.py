@@ -231,16 +231,16 @@ class CSSValidator():
     def validate_blocks(self, rule):
         ''' checks counter names and position values '''
         if rule.at_keyword is not None:
-            declarations = parser.parse_declaration_list(rule.body):
+            declarations = parser.parse_declaration_list(rule.body)
         else: # not an at-rule
             declarations = rule.declarations
 
         for declaration in declarations:
-            if declaration.name = 'position':
+            if declaration.name == 'position':
                 if 'fixed' in declaration.value:
                     raise ValueError('Found illegal position `fixed` in CSS.')
             elif 'counter' in declaration.name:
                 if not self.unique_string in declaration.value[0]: # there will always be one token
                     raise ValueError('Found illegal counter name {} in CSS. Counter names must '
                                      'contain a unique_string {}'.
-                                     format(declaration.value[0], self.unique_string())
+                                     format(declaration.value[0], self.unique_string()))
