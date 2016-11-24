@@ -14,6 +14,7 @@ from nilearn import image as nlimage
 from io import open
 import jinja2
 from pkg_resources import resource_filename as pkgrf
+from niworkflows.common import report
 
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
@@ -31,7 +32,7 @@ def save_html(template, report_file_name, unique_string, **kwargs):
                          .format(unique_string))
 
     # validate html
-    validator = HTMLValidator(unique_string=unique_string)
+    validator = report.HTMLValidator(unique_string=unique_string)
     for key, html in enumerate(kwargs.keys()):
         validator.feed(html)
         validator.close()
@@ -67,6 +68,7 @@ def as_svg(image):
     return '\n'.join(image_svg) # straight up giant string
 
 def cuts_from_bbox(mask_nii, cuts=3):
+    # deprecated--use nilearn (https://github.com/poldracklab/niworkflows/issues/26)
     from nibabel.affines import apply_affine
     imnii = nb.load(mask_nii)
     mask_data = imnii.get_data()
