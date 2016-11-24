@@ -1,9 +1,5 @@
 import unittest
-import mock
-
-from nipype.interfaces.fsl.utils import SmoothOutputSpec
-
-from niworkflows.viz.utils import save_html
+from niworkflows.common import report
 
 class TestHTMLValidator(unittest.TestCase):
 
@@ -33,21 +29,3 @@ class TestHTMLValidator(unittest.TestCase):
             validator.feed(html)
             with self.assertRaises(ValueError):
                 validator.close()
-
-    @mock.patch('jinja2.Environment')
-    @mock.patch('niworkflows.common.report.open', mock.mock_open(), create=True)
-    def test_save_html(self, jinja_mock):
-        template_mock= mock.MagicMock()
-        jinja_mock.return_value.get_template.return_value = template_mock
-
-        unique_string = 'unique string'
-        html = 'some html'
-        report_file_name = 'report file name'
-
-        save_html(template='overlay_3d_report.tpl',
-                         report_file_name=report_file_name,
-                         unique_string=unique_string,
-                         another_keyword=html)
-
-        template_mock.render.assert_called_once_with({'unique_string': unique_string,
-                                                      'another_keyword': html})
