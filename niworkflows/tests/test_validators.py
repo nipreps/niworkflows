@@ -13,11 +13,11 @@ class TestValidator(unittest.TestCase):
             validator.feed(html)
             validator.close()
 
-        valid_htmls = self._string_formatter(self.unique_string,
+        valid_htmls = self._unique_stringify(self.unique_string,
                                              ['<super></super>', 'id=la{}', 'id={}{}', 'id = a{}',
                                               '', '<div class=heya id =yall{}', '{}', 'ID=what{}',
                                               'id=id{}', 'Id=a{}', 'iD=a{}'])
-        invalid_htmls = self._string_formatter(self.unique_string,
+        invalid_htmls = self._unique_stringify(self.unique_string,
                                                ['<body>', '<head id={}x', '<header', '<footer',
                                                 '<mainlandchina', 'id = {}', 'id=wassup',
                                                 'id=s {}', 'id={}s', '  ID =x {}x',
@@ -38,15 +38,19 @@ class TestValidator(unittest.TestCase):
             with self.assertRaises(ValueError):
                 func(validator, string)
 
-    def _string_formatter(self, unique_string, strings):
+    def _unique_stringify(self, unique_string, strings):
         new_strings = []
         for string in strings:
             try:
-                new_strings.append(string.format(unique_string))
+                new_string = string.format(unique_string)
             except IndexError:
                 pass
+            except:
+                print(string)
+                raise
+            new_strings.append(new_string)
 
         if new_strings != strings:
-            self._string_formatter(new_strings, unique_string)
+            self._unique_stringify(unique_string, new_strings)
 
         return new_strings
