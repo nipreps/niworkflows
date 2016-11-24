@@ -6,7 +6,38 @@ class TestValidator(unittest.TestCase):
     unique_string = 'lala'
 
     def test_css_validator(self):
-        pass
+
+        def _use_validator(validator, css):
+            validator.validate(css)
+
+        valid_csses = self._unique_stringify(self.unique_string,
+                                             ['', '@keyframe {}sdf;', '@keyframe sdf{};',
+                                              '@keyframe {}{};', '@keyframe a{}a;', '* ( )',
+                                              '#{} ( )', '#{} blah ( )', '#{} blah wut ( )',
+                                              '    ', 'earp#{} ( )',
+                                              '* ( counter-increment: {}blah )',
+                                              '#{} ( counter-reset: blah{} )',
+                                              '* ( color: black; counter-reset: blah{}; left: 0 )',
+                                              '* ( counter-increment: {}a 1 a{} 2 a{}a 3 )',
+                                              '* ( position: absolute )'])
+        invalid_csses = self._unique_stringify(self.unique_string,
+                                               ['@import blah.txt;', '@keyframe {};',
+                                                '#{} * ( )', 'blah #{} ( )', 'earp{} ( )',
+                                                '{} ( )', '#{} ( counter-increment: {}',
+                                                '@keyframe sup;',
+                                                '* ( color: black; counter-reset: blah; left: 0 )',
+                                                '* ( counter-reset: {}a 1 {} a{} 0 )',
+                                                '* ( position: fixed )'])
+
+        for csses in [valid_csses, invalid_csses]:
+            self._unique_stringify(self.unique_string, csses)
+            csses = [css.replace('(', '{').replace(')', '}') for css in csses]
+
+        self._tester(
+            valid_strings=[ valid_csses],
+            invalid_strings=[invalid_csses],
+            validator=report.CSSValidator(unique_string=self.unique_string),
+            func=_use_validator)
 
     def test_html_validator(self):
         def _use_validator(validator, html):
