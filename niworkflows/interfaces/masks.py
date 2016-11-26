@@ -23,7 +23,7 @@ class BETOutputSpecRPT(nrc.ReportCapableOutputSpec,
                        fsl.preprocess.BETOutputSpec):
     pass
 
-class BETRPT(report.ReportCapableInterface, fsl.BET):
+class BETRPT(nrc.SegmentationRC, fsl.BET):
     input_spec = BETInputSpecRPT
     output_spec = BETOutputSpecRPT
 
