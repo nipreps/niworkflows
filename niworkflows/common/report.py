@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function
 from io import open
 import os
 import string
+import warnings
 from abc import abstractmethod
 from html.parser import HTMLParser
 import tinycss
@@ -139,6 +140,34 @@ class SegmentationRC(ReportCapableInterface):
     """ An abstract mixin to registration nipype interfaces """
     pass
 
+class CSSValidator():
+    ''' no attribute in CSS may be position: fixed
+
+    Like  HTMLValidator, valid CSS is assumed and not checked.'''
+
+    def __init__(self):
+        self.parser = tinycss.make_parser()
+
+    def validate(self, css):
+        stylesheet = self.parser.parse_stylesheet(css)
+        for rule in stylesheet.rules:
+            self.validate_no_fixed_position(rule)
+        if not stylesheet.errors is None and len(stylesheet.errors) > 0:
+            warnings.warn('CSS Validator encountered the following parser errors. '
+                          'CSS may not be syntactically correct, and CSS Validator may not have '
+                          'been able to do its job. \n{}'.format(stylesheet.errors))
+
+    def validate_no_fixed_position():
+        ''' checks counter names and position values '''
+        if rule.at_keyword is not None:
+            declarations = parser.parse_declaration_list(rule.body)
+        else: # not an at-rule
+            declarations = rule.declarations
+
+        for declaration in declarations:
+            if declaration.name == 'position' and 'fixed' in declaration.value:
+                raise ValueError('Found illegal position `fixed` in CSS.')
+
 class HTMLValidator(HTMLParser):
     ''' There are limitations on the html passed to save_html because
     save_html's result will be concatenated with other html strings
@@ -155,16 +184,24 @@ class HTMLValidator(HTMLParser):
     html is assumed to be complete, valid html
     '''
 
-    def __init__(self, unique_string):
+    def __init__(self, unique_string, css_validator = CSSValidator()):
         super(HTMLValidator, self).__init__()
         self.unique_string = unique_string
+        self.css_validator = css_validator
+
         self.bad_tags = []
         self.bad_ids = []
         self.taken_ids = [unique_string] # in template
+        self.in_style = False
 
     def handle_starttag(self, tag, attrs):
         if tag in ['head', 'body', 'header', 'footer', 'main']:
             self.bad_tags.append(tag)
+        elif tag == 'style':
+            self.in_style = True
+            if not 'scoped' in [attribute for attribute, value in attrs]:
+                self.bad_tags.append(tag)
+
         for attr, value in attrs:
             if attr=='id':
                 # if unique_string is not found in the id name
@@ -173,72 +210,24 @@ class HTMLValidator(HTMLParser):
                 elif value in self.taken_ids: # the value is already being used as an id
                     self.bad_ids.append(value)
 
+    def handle_endtag(self, tag):
+        self.in_style = False
+
+    def handle_data(self, data):
+        if self.in_style:
+            self.css_validator.validate(data)
+
+    def handle_decl(self, decl):
+        self.bad_tags.append(decl)
+
     def close(self):
         super(HTMLValidator, self).close()
         error_string = ''
         if len(self.bad_tags) > 0:
-            error_string = 'Found the following illegal tags: {}.\n'.format(self.bad_tags)
+            error_string = 'Found the following illegal tags. All <style> tags must be scoped: {}.\n'.format(self.bad_tags)
         if len(self.bad_ids) > 0:
             error_string = error_string + 'Found the following illegal ids: {}.\n ids must '
             'contain unique_string ({}) and be unique from each other.\n'.format(
                 self.bad_ids, self.unique_string)
         if len(error_string) > 0:
             raise ValueError(error_string)
-
-class CSSValidator():
-    ''' CSS embedded in HTML snippets must follow the following guidelines:
-    * selectors must be '*', or begin with '#unique_string' or '@keyframe'
-    * keyframe names and counter names must contain, but not be equal to, the unique string
-    * position may not be fixed
-
-    Similar to  HTMLValidator, valid CSS is assumed and not checked.'''
-
-    def __init__(self, unique_string):
-        self.unique_string = unique_string
-        self.parser = tinycss.make_parser()
-
-    def validate(self, css):
-        stylesheet = self.parser.parse_stylesheet(css)
-        for rule in stylesheet.rules:
-            self.validate_selector(rule)
-            self.validate_block(rule)
-        if len(parser.errors) > 0:
-            warnings.warn('CSS Validator encountered the following parser errors. '
-                          'CSS may not be syntactically correct, and CSS Validator may not have '
-                          'been able to do its job. \n{}'.format(parser.errors))
-
-    def validate_selectors(self, rule):
-        ''' Checks for at-rules that are not keyframes, invalid keyframe names, and selectors
-        that do not start with the id unique_string'''
-        if rule.at_keyword is not None:
-            if rule.at_keyword != 'keyframe':
-                raise ValueError('Found invalid @-rule {} in CSS.'.format(rule))
-            validate_unique_name(rule.head[0], '@keyframe')
-        else: # not an at-rule
-            biggest_selector = rule.selector[0]
-            if biggest_selector[-len(self.unique_string):] != '#' + self.unique_string: # first selector must specify id unique_string
-                raise ValueError('Found an invalid rule set in CSS. First selector in {} is not anything#{}'.format(rule, self.unique_string))
-            elif biggest_selector != '*':
-                raise ValueError('Found an invalid rule set in CSS. Selector {} is not '
-                                 '@keyframe, "*", or start with id unique_string {}'.
-                                 format(rule.selector, self.unique_string))
-
-    def validate_blocks(self, rule):
-        ''' checks counter names and position values '''
-        if rule.at_keyword is not None:
-            declarations = parser.parse_declaration_list(rule.body)
-        else: # not an at-rule
-            declarations = rule.declarations
-
-        for declaration in declarations:
-            if declaration.name == 'position':
-                if 'fixed' in declaration.value:
-                    raise ValueError('Found illegal position `fixed` in CSS.')
-            elif 'counter' in declaration.name:
-                for value in declaration.value:
-                    if value.type == tinycss.IDENT:
-                        validate_unique_name(value, 'counter')
-
-    def validate_unique_name(self, name, title):
-        if not (self.unique_string in name and self.unique_string != name):
-            raise ValueError('Found illegal {} name {} in CSS. {} names must contain the unique id {}'.format(title, name, title, unique_string))
