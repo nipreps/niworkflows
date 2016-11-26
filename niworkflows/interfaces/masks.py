@@ -77,7 +77,7 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
                                  self.N_SLICES, background_params)
 
         save_html(template='overlay_3d_report.tpl',
-                  report_file_name=self.out_report,
+                  report_file_name=self._out_report,
                   unique_string='bet' + str(uuid.uuid4()),
                   base_image=base_svgs,
                   overlay_image=overlay_svgs,
