@@ -14,7 +14,7 @@ from nipype.utils.tmpdirs import InTemporaryDirectory
 from niworkflows.data.getters import get_mni_template_ras, get_ds003_downsampled
 
 from niworkflows.interfaces.registration import FLIRTRPT
-from niworkflows.interfaces.segmentation import BETRPT
+from niworkflows.interfaces.segmentation import BETRPT, FASTRPT
 
 MNI_DIR = get_mni_template_ras()
 MNI_2MM = os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz')
@@ -60,7 +60,7 @@ class TestBETRPT(unittest.TestCase):
 
         _smoke_test_report(BETRPT(in_file=mni_4d_file, generate_report=True, mask=True))
 
-def _smoke_test_report(self, report_interface):
+def _smoke_test_report(report_interface):
     with InTemporaryDirectory():
         report_interface.run()
         html_report = report_interface.aggregate_outputs().html_report
@@ -71,6 +71,6 @@ class TestFASTRPT(unittest.TestCase):
     ''' tests use mni as in_file '''
 
     def test_generate_report(self):
-        _smoke_test_report(FASTRPT(in_file=MNI_2MM, generate_report=True, no_bias=True,
-                                   probability_maps=True),
-                           name='Segmentation')
+        ''' test of FAST's report under basic conditions '''
+        _smoke_test_report(FASTRPT(in_files=MNI_2MM, generate_report=True, no_bias=True,
+                                   probability_maps=True))

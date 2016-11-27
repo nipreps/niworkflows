@@ -27,7 +27,9 @@ class FASTRPT(nrc.SegmentationRC,
     output_spec = FASTOutputSpecRPT
 
     def _generate_report(self):
-        raise NotImplementedError
+        ''' generates a report showing nine slices, three per axis, of an
+        arbitrary volume of `in_files`, with the resulting segmentation
+        overlaid '''
 
 
 class BETInputSpecRPT(nrc.ReportCapableInputSpec,
@@ -49,7 +51,8 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
         return super(BETRPT, self)._run_interface(runtime)
 
     def _generate_report(self):
-        ''' generates a report showing three orthogonal slices of an arbitrary
+        ''' generates a report showing nine slices, three per axis,
+        of an arbitrary
         volume of in_file, with the resulting binary brain mask overlaid '''
 
         mask_file = self.aggregate_outputs().out_file
