@@ -8,7 +8,7 @@ from uuid import uuid4
 import numpy as np
 from lxml import etree
 import nibabel as nb
-from nilearn.plotting import plot_anat, plot_roi
+from nilearn.plotting import plot_anat, plot_roi, find_cut_slices
 from nilearn import image as nlimage
 
 from io import open
@@ -87,8 +87,10 @@ def plot_mask(image_nii, mask_nii, masked=False, out_file=None, ifinputs=None, i
     # most of the time just do simple semi-transparent overlay of brain mask over input
     if not masked:
         mask_nii = nlimage.threshold_img(mask_nii, 1e-3)
+    else:
+        mask_nii = nb.load(mask_nii)
 
-    cuts = cuts_from_bbox(mask_nii)
+    cuts = {k: find_cut_slices(mask_nii, direction=k, n_cuts=3) for k in ['x', 'y', 'z']}
     plot_params = {
         'anat_img': _3d_in_file(image_nii),
         'alpha': 0.6
