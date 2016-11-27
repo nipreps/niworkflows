@@ -11,6 +11,8 @@ class TestValidator(unittest.TestCase):
         def _use_validator(validator, css):
             validator.validate(css)
 
+        def _curly_bracify(csses):
+            return [css.replace('(', '{').replace(')', '}') for css in csses]
         valid_csses = self._unique_stringify(self.unique_string,
                                              ['', '@keyframe {}sdf;', '@keyframe sdf{};',
                                               '@keyframe {}{};', '@keyframe a{}a;', '* ( )',
@@ -22,15 +24,13 @@ class TestValidator(unittest.TestCase):
                                               '* ( counter-increment: {}a 1 a{} 2 a{}a 3 )',
                                               '* ( position: absolute )'])
         invalid_csses = self._unique_stringify(self.unique_string,
-                                               ['* ( position: fixed )'])
-
-        for csses in [valid_csses, invalid_csses]:
-            self._unique_stringify(self.unique_string, csses)
-            csses = [css.replace('(', '{').replace(')', '}') for css in csses]
+                                               ['#{} (position: fixed)', '* ( position: fixed )'])
+        valid_csses = _curly_bracify(valid_csses)
+        invalid_csses = _curly_bracify(invalid_csses)
 
         self._tester(
-            valid_strings=[ valid_csses],
-            invalid_strings=[invalid_csses],
+            valid_strings=valid_csses,
+            invalid_strings=invalid_csses,
             validator=report.CSSValidator(),
             func=_use_validator)
 
@@ -43,14 +43,14 @@ class TestValidator(unittest.TestCase):
         valid_htmls = self._unique_stringify(self.unique_string,
                                              ['<super></super>', 'id=la{}', 'id={}{}', 'id = a{}',
                                               '', '<div class=heya id =yall{}', '{}', 'ID=what{}',
-                                              'id=id{}', 'Id=a{}', 'iD=a{}'])
+                                              'id=id{}', 'Id=a{}', 'iD=a{}', '<mainlandchina>'])
         invalid_htmls = self._unique_stringify(self.unique_string,
-                                               ['<body>', '<head id={}x', '<header', '<footer',
-                                                '<mainlandchina', 'id = {}', 'id=wassup',
-                                                'id=s {}', 'id={}s', '  ID =x {}x',
-                                                '<p id=a{}></p><p id=a{}>', '<style>', '<!blah>',
+                                               ['<body>', '<head id={}x>', '<header>', '<footer>',
+                                                '<p id = {}>', '<p id=wassup>',
+                                                '<p id=s {}>', '<p id={} s>', '<p  ID =x {}x>',
+                                                '<p id=a{}></p><p id=a{}>', '<style>', '<!DOCTYPE>',
                                                 '<?xml>'])
-        invalid_htmls = invalid_htmls + ['id=' + self.unique_string[1:]]
+        invalid_htmls = invalid_htmls + ['<p id=' + self.unique_string[1:] + '>']
 
         self._tester(
             valid_strings=valid_htmls,
@@ -67,16 +67,20 @@ class TestValidator(unittest.TestCase):
         validator = report.HTMLValidator(unique_string=self.unique_string,
                                          css_validator=mock_css_validator)
         for html in [explicitly_css, implicitly_css]:
-            mock_css_validator.reset_mock()
             validator.feed(html)
             validator.close()
+            validator.reset()
             mock_css_validator.validate.assert_called_once_with(self.mock_css)
+            mock_css_validator.reset_mock()
+
+        validator.feed('<not a style tag>asdfsdf</not>')
+        validator.close()
+        self.assertFalse(mock_css_validator.validate.called)
 
     def _tester(self, validator, valid_strings, invalid_strings, func):
-        '''
         for string in valid_strings:
             func(validator, string)
-        '''
+
         for string in invalid_strings:
             with self.assertRaises(ValueError):
                 func(validator, string)

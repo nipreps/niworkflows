@@ -153,11 +153,12 @@ class CSSValidator():
         for rule in stylesheet.rules:
             self.validate_no_fixed_position(rule)
         if not stylesheet.errors is None and len(stylesheet.errors) > 0:
-            warnings.warn('CSS Validator encountered the following parser errors. '
-                          'CSS may not be syntactically correct, and CSS Validator may not have '
-                          'been able to do its job. \n{}'.format(stylesheet.errors))
+            warnings.warn('CSS Validator encountered the following parser errors while parsing '
+                          '(CSS starting `{}`). CSS may not be syntactically correct, and CSS '
+                          'Validator may not have been able to do its job. \n{}'.format(
+                              css[:5], stylesheet.errors))
 
-    def validate_no_fixed_position():
+    def validate_no_fixed_position(self, rule):
         ''' checks counter names and position values '''
         if rule.at_keyword is not None:
             declarations = parser.parse_declaration_list(rule.body)
@@ -165,7 +166,8 @@ class CSSValidator():
             declarations = rule.declarations
 
         for declaration in declarations:
-            if declaration.name == 'position' and 'fixed' in declaration.value:
+            if declaration.name == 'position' and 'fixed' in [value.as_css()
+                                                              for value in declaration.value]:
                 raise ValueError('Found illegal position `fixed` in CSS.')
 
 class HTMLValidator(HTMLParser):
@@ -177,7 +179,8 @@ class HTMLValidator(HTMLParser):
 
     If the html contains a tag with the id attribute, the value of id must
     contain unique_string and not be equal to unique_string. In addition, all
-    id's within any one save_html call are also unique from each other.
+    id's within any one save_html call are also unique from each other. All
+    <style> tags must be scoped.
 
     If appropriate, invokes CSSValidator.
 
@@ -185,14 +188,9 @@ class HTMLValidator(HTMLParser):
     '''
 
     def __init__(self, unique_string, css_validator = CSSValidator()):
-        super(HTMLValidator, self).__init__()
         self.unique_string = unique_string
         self.css_validator = css_validator
-
-        self.bad_tags = []
-        self.bad_ids = []
-        self.taken_ids = [unique_string] # in template
-        self.in_style = False
+        super(HTMLValidator, self).__init__()
 
     def handle_starttag(self, tag, attrs):
         if tag in ['head', 'body', 'header', 'footer', 'main']:
@@ -219,6 +217,16 @@ class HTMLValidator(HTMLParser):
 
     def handle_decl(self, decl):
         self.bad_tags.append(decl)
+
+    def handle_pi(self, pi):
+        self.bad_tags.append(pi)
+
+    def reset(self):
+        super(HTMLValidator, self).reset()
+        self.bad_tags = []
+        self.bad_ids = []
+        self.taken_ids = [self.unique_string] # in template
+        self.in_style = False
 
     def close(self):
         super(HTMLValidator, self).close()
