@@ -31,7 +31,7 @@ class ReportCapableInterface(object):
         ''' delegates to base interface run method, then attempts to generate reports;
         may need to be changed completely and added instead to Node.write_report() or, ideally, 
         .run()'''
-        self.html_report = os.path.join(runtime.cwd, 'report.html')
+
         try:
             runtime = super(ReportCapableInterface, self)._run_interface(runtime)
             #  command line interfaces might not raise an exception, check return_code
