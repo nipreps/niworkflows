@@ -10,6 +10,7 @@ from io import open
 
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
+from niworkflows.viz import utils as viz
 
 PY3 = version_info[0] > 2
 
@@ -32,7 +33,6 @@ class ReportCapableInterface(BaseInterface):
     def _run_interface(self, runtime):
         """ delegates to base interface run method, then attempts to generate reports """
         # make this _run_interface seamless (avoid wrap it into try..except)
-        print('run interface', os.getcwd())
         try:
             runtime = super(ReportCapableInterface, self)._run_interface(runtime)
         except NotImplementedError:
@@ -42,11 +42,11 @@ class ReportCapableInterface(BaseInterface):
         if not self.inputs.generate_report:
             return runtime
 
+        self._out_report = os.path.abspath(self.inputs.out_report)
         self._post_run_hook(runtime)
 
         # check exit code and act consequently
         NIWORKFLOWS_LOG.debug('Running report generation code')
-        self._out_report = os.path.abspath(self.inputs.out_report)
 
         _report_ok = False
         if hasattr(runtime, 'returncode') and runtime.returncode == 0:
@@ -112,7 +112,7 @@ class RegistrationRC(ReportCapableInterface):
 
     def _generate_report(self):
         """ Generates the visual report """
-        from niworkflows.viz.utils import compose_view, plot_xyz
+        from niworkflows.viz.utils import compose_view, plot_registration
         NIWORKFLOWS_LOG.info('Generating visual report')
 
         # Call composer
@@ -127,4 +127,13 @@ class RegistrationRC(ReportCapableInterface):
 
 class SegmentationRC(ReportCapableInterface):
     """ An abstract mixin to segmentation nipype interfaces """
-    pass
+    def _generate_report(self):
+        viz.plot_segs(
+            image_nii=self._anat_file,
+            seg_niis=self._seg_files,
+            mask_nii=self._mask_file,
+            out_file=self._out_report,
+            masked=self._masked,
+            title=self._report_title
+        )
+

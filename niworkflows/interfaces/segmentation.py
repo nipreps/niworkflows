@@ -26,7 +26,7 @@ class FASTRPT(nrc.SegmentationRC,
     input_spec = FASTInputSpecRPT
     output_spec = FASTOutputSpecRPT
 
-    def _generate_report(self):
+    def _post_run_hook(self, runtime):
         ''' generates a report showing nine slices, three per axis, of an
         arbitrary volume of `in_files`, with the resulting segmentation
         overlaid '''
@@ -62,21 +62,16 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
 
         return super(BETRPT, self)._run_interface(runtime)
 
-    def _generate_report(self):
+    def _post_run_hook(self, runtime):
         ''' generates a report showing nine slices, three per axis,
         of an arbitrary
         volume of in_file, with the resulting binary brain mask overlaid '''
 
-        mask_file = self.aggregate_outputs().out_file
-        if self.inputs.mask:
-            mask_file = self.aggregate_outputs().mask_file
+        self._anat_file = self.inputs.in_file
+        self._mask_file = self.aggregate_outputs().mask_file
+        self._seg_files = [self._mask_file]
+        self._masked = self.inputs.mask
+        self._report_title = "BET: brain mask over anatomical input"
 
-        NIWORKFLOWS_LOG.info('Generating report for file "%s", and mask file "%s"',
-                             self.inputs.in_file, mask_file)
-        plot_segs(
-            image_nii=self.inputs.in_file,
-            seg_niis=[mask_file],
-            mask_nii=mask_file,
-            out_file=self._out_report, masked=self.inputs.mask,
-            title="BET: brain mask over anatomical input"
-        )
+        NIWORKFLOWS_LOG.info('Generating report for BET. file "%s", and mask file "%s"',
+                             self._anat_file, self._mask_file)
