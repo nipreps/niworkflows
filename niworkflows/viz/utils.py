@@ -8,7 +8,7 @@ from uuid import uuid4
 import numpy as np
 from lxml import etree
 import nibabel as nb
-from nilearn.plotting import plot_anat, plot_roi
+from nilearn.plotting import plot_anat, plot_roi, find_cut_slices
 from nilearn import image as nlimage
 
 from io import open
@@ -54,27 +54,6 @@ def as_svg(image):
     image_svg = image_svg[svg_start:] # strip out extra DOCTYPE, etc headers
     return '\n'.join(image_svg) # straight up giant string
 
-def cuts_from_bbox(mask_nii, cuts=3):
-    from nibabel.affines import apply_affine
-    imnii = nb.load(mask_nii)
-    mask_data = imnii.get_data()
-    B = np.argwhere(mask_data > 0)
-    start_coords = B.min(0)
-    stop_coords = B.max(0) + 1
-
-    vox_coords = []
-    for start, stop in zip(start_coords, stop_coords):
-        inc = abs(stop - start) / (cuts + 1)
-        vox_coords.append([start + (i + 1) * inc for i in range(cuts)])
-
-    ras_coords = []
-    for cross in np.array(vox_coords).T:
-        ras_coords.append(apply_affine(imnii.affine, cross).tolist())
-
-    ras_cuts = [list(coords) for coords in np.transpose(ras_coords)]
-    return {k: v for k, v in zip(['x', 'y', 'z'], ras_cuts)}
-
-
 def _3d_in_file(in_file):
     ''' if self.inputs.in_file is 3d, return it.
     if 4d, pick an arbitrary volume and return that '''
@@ -87,8 +66,10 @@ def plot_mask(image_nii, mask_nii, masked=False, out_file=None, ifinputs=None, i
     # most of the time just do simple semi-transparent overlay of brain mask over input
     if not masked:
         mask_nii = nlimage.threshold_img(mask_nii, 1e-3)
+    else:
+        mask_nii = nb.load(mask_nii)
 
-    cuts = cuts_from_bbox(mask_nii)
+    cuts = {k: find_cut_slices(mask_nii, direction=k, n_cuts=3) for k in ['x', 'y', 'z']}
     plot_params = {
         'anat_img': _3d_in_file(image_nii),
         'alpha': 0.6
