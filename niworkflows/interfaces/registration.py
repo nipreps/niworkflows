@@ -25,7 +25,7 @@ class RobustMNINormalizationRPT(
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference_image
-        self._moving_image = self.aggregate_outputs().warped_file
+        self._moving_image = self.aggregate_outputs().warped_image
 
 
 class FLIRTInputSpecRPT(nrc.RegistrationRCInputSpec,
