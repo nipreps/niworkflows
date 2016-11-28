@@ -45,22 +45,22 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
         self._moving_image = self.aggregate_outputs().out_file
 
 
-class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
-                           fsl.preprocess.ApplyXfmInputSpec):
-    pass
+# class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
+#                            fsl.preprocess.ApplyXfmInputSpec):
+#     pass
 
-class ApplyXFMRPT(FLIRTRPT):
-    ''' ApplyXFM is a wrapper around FLIRT. ApplyXFMRPT is a wrapper around FLIRTRPT.'''
-    input_spec = ApplyXFMInputSpecRPT
+# class ApplyXFMRPT(FLIRTRPT):
+#     ''' ApplyXFM is a wrapper around FLIRT. ApplyXFMRPT is a wrapper around FLIRTRPT.'''
+#     input_spec = ApplyXFMInputSpecRPT
 
-class ANTSRegistrationInputSpecRPT(nrc.RegistrationRCInputSpec,
-                                   ants.registration.RegistrationInputSpec):
-    pass
+# class ANTSRegistrationInputSpecRPT(nrc.RegistrationRCInputSpec,
+#                                    ants.registration.RegistrationInputSpec):
+#     pass
 
-class ANTSRegistrationOutputSpecRPT(nrc.ReportCapableOutputSpec,
-                                    ants.registration.RegistrationOutputSpec):
-    pass
+# class ANTSRegistrationOutputSpecRPT(nrc.ReportCapableOutputSpec,
+#                                     ants.registration.RegistrationOutputSpec):
+#     pass
 
-class ANTSRegistrationRPT(nrc.RegistrationRC, ants.Registration):
-    input_spec = ANTSRegistrationInputSpecRPT
-    output_spec = ANTSRegistrationOutputSpecRPT
+# class ANTSRegistrationRPT(nrc.RegistrationRC, ants.Registration):
+#     input_spec = ANTSRegistrationInputSpecRPT
+#     output_spec = ANTSRegistrationOutputSpecRPT
