@@ -107,12 +107,11 @@ class RobustMNINormalization(BaseInterface):
 
     def _config_ants(self, ants_settings):
         NIWORKFLOWS_LOG.info('Loading settings from file %s.', ants_settings)
-        self.norm = Registration(
-            moving_image=self.inputs.moving_image,
-            num_threads=self.inputs.num_threads,
-            from_file=ants_settings,
-            terminal_output='file'
-        )
+        self.norm = Registration(terminal_output='file')
+        self.norm.load_inputs_from_json(ants_settings, overwrite=True)
+        self.norm.inputs.moving_image = self.inputs.moving_image
+        self.norm.inputs.num_threads = self.inputs.num_threads
+
         if isdefined(self.inputs.moving_mask):
             self.norm.inputs.moving_image_mask = self.inputs.moving_mask
 
