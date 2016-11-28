@@ -117,12 +117,12 @@ class RegistrationRC(ReportCapableInterface):
 
         # Call composer
         compose_view(
-            plot_xyz(self._fixed_image, 'fixed-image',
-                     estimate_brightness=True,
-                     cuts=self.DEFAULT_MNI_CUTS),
-            plot_xyz(self._moving_image, 'moving-image',
-                     estimate_brightness=True,
-                     cuts=self.DEFAULT_MNI_CUTS),
+            plot_registration(self._fixed_image, 'fixed-image',
+                              estimate_brightness=True,
+                              cuts=self.DEFAULT_MNI_CUTS),
+            plot_registration(self._moving_image, 'moving-image',
+                              estimate_brightness=True,
+                              cuts=self.DEFAULT_MNI_CUTS),
             out_file=self._out_report)
 
 class SegmentationRC(ReportCapableInterface):

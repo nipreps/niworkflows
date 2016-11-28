@@ -65,38 +65,44 @@ def _3d_in_file(in_file):
     '''
 
     in_file = filemanip.filename_to_list(in_file)[0]
-    if nb.load(in_file).get_data().ndim == 3:
+
+    try:
+        in_file = nb.load(in_file)
+    except AttributeError:
+        in_file = in_file
+
+    if in_file.get_data().ndim == 3:
         return in_file
 
     return nlimage.index_img(in_file, 0)
 
 def plot_mask(image_nii, mask_nii, masked=False, out_file=None, ifinputs=None, ifoutputs=None, title=None):
-    # most of the time just do simple semi-transparent overlay of brain mask over input
-    if not masked:
-        mask_nii = nlimage.threshold_img(mask_nii, 1e-3)
-    else:
-        mask_nii = nb.load(mask_nii)
+    """ blue contour of the mask (usu. brain mask) over the image (e.g. anatomical) """
+
+    def _plot_anat_with_contours(image, mask=None, **plot_params):
+        if mask is None:
+            raise ValueError('mask cannot be None')
+
+        # anatomical
+        plot_params['alpha'] = 0.6
+        svg = plot_anat(image, **plot_params)
+
+        # mask contour
+        plot_params['colors'] = 'b',
+        plot_params['levels'] = [0.5]
+        plot_params['alpha'] = 1
+        svg.add_contours(mask, **plot_params)
+
+        svgs_list.append(as_svg(svg))
+
+    mask_nii = nb.load(mask_nii) if masked else nlimage.threshold_img(mask_nii, 1e-3)
+    image_nii = _3d_in_file(image_nii)
 
     cuts = {k: find_cut_slices(mask_nii, direction=k, n_cuts=3) for k in ['x', 'y', 'z']}
-    plot_params = {
-        'anat_img': _3d_in_file(image_nii),
-        'alpha': 0.6
-    }
-
-    contour_params = {
-        'colors': 'b',
-        'levels': [0.5],
-        'alpha': 1
-    }
+    print(cuts)
 
     svgs_list = []
-    for display_mode in 'x', 'y', 'z':
-        plot_params['display_mode'] = display_mode
-        plot_params['cut_coords'] = cuts[display_mode]
-        svg = plot_anat(**plot_params)
-        svg.add_contours(mask_nii, **contour_params)
-        svg.close()
-        svgs_list.append(as_svg(svg))
+    plot_xyz(image_nii, _plot_anat_with_contours, cuts, mask=mask_nii)
 
     save_html(template='segmentation.tpl',
               report_file_name=out_file,
@@ -104,47 +110,25 @@ def plot_mask(image_nii, mask_nii, masked=False, out_file=None, ifinputs=None, i
               base_image='<br />'.join(svgs_list),
               title=title)
 
-    # Let's just fail miserably if something goes wrong
-    # I keep this code here until we are sure there are no weird outputs
-    # except TypeError: # in case of weird outputs
-    #     overlay_file_name, overlay_label = self._overlay_file_name()
-    #     if overlay_file_name:
-    #         background_params = {'anat_img': _3d_in_file(),
-    #                              'cut_coords': 3,
-    #                              'cmap': 'gray'}
-    #         base_svgs = _xyz_svgs(plot_anat, background_params)
-    #         overlay_svgs = _xyz_svgs(_plot_overlay_over_anat, background_params)
+def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=['z', 'x', 'y'], **kwargs):
+    """
+    plot_func must be a function that conforms to nilearn's plot_* signatures
+    """
+    plot_params = {} if plot_params is None else plot_params
 
-    #         save_html(template='overlay_3d_nrc.tpl',
-    #                   report_file_name=self.html_report,
-    #                   unique_string='bet' + str(uuid.uuid4()),
-    #                   base_image=base_svgs,
-    #                   overlay_image=overlay_svgs,
-    #                   inputs=self.inputs,
-    #                   outputs=self.aggregate_outputs(),
-    #                   title="BET: " + overlay_label + " over the input (anatomical)")
+    for dimension in dimensions:
+        plot_params['display_mode'] = dimension
+        plot_params['cut_coords'] = cuts[dimension]
+        plot_func(image, **plot_params, **kwargs)
 
-    #     else: # just print an output (no overlay)
-    #         file_name = self._pick_output_file()
-    #         image = plotting.plot_img(file_name)
-
-    #         save_html(template='overlay_3d_nrc.tpl',
-    #                   report_file_name=self.html_report,
-    #                   unique_string='bet' + str(uuid.uuid4()),
-    #                   base_image=as_svg(image),
-    #                   title="BET: " + file_name,
-    #                   inputs=self.inputs,
-    #                   outputs=self.aggregate_outputs())
-    #         image.close()
-
-
-def plot_xyz(anat_img, div_id, plot_params=None,
-             order=('z', 'x', 'y'), cuts=None,
-             estimate_brightness=False):
+def plot_registration(anat_img, div_id, plot_params=None,
+                      order=('z', 'x', 'y'), cuts=None,
+                      estimate_brightness=False):
     """
     Plots the foreground and background views
     Default order is: axial, coronal, sagittal
     """
+
     plot_params = {} if plot_params is None else plot_params
 
     # Use default MNI cuts if none defined
