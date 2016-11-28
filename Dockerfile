@@ -42,12 +42,12 @@ ENV PATH=/usr/local/miniconda/bin:$PATH \
 
 # Create conda environment
 RUN conda config --add channels conda-forge && \
-    conda install -y numpy scipy matplotlib && \
+    conda install -y numpy scipy matplotlib pandas lxml libxslt && \
     python -c "from matplotlib import font_manager"
 
 WORKDIR /root/
 COPY . niworkflows/
 RUN cd niworkflows && \
-    pip install -e .[all] && \
+    python setup.py install && \
     python -c 'from niworkflows.data.getters import get_mni_template_ras; get_mni_template_ras()' && \
     python -c 'from niworkflows.data.getters import get_ds003_downsampled; get_ds003_downsampled()'
