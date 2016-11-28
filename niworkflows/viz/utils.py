@@ -60,7 +60,7 @@ def _3d_in_file(in_file):
     ''' if self.inputs.in_file is 3d, return it.
     if 4d, pick an arbitrary volume and return that.
 
-    if self.inputs.in_file is a list of files, return an arbitrary file from
+    if in_file is a list of files, return an arbitrary file from
     the list, and an arbitrary volume from that file
     '''
 

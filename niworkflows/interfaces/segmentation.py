@@ -30,19 +30,17 @@ class FASTRPT(nrc.SegmentationRC,
         ''' generates a report showing nine slices, three per axis, of an
         arbitrary volume of `in_files`, with the resulting segmentation
         overlaid '''
+        self._anat_file = self.inputs.in_files[0],
+        self._mask_file = self.aggregate_outputs().tissue_class_map
+        self._seg_files = self.aggregate_outputs().tissue_class_files
+        self._masked = False
+        self._report_title = "FAST: segmentation over anatomical"
 
         NIWORKFLOWS_LOG.info('Generating report for FAST (in_files {}, segmentation {}, individual tissue classes {}).'.
                              format(self.inputs.in_files,
                                     self.aggregate_outputs().tissue_class_map,
                                     self.aggregate_outputs().tissue_class_files))
-        self._out_report = 'report.html'
-        plot_segs(
-            image_nii=self.inputs.in_files,
-            seg_niis=self.aggregate_outputs().tissue_class_files,
-            mask_nii=self.aggregate_outputs().tissue_class_map,
-            out_file=self._out_report,
-            title="FAST: segmentation over anatomical"
-        )
+
 
 class BETInputSpecRPT(nrc.ReportCapableInputSpec,
                       fsl.preprocess.BETInputSpec):
