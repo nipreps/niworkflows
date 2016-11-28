@@ -14,7 +14,7 @@ from nipype.utils.tmpdirs import InTemporaryDirectory
 from niworkflows.data.getters import get_mni_template_ras, get_ds003_downsampled
 
 from niworkflows.interfaces.registration import FLIRTRPT
-from niworkflows.interfaces.segmentation import BETRPT
+from niworkflows.interfaces.masks import BETRPT
 
 MNI_DIR = get_mni_template_ras()
 DS003_DIR = get_ds003_downsampled()
@@ -48,7 +48,7 @@ class TestBETRPT(unittest.TestCase):
     def test_generate_report(self):
         ''' test of BET's report under basic (output binary mask) conditions '''
         self._smoke(BETRPT(in_file=os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz'),
-                           generate_report=True))
+                           generate_report=True, mask=True))
 
     def test_generate_report_from_4d(self):
         ''' if the in_file was 4d, it should be able to produce the same report
