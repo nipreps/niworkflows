@@ -8,12 +8,14 @@ from uuid import uuid4
 import numpy as np
 from lxml import etree
 import nibabel as nb
-from nilearn.plotting import plot_anat, plot_roi, find_cut_slices
+from nilearn.plotting import plot_anat, find_cut_slices
 from nilearn import image as nlimage
 
 from io import open
 import jinja2
 from pkg_resources import resource_filename as pkgrf
+
+from nipype.utils import filemanip
 
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
@@ -56,13 +58,19 @@ def as_svg(image):
 
 def _3d_in_file(in_file):
     ''' if self.inputs.in_file is 3d, return it.
-    if 4d, pick an arbitrary volume and return that '''
+    if 4d, pick an arbitrary volume and return that.
+
+    if self.inputs.in_file is a list of files, return an arbitrary file from
+    the list, and an arbitrary volume from that file
+    '''
+
+    in_file = filemanip.filename_to_list(in_file)[0]
     if nb.load(in_file).get_data().ndim == 3:
         return in_file
 
     return nlimage.index_img(in_file, 0)
 
-def plot_mask(image_nii, mask_nii, masked=False, out_file=None, ifinputs=None, ifoutputs=None):
+def plot_mask(image_nii, mask_nii, masked=False, out_file=None, ifinputs=None, ifoutputs=None, title=None):
     # most of the time just do simple semi-transparent overlay of brain mask over input
     if not masked:
         mask_nii = nlimage.threshold_img(mask_nii, 1e-3)
@@ -94,7 +102,7 @@ def plot_mask(image_nii, mask_nii, masked=False, out_file=None, ifinputs=None, i
               report_file_name=out_file,
               unique_string='bet' + str(uuid4()),
               base_image='<br />'.join(svgs_list),
-              title="BET: brain mask over anatomical input")
+              title=title)
 
     # Let's just fail miserably if something goes wrong
     # I keep this code here until we are sure there are no weird outputs

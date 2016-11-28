@@ -32,6 +32,7 @@ class ReportCapableInterface(BaseInterface):
     def _run_interface(self, runtime):
         """ delegates to base interface run method, then attempts to generate reports """
         # make this _run_interface seamless (avoid wrap it into try..except)
+        print('run interface', os.getcwd())
         try:
             runtime = super(ReportCapableInterface, self)._run_interface(runtime)
         except NotImplementedError:
@@ -124,7 +125,6 @@ class RegistrationRC(ReportCapableInterface):
                      cuts=self.DEFAULT_MNI_CUTS),
             out_file=self._out_report)
 
-
 class SegmentationRC(ReportCapableInterface):
-    """ An abstract mixin to registration nipype interfaces """
+    """ An abstract mixin to segmentation nipype interfaces """
     pass
