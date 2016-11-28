@@ -10,7 +10,7 @@ from __future__ import absolute_import, division, print_function
 from nipype.interfaces import fsl
 from nipype.interfaces.base import traits, isdefined
 from niworkflows.common import report as nrc
-from niworkflows.viz.utils import plot_mask
+from niworkflows.viz.utils import plot_segs
 from niworkflows import NIWORKFLOWS_LOG
 
 class FASTInputSpecRPT(nrc.ReportCapableInputSpec,
@@ -31,13 +31,15 @@ class FASTRPT(nrc.SegmentationRC,
         arbitrary volume of `in_files`, with the resulting segmentation
         overlaid '''
 
-        NIWORKFLOWS_LOG.info('Generating report for FAST (in_files {}, segmentation {}).'.
+        NIWORKFLOWS_LOG.info('Generating report for FAST (in_files {}, segmentation {}, individual tissue classes {}).'.
                              format(self.inputs.in_files,
-                                    self.aggregate_outputs().tissue_class_map))
-
-        plot_mask(
-            self.inputs.in_files,
-            self.aggregate_outputs().tissue_class_map,
+                                    self.aggregate_outputs().tissue_class_map,
+                                    self.aggregate_outputs().tissue_class_files))
+        self._out_report = 'report.html'
+        plot_segs(
+            image_nii=self.inputs.in_files,
+            seg_niis=self.aggregate_outputs().tissue_class_files,
+            mask_nii=self.aggregate_outputs().tissue_class_map,
             out_file=self._out_report,
             title="FAST: segmentation over anatomical"
         )
@@ -71,8 +73,10 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
 
         NIWORKFLOWS_LOG.info('Generating report for file "%s", and mask file "%s"',
                              self.inputs.in_file, mask_file)
-        plot_mask(
-            self.inputs.in_file, mask_file,
+        plot_segs(
+            image_nii=self.inputs.in_file,
+            seg_niis=[mask_file],
+            mask_nii=mask_file,
             out_file=self._out_report, masked=self.inputs.mask,
             title="BET: brain mask over anatomical input"
         )

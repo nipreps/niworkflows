@@ -76,43 +76,45 @@ def _3d_in_file(in_file):
 
     return nlimage.index_img(in_file, 0)
 
-def plot_mask(image_nii, mask_nii, masked=False, out_file=None, ifinputs=None, ifoutputs=None, title=None):
-    """ blue contour of the mask (usu. brain mask) over the image (e.g. anatomical) """
+def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, ifinputs=None, ifoutputs=None, title=None, **plot_params):
+    """ plot segmentation as contours over the image (e.g. anatomical). seg_niis should be a list of files. mask_nii helps determine the cut coordinates. plot_params will be passed on to nilearn plot_* functions """
 
-    def _plot_anat_with_contours(image, mask=None, **plot_params):
-        if mask is None:
-            raise ValueError('mask cannot be None')
+    def _plot_anat_with_contours(image, segs=None, **plot_params):
+        assert not segs is None
+        assert len(segs) <= 3
+        plot_params = {} if plot_params is None else plot_params
 
         # anatomical
-        plot_params['alpha'] = 0.6
+        plot_params['alpha'] = .7
         svg = plot_anat(image, **plot_params)
 
-        # mask contour
-        plot_params['colors'] = 'b',
-        plot_params['levels'] = [0.5]
-        plot_params['alpha'] = 1
-        svg.add_contours(mask, **plot_params)
+        # segment contours
+        for seg, color in zip(segs, ['b', 'r', 'y']):
+            plot_params['colors'] = color
+            plot_params['levels'] = [0.5] if not 'levels' in plot_params else plot_params['levels']
+            plot_params['alpha'] = 1
+            svg.add_contours(seg, **plot_params)
 
         svgs_list.append(as_svg(svg))
 
-    mask_nii = nb.load(mask_nii) if masked else nlimage.threshold_img(mask_nii, 1e-3)
     image_nii = _3d_in_file(image_nii)
+    seg_niis = filemanip.filename_to_list(seg_niis)
+    mask_nii = nb.load(mask_nii) if masked else nlimage.threshold_img(mask_nii, 1e-3)
 
     cuts = {k: find_cut_slices(mask_nii, direction=k, n_cuts=3) for k in ['x', 'y', 'z']}
-    print(cuts)
 
     svgs_list = []
-    plot_xyz(image_nii, _plot_anat_with_contours, cuts, mask=mask_nii)
+    plot_xyz(image_nii, _plot_anat_with_contours, cuts, segs=seg_niis)
 
     save_html(template='segmentation.tpl',
               report_file_name=out_file,
-              unique_string='bet' + str(uuid4()),
+              unique_string='seg' + str(uuid4()),
               base_image='<br />'.join(svgs_list),
               title=title)
 
 def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=['z', 'x', 'y'], **kwargs):
     """
-    plot_func must be a function that conforms to nilearn's plot_* signatures
+    plot_func must be a function that more-or-less conforms to nilearn's plot_* signature
     """
     plot_params = {} if plot_params is None else plot_params
 

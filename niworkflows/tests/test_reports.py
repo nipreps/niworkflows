@@ -42,7 +42,6 @@ class TestFLIRTRPT(unittest.TestCase):
 
 #     #def test_applyxfm_wrapper(self):
 #     #    self.test_known_file_out(ApplyXFMRPT)
-@unittest.skip
 class TestBETRPT(unittest.TestCase):
     ''' tests it using mni as in_file '''
 
@@ -74,6 +73,11 @@ class TestFASTRPT(unittest.TestCase):
     def test_generate_report(self):
         ''' test of FAST's report under basic conditions '''
 
-        _smoke_test_report(FASTRPT(in_files=MNI_2MM, generate_report=True, no_bias=True,
-                                   probability_maps=True))
+        bet_interface = BETRPT(in_file=MNI_2MM, mask=True)
+        bet_interface.run()
+        skullstripped = bet_interface.aggregate_outputs().out_file
 
+        report_interface = FASTRPT(in_files=skullstripped, generate_report=True, no_bias=True,
+                                   probability_maps=True, segments=True)
+
+        _smoke_test_report(report_interface)
