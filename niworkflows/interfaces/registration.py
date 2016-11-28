@@ -5,8 +5,27 @@ ReportCapableInterfaces for registration tools
 """
 from __future__ import absolute_import, division, print_function
 
-from nipype.interfaces import ants, fsl
+from nipype.interfaces import fsl
+from niworkflows.anat import mni
 from niworkflows.common import report as nrc
+
+
+class RobustMNINormalizationInputSpecRPT(
+    nrc.RegistrationRCInputSpec, mni.RobustMNINormalizationInputSpec):
+    pass
+
+class RobustMNINormalizationOutputSpecRPT(
+    nrc.ReportCapableOutputSpec, mni.RegistrationOutputSpec):
+    pass
+
+class RobustMNINormalizationRPT(
+    nrc.RegistrationRC, mni.RobustMNINormalization):
+    input_spec = RobustMNINormalizationInputSpecRPT
+    output_spec = RobustMNINormalizationOutputSpecRPT
+
+    def _post_run_hook(self, runtime):
+        self._fixed_image = self.inputs.reference_image
+        self._moving_image = self.aggregate_outputs().warped_file
 
 
 class FLIRTInputSpecRPT(nrc.RegistrationRCInputSpec,
