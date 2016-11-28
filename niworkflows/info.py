@@ -55,7 +55,7 @@ SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 
 LINKS_REQUIRES = ['git+https://github.com/nipy/nipype.git@master#egg=nipype']
-TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist']
+TESTS_REQUIRES = ['nose']
 EXTRA_REQUIRES = {
     'doc': ['sphinx'],
     'tests': TESTS_REQUIRES,
