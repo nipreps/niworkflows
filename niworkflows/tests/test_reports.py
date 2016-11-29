@@ -10,7 +10,6 @@ from shutil import copy
 import nibabel as nb
 from nilearn import image
 from nipype.utils.tmpdirs import InTemporaryDirectory
-from nipype.interfaces import fsl
 
 from niworkflows.data.getters import get_mni_template_ras, get_ds003_downsampled
 
@@ -21,6 +20,13 @@ from niworkflows.interfaces.masks import BETRPT
 MNI_DIR = get_mni_template_ras()
 MNI_2MM = os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz')
 DS003_DIR = get_ds003_downsampled()
+
+def stage_artifacts(filename, new_filename):
+    """ filename: the name of the file to be saved as an artifact.
+        new_filename: what to call the artifact (which will be saved in the
+       `/scratch` folder) """
+    if os.getenv('SAVE_CIRCLE_ARTIFACTS', False) == "1":
+        copy(filename, os.path.join('/scratch', new_filename))
 
 class TestFLIRTRPT(unittest.TestCase):
     def setUp(self):
@@ -35,11 +41,11 @@ class TestFLIRTRPT(unittest.TestCase):
             res = flirt_rpt.run()
             out_report = res.outputs.out_report
 
-            if os.getenv('SAVE_CIRCLE_ARTIFACTS', False) == "1":
-                copy(out_report, os.path.join('/scratch', 'testFLIRT.svg'))
+            stage_artifacts(out_report, 'testFLIRT.svg')
 
             self.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
                             .format(out_report))
+
 
 #     #def test_applyxfm_wrapper(self):
 #     #    self.test_known_file_out(ApplyXFMRPT)
@@ -49,7 +55,8 @@ class TestBETRPT(unittest.TestCase):
 
     def test_generate_report(self):
         ''' test of BET's report under basic (output binary mask) conditions '''
-        _smoke_test_report(BETRPT(in_file=MNI_2MM, generate_report=True, mask=True))
+        _smoke_test_report(BETRPT(in_file=MNI_2MM, generate_report=True, mask=True),
+                           'testBET.html')
 
     def test_generate_report_from_4d(self):
         ''' if the in_file was 4d, it should be able to produce the same report
@@ -60,14 +67,16 @@ class TestBETRPT(unittest.TestCase):
         mni_4d_file = os.path.join(os.getcwd(), 'mni_4d.nii.gz')
         nb.save(mni_4d, mni_4d_file)
 
-        _smoke_test_report(BETRPT(in_file=mni_4d_file, generate_report=True, mask=True))
+        _smoke_test_report(BETRPT(in_file=mni_4d_file, generate_report=True, mask=True),
+                           'testBET4d.html')
 
-def _smoke_test_report(report_interface):
-    with InTemporaryDirectory() as temp_dir:
+def _smoke_test_report(report_interface, artifact_name):
+    with InTemporaryDirectory():
         report_interface.run()
         out_report = report_interface.aggregate_outputs().out_report
+        stage_artifacts(out_report, artifact_name)
         unittest.TestCase.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
-                        .format(out_report))
+                                     .format(out_report))
 
 class TestFASTRPT(unittest.TestCase):
     ''' tests use mni as in_file '''
@@ -82,4 +91,4 @@ class TestFASTRPT(unittest.TestCase):
         report_interface = FASTRPT(in_files=skullstripped, generate_report=True, no_bias=True,
                                    probability_maps=True, segments=True, out_basename='test')
 
-        _smoke_test_report(report_interface)
+        _smoke_test_report(report_interface, 'testFast.html')
