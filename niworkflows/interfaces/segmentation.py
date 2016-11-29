@@ -6,11 +6,8 @@ ReportCapableInterfaces for segmentation tools
 """
 from __future__ import absolute_import, division, print_function
 
-
 from nipype.interfaces import fsl
-from nipype.interfaces.base import traits, isdefined
 from niworkflows.common import report as nrc
-from niworkflows.viz.utils import plot_segs
 from niworkflows import NIWORKFLOWS_LOG
 
 class FASTInputSpecRPT(nrc.ReportCapableInputSpec,
@@ -36,7 +33,8 @@ class FASTRPT(nrc.SegmentationRC,
         self._masked = False
         self._report_title = "FAST: segmentation over anatomical"
 
-        NIWORKFLOWS_LOG.info('Generating report for FAST (in_files {}, segmentation {}, individual tissue classes {}).'.
-                             format(self.inputs.in_files,
-                                    self.aggregate_outputs().tissue_class_map,
-                                    self.aggregate_outputs().tissue_class_files))
+        NIWORKFLOWS_LOG.info('Generating report for FAST (in_files %s, '
+                             'segmentation %s, individual tissue classes %s).',
+                             self.inputs.in_files,
+                             self.aggregate_outputs().tissue_class_map,
+                             self.aggregate_outputs().tissue_class_files)

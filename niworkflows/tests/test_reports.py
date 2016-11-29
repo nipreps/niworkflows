@@ -21,7 +21,7 @@ from niworkflows.interfaces.masks import BETRPT
 MNI_DIR = get_mni_template_ras()
 MNI_2MM = os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz')
 DS003_DIR = get_ds003_downsampled()
-@unittest.skip
+
 class TestFLIRTRPT(unittest.TestCase):
     def setUp(self):
         self.out_file = "test_flirt.nii.gz"
@@ -43,6 +43,7 @@ class TestFLIRTRPT(unittest.TestCase):
 
 #     #def test_applyxfm_wrapper(self):
 #     #    self.test_known_file_out(ApplyXFMRPT)
+
 class TestBETRPT(unittest.TestCase):
     ''' tests it using mni as in_file '''
 

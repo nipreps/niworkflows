@@ -1,10 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
-
 from nipype.interfaces import fsl
-from nipype.interfaces.base import traits, isdefined
 from niworkflows.common import report as nrc
-from niworkflows.viz.utils import plot_segs
 from niworkflows import NIWORKFLOWS_LOG
 
 class BETInputSpecRPT(nrc.ReportCapableInputSpec,
