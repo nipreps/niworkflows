@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Helper tools for visualization purposes"""
 from __future__ import absolute_import, division, print_function
+from io import open
+
 import os.path as op
 from sys import version_info
 
@@ -11,7 +13,6 @@ import nibabel as nb
 from nilearn.plotting import plot_anat
 from nilearn import image as nlimage
 
-from io import open
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 
@@ -58,7 +59,7 @@ def as_svg(image):
 
 def cuts_from_bbox(mask_nii, cuts=3):
     from nibabel.affines import apply_affine
-    imnii = nb.load(mask_nii)
+    imnii = mask_nii
     mask_data = imnii.get_data()
     B = np.argwhere(mask_data > 0)
     start_coords = B.min(0)
@@ -97,8 +98,12 @@ def _3d_in_file(in_file):
 
     return nlimage.index_img(in_file, 0)
 
-def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, ifinputs=None, ifoutputs=None, title=None, **plot_params):
-    """ plot segmentation as contours over the image (e.g. anatomical). seg_niis should be a list of files. mask_nii helps determine the cut coordinates. plot_params will be passed on to nilearn plot_* functions """
+def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None, **plot_params):
+    """ plot segmentation as contours over the image (e.g. anatomical).
+    seg_niis should be a list of files. mask_nii helps determine the cut
+    coordinates. plot_params will be passed on to nilearn plot_* functions. If
+    seg_niis is a list of size one, it behaves as if it was plotting the mask.
+    """
 
     def _plot_anat_with_contours(image, segs=None, **plot_params):
         assert not segs is None
@@ -112,7 +117,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, ifinputs=No
         # segment contours
         for seg, color in zip(segs, ['b', 'r', 'y']):
             plot_params['colors'] = color
-            plot_params['levels'] = [0.5] if not 'levels' in plot_params else plot_params['levels']
+            plot_params['levels'] = [0.5] if 'levels' not in plot_params else plot_params['levels']
             plot_params['alpha'] = 1
             svg.add_contours(seg, **plot_params)
 
@@ -125,7 +130,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, ifinputs=No
     cuts = cuts_from_bbox(mask_nii)
 
     svgs_list = []
-    plot_xyz(image_nii, _plot_anat_with_contours, cuts, segs=seg_niis)
+    plot_xyz(image_nii, _plot_anat_with_contours, cuts, segs=seg_niis, **plot_params)
 
     save_html(template='segmentation.tpl',
               report_file_name=out_file,
@@ -133,7 +138,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, ifinputs=No
               base_image='<br />'.join(svgs_list),
               title=title)
 
-def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=['z', 'x', 'y'], **kwargs):
+def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=('z', 'x', 'y'), **kwargs):
     """
     plot_func must be a function that more-or-less conforms to nilearn's plot_* signature
     """
