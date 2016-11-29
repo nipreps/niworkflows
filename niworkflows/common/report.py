@@ -5,8 +5,12 @@ from __future__ import absolute_import, division, print_function
 
 import os
 from sys import version_info
-from abc import abstractmethod
 from io import open
+import string
+from abc import abstractmethod
+from html.parser import HTMLParser
+import jinja2
+from pkg_resources import resource_filename as pkgrf
 
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
@@ -32,7 +36,7 @@ class ReportCapableInterface(BaseInterface):
 
     def _run_interface(self, runtime):
         """ delegates to base interface run method, then attempts to generate reports """
-        # make this _run_interface seamless (avoid wrap it into try..except)
+
         try:
             runtime = super(ReportCapableInterface, self)._run_interface(runtime)
         except NotImplementedError:
@@ -91,7 +95,6 @@ class ReportCapableInterface(BaseInterface):
         with open(self._out_report, 'w' if PY3 else 'wb') as outfile:
             outfile.write(errorstr)
 
-
 class RegistrationRCInputSpec(ReportCapableInputSpec):
     out_report = File(
         'report.svg', usedefault=True, desc='filename for the visual report')
@@ -137,3 +140,50 @@ class SegmentationRC(ReportCapableInterface):
             title=self._report_title
         )
 
+class HTMLValidator(HTMLParser):
+    ''' There are limitations on the html passed to save_html because
+    save_html's result will be concatenated with other html strings
+
+    html may not contain the tags 'head', 'body', 'header', 'footer', 'main',
+    because those elements are supposed to be unique.
+
+    html should also not contain '<style' because selectors/@keyframes, etc. in
+    embedded CSS may conflict in unpredictable ways. However, due to lack of
+    control over svg creation, this is not checked for.
+
+    If the html contains a tag with the id attribute, the value of id must
+    contain unique_string and not be equal to unique_string. In addition, all
+    id's within any one save_html call are also unique from each other.
+
+    html is assumed to be complete, valid html
+    '''
+
+    def __init__(self, unique_string):
+        super(HTMLValidator, self).__init__()
+        self.unique_string = unique_string
+        self.bad_tags = []
+        self.bad_ids = []
+        self.taken_ids = [unique_string] # in template
+
+    def handle_starttag(self, tag, attrs):
+        if tag in ['head', 'body', 'header', 'footer', 'main']:
+            self.bad_tags.append(tag)
+        for attr, value in attrs:
+            if attr=='id':
+                # if unique_string is not found in the id name
+                if value.find(self.unique_string) == -1:
+                    self.bad_ids.append(value)
+                elif value in self.taken_ids: # the value is already being used as an id
+                    self.bad_ids.append(value)
+
+    def close(self):
+        super(HTMLValidator, self).close()
+        error_string = ''
+        if len(self.bad_tags) > 0:
+            error_string = 'Found the following illegal tags: {}.\n'.format(self.bad_tags)
+        if len(self.bad_ids) > 0:
+            error_string = error_string + 'Found the following illegal ids: {}.\n ids must '
+            'contain unique_string ({}) and be unique from each other.\n'.format(
+                self.bad_ids, self.unique_string)
+        if len(error_string) > 0:
+            raise ValueError(error_string)
