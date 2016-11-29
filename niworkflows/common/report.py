@@ -5,14 +5,12 @@ from __future__ import absolute_import, division, print_function
 
 from io import open
 import os
-import string
 import warnings
 from abc import abstractmethod
 from html.parser import HTMLParser
 import tinycss
 import jinja2
 from pkg_resources import resource_filename as pkgrf
-
 from sys import version_info
 
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
@@ -37,11 +35,7 @@ class ReportCapableInterface(BaseInterface):
         super(ReportCapableInterface, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
-        ''' delegates to base interface run method, then attempts to generate reports;
-        may need to be changed completely and added instead to Node.write_report() or, ideally, 
-        .run()'''
-        self.html_report = os.path.join(runtime.cwd, 'report.html')
-
+        """ delegates to base interface run method, then attempts to generate reports """
         # make this _run_interface seamless (avoid wrap it into try..except)
         try:
             runtime = super(ReportCapableInterface, self)._run_interface(runtime)
@@ -101,7 +95,6 @@ class ReportCapableInterface(BaseInterface):
         with open(self._out_report, 'w' if PY3 else 'wb') as outfile:
             outfile.write(errorstr)
 
-
 class RegistrationRCInputSpec(ReportCapableInputSpec):
     out_report = File(
         'report.svg', usedefault=True, desc='filename for the visual report')
@@ -134,7 +127,6 @@ class RegistrationRC(ReportCapableInterface):
                      estimate_brightness=True,
                      cuts=self.DEFAULT_MNI_CUTS),
             out_file=self._out_report)
-
 
 class SegmentationRC(ReportCapableInterface):
     """ An abstract mixin to registration nipype interfaces """
@@ -199,7 +191,6 @@ class HTMLValidator(HTMLParser):
             self.in_style = True
             if not 'scoped' in [attribute for attribute, value in attrs]:
                 self.bad_tags.append(tag)
-
         for attr, value in attrs:
             if attr=='id':
                 # if unique_string is not found in the id name
@@ -239,3 +230,4 @@ class HTMLValidator(HTMLParser):
                 self.bad_ids, self.unique_string)
         if len(error_string) > 0:
             raise ValueError(error_string)
+
