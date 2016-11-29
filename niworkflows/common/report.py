@@ -6,12 +6,13 @@ from __future__ import absolute_import, division, print_function
 from io import open
 import os
 import warnings
-from abc import abstractmethod
 from html.parser import HTMLParser
 import tinycss
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 from sys import version_info
+import string
+from abc import abstractmethod
 
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
@@ -36,7 +37,7 @@ class ReportCapableInterface(BaseInterface):
 
     def _run_interface(self, runtime):
         """ delegates to base interface run method, then attempts to generate reports """
-        # make this _run_interface seamless (avoid wrap it into try..except)
+
         try:
             runtime = super(ReportCapableInterface, self)._run_interface(runtime)
         except NotImplementedError:
