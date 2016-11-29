@@ -1,2 +1,2 @@
--e git+https://github.com/nipy/nipype#egg=nipype
+-e git+https://github.com/shoshber/nipype#egg=nipype
 -e .
