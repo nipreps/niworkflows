@@ -80,6 +80,6 @@ class TestFASTRPT(unittest.TestCase):
         skullstripped = bet_interface.aggregate_outputs().out_file
 
         report_interface = FASTRPT(in_files=skullstripped, generate_report=True, no_bias=True,
-                                   probability_maps=True, segments=True)
+                                   probability_maps=True, segments=True, out_basename='test')
 
         _smoke_test_report(report_interface)
