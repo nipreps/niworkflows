@@ -15,7 +15,8 @@ from nipype.interfaces import fsl
 from niworkflows.data.getters import get_mni_template_ras, get_ds003_downsampled
 
 from niworkflows.interfaces.registration import FLIRTRPT
-from niworkflows.interfaces.segmentation import BETRPT, FASTRPT
+from niworkflows.interfaces.segmentation import FASTRPT
+from niworkflows.interfaces.masks import BETRPT
 
 MNI_DIR = get_mni_template_ras()
 MNI_2MM = os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz')
