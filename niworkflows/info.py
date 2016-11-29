@@ -54,7 +54,7 @@ REQUIRES = ['nipype', 'future', 'nilearn', 'sklearn', 'pandas', 'matplotlib',
 SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 
-LINKS_REQUIRES = ['git+https://github.com/oesteban/nipype.git#egg=nipype',]
+LINKS_REQUIRES = ['git+https://github.com/shoshber/nipype.git#egg=nipype',]
 TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist']
 EXTRA_REQUIRES = {
     'doc': ['sphinx'],
