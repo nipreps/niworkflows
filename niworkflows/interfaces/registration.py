@@ -45,9 +45,10 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
         self._moving_image = self.aggregate_outputs().out_file
 
 
-# class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
-#                            fsl.preprocess.ApplyXfmInputSpec):
-#     pass
+class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
+                           fsl.preprocess.ApplyXFMInputSpec):
+    pass
+
 
 # class ApplyXFMRPT(FLIRTRPT):
 #     ''' ApplyXFM is a wrapper around FLIRT. ApplyXFMRPT is a wrapper around FLIRTRPT.'''

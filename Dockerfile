@@ -48,6 +48,6 @@ RUN conda config --add channels conda-forge && \
 WORKDIR /root/
 COPY . niworkflows/
 RUN cd niworkflows && \
-    python setup.py install && \
+    pip install --process-dependency-links -e .[all] && \
     python -c 'from niworkflows.data.getters import get_mni_template_ras; get_mni_template_ras()' && \
     python -c 'from niworkflows.data.getters import get_ds003_downsampled; get_ds003_downsampled()'
