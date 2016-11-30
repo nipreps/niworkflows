@@ -24,7 +24,7 @@ SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
 
 
-class CSSValidator():
+class CSSValidator(object):
     ''' no attribute in CSS may be position: fixed
 
     Like  HTMLValidator, valid CSS is assumed and not checked.'''
@@ -56,7 +56,7 @@ class CSSValidator():
 
 
 
-class HTMLValidator(HTMLParser):
+class HTMLValidator(HTMLParser, object):
     ''' There are limitations on the html passed to save_html because
     save_html's result will be concatenated with other html strings
 
@@ -138,7 +138,7 @@ def save_html(template, report_file_name, unique_string, **kwargs):
                          .format(unique_string))
 
     # validate html
-    validator = report.HTMLValidator(unique_string=unique_string)
+    validator = HTMLValidator(unique_string=unique_string)
     for key, html in enumerate(kwargs.keys()):
         validator.feed(html)
         validator.close()
@@ -265,7 +265,8 @@ def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=('z', 'x', 'y'
     for dimension in dimensions:
         plot_params['display_mode'] = dimension
         plot_params['cut_coords'] = cuts[dimension]
-        plot_func(image, **plot_params)
+        kwargs.update(plot_params)
+        plot_func(image, **kwargs)
 
 
 def plot_registration(anat_img, div_id, plot_params=None,
