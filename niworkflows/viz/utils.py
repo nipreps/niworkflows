@@ -141,7 +141,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
     seg_niis = filemanip.filename_to_list(seg_niis)
     mask_nii = nb.load(mask_nii) if masked else nlimage.threshold_img(mask_nii, 1e-3)
 
-    cuts = cuts_from_bbox(mask_nii)
+    cuts = cuts_from_bbox(mask_nii, cuts=7)
 
     svgs_list = []
     plot_xyz(image_nii, _plot_anat_with_contours, cuts, segs=seg_niis, **plot_params)
