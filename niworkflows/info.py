@@ -50,11 +50,10 @@ CLASSIFIERS = [
 ]
 
 REQUIRES = ['nipype', 'future', 'nilearn', 'sklearn', 'pandas', 'matplotlib',
-            'jinja2', 'svgutils', 'tinycss']
+            'jinja2', 'svgutils', 'tinycss', 'nipype']
 SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 
-LINKS_REQUIRES = ['git+https://github.com/oesteban/nipype.git#egg=nipype',]
 TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist']
 EXTRA_REQUIRES = {
     'doc': ['sphinx'],
