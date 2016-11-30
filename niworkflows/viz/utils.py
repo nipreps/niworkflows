@@ -129,7 +129,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
         svg = plot_anat(image, **plot_params)
 
         # segment contours
-        for seg, color in zip(segs, ['r', 'b', 'y']):
+        for seg, color in zip(segs, ['r', 'g', 'y']):
             plot_params['colors'] = color
             plot_params['levels'] = [0.5] if 'levels' not in plot_params else plot_params['levels']
             plot_params['alpha'] = 1
