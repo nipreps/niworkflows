@@ -54,6 +54,7 @@ REQUIRES = ['nipype', 'future', 'nilearn', 'sklearn', 'pandas', 'matplotlib',
 SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 
+LINKS_REQUIRES = []
 TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist']
 EXTRA_REQUIRES = {
     'doc': ['sphinx'],
