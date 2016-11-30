@@ -11,11 +11,12 @@ import nibabel as nb
 from nilearn import image
 from nipype.utils.tmpdirs import InTemporaryDirectory
 
-from niworkflows.data.getters import get_mni_template_ras, get_ds003_downsampled
+from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsampled,
+                                      get_ants_oasis_template_ras)
 
 from niworkflows.interfaces.registration import FLIRTRPT
 from niworkflows.interfaces.segmentation import FASTRPT
-from niworkflows.interfaces.masks import BETRPT
+from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT
 
 MNI_DIR = get_mni_template_ras()
 MNI_2MM = os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz')
@@ -91,4 +92,4 @@ class TestFASTRPT(unittest.TestCase):
         report_interface = FASTRPT(in_files=skullstripped, generate_report=True, no_bias=True,
                                    probability_maps=True, segments=True, out_basename='test')
 
-        _smoke_test_report(report_interface, 'testFast.html')
+        _smoke_test_report(report_interface, 'testFAST.html')
