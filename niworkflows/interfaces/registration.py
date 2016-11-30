@@ -27,7 +27,7 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
 
 
 class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
-                           fsl.preprocess.ApplyXfmInputSpec):
+                           fsl.preprocess.ApplyXFMInputSpec):
     pass
 
 class ApplyXFMRPT(FLIRTRPT):
