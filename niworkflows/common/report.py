@@ -16,6 +16,7 @@ from abc import abstractmethod
 
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
+from niworkflows.viz import utils as viz
 
 PY3 = version_info[0] > 2
 
@@ -47,11 +48,11 @@ class ReportCapableInterface(BaseInterface):
         if not self.inputs.generate_report:
             return runtime
 
+        self._out_report = os.path.abspath(self.inputs.out_report)
         self._post_run_hook(runtime)
 
         # check exit code and act consequently
         NIWORKFLOWS_LOG.debug('Running report generation code')
-        self._out_report = os.path.abspath(self.inputs.out_report)
 
         _report_ok = False
         if hasattr(runtime, 'returncode') and runtime.returncode == 0:
@@ -116,22 +117,30 @@ class RegistrationRC(ReportCapableInterface):
 
     def _generate_report(self):
         """ Generates the visual report """
-        from niworkflows.viz.utils import compose_view, plot_xyz
+        from niworkflows.viz.utils import compose_view, plot_registration
         NIWORKFLOWS_LOG.info('Generating visual report')
 
         # Call composer
         compose_view(
-            plot_xyz(self._fixed_image, 'fixed-image',
-                     estimate_brightness=True,
-                     cuts=self.DEFAULT_MNI_CUTS),
-            plot_xyz(self._moving_image, 'moving-image',
-                     estimate_brightness=True,
-                     cuts=self.DEFAULT_MNI_CUTS),
+            plot_registration(self._fixed_image, 'fixed-image',
+                              estimate_brightness=True,
+                              cuts=self.DEFAULT_MNI_CUTS),
+            plot_registration(self._moving_image, 'moving-image',
+                              estimate_brightness=True,
+                              cuts=self.DEFAULT_MNI_CUTS),
             out_file=self._out_report)
 
 class SegmentationRC(ReportCapableInterface):
-    """ An abstract mixin to registration nipype interfaces """
-    pass
+    """ An abstract mixin to segmentation nipype interfaces """
+    def _generate_report(self):
+        viz.plot_segs(
+            image_nii=self._anat_file,
+            seg_niis=self._seg_files,
+            mask_nii=self._mask_file,
+            out_file=self._out_report,
+            masked=self._masked,
+            title=self._report_title
+        )
 
 class CSSValidator():
     ''' no attribute in CSS may be position: fixed
@@ -231,4 +240,3 @@ class HTMLValidator(HTMLParser):
                 self.bad_ids, self.unique_string)
         if len(error_string) > 0:
             raise ValueError(error_string)
-

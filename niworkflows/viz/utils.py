@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Helper tools for visualization purposes"""
 from __future__ import absolute_import, division, print_function
+from io import open
+
 import os.path as op
 from sys import version_info
 
@@ -8,13 +10,14 @@ from uuid import uuid4
 import numpy as np
 from lxml import etree
 import nibabel as nb
-from nilearn.plotting import plot_anat, plot_roi
+from nilearn.plotting import plot_anat
 from nilearn import image as nlimage
 
-from io import open
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 from niworkflows.common import report
+
+from nipype.utils import filemanip
 
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
@@ -70,7 +73,7 @@ def as_svg(image):
 def cuts_from_bbox(mask_nii, cuts=3):
     # deprecated--use nilearn (https://github.com/poldracklab/niworkflows/issues/26)
     from nibabel.affines import apply_affine
-    imnii = nb.load(mask_nii)
+    imnii = mask_nii
     mask_data = imnii.get_data()
     B = np.argwhere(mask_data > 0)
     start_coords = B.min(0)
@@ -91,85 +94,83 @@ def cuts_from_bbox(mask_nii, cuts=3):
 
 def _3d_in_file(in_file):
     ''' if self.inputs.in_file is 3d, return it.
-    if 4d, pick an arbitrary volume and return that '''
-    if nb.load(in_file).get_data().ndim == 3:
+    if 4d, pick an arbitrary volume and return that.
+
+    if in_file is a list of files, return an arbitrary file from
+    the list, and an arbitrary volume from that file
+    '''
+
+    in_file = filemanip.filename_to_list(in_file)[0]
+
+    try:
+        in_file = nb.load(in_file)
+    except AttributeError:
+        in_file = in_file
+
+    if in_file.get_data().ndim == 3:
         return in_file
 
     return nlimage.index_img(in_file, 0)
 
-def plot_mask(image_nii, mask_nii, masked=False, out_file=None, ifinputs=None, ifoutputs=None):
-    # most of the time just do simple semi-transparent overlay of brain mask over input
-    if not masked:
-        mask_nii = nlimage.threshold_img(mask_nii, 1e-3)
+def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None, **plot_params):
+    """ plot segmentation as contours over the image (e.g. anatomical).
+    seg_niis should be a list of files. mask_nii helps determine the cut
+    coordinates. plot_params will be passed on to nilearn plot_* functions. If
+    seg_niis is a list of size one, it behaves as if it was plotting the mask.
+    """
+
+    def _plot_anat_with_contours(image, segs=None, **plot_params):
+        assert not segs is None
+        assert len(segs) <= 3
+        plot_params = {} if plot_params is None else plot_params
+
+        # anatomical
+        plot_params['alpha'] = .7
+        svg = plot_anat(image, **plot_params)
+
+        # segment contours
+        for seg, color in zip(segs, ['b', 'r', 'y']):
+            plot_params['colors'] = color
+            plot_params['levels'] = [0.5] if 'levels' not in plot_params else plot_params['levels']
+            plot_params['alpha'] = 1
+            svg.add_contours(seg, **plot_params)
+
+        svgs_list.append(as_svg(svg))
+
+    image_nii = _3d_in_file(image_nii)
+    seg_niis = filemanip.filename_to_list(seg_niis)
+    mask_nii = nb.load(mask_nii) if masked else nlimage.threshold_img(mask_nii, 1e-3)
 
     cuts = cuts_from_bbox(mask_nii)
-    plot_params = {
-        'anat_img': _3d_in_file(image_nii),
-        'alpha': 0.6
-    }
-
-    contour_params = {
-        'colors': 'b',
-        'levels': [0.5],
-        'alpha': 1
-    }
 
     svgs_list = []
-    for display_mode in 'x', 'y', 'z':
-        plot_params['display_mode'] = display_mode
-        plot_params['cut_coords'] = cuts[display_mode]
-        svg = plot_anat(**plot_params)
-        svg.add_contours(mask_nii, **contour_params)
-        svg.close()
-        svgs_list.append(as_svg(svg))
+    plot_xyz(image_nii, _plot_anat_with_contours, cuts, segs=seg_niis, **plot_params)
 
     save_html(template='segmentation.tpl',
               report_file_name=out_file,
-              unique_string='bet' + str(uuid4()),
+              unique_string='seg' + str(uuid4()),
               base_image='<br />'.join(svgs_list),
-              title="BET: brain mask over anatomical input")
+              title=title)
 
-    # Let's just fail miserably if something goes wrong
-    # I keep this code here until we are sure there are no weird outputs
-    # except TypeError: # in case of weird outputs
-    #     overlay_file_name, overlay_label = self._overlay_file_name()
-    #     if overlay_file_name:
-    #         background_params = {'anat_img': _3d_in_file(),
-    #                              'cut_coords': 3,
-    #                              'cmap': 'gray'}
-    #         base_svgs = _xyz_svgs(plot_anat, background_params)
-    #         overlay_svgs = _xyz_svgs(_plot_overlay_over_anat, background_params)
+def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=('z', 'x', 'y'), **kwargs):
+    """
+    plot_func must be a function that more-or-less conforms to nilearn's plot_* signature
+    """
+    plot_params = {} if plot_params is None else plot_params
 
-    #         save_html(template='overlay_3d_nrc.tpl',
-    #                   report_file_name=self.html_report,
-    #                   unique_string='bet' + str(uuid.uuid4()),
-    #                   base_image=base_svgs,
-    #                   overlay_image=overlay_svgs,
-    #                   inputs=self.inputs,
-    #                   outputs=self.aggregate_outputs(),
-    #                   title="BET: " + overlay_label + " over the input (anatomical)")
+    for dimension in dimensions:
+        plot_params['display_mode'] = dimension
+        plot_params['cut_coords'] = cuts[dimension]
+        plot_func(image, **plot_params, **kwargs)
 
-    #     else: # just print an output (no overlay)
-    #         file_name = self._pick_output_file()
-    #         image = plotting.plot_img(file_name)
-
-    #         save_html(template='overlay_3d_nrc.tpl',
-    #                   report_file_name=self.html_report,
-    #                   unique_string='bet' + str(uuid.uuid4()),
-    #                   base_image=as_svg(image),
-    #                   title="BET: " + file_name,
-    #                   inputs=self.inputs,
-    #                   outputs=self.aggregate_outputs())
-    #         image.close()
-
-
-def plot_xyz(anat_img, div_id, plot_params=None,
-             order=('z', 'x', 'y'), cuts=None,
-             estimate_brightness=False):
+def plot_registration(anat_img, div_id, plot_params=None,
+                      order=('z', 'x', 'y'), cuts=None,
+                      estimate_brightness=False):
     """
     Plots the foreground and background views
     Default order is: axial, coronal, sagittal
     """
+
     plot_params = {} if plot_params is None else plot_params
 
     # Use default MNI cuts if none defined
