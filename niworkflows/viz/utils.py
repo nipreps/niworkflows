@@ -4,23 +4,126 @@ from __future__ import absolute_import, division, print_function
 from io import open
 
 import os.path as op
+from pkg_resources import resource_filename as pkgrf
 from sys import version_info
 
-from uuid import uuid4
+import jinja2
 import numpy as np
-from lxml import etree
 import nibabel as nb
+import tinycss
+import warnings
+from html.parser import HTMLParser
+from lxml import etree
 from nilearn.plotting import plot_anat
 from nilearn import image as nlimage
-
-import jinja2
-from pkg_resources import resource_filename as pkgrf
-from niworkflows.common import report
-
 from nipype.utils import filemanip
+from uuid import uuid4
+
 
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
+
+
+class CSSValidator():
+    ''' no attribute in CSS may be position: fixed
+
+    Like  HTMLValidator, valid CSS is assumed and not checked.'''
+
+    def __init__(self):
+        self.parser = tinycss.make_parser()
+
+    def validate(self, css):
+        stylesheet = self.parser.parse_stylesheet(css)
+        for rule in stylesheet.rules:
+            self.validate_no_fixed_position(rule)
+        if not stylesheet.errors is None and len(stylesheet.errors) > 0:
+            warnings.warn('CSS Validator encountered the following parser errors while parsing '
+                          '(CSS starting `{}`). CSS may not be syntactically correct, and CSS '
+                          'Validator may not have been able to do its job. \n{}'.format(
+                              css[:5], stylesheet.errors))
+
+    def validate_no_fixed_position(self, rule):
+        ''' checks counter names and position values '''
+        if rule.at_keyword is not None:
+            declarations = parser.parse_declaration_list(rule.body)
+        else: # not an at-rule
+            declarations = rule.declarations
+
+        for declaration in declarations:
+            if declaration.name == 'position' and 'fixed' in [value.as_css()
+                                                              for value in declaration.value]:
+                raise ValueError('Found illegal position `fixed` in CSS.')
+
+
+
+class HTMLValidator(HTMLParser):
+    ''' There are limitations on the html passed to save_html because
+    save_html's result will be concatenated with other html strings
+
+    html may not contain the tags 'head', 'body', 'header', 'footer', 'main',
+    because those elements are supposed to be unique.
+
+    If the html contains a tag with the id attribute, the value of id must
+    contain unique_string and not be equal to unique_string. In addition, all
+    id's within any one save_html call are also unique from each other. All
+    <style> tags must be scoped.
+
+    If appropriate, invokes CSSValidator.
+
+    html is assumed to be complete, valid html
+    '''
+
+    def __init__(self, unique_string, css_validator = CSSValidator()):
+        self.unique_string = unique_string
+        self.css_validator = css_validator
+        super(HTMLValidator, self).__init__()
+
+    def handle_starttag(self, tag, attrs):
+        if tag in ['head', 'body', 'header', 'footer', 'main']:
+            self.bad_tags.append(tag)
+        elif tag == 'style':
+            self.in_style = True
+            if not 'scoped' in [attribute for attribute, value in attrs]:
+                self.bad_tags.append(tag)
+        for attr, value in attrs:
+            if attr=='id':
+                # if unique_string is not found in the id name
+                if value.find(self.unique_string) == -1:
+                    self.bad_ids.append(value)
+                elif value in self.taken_ids: # the value is already being used as an id
+                    self.bad_ids.append(value)
+
+    def handle_endtag(self, tag):
+        self.in_style = False
+
+    def handle_data(self, data):
+        if self.in_style:
+            self.css_validator.validate(data)
+
+    def handle_decl(self, decl):
+        self.bad_tags.append(decl)
+
+    def handle_pi(self, pi):
+        self.bad_tags.append(pi)
+
+    def reset(self):
+        super(HTMLValidator, self).reset()
+        self.bad_tags = []
+        self.bad_ids = []
+        self.taken_ids = [self.unique_string] # in template
+        self.in_style = False
+
+    def close(self):
+        super(HTMLValidator, self).close()
+        error_string = ''
+        if len(self.bad_tags) > 0:
+            error_string = 'Found the following illegal tags. All <style> tags must be scoped: {}.\n'.format(self.bad_tags)
+        if len(self.bad_ids) > 0:
+            error_string = error_string + 'Found the following illegal ids: {}.\n ids must '
+            'contain unique_string ({}) and be unique from each other.\n'.format(
+                self.bad_ids, self.unique_string)
+        if len(error_string) > 0:
+            raise ValueError(error_string)
 
 
 def save_html(template, report_file_name, unique_string, **kwargs):
@@ -152,6 +255,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
               base_image='<br />'.join(svgs_list),
               title=title)
 
+
 def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=('z', 'x', 'y'), **kwargs):
     """
     plot_func must be a function that more-or-less conforms to nilearn's plot_* signature
@@ -161,7 +265,8 @@ def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=('z', 'x', 'y'
     for dimension in dimensions:
         plot_params['display_mode'] = dimension
         plot_params['cut_coords'] = cuts[dimension]
-        plot_func(image, **plot_params, **kwargs)
+        plot_func(image, **plot_params)
+
 
 def plot_registration(anat_img, div_id, plot_params=None,
                       order=('z', 'x', 'y'), cuts=None,
