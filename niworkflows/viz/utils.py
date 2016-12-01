@@ -1,23 +1,27 @@
 # -*- coding: utf-8 -*-
 """Helper tools for visualization purposes"""
-from __future__ import absolute_import, division, print_function
-from io import open
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os.path as op
 from sys import version_info
 
-from uuid import uuid4
 import numpy as np
-from lxml import etree
 import nibabel as nb
-from nilearn.plotting import plot_anat
-from nilearn import image as nlimage
+from uuid import uuid4
+from io import open
 
 import jinja2
 from pkg_resources import resource_filename as pkgrf
-from niworkflows.common import report
 
+from lxml import etree
+from html.parser import HTMLParser
+import tinycss
+from nilearn.plotting import plot_anat
+from nilearn import image as nlimage
 from nipype.utils import filemanip
+
+from niworkflows.viz.validators import HTMLValidator
+
 
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
@@ -35,8 +39,8 @@ def save_html(template, report_file_name, unique_string, **kwargs):
                          .format(unique_string))
 
     # validate html
-    validator = report.HTMLValidator(unique_string=unique_string)
-    for key, html in enumerate(kwargs.keys()):
+    validator = HTMLValidator(unique_string=unique_string)
+    for html in list(kwargs.keys()):
         validator.feed(html)
         validator.close()
 
@@ -51,6 +55,7 @@ def save_html(template, report_file_name, unique_string, **kwargs):
 
     with open(report_file_name, 'w' if PY3 else 'wb') as handle:
         handle.write(report_render)
+
 
 def as_svg(image):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
@@ -67,14 +72,14 @@ def as_svg(image):
             svg_start = i
             continue
 
-    image_svg = image_svg[svg_start:] # strip out extra DOCTYPE, etc headers
-    return '\n'.join(image_svg) # straight up giant string
+    image_svg = image_svg[svg_start:]  # strip out extra DOCTYPE, etc headers
+    return '\n'.join(image_svg)  # straight up giant string
+
 
 def cuts_from_bbox(mask_nii, cuts=3):
-    # deprecated--use nilearn (https://github.com/poldracklab/niworkflows/issues/26)
+    """Finds equi-spaced cuts for presenting images"""
     from nibabel.affines import apply_affine
-    imnii = mask_nii
-    mask_data = imnii.get_data()
+    mask_data = mask_nii.get_data()
     B = np.argwhere(mask_data > 0)
     start_coords = B.min(0)
     stop_coords = B.max(0) + 1
@@ -86,7 +91,7 @@ def cuts_from_bbox(mask_nii, cuts=3):
 
     ras_coords = []
     for cross in np.array(vox_coords).T:
-        ras_coords.append(apply_affine(imnii.affine, cross).tolist())
+        ras_coords.append(apply_affine(mask_nii.affine, cross).tolist())
 
     ras_cuts = [list(coords) for coords in np.transpose(ras_coords)]
     return {k: v for k, v in zip(['x', 'y', 'z'], ras_cuts)}
@@ -112,6 +117,7 @@ def _3d_in_file(in_file):
 
     return nlimage.index_img(in_file, 0)
 
+
 def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None, **plot_params):
     """ plot segmentation as contours over the image (e.g. anatomical).
     seg_niis should be a list of files. mask_nii helps determine the cut
@@ -131,7 +137,8 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
         # segment contours
         for seg, color in zip(segs, ['r', 'g', 'y']):
             plot_params['colors'] = color
-            plot_params['levels'] = [0.5] if 'levels' not in plot_params else plot_params['levels']
+            plot_params['levels'] = [
+                0.5] if 'levels' not in plot_params else plot_params['levels']
             plot_params['alpha'] = 1
             svg.add_contours(seg, **plot_params)
 
@@ -139,18 +146,21 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
 
     image_nii = _3d_in_file(image_nii)
     seg_niis = filemanip.filename_to_list(seg_niis)
-    mask_nii = nb.load(mask_nii) if masked else nlimage.threshold_img(mask_nii, 1e-3)
+    mask_nii = nb.load(
+        mask_nii) if masked else nlimage.threshold_img(mask_nii, 1e-3)
 
     cuts = cuts_from_bbox(mask_nii, cuts=7)
 
     svgs_list = []
-    plot_xyz(image_nii, _plot_anat_with_contours, cuts, segs=seg_niis, **plot_params)
+    plot_xyz(image_nii, _plot_anat_with_contours,
+             cuts, segs=seg_niis, **plot_params)
 
     save_html(template='segmentation.tpl',
               report_file_name=out_file,
               unique_string='seg' + str(uuid4()),
               base_image='<br />'.join(svgs_list),
               title=title)
+
 
 def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=('z', 'x', 'y'), **kwargs):
     """
@@ -161,7 +171,9 @@ def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=('z', 'x', 'y'
     for dimension in dimensions:
         plot_params['display_mode'] = dimension
         plot_params['cut_coords'] = cuts[dimension]
-        plot_func(image, **plot_params, **kwargs)
+        kwargs.update(plot_params)
+        plot_func(image, **kwargs)
+
 
 def plot_registration(anat_img, div_id, plot_params=None,
                       order=('z', 'x', 'y'), cuts=None,
