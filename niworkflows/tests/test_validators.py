@@ -1,6 +1,12 @@
+# -*- coding: utf-8 -*-
+""" test validators """
+
+from __future__ import absolute_import, division, print_function, unicode_literals
 import unittest
 import mock
+
 from niworkflows.common import report
+from niworkflows.viz.validators import HTMLValidator, CSSValidator
 
 class TestValidator(unittest.TestCase):
 
@@ -31,7 +37,7 @@ class TestValidator(unittest.TestCase):
         self._tester(
             valid_strings=valid_csses,
             invalid_strings=invalid_csses,
-            validator=report.CSSValidator(),
+            validator=CSSValidator(),
             func=_use_validator)
 
     def test_html_validator(self):
@@ -55,16 +61,16 @@ class TestValidator(unittest.TestCase):
         self._tester(
             valid_strings=valid_htmls,
             invalid_strings=invalid_htmls,
-            validator = report.HTMLValidator(unique_string=self.unique_string),
+            validator = HTMLValidator(unique_string=self.unique_string),
             func=_use_validator)
 
-    @mock.patch('niworkflows.common.report.CSSValidator')
+    @mock.patch('niworkflows.viz.validators.CSSValidator')
     def test_html_css_interaction(self, mock_css_validator):
         ''' HTML validator should invoke CSS validator for the content of <style> tags '''
         explicitly_css = '<style type="text/css" scoped>{}</style>'.format(self.mock_css)
         implicitly_css = '<style scoped>{}</style>'.format(self.mock_css)
 
-        validator = report.HTMLValidator(unique_string=self.unique_string,
+        validator = HTMLValidator(unique_string=self.unique_string,
                                          css_validator=mock_css_validator)
         for html in [explicitly_css, implicitly_css]:
             validator.feed(html)

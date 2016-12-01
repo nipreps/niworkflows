@@ -3,7 +3,7 @@
 ReportCapableInterfaces for registration tools
 
 """
-from __future__ import absolute_import, division, print_function
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from nipype.interfaces import fsl
 from niworkflows.anat import mni
