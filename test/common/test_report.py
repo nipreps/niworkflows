@@ -4,6 +4,8 @@ import mock
 from nipype.interfaces.fsl.utils import SmoothOutputSpec
 
 from niworkflows.common import report
+from niworkflows.viz.utils import save_html
+from niworkflows.viz.validators import HTMLValidator
 
 class TestHTMLValidator(unittest.TestCase):
 
@@ -20,7 +22,7 @@ class TestHTMLValidator(unittest.TestCase):
                          'id=' + unique_string[1:], '  ID =x ' + unique_string + 'x',
                          '<p id=a' + unique_string + '></p><p id=a' + unique_string + '>']
 
-        validator = report.HTMLValidator(unique_string=unique_string)
+        validator = HTMLValidator(unique_string=unique_string)
             
         for html in valid_htmls:
             validator.feed(html)
@@ -41,7 +43,7 @@ class TestHTMLValidator(unittest.TestCase):
         html = 'some html'
         report_file_name = 'report file name'
 
-        report.save_html(template='overlay_3d_report.tpl',
+        save_html(template='overlay_3d_report.tpl',
                          report_file_name=report_file_name,
                          unique_string=unique_string,
                          another_keyword=html)
