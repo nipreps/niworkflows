@@ -7,8 +7,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from nipype.interfaces import fsl
 from niworkflows.anat import mni
-from niworkflows.common import report as nrc
-
+import niworkflows.common.report as nrc
+from niworkflows import NIWORKFLOWS_LOG
 
 class RobustMNINormalizationInputSpecRPT(
     nrc.RegistrationRCInputSpec, mni.RobustMNINormalizationInputSpec):
@@ -24,8 +24,11 @@ class RobustMNINormalizationRPT(
     output_spec = RobustMNINormalizationOutputSpecRPT
 
     def _post_run_hook(self, runtime):
-        self._fixed_image = self.inputs.reference_image
+        # We need to dig into the internal ants.Registration interface
+        self._fixed_image = self.norm.inputs.fixed_image[0]  # and get first item
         self._moving_image = self.aggregate_outputs().warped_image
+        NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
+                             self._fixed_image, self._moving_image)
 
 
 class FLIRTInputSpecRPT(nrc.RegistrationRCInputSpec,
@@ -43,7 +46,8 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference
         self._moving_image = self.aggregate_outputs().out_file
-
+        NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
+                             self._fixed_image, self._moving_image)
 
 class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
                            fsl.preprocess.ApplyXFMInputSpec):

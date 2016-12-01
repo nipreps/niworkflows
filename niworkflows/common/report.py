@@ -10,7 +10,6 @@ from io import open
 
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
-from niworkflows.viz import utils as viz
 
 PY3 = version_info[0] > 2
 
@@ -88,10 +87,12 @@ class ReportCapableInterface(BaseInterface):
     def _generate_error_report(self, errno=None):
         """ Saves an html snippet """
         # as of now we think this will be the same for every interface
+        NIWORKFLOWS_LOG.warn('Report was not generated')
+
         errorstr = '<div><span class="error">Failed to generate report!</span>.\n'
         if errno:
             errorstr += (' <span class="error">Interface returned exit '
-                         'code %d</span>\n') % errno
+                         'code %d</span>.\n') % errno
         errorstr += '</div>\n'
         with open(self._out_report, 'w' if PY3 else 'wb') as outfile:
             outfile.write(errorstr)
@@ -138,7 +139,8 @@ class SegmentationRC(ReportCapableInterface):
     """ An abstract mixin to segmentation nipype interfaces """
 
     def _generate_report(self):
-        viz.plot_segs(
+        from niworkflows.viz.utils import plot_segs
+        plot_segs(
             image_nii=self._anat_file,
             seg_niis=self._seg_files,
             mask_nii=self._mask_file,

@@ -95,6 +95,7 @@ class RobustMNINormalization(BaseInterface):
             shutil.move(outfile, outfile + '.%03d' % self.retry)
 
             if interface_result is not None:
+                runtime.returncode = 0
                 self._results.update(interface_result.outputs.get())
                 NIWORKFLOWS_LOG.info(
                     'Successful spatial normalization (retry #%d).', self.retry)
