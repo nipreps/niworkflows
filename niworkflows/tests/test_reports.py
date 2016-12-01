@@ -36,27 +36,14 @@ class TestFLIRTRPT(unittest.TestCase):
             moving = os.path.join(DS003_DIR, 'sub-01/anat/sub-01_T1w.nii.gz')
             flirt_rpt = FLIRTRPT(generate_report=True, in_file=moving,
                                  reference=reference)
-            res = flirt_rpt.run()
-            out_report = res.outputs.out_report
-
-            stage_artifacts(out_report, 'testFLIRT.svg')
-
-            self.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
-                            .format(out_report))
+            _smoke_test_report(flirt_rpt, 'testFLIRT.svg')
 
     def test_RobustMNINormalizationRPT(self):
         with InTemporaryDirectory():
             moving = os.path.join(DS003_DIR, 'sub-01/anat/sub-01_T1w.nii.gz')
             ants_rpt = RobustMNINormalizationRPT(
                 generate_report=True, moving_image=moving, testing=True)
-            res = ants_rpt.run()
-            out_report = res.outputs.out_report
-
-            if os.getenv('SAVE_CIRCLE_ARTIFACTS', False) == "1":
-                copy(out_report, os.path.join('/scratch', 'testRobustMNINormalizationRPT.svg'))
-
-            self.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
-                            .format(out_report))
+            _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT.svg')
 
 
 #     #def test_applyxfm_wrapper(self):
