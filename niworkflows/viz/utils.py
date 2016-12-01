@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
 """Helper tools for visualization purposes"""
 from __future__ import absolute_import, division, print_function
-from io import open
 
 import os.path as op
-from pkg_resources import resource_filename as pkgrf
 from sys import version_info
+import warnings
 
-import jinja2
 import numpy as np
 import nibabel as nb
-import tinycss
-import warnings
-from html.parser import HTMLParser
+from uuid import uuid4
+from io import open
+
+import jinja2
+from pkg_resources import resource_filename as pkgrf
 from lxml import etree
+from html.parser import HTMLParser
+import tinycss
 from nilearn.plotting import plot_anat
 from nilearn import image as nlimage
 from nipype.utils import filemanip
-from uuid import uuid4
 
 
 SVGNS = "http://www.w3.org/2000/svg"
@@ -26,7 +27,6 @@ PY3 = version_info[0] > 2
 
 class CSSValidator(object):
     ''' no attribute in CSS may be position: fixed
-
     Like  HTMLValidator, valid CSS is assumed and not checked.'''
 
     def __init__(self):
@@ -46,14 +46,13 @@ class CSSValidator(object):
         ''' checks counter names and position values '''
         if rule.at_keyword is not None:
             declarations = parser.parse_declaration_list(rule.body)
-        else: # not an at-rule
+        else:  # not an at-rule
             declarations = rule.declarations
 
         for declaration in declarations:
             if declaration.name == 'position' and 'fixed' in [value.as_css()
                                                               for value in declaration.value]:
                 raise ValueError('Found illegal position `fixed` in CSS.')
-
 
 
 class HTMLValidator(HTMLParser, object):
@@ -73,7 +72,7 @@ class HTMLValidator(HTMLParser, object):
     html is assumed to be complete, valid html
     '''
 
-    def __init__(self, unique_string, css_validator = CSSValidator()):
+    def __init__(self, unique_string, css_validator=CSSValidator()):
         self.unique_string = unique_string
         self.css_validator = css_validator
         super(HTMLValidator, self).__init__()
@@ -86,11 +85,12 @@ class HTMLValidator(HTMLParser, object):
             if not 'scoped' in [attribute for attribute, value in attrs]:
                 self.bad_tags.append(tag)
         for attr, value in attrs:
-            if attr=='id':
+            if attr == 'id':
                 # if unique_string is not found in the id name
                 if value.find(self.unique_string) == -1:
                     self.bad_ids.append(value)
-                elif value in self.taken_ids: # the value is already being used as an id
+                # the value is already being used as an id
+                elif value in self.taken_ids:
                     self.bad_ids.append(value)
 
     def handle_endtag(self, tag):
@@ -110,16 +110,18 @@ class HTMLValidator(HTMLParser, object):
         super(HTMLValidator, self).reset()
         self.bad_tags = []
         self.bad_ids = []
-        self.taken_ids = [self.unique_string] # in template
+        self.taken_ids = [self.unique_string]  # in template
         self.in_style = False
 
     def close(self):
         super(HTMLValidator, self).close()
         error_string = ''
         if len(self.bad_tags) > 0:
-            error_string = 'Found the following illegal tags. All <style> tags must be scoped: {}.\n'.format(self.bad_tags)
+            error_string = 'Found the following illegal tags. All <style> tags must be scoped: {}.\n'.format(
+                self.bad_tags)
         if len(self.bad_ids) > 0:
-            error_string = error_string + 'Found the following illegal ids: {}.\n ids must '
+            error_string = error_string + \
+                'Found the following illegal ids: {}.\n ids must '
             'contain unique_string ({}) and be unique from each other.\n'.format(
                 self.bad_ids, self.unique_string)
         if len(error_string) > 0:
@@ -139,7 +141,7 @@ def save_html(template, report_file_name, unique_string, **kwargs):
 
     # validate html
     validator = HTMLValidator(unique_string=unique_string)
-    for key, html in enumerate(kwargs.keys()):
+    for html in list(kwargs.keys()):
         validator.feed(html)
         validator.close()
 
@@ -154,6 +156,7 @@ def save_html(template, report_file_name, unique_string, **kwargs):
 
     with open(report_file_name, 'w' if PY3 else 'wb') as handle:
         handle.write(report_render)
+
 
 def as_svg(image):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
@@ -170,14 +173,14 @@ def as_svg(image):
             svg_start = i
             continue
 
-    image_svg = image_svg[svg_start:] # strip out extra DOCTYPE, etc headers
-    return '\n'.join(image_svg) # straight up giant string
+    image_svg = image_svg[svg_start:]  # strip out extra DOCTYPE, etc headers
+    return '\n'.join(image_svg)  # straight up giant string
+
 
 def cuts_from_bbox(mask_nii, cuts=3):
-    # deprecated--use nilearn (https://github.com/poldracklab/niworkflows/issues/26)
+    """Finds equi-spaced cuts for presenting images"""
     from nibabel.affines import apply_affine
-    imnii = mask_nii
-    mask_data = imnii.get_data()
+    mask_data = mask_nii.get_data()
     B = np.argwhere(mask_data > 0)
     start_coords = B.min(0)
     stop_coords = B.max(0) + 1
@@ -189,7 +192,7 @@ def cuts_from_bbox(mask_nii, cuts=3):
 
     ras_coords = []
     for cross in np.array(vox_coords).T:
-        ras_coords.append(apply_affine(imnii.affine, cross).tolist())
+        ras_coords.append(apply_affine(mask_nii.affine, cross).tolist())
 
     ras_cuts = [list(coords) for coords in np.transpose(ras_coords)]
     return {k: v for k, v in zip(['x', 'y', 'z'], ras_cuts)}
@@ -215,6 +218,7 @@ def _3d_in_file(in_file):
 
     return nlimage.index_img(in_file, 0)
 
+
 def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None, **plot_params):
     """ plot segmentation as contours over the image (e.g. anatomical).
     seg_niis should be a list of files. mask_nii helps determine the cut
@@ -234,7 +238,8 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
         # segment contours
         for seg, color in zip(segs, ['r', 'g', 'y']):
             plot_params['colors'] = color
-            plot_params['levels'] = [0.5] if 'levels' not in plot_params else plot_params['levels']
+            plot_params['levels'] = [
+                0.5] if 'levels' not in plot_params else plot_params['levels']
             plot_params['alpha'] = 1
             svg.add_contours(seg, **plot_params)
 
@@ -242,12 +247,14 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
 
     image_nii = _3d_in_file(image_nii)
     seg_niis = filemanip.filename_to_list(seg_niis)
-    mask_nii = nb.load(mask_nii) if masked else nlimage.threshold_img(mask_nii, 1e-3)
+    mask_nii = nb.load(
+        mask_nii) if masked else nlimage.threshold_img(mask_nii, 1e-3)
 
     cuts = cuts_from_bbox(mask_nii, cuts=7)
 
     svgs_list = []
-    plot_xyz(image_nii, _plot_anat_with_contours, cuts, segs=seg_niis, **plot_params)
+    plot_xyz(image_nii, _plot_anat_with_contours,
+             cuts, segs=seg_niis, **plot_params)
 
     save_html(template='segmentation.tpl',
               report_file_name=out_file,

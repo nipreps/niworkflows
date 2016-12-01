@@ -3,13 +3,11 @@
 """ class mixin and utilities for enabling reports for nipype interfaces """
 from __future__ import absolute_import, division, print_function
 
-import jinja2
 import os
-import string
+from sys import version_info
 from abc import abstractmethod
 from io import open
-from pkg_resources import resource_filename as pkgrf
-from sys import version_info
+from builtins import object
 
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
@@ -17,16 +15,20 @@ from niworkflows.viz import utils as viz
 
 PY3 = version_info[0] > 2
 
+
 class ReportCapableInputSpec(BaseInterfaceInputSpec):
     generate_report = traits.Bool(
         False, usedefault=True, desc="Set to true to enable report generation for node")
     out_report = File(
         'report.html', usedefault=True, desc='filename for the visual report')
 
+
 class ReportCapableOutputSpec(TraitedSpec):
     out_report = File(desc='filename for the visual report')
 
+
 class ReportCapableInterface(BaseInterface):
+
     """ temporary mixin to enable reports for nipype interfaces """
 
     def __init__(self, **inputs):
@@ -37,7 +39,8 @@ class ReportCapableInterface(BaseInterface):
         """ delegates to base interface run method, then attempts to generate reports """
 
         try:
-            runtime = super(ReportCapableInterface, self)._run_interface(runtime)
+            runtime = super(
+                ReportCapableInterface, self)._run_interface(runtime)
         except NotImplementedError:
             pass  # the interface is derived from BaseInterface
 
@@ -94,11 +97,14 @@ class ReportCapableInterface(BaseInterface):
         with open(self._out_report, 'w' if PY3 else 'wb') as outfile:
             outfile.write(errorstr)
 
+
 class RegistrationRCInputSpec(ReportCapableInputSpec):
     out_report = File(
         'report.svg', usedefault=True, desc='filename for the visual report')
 
+
 class RegistrationRC(ReportCapableInterface):
+
     """ An abstract mixin to registration nipype interfaces """
 
     def __init__(self, **inputs):
@@ -127,8 +133,11 @@ class RegistrationRC(ReportCapableInterface):
                               cuts=self.DEFAULT_MNI_CUTS),
             out_file=self._out_report)
 
+
 class SegmentationRC(ReportCapableInterface):
+
     """ An abstract mixin to segmentation nipype interfaces """
+
     def _generate_report(self):
         viz.plot_segs(
             image_nii=self._anat_file,
@@ -138,5 +147,3 @@ class SegmentationRC(ReportCapableInterface):
             masked=self._masked,
             title=self._report_title
         )
-
-
