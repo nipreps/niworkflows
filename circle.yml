@@ -21,6 +21,7 @@ dependencies:
 test:
   override:
     - docker run -ti -v /etc/localtime:/etc/localtime:ro --env SAVE_CIRCLE_ARTIFACTS="1" -v ${SCRATCH}:/scratch --rm --entrypoint=/usr/local/miniconda/bin/nosetests niworkflows:py35 /root/niworkflows
+        timeout: 36000
 
 general:
   artifacts:
