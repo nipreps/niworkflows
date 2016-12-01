@@ -82,7 +82,7 @@ class TestBrainExtractionRPT(unittest.TestCase):
         '''
         def _template_name(filename):
             return os.path.join(get_ants_oasis_template_ras(), filename)
-        print(get_ants_oasis_template_ras())
+
         _smoke_test_report(BrainExtractionRPT(generate_report=True,
                                               dimension=3,
                                               use_floatingpoint_precision=1,

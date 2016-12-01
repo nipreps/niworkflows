@@ -50,9 +50,7 @@ class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
     def _post_run_hook(self, runtime):
         ''' generates a report showing slices from each axis '''
 
-        #brain_extraction_mask = self.aggregate_outputs().BrainExtractionMask
-        # remove this
-        brain_extraction_mask = "/tmp/tmp5baity8n/testBrainExtractionRPTBrainExtractionMask.nii.gz"
+        brain_extraction_mask = self.aggregate_outputs().BrainExtractionMask
 
         self._anat_file = self.inputs.anatomical_image
         self._mask_file = brain_extraction_mask
