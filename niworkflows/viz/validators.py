@@ -37,7 +37,7 @@ class CSSValidator(object):
                 raise ValueError('Found illegal position `fixed` in CSS.')
 
 
-class HTMLValidator(HTMLParser):
+class HTMLValidator(HTMLParser, object):
     ''' There are limitations on the html passed to save_html because
     save_html's result will be concatenated with other html strings
 
