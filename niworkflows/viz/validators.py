@@ -1,10 +1,14 @@
+# -*- coding: utf-8 -*-
+""" css/html validation """
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from html.parser import HTMLParser
 import tinycss
 import warnings
+from builtins import object
 
 class CSSValidator(object):
     ''' no attribute in CSS may be position: fixed
-
     Like  HTMLValidator, valid CSS is assumed and not checked.'''
 
     def __init__(self):
@@ -23,15 +27,14 @@ class CSSValidator(object):
     def validate_no_fixed_position(self, rule):
         ''' checks counter names and position values '''
         if rule.at_keyword is not None:
-            declarations = parser.parse_declaration_list(rule.body)
-        else: # not an at-rule
+            declarations = self.parser.parse_declaration_list(rule.body)
+        else:  # not an at-rule
             declarations = rule.declarations
 
         for declaration in declarations:
-            if declaration.name == 'position' and 'fixed' in [value.as_css()
-                                                              for value in declaration.value]:
+            if (declaration.name == 'position' and
+                    'fixed' in [value.as_css() for value in declaration.value]):
                 raise ValueError('Found illegal position `fixed` in CSS.')
-
 
 
 class HTMLValidator(HTMLParser, object):
@@ -51,9 +54,16 @@ class HTMLValidator(HTMLParser, object):
     html is assumed to be complete, valid html
     '''
 
-    def __init__(self, unique_string, css_validator = CSSValidator()):
+    def __init__(self, unique_string, css_validator=CSSValidator()):
         self.unique_string = unique_string
         self.css_validator = css_validator
+
+        # Class' members should be initialized here
+        self.bad_tags = []
+        self.bad_ids = []
+        self.taken_ids = [self.unique_string]  # in template
+        self.in_style = False
+
         super(HTMLValidator, self).__init__()
 
     def handle_starttag(self, tag, attrs):
@@ -64,11 +74,12 @@ class HTMLValidator(HTMLParser, object):
             if not 'scoped' in [attribute for attribute, value in attrs]:
                 self.bad_tags.append(tag)
         for attr, value in attrs:
-            if attr=='id':
+            if attr == 'id':
                 # if unique_string is not found in the id name
                 if value.find(self.unique_string) == -1:
                     self.bad_ids.append(value)
-                elif value in self.taken_ids: # the value is already being used as an id
+                # the value is already being used as an id
+                elif value in self.taken_ids:
                     self.bad_ids.append(value)
 
     def handle_endtag(self, tag):
@@ -88,19 +99,21 @@ class HTMLValidator(HTMLParser, object):
         super(HTMLValidator, self).reset()
         self.bad_tags = []
         self.bad_ids = []
-        self.taken_ids = [self.unique_string] # in template
+        self.taken_ids = [self.unique_string]  # in template
         self.in_style = False
 
     def close(self):
         super(HTMLValidator, self).close()
         error_string = ''
         if len(self.bad_tags) > 0:
-            error_string = 'Found the following illegal tags. All <style> tags must be scoped: {}.\n'.format(self.bad_tags)
+            error_string = (
+                'Found the following illegal tags. All <style> '
+                'tags must be scoped: {}.\n').format(self.bad_tags)
         if len(self.bad_ids) > 0:
-            error_string = error_string + 'Found the following illegal ids: {}.\n ids must '
-            'contain unique_string ({}) and be unique from each other.\n'.format(
-                self.bad_ids, self.unique_string)
+            error_string += (
+                'Found the following illegal ids: {}.\n ids must '
+                'contain unique_string ({}) and be unique from each other.\n').format(
+                    self.bad_ids, self.unique_string)
+
         if len(error_string) > 0:
             raise ValueError(error_string)
-
-
