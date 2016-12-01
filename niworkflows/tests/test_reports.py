@@ -75,8 +75,8 @@ def _smoke_test_report(report_interface, artifact_name):
         report_interface.run()
         out_report = report_interface.aggregate_outputs().out_report
         stage_artifacts(out_report, artifact_name)
-        unittest.TestCase.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
-                                     .format(out_report))
+        unittest.TestCase().assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
+                                       .format(out_report))
 
 class TestFASTRPT(unittest.TestCase):
     ''' tests use mni as in_file '''
