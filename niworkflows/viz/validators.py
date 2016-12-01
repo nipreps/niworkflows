@@ -1,7 +1,11 @@
+# -*- coding: utf-8 -*-
+""" css/html validation """
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from html.parser import HTMLParser
 import tinycss
 import warnings
-
+from builtins import object
 
 class CSSValidator(object):
     ''' no attribute in CSS may be position: fixed

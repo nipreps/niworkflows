@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper tools for visualization purposes"""
-from __future__ import absolute_import, division, print_function
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os.path as op
 from sys import version_info

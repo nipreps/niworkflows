@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 # @Author: shoshber
 """ class mixin and utilities for enabling reports for nipype interfaces """
-from __future__ import absolute_import, division, print_function
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
 from sys import version_info
 from abc import abstractmethod
 from io import open
-from builtins import object
 
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
