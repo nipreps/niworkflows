@@ -11,11 +11,12 @@ import nibabel as nb
 from nilearn import image
 from nipype.utils.tmpdirs import InTemporaryDirectory
 
-from niworkflows.data.getters import get_mni_template_ras, get_ds003_downsampled
+from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsampled,
+                                      get_ants_oasis_template_ras)
 
 from niworkflows.interfaces.registration import FLIRTRPT
 from niworkflows.interfaces.segmentation import FASTRPT
-from niworkflows.interfaces.masks import BETRPT
+from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT
 
 MNI_DIR = get_mni_template_ras()
 MNI_2MM = os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz')
@@ -70,10 +71,33 @@ class TestBETRPT(unittest.TestCase):
         _smoke_test_report(BETRPT(in_file=mni_4d_file, generate_report=True, mask=True),
                            'testBET4d.html')
 
+class TestBrainExtractionRPT(unittest.TestCase):
+    ''' tests the report capable version of ANTS's BrainExtraction interface, using mni as input'''
+
+    def test_generate_report(self):
+        ''' test of BrainExtractionRPT under basic conditions:
+                - dimension=3
+                - use_floatingpoint_precision=1,
+                - brain_template, brain_probability_mask, extraction_registration_mask from get_ants_oasis_template_ras()
+        '''
+        def _template_name(filename):
+            return os.path.join(get_ants_oasis_template_ras(), filename)
+
+        _smoke_test_report(BrainExtractionRPT(generate_report=True,
+                                              dimension=3,
+                                              use_floatingpoint_precision=1,
+                                              anatomical_image=MNI_2MM,
+                                              brain_template=_template_name('T_template0.nii.gz'),
+                                              brain_probability_mask=_template_name('T_template0_BrainCerebellumProbabilityMask.nii.gz'),
+                                              extraction_registration_mask=_template_name('T_template0_BrainCerebellumRegistrationMask.nii.gz'),
+                                              out_prefix='testBrainExtractionRPT',
+                                              debug=True), # run faster for testing purposes
+                           'testANTSBrainExtraction.html')
+
 def _smoke_test_report(report_interface, artifact_name):
     with InTemporaryDirectory():
         report_interface.run()
-        out_report = report_interface.aggregate_outputs().out_report
+        out_report = report_interface.inputs.out_report
         stage_artifacts(out_report, artifact_name)
         unittest.TestCase.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
                                      .format(out_report))
@@ -91,4 +115,4 @@ class TestFASTRPT(unittest.TestCase):
         report_interface = FASTRPT(in_files=skullstripped, generate_report=True, no_bias=True,
                                    probability_maps=True, segments=True, out_basename='test')
 
-        _smoke_test_report(report_interface, 'testFast.html')
+        _smoke_test_report(report_interface, 'testFAST.html')
