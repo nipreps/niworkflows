@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import unittest
 from shutil import copy
+import pkg_resources as pkgr
 
 import nibabel as nb
 from nilearn import image
@@ -14,7 +15,8 @@ from nipype.utils.tmpdirs import InTemporaryDirectory
 from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsampled,
                                       get_ants_oasis_template_ras)
 
-from niworkflows.interfaces.registration import FLIRTRPT, RobustMNINormalizationRPT
+from niworkflows.interfaces.registration import (
+    FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT)
 from niworkflows.interfaces.segmentation import FASTRPT
 from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT
 
@@ -29,21 +31,35 @@ def stage_artifacts(filename, new_filename):
     if os.getenv('SAVE_CIRCLE_ARTIFACTS', False) == "1":
         copy(filename, os.path.join('/scratch', new_filename))
 
-class TestFLIRTRPT(unittest.TestCase):
+class TestRegistrationInterfaces(unittest.TestCase):
+    """ tests the interfaces derived from RegistrationRC """
+
+    reference = os.path.join(MNI_DIR, 'MNI152_T1_1mm.nii.gz')
+    moving = os.path.join(DS003_DIR, 'sub-01/anat/sub-01_T1w.nii.gz')
+
     def test_FLIRTRPT(self):
+        """ the FLIRT report capable test """
         with InTemporaryDirectory():
-            reference = os.path.join(MNI_DIR, 'MNI152_T1_1mm.nii.gz')
-            moving = os.path.join(DS003_DIR, 'sub-01/anat/sub-01_T1w.nii.gz')
-            flirt_rpt = FLIRTRPT(generate_report=True, in_file=moving,
-                                 reference=reference)
+            flirt_rpt = FLIRTRPT(generate_report=True, in_file=self.moving,
+                                 reference=self.reference)
             _smoke_test_report(flirt_rpt, 'testFLIRT.svg')
 
     def test_RobustMNINormalizationRPT(self):
+        """ the RobustMNINormalizationRPT report capable test """
         with InTemporaryDirectory():
-            moving = os.path.join(DS003_DIR, 'sub-01/anat/sub-01_T1w.nii.gz')
             ants_rpt = RobustMNINormalizationRPT(
-                generate_report=True, moving_image=moving, testing=True)
+                generate_report=True, moving_image=self.moving, testing=True)
             _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT.svg')
+
+    def test_ANTSRegistrationRPT(self):
+        """ the RobustMNINormalizationRPT report capable test """
+        with InTemporaryDirectory():
+            ants_rpt = ANTSRegistrationRPT(
+                generate_report=True, moving_image=self.moving, fixed_image=self.reference,
+                from_file=pkgr.resource_filename(
+                    'niworkflows.data', 't1-mni_registration_testing_000.json'))
+            _smoke_test_report(ants_rpt, 'testANTSRegistrationRPT.svg')
+
 
 
 #     #def test_applyxfm_wrapper(self):
