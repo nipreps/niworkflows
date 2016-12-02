@@ -43,16 +43,17 @@ def main():
         classifiers=ldict['CLASSIFIERS'],
         packages=find_packages(exclude=['*.tests']),
         zip_safe=False,
-        package_data={'niworkflows': ['data/t1-mni_registration*.json'],
-                      'niworkflows.viz': ['viz/overlay_3d_report.tpl'],
-                      'niworkflows.data': ['templates/mni_icbm152_nlin_asym_09c/*.nii.gz']},
-        include_package_data=True,
         # Dependencies handling
         setup_requires=ldict['SETUP_REQUIRES'],
         install_requires=list(set(ldict['REQUIRES'])),
         dependency_links=ldict['LINKS_REQUIRES'],
         tests_require=ldict['TESTS_REQUIRES'],
         extras_require=ldict['EXTRA_REQUIRES'],
+        # Data
+        package_data={'niworkflows': ['data/t1-mni_registration*.json'],
+                      'niworkflows.viz': ['viz/*.tpl'],
+                      'niworkflows.data': ['templates/mni_icbm152_nlin_asym_09c/*.nii.gz']},
+        include_package_data=True,
     )
 
 if __name__ == '__main__':

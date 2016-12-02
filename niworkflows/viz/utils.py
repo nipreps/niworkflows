@@ -14,8 +14,6 @@ import jinja2
 from pkg_resources import resource_filename as pkgrf
 
 from lxml import etree
-from html.parser import HTMLParser
-import tinycss
 from nilearn.plotting import plot_anat
 from nilearn import image as nlimage
 from nipype.utils import filemanip

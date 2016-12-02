@@ -42,7 +42,7 @@ ENV PATH=/usr/local/miniconda/bin:$PATH \
 
 # Create conda environment
 RUN conda config --add channels conda-forge && \
-    conda install -y numpy scipy matplotlib && \
+    conda install -y numpy scipy matplotlib pandas lxml libxslt nose mock && \
     python -c "from matplotlib import font_manager"
 
 WORKDIR /root/

@@ -14,7 +14,7 @@ from nipype.utils.tmpdirs import InTemporaryDirectory
 from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsampled,
                                       get_ants_oasis_template_ras)
 
-from niworkflows.interfaces.registration import FLIRTRPT
+from niworkflows.interfaces.registration import FLIRTRPT, RobustMNINormalizationRPT
 from niworkflows.interfaces.segmentation import FASTRPT
 from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT
 
@@ -30,22 +30,20 @@ def stage_artifacts(filename, new_filename):
         copy(filename, os.path.join('/scratch', new_filename))
 
 class TestFLIRTRPT(unittest.TestCase):
-    def setUp(self):
-        self.out_file = "test_flirt.nii.gz"
-
-    def test_known_file_out(self, flirt=FLIRTRPT):
+    def test_FLIRTRPT(self):
         with InTemporaryDirectory():
             reference = os.path.join(MNI_DIR, 'MNI152_T1_1mm.nii.gz')
             moving = os.path.join(DS003_DIR, 'sub-01/anat/sub-01_T1w.nii.gz')
-            flirt_rpt = flirt(generate_report=True, in_file=moving,
-                              reference=reference)
-            res = flirt_rpt.run()
-            out_report = res.outputs.out_report
+            flirt_rpt = FLIRTRPT(generate_report=True, in_file=moving,
+                                 reference=reference)
+            _smoke_test_report(flirt_rpt, 'testFLIRT.svg')
 
-            stage_artifacts(out_report, 'testFLIRT.svg')
-
-            self.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
-                            .format(out_report))
+    def test_RobustMNINormalizationRPT(self):
+        with InTemporaryDirectory():
+            moving = os.path.join(DS003_DIR, 'sub-01/anat/sub-01_T1w.nii.gz')
+            ants_rpt = RobustMNINormalizationRPT(
+                generate_report=True, moving_image=moving, testing=True)
+            _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT.svg')
 
 
 #     #def test_applyxfm_wrapper(self):
