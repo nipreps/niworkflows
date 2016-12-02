@@ -49,12 +49,12 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.5',
 ]
 
-REQUIRES = ['nipype==8ddc', 'future', 'nilearn', 'sklearn', 'pandas', 'matplotlib',
+REQUIRES = ['nipype', 'future', 'nilearn', 'sklearn', 'pandas', 'matplotlib',
             'jinja2', 'svgutils', 'tinycss']
 SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 
-LINKS_REQUIRES = ['git+https://github.com/nipy/nipype.git@8ddca5a03fcad26887c862dc23c82ef23f2ee506#egg=nipype-8ddc',]
+LINKS_REQUIRES = []
 TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist', 'nose']
 
 EXTRA_REQUIRES = {
