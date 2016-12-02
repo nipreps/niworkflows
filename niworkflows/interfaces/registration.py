@@ -44,7 +44,7 @@ class ANTSRegistrationRPT(nrc.RegistrationRC, ants.Registration):
     output_spec = ANTSRegistrationOutputSpecRPT
 
     def _post_run_hook(self, runtime):
-        self._fixed_image = self.inputs.fixed_image
+        self._fixed_image = self.inputs.fixed_image[0]
         self._moving_image = self.aggregate_outputs().warped_image
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
