@@ -24,6 +24,15 @@ from niworkflows.viz.validators import HTMLValidator
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
 
+def robust_set_limits(data, plot_params):
+    vmin = np.percentile(data, 15)
+    if plot_params.get('vmin', None) is None:
+        plot_params['vmin'] = vmin
+    if plot_params.get('vmax', None) is None:
+        plot_params['vmax'] = np.percentile(data[data > vmin], 99.8)
+
+    return plot_params
+
 
 def save_html(template, report_file_name, unique_string, **kwargs):
     ''' save an actual html file with name report_file_name. unique_string's
@@ -142,7 +151,13 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
 
         svgs_list.append(as_svg(svg))
 
+    plot_params = {} if plot_params is None else plot_params
+
     image_nii = _3d_in_file(image_nii)
+    data = image_nii.get_data()
+
+    plot_params = robust_set_limits(data, plot_params)
+
     seg_niis = filemanip.filename_to_list(seg_niis)
     mask_nii = nb.load(
         mask_nii) if masked else nlimage.threshold_img(mask_nii, 1e-3)
@@ -191,11 +206,7 @@ def plot_registration(anat_img, div_id, plot_params=None,
     if estimate_brightness:
         from nibabel import load as loadnii
         data = loadnii(anat_img).get_data().reshape(-1)
-        vmin = np.percentile(data, 15)
-        if plot_params.get('vmin', None) is None:
-            plot_params['vmin'] = vmin
-        if plot_params.get('vmax', None) is None:
-            plot_params['vmax'] = np.percentile(data[data > vmin], 99.8)
+        plot_params = robust_set_limits(data, plot_params)
 
     # Plot each cut axis
     for mode in list(order):
