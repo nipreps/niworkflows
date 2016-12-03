@@ -7,9 +7,11 @@ import os
 from sys import version_info
 from abc import abstractmethod
 from io import open
+import nibabel as nb
 
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
+from nilearn.masking import apply_mask, unmask
 
 PY3 = version_info[0] > 2
 
@@ -110,6 +112,8 @@ class RegistrationRC(ReportCapableInterface):
     def __init__(self, **inputs):
         self._fixed_image = None
         self._moving_image = None
+        self._fixed_image_mask = None
+        self._moving_image_mask = None
         super(RegistrationRC, self).__init__(**inputs)
 
     DEFAULT_MNI_CUTS = {
@@ -123,12 +127,26 @@ class RegistrationRC(ReportCapableInterface):
         from niworkflows.viz.utils import compose_view, plot_registration
         NIWORKFLOWS_LOG.info('Generating visual report')
 
+        fixed_image_nii = nb.load(self._fixed_image)
+        moving_image_nii = nb.load(self._moving_image)
+
+        if self._fixed_image_mask:
+            fixed_image_nii = unmask(apply_mask(fixed_image_nii,
+                                                self._fixed_image_mask),
+                                     fixed_image_nii)
+
+        if self._moving_image_mask:
+            moving_image_nii = unmask(apply_mask(moving_image_nii,
+                                                 self._moving_image_mask),
+                                      moving_image_nii)
+
+
         # Call composer
         compose_view(
-            plot_registration(self._fixed_image, 'fixed-image',
+            plot_registration(fixed_image_nii, 'fixed-image',
                               estimate_brightness=True,
                               cuts=self.DEFAULT_MNI_CUTS),
-            plot_registration(self._moving_image, 'moving-image',
+            plot_registration(moving_image_nii, 'moving-image',
                               estimate_brightness=True,
                               cuts=self.DEFAULT_MNI_CUTS),
             out_file=self._out_report)
