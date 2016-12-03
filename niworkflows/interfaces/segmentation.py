@@ -9,7 +9,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from nipype.interfaces import fsl
 from niworkflows.common import report as nrc
 from niworkflows import NIWORKFLOWS_LOG
-from nipype.interfaces.base import isdefined
 
 class FASTInputSpecRPT(nrc.ReportCapableInputSpec,
                        fsl.preprocess.FASTInputSpec):
@@ -30,8 +29,7 @@ class FASTRPT(nrc.SegmentationRC,
         overlaid '''
         self._anat_file = self.inputs.in_files[0],
         self._mask_file = self.aggregate_outputs().tissue_class_map
-        if isdefined(self.aggregate_outputs().tissue_class_files):
-            self._seg_files = self.aggregate_outputs().tissue_class_files
+        self._seg_files = self.aggregate_outputs().tissue_class_files
         self._masked = False
         self._report_title = "FAST: segmentation over anatomical"
 

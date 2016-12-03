@@ -130,15 +130,3 @@ class TestFASTRPT(unittest.TestCase):
                                    probability_maps=True, segments=True, out_basename='test')
 
         _smoke_test_report(report_interface, 'testFAST.html')
-
-    def test_generate_report_no_segments(self):
-        ''' test of FAST's report under no segments conditions '''
-
-        bet_interface = BETRPT(in_file=MNI_2MM, mask=True)
-        bet_interface.run()
-        skullstripped = bet_interface.aggregate_outputs().out_file
-
-        report_interface = FASTRPT(in_files=skullstripped, generate_report=True, no_bias=True,
-                                   probability_maps=True, out_basename='test')
-
-        _smoke_test_report(report_interface, 'testFAST_no_segments.html')
