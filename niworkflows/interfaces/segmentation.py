@@ -23,6 +23,12 @@ class FASTRPT(nrc.SegmentationRC,
     input_spec = FASTInputSpecRPT
     output_spec = FASTOutputSpecRPT
 
+    def _run_interface(self, runtime):
+        if self.inputs.generate_report:
+            self.inputs.segments = True
+
+        return super(FASTRPT, self)._run_interface(runtime)
+
     def _post_run_hook(self, runtime):
         ''' generates a report showing nine slices, three per axis, of an
         arbitrary volume of `in_files`, with the resulting segmentation
