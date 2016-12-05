@@ -9,6 +9,7 @@ from nipype.interfaces import fsl, ants
 from niworkflows.anat import mni
 import niworkflows.common.report as nrc
 from niworkflows import NIWORKFLOWS_LOG
+from nipype.interfaces.base import isdefined
 
 class RobustMNINormalizationInputSpecRPT(
     nrc.RegistrationRCInputSpec, mni.RobustMNINormalizationInputSpec):
@@ -26,7 +27,11 @@ class RobustMNINormalizationRPT(
     def _post_run_hook(self, runtime):
         # We need to dig into the internal ants.Registration interface
         self._fixed_image = self.norm.inputs.fixed_image[0]  # and get first item
+        if isdefined(self.norm.inputs.fixed_image_mask):
+            self._fixed_image_mask = self.norm.inputs.fixed_image_mask
         self._moving_image = self.aggregate_outputs().warped_image
+        if isdefined(self.norm.inputs.moving_image_mask):
+            self._moving_image_mask = self.norm.inputs.moving_image_mask
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 

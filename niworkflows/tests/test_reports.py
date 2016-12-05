@@ -35,6 +35,7 @@ class TestRegistrationInterfaces(unittest.TestCase):
     """ tests the interfaces derived from RegistrationRC """
 
     reference = os.path.join(MNI_DIR, 'MNI152_T1_1mm.nii.gz')
+    reference_mask = os.path.join(MNI_DIR, 'MNI152_T1_1mm_brain_mask.nii.gz')
     moving = os.path.join(DS003_DIR, 'sub-01/anat/sub-01_T1w.nii.gz')
 
     def test_FLIRTRPT(self):
@@ -50,6 +51,14 @@ class TestRegistrationInterfaces(unittest.TestCase):
             ants_rpt = RobustMNINormalizationRPT(
                 generate_report=True, moving_image=self.moving, testing=True)
             _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT.svg')
+
+    def test_RobustMNINormalizationRPT_masked(self):
+        """ the RobustMNINormalizationRPT report capable test with masking """
+        with InTemporaryDirectory():
+            ants_rpt = RobustMNINormalizationRPT(
+                generate_report=True, moving_image=self.moving,
+                reference_mask=self.reference_mask, testing=True)
+            _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT_masked.svg')
 
     def test_ANTSRegistrationRPT(self):
         """ the RobustMNINormalizationRPT report capable test """

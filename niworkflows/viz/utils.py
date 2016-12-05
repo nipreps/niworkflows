@@ -173,7 +173,7 @@ def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=('z', 'x', 'y'
         plot_func(image, **kwargs)
 
 
-def plot_registration(anat_img, div_id, plot_params=None,
+def plot_registration(anat_nii, div_id, plot_params=None,
                       order=('z', 'x', 'y'), cuts=None,
                       estimate_brightness=False):
     """
@@ -189,8 +189,7 @@ def plot_registration(anat_img, div_id, plot_params=None,
 
     out_files = []
     if estimate_brightness:
-        from nibabel import load as loadnii
-        data = loadnii(anat_img).get_data().reshape(-1)
+        data = anat_nii.get_data().reshape(-1)
         vmin = np.percentile(data, 15)
         if plot_params.get('vmin', None) is None:
             plot_params['vmin'] = vmin
@@ -205,7 +204,7 @@ def plot_registration(anat_img, div_id, plot_params=None,
         plot_params['output_file'] = out_file
 
         # Generate nilearn figure
-        plot_anat(anat_img, **plot_params)
+        plot_anat(anat_nii, **plot_params)
         out_files.append(out_file)
 
         # Open generated svg file and fix id
