@@ -30,8 +30,6 @@ class RobustMNINormalizationRPT(
         if isdefined(self.norm.inputs.fixed_image_mask):
             self._fixed_image_mask = self.norm.inputs.fixed_image_mask
         self._moving_image = self.aggregate_outputs().warped_image
-        if isdefined(self.norm.inputs.moving_image_mask):
-            self._moving_image_mask = self.norm.inputs.moving_image_mask
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
