@@ -204,9 +204,8 @@ def plot_registration(anat_nii, div_id, plot_params=None,
 
     out_files = []
     if estimate_brightness:
-        from nibabel import load as loadnii
-        data = loadnii(anat_img).get_data().reshape(-1)
-        plot_params.update(robust_set_limits(data, plot_params))
+        plot_params = robust_set_limits(anat_nii.get_data().reshape(-1),
+                                        plot_params)
 
     # Plot each cut axis
     for mode in list(order):
