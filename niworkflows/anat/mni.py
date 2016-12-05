@@ -76,13 +76,13 @@ class RobustMNINormalization(BaseInterface):
 
         if isdefined(self.inputs.moving_mask):
             self._dilated_moving_image_mask = dilate(self.inputs.moving_mask,
-                                                     new_name="dilated_fixed.nii.gz")
+                                                     new_name="dilated_moving_mask.nii.gz")
         else:
             self._dilated_moving_image_mask = self.inputs.moving_mask
 
         if isdefined(self.inputs.reference_mask):
             self._dilated_reference_image_mask = dilate(self.inputs.reference_mask,
-                                                     new_name="dilated_moving.nii.gz")
+                                                     new_name="dilated_reference_mask.nii.gz")
         else:
             self._dilated_reference_image_mask = self.inputs.reference_mask
 
@@ -147,10 +147,10 @@ class RobustMNINormalization(BaseInterface):
             self.norm.inputs.fixed_image = op.join(
                 mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
 
-            if not self._dilated_fixed_image_mask:
+            if not self._dilated_reference_image_mask:
                 self._dilated_reference_image_mask = dilate(op.join(
                 mni_template, '%dmm_brainmask.nii.gz' % resolution),
-                new_name="dilated_fixed.nii.gz")
+                new_name="dilated_reference_mask.nii.gz")
 
             self.norm.inputs.fixed_image_mask = self._dilated_reference_image_mask
 
