@@ -113,7 +113,6 @@ class RegistrationRC(ReportCapableInterface):
         self._fixed_image = None
         self._moving_image = None
         self._fixed_image_mask = None
-        self._moving_image_mask = None
         self._fixed_image_label = "fixed"
         self._moving_image_label = "moving"
         super(RegistrationRC, self).__init__(**inputs)
@@ -136,11 +135,11 @@ class RegistrationRC(ReportCapableInterface):
             fixed_image_nii = unmask(apply_mask(fixed_image_nii,
                                                 self._fixed_image_mask),
                                      self._fixed_image_mask)
-
-        if self._moving_image_mask:
+            # since the moving image is already in the fixed image space we
+            # should apply the same mask
             moving_image_nii = unmask(apply_mask(moving_image_nii,
-                                                 self._moving_image_mask),
-                                      self._moving_image_mask)
+                                                 self._fixed_image_mask),
+                                      self._fixed_image_mask)
 
 
         # Call composer
