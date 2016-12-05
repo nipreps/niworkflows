@@ -80,11 +80,11 @@ class RobustMNINormalization(BaseInterface):
         else:
             self._dilated_moving_image_mask = self.inputs.moving_mask
 
-        if isdefined(self.inputs.fixed_mask):
-            self._dilated_moving_image_mask = dilate(self.inputs.moving_mask,
+        if isdefined(self.inputs.reference_mask):
+            self._dilated_reference_image_mask = dilate(self.inputs.reference_mask,
                                                      new_name="dilated_moving.nii.gz")
         else:
-            self._dilated_moving_image_mask = self.inputs.moving_mask
+            self._dilated_reference_image_mask = self.inputs.reference_mask
 
         for ants_settings in settings_files:
             interface_result = None
@@ -132,7 +132,7 @@ class RobustMNINormalization(BaseInterface):
         if isdefined(self.inputs.reference_image):
             self.norm.inputs.fixed_image = self.inputs.reference_image
             if isdefined(self.inputs.reference_mask):
-                self.norm.inputs.fixed_image_mask = self._dilated_fixed_image_mask
+                self.norm.inputs.fixed_image_mask = self._dilated_reference_image_mask
         else:
             get_template = getattr(getters, 'get_{}'.format(self.inputs.template))
             mni_template = get_template()
@@ -148,11 +148,11 @@ class RobustMNINormalization(BaseInterface):
                 mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
 
             if not self._dilated_fixed_image_mask:
-                self._dilated_fixed_image_mask = dilate(op.join(
+                self._dilated_reference_image_mask = dilate(op.join(
                 mni_template, '%dmm_brainmask.nii.gz' % resolution),
                 new_name="dilated_fixed.nii.gz")
 
-            self.norm.inputs.fixed_image_mask = self._dilated_fixed_image_mask
+            self.norm.inputs.fixed_image_mask = self._dilated_reference_image_mask
 
 
 def dilate(in_file, mm_factor=5, new_name="dilated.nii.gz"):
