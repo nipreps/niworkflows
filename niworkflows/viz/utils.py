@@ -190,7 +190,7 @@ def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=('z', 'x', 'y'
 
 def plot_registration(anat_nii, div_id, plot_params=None,
                       order=('z', 'x', 'y'), cuts=None,
-                      estimate_brightness=False):
+                      estimate_brightness=False, label=None):
     """
     Plots the foreground and background views
     Default order is: axial, coronal, sagittal
@@ -208,11 +208,15 @@ def plot_registration(anat_nii, div_id, plot_params=None,
                                         plot_params)
 
     # Plot each cut axis
-    for mode in list(order):
+    for i, mode in enumerate(list(order)):
         out_file = '{}_{}.svg'.format(div_id, mode)
         plot_params['display_mode'] = mode
         plot_params['cut_coords'] = cuts[mode]
         plot_params['output_file'] = out_file
+        if i == 0:
+            plot_params['title'] = label
+        else:
+            plot_params['title'] = None
 
         # Generate nilearn figure
         plot_anat(anat_nii, **plot_params)
