@@ -7,7 +7,7 @@ import os
 from sys import version_info
 from abc import abstractmethod
 from io import open
-import nibabel as nb
+from nilearn.image import load_img
 
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
@@ -128,8 +128,8 @@ class RegistrationRC(ReportCapableInterface):
         from niworkflows.viz.utils import compose_view, plot_registration
         NIWORKFLOWS_LOG.info('Generating visual report')
 
-        fixed_image_nii = nb.load(self._fixed_image)
-        moving_image_nii = nb.load(self._moving_image)
+        fixed_image_nii = load_img(self._fixed_image)
+        moving_image_nii = load_img(self._moving_image)
 
         if self._fixed_image_mask:
             fixed_image_nii = unmask(apply_mask(fixed_image_nii,
