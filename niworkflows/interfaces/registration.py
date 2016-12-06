@@ -10,6 +10,7 @@ from niworkflows.anat import mni
 import niworkflows.common.report as nrc
 from niworkflows import NIWORKFLOWS_LOG
 from nipype.interfaces.base import isdefined
+from nilearn.image import index_img
 
 class RobustMNINormalizationInputSpecRPT(
     nrc.RegistrationRCInputSpec, mni.RobustMNINormalizationInputSpec):
@@ -72,6 +73,29 @@ class ANTSApplyTransformsRPT(nrc.RegistrationRC, ants.ApplyTransforms):
                              self._fixed_image, self._moving_image)
 
 
+class ApplyTOPUPInputSpecRPT(nrc.RegistrationRCInputSpec,
+                             fsl.epi.ApplyTOPUPInputSpec):
+    pass
+
+
+class ApplyTOPUPOutputSpecRPT(nrc.ReportCapableOutputSpec,
+                              fsl.epi.ApplyTOPUPOutputSpec):
+    pass
+
+
+class ApplyTOPUPRPT(nrc.RegistrationRC, fsl.ApplyTOPUP):
+    input_spec = ApplyTOPUPInputSpecRPT
+    output_spec = ApplyTOPUPOutputSpecRPT
+
+    def _post_run_hook(self, runtime):
+        self._fixed_image_label = "before"
+        self._moving_image_label = "after"
+        self._fixed_image = index_img(self.inputs.in_files[0], 0)
+        self._moving_image = index_img(self.aggregate_outputs().out_corrected, 0)
+        NIWORKFLOWS_LOG.info('Report - setting before (%s) and after (%s) images',
+                             self._fixed_image, self._moving_image)
+
+
 class FLIRTInputSpecRPT(nrc.RegistrationRCInputSpec,
                         fsl.preprocess.FLIRTInputSpec):
     pass
@@ -87,9 +111,9 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference
         self._moving_image = self.aggregate_outputs().out_file
-        NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
-                             self._fixed_image, self._moving_image)
-
+        NIWORKFLOWS_LOG.info(
+            'Report - setting fixed (%s) and moving (%s) images',
+            self._fixed_image, self._moving_image)
 
 
 # COMMENTED OUT UNTIL WE REALLY IMPLEMENT IT
