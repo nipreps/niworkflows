@@ -12,6 +12,9 @@ import nibabel as nb
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
 from nilearn.masking import apply_mask, unmask
+from nilearn.image import threshold_img, load_img
+
+from niworkflows.viz.utils import cuts_from_bbox
 
 PY3 = version_info[0] > 2
 
@@ -117,12 +120,6 @@ class RegistrationRC(ReportCapableInterface):
         self._moving_image_label = "moving"
         super(RegistrationRC, self).__init__(**inputs)
 
-    DEFAULT_MNI_CUTS = {
-        'x': [-25, -20, -10, 0, 10, 20, 25],
-        'y': [-25, -20, -10, 0, 10, 20, 25],
-        'z': [-15, -10, -5, 0, 5, 10, 15]
-    }
-
     def _generate_report(self):
         """ Generates the visual report """
         from niworkflows.viz.utils import compose_view, plot_registration
@@ -140,17 +137,20 @@ class RegistrationRC(ReportCapableInterface):
             moving_image_nii = unmask(apply_mask(moving_image_nii,
                                                  self._fixed_image_mask),
                                       self._fixed_image_mask)
+            mask_nii = load_img(self._fixed_image_mask)
+        else:
+            mask_nii = threshold_img(fixed_image_nii, 1e-3)
 
-
+        cuts = cuts_from_bbox(mask_nii, cuts=7)
         # Call composer
         compose_view(
             plot_registration(fixed_image_nii, 'fixed-image',
                               estimate_brightness=True,
-                              cuts=self.DEFAULT_MNI_CUTS,
+                              cuts=cuts,
                               label=self._fixed_image_label),
             plot_registration(moving_image_nii, 'moving-image',
                               estimate_brightness=True,
-                              cuts=self.DEFAULT_MNI_CUTS,
+                              cuts=cuts,
                               label=self._moving_image_label),
             out_file=self._out_report)
 
