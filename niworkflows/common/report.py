@@ -125,8 +125,8 @@ class RegistrationRC(ReportCapableInterface):
         NIWORKFLOWS_LOG.info('Generating visual report')
 
         fixed_image_nii = load_img(self._fixed_image)
-        fixed_contour_nii = load_img(self._fixed_contour) if self._fixed_contour is not None else None
         moving_image_nii = load_img(self._moving_image)
+        contour_nii = load_img(self._contour) if self._contour is not None else None
 
         if self._fixed_image_mask:
             fixed_image_nii = unmask(apply_mask(fixed_image_nii,
@@ -142,22 +142,23 @@ class RegistrationRC(ReportCapableInterface):
             mask_nii = threshold_img(fixed_image_nii, 1e-3)
 
         cuts = cuts_from_bbox(mask_nii, cuts=7)
+
         # Call composer
         compose_view(
             plot_registration(fixed_image_nii, 'fixed-image',
                               estimate_brightness=True,
                               cuts=cuts,
                               label=self._fixed_image_label,
-                              contour=fixed_contour_nii),
+                              contour=contour_nii),
             plot_registration(moving_image_nii, 'moving-image',
                               estimate_brightness=True,
                               cuts=cuts,
-                              label=self._moving_image_label),
+                              label=self._moving_image_label,
+                              contour=contour_nii),
             out_file=self._out_report)
 
 
 class SegmentationRC(ReportCapableInterface):
-
     """ An abstract mixin to segmentation nipype interfaces """
 
     def _generate_report(self):
