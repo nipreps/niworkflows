@@ -116,11 +116,21 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
             self._fixed_image, self._moving_image)
 
 
-# COMMENTED OUT UNTIL WE REALLY IMPLEMENT IT
-# class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
-#                            fsl.preprocess.ApplyXFMInputSpec):
-#     pass
-#
-# class ApplyXFMRPT(FLIRTRPT):
-#     ''' ApplyXFM is a wrapper around FLIRT. ApplyXFMRPT is a wrapper around FLIRTRPT.'''
-#     input_spec = ApplyXFMInputSpecRPT
+class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
+                           fsl.preprocess.ApplyXFMInputSpec):
+    pass
+
+class ApplyXFMOutputSpecRPT(nrc.ReportCapableOutputSpec,
+                         fsl.preprocess.ApplyXFMOutputSpec):
+    pass
+
+class ApplyXFMRPT(nrc.RegistrationRC, fsl.ApplyXFM):
+    input_spec = ApplyXFMInputSpecRPT
+    output_spec = ApplyXFMOutputSpecRPT
+
+    def _post_run_hook(self, runtime):
+        self._fixed_image = self.inputs.reference
+        self._moving_image = self.aggregate_outputs().out_file
+        NIWORKFLOWS_LOG.info(
+            'Report - setting fixed (%s) and moving (%s) images',
+            self._fixed_image, self._moving_image)
