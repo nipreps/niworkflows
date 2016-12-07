@@ -159,6 +159,7 @@ class RegistrationRC(ReportCapableInterface):
 
 
 class SegmentationRC(ReportCapableInterface):
+
     """ An abstract mixin to segmentation nipype interfaces """
 
     def _generate_report(self):
