@@ -120,13 +120,10 @@ class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
                            fsl.preprocess.ApplyXFMInputSpec):
     pass
 
-class ApplyXFMOutputSpecRPT(nrc.ReportCapableOutputSpec,
-                         fsl.preprocess.ApplyXFMOutputSpec):
-    pass
 
 class ApplyXFMRPT(nrc.RegistrationRC, fsl.ApplyXFM):
     input_spec = ApplyXFMInputSpecRPT
-    output_spec = ApplyXFMOutputSpecRPT
+    output_spec = FLIRTOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference
