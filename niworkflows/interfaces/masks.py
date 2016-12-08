@@ -7,10 +7,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 from nipype.interfaces import fsl, ants
-from nipype.interfaces.base import File, BaseInterface, BaseInterfaceInputSpec
+from nipype.interfaces.base import File, BaseInterfaceInputSpec, traits, isdefined
 from niworkflows.common import report as nrc
 from niworkflows import NIWORKFLOWS_LOG
 from nilearn.masking import compute_epi_mask
+import scipy.ndimage as nd
+import numpy as np
+from nilearn.image import new_img_like
 
 class BETInputSpecRPT(nrc.ReportCapableInputSpec,
                       fsl.preprocess.BETInputSpec):
@@ -75,6 +78,7 @@ class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
 class ComputeEPIMaskInputSpec(nrc.ReportCapableInputSpec,
                               BaseInterfaceInputSpec):
     in_file = File(exists=True, desc="3D or 4D EPI file")
+    dilation = traits.Int(desc="binary dilation on the nilearn output")
 
 
 class ComputeEPIMaskOutputSpec(nrc.ReportCapableOutputSpec):
@@ -87,7 +91,13 @@ class ComputeEPIMask(nrc.SegmentationRC):
 
     def _run_interface(self, runtime):
         mask_nii = compute_epi_mask(self.inputs.in_file)
-        mask_nii.to_filename("mask_file.nii.gz")
+
+        mask_data = mask_nii.get_data()
+        if isdefined(self.inputs.dilation):
+            mask_data = nd.morphology.binary_dilation(mask_data).astype(np.uint8)
+        better_mask = new_img_like(mask_nii, mask_data)
+        better_mask.set_data_dtype(np.uint8)
+        better_mask.to_filename("mask_file.nii.gz")
 
         self._mask_file = os.path.abspath("mask_file.nii.gz")
 
