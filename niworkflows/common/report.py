@@ -126,7 +126,10 @@ class RegistrationRC(ReportCapableInterface):
 
         fixed_image_nii = load_img(self._fixed_image)
         moving_image_nii = load_img(self._moving_image)
-        contour_nii = load_img(self._contour) if self._contour is not None else None
+        if hasattr(self, '_contour') and self._contour is not None:
+            contour_nii = load_img(self._contour)
+        else:
+            contour_nii = None
 
         if self._fixed_image_mask:
             fixed_image_nii = unmask(apply_mask(fixed_image_nii,
