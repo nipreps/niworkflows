@@ -64,11 +64,9 @@ def save_html(template, report_file_name, unique_string, **kwargs):
         handle.write(report_render)
 
 
-def as_svg(image):
+def as_svg(image, filename='temp.svg'):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
     A bit hacky. '''
-    filename = 'temp.svg'
-
     image.savefig(filename)
     with open(filename, 'r' if PY3 else 'rb') as file_obj:
         image_svg = file_obj.readlines()
@@ -190,7 +188,7 @@ def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=('z', 'x', 'y'
 
 def plot_registration(anat_nii, div_id, plot_params=None,
                       order=('z', 'x', 'y'), cuts=None,
-                      estimate_brightness=False, label=None):
+                      estimate_brightness=False, label=None, contour=None):
     """
     Plots the foreground and background views
     Default order is: axial, coronal, sagittal
@@ -212,19 +210,18 @@ def plot_registration(anat_nii, div_id, plot_params=None,
         out_file = '{}_{}.svg'.format(div_id, mode)
         plot_params['display_mode'] = mode
         plot_params['cut_coords'] = cuts[mode]
-        plot_params['output_file'] = out_file
         if i == 0:
             plot_params['title'] = label
         else:
             plot_params['title'] = None
 
         # Generate nilearn figure
-        plot_anat(anat_nii, **plot_params)
-        out_files.append(out_file)
+        display = plot_anat(anat_nii, **plot_params)
+        if contour is not None:
+            display.add_contours(contour, levels=[.9])
 
-        # Open generated svg file and fix id
-        with open(out_file, 'rb') as f:
-            svg = f.read()
+        out_files.append(out_file)
+        svg = as_svg(display, out_file)
 
         # Find and replace the figure_1 id.
         xml_data = etree.fromstring(svg)
@@ -296,4 +293,3 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     with open(out_file, 'w' if PY3 else 'wb') as f:
         f.write('\n'.join(svg))
     return out_file
-
