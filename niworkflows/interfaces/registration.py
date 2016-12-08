@@ -111,6 +111,7 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference
         self._moving_image = self.aggregate_outputs().out_file
+        self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',
             self._fixed_image, self._moving_image)

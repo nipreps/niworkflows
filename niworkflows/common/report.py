@@ -7,7 +7,6 @@ import os
 from sys import version_info
 from abc import abstractmethod
 from io import open
-from nilearn.image import load_img
 
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
@@ -121,6 +120,7 @@ class RegistrationRC(ReportCapableInterface):
         self._fixed_image_mask = None
         self._fixed_image_label = "fixed"
         self._moving_image_label = "moving"
+        self._contour = None
         super(RegistrationRC, self).__init__(**inputs)
 
     def _generate_report(self):
@@ -130,6 +130,7 @@ class RegistrationRC(ReportCapableInterface):
 
         fixed_image_nii = load_img(self._fixed_image)
         moving_image_nii = load_img(self._moving_image)
+        contour_nii = load_img(self._contour) if self._contour is not None else None
 
         if self._fixed_image_mask:
             fixed_image_nii = unmask(apply_mask(fixed_image_nii,
@@ -145,16 +146,19 @@ class RegistrationRC(ReportCapableInterface):
             mask_nii = threshold_img(fixed_image_nii, 1e-3)
 
         cuts = cuts_from_bbox(mask_nii, cuts=7)
+
         # Call composer
         compose_view(
             plot_registration(fixed_image_nii, 'fixed-image',
                               estimate_brightness=True,
                               cuts=cuts,
-                              label=self._fixed_image_label),
+                              label=self._fixed_image_label,
+                              contour=contour_nii),
             plot_registration(moving_image_nii, 'moving-image',
                               estimate_brightness=True,
                               cuts=cuts,
-                              label=self._moving_image_label),
+                              label=self._moving_image_label,
+                              contour=contour_nii),
             out_file=self._out_report)
 
 
