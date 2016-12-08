@@ -71,7 +71,10 @@ class ReportCapableInterface(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = super(ReportCapableInterface, self)._list_outputs()
+        try:
+            outputs = super(ReportCapableInterface, self)._list_outputs()
+        except NotImplementedError:
+            outputs = {}
         if self._out_report is not None:
             outputs['out_report'] = self._out_report
         return outputs

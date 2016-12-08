@@ -5,9 +5,12 @@ ReportCapableInterfaces for masks tools
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import os
 from nipype.interfaces import fsl, ants
+from nipype.interfaces.base import File, BaseInterface, BaseInterfaceInputSpec
 from niworkflows.common import report as nrc
 from niworkflows import NIWORKFLOWS_LOG
+from nilearn.masking import compute_epi_mask
 
 class BETInputSpecRPT(nrc.ReportCapableInputSpec,
                       fsl.preprocess.BETInputSpec):
@@ -40,6 +43,8 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
         NIWORKFLOWS_LOG.info('Generating report for BET. file "%s", and mask file "%s"',
                              self._anat_file, self._mask_file)
 
+# TODO: move this interface to nipype.interfaces.nilearn
+
 class BrainExtractionInputSpecRPT(nrc.ReportCapableInputSpec,
                                   ants.segmentation.BrainExtractionInputSpec):
     pass
@@ -64,4 +69,45 @@ class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
         self._report_title = 'ANTS BrainExtraction: brain mask over anatomical input'
 
         NIWORKFLOWS_LOG.info('Generating report for ANTS BrainExtraction. file "%s", mask "%s"',
+                             self._anat_file, self._mask_file)
+
+
+class ComputeEPIMaskInputSpec(nrc.ReportCapableInputSpec,
+                              BaseInterfaceInputSpec):
+    in_file = File(exists=True, desc="3D or 4D EPI file")
+
+
+class ComputeEPIMaskOutputSpec(nrc.ReportCapableOutputSpec):
+    mask_file = File(exists=True, desc="Binary brain mask")
+
+
+class ComputeEPIMask(nrc.SegmentationRC):
+    input_spec = ComputeEPIMaskInputSpec
+    output_spec = ComputeEPIMaskOutputSpec
+
+    def _run_interface(self, runtime):
+        mask_nii = compute_epi_mask(self.inputs.in_file)
+        mask_nii.to_filename("mask_file.nii.gz")
+
+        self._mask_file = os.path.abspath("mask_file.nii.gz")
+
+        runtime.returncode = 0
+        return super(ComputeEPIMask, self)._run_interface(runtime)
+
+    def _list_outputs(self):
+        outputs = super(ComputeEPIMask, self)._list_outputs()
+        outputs['mask_file'] = self._mask_file
+        return outputs
+
+    def _post_run_hook(self, runtime):
+        ''' generates a report showing slices from each axis of an arbitrary
+        volume of in_file, with the resulting binary brain mask overlaid '''
+
+        self._anat_file = self.inputs.in_file
+        self._mask_file = self.aggregate_outputs().mask_file
+        self._seg_files = [self._mask_file]
+        self._masked = True
+        self._report_title = "nilearn.compute_epi_mask: brain mask over EPI input"
+
+        NIWORKFLOWS_LOG.info('Generating report for nilearn.compute_epi_mask. file "%s", and mask file "%s"',
                              self._anat_file, self._mask_file)
