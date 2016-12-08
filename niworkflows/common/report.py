@@ -117,6 +117,7 @@ class RegistrationRC(ReportCapableInterface):
         self._fixed_image_mask = None
         self._fixed_image_label = "fixed"
         self._moving_image_label = "moving"
+        self._contour = None
         super(RegistrationRC, self).__init__(**inputs)
 
     def _generate_report(self):
@@ -126,10 +127,7 @@ class RegistrationRC(ReportCapableInterface):
 
         fixed_image_nii = load_img(self._fixed_image)
         moving_image_nii = load_img(self._moving_image)
-        if hasattr(self, '_contour') and self._contour is not None:
-            contour_nii = load_img(self._contour)
-        else:
-            contour_nii = None
+        contour_nii = load_img(self._contour) if self._contour is not None else None
 
         if self._fixed_image_mask:
             fixed_image_nii = unmask(apply_mask(fixed_image_nii,
