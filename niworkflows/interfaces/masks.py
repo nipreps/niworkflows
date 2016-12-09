@@ -15,6 +15,7 @@ import scipy.ndimage as nd
 import numpy as np
 import nibabel as nb
 
+
 class BETInputSpecRPT(nrc.ReportCapableInputSpec,
                       fsl.preprocess.BETInputSpec):
     pass
@@ -45,6 +46,7 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
 
         NIWORKFLOWS_LOG.info('Generating report for BET. file "%s", and mask file "%s"',
                              self._anat_file, self._mask_file)
+
 
 class BrainExtractionInputSpecRPT(nrc.ReportCapableInputSpec,
                                   ants.segmentation.BrainExtractionInputSpec):
