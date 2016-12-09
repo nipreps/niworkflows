@@ -46,7 +46,6 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
         NIWORKFLOWS_LOG.info('Generating report for BET. file "%s", and mask file "%s"',
                              self._anat_file, self._mask_file)
 
-# TODO: move this interface to nipype.interfaces.nilearn
 
 class BrainExtractionInputSpecRPT(nrc.ReportCapableInputSpec,
                                   ants.segmentation.BrainExtractionInputSpec):
@@ -75,6 +74,7 @@ class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
                              self._anat_file, self._mask_file)
 
 
+# TODO: move this interface to nipype.interfaces.nilearn
 class ComputeEPIMaskInputSpec(nrc.ReportCapableInputSpec,
                               BaseInterfaceInputSpec):
     in_file = File(exists=True, desc="3D or 4D EPI file")
