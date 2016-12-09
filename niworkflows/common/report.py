@@ -142,7 +142,11 @@ class RegistrationRC(ReportCapableInterface):
         else:
             mask_nii = threshold_img(fixed_image_nii, 1e-3)
 
-        cuts = cuts_from_bbox(mask_nii, cuts=7)
+        n_cuts = 7
+        if not self._fixed_image_mask and contour_nii:
+            cuts = cuts_from_bbox(contour_nii, cuts=n_cuts)
+        else:
+            cuts = cuts_from_bbox(mask_nii, cuts=n_cuts)
 
         # Call composer
         compose_view(
