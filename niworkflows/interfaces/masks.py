@@ -141,7 +141,7 @@ class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
     def _post_run_hook(self, runtime):
         ''' generates a report showing slices from each axis '''
 
-        self._anat_file = mean_img(self.inputs.realigned_file)
+        self._anat_file = self.inputs.realigned_file
         self._mask_file = self.inputs.mask_file
         self._seg_files = [self.inputs.mask_file]
         self._masked = False
