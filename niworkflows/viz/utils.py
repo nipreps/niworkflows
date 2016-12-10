@@ -151,7 +151,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
 
     plot_params = {} if plot_params is None else plot_params
 
-    image_nii = _3d_in_file(image_nii)
+    image_nii = nlimage.load_img(image_nii)
     data = image_nii.get_data()
 
     plot_params = robust_set_limits(data, plot_params)
