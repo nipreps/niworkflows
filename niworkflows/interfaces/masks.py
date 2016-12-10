@@ -13,7 +13,8 @@ from niworkflows import NIWORKFLOWS_LOG
 from nilearn.masking import compute_epi_mask
 import scipy.ndimage as nd
 import numpy as np
-from nilearn.image import new_img_like
+import nibabel as nb
+
 
 class BETInputSpecRPT(nrc.ReportCapableInputSpec,
                       fsl.preprocess.BETInputSpec):
@@ -90,12 +91,14 @@ class ComputeEPIMask(nrc.SegmentationRC):
     output_spec = ComputeEPIMaskOutputSpec
 
     def _run_interface(self, runtime):
+        orig_file_nii = nb.load(self.inputs.in_file)
         mask_nii = compute_epi_mask(self.inputs.in_file)
 
         mask_data = mask_nii.get_data()
         if isdefined(self.inputs.dilation):
             mask_data = nd.morphology.binary_dilation(mask_data).astype(np.uint8)
-        better_mask = new_img_like(mask_nii, mask_data)
+        better_mask = nb.Nifti1Image(mask_data, orig_file_nii.affine,
+                                     orig_file_nii.header)
         better_mask.set_data_dtype(np.uint8)
         better_mask.to_filename("mask_file.nii.gz")
 
