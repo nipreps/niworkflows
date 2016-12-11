@@ -152,3 +152,28 @@ class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
 
         NIWORKFLOWS_LOG.info('Generating report for aCompCor. file "%s", mask "%s"',
                              self.inputs.realigned_file, self._mask_file)
+
+class TCompCorInputSpecRPT(nrc.ReportCapableInputSpec,
+                           confounds.TCompCorInputSpec):
+    pass
+
+class TCompCorOutputSpecRPT(nrc.ReportCapableOutputSpec,
+                            confounds.TCompCorOutputSpec):
+    pass
+
+class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
+    input_spec = TCompCorInputSpecRPT
+    output_spec = TCompCorOutputSpecRPT
+
+    def _post_run_hook(self, runtime):
+        ''' generates a report showing slices from each axis '''
+
+        self._anat_file = self.inputs.realigned_file
+        self._mask_file = self.aggregate_outputs().high_variance_mask
+        self._seg_files = [self.aggregate_outputs().high_variance_mask]
+        self._masked = False
+        self._report_title = 'tCompCor - high variance voxels'
+
+        NIWORKFLOWS_LOG.info('Generating report for tCompCor. file "%s", mask "%s"',
+                             self.inputs.realigned_file,
+                             self.aggregate_outputs().high_variance_mask)
