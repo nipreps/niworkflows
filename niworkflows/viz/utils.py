@@ -148,6 +148,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
             svg.add_contours(seg, **plot_params)
 
         svgs_list.append(as_svg(svg))
+        svg.close()
 
     plot_params = {} if plot_params is None else plot_params
 
@@ -222,6 +223,7 @@ def plot_registration(anat_nii, div_id, plot_params=None,
 
         out_files.append(out_file)
         svg = as_svg(display, out_file)
+        display.close()
 
         # Find and replace the figure_1 id.
         xml_data = etree.fromstring(svg)
