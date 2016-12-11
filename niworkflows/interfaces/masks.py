@@ -6,8 +6,11 @@ ReportCapableInterfaces for masks tools
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
+
+from nilearn.image import mean_img
 from nipype.interfaces import fsl, ants
 from nipype.interfaces.base import File, BaseInterfaceInputSpec, traits, isdefined
+from nipype.algorithms import confounds
 from niworkflows.common import report as nrc
 from niworkflows import NIWORKFLOWS_LOG
 from nilearn.masking import compute_epi_mask
@@ -124,3 +127,28 @@ class ComputeEPIMask(nrc.SegmentationRC):
 
         NIWORKFLOWS_LOG.info('Generating report for nilearn.compute_epi_mask. file "%s", and mask file "%s"',
                              self._anat_file, self._mask_file)
+
+
+class ACompCorInputSpecRPT(nrc.ReportCapableInputSpec,
+                           confounds.CompCorInputSpec):
+    pass
+
+class ACompCorOutputSpecRPT(nrc.ReportCapableOutputSpec,
+                            confounds.CompCorOutputSpec):
+    pass
+
+class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
+    input_spec = ACompCorInputSpecRPT
+    output_spec = ACompCorOutputSpecRPT
+
+    def _post_run_hook(self, runtime):
+        ''' generates a report showing slices from each axis '''
+
+        self._anat_file = self.inputs.realigned_file
+        self._mask_file = self.inputs.mask_file
+        self._seg_files = [self.inputs.mask_file]
+        self._masked = False
+        self._report_title = 'aCompCor ROI'
+
+        NIWORKFLOWS_LOG.info('Generating report for aCompCor. file "%s", mask "%s"',
+                             self.inputs.realigned_file, self._mask_file)
