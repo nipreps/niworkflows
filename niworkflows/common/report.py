@@ -17,6 +17,16 @@ from niworkflows.viz.utils import cuts_from_bbox
 
 PY3 = version_info[0] > 2
 
+class ReportFile(traits.File):
+    """ A trait that validates the HTML of reportlets for concatenatability """
+
+    def validate(self, object, name, value):
+        """ Validates that a specified value is valid for this trait.
+        """
+        validated_value = super(ReportFile, self).validate(object, name, value)
+
+        self.error(object, name, value)
+
 
 class ReportCapableInputSpec(BaseInterfaceInputSpec):
     generate_report = traits.Bool(
@@ -26,7 +36,7 @@ class ReportCapableInputSpec(BaseInterfaceInputSpec):
 
 
 class ReportCapableOutputSpec(TraitedSpec):
-    out_report = File(desc='filename for the visual report')
+    out_report = ReportFile(desc='filename for the visual report')
 
 
 class ReportCapableInterface(BaseInterface):
