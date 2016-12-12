@@ -5,10 +5,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import unittest
 import mock
 
-from niworkflows.common import report
 from niworkflows.viz.validators import HTMLValidator, CSSValidator
 
 class TestValidator(unittest.TestCase):
+    """ Tests HTMLVAlidator and CSSValidator """
 
     unique_string = 'lala'
     mock_css = 'This is CSS.'
@@ -61,7 +61,7 @@ class TestValidator(unittest.TestCase):
         self._tester(
             valid_strings=valid_htmls,
             invalid_strings=invalid_htmls,
-            validator = HTMLValidator(unique_string=self.unique_string),
+            validator=HTMLValidator(unique_string=self.unique_string),
             func=_use_validator)
 
     @mock.patch('niworkflows.viz.validators.CSSValidator')
@@ -71,7 +71,7 @@ class TestValidator(unittest.TestCase):
         implicitly_css = '<style scoped>{}</style>'.format(self.mock_css)
 
         validator = HTMLValidator(unique_string=self.unique_string,
-                                         css_validator=mock_css_validator)
+                                  css_validator=mock_css_validator)
         for html in [explicitly_css, implicitly_css]:
             validator.feed(html)
             validator.close()
@@ -84,6 +84,8 @@ class TestValidator(unittest.TestCase):
         self.assertFalse(mock_css_validator.validate.called)
 
     def _tester(self, validator, valid_strings, invalid_strings, func):
+        """ Test that the validator passes for all valid_strings;
+        test that the validator throws an error for all invalid strings"""
         for string in valid_strings:
             func(validator, string)
 
@@ -92,6 +94,7 @@ class TestValidator(unittest.TestCase):
                 func(validator, string)
 
     def _unique_stringify(self, unique_string, strings):
+        """ Utility function for inserting unique_string """
         new_strings = []
         for string in strings:
             try:
@@ -107,3 +110,15 @@ class TestValidator(unittest.TestCase):
             self._unique_stringify(unique_string, new_strings)
 
         return new_strings
+
+class TestReportFile(unittest.TestCase):
+    """ tests the custom Trait class ReportFile, defined in niworkflows/common/report.py """
+
+    def test_report_file_valid(self):
+        """ Make sure HTMLValidator is called on the contents of the file """
+
+    def test_report_file_invalid(self):
+        """ If the contents of the file don't pass the HTMLValidator, error """
+
+    def test_nonexistent_report_file(self):
+        """ If the file does not exist, ReportFile should behave the same as File """
