@@ -65,6 +65,22 @@ class TestValidator(unittest.TestCase):
             validator=HTMLValidator(unique_string=self.unique_string),
             func=_use_validator)
 
+    def test_html_validator_unique_id(self):
+        ''' sometimes you can't know the unique id ahead of time,
+        but you can divine it from the html'''
+        html = '<div id={}>Stuff</div>'.format(self.unique_string)
+        validator = HTMLValidator()
+        validator.simple_validate(html)
+
+        self.assertEqual(validator.unique_string, self.unique_string)
+
+    def test_html_validator_no_unique_id(self):
+        html = '<div><span id={}></span></div>'.format(self.unique_string)
+        validator = HTMLValidator()
+
+        with self.assertRaisesRegex(ValueError, 'could not be discovered'):
+            validator.simple_validate(html)
+
     @mock.patch('niworkflows.viz.validators.CSSValidator')
     def test_html_css_interaction(self, mock_css_validator):
         ''' HTML validator should invoke CSS validator for the content of <style> tags '''

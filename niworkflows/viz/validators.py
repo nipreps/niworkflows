@@ -61,10 +61,13 @@ class HTMLValidator(HTMLParser, object):
 
     If appropriate, invokes CSSValidator.
 
+    If unique_string is not given to `__init__`, HTMLValidator will attempt to discover it.
+    See `discover_unique_string` for details.
+
     html is assumed to be complete, valid html
     '''
 
-    def __init__(self, unique_string, css_validator=CSSValidator()):
+    def __init__(self, unique_string=None, css_validator=CSSValidator()):
         self.unique_string = unique_string
         self.css_validator = css_validator
 
@@ -82,7 +85,23 @@ class HTMLValidator(HTMLParser, object):
         self.feed(html)
         self.close()
 
+    def discover_unique_string(self, attrs):
+        """ the first start tag must have an id attribute,
+        with that attribute's value being the unique_string """
+        for attr, value in attrs:
+            if attr == 'id':
+                self.unique_string = value
+
+        # if self.unique_string is not found, error immediately
+        if self.unique_string is None:
+            raise ValueError('unique_string was not specified and could not be discovered. '
+                             'Expected the first start tag to have "id=unique_string" '
+                             'but its attributes were {}'.format(attrs))
+
     def handle_starttag(self, tag, attrs):
+        if self.unique_string is None: # unique_string hasn't been found yet
+            self.discover_unique_string(attrs)
+
         if tag in ['head', 'body', 'header', 'footer', 'main']:
             self.bad_tags.append(tag)
         elif tag == 'style':
