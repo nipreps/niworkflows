@@ -125,13 +125,13 @@ class TestReportFile(unittest.TestCase):
     def test_report_file_invalid(self, mock_validator):
         """ If the contents of the file don't pass the HTMLValidator, error """
 
-    @mock.patch('niworkflows.common.report.ReportFile', validate)
+    @mock.patch('niworkflows.common.report.ReportFile.validate')
     def test_report_capable_input_spec(self, mock_report_file_validate):
         """ The file does not exist yet--behavior of ReportFile should be the same as for File """
         with self.assertRaises(TraitError):
             interface = StubInterface(out_report='nonexistentfile.html')
 
-    @mock.patch('niworkflows.common.report.ReportFile', validate)
+    @mock.patch('niworkflows.common.report.ReportFile.validate')
     def test_report_capable_output_spec(self, mock_report_file_validate):
         """ Make sure the ReportFile.validate() is called """
         interface = StubInterface()

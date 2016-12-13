@@ -13,17 +13,9 @@ from niworkflows import NIWORKFLOWS_LOG
 from nilearn.masking import apply_mask, unmask
 from nilearn.image import threshold_img, load_img
 
-from niworkflows.viz.utils import cuts_from_bbox
+from niworkflows.viz.utils import cuts_from_bbox, ReportFile
 
 PY3 = version_info[0] > 2
-
-class ReportFile(traits.File):
-    """ A trait that validates the HTML of reportlets for concatenatability """
-
-    def validate(self, object, name, value):
-        """ Validates that a specified value is valid for this trait. """
-        validated_value = super(ReportFile, self).validate(object, name, value)
-        self.error(object, name, value)
 
 class ReportCapableInputSpec(BaseInterfaceInputSpec):
     generate_report = traits.Bool(
