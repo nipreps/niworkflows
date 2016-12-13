@@ -115,19 +115,29 @@ class TestValidator(unittest.TestCase):
 class TestReportFile(unittest.TestCase):
     """ tests the custom Trait class ReportFile, defined in niworkflows/common/report.py """
 
+    @mock.patch('os.path.isfile', return_value=True)
     @mock.patch('niworkflows.viz.validators.HTMLValidator')
-    def test_report_file_valid(self, mock_validator):
+    def test_report_file_valid(self, mock_validator, mock_isfile):
         """ Make sure HTMLValidator is called on the contents of the file """
+        ReportFile(exists=True).validate(None, None, 'report.html')
 
+        self.assertTrue(mock_validator.simple_validate.called)
+
+    @mock.patch('os.path.isfile', return_value=True)
     @mock.patch('niworkflows.viz.validators.HTMLValidator')
-    def test_report_file_invalid(self, mock_validator):
+    def test_report_file_invalid(self, mock_validator, mock_isfile):
         """ If the contents of the file don't pass the HTMLValidator, error """
+        mock_validator.simple_validate.side_effect = ValueError('message')
+
+        with self.assertRaisesRegex(traits.TraitError, 'valid'):
+            ReportFile(exists=True).validate(None, None, 'report.html')
 
     @mock.patch('niworkflows.common.report.ReportFile.validate')
     def test_report_capable_input_spec(self, mock_report_file_validate):
         """ The file does not exist yet--behavior of ReportFile should be the same as for File """
-        with self.assertRaises(traits.TraitError):
-            interface = StubInterface(out_report='nonexistentfile.html')
+        with self.assertRaisesRegex(traits.TraitError, 'must be a file name'):
+            interface = StubInterface()
+            interface.inputs.out_report = 'nonexistentfile.html'
 
     @mock.patch('niworkflows.common.report.ReportFile.validate')
     def test_report_capable_output_spec(self, mock_report_file_validate):
@@ -141,11 +151,11 @@ class StubInputSpec(BaseInterfaceInputSpec):
     out_report = ReportFile('report.html', use_default=True)
 
 class StubOutputSpec(TraitedSpec):
-    out_report = ReportFile()
+    out_report = ReportFile(exists=True)
 
 class StubInterface(BaseInterface):
-    inputspec = StubInputSpec
-    outputspec = StubOutputSpec
+    input_spec = StubInputSpec
+    output_spec = StubOutputSpec
 
     def _run_interface(self, runtime):
         pass
