@@ -295,11 +295,3 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     with open(out_file, 'w' if PY3 else 'wb') as f:
         f.write('\n'.join(svg))
     return out_file
-
-class ReportFile(traits.File):
-    """ A trait that validates the HTML of reportlets for concatenatability """
-
-    def validate(self, object, name, value):
-        """ Validates that a specified value is valid for this trait. """
-        validated_value = super(ReportFile, self).validate(object, name, value)
-        self.error(object, name, value)

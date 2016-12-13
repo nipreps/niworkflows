@@ -13,7 +13,8 @@ from niworkflows import NIWORKFLOWS_LOG
 from nilearn.masking import apply_mask, unmask
 from nilearn.image import threshold_img, load_img
 
-from niworkflows.viz.utils import cuts_from_bbox, ReportFile
+from niworkflows.viz.validators import ReportFile
+from niworkflows.viz.utils import cuts_from_bbox
 
 PY3 = version_info[0] > 2
 

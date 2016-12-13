@@ -7,6 +7,14 @@ import tinycss
 import warnings
 from builtins import object
 
+class ReportFile(traits.File):
+    """ A trait that validates the HTML of reportlets for concatenatability """
+
+    def validate(self, object, name, value):
+        """ Validates that a specified value is valid for this trait. """
+        validated_value = super(ReportFile, self).validate(object, name, value)
+        self.error(object, name, value)
+
 class CSSValidator(object):
     ''' no attribute in CSS may be position: fixed
     Like  HTMLValidator, valid CSS is assumed and not checked.'''
