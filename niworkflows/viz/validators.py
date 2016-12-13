@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """ css/html validation """
 from __future__ import absolute_import, division, print_function, unicode_literals
+import warnings
+from builtins import object
 
 from html.parser import HTMLParser
 import tinycss
-import warnings
-from builtins import object
 
 from nipype.interfaces.base import File
 
@@ -75,6 +75,12 @@ class HTMLValidator(HTMLParser, object):
         self.in_style = False
 
         super(HTMLValidator, self).__init__()
+
+    def simple_validate(self, html):
+        """ utility to make simple cases easy """
+        self.reset()
+        self.feed(html)
+        self.close()
 
     def handle_starttag(self, tag, attrs):
         if tag in ['head', 'body', 'header', 'footer', 'main']:

@@ -45,9 +45,7 @@ class TestValidator(unittest.TestCase):
 
     def test_html_validator(self):
         def _use_validator(validator, html):
-            validator.reset()
-            validator.feed(html)
-            validator.close()
+            validator.simple_validate(html)
 
         valid_htmls = self._unique_stringify(self.unique_string,
                                              ['<super></super>', 'id=la{}', 'id={}{}', 'id = a{}',
