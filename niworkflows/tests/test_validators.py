@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import unittest
 import mock
 
-from nipype.interfaces import BaseInterface
+from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec, traits
 
 from niworkflows.common.report import ReportFile
 from niworkflows.viz.validators import HTMLValidator, CSSValidator
@@ -128,30 +128,30 @@ class TestReportFile(unittest.TestCase):
     @mock.patch('niworkflows.common.report.ReportFile.validate')
     def test_report_capable_input_spec(self, mock_report_file_validate):
         """ The file does not exist yet--behavior of ReportFile should be the same as for File """
-        with self.assertRaises(TraitError):
+        with self.assertRaises(traits.TraitError):
             interface = StubInterface(out_report='nonexistentfile.html')
 
     @mock.patch('niworkflows.common.report.ReportFile.validate')
     def test_report_capable_output_spec(self, mock_report_file_validate):
         """ Make sure the ReportFile.validate() is called """
         interface = StubInterface()
-        interface.run()
+        interface._run_interface(None)
         self.assertTrue(mock_report_file_validate.called)
 
-    # Stub Interface/Input/Output to facilitate testing
+# Stub Interface/Input/Output to facilitate testing
+class StubInputSpec(BaseInterfaceInputSpec):
+    out_report = ReportFile('report.html', use_default=True)
 
-    class StubInputSpec(BaseInterfaceInputSpec):
-        out_report = ReportFile('report.html', use_default=True)
+class StubOutputSpec(TraitedSpec):
+    out_report = ReportFile()
 
-    class StubOutputSpec(TraitedSpec):
-        out_report = ReportFile()
+class StubInterface(BaseInterface):
+    inputspec = StubInputSpec
+    outputspec = StubOutputSpec
 
-    class StubInterface(BaseInterface):
-        inputspec = StubInputSpec()
-        outputspec = StubOutputSpec()
+    def _run_interface(self, runtime):
+        pass
 
-        def _run_interface(runtime):
-            pass
+    def _list_outputs(self, runtime):
+        return {'report': 'report.html'}
 
-        def _list_outputs(runtime):
-            return {'report': 'report.html'}

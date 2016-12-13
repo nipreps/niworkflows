@@ -7,7 +7,9 @@ import tinycss
 import warnings
 from builtins import object
 
-class ReportFile(traits.File):
+from nipype.interfaces.base import File
+
+class ReportFile(File):
     """ A trait that validates the HTML of reportlets for concatenatability """
 
     def validate(self, object, name, value):
