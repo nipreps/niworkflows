@@ -128,16 +128,21 @@ class TestValidator(unittest.TestCase):
 
         return new_strings
 
+
 class TestReportFile(unittest.TestCase):
     """ tests the custom Trait class ReportFile, defined in niworkflows/common/report.py """
 
     @mock.patch('os.path.isfile', return_value=True)
-    @mock.patch('niworkflows.viz.validators.HTMLValidator')
+    @mock.patch('niworkflows.viz.validators.HTMLValidator.simple_validate')
     def test_report_file_valid(self, mock_validator, mock_isfile):
         """ Make sure HTMLValidator is called on the contents of the file """
-        ReportFile(exists=True).validate(None, None, 'report.html')
+        dummy_file = '.coveragerc' # arbitrary file bc I can't waste more time on mock.mock_open
+        with open(dummy_file) as file_handler:
+            contents = file_handler.read()
 
-        self.assertTrue(mock_validator.simple_validate.called)
+        ReportFile(exists=True).validate(None, None, dummy_file)
+
+        mock_validator.assert_called_once_with(contents)
 
     @mock.patch('os.path.isfile', return_value=True)
     @mock.patch('niworkflows.viz.validators.HTMLValidator')

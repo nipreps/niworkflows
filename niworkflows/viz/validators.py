@@ -2,7 +2,7 @@
 """ css/html validation """
 from __future__ import absolute_import, division, print_function, unicode_literals
 import warnings
-from builtins import object
+from builtins import object, open
 
 from html.parser import HTMLParser
 import tinycss
@@ -15,7 +15,12 @@ class ReportFile(File):
     def validate(self, object, name, value):
         """ Validates that a specified value is valid for this trait. """
         validated_value = super(ReportFile, self).validate(object, name, value)
-        self.error(object, name, value)
+
+        try:
+            with open(value) as file_handler:
+                HTMLValidator().simple_validate(file_handler.read())
+        except ValueError:
+            self.error(object, name, value)
 
 class CSSValidator(object):
     ''' no attribute in CSS may be position: fixed
