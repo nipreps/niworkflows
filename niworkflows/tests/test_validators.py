@@ -5,10 +5,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import unittest
 import mock
 
+from nipype.interfaces import BaseInterface
+
+from niworkflows.common.report import ReportFile
 from niworkflows.viz.validators import HTMLValidator, CSSValidator
 
 class TestValidator(unittest.TestCase):
-    """ Tests HTMLVAlidator and CSSValidator """
+    """ Tests HTMLValidator and CSSValidator """
 
     unique_string = 'lala'
     mock_css = 'This is CSS.'
@@ -114,11 +117,41 @@ class TestValidator(unittest.TestCase):
 class TestReportFile(unittest.TestCase):
     """ tests the custom Trait class ReportFile, defined in niworkflows/common/report.py """
 
-    def test_report_file_valid(self):
+    @mock.patch('niworkflows.viz.validators.HTMLValidator')
+    def test_report_file_valid(self, mock_validator):
         """ Make sure HTMLValidator is called on the contents of the file """
 
-    def test_report_file_invalid(self):
+    @mock.patch('niworkflows.viz.validators.HTMLValidator')
+    def test_report_file_invalid(self, mock_validator):
         """ If the contents of the file don't pass the HTMLValidator, error """
 
-    def test_nonexistent_report_file(self):
-        """ If the file does not exist, ReportFile should behave the same as File """
+    @mock.patch('niworkflows.common.report.ReportFile', validate)
+    def test_report_capable_input_spec(self, mock_report_file_validate):
+        """ The file does not exist yet--behavior of ReportFile should be the same as for File """
+        with self.assertRaises(TraitError):
+            interface = StubInterface(out_report='nonexistentfile.html')
+
+    @mock.patch('niworkflows.common.report.ReportFile', validate)
+    def test_report_capable_output_spec(self, mock_report_file_validate):
+        """ Make sure the ReportFile.validate() is called """
+        interface = StubInterface()
+        interface.run()
+        self.assertTrue(mock_report_file_validate.called)
+
+    # Stub Interface/Input/Output to facilitate testing
+
+    class StubInputSpec(BaseInterfaceInputSpec):
+        out_report = ReportFile('report.html', use_default=True)
+
+    class StubOutputSpec(TraitedSpec):
+        out_report = ReportFile()
+
+    class StubInterface(BaseInterface):
+        inputspec = StubInputSpec()
+        outputspec = StubOutputSpec()
+
+        def _run_interface(runtime):
+            pass
+
+        def _list_outputs(runtime):
+            return {'report': 'report.html'}
