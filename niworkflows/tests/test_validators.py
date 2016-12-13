@@ -143,14 +143,13 @@ class TestReportFile(unittest.TestCase):
         ReportFile(exists=True).validate(None, None, self.dummy_file)
         mock_validator.assert_called_once_with(self.contents)
 
-    @mock.patch('os.path.isfile', return_value=True)
     @mock.patch('niworkflows.viz.validators.HTMLValidator')
-    def test_report_file_invalid(self, mock_validator, mock_isfile):
+    def test_report_file_invalid(self, mock_validator):
         """ If the contents of the file don't pass the HTMLValidator, error """
         mock_validator.simple_validate.side_effect = ValueError('message')
 
         with self.assertRaisesRegex(traits.TraitError, 'valid'):
-            ReportFile(exists=True).validate(None, None, 'report.html')
+            ReportFile(exists=True).validate(None, None, self.dummy_file)
 
     @mock.patch('niworkflows.common.report.ReportFile.validate')
     def test_report_capable_input_spec(self, mock_report_file_validate):
