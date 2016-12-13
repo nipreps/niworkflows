@@ -1,0 +1,1 @@
+-e https://github.com/rwblair/nipype.git@18468d10e3f41fec5887f25ca5d6a1d771c024de#egg=nipype
