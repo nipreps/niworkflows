@@ -56,16 +56,13 @@ class ReportCapableInterface(BaseInterface):
         # check exit code and act consequently
         NIWORKFLOWS_LOG.debug('Running report generation code')
 
-        _report_ok = False
-        if hasattr(runtime, 'returncode') and runtime.returncode == 0:
-            self._generate_report()
-            _report_ok = True
-            NIWORKFLOWS_LOG.info('Successfully created report (%s)',
-                                 self._out_report)
-
-        if not _report_ok:
+        if hasattr(runtime, 'returncode') and runtime.returncode not in [0, None]:
             self._generate_error_report(
                 errno=runtime.get('returncode', None))
+        else:
+            self._generate_report()
+            NIWORKFLOWS_LOG.info('Successfully created report (%s)',
+                                 self._out_report)
 
         return runtime
 

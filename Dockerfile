@@ -51,6 +51,7 @@ ENV CRN_SHARED_DATA /niworkflows_data
 WORKDIR /root/
 COPY . niworkflows/
 RUN cd niworkflows && \
+
     pip install -e git+https://github.com/rwblair/nipype.git@90530151475670fa360db903e4e1adbed11b3da6#egg=nipype && \
     pip install --process-dependency-links -e .[all] && \
     python -c 'from niworkflows.data.getters import get_mni_template_ras; get_mni_template_ras()' && \
