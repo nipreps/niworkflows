@@ -89,8 +89,8 @@ class ApplyTOPUPRPT(nrc.RegistrationRC, fsl.ApplyTOPUP):
     output_spec = ApplyTOPUPOutputSpecRPT
 
     def _post_run_hook(self, runtime):
-        self._fixed_image_label = "corrected"
-        self._moving_image_label = "warped"
+        self._fixed_image_label = "after"
+        self._moving_image_label = "before"
         self._fixed_image = index_img(self.aggregate_outputs().out_corrected, 0)
         self._moving_image = index_img(self.inputs.in_files[0], 0)
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
@@ -113,8 +113,8 @@ class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
     output_spec = FUGUEOutputSpecRPT
 
     def _post_run_hook(self, runtime):
-        self._fixed_image_label = "corrected"
-        self._moving_image_label = "warped"
+        self._fixed_image_label = "after"
+        self._moving_image_label = "before"
         self._fixed_image = self.aggregate_outputs().unwarped_file
         self._moving_image = self.inputs.in_file
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
