@@ -151,8 +151,7 @@ class TestReportFile(unittest.TestCase):
         with self.assertRaisesRegex(traits.TraitError, 'valid'):
             ReportFile(exists=True).validate(None, 'out_report', self.dummy_file)
 
-    @mock.patch('niworkflows.common.report.ReportFile.validate')
-    def test_report_capable_input_spec(self, mock_report_file_validate):
+    def test_no_file(self):
         """ The file does not exist yet--behavior of ReportFile should be the same as for File """
         with self.assertRaisesRegex(traits.TraitError, 'must be a file name'):
             interface = StubInterface()
@@ -164,6 +163,13 @@ class TestReportFile(unittest.TestCase):
         interface = StubInterface()
         interface._run_interface(None)
         self.assertTrue(mock_report_file_validate.called)
+
+    def test_init_exists(self):
+        """ The ReportFile trait only makes sense if exists == True. """
+        report_files = [ReportFile(), ReportFile(exists=True), ReportFile(exists=False)]
+
+        for report_file in report_files:
+            self.assertTrue(report_file.exists)
 
 # Stub Interface/Input/Output to facilitate testing
 class StubInputSpec(BaseInterfaceInputSpec):

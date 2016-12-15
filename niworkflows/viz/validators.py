@@ -12,6 +12,11 @@ from nipype.interfaces.base import File
 class ReportFile(File):
     """ A trait that validates the HTML of reportlets for concatenatability """
 
+    def __init__(self, *args, **kwargs):
+        """ The contents of the file must pass validation, therefore the file must exist. """
+        super(ReportFile, self).__init__(*args, **kwargs)
+        self.exists = True
+
     def validate(self, object, name, value):
         """ Validates that a specified value is valid for this trait. """
         validated_value = super(ReportFile, self).validate(object, name, value)
