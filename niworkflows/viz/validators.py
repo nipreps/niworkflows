@@ -20,7 +20,11 @@ class ReportFile(File):
             with open(value) as file_handler:
                 HTMLValidator().simple_validate(file_handler.read())
         except ValueError:
-            self.error(object, name, value)
+            self.error(object, 'out_report', value)
+
+    def info(self):
+        """ returns a string that will be used in the error message """
+        return super(ReportFile, self).info() + ' and pass HTML validation'
 
 class CSSValidator(object):
     ''' no attribute in CSS may be position: fixed
