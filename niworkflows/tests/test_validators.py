@@ -2,13 +2,17 @@
 """ test validators """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+import os
 import unittest
 import mock
 
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec, traits
+import nipype.pipeline.engine as pe
 
 from niworkflows.common.report import ReportFile
 from niworkflows.viz.validators import HTMLValidator, CSSValidator
+
+DUMMY_FILE = '.coveragerc' # arbitrary existing file
 
 class TestValidator(unittest.TestCase):
     """ Tests HTMLValidator and CSSValidator """
@@ -133,14 +137,13 @@ class TestReportFile(unittest.TestCase):
     """ tests the custom Trait class ReportFile, defined in niworkflows/common/report.py """
 
     def setUp(self):
-        self.dummy_file = '.coveragerc' # arbitrary file bc I can't waste more time on mock_open
-        with open(self.dummy_file) as file_handler:
+        with open(DUMMY_FILE) as file_handler:
             self.contents = file_handler.read()
 
     @mock.patch('niworkflows.viz.validators.HTMLValidator.simple_validate')
     def test_report_file_valid(self, mock_validator):
         """ Make sure HTMLValidator is called on the contents of the file """
-        ReportFile(exists=True).validate(None, 'out_report', self.dummy_file)
+        ReportFile(exists=True).validate(None, 'out_report', DUMMY_FILE)
         mock_validator.assert_called_once_with(self.contents)
 
     @mock.patch('niworkflows.viz.validators.HTMLValidator.simple_validate')
@@ -149,7 +152,7 @@ class TestReportFile(unittest.TestCase):
         mock_validator.side_effect = ValueError('message')
 
         with self.assertRaisesRegex(traits.TraitError, 'valid'):
-            ReportFile(exists=True).validate(None, 'out_report', self.dummy_file)
+            ReportFile(exists=True).validate(None, 'out_report', DUMMY_FILE)
 
     def test_no_file(self):
         """ The file does not exist yet--behavior of ReportFile should be the same as for File """
@@ -157,12 +160,16 @@ class TestReportFile(unittest.TestCase):
             interface = StubInterface()
             interface.inputs.out_report = 'nonexistentfile.html'
 
-    @mock.patch('niworkflows.common.report.ReportFile.validate')
-    def test_report_capable_output_spec(self, mock_report_file_validate):
+    '''
+    @mock.patch('niworkflows.viz.validators.ReportFile.validate')
+    def test_in_action(self, mock_report_file_validate):
         """ Make sure the ReportFile.validate() is called """
         interface = StubInterface()
-        interface._run_interface(None)
+        interface.run()
+        interface.aggregate_outputs()
+        print('asdf', interface.aggregate_outputs().get())
         self.assertTrue(mock_report_file_validate.called)
+    '''
 
     def test_init_exists(self):
         """ The ReportFile trait only makes sense if exists == True. """
@@ -183,8 +190,7 @@ class StubInterface(BaseInterface):
     output_spec = StubOutputSpec
 
     def _run_interface(self, runtime):
-        pass
+        return runtime
 
-    def _list_outputs(self, runtime):
-        return {'report': 'report.html'}
-
+    def _list_outputs(self):
+        return { 'out_report': DUMMY_FILE }
