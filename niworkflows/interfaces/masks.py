@@ -95,11 +95,28 @@ class ComputeEPIMask(nrc.SegmentationRC):
 
     def _run_interface(self, runtime):
         orig_file_nii = nb.load(self.inputs.in_file)
-        mask_nii = compute_epi_mask(self.inputs.in_file)
+        in_file_data = orig_file_nii.get_data()
+
+        # pad the data to avoid the mask estimation running into edge effects
+        in_file_data_padded = np.pad(in_file_data, (1, 1), 'constant',
+                                     constant_values=(0, 0))
+
+        padded_nii = nb.Nifti1Image(in_file_data_padded, orig_file_nii.affine,
+                                    orig_file_nii.header)
+
+        mask_nii = compute_epi_mask(padded_nii, exclude_zeros=True)
 
         mask_data = mask_nii.get_data()
         if isdefined(self.inputs.dilation):
             mask_data = nd.morphology.binary_dilation(mask_data).astype(np.uint8)
+
+        # reverse image padding
+        mask_data = mask_data[1:-1, 1:-1, 1:-1]
+
+        # exclude zero and NaN voxels
+        mask_data[in_file_data == 0] = 0
+        mask_data[np.isnan(in_file_data)] = 0
+
         better_mask = nb.Nifti1Image(mask_data, orig_file_nii.affine,
                                      orig_file_nii.header)
         better_mask.set_data_dtype(np.uint8)
