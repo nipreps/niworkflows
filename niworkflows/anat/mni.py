@@ -38,6 +38,7 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     settings = traits.List(File(exists=True), desc='pass on the list of settings files')
     template_resolution = traits.Enum(1, 2, mandatory=True, usedefault=True,
                                       desc='template resolution')
+    explicit_masking =traits.Bool(True)
 
 
 class RobustMNINormalization(BaseInterface):
@@ -127,7 +128,10 @@ class RobustMNINormalization(BaseInterface):
             terminal_output='file'
         )
         if isdefined(self.inputs.moving_mask):
-            self.norm.inputs.moving_image_mask = self._dilated_moving_image_mask
+            #self.norm.inputs.moving_image_mask = self._dilated_moving_image_mask
+            self.norm.inputs.moving_image = mask(self.inputs.moving_image[0],
+                                                 self.inputs.moving_mask,
+                                                 "moving_masked.nii.gz")
 
         if isdefined(self.inputs.reference_image):
             self.norm.inputs.fixed_image = self.inputs.reference_image
@@ -144,18 +148,21 @@ class RobustMNINormalization(BaseInterface):
             if self.inputs.testing:
                 resolution = 2
 
-            self.norm.inputs.fixed_image = op.join(
-                mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
+            self.norm.inputs.fixed_image = mask(op.join(
+                mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference)),
+                op.join(
+                    mni_template, '%dmm_brainmask.nii.gz' % resolution),
+                "fixed_masked.nii.gz")
 
             if not self._dilated_reference_image_mask:
                 self._dilated_reference_image_mask = dilate(op.join(
                 mni_template, '%dmm_brainmask.nii.gz' % resolution),
                 new_name="dilated_reference_mask.nii.gz")
 
-            self.norm.inputs.fixed_image_mask = self._dilated_reference_image_mask
+            #self.norm.inputs.fixed_image_mask = self._dilated_reference_image_mask
 
 
-def dilate(in_file, mm_factor=5, new_name="dilated.nii.gz"):
+def dilate(in_file, mm_factor=15, new_name="dilated.nii.gz"):
     from scipy.ndimage import binary_dilation
     import nibabel as nb
     import os
@@ -167,3 +174,16 @@ def dilate(in_file, mm_factor=5, new_name="dilated.nii.gz"):
     new_nii = nb.Nifti1Image(new_data, nii.affine, nii.header)
     new_nii.to_filename(new_name)
     return os.path.abspath(new_name)
+
+def mask(in_file, mask_file, new_name):
+    import nibabel as nb
+    import os
+
+    in_nii = nb.load(in_file)
+    mask_nii = nb.load(mask_file)
+    data = in_nii.get_data()
+    data[mask_nii.get_data() == 0] = 0
+    new_nii = nb.Nifti1Image(data, in_nii.affine, in_nii.header)
+    new_nii.to_filename(new_name)
+    return os.path.abspath(new_name)
+
