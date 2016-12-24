@@ -50,8 +50,7 @@ def main():
         tests_require=ldict['TESTS_REQUIRES'],
         extras_require=ldict['EXTRA_REQUIRES'],
         # Data
-        package_data={'niworkflows': ['data/t1-mni_registration*.json'],
-                      'niworkflows.viz': ['viz/*.tpl'],
+        package_data={'niworkflows': ['data/t1-mni_registration*.json', 'viz/*.tpl'],
                       'niworkflows.data': ['templates/mni_icbm152_nlin_asym_09c/*.nii.gz']},
         include_package_data=True,
     )

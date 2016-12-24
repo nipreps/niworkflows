@@ -7,11 +7,13 @@ import os
 from sys import version_info
 from abc import abstractmethod
 from io import open
-import nibabel as nb
 
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
 from nilearn.masking import apply_mask, unmask
+from nilearn.image import threshold_img, load_img
+
+from niworkflows.viz.utils import cuts_from_bbox
 
 PY3 = version_info[0] > 2
 
@@ -54,21 +56,21 @@ class ReportCapableInterface(BaseInterface):
         # check exit code and act consequently
         NIWORKFLOWS_LOG.debug('Running report generation code')
 
-        _report_ok = False
-        if hasattr(runtime, 'returncode') and runtime.returncode == 0:
-            self._generate_report()
-            _report_ok = True
-            NIWORKFLOWS_LOG.info('Successfully created report (%s)',
-                                 self._out_report)
-
-        if not _report_ok:
+        if hasattr(runtime, 'returncode') and runtime.returncode not in [0, None]:
             self._generate_error_report(
                 errno=runtime.get('returncode', None))
+        else:
+            self._generate_report()
+            NIWORKFLOWS_LOG.info('Successfully created report (%s)',
+                                 self._out_report)
 
         return runtime
 
     def _list_outputs(self):
-        outputs = super(ReportCapableInterface, self)._list_outputs()
+        try:
+            outputs = super(ReportCapableInterface, self)._list_outputs()
+        except NotImplementedError:
+            outputs = {}
         if self._out_report is not None:
             outputs['out_report'] = self._out_report
         return outputs
@@ -113,21 +115,19 @@ class RegistrationRC(ReportCapableInterface):
         self._fixed_image = None
         self._moving_image = None
         self._fixed_image_mask = None
+        self._fixed_image_label = "fixed"
+        self._moving_image_label = "moving"
+        self._contour = None
         super(RegistrationRC, self).__init__(**inputs)
-
-    DEFAULT_MNI_CUTS = {
-        'x': [-25, -20, -10, 0, 10, 20, 25],
-        'y': [-25, -20, -10, 0, 10, 20, 25],
-        'z': [-15, -10, -5, 0, 5, 10, 15]
-    }
 
     def _generate_report(self):
         """ Generates the visual report """
         from niworkflows.viz.utils import compose_view, plot_registration
         NIWORKFLOWS_LOG.info('Generating visual report')
 
-        fixed_image_nii = nb.load(self._fixed_image)
-        moving_image_nii = nb.load(self._moving_image)
+        fixed_image_nii = load_img(self._fixed_image)
+        moving_image_nii = load_img(self._moving_image)
+        contour_nii = load_img(self._contour) if self._contour is not None else None
 
         if self._fixed_image_mask:
             fixed_image_nii = unmask(apply_mask(fixed_image_nii,
@@ -138,16 +138,28 @@ class RegistrationRC(ReportCapableInterface):
             moving_image_nii = unmask(apply_mask(moving_image_nii,
                                                  self._fixed_image_mask),
                                       self._fixed_image_mask)
+            mask_nii = load_img(self._fixed_image_mask)
+        else:
+            mask_nii = threshold_img(fixed_image_nii, 1e-3)
 
+        n_cuts = 7
+        if not self._fixed_image_mask and contour_nii:
+            cuts = cuts_from_bbox(contour_nii, cuts=n_cuts)
+        else:
+            cuts = cuts_from_bbox(mask_nii, cuts=n_cuts)
 
         # Call composer
         compose_view(
             plot_registration(fixed_image_nii, 'fixed-image',
                               estimate_brightness=True,
-                              cuts=self.DEFAULT_MNI_CUTS),
+                              cuts=cuts,
+                              label=self._fixed_image_label,
+                              contour=contour_nii),
             plot_registration(moving_image_nii, 'moving-image',
                               estimate_brightness=True,
-                              cuts=self.DEFAULT_MNI_CUTS),
+                              cuts=cuts,
+                              label=self._moving_image_label,
+                              contour=contour_nii),
             out_file=self._out_report)
 
 
