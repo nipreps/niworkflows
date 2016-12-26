@@ -38,7 +38,12 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     settings = traits.List(File(exists=True), desc='pass on the list of settings files')
     template_resolution = traits.Enum(1, 2, mandatory=True, usedefault=True,
                                       desc='template resolution')
-    explicit_masking =traits.Bool(True)
+    explicit_masking = traits.Bool(True, usedefault=True,
+                                   desc="Set voxels outside the masks to zero"
+                                        "thus creating an artificial border"
+                                        "that can drive the registration. "
+                                        "Requires reliable and accurate masks."
+                                        "See https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba")
 
 
 class RobustMNINormalization(BaseInterface):
@@ -74,18 +79,6 @@ class RobustMNINormalization(BaseInterface):
 
     def _run_interface(self, runtime):
         settings_files = self._get_settings()
-
-        if isdefined(self.inputs.moving_mask):
-            self._dilated_moving_image_mask = dilate(self.inputs.moving_mask,
-                                                     new_name="dilated_moving_mask.nii.gz")
-        else:
-            self._dilated_moving_image_mask = self.inputs.moving_mask
-
-        if isdefined(self.inputs.reference_mask):
-            self._dilated_reference_image_mask = dilate(self.inputs.reference_mask,
-                                                     new_name="dilated_reference_mask.nii.gz")
-        else:
-            self._dilated_reference_image_mask = self.inputs.reference_mask
 
         for ants_settings in settings_files:
             interface_result = None
@@ -128,15 +121,25 @@ class RobustMNINormalization(BaseInterface):
             terminal_output='file'
         )
         if isdefined(self.inputs.moving_mask):
-            #self.norm.inputs.moving_image_mask = self._dilated_moving_image_mask
-            self.norm.inputs.moving_image = mask(self.inputs.moving_image[0],
-                                                 self.inputs.moving_mask,
-                                                 "moving_masked.nii.gz")
+            if self.inputs.explicit_masking:
+                self.norm.inputs.moving_image = mask(
+                    self.inputs.moving_image[0],
+                    self.inputs.moving_mask,
+                    "moving_masked.nii.gz")
+            else:
+                self.norm.inputs.moving_image_mask = self.inputs.moving_mask
+
 
         if isdefined(self.inputs.reference_image):
             self.norm.inputs.fixed_image = self.inputs.reference_image
             if isdefined(self.inputs.reference_mask):
-                self.norm.inputs.fixed_image_mask = self._dilated_reference_image_mask
+                if self.inputs.explicit_masking:
+                    self.norm.inputs.fixed_image = mask(
+                        self.inputs.reference_image[0],
+                        self.inputs.mreference_mask,
+                        "fixed_masked.nii.gz")
+                else:
+                    self.norm.inputs.fixed_image_mask = self.inputs.reference_mask
         else:
             get_template = getattr(getters, 'get_{}'.format(self.inputs.template))
             mni_template = get_template()
@@ -148,32 +151,20 @@ class RobustMNINormalization(BaseInterface):
             if self.inputs.testing:
                 resolution = 2
 
-            self.norm.inputs.fixed_image = mask(op.join(
-                mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference)),
-                op.join(
-                    mni_template, '%dmm_brainmask.nii.gz' % resolution),
-                "fixed_masked.nii.gz")
+            if self.inputs.explicit_masking:
+                self.norm.inputs.fixed_image = mask(op.join(
+                    mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference)),
+                    op.join(
+                        mni_template, '%dmm_brainmask.nii.gz' % resolution),
+                    "fixed_masked.nii.gz")
+            else:
+                self.norm.inputs.fixed_image = op.join(
+                    mni_template,
+                    '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
+                self.norm.inputs.fixed_image_mask = op.join(
+                    mni_template, '%dmm_brainmask.nii.gz' % resolution)
 
-            if not self._dilated_reference_image_mask:
-                self._dilated_reference_image_mask = dilate(op.join(
-                mni_template, '%dmm_brainmask.nii.gz' % resolution),
-                new_name="dilated_reference_mask.nii.gz")
 
-            #self.norm.inputs.fixed_image_mask = self._dilated_reference_image_mask
-
-
-def dilate(in_file, mm_factor=15, new_name="dilated.nii.gz"):
-    from scipy.ndimage import binary_dilation
-    import nibabel as nb
-    import os
-
-    nii = nb.load(in_file)
-    data = nii.get_data()
-    voxel_factor = int(mm_factor/max(nii.header.get_zooms()[:3])+1)
-    new_data = binary_dilation(data, iterations=voxel_factor)
-    new_nii = nb.Nifti1Image(new_data, nii.affine, nii.header)
-    new_nii.to_filename(new_name)
-    return os.path.abspath(new_name)
 
 def mask(in_file, mask_file, new_name):
     import nibabel as nb
