@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """ test validators """
-
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 import unittest
 import mock
 
 from nipype.interfaces.base import BaseInterface, BaseInterfaceInputSpec, TraitedSpec, traits
+from nipype.utils.tmpdirs import InTemporaryDirectory
 import nipype.pipeline.engine as pe
 
 from niworkflows.common.report import ReportFile
@@ -123,7 +123,6 @@ class TestValidator(unittest.TestCase):
             except IndexError:
                 pass
             except:
-                print(string)
                 raise
             new_strings.append(new_string)
 
@@ -160,16 +159,13 @@ class TestReportFile(unittest.TestCase):
             interface = StubInterface()
             interface.inputs.out_report = 'nonexistentfile.html'
 
-    '''
-    @mock.patch('niworkflows.viz.validators.ReportFile.validate')
-    def test_in_action(self, mock_report_file_validate):
+    @mock.patch('niworkflows.viz.validators.HTMLValidator.simple_validate')
+    def test_in_action(self, mock_validator):
         """ Make sure the ReportFile.validate() is called """
-        interface = StubInterface()
-        interface.run()
-        interface.aggregate_outputs()
-        print('asdf', interface.aggregate_outputs().get())
-        self.assertTrue(mock_report_file_validate.called)
-    '''
+        with InTemporaryDirectory():
+            interface = StubInterface()
+            interface.run()
+            self.assertTrue(mock_validator.caled)
 
     def test_init_exists(self):
         """ The ReportFile trait only makes sense if exists == True. """
@@ -180,17 +176,19 @@ class TestReportFile(unittest.TestCase):
 
 # Stub Interface/Input/Output to facilitate testing
 class StubInputSpec(BaseInterfaceInputSpec):
-    out_report = ReportFile('report.html', use_default=True)
+    out_report = traits.File('report.html', exists=False, usedefault=True)
 
 class StubOutputSpec(TraitedSpec):
     out_report = ReportFile(exists=True)
+    out_file = traits.File('file.txt', exists=True)
 
 class StubInterface(BaseInterface):
     input_spec = StubInputSpec
     output_spec = StubOutputSpec
 
     def _run_interface(self, runtime):
+        open(self.inputs.out_report, 'w').close()
         return runtime
 
     def _list_outputs(self):
-        return { 'out_report': DUMMY_FILE }
+        return { 'out_report': os.path.abspath(self.inputs.out_report) }

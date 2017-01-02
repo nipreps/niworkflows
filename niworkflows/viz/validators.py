@@ -7,9 +7,9 @@ from builtins import object, open
 from html.parser import HTMLParser
 import tinycss
 
-from nipype.interfaces.base import File
+from nipype.interfaces.base import traits
 
-class ReportFile(File):
+class ReportFile(traits.File):
     """ A trait that validates the HTML of reportlets for concatenatability """
 
     def __init__(self, *args, **kwargs):
@@ -26,6 +26,8 @@ class ReportFile(File):
                 HTMLValidator().simple_validate(file_handler.read())
         except ValueError:
             self.error(object, 'out_report', value)
+
+        return validated_value
 
     def info(self):
         """ returns a string that will be used in the error message """
