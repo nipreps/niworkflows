@@ -12,8 +12,6 @@ import nipype.pipeline.engine as pe
 from niworkflows.common.report import ReportFile
 from niworkflows.viz.validators import HTMLValidator, CSSValidator
 
-DUMMY_FILE = '.coveragerc' # arbitrary existing file
-
 class TestValidator(unittest.TestCase):
     """ Tests HTMLValidator and CSSValidator """
 
@@ -135,14 +133,17 @@ class TestValidator(unittest.TestCase):
 class TestReportFile(unittest.TestCase):
     """ tests the custom Trait class ReportFile, defined in niworkflows/common/report.py """
 
+    dummy_file = 'file.txt'
+    contents = 'the contents'
+
     def setUp(self):
-        with open(DUMMY_FILE) as file_handler:
-            self.contents = file_handler.read()
+        with open(self.dummy_file, 'w') as file_handler:
+            file_handler.write(self.contents)
 
     @mock.patch('niworkflows.viz.validators.HTMLValidator.simple_validate')
     def test_report_file_valid(self, mock_validator):
         """ Make sure HTMLValidator is called on the contents of the file """
-        ReportFile(exists=True).validate(None, 'out_report', DUMMY_FILE)
+        ReportFile(exists=True).validate(None, 'out_report', self.dummy_file)
         mock_validator.assert_called_once_with(self.contents)
 
     @mock.patch('niworkflows.viz.validators.HTMLValidator.simple_validate')
@@ -151,7 +152,7 @@ class TestReportFile(unittest.TestCase):
         mock_validator.side_effect = ValueError('message')
 
         with self.assertRaisesRegex(traits.TraitError, 'valid'):
-            ReportFile(exists=True).validate(None, 'out_report', DUMMY_FILE)
+            ReportFile(exists=True).validate(None, 'out_report', self.dummy_file)
 
     def test_no_file(self):
         """ The file does not exist yet--behavior of ReportFile should be the same as for File """
@@ -176,7 +177,7 @@ class TestReportFile(unittest.TestCase):
 
 # Stub Interface/Input/Output to facilitate testing
 class StubInputSpec(BaseInterfaceInputSpec):
-    out_report = traits.File('report.html', exists=False, usedefault=True)
+    out_report = ReportFile('report.html', exists=False, usedefault=True)
 
 class StubOutputSpec(TraitedSpec):
     out_report = ReportFile(exists=True)
