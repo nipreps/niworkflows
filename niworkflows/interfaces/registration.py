@@ -30,7 +30,7 @@ class RobustMNINormalizationRPT(
         self._fixed_image = self.norm.inputs.fixed_image[0]  # and get first item
         if isdefined(self.norm.inputs.fixed_image_mask):
             self._fixed_image_mask = self.norm.inputs.fixed_image_mask
-        self._moving_image = self.aggregate_outputs().warped_image
+        self._moving_image = self._get_outputs()['warped_image']
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
@@ -49,7 +49,7 @@ class ANTSRegistrationRPT(nrc.RegistrationRC, ants.Registration):
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.fixed_image[0]
-        self._moving_image = self.aggregate_outputs().warped_image
+        self._moving_image = self._get_outputs()['warped_image']
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
@@ -68,7 +68,7 @@ class ANTSApplyTransformsRPT(nrc.RegistrationRC, ants.ApplyTransforms):
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference_image
-        self._moving_image = self.aggregate_outputs().output_image
+        self._moving_image = self._get_outputs()['output_image']
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
@@ -91,7 +91,7 @@ class ApplyTOPUPRPT(nrc.RegistrationRC, fsl.ApplyTOPUP):
         self._fixed_image_label = "before"
         self._moving_image_label = "after"
         self._fixed_image = index_img(self.inputs.in_files[0], 0)
-        self._moving_image = index_img(self.aggregate_outputs().out_corrected, 0)
+        self._moving_image = index_img(self._get_outputs()['out_corrected'], 0)
         NIWORKFLOWS_LOG.info('Report - setting before (%s) and after (%s) images',
                              self._fixed_image, self._moving_image)
 
@@ -110,7 +110,7 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference
-        self._moving_image = self.aggregate_outputs().out_file
+        self._moving_image = self._get_outputs()['out_file']
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',
