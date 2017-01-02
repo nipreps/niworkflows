@@ -8,8 +8,8 @@ from bs4 import BeautifulSoup
 PY3 = version_info[0] > 2
 
 def as_svg(image, filename='temp.svg'):
-    ''' takes an image as created by nilearn.plotting and returns a blob svg.
-    A bit hacky. '''
+    """ takes an image as created by nilearn.plotting and returns a blob svg.
+    A bit hacky. """
     image.savefig(filename)
     with open(filename, 'r' if PY3 else 'rb') as file_obj:
         image_svg = file_obj.readlines()
@@ -24,14 +24,22 @@ def as_svg(image, filename='temp.svg'):
     return '\n'.join(image_svg)  # straight up giant string
 
 
-def uniquify(html_string):
-    ''' Make HTML concatenable. To see the rules for valid concatenable HTML, see validators.py '''
+def uniquify(html_string, unique_string):
+    """ Make HTML concatenable. To see the rules for valid concatenable HTML, see validators.py """
     soup = BeautifulSoup(html_string, 'html.parser')
     scope_style_tags(soup)
+    add_unique_string_to_ids(soup, unique_string)
     return str(soup)
 
 def scope_style_tags(soup):
-    ''' take a BeautifulSoup object, returns the same object with all style tags scoped '''
+    """ takes a BeautifulSoup object, returns the same object with all style tags scoped """
     for style_tag in soup.find_all('style'):
         style_tag['scoped'] = True
+    return soup
+
+def add_unique_string_to_ids(soup, unique_string):
+    """ takes a BeautifulSoup object,
+    returns the same object with all ids containing the unique_string """
+    for tag in soup.find_all(id=True): # all tags with an id
+        tag['id'] = tag['id'] + unique_string
     return soup

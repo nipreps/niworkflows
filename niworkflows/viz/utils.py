@@ -130,8 +130,10 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
             plot_params['alpha'] = 1
             svg.add_contours(seg, **plot_params)
 
-        svgs_list.append(uniquify(as_svg(svg)))
+        svgs_list.append(uniquify(as_svg(svg), unique_string))
         svg.close()
+
+    unique_string = 'seg' + str(uuid4())
 
     plot_params = {} if plot_params is None else plot_params
 
@@ -152,7 +154,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
 
     save_html(template='segmentation.tpl',
               report_file_name=out_file,
-              unique_string='seg' + str(uuid4()),
+              unique_string=unique_string,
               base_image='<br />'.join(svgs_list),
               title=title)
 
