@@ -19,8 +19,7 @@ from nilearn import image as nlimage
 from nipype.utils import filemanip
 
 from niworkflows.viz.validators import HTMLValidator
-
-from html_processors import as_svg, uniquify
+from niworkflows.viz.html_processors import as_svg, uniquify
 
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2

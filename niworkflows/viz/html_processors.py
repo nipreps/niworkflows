@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Helper tools for cleaning up html"""
+"""Helper tools for cleaning up html. """
 from __future__ import absolute_import, division, print_function, unicode_literals
+from sys import version_info
 
 from bs4 import BeautifulSoup
+
+PY3 = version_info[0] > 2
 
 def as_svg(image, filename='temp.svg'):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
