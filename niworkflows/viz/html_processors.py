@@ -27,6 +27,11 @@ def as_svg(image, filename='temp.svg'):
 def uniquify(html_string):
     ''' Make HTML concatenable. To see the rules for valid concatenable HTML, see validators.py '''
     soup = BeautifulSoup(html_string, 'html.parser')
+    scope_style_tags(soup)
+    return str(soup)
+
+def scope_style_tags(soup):
+    ''' take a BeautifulSoup object, returns the same object with all style tags scoped '''
     for style_tag in soup.find_all('style'):
         style_tag['scoped'] = True
-    return str(soup)
+    return soup
