@@ -20,6 +20,7 @@ from nipype.utils import filemanip
 
 from niworkflows.viz.validators import HTMLValidator
 
+from html_processors import as_svg, uniquify
 
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
@@ -62,23 +63,6 @@ def save_html(template, report_file_name, unique_string, **kwargs):
 
     with open(report_file_name, 'w' if PY3 else 'wb') as handle:
         handle.write(report_render)
-
-
-def as_svg(image, filename='temp.svg'):
-    ''' takes an image as created by nilearn.plotting and returns a blob svg.
-    A bit hacky. '''
-    image.savefig(filename)
-    with open(filename, 'r' if PY3 else 'rb') as file_obj:
-        image_svg = file_obj.readlines()
-
-    svg_start = 0
-    for i, line in enumerate(image_svg):
-        if '<svg ' in line:
-            svg_start = i
-            continue
-
-    image_svg = image_svg[svg_start:]  # strip out extra DOCTYPE, etc headers
-    return '\n'.join(image_svg)  # straight up giant string
 
 
 def cuts_from_bbox(mask_nii, cuts=3):
@@ -147,7 +131,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
             plot_params['alpha'] = 1
             svg.add_contours(seg, **plot_params)
 
-        svgs_list.append(as_svg(svg))
+        svgs_list.append(uniquify(as_svg(svg)))
         svg.close()
 
     plot_params = {} if plot_params is None else plot_params
