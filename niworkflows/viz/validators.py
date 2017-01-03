@@ -83,6 +83,8 @@ class HTMLValidator(HTMLParser, object):
     html is assumed to be complete, valid html
     '''
 
+    DISALLOW_TAGS = ['head', 'body', 'header', 'footer', 'main']
+
     def __init__(self, unique_string=None, css_validator=CSSValidator()):
         self.unique_string = unique_string
         self.css_validator = css_validator
@@ -114,7 +116,7 @@ class HTMLValidator(HTMLParser, object):
         if self.unique_string is None: # unique_string hasn't been found yet
             self.discover_unique_string(attrs)
 
-        if tag in ['head', 'body', 'header', 'footer', 'main']:
+        if tag in self.DISALLOW_TAGS:
             self.bad_tags.append(tag)
         elif tag == 'style':
             self.in_style = True
@@ -161,8 +163,10 @@ class HTMLValidator(HTMLParser, object):
         error_string = ''
         if len(self.bad_tags) > 0:
             error_string = (
-                'Found the following illegal tags. All <style> '
-                'tags must be scoped: {}.\n').format(self.bad_tags)
+                'Found the following illegal tags: {}\n'
+                'All <style> tags must be scoped.\n'
+                'The following tags are not allowed: {}\n'
+                'Declarations are not allowed\n').format(self.bad_tags, self.DISALLOW_TAGS)
         if len(self.bad_ids) > 0:
             error_string += (
                 'Found the following illegal ids: {}.\n ids must '
