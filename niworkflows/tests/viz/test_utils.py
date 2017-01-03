@@ -8,8 +8,9 @@ class TestUtils(unittest.TestCase):
     @mock.patch('jinja2.Environment')
     @mock.patch('niworkflows.common.report.open', mock.mock_open(), create=True)
     def test_save_html(self, jinja_mock):
-        template_mock= mock.MagicMock()
+        template_mock = mock.MagicMock()
         jinja_mock.return_value.get_template.return_value = template_mock
+        template_mock.render.return_value = 'a string'
 
         unique_string = 'unique string'
         html = 'some html'
