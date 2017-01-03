@@ -33,18 +33,16 @@ def uniquify(html_string, unique_string):
     return str(soup)
 
 def scope_style_tags(soup):
-    """ takes a BeautifulSoup object, returns the same object with all style tags scoped """
+    """ takes a BeautifulSoup object, adds `scoped` to all style tags """
     for style_tag in soup.find_all('style'):
         style_tag['scoped'] = True
-    return soup
 
 def add_unique_string_to_ids(soup, unique_string):
     """ takes a BeautifulSoup object,
-    returns the same object with all ids containing the unique_string """
+    adds unique_string to all the ids if they don't already contain it. """
     for tag in soup.find_all(id=True): # all tags with an id
-        if unique_string not in  tag['id']:
+        if unique_string not in tag['id']:
             tag['id'] = tag['id'] + unique_string
-    return soup
 
 def differentiate_ids(soup, unique_string):
     """ takes a BeautifulSoup object,

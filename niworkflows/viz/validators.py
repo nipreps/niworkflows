@@ -166,7 +166,7 @@ class HTMLValidator(HTMLParser, object):
         if len(self.bad_ids) > 0:
             error_string += (
                 'Found the following illegal ids: {}.\n ids must '
-                'contain unique_string ({}) and be unique from each other.\n').format(
+                'contain unique_string ({}).\n').format(
                     self.bad_ids, self.unique_string)
         if len(self.same_ids) > 0:
             error_string += (
