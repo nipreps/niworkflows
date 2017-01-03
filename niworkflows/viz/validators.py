@@ -87,11 +87,7 @@ class HTMLValidator(HTMLParser, object):
         self.unique_string = unique_string
         self.css_validator = css_validator
 
-        # Class' members should be initialized here
-        self.bad_tags = []
-        self.bad_ids = []
-        self.taken_ids = [self.unique_string]  # in template
-        self.in_style = False
+        self._reset()
 
         super(HTMLValidator, self).__init__()
 
@@ -148,9 +144,14 @@ class HTMLValidator(HTMLParser, object):
 
     def reset(self):
         super(HTMLValidator, self).reset()
+        self._reset()
+
+    def _reset(self):
+        """ internal reset helper """
         self.bad_tags = []
         self.bad_ids = []
         self.taken_ids = [self.unique_string]  # in template
+        self.same_ids = []
         self.in_style = False
 
     def close(self):
