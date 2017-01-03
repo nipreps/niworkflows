@@ -277,7 +277,8 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
 .foreground-svg:hover { animation-play-state: paused;}
  </style>""" % tuple([unique_string] * 2))
     with open(out_file, 'w' if PY3 else 'wb') as f:
-        svg_string = uniquify('<div id=' + unique_string + '>' + '\n'.join(svg) + '</div>',
-                              unique_string)
+        svg_string = '\n'.join(svg[1:]) # svg[0] is just the xml declaration
+        svg_string = '<div id=' + unique_string + '>' + svg_string + '</div>'
+        svg_string = uniquify(svg_string, unique_string)
         f.write(svg_string)
     return out_file
