@@ -29,6 +29,7 @@ def uniquify(html_string, unique_string):
     soup = BeautifulSoup(html_string, 'html.parser')
     scope_style_tags(soup)
     add_unique_string_to_ids(soup, unique_string)
+    differentiate_ids(soup, unique_string)
     return str(soup)
 
 def scope_style_tags(soup):
@@ -44,3 +45,12 @@ def add_unique_string_to_ids(soup, unique_string):
         if unique_string not in  tag['id']:
             tag['id'] = tag['id'] + unique_string
     return soup
+
+def differentiate_ids(soup, unique_string):
+    """ takes a BeautifulSoup object,
+    adds a monotonic num to the end of every id to make sure all are unique """
+    counter = 0
+    for tag in soup.find_all(id=True): # all tags with an id
+        if tag['id'] != unique_string:
+            tag['id'] = tag['id'] + str(counter)
+            counter = counter + 1
