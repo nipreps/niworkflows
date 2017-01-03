@@ -210,10 +210,7 @@ def plot_registration(anat_nii, div_id, plot_params=None,
         svg = as_svg(display, out_file)
         display.close()
 
-        # Find and replace the figure_1 id.
         xml_data = etree.fromstring(svg)
-        find_text = etree.ETXPath("//{%s}g[@id='figure_1']" % (SVGNS))
-        find_text(xml_data)[0].set('id', '%s-%s-%s' % (div_id, mode, uuid4()))
 
         with open(out_file, 'wb') as f:
             f.write(etree.tostring(xml_data))
