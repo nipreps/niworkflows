@@ -127,7 +127,9 @@ class HTMLValidator(HTMLParser, object):
                     self.bad_ids.append(value)
                 # the value is already being used as an id
                 elif value in self.taken_ids:
-                    self.bad_ids.append(value)
+                    self.same_ids.append(value)
+                else:
+                    self.taken_ids.append(value)
 
     def handle_endtag(self, tag):
         self.in_style = False
@@ -166,6 +168,9 @@ class HTMLValidator(HTMLParser, object):
                 'Found the following illegal ids: {}.\n ids must '
                 'contain unique_string ({}) and be unique from each other.\n').format(
                     self.bad_ids, self.unique_string)
-
+        if len(self.same_ids) > 0:
+            error_string += (
+                'ids must be unique, but the following same ids were found: '
+                '{}\n').format(self.same_ids)
         if len(error_string) > 0:
             raise ValueError(error_string)
