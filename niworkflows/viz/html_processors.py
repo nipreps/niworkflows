@@ -41,5 +41,6 @@ def add_unique_string_to_ids(soup, unique_string):
     """ takes a BeautifulSoup object,
     returns the same object with all ids containing the unique_string """
     for tag in soup.find_all(id=True): # all tags with an id
-        tag['id'] = tag['id'] + unique_string
+        if unique_string not in  tag['id']:
+            tag['id'] = tag['id'] + unique_string
     return soup
