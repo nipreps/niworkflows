@@ -30,7 +30,7 @@ class RobustMNINormalizationRPT(
         self._fixed_image = self.norm.inputs.fixed_image[0]  # and get first item
         if isdefined(self.norm.inputs.fixed_image_mask):
             self._fixed_image_mask = self.norm.inputs.fixed_image_mask
-        self._moving_image = self.aggregate_outputs().warped_image
+        self._moving_image = self._list_outputs()['warped_image']
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
@@ -49,7 +49,7 @@ class ANTSRegistrationRPT(nrc.RegistrationRC, ants.Registration):
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.fixed_image[0]
-        self._moving_image = self.aggregate_outputs().warped_image
+        self._moving_image = self._list_outputs()['warped_image']
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
@@ -68,7 +68,7 @@ class ANTSApplyTransformsRPT(nrc.RegistrationRC, ants.ApplyTransforms):
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference_image
-        self._moving_image = self.aggregate_outputs().output_image
+        self._moving_image = self._list_outputs()['output_image']
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
@@ -137,7 +137,7 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference
-        self._moving_image = self.aggregate_outputs().out_file
+        self._moving_image = self._list_outputs()['out_file']
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',

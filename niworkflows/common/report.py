@@ -13,20 +13,20 @@ from niworkflows import NIWORKFLOWS_LOG
 from nilearn.masking import apply_mask, unmask
 from nilearn.image import threshold_img, load_img
 
+from niworkflows.viz.validators import ReportFile
 from niworkflows.viz.utils import cuts_from_bbox
 
 PY3 = version_info[0] > 2
 
-
 class ReportCapableInputSpec(BaseInterfaceInputSpec):
     generate_report = traits.Bool(
         False, usedefault=True, desc="Set to true to enable report generation for node")
-    out_report = File(
+    out_report = ReportFile(
         'report.html', usedefault=True, desc='filename for the visual report')
 
 
 class ReportCapableOutputSpec(TraitedSpec):
-    out_report = File(desc='filename for the visual report')
+    out_report = ReportFile(desc='filename for the visual report')
 
 
 class ReportCapableInterface(BaseInterface):

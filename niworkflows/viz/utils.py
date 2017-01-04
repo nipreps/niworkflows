@@ -19,7 +19,7 @@ from nilearn import image as nlimage
 from nipype.utils import filemanip
 
 from niworkflows.viz.validators import HTMLValidator
-
+from niworkflows.viz.html_processors import as_svg, uniquify
 
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
@@ -62,23 +62,6 @@ def save_html(template, report_file_name, unique_string, **kwargs):
 
     with open(report_file_name, 'w' if PY3 else 'wb') as handle:
         handle.write(report_render)
-
-
-def as_svg(image, filename='temp.svg'):
-    ''' takes an image as created by nilearn.plotting and returns a blob svg.
-    A bit hacky. '''
-    image.savefig(filename)
-    with open(filename, 'r' if PY3 else 'rb') as file_obj:
-        image_svg = file_obj.readlines()
-
-    svg_start = 0
-    for i, line in enumerate(image_svg):
-        if '<svg ' in line:
-            svg_start = i
-            continue
-
-    image_svg = image_svg[svg_start:]  # strip out extra DOCTYPE, etc headers
-    return '\n'.join(image_svg)  # straight up giant string
 
 
 def cuts_from_bbox(mask_nii, cuts=3):
@@ -150,6 +133,8 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
         svgs_list.append(as_svg(svg))
         svg.close()
 
+    unique_string = 'seg' + str(uuid4())
+
     plot_params = {} if plot_params is None else plot_params
 
     image_nii = _3d_in_file(image_nii)
@@ -166,11 +151,12 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
     svgs_list = []
     plot_xyz(image_nii, _plot_anat_with_contours,
              cuts, segs=seg_niis, **plot_params)
+    html_string = uniquify('<br />'.join(svgs_list), unique_string)
 
     save_html(template='segmentation.tpl',
               report_file_name=out_file,
-              unique_string='seg' + str(uuid4()),
-              base_image='<br />'.join(svgs_list),
+              unique_string=unique_string,
+              base_image=html_string,
               title=title)
 
 
@@ -225,10 +211,7 @@ def plot_registration(anat_nii, div_id, plot_params=None,
         svg = as_svg(display, out_file)
         display.close()
 
-        # Find and replace the figure_1 id.
         xml_data = etree.fromstring(svg)
-        find_text = etree.ETXPath("//{%s}g[@id='figure_1']" % (SVGNS))
-        find_text(xml_data)[0].set('id', '%s-%s-%s' % (div_id, mode, uuid4()))
 
         with open(out_file, 'wb') as f:
             f.write(etree.tostring(xml_data))
@@ -286,12 +269,17 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     with open(out_file, 'r' if PY3 else 'rb') as f:
         svg = f.read().split('\n')
 
+    unique_string = 'a' + str(uuid4()) # must start with an alphabetic char
+
     svg.insert(2, """\
-<style type="text/css">
+<style type="text/css" scoped>
 @keyframes flickerAnimation%s { 0%% {opacity: 1;} 100%% { opacity: 0; }}
 .foreground-svg { animation: 1s ease-in-out 0s alternate none infinite running flickerAnimation%s;}
 .foreground-svg:hover { animation-play-state: paused;}
-</style>""" % tuple([uuid4()] * 2))
+ </style>""" % tuple([unique_string] * 2))
     with open(out_file, 'w' if PY3 else 'wb') as f:
-        f.write('\n'.join(svg))
+        svg_string = '\n'.join(svg[1:]) # svg[0] is just the xml declaration
+        svg_string = '<div id=' + unique_string + '>' + svg_string + '</div>'
+        svg_string = uniquify(svg_string, unique_string)
+        f.write(svg_string)
     return out_file
