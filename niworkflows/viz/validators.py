@@ -119,6 +119,7 @@ class HTMLValidator(HTMLParser, object):
         if tag in self.DISALLOW_TAGS:
             self.bad_tags.append(tag)
         elif tag == 'style':
+            print('style', tag)
             self.in_style = True
             if not 'scoped' in [attribute for attribute, value in attrs]:
                 self.bad_tags.append(tag)
