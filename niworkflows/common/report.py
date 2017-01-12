@@ -160,7 +160,8 @@ class RegistrationRC(ReportCapableInterface):
                               cuts=cuts,
                               label=self._moving_image_label,
                               contour=contour_nii),
-            out_file=self._out_report)
+            out_file=self._out_report
+        )
 
 
 class SegmentationRC(ReportCapableInterface):

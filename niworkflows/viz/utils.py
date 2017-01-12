@@ -289,8 +289,8 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     svg.insert(2, """\
 <style type="text/css">
 @keyframes flickerAnimation%s { 0%% {opacity: 1;} 100%% { opacity: 0; }}
-.foreground-svg { animation: 1s ease-in-out 0s alternate none infinite running flickerAnimation%s;}
-.foreground-svg:hover { animation-play-state: paused;}
+.foreground-svg { animation: 1s ease-in-out 0s alternate none infinite paused flickerAnimation%s;}
+.foreground-svg:hover { animation-play-state: running;}
 </style>""" % tuple([uuid4()] * 2))
     with open(out_file, 'w' if PY3 else 'wb') as f:
         f.write('\n'.join(svg))
