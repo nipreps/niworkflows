@@ -11,12 +11,12 @@ as well as for open-source software distribution.
 from __future__ import absolute_import, division, print_function
 import datetime
 
-__version__ = '0.0.4a0'
+__version__ = 'dev'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
     datetime.datetime.now().year)
-__credits__ = ['Oscar Esteban', 'Ross Blair', 'Shoshana L. Berleant', 'Chris F. Gorgolewski',
+__credits__ = ['Oscar Esteban', 'Ross Blair', 'Shoshana L. Berleant', 'Chris Gorgolewski',
                'Russell A. Poldrack']
 __license__ = '3-clause BSD'
 __maintainer__ = 'Oscar Esteban'
