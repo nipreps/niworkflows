@@ -30,7 +30,7 @@ general:
 deployment:
   hub:
     tag: /*/
-      commands:
-        - printf "[distutils]\nindex-servers =\n    pypi\n\n[pypi]\nusername:$PYPI_USER\npassword:$PYPI_PASS\n" > ~/.pypirc
-        - sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" niworkflows/info.py
-        - python setup.py sdist upload -r pypi
+    commands:
+      - printf "[distutils]\nindex-servers =\n    pypi\n\n[pypi]\nusername:$PYPI_USER\npassword:$PYPI_PASS\n" > ~/.pypirc
+      - sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" niworkflows/info.py
+      - python setup.py sdist upload -r pypi
