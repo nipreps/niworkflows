@@ -161,7 +161,7 @@ class BBRegisterRPT(nrc.RegistrationRC, freesurfer.BBRegister):
         # bbregister takes a subject_id, so the target is likely to be the
         # T1 anatomical
         self._fixed_image = os.path.join(os.getenv('SUBJECTS_DIR'),
-                                         self.input.subject_id, 'mri',
+                                         self.inputs.subject_id, 'mri',
                                          'T1.mgz')
         self._moving_image = self.aggregate_outputs().registered_file
         NIWORKFLOWS_LOG.info(
