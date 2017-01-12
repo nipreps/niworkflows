@@ -280,6 +280,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     ]
     fig.append(newroots)
     out_file = op.abspath(out_file)
+    fig.root.setsize("", "")
     fig.save(out_file)
 
     # Add styles for the flicker animation
