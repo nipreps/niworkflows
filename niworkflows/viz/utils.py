@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os.path as op
+import re
 from sys import version_info
 
 import numpy as np
