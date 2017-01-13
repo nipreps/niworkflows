@@ -79,7 +79,7 @@ def as_svg(image, filename='temp.svg'):
             line = re.sub(' height="[0-9]+[a-z]*"', '', line)
             line = re.sub(' width="[0-9]+[a-z]*"', '', line)
             svg_start = i
-        if svg_start is not None
+        if svg_start is not None:
             svg_lines_corrected.append(line)
     image_svg = svg_lines_corrected # strip out extra DOCTYPE, etc headers
     return '\n'.join(image_svg)  # straight up giant string
