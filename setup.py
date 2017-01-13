@@ -34,7 +34,6 @@ def main():
         long_description=ldict['__longdesc__'],
         author=ldict['__author__'],
         author_email=ldict['__email__'],
-        email=ldict['__email__'],
         maintainer=ldict['__maintainer__'],
         maintainer_email=ldict['__email__'],
         license=ldict['__license__'],
