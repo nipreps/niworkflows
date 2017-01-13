@@ -160,10 +160,11 @@ class BBRegisterRPT(nrc.RegistrationRC, freesurfer.BBRegister):
     def _post_run_hook(self, runtime):
         # bbregister takes a subject_id, so the target is likely to be the
         # T1 anatomical
-        self._fixed_image = os.path.join(os.getenv('SUBJECTS_DIR'),
-                                         self.inputs.subject_id, 'mri',
-                                         'T1.mgz')
+        mri_dir = os.path.join(os.getenv('SUBJECTS_DIR'),
+                               self.inputs.subject_id, 'mri')
+        self._fixed_image = os.path.join(mri_dir, 'T1.mgz')
         self._moving_image = self.aggregate_outputs().registered_file
+        self._contour = os.path.join(mri_dir, 'ribbon.mgz')
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',
             self._fixed_image, self._moving_image)
