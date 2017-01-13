@@ -30,7 +30,7 @@
 # not for distribution within Docker hub.
 # For that purpose, the Dockerfile is found in build/Dockerfile.
 
-FROM poldracklab/neuroimaging-core:base-0.0.2
+FROM poldracklab/neuroimaging-core:freesurfer-0.0.2
 
 # Install miniconda
 RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
