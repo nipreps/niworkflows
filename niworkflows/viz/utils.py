@@ -229,6 +229,8 @@ def plot_registration(anat_nii, div_id, plot_params=None,
         xml_data = etree.fromstring(svg)
         find_text = etree.ETXPath("//{%s}g[@id='figure_1']" % (SVGNS))
         find_text(xml_data)[0].set('id', '%s-%s-%s' % (div_id, mode, uuid4()))
+        xml_data.root.set("width", "")
+        xml_data.root.set("height", "")
 
         with open(out_file, 'wb') as f:
             f.write(etree.tostring(xml_data))
