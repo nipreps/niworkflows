@@ -5,8 +5,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import unittest
-import pkg_resources as pkgr
 from shutil import copy
+import pkg_resources as pkgr
 
 import nibabel as nb
 from nilearn import image
@@ -14,6 +14,7 @@ from nipype.utils.tmpdirs import InTemporaryDirectory
 
 from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsampled,
                                       get_ants_oasis_template_ras)
+
 from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT)
 from niworkflows.interfaces.segmentation import FASTRPT
