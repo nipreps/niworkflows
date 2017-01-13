@@ -229,7 +229,7 @@ def plot_registration(anat_nii, div_id, plot_params=None,
         display = plot_anat(anat_nii, **plot_params)
         if ribbon:
             kwargs = {'levels': [0.5], 'linewidths': 0.5}
-            display.add_contours(white, colors='y', **kwargs)
+            display.add_contours(white, colors='b', **kwargs)
             display.add_contours(pial, colors='r', **kwargs)
         elif contour is not None:
             display.add_contours(contour, levels=[.9])
