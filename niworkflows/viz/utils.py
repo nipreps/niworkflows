@@ -14,8 +14,8 @@ import jinja2
 from pkg_resources import resource_filename as pkgrf
 
 from lxml import etree
-from nilearn.plotting import plot_anat
 from nilearn import image as nlimage
+from nilearn.plotting import plot_anat
 from nipype.utils import filemanip
 
 from niworkflows.viz.validators import HTMLValidator
@@ -65,19 +65,23 @@ def save_html(template, report_file_name, unique_string, **kwargs):
 
 
 def as_svg(image, filename='temp.svg'):
-    ''' takes an image as created by nilearn.plotting and returns a blob svg.
-    A bit hacky. '''
+    ''' Takes an image as created by nilearn.plotting and returns the svg with
+        extra headers removed and the width and height style values set to
+        nothing. '''
     image.savefig(filename)
     with open(filename, 'r' if PY3 else 'rb') as file_obj:
         image_svg = file_obj.readlines()
 
-    svg_start = 0
+    svg_start = None
+    svg_lines_corrected = []
     for i, line in enumerate(image_svg):
         if '<svg ' in line:
+            line = re.sub(' height="[0-9]+[a-z]*"', '', line)
+            line = re.sub(' width="[0-9]+[a-z]*"', '', line)
             svg_start = i
-            continue
-
-    image_svg = image_svg[svg_start:]  # strip out extra DOCTYPE, etc headers
+        if svg_start is not None
+            svg_lines_corrected.append(line)
+    image_svg = svg_lines_corrected # strip out extra DOCTYPE, etc headers
     return '\n'.join(image_svg)  # straight up giant string
 
 
@@ -280,8 +284,6 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     ]
     fig.append(newroots)
     out_file = op.abspath(out_file)
-    fig.root.set("width", "")
-    fig.root.set("height", "")
     fig.save(out_file)
 
     # Add styles for the flicker animation
