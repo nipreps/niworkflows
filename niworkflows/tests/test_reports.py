@@ -17,7 +17,7 @@ from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsample
 
 from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT)
-from niworkflows.interfaces.segmentation import FASTRPT
+from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
 from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT
 
 MNI_DIR = get_mni_template_ras()
@@ -160,3 +160,12 @@ class TestFASTRPT(unittest.TestCase):
                                    probability_maps=True, out_basename='test')
 
         _smoke_test_report(report_interface, 'testFAST_no_segments.html')
+
+
+class TestReconAllRPT(unittest.TestCase):
+    def test_generate_report(self):
+        report_interface = ReconAllRPT(subject_id='fsaverage', directive='all',
+                                       subjects_dir=os.getenv('SUBJECTS_DIR'),
+                                       mock_run=True, generate_report=True,
+                                       out_report='test.svg')
+        _smoke_test_report(report_interface, 'testReconAll.svg')
