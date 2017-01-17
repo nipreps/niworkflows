@@ -83,8 +83,7 @@ def as_svg(image, filename='temp.svg', compress=True):
 
     if shutil.which("svgo") and compress:
         out_file = op.join(tmp_dir, "svgo_out.svg")
-        subprocess.check_output(
-            ["svgo", "-i", svg_file, "-p", "3", "--pretty", "-o", out_file],
+        subprocess.check_call("svgo -i %s -p 3 --pretty -o %s"%(svg_file, out_file),
             shell=True)
         svg_file = out_file
 
