@@ -45,10 +45,9 @@ RUN conda config --add channels conda-forge && \
     conda install -y numpy scipy matplotlib pandas lxml libxslt nose mock && \
     python -c "from matplotlib import font_manager"
 
-RUN /bin/bash -c 'echo WEBP && \
-  wget -q "http://downloads.webmproject.org/releases/webp/libwebp-0.5.2-linux-x86-64.tar.gz" && \
+RUN curl -sSLO "http://downloads.webmproject.org/releases/webp/libwebp-0.5.2-linux-x86-64.tar.gz" && \
   tar -xf libwebp-0.5.2-linux-x86-64.tar.gz && cd libwebp-0.5.2-linux-x86-64/bin && \
-  mv cwebp /usr/local/bin/ && rm libwebp-0.5.2-linux-x86-64.tar.gz && rm -rf libwebp-0.5.2-linux-x86-64
+  mv cwebp /usr/local/bin/ && rm -rf libwebp-0.5.2-linux-x86-64
 
 RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
 RUN apt-get install -y nodejs
