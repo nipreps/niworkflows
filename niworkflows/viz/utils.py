@@ -83,7 +83,7 @@ def as_svg(image, filename='temp.svg', compress=True):
 
     if shutil.which("svgo") and compress:
         out_file = op.join(tmp_dir, "svgo_out.svg")
-        subprocess.run(
+        subprocess.check_output(
             ["svgo", "-i", svg_file, "-p", "3", "--pretty", "-o", out_file],
             shell=True)
         svg_file = out_file
@@ -112,8 +112,8 @@ def as_svg(image, filename='temp.svg', compress=True):
                     with open(png_tmp, 'r' if PY3 else 'rb') as fp_png:
                         fp_png.write(bobj)
                     cwebp_out = op.join(tmp_dir, "cwebp_out.webp")
-                    subprocess.run(["cwebp", "-noalpha", png_tmp, "-q",
-                                    "80", "-o", cwebp_out])
+                    subprocess.check_output(["cwebp", "-noalpha", png_tmp, "-q",
+                                             "80", "-o", cwebp_out])
                     with open(cwebp_out, 'r' if PY3 else 'rb') as fp_webp:
                         webp_b64 = base64.b64encode(fp_webp.read()).decode(
                             "utf-8")
