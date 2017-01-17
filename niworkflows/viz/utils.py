@@ -3,6 +3,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os.path as op
+import shutil
+import tempfile
+import subprocess
+import base64
 from sys import version_info
 
 import numpy as np
@@ -64,20 +68,72 @@ def save_html(template, report_file_name, unique_string, **kwargs):
         handle.write(report_render)
 
 
-def as_svg(image, filename='temp.svg'):
+def as_svg(image, filename='temp.svg', compress=True):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
-    A bit hacky. '''
-    image.savefig(filename)
-    with open(filename, 'r' if PY3 else 'rb') as file_obj:
-        image_svg = file_obj.readlines()
+    Performs compression (can be disabled). A bit hacky. '''
+
+    tmp_dir = tempfile.mkdtemp()
+
+    if op.isabs(filename):
+        svg_file = filename
+    else:
+        svg_file = op.join(tmp_dir, filename)
+
+    image.savefig(svg_file)
+
+    if shutil.which("svgo") and compress:
+        out_file = op.join(tmp_dir, "svgo_out.svg")
+        subprocess.run(
+            ["svgo", "-i", svg_file, "-p", "3", "--pretty", "-o", out_file],
+            shell=True)
+        svg_file = out_file
+
+    if shutil.which("cwebp") and compress:
+        new_lines = []
+        with open(svg_file, 'r' if PY3 else 'rb') as fp:
+            for line in fp:
+                if "image/png" in line:
+                    tmp_lines = [line]
+                    while "/>" not in line:
+                        line = fp.readline()
+                        tmp_lines.append(line)
+                    content = ''.join(tmp_lines).replace('\n', '').replace(
+                        ',  ', ',')
+
+                    left = content.split('base64,')[0] + 'base64,'
+                    left = left.replace("image/png", "image/webp")
+
+                    right = content.split('base64,')[1]
+                    png_b64 = right.split('" ')[0]
+                    right = '" ' + right.split('" ')[1]
+
+                    bobj = base64.b64decode(png_b64)
+                    png_tmp = op.join(tmp_dir, "cwebp_in.png")
+                    with open(png_tmp, 'r' if PY3 else 'rb') as fp_png:
+                        fp_png.write(bobj)
+                    cwebp_out = op.join(tmp_dir, "cwebp_out.webp")
+                    subprocess.run(["cwebp", "-noalpha", png_tmp, "-q",
+                                    "80", "-o", cwebp_out])
+                    with open(cwebp_out, 'r' if PY3 else 'rb') as fp_webp:
+                        webp_b64 = base64.b64encode(fp_webp.read()).decode(
+                            "utf-8")
+                    new_lines.append(left + webp_b64 + right)
+                else:
+                    new_lines.append(line)
+        lines = new_lines
+    else:
+        with open(svg_file, 'r' if PY3 else 'rb') as fp:
+            lines = fp.readlines()
+
+    shutil.rmtree(tmp_dir)
 
     svg_start = 0
-    for i, line in enumerate(image_svg):
+    for i, line in enumerate(lines):
         if '<svg ' in line:
             svg_start = i
             continue
 
-    image_svg = image_svg[svg_start:]  # strip out extra DOCTYPE, etc headers
+    image_svg = lines[svg_start:]  # strip out extra DOCTYPE, etc headers
     return '\n'.join(image_svg)  # straight up giant string
 
 
