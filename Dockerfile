@@ -49,7 +49,7 @@ RUN curl -sSLO "http://downloads.webmproject.org/releases/webp/libwebp-0.5.2-lin
   tar -xf libwebp-0.5.2-linux-x86-64.tar.gz && cd libwebp-0.5.2-linux-x86-64/bin && \
   mv cwebp /usr/local/bin/ && rm -rf libwebp-0.5.2-linux-x86-64
 
-RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_7.x | bash -
 RUN apt-get install -y nodejs
 RUN npm install -g svgo
 
