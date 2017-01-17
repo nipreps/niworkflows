@@ -4,8 +4,9 @@ ReportCapableInterfaces for registration tools
 
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
+import os
 
-from nipype.interfaces import fsl, ants
+from nipype.interfaces import fsl, ants, freesurfer
 from niworkflows.anat import mni
 import niworkflows.common.report as nrc
 from niworkflows import NIWORKFLOWS_LOG
@@ -142,6 +143,32 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',
             self._fixed_image, self._moving_image)
+
+
+class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
+                             freesurfer.preprocess.BBRegisterInputSpec):
+    pass
+
+class BBRegisterOutputSpecRPT(nrc.ReportCapableOutputSpec,
+                              freesurfer.preprocess.BBRegisterOutputSpec):
+    pass
+
+class BBRegisterRPT(nrc.RegistrationRC, freesurfer.BBRegister):
+    input_spec = BBRegisterInputSpecRPT
+    output_spec = BBRegisterOutputSpecRPT
+
+    def _post_run_hook(self, runtime):
+        # bbregister takes a subject_id, so the target is likely to be the
+        # T1 anatomical
+        mri_dir = os.path.join(os.getenv('SUBJECTS_DIR'),
+                               self.inputs.subject_id, 'mri')
+        self._fixed_image = os.path.join(mri_dir, 'T1.mgz')
+        self._moving_image = self.aggregate_outputs().registered_file
+        self._contour = os.path.join(mri_dir, 'ribbon.mgz')
+        NIWORKFLOWS_LOG.info(
+            'Report - setting fixed (%s) and moving (%s) images',
+            self._fixed_image, self._moving_image)
+
 
 # COMMENTED OUT UNTIL WE REALLY IMPLEMENT IT
 # class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
