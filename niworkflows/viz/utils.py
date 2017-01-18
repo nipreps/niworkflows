@@ -81,12 +81,16 @@ def as_svg(image, filename='temp.svg', compress=True, force=False):
 
     image.savefig(svg_file)
 
+`    # Compress the SVG file using SVGO
     if (shutil.which("svgo") and compress) or force:
         out_file = op.join(tmp_dir, "svgo_out.svg")
-        subprocess.check_call("svgo -i %s -o %s -p 3 --pretty"%(svg_file, out_file),
-            shell=True)
+        subprocess.check_call("svgo -i %s -o %s -p 3 --pretty" % (svg_file,
+                                                                  out_file),
+                              shell=True,
+                              stdout=subprocess.DEVNULL)
         svg_file = out_file
 
+    # Convert all of the rasters inside the SVG file with 80% compressed WEBP
     if (shutil.which("cwebp") and compress) or force:
         new_lines = []
         with open(svg_file, 'r') as fp:
@@ -111,7 +115,9 @@ def as_svg(image, filename='temp.svg', compress=True, force=False):
                         fp_png.write(bobj)
                     cwebp_out = op.join(tmp_dir, "cwebp_out.webp")
                     subprocess.check_call(["cwebp", "-noalpha", png_tmp, "-q",
-                                             "80", "-o", cwebp_out])
+                                             "80", "-o", cwebp_out],
+                                          shell=True,
+                                          stdout=subprocess.DEVNULL)
                     with open(cwebp_out, 'rb') as fp_webp:
                         webp_b64 = base64.b64encode(fp_webp.read()).decode(
                             "utf-8")
