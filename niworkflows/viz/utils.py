@@ -68,7 +68,7 @@ def save_html(template, report_file_name, unique_string, **kwargs):
         handle.write(report_render)
 
 
-def as_svg(image, filename='temp.svg', compress=True):
+def as_svg(image, filename='temp.svg', compress=True, force=False):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
     Performs compression (can be disabled). A bit hacky. '''
 
@@ -81,15 +81,15 @@ def as_svg(image, filename='temp.svg', compress=True):
 
     image.savefig(svg_file)
 
-    if shutil.which("svgo") and compress:
+    if (shutil.which("svgo") and compress) or force:
         out_file = op.join(tmp_dir, "svgo_out.svg")
-        subprocess.check_call("svgo -i %s -p 3 --pretty -o %s"%(svg_file, out_file),
+        subprocess.check_call("svgo -i %s -o %s -p 3 --pretty"%(svg_file, out_file),
             shell=True)
         svg_file = out_file
 
-    if shutil.which("cwebp") and compress:
+    if (shutil.which("cwebp") and compress) or force:
         new_lines = []
-        with open(svg_file, 'r' if PY3 else 'rb') as fp:
+        with open(svg_file, 'r') as fp:
             for line in fp:
                 if "image/png" in line:
                     tmp_lines = [line]
@@ -101,19 +101,18 @@ def as_svg(image, filename='temp.svg', compress=True):
 
                     left = content.split('base64,')[0] + 'base64,'
                     left = left.replace("image/png", "image/webp")
-
                     right = content.split('base64,')[1]
-                    png_b64 = right.split('" ')[0]
-                    right = '" ' + right.split('" ')[1]
+                    png_b64 = right.split('"')[0]
+                    right = '"' + '"'.join(right.split('"')[1:])
 
                     bobj = base64.b64decode(png_b64)
                     png_tmp = op.join(tmp_dir, "cwebp_in.png")
-                    with open(png_tmp, 'r' if PY3 else 'rb') as fp_png:
+                    with open(png_tmp, 'wb') as fp_png:
                         fp_png.write(bobj)
                     cwebp_out = op.join(tmp_dir, "cwebp_out.webp")
-                    subprocess.check_output(["cwebp", "-noalpha", png_tmp, "-q",
+                    subprocess.check_call(["cwebp", "-noalpha", png_tmp, "-q",
                                              "80", "-o", cwebp_out])
-                    with open(cwebp_out, 'r' if PY3 else 'rb') as fp_webp:
+                    with open(cwebp_out, 'rb') as fp_webp:
                         webp_b64 = base64.b64encode(fp_webp.read()).decode(
                             "utf-8")
                     new_lines.append(left + webp_b64 + right)
@@ -121,7 +120,7 @@ def as_svg(image, filename='temp.svg', compress=True):
                     new_lines.append(line)
         lines = new_lines
     else:
-        with open(svg_file, 'r' if PY3 else 'rb') as fp:
+        with open(svg_file, 'r') as fp:
             lines = fp.readlines()
 
     shutil.rmtree(tmp_dir)
