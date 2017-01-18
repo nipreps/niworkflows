@@ -5,8 +5,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import unittest
-import pkg_resources as pkgr
 from shutil import copy
+import pkg_resources as pkgr
 
 import nibabel as nb
 from nilearn import image
@@ -14,8 +14,9 @@ from nipype.utils.tmpdirs import InTemporaryDirectory
 
 from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsampled,
                                       get_ants_oasis_template_ras)
+
 from niworkflows.interfaces.registration import (
-    FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT)
+    FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT)
 from niworkflows.interfaces.segmentation import FASTRPT
 from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT
 
@@ -49,6 +50,17 @@ class TestRegistrationInterfaces(unittest.TestCase):
         flirt_rpt = FLIRTRPT(generate_report=True, in_file=self.moving,
                              reference=self.reference, wm_seg=self.reference_mask)
         _smoke_test_report(flirt_rpt, 'testFLIRTRPTBBR.svg')
+
+    def test_BBRegisterRPT(self):
+        """ the BBRegister report capable test """
+        subject_id = 'fsaverage'
+        bbregister_rpt = BBRegisterRPT(generate_report=True,
+                                       contrast_type='t1',
+                                       init='fsl',
+                                       source_file=self.moving,
+                                       subject_id=subject_id,
+                                       registered_file=True)
+        _smoke_test_report(bbregister_rpt, 'testBBRegister.svg')
 
     def test_RobustMNINormalizationRPT(self):
         """ the RobustMNINormalizationRPT report capable test """

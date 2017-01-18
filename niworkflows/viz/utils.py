@@ -212,6 +212,15 @@ def plot_registration(anat_nii, div_id, plot_params=None,
         plot_params = robust_set_limits(anat_nii.get_data().reshape(-1),
                                         plot_params)
 
+    # FreeSurfer ribbon.mgz
+    ribbon = contour is not None and \
+            np.array_equal(np.unique(contour.get_data()),
+                           [0, 2, 3, 41, 42])
+    if ribbon:
+        contour_data = contour.get_data() % 39
+        white = nlimage.new_img_like(contour, contour_data == 2)
+        pial = nlimage.new_img_like(contour, contour_data >= 2)
+
     # Plot each cut axis
     for i, mode in enumerate(list(order)):
         out_file = '{}_{}.svg'.format(div_id, mode)
@@ -224,7 +233,11 @@ def plot_registration(anat_nii, div_id, plot_params=None,
 
         # Generate nilearn figure
         display = plot_anat(anat_nii, **plot_params)
-        if contour is not None:
+        if ribbon:
+            kwargs = {'levels': [0.5], 'linewidths': 0.5}
+            display.add_contours(white, colors='b', **kwargs)
+            display.add_contours(pial, colors='r', **kwargs)
+        elif contour is not None:
             display.add_contours(contour, levels=[.9])
 
         out_files.append(out_file)

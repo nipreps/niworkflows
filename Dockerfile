@@ -30,7 +30,7 @@
 # not for distribution within Docker hub.
 # For that purpose, the Dockerfile is found in build/Dockerfile.
 
-FROM poldracklab/neuroimaging-core:base-0.0.2
+FROM poldracklab/neuroimaging-core:freesurfer-0.0.2
 
 # Install miniconda
 RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
@@ -45,15 +45,18 @@ RUN conda config --add channels conda-forge && \
     conda install -y numpy scipy matplotlib pandas lxml libxslt nose mock && \
     python -c "from matplotlib import font_manager"
 
+# Installing dev requirements (packages that are not in pypi)
+ADD requirements.txt requirements.txt
+RUN pip install -r requirements.txt && \
+    rm -rf ~/.cache/pip
+
 RUN mkdir /niworkflows_data
 ENV CRN_SHARED_DATA /niworkflows_data
 
 WORKDIR /root/
 COPY . niworkflows/
 RUN cd niworkflows && \
-
-    pip install -e git+https://github.com/rwblair/nipype.git@90530151475670fa360db903e4e1adbed11b3da6#egg=nipype && \
-    pip install --process-dependency-links -e .[all] && \
+    pip install -e .[all] && \
     python -c 'from niworkflows.data.getters import get_mni_template_ras; get_mni_template_ras()' && \
     python -c 'from niworkflows.data.getters import get_ds003_downsampled; get_ds003_downsampled()' && \
     python -c 'from niworkflows.data.getters import get_ants_oasis_template_ras; get_ants_oasis_template_ras()'
