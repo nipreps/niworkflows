@@ -81,7 +81,7 @@ def as_svg(image, filename='temp.svg', compress=True, force=False):
 
     image.savefig(svg_file)
 
-`    # Compress the SVG file using SVGO
+    # Compress the SVG file using SVGO
     if (shutil.which("svgo") and compress) or force:
         out_file = op.join(tmp_dir, "svgo_out.svg")
         subprocess.check_call("svgo -i %s -o %s -p 3 --pretty" % (svg_file,
