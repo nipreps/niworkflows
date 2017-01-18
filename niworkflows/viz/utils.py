@@ -79,7 +79,7 @@ def as_svg(image, filename='temp.svg'):
         if '<svg ' in line:
             line = re.sub(' height="[0-9]+[a-z]*"', '', line)
             line = re.sub(' width="[0-9]+[a-z]*"', '', line)
-            line = re.sub(' viewBox', 'preseveAspectRation="xMidYMid meet" viewBox')
+            line = re.sub(' viewBox', 'preseveAspectRation="xMidYMid meet" viewBox', line)
             svg_start = i
         if svg_start is not None:
             svg_lines_corrected.append(line)
