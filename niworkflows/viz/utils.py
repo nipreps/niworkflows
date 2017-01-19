@@ -84,7 +84,7 @@ def as_svg(image, filename='temp.svg', compress=True, force=False):
     # Compress the SVG file using SVGO
     if (shutil.which("svgo") and compress) or force:
         out_file = op.join(tmp_dir, "svgo_out.svg")
-        subprocess.check_call("svgo -i %s -o %s -q -p 3 --pretty" % (svg_file,
+        subprocess.check_call("svgo -i %s -o %s -q -p 3 --pretty --disable=cleanupNumericValues" % (svg_file,
                                                                   out_file),
                               shell=True)
         svg_file = out_file
@@ -318,7 +318,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     roots = [f.getroot() for f in svgs]
     nsvgs = len(svgs) // 2
     # Query the size of each
-    sizes = [(int(f.width[:-2]), int(f.height[:-2])) for f in svgs]
+    sizes = [(int(f.width.replace('pt', '')), int(f.height.replace('pt', ''))) for f in svgs]
 
     # Calculate the scale to fit all widths
     scales = [1.0] * len(svgs)
