@@ -267,7 +267,12 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     roots = [f.getroot() for f in svgs]
     nsvgs = len(svgs) // 2
     # Query the size of each
-    sizes = [(int(f.width[:-2]), int(f.height[:-2])) for f in svgs]
+    sizes = []
+    for f in svgs:
+        viewbox = f.root.get("viewBox").split(" ")
+        width = int(viewbox[2])
+        height = int(viewbox[3])
+        sizes.append((width, height))
 
     # Calculate the scale to fit all widths
     scales = [1.0] * len(svgs)
