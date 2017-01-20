@@ -68,7 +68,7 @@ def save_html(template, report_file_name, unique_string, **kwargs):
         handle.write(report_render)
 
 
-def as_svg(image, filename='temp.svg', compress=True, force=False):
+def as_svg(image, filename='temp.svg', compress='auto'):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
     Performs compression (can be disabled). A bit hacky. '''
 
@@ -82,7 +82,7 @@ def as_svg(image, filename='temp.svg', compress=True, force=False):
     image.savefig(svg_file)
 
     # Compress the SVG file using SVGO
-    if (shutil.which("svgo") and compress) or force:
+    if (shutil.which("svgo") and compress == 'auto') or compress == True:
         out_file = op.join(tmp_dir, "svgo_out.svg")
         subprocess.check_call("svgo -i %s -o %s -q -p 3 --pretty --disable=cleanupNumericValues" % (svg_file,
                                                                   out_file),
@@ -90,7 +90,7 @@ def as_svg(image, filename='temp.svg', compress=True, force=False):
         svg_file = out_file
 
     # Convert all of the rasters inside the SVG file with 80% compressed WEBP
-    if (shutil.which("cwebp") and compress) or force:
+    if (shutil.which("cwebp") and compress == 'auto') or compress == True:
         new_lines = []
         with open(svg_file, 'r') as fp:
             for line in fp:
@@ -180,7 +180,8 @@ def _3d_in_file(in_file):
     return nlimage.index_img(in_file, 0)
 
 
-def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None, **plot_params):
+def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
+              compress='auto', **plot_params):
     """ plot segmentation as contours over the image (e.g. anatomical).
     seg_niis should be a list of files. mask_nii helps determine the cut
     coordinates. plot_params will be passed on to nilearn plot_* functions. If
@@ -204,7 +205,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
             plot_params['alpha'] = 1
             svg.add_contours(seg, **plot_params)
 
-        svgs_list.append(as_svg(svg))
+        svgs_list.append(as_svg(svg, compress=compress))
         svg.close()
 
     plot_params = {} if plot_params is None else plot_params
@@ -246,7 +247,8 @@ def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=('z', 'x', 'y'
 
 def plot_registration(anat_nii, div_id, plot_params=None,
                       order=('z', 'x', 'y'), cuts=None,
-                      estimate_brightness=False, label=None, contour=None):
+                      estimate_brightness=False, label=None, contour=None,
+                      compress='auto'):
     """
     Plots the foreground and background views
     Default order is: axial, coronal, sagittal
@@ -292,7 +294,7 @@ def plot_registration(anat_nii, div_id, plot_params=None,
             display.add_contours(contour, levels=[.9])
 
         out_files.append(out_file)
-        svg = as_svg(display, out_file)
+        svg = as_svg(display, out_file, compress=compress)
         display.close()
 
         # Find and replace the figure_1 id.

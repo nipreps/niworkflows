@@ -23,6 +23,11 @@ class ReportCapableInputSpec(BaseInterfaceInputSpec):
         False, usedefault=True, desc="Set to true to enable report generation for node")
     out_report = File(
         'report.html', usedefault=True, desc='filename for the visual report')
+    compress_report = traits.Enum('auto', True, False, usedefault=True,
+                                  desc="Compress the reportlet using SVGO or"
+                                       "WEBP. 'auto' - compress if relevant "
+                                       "software is installed, True = force,"
+                                       "False - don't attempt to compress")
 
 
 class ReportCapableOutputSpec(TraitedSpec):
@@ -154,12 +159,14 @@ class RegistrationRC(ReportCapableInterface):
                               estimate_brightness=True,
                               cuts=cuts,
                               label=self._fixed_image_label,
-                              contour=contour_nii),
+                              contour=contour_nii,
+                              compress=self.inputs.copress_report),
             plot_registration(moving_image_nii, 'moving-image',
                               estimate_brightness=True,
                               cuts=cuts,
                               label=self._moving_image_label,
-                              contour=contour_nii),
+                              contour=contour_nii,
+                              compress=self.inputs.copress_report),
             out_file=self._out_report
         )
 
@@ -176,5 +183,6 @@ class SegmentationRC(ReportCapableInterface):
             mask_nii=self._mask_file,
             out_file=self.inputs.out_report,
             masked=self._masked,
-            title=self._report_title
+            title=self._report_title,
+            compress=self.inputs.compress_report
         )
