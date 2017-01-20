@@ -259,7 +259,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     # Read all svg files and get roots
     svgs = [svgt.fromfile(f) for f in bg_svgs + fg_svgs]
     roots = [f.getroot() for f in svgs]
-    nsvgs = len(svgs) // 2
+    nsvgs = len(bg_svgs)
     # Query the size of each
     sizes = [(int(f.width[:-2]), int(f.height[:-2])) for f in svgs]
 
@@ -287,24 +287,27 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
             yoffset = 0
 
     # Group background and foreground panels in two groups
-    newroots = [
-        svgt.GroupElement(roots[:3], {'class': 'background-svg'}),
-        svgt.GroupElement(roots[3:], {'class': 'foreground-svg'})
-    ]
+    if fg_svgs:
+        newroots = [
+            svgt.GroupElement(roots[:3], {'class': 'background-svg'}),
+            svgt.GroupElement(roots[3:], {'class': 'foreground-svg'})
+        ]
+    else:
+        newroots = roots
     fig.append(newroots)
     out_file = op.abspath(out_file)
     fig.save(out_file)
 
     # Add styles for the flicker animation
-    with open(out_file, 'r' if PY3 else 'rb') as f:
-        svg = f.read().split('\n')
+    if fg_svgs:
+        with open(out_file, 'r' if PY3 else 'rb') as f:
+            svg = f.read().split('\n')
 
-    svg.insert(2, """\
-<style type="text/css">
+        svg.insert(2, """<style type="text/css">
 @keyframes flickerAnimation%s { 0%% {opacity: 1;} 100%% { opacity: 0; }}
 .foreground-svg { animation: 1s ease-in-out 0s alternate none infinite paused flickerAnimation%s;}
 .foreground-svg:hover { animation-play-state: running;}
 </style>""" % tuple([uuid4()] * 2))
-    with open(out_file, 'w' if PY3 else 'wb') as f:
-        f.write('\n'.join(svg))
+        with open(out_file, 'w' if PY3 else 'wb') as f:
+            f.write('\n'.join(svg))
     return out_file
