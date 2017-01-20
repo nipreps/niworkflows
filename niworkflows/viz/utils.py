@@ -303,8 +303,8 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
         svgt.GroupElement(roots[3:], {'class': 'foreground-svg'})
     ]
     fig.append(newroots)
-    fig.root.pop("width")
-    fig.root.pop("height")
+    fig.root.attrib.pop("width")
+    fig.root.attrib.pop("height")
     fig.root.set("preserveAspectRatio", "xMidYMid meet")
     out_file = op.abspath(out_file)
     fig.save(out_file)
