@@ -160,13 +160,13 @@ class RegistrationRC(ReportCapableInterface):
                               cuts=cuts,
                               label=self._fixed_image_label,
                               contour=contour_nii,
-                              compress=self.inputs.copress_report),
+                              compress=self.inputs.compress_report),
             plot_registration(moving_image_nii, 'moving-image',
                               estimate_brightness=True,
                               cuts=cuts,
                               label=self._moving_image_label,
                               contour=contour_nii,
-                              compress=self.inputs.copress_report),
+                              compress=self.inputs.compress_report),
             out_file=self._out_report
         )
 
