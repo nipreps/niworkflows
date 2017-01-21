@@ -6,7 +6,9 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 from os import path as op
 import shutil
+import sys
 import pkg_resources as pkgr
+from multiprocessing import cpu_count
 
 from nipype.interfaces.ants.registration import Registration, RegistrationOutputSpec
 from nipype.interfaces.base import (traits, isdefined, BaseInterface, BaseInterfaceInputSpec,
@@ -22,7 +24,7 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
         File(exists=True), desc='override the reference image')
     moving_mask = File(exists=True, desc='moving image mask')
     reference_mask = File(exists=True, desc='reference image mask')
-    num_threads = traits.Int(1, usedefault=True, nohash=True,
+    num_threads = traits.Int(cpu_count(), usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
     testing = traits.Bool(False, usedefault=True, desc='use testing settings')
     orientation = traits.Enum('RAS', 'LAS', mandatory=True, usedefault=True,
