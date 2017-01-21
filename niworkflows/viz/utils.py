@@ -73,6 +73,9 @@ def as_svg(image, filename='temp.svg'):
     with open(filename, 'r' if PY3 else 'rb') as file_obj:
         image_svg = file_obj.readlines()
 
+    start_idx = image_svg.find('<svg ')
+    end_idx = image_svg.rfind('</svg>')
+
     svg_start = None
     svg_lines_corrected = []
     for i, line in enumerate(image_svg):
@@ -86,6 +89,31 @@ def as_svg(image, filename='temp.svg'):
     image_svg = svg_lines_corrected # strip out extra DOCTYPE, etc headers
     return '\n'.join(image_svg)  # straight up giant string
 
+def svg2str(display_object, dpi=300):
+    """
+    Serializes a nilearn display object as a string
+    """
+    from io import StringIO
+    image_buf = StringIO()
+    display_object.frame_axes.figure.savefig(
+        image_buf, dpi=dpi, format='svg',
+        facecolor='k', edgecolor='k')
+    image_buf.seek(0)
+    return image_buf.getvalue()
+
+def extract_svg(display_object, dpi=300):
+    """
+    Removes the preamble of the svg files generated with nilearn
+    """
+    image_svg = svg2str(display_object, dpi)
+    image_svg = re.sub(' height="[0-9]+[a-z]*"', '', image_svg, count=1)
+    image_svg = re.sub(' width="[0-9]+[a-z]*"', '', image_svg, count=1)
+    image_svg = re.sub(' viewBox',
+                       ' preseveAspectRation="xMidYMid meet" viewBox',
+                       image_svg, count=1)
+    start_idx = image_svg.find('<svg ')
+    end_idx = image_svg.rfind('</svg>')
+    return image_svg[start_idx:end_idx]
 
 def cuts_from_bbox(mask_nii, cuts=3):
     """Finds equi-spaced cuts for presenting images"""
@@ -153,7 +181,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
             plot_params['alpha'] = 1
             svg.add_contours(seg, **plot_params)
 
-        svgs_list.append(as_svg(svg))
+        svgs_list.append(extract_svg(svg))
         svg.close()
 
     plot_params = {} if plot_params is None else plot_params
