@@ -32,6 +32,15 @@ def stage_artifacts(filename, new_filename):
     if os.getenv('SAVE_CIRCLE_ARTIFACTS', False) == "1":
         copy(filename, os.path.join('/scratch', new_filename))
 
+def _smoke_test_report(report_interface, artifact_name):
+    with InTemporaryDirectory():
+        report_interface.run()
+        out_report = report_interface.inputs.out_report
+        stage_artifacts(out_report, artifact_name)
+        unittest.TestCase.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
+                                     .format(out_report))
+
+
 class TestRegistrationInterfaces(unittest.TestCase):
     """ tests the interfaces derived from RegistrationRC """
 
@@ -131,14 +140,6 @@ class TestBrainExtractionRPT(unittest.TestCase):
             ),
             'testANTSBrainExtraction.html'
         )
-
-def _smoke_test_report(report_interface, artifact_name):
-    with InTemporaryDirectory():
-        report_interface.run()
-        out_report = report_interface.inputs.out_report
-        stage_artifacts(out_report, artifact_name)
-        unittest.TestCase.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
-                                     .format(out_report))
 
 class TestFASTRPT(unittest.TestCase):
     ''' tests use mni as in_file '''
