@@ -166,6 +166,7 @@ class TestReconAllRPT(unittest.TestCase):
     def test_generate_report(self):
         report_interface = ReconAllRPT(subject_id='fsaverage', directive='all',
                                        subjects_dir=os.getenv('SUBJECTS_DIR'),
-                                       mock_run=True, generate_report=True,
+                                       generate_report=True,
                                        out_report='test.svg')
+        report_interface.mock_run = True
         _smoke_test_report(report_interface, 'testReconAll.svg')

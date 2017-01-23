@@ -23,8 +23,6 @@ class ReportCapableInputSpec(BaseInterfaceInputSpec):
         False, usedefault=True, desc="Set to true to enable report generation for node")
     out_report = File(
         'report.html', usedefault=True, desc='filename for the visual report')
-    mock_run = traits.Bool(False, usedefault=True,
-                           desc="Set to true to skip running the base interface")
 
 
 class ReportCapableOutputSpec(TraitedSpec):
@@ -37,12 +35,13 @@ class ReportCapableInterface(BaseInterface):
 
     def __init__(self, **inputs):
         self._out_report = None
+        self._mock_run = None
         super(ReportCapableInterface, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
         """ delegates to base interface run method, then attempts to generate reports """
 
-        if not self.inputs.mock_run:
+        if not self._mock_run:
             try:
                 runtime = super(
                     ReportCapableInterface, self)._run_interface(runtime)
@@ -105,6 +104,14 @@ class ReportCapableInterface(BaseInterface):
         errorstr += '</div>\n'
         with open(self._out_report, 'w' if PY3 else 'wb') as outfile:
             outfile.write(errorstr)
+
+    @property
+    def mock_run(self):
+        return self._mock_run
+
+    @mock_run.setter
+    def mock_run(self, value):
+        self._mock_run = value
 
 
 class RegistrationRCInputSpec(ReportCapableInputSpec):
