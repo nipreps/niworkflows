@@ -19,6 +19,7 @@ from nilearn import image as nlimage
 from nilearn.plotting import plot_anat
 from nipype.utils import filemanip
 
+from niworkflows import NIWORKFLOWS_LOG
 from niworkflows.viz.validators import HTMLValidator
 
 
@@ -111,8 +112,15 @@ def extract_svg(display_object, dpi=300):
     image_svg = re.sub(' viewBox',
                        ' preseveAspectRation="xMidYMid meet" viewBox',
                        image_svg, count=1)
+    start_tag = '<svg '
     start_idx = image_svg.find('<svg ')
-    end_idx = image_svg.rfind('</svg>')
+    end_tag = '</svg>'
+    end_idx = image_svg.rfind(end_tag)
+    if start_idx is -1 or end_idx is -1:
+        NIWORKFLOWS_LOG.info('svg tags not found in extract_svg')
+    # rfind gives the start index of the substr. We want this substr 
+    # included in our return value so we add its length to the index.
+    end_idx += len(end_tag)
     return image_svg[start_idx:end_idx]
 
 def cuts_from_bbox(mask_nii, cuts=3):
@@ -268,17 +276,22 @@ def plot_registration(anat_nii, div_id, plot_params=None,
         elif contour is not None:
             display.add_contours(contour, levels=[.9])
 
-        out_files.append(out_file)
-        svg = as_svg(display, out_file)
+        svg = extract_svg(display)
         display.close()
 
         # Find and replace the figure_1 id.
-        xml_data = etree.fromstring(svg)
+
+        try:
+            xml_data = etree.fromstring(svg)
+        except etree.XMLSyntaxError as e:
+            NIWORKFLOWS_LOG.info(e)
+            return
         find_text = etree.ETXPath("//{%s}g[@id='figure_1']" % (SVGNS))
         find_text(xml_data)[0].set('id', '%s-%s-%s' % (div_id, mode, uuid4()))
 
-        with open(out_file, 'wb') as f:
-            f.write(etree.tostring(xml_data))
+        out_files.append(etree.tostring(xml_data))
+        #with open(out_file, 'wb') as f:
+        #    f.write(etree.tostring(xml_data))
     return out_files
 
 
@@ -291,9 +304,10 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     import svgutils.compose as svgc
 
     # Read all svg files and get roots
-    svgs = [svgt.fromfile(f) for f in bg_svgs + fg_svgs]
+    svgs = [svgt.fromstring(f) for f in bg_svgs + fg_svgs]
     roots = [f.getroot() for f in svgs]
     nsvgs = len(svgs) // 2
+
     # Query the size of each
     sizes = []
     for f in svgs:
