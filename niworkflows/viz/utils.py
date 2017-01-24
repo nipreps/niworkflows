@@ -66,30 +66,6 @@ def save_html(template, report_file_name, unique_string, **kwargs):
         handle.write(report_render)
 
 
-def as_svg(image, filename='temp.svg'):
-    ''' Takes an image as created by nilearn.plotting and returns the svg with
-        extra headers removed and the width and height style values set to
-        nothing. '''
-    image.savefig(filename)
-    with open(filename, 'r' if PY3 else 'rb') as file_obj:
-        image_svg = file_obj.readlines()
-
-    start_idx = image_svg.find('<svg ')
-    end_idx = image_svg.rfind('</svg>')
-
-    svg_start = None
-    svg_lines_corrected = []
-    for i, line in enumerate(image_svg):
-        if '<svg ' in line:
-            line = re.sub(' height="[0-9]+[a-z]*"', '', line)
-            line = re.sub(' width="[0-9]+[a-z]*"', '', line)
-            line = re.sub(' viewBox', ' preseveAspectRation="xMidYMid meet" viewBox', line)
-            svg_start = i
-        if svg_start is not None:
-            svg_lines_corrected.append(line)
-    image_svg = svg_lines_corrected # strip out extra DOCTYPE, etc headers
-    return '\n'.join(image_svg)  # straight up giant string
-
 def svg2str(display_object, dpi=300):
     """
     Serializes a nilearn display object as a string
@@ -113,7 +89,7 @@ def extract_svg(display_object, dpi=300):
                        ' preseveAspectRation="xMidYMid meet" viewBox',
                        image_svg, count=1)
     start_tag = '<svg '
-    start_idx = image_svg.find('<svg ')
+    start_idx = image_svg.find(start_tag)
     end_tag = '</svg>'
     end_idx = image_svg.rfind(end_tag)
     if start_idx is -1 or end_idx is -1:
