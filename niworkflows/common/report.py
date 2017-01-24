@@ -35,16 +35,20 @@ class ReportCapableInterface(BaseInterface):
 
     def __init__(self, **inputs):
         self._out_report = None
+        self._mock_run = None
         super(ReportCapableInterface, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
         """ delegates to base interface run method, then attempts to generate reports """
 
-        try:
-            runtime = super(
-                ReportCapableInterface, self)._run_interface(runtime)
-        except NotImplementedError:
-            pass  # the interface is derived from BaseInterface
+        if not self._mock_run:
+            try:
+                runtime = super(
+                    ReportCapableInterface, self)._run_interface(runtime)
+            except NotImplementedError:
+                pass  # the interface is derived from BaseInterface
+        else:
+            runtime.returncode = 0
 
         # leave early if there's nothing to do
         if not self.inputs.generate_report:
@@ -100,6 +104,14 @@ class ReportCapableInterface(BaseInterface):
         errorstr += '</div>\n'
         with open(self._out_report, 'w' if PY3 else 'wb') as outfile:
             outfile.write(errorstr)
+
+    @property
+    def mock_run(self):
+        return self._mock_run
+
+    @mock_run.setter
+    def mock_run(self, value):
+        self._mock_run = value
 
 
 class RegistrationRCInputSpec(ReportCapableInputSpec):
@@ -177,4 +189,45 @@ class SegmentationRC(ReportCapableInterface):
             out_file=self.inputs.out_report,
             masked=self._masked,
             title=self._report_title
+        )
+
+
+class SurfaceSegmentationRC(ReportCapableInterface):
+
+    """ An abstract mixin to registration nipype interfaces """
+
+    def __init__(self, **inputs):
+        self._anat_file = None
+        self._mask_file = None
+        self._contour = None
+        super(SurfaceSegmentationRC, self).__init__(**inputs)
+
+    def _generate_report(self):
+        """ Generates the visual report """
+        from niworkflows.viz.utils import compose_view, plot_registration
+        NIWORKFLOWS_LOG.info('Generating visual report')
+
+        anat = load_img(self._anat_file)
+        contour_nii = load_img(self._contour) if self._contour is not None else None
+
+        if self._mask_file:
+            anat = unmask(apply_mask(anat, self._mask_file), self._mask_file)
+            mask_nii = load_img(self._mask_file)
+        else:
+            mask_nii = threshold_img(anat, 1e-3)
+
+        n_cuts = 7
+        if not self._mask_file and contour_nii:
+            cuts = cuts_from_bbox(contour_nii, cuts=n_cuts)
+        else:
+            cuts = cuts_from_bbox(mask_nii, cuts=n_cuts)
+
+        # Call composer
+        compose_view(
+            plot_registration(anat, 'fixed-image',
+                              estimate_brightness=True,
+                              cuts=cuts,
+                              contour=contour_nii),
+            [],
+            out_file=self._out_report
         )

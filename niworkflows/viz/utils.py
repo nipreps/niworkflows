@@ -254,57 +254,53 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     the CSS code for the flickering animation
     """
     import svgutils.transform as svgt
-    import svgutils.compose as svgc
 
     # Read all svg files and get roots
     svgs = [svgt.fromfile(f) for f in bg_svgs + fg_svgs]
     roots = [f.getroot() for f in svgs]
-    nsvgs = len(svgs) // 2
+    nsvgs = len(bg_svgs)
     # Query the size of each
-    sizes = [(int(f.width[:-2]), int(f.height[:-2])) for f in svgs]
+    sizes = np.array([(int(f.width[:-2]), int(f.height[:-2])) for f in svgs])
 
     # Calculate the scale to fit all widths
-    scales = [1.0] * len(svgs)
-    if not all([width[0] == sizes[0][0] for width in sizes[1:]]):
-        ref_size = sizes[ref]
-        for i, els in enumerate(sizes):
-            scales[i] = ref_size[0]/els[0]
-
-    newsizes = [tuple(size)
-                for size in np.array(sizes) * np.array(scales)[..., np.newaxis]]
+    width = sizes[ref, 0]
+    scales = width / sizes[:, 0]
+    heights = sizes[:, 1] * scales
 
     # Compose the views panel: total size is the width of
     # any element (used the first here) and the sum of heights
-    totalsize = [newsizes[0][0], np.sum(newsizes[:3], axis=0)[1]]
-    fig = svgt.SVGFigure(totalsize[0], totalsize[1])
+    fig = svgt.SVGFigure(width, heights[:nsvgs].sum())
 
     yoffset = 0
     for i, r in enumerate(roots):
-        size = newsizes[i]
         r.moveto(0, yoffset, scale=scales[i])
-        yoffset += size[1]
         if i == (nsvgs - 1):
             yoffset = 0
+        else:
+            yoffset += heights[i]
 
     # Group background and foreground panels in two groups
-    newroots = [
-        svgt.GroupElement(roots[:3], {'class': 'background-svg'}),
-        svgt.GroupElement(roots[3:], {'class': 'foreground-svg'})
-    ]
+    if fg_svgs:
+        newroots = [
+            svgt.GroupElement(roots[:nsvgs], {'class': 'background-svg'}),
+            svgt.GroupElement(roots[nsvgs:], {'class': 'foreground-svg'})
+        ]
+    else:
+        newroots = roots
     fig.append(newroots)
     out_file = op.abspath(out_file)
     fig.save(out_file)
 
     # Add styles for the flicker animation
-    with open(out_file, 'r' if PY3 else 'rb') as f:
-        svg = f.read().split('\n')
+    if fg_svgs:
+        with open(out_file, 'r' if PY3 else 'rb') as f:
+            svg = f.read().split('\n')
 
-    svg.insert(2, """\
-<style type="text/css">
+        svg.insert(2, """<style type="text/css">
 @keyframes flickerAnimation%s { 0%% {opacity: 1;} 100%% { opacity: 0; }}
 .foreground-svg { animation: 1s ease-in-out 0s alternate none infinite paused flickerAnimation%s;}
 .foreground-svg:hover { animation-play-state: running;}
 </style>""" % tuple([uuid4()] * 2))
-    with open(out_file, 'w' if PY3 else 'wb') as f:
-        f.write('\n'.join(svg))
+        with open(out_file, 'w' if PY3 else 'wb') as f:
+            f.write('\n'.join(svg))
     return out_file
