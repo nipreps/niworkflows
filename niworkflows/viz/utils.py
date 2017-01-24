@@ -291,6 +291,8 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
         sizes.append((width, height))
     nsvgs = len(bg_svgs)
 
+    sizes = np.array(sizes)
+
     # Calculate the scale to fit all widths
     width = sizes[ref, 0]
     scales = width / sizes[:, 0]
