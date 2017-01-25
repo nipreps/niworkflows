@@ -6,7 +6,6 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 from os import path as op
 import shutil
-import sys
 import pkg_resources as pkgr
 from multiprocessing import cpu_count
 

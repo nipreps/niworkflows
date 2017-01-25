@@ -75,7 +75,6 @@ def svg2str(display_object, dpi=300):
     display_object.frame_axes.figure.savefig(
         image_buf, dpi=dpi, format='svg',
         facecolor='k', edgecolor='k')
-    image_buf.seek(0)
     return image_buf.getvalue()
 
 def extract_svg(display_object, dpi=300):
@@ -266,8 +265,7 @@ def plot_registration(anat_nii, div_id, plot_params=None,
         find_text(xml_data)[0].set('id', '%s-%s-%s' % (div_id, mode, uuid4()))
 
         out_files.append(etree.tostring(xml_data))
-        #with open(out_file, 'wb') as f:
-        #    f.write(etree.tostring(xml_data))
+
     return out_files
 
 
