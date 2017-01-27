@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os.path as op
+import re
 from sys import version_info
 
 import numpy as np
@@ -14,10 +15,11 @@ import jinja2
 from pkg_resources import resource_filename as pkgrf
 
 from lxml import etree
-from nilearn.plotting import plot_anat
 from nilearn import image as nlimage
+from nilearn.plotting import plot_anat
 from nipype.utils import filemanip
 
+from niworkflows import NIWORKFLOWS_LOG
 from niworkflows.viz.validators import HTMLValidator
 
 
@@ -64,22 +66,37 @@ def save_html(template, report_file_name, unique_string, **kwargs):
         handle.write(report_render)
 
 
-def as_svg(image, filename='temp.svg'):
-    ''' takes an image as created by nilearn.plotting and returns a blob svg.
-    A bit hacky. '''
-    image.savefig(filename)
-    with open(filename, 'r' if PY3 else 'rb') as file_obj:
-        image_svg = file_obj.readlines()
+def svg2str(display_object, dpi=300):
+    """
+    Serializes a nilearn display object as a string
+    """
+    from io import StringIO
+    image_buf = StringIO()
+    display_object.frame_axes.figure.savefig(
+        image_buf, dpi=dpi, format='svg',
+        facecolor='k', edgecolor='k')
+    return image_buf.getvalue()
 
-    svg_start = 0
-    for i, line in enumerate(image_svg):
-        if '<svg ' in line:
-            svg_start = i
-            continue
-
-    image_svg = image_svg[svg_start:]  # strip out extra DOCTYPE, etc headers
-    return '\n'.join(image_svg)  # straight up giant string
-
+def extract_svg(display_object, dpi=300):
+    """
+    Removes the preamble of the svg files generated with nilearn
+    """
+    image_svg = svg2str(display_object, dpi)
+    image_svg = re.sub(' height="[0-9]+[a-z]*"', '', image_svg, count=1)
+    image_svg = re.sub(' width="[0-9]+[a-z]*"', '', image_svg, count=1)
+    image_svg = re.sub(' viewBox',
+                       ' preseveAspectRation="xMidYMid meet" viewBox',
+                       image_svg, count=1)
+    start_tag = '<svg '
+    start_idx = image_svg.find(start_tag)
+    end_tag = '</svg>'
+    end_idx = image_svg.rfind(end_tag)
+    if start_idx is -1 or end_idx is -1:
+        NIWORKFLOWS_LOG.info('svg tags not found in extract_svg')
+    # rfind gives the start index of the substr. We want this substr 
+    # included in our return value so we add its length to the index.
+    end_idx += len(end_tag)
+    return image_svg[start_idx:end_idx]
 
 def cuts_from_bbox(mask_nii, cuts=3):
     """Finds equi-spaced cuts for presenting images"""
@@ -147,7 +164,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
             plot_params['alpha'] = 1
             svg.add_contours(seg, **plot_params)
 
-        svgs_list.append(as_svg(svg))
+        svgs_list.append(extract_svg(svg))
         svg.close()
 
     plot_params = {} if plot_params is None else plot_params
@@ -234,17 +251,21 @@ def plot_registration(anat_nii, div_id, plot_params=None,
         elif contour is not None:
             display.add_contours(contour, levels=[.9])
 
-        out_files.append(out_file)
-        svg = as_svg(display, out_file)
+        svg = extract_svg(display)
         display.close()
 
         # Find and replace the figure_1 id.
-        xml_data = etree.fromstring(svg)
+
+        try:
+            xml_data = etree.fromstring(svg)
+        except etree.XMLSyntaxError as e:
+            NIWORKFLOWS_LOG.info(e)
+            return
         find_text = etree.ETXPath("//{%s}g[@id='figure_1']" % (SVGNS))
         find_text(xml_data)[0].set('id', '%s-%s-%s' % (div_id, mode, uuid4()))
 
-        with open(out_file, 'wb') as f:
-            f.write(etree.tostring(xml_data))
+        out_files.append(etree.tostring(xml_data))
+
     return out_files
 
 
@@ -256,11 +277,19 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     import svgutils.transform as svgt
 
     # Read all svg files and get roots
-    svgs = [svgt.fromfile(f) for f in bg_svgs + fg_svgs]
+    svgs = [svgt.fromstring(f) for f in bg_svgs + fg_svgs]
     roots = [f.getroot() for f in svgs]
-    nsvgs = len(bg_svgs)
+
     # Query the size of each
-    sizes = np.array([(int(f.width[:-2]), int(f.height[:-2])) for f in svgs])
+    sizes = []
+    for f in svgs:
+        viewbox = f.root.get("viewBox").split(" ")
+        width = int(viewbox[2])
+        height = int(viewbox[3])
+        sizes.append((width, height))
+    nsvgs = len(bg_svgs)
+
+    sizes = np.array(sizes)
 
     # Calculate the scale to fit all widths
     width = sizes[ref, 0]
@@ -288,6 +317,9 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     else:
         newroots = roots
     fig.append(newroots)
+    fig.root.attrib.pop("width")
+    fig.root.attrib.pop("height")
+    fig.root.set("preserveAspectRatio", "xMidYMid meet")
     out_file = op.abspath(out_file)
     fig.save(out_file)
 
