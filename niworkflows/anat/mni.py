@@ -115,66 +115,112 @@ class RobustMNINormalization(BaseInterface):
 
     def _config_ants(self, ants_settings):
         NIWORKFLOWS_LOG.info('Loading settings from file %s.', ants_settings)
+
+        # Call the Registration class from nipype.interfaces.ants
         self.norm = Registration(
             moving_image=self.inputs.moving_image,
             num_threads=self.inputs.num_threads,
             from_file=ants_settings,
             terminal_output='file'
         )
+       
+        # If the settings specify a moving mask...
         if isdefined(self.inputs.moving_mask):
+            # ...and explicit masking is turned on...
             if self.inputs.explicit_masking:
+                # Mask the moving image;
+                # Use the masked image as the moving image for Registration;
+                # Do not use the moving mask during registration.
                 self.norm.inputs.moving_image = mask(
                     self.inputs.moving_image[0],
                     self.inputs.moving_mask,
                     "moving_masked.nii.gz")
             else:
+                # Use the moving mask during registration.
                 self.norm.inputs.moving_image_mask = self.inputs.moving_mask
 
-
+        # If the settings specify a reference image...
         if isdefined(self.inputs.reference_image):
+            # ...set that reference image as the fixed image.
             self.norm.inputs.fixed_image = self.inputs.reference_image
+            # if the settings specify a reference mask...
             if isdefined(self.inputs.reference_mask):
+                # ...and explicit masking is turned on...
                 if self.inputs.explicit_masking:
+                    # Mask the moving image;
+                    # Use the masked image as the moving image for Registration;
+                    # Do not use the moving mask during registration.
                     self.norm.inputs.fixed_image = mask(
                         self.inputs.reference_image[0],
                         self.inputs.mreference_mask,
                         "fixed_masked.nii.gz")
                 else:
+                    # Use the moving mask during registration.
                     self.norm.inputs.fixed_image_mask = self.inputs.reference_mask
         else:
             get_template = getattr(getters, 'get_{}'.format(self.inputs.template))
             mni_template = get_template()
 
+            # Raise an error if the user specifies an unsupported image orientation.
             if self.inputs.orientation == 'LAS':
                 raise NotImplementedError
 
+            # Sete the template resolution.
             resolution = self.inputs.template_resolution
+            # Use a 2mm template when running in testing mode.
             if self.inputs.testing:
                 resolution = 2
 
+            # If explicit masking is turned on...
             if self.inputs.explicit_masking:
+                # Mask the template image with the pre-computed template mask;
+                # Use the masked image as the fixed image for Registration;
+                # Do not use a fixed image mask during registration.
                 self.norm.inputs.fixed_image = mask(op.join(
                     mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference)),
-                    op.join(
-                        mni_template, '%dmm_brainmask.nii.gz' % resolution),
+                    op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution),
                     "fixed_masked.nii.gz")
             else:
                 self.norm.inputs.fixed_image = op.join(
-                    mni_template,
-                    '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
+                    mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
                 self.norm.inputs.fixed_image_mask = op.join(
                     mni_template, '%dmm_brainmask.nii.gz' % resolution)
 
 
 
 def mask(in_file, mask_file, new_name):
+    """
+    Applies a binary mask to an image.
+
+    Parameters
+    ----------
+    in_file : str
+              Path to a NIfTI file.
+    mask_file : str
+                Path to a NIfTI file.
+    new_name : str
+               Path/filename for the masked output image.
+
+    Returns
+    -------
+    str
+        Absolute path of the masked output image.
+
+    Notes
+    -----
+    in_file and mask_file must be in the same
+    image space and have the same dimensions.
+    """
     import nibabel as nb
     import os
-
+    # Load the input image
     in_nii = nb.load(in_file)
+    # Load the mask image
     mask_nii = nb.load(mask_file)
+    # Set all non-mask voxels in the input file to zero.
     data = in_nii.get_data()
     data[mask_nii.get_data() == 0] = 0
+    # Save the new masked image.
     new_nii = nb.Nifti1Image(data, in_nii.affine, in_nii.header)
     new_nii.to_filename(new_name)
     return os.path.abspath(new_name)
