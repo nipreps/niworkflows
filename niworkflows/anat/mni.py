@@ -17,28 +17,41 @@ from niworkflows.data import getters
 from niworkflows import __packagename__, NIWORKFLOWS_LOG
 
 class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
+    # Set the input file to be used as the moving image.
     moving_image = InputMultiPath(
         File(exists=True), mandatory=True, desc='image to apply transformation to')
+    # Set an input file to be used as the reference image (instead of the default template).
     reference_image = InputMultiPath(
         File(exists=True), desc='override the reference image')
+    # Set the input file to be used as the moving mask.
     moving_mask = File(exists=True, desc='moving image mask')
+    # Set the input file to be used as the reference mask.
     reference_mask = File(exists=True, desc='reference image mask')
+    # Number of threads to use for ANTs/ITK processes.
     num_threads = traits.Int(cpu_count(), usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
+    # Run in test mode?
     testing = traits.Bool(False, usedefault=True, desc='use testing settings')
+    # Set orientation of input and template images.
     orientation = traits.Enum('RAS', 'LAS', mandatory=True, usedefault=True,
                               desc='modify template orientation (should match input image)')
+    # Set the modality of the reference image.
     reference = traits.Enum('T1', 'T2', 'PD', mandatory=True, usedefault=True,
                             desc='set the reference modality for registration')
+    # T1 or EPI registration?
     moving = traits.Enum('T1', 'EPI', usedefault=True, mandatory=True,
                          desc='registration type')
+    # Set the default template to use.
     template = traits.Enum(
         'mni_icbm152_linear',
         'mni_icbm152_nlin_asym_09c',
         usedefault=True, desc='define the template to be used')
+    # Load other settings from file.
     settings = traits.List(File(exists=True), desc='pass on the list of settings files')
+    # Set the resolution of the default template.
     template_resolution = traits.Enum(1, 2, mandatory=True, usedefault=True,
                                       desc='template resolution')
+    # Use explicit masking?
     explicit_masking = traits.Bool(True, usedefault=True,
                                    desc="Set voxels outside the masks to zero"
                                         "thus creating an artificial border"
@@ -65,16 +78,26 @@ class RobustMNINormalization(BaseInterface):
         super(RobustMNINormalization, self).__init__(**inputs)
 
     def _get_settings(self):
+        """
+        Return any settings defined by the user, as well as any pre-defined
+        settings files that exist for the image modalities to be registered.
+        """
+        # If user-defined settings exist...
         if isdefined(self.inputs.settings):
+            # Note this in the log and return those settings.
             NIWORKFLOWS_LOG.info('User-defined settings, overriding defaults')
             return self.inputs.settings
-
+        
+        # Define a prefix for output files based on the modality of the moving image.
         filestart = '{}-mni_registration_'.format(self.inputs.moving.lower())
+        # If running in test mode, indicate this in the output prefix.
         if self.inputs.testing:
             filestart += 'testing_'
-
+        
+        # Get a list of settings files that match the output prefix. 
         filenames = [i for i in pkgr.resource_listdir('niworkflows', 'data')
                      if i.startswith(filestart) and i.endswith('.json')]
+        # Return the settings files.
         return [pkgr.resource_filename('niworkflows.data', f)
                 for f in sorted(filenames)]
 
@@ -114,6 +137,10 @@ class RobustMNINormalization(BaseInterface):
             'Robust spatial normalization failed after %d retries.' % (self.retry - 1))
 
     def _config_ants(self, ants_settings):
+        """
+        Configure RobustMNINormalization based on defaults and custom
+        settings specified in RobustMNINormalizationInputSpec.
+        """
         NIWORKFLOWS_LOG.info('Loading settings from file %s.', ants_settings)
 
         # Call the Registration class from nipype.interfaces.ants
@@ -158,6 +185,7 @@ class RobustMNINormalization(BaseInterface):
                     # Use the moving mask during registration.
                     self.norm.inputs.fixed_image_mask = self.inputs.reference_mask
         else:
+            # Get the template specified by the user.
             get_template = getattr(getters, 'get_{}'.format(self.inputs.template))
             mni_template = get_template()
 
@@ -165,7 +193,7 @@ class RobustMNINormalization(BaseInterface):
             if self.inputs.orientation == 'LAS':
                 raise NotImplementedError
 
-            # Sete the template resolution.
+            # Set the template resolution.
             resolution = self.inputs.template_resolution
             # Use a 2mm template when running in testing mode.
             if self.inputs.testing:
@@ -181,8 +209,10 @@ class RobustMNINormalization(BaseInterface):
                     op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution),
                     "fixed_masked.nii.gz")
             else:
+                # Use the raw template image for Registration.
                 self.norm.inputs.fixed_image = op.join(
                     mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
+                # Use the pre-computed mask for Registration.
                 self.norm.inputs.fixed_image_mask = op.join(
                     mni_template, '%dmm_brainmask.nii.gz' % resolution)
 
