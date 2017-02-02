@@ -102,37 +102,48 @@ class RobustMNINormalization(BaseInterface):
                 for f in sorted(filenames)]
 
     def _run_interface(self, runtime):
+        # Get a list of settings files.
         settings_files = self._get_settings()
 
+        # For each settings file...
         for ants_settings in settings_files:
             interface_result = None
 
+            # Configure an ANTs run based on these settings.
             self._config_ants(ants_settings)
-
+            
+            # Print the retry number and command line call to the log.
             NIWORKFLOWS_LOG.info(
                 'Retry #%d, commandline: \n%s', self.retry, self.norm.cmdline)
             try:
+                # Try running registration.
                 interface_result = self.norm.run()
             except Exception as exc:
+                # If registration fails, note this in the log.
                 NIWORKFLOWS_LOG.warn(
                         'Retry #%d failed: %s.', self.retry, exc)
 
-
             errfile = op.join(runtime.cwd, 'stderr.nipype')
             outfile = op.join(runtime.cwd, 'stdout.nipype')
-
+ 
             shutil.move(errfile, errfile + '.%03d' % self.retry)
             shutil.move(outfile, outfile + '.%03d' % self.retry)
-
+            
+            # If registration runs successfully...
             if interface_result is not None:
                 runtime.returncode = 0
+                # Grab the outputs.
                 self._results.update(interface_result.outputs.get())
+                # Note this in the log.
                 NIWORKFLOWS_LOG.info(
                     'Successful spatial normalization (retry #%d).', self.retry)
+                # Break out of the retry loop.
                 return runtime
 
+            # If registration failed, increment the retry counter.
             self.retry += 1
 
+        # If all tries fail, raise an error.
         raise RuntimeError(
             'Robust spatial normalization failed after %d retries.' % (self.retry - 1))
 
