@@ -76,13 +76,10 @@ def svg_compress(image, compress='auto'):
     # Compress the SVG file using SVGO
     if (shutil.which("svgo") and compress == 'auto') or compress is True:
 
-        p = subprocess.Popen("svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues",
-                             stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE,
-                             shell=True)
-        image = p.communicate(input=image.encode('utf-8'))[0].decode('utf-8')
-        if p.wait() != 0:
-            raise Exception("svgo failed to run.")
+        p = subprocess.run("svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues",
+                           stdin=image.encode('utf-8'), stdout=subprocess.PIPE,
+                           shell=True, check=True)
+        image = p.stdout.decode('utf-8')
 
     # Convert all of the rasters inside the SVG file with 80% compressed WEBP
     if (shutil.which("cwebp") and compress == 'auto') or compress == True:
@@ -103,21 +100,17 @@ def svg_compress(image, compress='auto'):
                     png_b64 = right.split('"')[0]
                     right = '"' + '"'.join(right.split('"')[1:])
 
-                    bobj = base64.b64decode(png_b64)
-                    p = subprocess.Popen("cwebp -quiet -noalpha -q 80 -o - -- -",
-                                         stdin=subprocess.PIPE,
-                                         stdout=subprocess.PIPE,
-                                         shell=True)
-                    bimg = p.communicate(input=bobj)[0]
-                    if p.wait() != 0:
-                        raise Exception("cwebp failed to run.")
-                    new_lines.append(left + base64.b64encode(bimg).decode('utf-8') + right)
+                    p = subprocess.run("cwebp -quiet -noalpha -q 80 -o - -- -",
+                                       stdin=base64.b64decode(png_b64),
+                                       stdout=subprocess.PIPE,
+                                       shell=True, check=True)
+                    webpimg = base64.b64encode(p.stdout).decode('utf-8')
+                    new_lines.append(left + webpimg + right)
                 else:
                     new_lines.append(line)
         lines = new_lines
     else:
-        with StringIO(image) as fp:
-            lines = fp.readlines()
+        lines = image.splitlines()
 
     svg_start = 0
     for i, line in enumerate(lines):
@@ -126,7 +119,7 @@ def svg_compress(image, compress='auto'):
             continue
 
     image_svg = lines[svg_start:]  # strip out extra DOCTYPE, etc headers
-    return '\n'.join(image_svg)  # straight up giant string
+    return ''.join(image_svg)  # straight up giant string
 
 def svg2str(display_object, dpi=300):
     """
