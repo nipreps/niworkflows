@@ -4,24 +4,25 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os.path as op
 import shutil
-import tempfile
 import subprocess
 import base64
+import re
 from sys import version_info
 
 import numpy as np
 import nibabel as nb
 from uuid import uuid4
 from io import open
-
+from io import StringIO
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 
 from lxml import etree
-from nilearn.plotting import plot_anat
 from nilearn import image as nlimage
+from nilearn.plotting import plot_anat
 from nipype.utils import filemanip
 
+from niworkflows import NIWORKFLOWS_LOG
 from niworkflows.viz.validators import HTMLValidator
 
 
@@ -68,31 +69,25 @@ def save_html(template, report_file_name, unique_string, **kwargs):
         handle.write(report_render)
 
 
-def as_svg(image, filename='temp.svg', compress='auto'):
+def svg_compress(image, compress='auto'):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
     Performs compression (can be disabled). A bit hacky. '''
 
-    tmp_dir = tempfile.mkdtemp()
-
-    if op.isabs(filename):
-        svg_file = filename
-    else:
-        svg_file = op.join(tmp_dir, filename)
-
-    image.savefig(svg_file)
-
     # Compress the SVG file using SVGO
-    if (shutil.which("svgo") and compress == 'auto') or compress == True:
-        out_file = op.join(tmp_dir, "svgo_out.svg")
-        subprocess.check_call("svgo -i %s -o %s -q -p 3 --pretty --disable=cleanupNumericValues" % (svg_file,
-                                                                  out_file),
-                              shell=True)
-        svg_file = out_file
+    if (shutil.which("svgo") and compress == 'auto') or compress is True:
+
+        p = subprocess.Popen("svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues",
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE,
+                             shell=True)
+        image = p.communicate(input=image.encode('utf-8'))[0].decode('utf-8')
+        if p.wait() != 0:
+            raise Exception("svgo failed to run.")
 
     # Convert all of the rasters inside the SVG file with 80% compressed WEBP
     if (shutil.which("cwebp") and compress == 'auto') or compress == True:
         new_lines = []
-        with open(svg_file, 'r') as fp:
+        with StringIO(image) as fp:
             for line in fp:
                 if "image/png" in line:
                     tmp_lines = [line]
@@ -109,24 +104,20 @@ def as_svg(image, filename='temp.svg', compress='auto'):
                     right = '"' + '"'.join(right.split('"')[1:])
 
                     bobj = base64.b64decode(png_b64)
-                    png_tmp = op.join(tmp_dir, "cwebp_in.png")
-                    with open(png_tmp, 'wb') as fp_png:
-                        fp_png.write(bobj)
-                    cwebp_out = op.join(tmp_dir, "cwebp_out.webp")
-                    subprocess.check_call("cwebp -quiet -noalpha -q 80 %s -o %s"%(png_tmp, cwebp_out),
-                                          shell=True)
-                    with open(cwebp_out, 'rb') as fp_webp:
-                        webp_b64 = base64.b64encode(fp_webp.read()).decode(
-                            "utf-8")
-                    new_lines.append(left + webp_b64 + right)
+                    p = subprocess.Popen("cwebp -quiet -noalpha -q 80 -o - -- -",
+                                         stdin=subprocess.PIPE,
+                                         stdout=subprocess.PIPE,
+                                         shell=True)
+                    bimg = p.communicate(input=bobj)[0]
+                    if p.wait() != 0:
+                        raise Exception("cwebp failed to run.")
+                    new_lines.append(left + base64.b64encode(bimg).decode('utf-8') + right)
                 else:
                     new_lines.append(line)
         lines = new_lines
     else:
-        with open(svg_file, 'r') as fp:
+        with StringIO(image) as fp:
             lines = fp.readlines()
-
-    shutil.rmtree(tmp_dir)
 
     svg_start = 0
     for i, line in enumerate(lines):
@@ -137,6 +128,39 @@ def as_svg(image, filename='temp.svg', compress='auto'):
     image_svg = lines[svg_start:]  # strip out extra DOCTYPE, etc headers
     return '\n'.join(image_svg)  # straight up giant string
 
+def svg2str(display_object, dpi=300):
+    """
+    Serializes a nilearn display object as a string
+    """
+    from io import StringIO
+    image_buf = StringIO()
+    display_object.frame_axes.figure.savefig(
+        image_buf, dpi=dpi, format='svg',
+        facecolor='k', edgecolor='k')
+    return image_buf.getvalue()
+
+def extract_svg(display_object, dpi=300, compress='auto'):
+    """
+    Removes the preamble of the svg files generated with nilearn
+    """
+    image_svg = svg2str(display_object, dpi)
+    if compress == True or compress == 'auto':
+        image_svg = svg_compress(image_svg, compress)
+    image_svg = re.sub(' height="[0-9]+[a-z]*"', '', image_svg, count=1)
+    image_svg = re.sub(' width="[0-9]+[a-z]*"', '', image_svg, count=1)
+    image_svg = re.sub(' viewBox',
+                       ' preseveAspectRation="xMidYMid meet" viewBox',
+                       image_svg, count=1)
+    start_tag = '<svg '
+    start_idx = image_svg.find(start_tag)
+    end_tag = '</svg>'
+    end_idx = image_svg.rfind(end_tag)
+    if start_idx is -1 or end_idx is -1:
+        NIWORKFLOWS_LOG.info('svg tags not found in extract_svg')
+    # rfind gives the start index of the substr. We want this substr 
+    # included in our return value so we add its length to the index.
+    end_idx += len(end_tag)
+    return image_svg[start_idx:end_idx]
 
 def cuts_from_bbox(mask_nii, cuts=3):
     """Finds equi-spaced cuts for presenting images"""
@@ -205,7 +229,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
             plot_params['alpha'] = 1
             svg.add_contours(seg, **plot_params)
 
-        svgs_list.append(as_svg(svg, compress=compress))
+        svgs_list.append(extract_svg(svg, compress=compress))
         svg.close()
 
     plot_params = {} if plot_params is None else plot_params
@@ -293,17 +317,21 @@ def plot_registration(anat_nii, div_id, plot_params=None,
         elif contour is not None:
             display.add_contours(contour, levels=[.9])
 
-        out_files.append(out_file)
-        svg = as_svg(display, out_file, compress=compress)
+        svg = extract_svg(display, compress=compress)
         display.close()
 
         # Find and replace the figure_1 id.
-        xml_data = etree.fromstring(svg)
+
+        try:
+            xml_data = etree.fromstring(svg)
+        except etree.XMLSyntaxError as e:
+            NIWORKFLOWS_LOG.info(e)
+            return
         find_text = etree.ETXPath("//{%s}g[@id='figure_1']" % (SVGNS))
         find_text(xml_data)[0].set('id', '%s-%s-%s' % (div_id, mode, uuid4()))
 
-        with open(out_file, 'wb') as f:
-            f.write(etree.tostring(xml_data))
+        out_files.append(etree.tostring(xml_data))
+
     return out_files
 
 
@@ -313,57 +341,64 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     the CSS code for the flickering animation
     """
     import svgutils.transform as svgt
-    import svgutils.compose as svgc
 
     # Read all svg files and get roots
-    svgs = [svgt.fromfile(f) for f in bg_svgs + fg_svgs]
+    svgs = [svgt.fromstring(f) for f in bg_svgs + fg_svgs]
     roots = [f.getroot() for f in svgs]
-    nsvgs = len(svgs) // 2
+
     # Query the size of each
-    sizes = [(int(f.width.replace('pt', '')), int(f.height.replace('pt', ''))) for f in svgs]
+    sizes = []
+    for f in svgs:
+        viewbox = f.root.get("viewBox").split(" ")
+        width = int(viewbox[2])
+        height = int(viewbox[3])
+        sizes.append((width, height))
+    nsvgs = len(bg_svgs)
+
+    sizes = np.array(sizes)
 
     # Calculate the scale to fit all widths
-    scales = [1.0] * len(svgs)
-    if not all([width[0] == sizes[0][0] for width in sizes[1:]]):
-        ref_size = sizes[ref]
-        for i, els in enumerate(sizes):
-            scales[i] = ref_size[0]/els[0]
-
-    newsizes = [tuple(size)
-                for size in np.array(sizes) * np.array(scales)[..., np.newaxis]]
+    width = sizes[ref, 0]
+    scales = width / sizes[:, 0]
+    heights = sizes[:, 1] * scales
 
     # Compose the views panel: total size is the width of
     # any element (used the first here) and the sum of heights
-    totalsize = [newsizes[0][0], np.sum(newsizes[:3], axis=0)[1]]
-    fig = svgt.SVGFigure(totalsize[0], totalsize[1])
+    fig = svgt.SVGFigure(width, heights[:nsvgs].sum())
 
     yoffset = 0
     for i, r in enumerate(roots):
-        size = newsizes[i]
         r.moveto(0, yoffset, scale=scales[i])
-        yoffset += size[1]
         if i == (nsvgs - 1):
             yoffset = 0
+        else:
+            yoffset += heights[i]
 
     # Group background and foreground panels in two groups
-    newroots = [
-        svgt.GroupElement(roots[:3], {'class': 'background-svg'}),
-        svgt.GroupElement(roots[3:], {'class': 'foreground-svg'})
-    ]
+    if fg_svgs:
+        newroots = [
+            svgt.GroupElement(roots[:nsvgs], {'class': 'background-svg'}),
+            svgt.GroupElement(roots[nsvgs:], {'class': 'foreground-svg'})
+        ]
+    else:
+        newroots = roots
     fig.append(newroots)
+    fig.root.attrib.pop("width")
+    fig.root.attrib.pop("height")
+    fig.root.set("preserveAspectRatio", "xMidYMid meet")
     out_file = op.abspath(out_file)
     fig.save(out_file)
 
     # Add styles for the flicker animation
-    with open(out_file, 'r' if PY3 else 'rb') as f:
-        svg = f.read().split('\n')
+    if fg_svgs:
+        with open(out_file, 'r' if PY3 else 'rb') as f:
+            svg = f.read().split('\n')
 
-    svg.insert(2, """\
-<style type="text/css">
+        svg.insert(2, """<style type="text/css">
 @keyframes flickerAnimation%s { 0%% {opacity: 1;} 100%% { opacity: 0; }}
 .foreground-svg { animation: 1s ease-in-out 0s alternate none infinite paused flickerAnimation%s;}
 .foreground-svg:hover { animation-play-state: running;}
 </style>""" % tuple([uuid4()] * 2))
-    with open(out_file, 'w' if PY3 else 'wb') as f:
-        f.write('\n'.join(svg))
+        with open(out_file, 'w' if PY3 else 'wb') as f:
+            f.write('\n'.join(svg))
     return out_file

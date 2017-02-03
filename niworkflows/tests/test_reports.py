@@ -5,8 +5,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import unittest
-from shutil import copy
 import pkg_resources as pkgr
+from multiprocessing import cpu_count
+from shutil import copy
 
 import nibabel as nb
 from nilearn import image
@@ -17,7 +18,7 @@ from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsample
 
 from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT)
-from niworkflows.interfaces.segmentation import FASTRPT
+from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
 from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT
 
 MNI_DIR = get_mni_template_ras()
@@ -30,6 +31,15 @@ def stage_artifacts(filename, new_filename):
        `/scratch` folder) """
     if os.getenv('SAVE_CIRCLE_ARTIFACTS', False) == "1":
         copy(filename, os.path.join('/scratch', new_filename))
+
+def _smoke_test_report(report_interface, artifact_name):
+    with InTemporaryDirectory():
+        report_interface.run()
+        out_report = report_interface.inputs.out_report
+        stage_artifacts(out_report, artifact_name)
+        unittest.TestCase.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
+                                     .format(out_report))
+
 
 class TestRegistrationInterfaces(unittest.TestCase):
     """ tests the interfaces derived from RegistrationRC """
@@ -115,24 +125,21 @@ class TestBrainExtractionRPT(unittest.TestCase):
         def _template_name(filename):
             return os.path.join(get_ants_oasis_template_ras(), filename)
 
-        _smoke_test_report(BrainExtractionRPT(generate_report=True,
-                                              dimension=3,
-                                              use_floatingpoint_precision=1,
-                                              anatomical_image=MNI_2MM,
-                                              brain_template=_template_name('T_template0.nii.gz'),
-                                              brain_probability_mask=_template_name('T_template0_BrainCerebellumProbabilityMask.nii.gz'),
-                                              extraction_registration_mask=_template_name('T_template0_BrainCerebellumRegistrationMask.nii.gz'),
-                                              out_prefix='testBrainExtractionRPT',
-                                              debug=True), # run faster for testing purposes
-                           'testANTSBrainExtraction.html')
-
-def _smoke_test_report(report_interface, artifact_name):
-    with InTemporaryDirectory():
-        report_interface.run()
-        out_report = report_interface.inputs.out_report
-        stage_artifacts(out_report, artifact_name)
-        unittest.TestCase.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
-                                     .format(out_report))
+        _smoke_test_report(
+            BrainExtractionRPT(
+                generate_report=True,
+                dimension=3,
+                use_floatingpoint_precision=1,
+                anatomical_image=MNI_2MM,
+                brain_template=_template_name('T_template0.nii.gz'),
+                brain_probability_mask=_template_name('T_template0_BrainCerebellumProbabilityMask.nii.gz'),
+                extraction_registration_mask=_template_name('T_template0_BrainCerebellumRegistrationMask.nii.gz'),
+                out_prefix='testBrainExtractionRPT',
+                debug=True, # run faster for testing purposes
+                num_threads=cpu_count()
+            ),
+            'testANTSBrainExtraction.html'
+        )
 
 class TestFASTRPT(unittest.TestCase):
     ''' tests use mni as in_file '''
@@ -179,3 +186,13 @@ class TestCompression(unittest.TestCase):
         unittest.TestCase.assertTrue(int(os.stat(uncompressed_report).st_size) > int(os.stat(compressed_report).st_size),
                                         'An uncompressed report is bigger than '
                                         'a compressed report')
+
+
+class TestReconAllRPT(unittest.TestCase):
+    def test_generate_report(self):
+        report_interface = ReconAllRPT(subject_id='fsaverage', directive='all',
+                                       subjects_dir=os.getenv('SUBJECTS_DIR'),
+                                       generate_report=True,
+                                       out_report='test.svg')
+        report_interface.mock_run = True
+        _smoke_test_report(report_interface, 'testReconAll.svg')
