@@ -3,6 +3,9 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os.path as op
+import shutil
+import subprocess
+import base64
 import re
 from sys import version_info
 
@@ -10,7 +13,7 @@ import numpy as np
 import nibabel as nb
 from uuid import uuid4
 from io import open
-
+from io import StringIO
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 
@@ -66,6 +69,58 @@ def save_html(template, report_file_name, unique_string, **kwargs):
         handle.write(report_render)
 
 
+def svg_compress(image, compress='auto'):
+    ''' takes an image as created by nilearn.plotting and returns a blob svg.
+    Performs compression (can be disabled). A bit hacky. '''
+
+    # Compress the SVG file using SVGO
+    if (shutil.which("svgo") and compress == 'auto') or compress is True:
+
+        p = subprocess.run("svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues",
+                           input=image.encode('utf-8'), stdout=subprocess.PIPE,
+                           shell=True, check=True)
+        image = p.stdout.decode('utf-8')
+
+    # Convert all of the rasters inside the SVG file with 80% compressed WEBP
+    if (shutil.which("cwebp") and compress == 'auto') or compress == True:
+        new_lines = []
+        with StringIO(image) as fp:
+            for line in fp:
+                if "image/png" in line:
+                    tmp_lines = [line]
+                    while "/>" not in line:
+                        line = fp.readline()
+                        tmp_lines.append(line)
+                    content = ''.join(tmp_lines).replace('\n', '').replace(
+                        ',  ', ',')
+
+                    left = content.split('base64,')[0] + 'base64,'
+                    left = left.replace("image/png", "image/webp")
+                    right = content.split('base64,')[1]
+                    png_b64 = right.split('"')[0]
+                    right = '"' + '"'.join(right.split('"')[1:])
+
+                    p = subprocess.run("cwebp -quiet -noalpha -q 80 -o - -- -",
+                                       input=base64.b64decode(png_b64),
+                                       stdout=subprocess.PIPE,
+                                       shell=True, check=True)
+                    webpimg = base64.b64encode(p.stdout).decode('utf-8')
+                    new_lines.append(left + webpimg + right)
+                else:
+                    new_lines.append(line)
+        lines = new_lines
+    else:
+        lines = image.splitlines()
+
+    svg_start = 0
+    for i, line in enumerate(lines):
+        if '<svg ' in line:
+            svg_start = i
+            continue
+
+    image_svg = lines[svg_start:]  # strip out extra DOCTYPE, etc headers
+    return ''.join(image_svg)  # straight up giant string
+
 def svg2str(display_object, dpi=300):
     """
     Serializes a nilearn display object as a string
@@ -77,11 +132,13 @@ def svg2str(display_object, dpi=300):
         facecolor='k', edgecolor='k')
     return image_buf.getvalue()
 
-def extract_svg(display_object, dpi=300):
+def extract_svg(display_object, dpi=300, compress='auto'):
     """
     Removes the preamble of the svg files generated with nilearn
     """
     image_svg = svg2str(display_object, dpi)
+    if compress == True or compress == 'auto':
+        image_svg = svg_compress(image_svg, compress)
     image_svg = re.sub(' height="[0-9]+[a-z]*"', '', image_svg, count=1)
     image_svg = re.sub(' width="[0-9]+[a-z]*"', '', image_svg, count=1)
     image_svg = re.sub(' viewBox',
@@ -140,7 +197,8 @@ def _3d_in_file(in_file):
     return nlimage.index_img(in_file, 0)
 
 
-def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None, **plot_params):
+def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
+              compress='auto', **plot_params):
     """ plot segmentation as contours over the image (e.g. anatomical).
     seg_niis should be a list of files. mask_nii helps determine the cut
     coordinates. plot_params will be passed on to nilearn plot_* functions. If
@@ -164,7 +222,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
             plot_params['alpha'] = 1
             svg.add_contours(seg, **plot_params)
 
-        svgs_list.append(extract_svg(svg))
+        svgs_list.append(extract_svg(svg, compress=compress))
         svg.close()
 
     plot_params = {} if plot_params is None else plot_params
@@ -206,7 +264,8 @@ def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=('z', 'x', 'y'
 
 def plot_registration(anat_nii, div_id, plot_params=None,
                       order=('z', 'x', 'y'), cuts=None,
-                      estimate_brightness=False, label=None, contour=None):
+                      estimate_brightness=False, label=None, contour=None,
+                      compress='auto'):
     """
     Plots the foreground and background views
     Default order is: axial, coronal, sagittal
@@ -251,7 +310,7 @@ def plot_registration(anat_nii, div_id, plot_params=None,
         elif contour is not None:
             display.add_contours(contour, levels=[.9])
 
-        svg = extract_svg(display)
+        svg = extract_svg(display, compress=compress)
         display.close()
 
         # Find and replace the figure_1 id.

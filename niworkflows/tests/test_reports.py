@@ -169,6 +169,25 @@ class TestFASTRPT(unittest.TestCase):
         _smoke_test_report(report_interface, 'testFAST_no_segments.html')
 
 
+class TestCompression(unittest.TestCase):
+
+    def test_compression(self):
+        ''' test if compression makes files smaller '''
+        uncompressed_int = BETRPT(in_file=MNI_2MM, generate_report=True,
+                                  mask=True, compress_report=False)
+        uncompressed_int.run()
+        uncompressed_report = uncompressed_int.inputs.out_report
+
+        compressed_int = BETRPT(in_file=MNI_2MM, generate_report=True,
+                                mask=True, compress_report=True)
+        compressed_int.run()
+        compressed_report = compressed_int.inputs.out_report
+
+        unittest.TestCase.assertTrue(int(os.stat(uncompressed_report).st_size) > int(os.stat(compressed_report).st_size),
+                                     'An uncompressed report is bigger than '
+                                     'a compressed report')
+
+
 class TestReconAllRPT(unittest.TestCase):
     def test_generate_report(self):
         report_interface = ReconAllRPT(subject_id='fsaverage', directive='all',
