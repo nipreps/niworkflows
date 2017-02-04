@@ -77,7 +77,7 @@ def svg_compress(image, compress='auto'):
     if (shutil.which("svgo") and compress == 'auto') or compress is True:
 
         p = subprocess.run("svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues",
-                           stdin=image.encode('utf-8'), stdout=subprocess.PIPE,
+                           input=image.encode('utf-8'), stdout=subprocess.PIPE,
                            shell=True, check=True)
         image = p.stdout.decode('utf-8')
 
@@ -101,7 +101,7 @@ def svg_compress(image, compress='auto'):
                     right = '"' + '"'.join(right.split('"')[1:])
 
                     p = subprocess.run("cwebp -quiet -noalpha -q 80 -o - -- -",
-                                       stdin=base64.b64decode(png_b64),
+                                       input=base64.b64decode(png_b64),
                                        stdout=subprocess.PIPE,
                                        shell=True, check=True)
                     webpimg = base64.b64encode(p.stdout).decode('utf-8')
