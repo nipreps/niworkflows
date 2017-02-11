@@ -12,7 +12,6 @@ from shutil import copy
 import nibabel as nb
 from nilearn import image
 from nipype.utils.tmpdirs import InTemporaryDirectory
-from nipype.testing import example_data
 
 
 from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsampled,
