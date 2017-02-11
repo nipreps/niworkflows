@@ -145,6 +145,15 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
             self._fixed_image, self._moving_image)
 
 
+class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
+                           fsl.preprocess.ApplyXFMInputSpec):
+    pass
+
+class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
+    input_spec = ApplyXFMInputSpecRPT
+    output_spec = FLIRTOutputSpecRPT
+
+
 class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
                              freesurfer.preprocess.BBRegisterInputSpec):
     pass
@@ -170,18 +179,3 @@ class BBRegisterRPT(nrc.RegistrationRC, freesurfer.BBRegister):
             self._fixed_image, self._moving_image)
 
 
-class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
-                           fsl.preprocess.ApplyXFMInputSpec):
-    pass
-
-
-class ApplyXFMRPT(nrc.RegistrationRC, fsl.ApplyXFM):
-    input_spec = ApplyXFMInputSpecRPT
-    output_spec = FLIRTOutputSpecRPT
-
-    def _post_run_hook(self, runtime):
-        self._fixed_image = self.inputs.reference
-        self._moving_image = self.aggregate_outputs().out_file
-        NIWORKFLOWS_LOG.info(
-            'Report - setting fixed (%s) and moving (%s) images',
-            self._fixed_image, self._moving_image)
