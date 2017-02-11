@@ -60,11 +60,14 @@ class TestRegistrationInterfaces(unittest.TestCase):
 
     def test_ApplyXFMRPT(self):
         """ the ApplyXFM report capable test """
+        flirt_rpt = FLIRTRPT(generate_report=False, in_file=self.moving,
+                             reference=self.reference)
+
         applyxfm_rpt = ApplyXFMRPT(
             generate_report=True,
-            in_file=example_data('structural.nii'),
-            in_matrix_file=example_data('trans.mat'),
-            reference=example_data('mni.nii'),
+            in_file=self.moving,
+            in_matrix_file=flirt_rpt.run().outputs.out_matrix_file,
+            reference=self.reference,
             apply_xfm=True
         )
         _smoke_test_report(applyxfm_rpt, 'testApplyXFM.svg')
