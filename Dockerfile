@@ -30,7 +30,7 @@
 # not for distribution within Docker hub.
 # For that purpose, the Dockerfile is found in build/Dockerfile.
 
-FROM poldracklab/neuroimaging-core:base-0.0.2
+FROM poldracklab/neuroimaging-core:freesurfer-0.0.2
 
 # Install miniconda
 RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
@@ -45,14 +45,27 @@ RUN conda config --add channels conda-forge && \
     conda install -y numpy scipy matplotlib pandas lxml libxslt nose mock && \
     python -c "from matplotlib import font_manager"
 
+RUN curl -sSLO "http://downloads.webmproject.org/releases/webp/libwebp-0.5.2-linux-x86-64.tar.gz" && \
+  tar -xf libwebp-0.5.2-linux-x86-64.tar.gz && cd libwebp-0.5.2-linux-x86-64/bin && \
+  mv cwebp /usr/local/bin/ && rm -rf libwebp-0.5.2-linux-x86-64
+
+RUN curl -sL https://deb.nodesource.com/setup_7.x | bash -
+RUN apt-get install -y nodejs
+RUN npm install -g svgo
+
+# Installing dev requirements (packages that are not in pypi)
+ADD requirements.txt requirements.txt
+RUN pip install -r requirements.txt && \
+    rm -rf ~/.cache/pip
+
 RUN mkdir /niworkflows_data
 ENV CRN_SHARED_DATA /niworkflows_data
 
 WORKDIR /root/
 COPY . niworkflows/
+RUN find /root/niworkflows/ -name "test*.py" -exec chmod a-x '{}' \;
 RUN cd niworkflows && \
-    pip install git+https://github.com/nipy/nipype.git@8ddca5a03fcad26887c862dc23c82ef23f2ee506#egg=nipype && \
-    pip install --process-dependency-links -e .[all] && \
+    pip install -e .[all] && \
     python -c 'from niworkflows.data.getters import get_mni_template_ras; get_mni_template_ras()' && \
     python -c 'from niworkflows.data.getters import get_ds003_downsampled; get_ds003_downsampled()' && \
     python -c 'from niworkflows.data.getters import get_ants_oasis_template_ras; get_ants_oasis_template_ras()'

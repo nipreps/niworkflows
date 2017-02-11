@@ -7,7 +7,6 @@ import os
 from sys import version_info
 from abc import abstractmethod
 from io import open
-from nilearn.image import load_img
 
 from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 from niworkflows import NIWORKFLOWS_LOG
@@ -24,6 +23,11 @@ class ReportCapableInputSpec(BaseInterfaceInputSpec):
         False, usedefault=True, desc="Set to true to enable report generation for node")
     out_report = File(
         'report.html', usedefault=True, desc='filename for the visual report')
+    compress_report = traits.Enum('auto', True, False, usedefault=True,
+                                  desc="Compress the reportlet using SVGO or"
+                                       "WEBP. 'auto' - compress if relevant "
+                                       "software is installed, True = force,"
+                                       "False - don't attempt to compress")
 
 
 class ReportCapableOutputSpec(TraitedSpec):
@@ -36,16 +40,20 @@ class ReportCapableInterface(BaseInterface):
 
     def __init__(self, **inputs):
         self._out_report = None
+        self._mock_run = None
         super(ReportCapableInterface, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
         """ delegates to base interface run method, then attempts to generate reports """
 
-        try:
-            runtime = super(
-                ReportCapableInterface, self)._run_interface(runtime)
-        except NotImplementedError:
-            pass  # the interface is derived from BaseInterface
+        if not self._mock_run:
+            try:
+                runtime = super(
+                    ReportCapableInterface, self)._run_interface(runtime)
+            except NotImplementedError:
+                pass  # the interface is derived from BaseInterface
+        else:
+            runtime.returncode = 0
 
         # leave early if there's nothing to do
         if not self.inputs.generate_report:
@@ -57,21 +65,21 @@ class ReportCapableInterface(BaseInterface):
         # check exit code and act consequently
         NIWORKFLOWS_LOG.debug('Running report generation code')
 
-        _report_ok = False
-        if hasattr(runtime, 'returncode') and runtime.returncode == 0:
-            self._generate_report()
-            _report_ok = True
-            NIWORKFLOWS_LOG.info('Successfully created report (%s)',
-                                 self._out_report)
-
-        if not _report_ok:
+        if hasattr(runtime, 'returncode') and runtime.returncode not in [0, None]:
             self._generate_error_report(
                 errno=runtime.get('returncode', None))
+        else:
+            self._generate_report()
+            NIWORKFLOWS_LOG.info('Successfully created report (%s)',
+                                 self._out_report)
 
         return runtime
 
     def _list_outputs(self):
-        outputs = super(ReportCapableInterface, self)._list_outputs()
+        try:
+            outputs = super(ReportCapableInterface, self)._list_outputs()
+        except NotImplementedError:
+            outputs = {}
         if self._out_report is not None:
             outputs['out_report'] = self._out_report
         return outputs
@@ -102,6 +110,14 @@ class ReportCapableInterface(BaseInterface):
         with open(self._out_report, 'w' if PY3 else 'wb') as outfile:
             outfile.write(errorstr)
 
+    @property
+    def mock_run(self):
+        return self._mock_run
+
+    @mock_run.setter
+    def mock_run(self, value):
+        self._mock_run = value
+
 
 class RegistrationRCInputSpec(ReportCapableInputSpec):
     out_report = File(
@@ -118,6 +134,7 @@ class RegistrationRC(ReportCapableInterface):
         self._fixed_image_mask = None
         self._fixed_image_label = "fixed"
         self._moving_image_label = "moving"
+        self._contour = None
         super(RegistrationRC, self).__init__(**inputs)
 
     def _generate_report(self):
@@ -127,6 +144,7 @@ class RegistrationRC(ReportCapableInterface):
 
         fixed_image_nii = load_img(self._fixed_image)
         moving_image_nii = load_img(self._moving_image)
+        contour_nii = load_img(self._contour) if self._contour is not None else None
 
         if self._fixed_image_mask:
             fixed_image_nii = unmask(apply_mask(fixed_image_nii,
@@ -141,18 +159,28 @@ class RegistrationRC(ReportCapableInterface):
         else:
             mask_nii = threshold_img(fixed_image_nii, 1e-3)
 
-        cuts = cuts_from_bbox(mask_nii, cuts=7)
+        n_cuts = 7
+        if not self._fixed_image_mask and contour_nii:
+            cuts = cuts_from_bbox(contour_nii, cuts=n_cuts)
+        else:
+            cuts = cuts_from_bbox(mask_nii, cuts=n_cuts)
+
         # Call composer
         compose_view(
             plot_registration(fixed_image_nii, 'fixed-image',
                               estimate_brightness=True,
                               cuts=cuts,
-                              label=self._fixed_image_label),
+                              label=self._fixed_image_label,
+                              contour=contour_nii,
+                              compress=self.inputs.compress_report),
             plot_registration(moving_image_nii, 'moving-image',
                               estimate_brightness=True,
                               cuts=cuts,
-                              label=self._moving_image_label),
-            out_file=self._out_report)
+                              label=self._moving_image_label,
+                              contour=contour_nii,
+                              compress=self.inputs.compress_report),
+            out_file=self._out_report
+        )
 
 
 class SegmentationRC(ReportCapableInterface):
@@ -167,5 +195,47 @@ class SegmentationRC(ReportCapableInterface):
             mask_nii=self._mask_file,
             out_file=self.inputs.out_report,
             masked=self._masked,
-            title=self._report_title
+            title=self._report_title,
+            compress=self.inputs.compress_report
+        )
+
+
+class SurfaceSegmentationRC(ReportCapableInterface):
+
+    """ An abstract mixin to registration nipype interfaces """
+
+    def __init__(self, **inputs):
+        self._anat_file = None
+        self._mask_file = None
+        self._contour = None
+        super(SurfaceSegmentationRC, self).__init__(**inputs)
+
+    def _generate_report(self):
+        """ Generates the visual report """
+        from niworkflows.viz.utils import compose_view, plot_registration
+        NIWORKFLOWS_LOG.info('Generating visual report')
+
+        anat = load_img(self._anat_file)
+        contour_nii = load_img(self._contour) if self._contour is not None else None
+
+        if self._mask_file:
+            anat = unmask(apply_mask(anat, self._mask_file), self._mask_file)
+            mask_nii = load_img(self._mask_file)
+        else:
+            mask_nii = threshold_img(anat, 1e-3)
+
+        n_cuts = 7
+        if not self._mask_file and contour_nii:
+            cuts = cuts_from_bbox(contour_nii, cuts=n_cuts)
+        else:
+            cuts = cuts_from_bbox(mask_nii, cuts=n_cuts)
+
+        # Call composer
+        compose_view(
+            plot_registration(anat, 'fixed-image',
+                              estimate_brightness=True,
+                              cuts=cuts,
+                              contour=contour_nii),
+            [],
+            out_file=self._out_report
         )
