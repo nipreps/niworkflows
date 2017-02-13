@@ -145,6 +145,15 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
             self._fixed_image, self._moving_image)
 
 
+class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
+                           fsl.preprocess.ApplyXFMInputSpec):
+    pass
+
+class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
+    input_spec = ApplyXFMInputSpecRPT
+    output_spec = FLIRTOutputSpecRPT
+
+
 class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
                              freesurfer.preprocess.BBRegisterInputSpec):
     pass
@@ -170,11 +179,3 @@ class BBRegisterRPT(nrc.RegistrationRC, freesurfer.BBRegister):
             self._fixed_image, self._moving_image)
 
 
-# COMMENTED OUT UNTIL WE REALLY IMPLEMENT IT
-# class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
-#                            fsl.preprocess.ApplyXFMInputSpec):
-#     pass
-#
-# class ApplyXFMRPT(FLIRTRPT):
-#     ''' ApplyXFM is a wrapper around FLIRT. ApplyXFMRPT is a wrapper around FLIRTRPT.'''
-#     input_spec = ApplyXFMInputSpecRPT

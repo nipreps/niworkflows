@@ -52,9 +52,7 @@ class ReconAllInputSpecRPT(nrc.ReportCapableInputSpec,
     pass
 
 class ReconAllOutputSpecRPT(nrc.ReportCapableOutputSpec,
-                            freesurfer.preprocess.ReconAllIOutputSpec):
-    # Note typo in fsl.preprocess.ReconAllIOutputSpec.
-    # Can fix when the pinned nipype includes 36e6c17
+                            freesurfer.preprocess.ReconAllOutputSpec):
     pass
 
 class ReconAllRPT(nrc.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):

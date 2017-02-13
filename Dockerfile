@@ -45,6 +45,14 @@ RUN conda config --add channels conda-forge && \
     conda install -y numpy scipy matplotlib pandas lxml libxslt nose mock && \
     python -c "from matplotlib import font_manager"
 
+RUN curl -sSLO "http://downloads.webmproject.org/releases/webp/libwebp-0.5.2-linux-x86-64.tar.gz" && \
+  tar -xf libwebp-0.5.2-linux-x86-64.tar.gz && cd libwebp-0.5.2-linux-x86-64/bin && \
+  mv cwebp /usr/local/bin/ && rm -rf libwebp-0.5.2-linux-x86-64
+
+RUN curl -sL https://deb.nodesource.com/setup_7.x | bash -
+RUN apt-get install -y nodejs
+RUN npm install -g svgo
+
 # Installing dev requirements (packages that are not in pypi)
 ADD requirements.txt requirements.txt
 RUN pip install -r requirements.txt && \
@@ -55,6 +63,7 @@ ENV CRN_SHARED_DATA /niworkflows_data
 
 WORKDIR /root/
 COPY . niworkflows/
+RUN find /root/niworkflows/ -name "test*.py" -exec chmod a-x '{}' \;
 RUN cd niworkflows && \
     pip install -e .[all] && \
     python -c 'from niworkflows.data.getters import get_mni_template_ras; get_mni_template_ras()' && \
