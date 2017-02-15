@@ -188,6 +188,7 @@ class RobustMNINormalization(BaseInterface):
                         "moving_cfm.nii.gz",
                         self.inputs.lesion_mask,
                         whole_img=False)
+            # If no lesion mask was specified...
             else:
                 # If explicit masking is turned on...
                 if self.inputs.explicit_masking:
@@ -201,26 +202,54 @@ class RobustMNINormalization(BaseInterface):
                 else:
                     # Use the moving mask during registration.
                     self.norm.inputs.moving_image_mask = self.inputs.moving_mask
-
+        # If no moving mask is specified...
+        else:
+            # If a lesion mask is specified...
+            if isdefined(self.inputs.lesion_mask):
+                    # Create a global CFM and use this as the moving mask.
+                    self.norm.inputs.moving_image_mask = make_cfm(
+                        self.inputs.moving_image,
+                        "moving_cfm.nii.gz",
+                        self.inputs.lesion_mask)
 
         # If the settings specify a reference image...
         if isdefined(self.inputs.reference_image):
             # ...set that reference image as the fixed image.
             self.norm.inputs.fixed_image = self.inputs.reference_image
-            # if the settings specify a reference mask...
+            # If the settings specify a reference mask...
             if isdefined(self.inputs.reference_mask):
-                # ...and explicit masking is turned on...
-                if self.inputs.explicit_masking:
-                    # Mask the fixed image;
-                    # Use the masked image as the fixed image for Registration;
-                    # Do not use the fixed mask during registration.
-                    self.norm.inputs.fixed_image = mask(
-                        self.inputs.reference_image[0],
-                        self.inputs.reference_mask,
-                        "fixed_masked.nii.gz")
-                else:
-                    # Use the fixed mask during registration.
-                    self.norm.inputs.fixed_image_mask = self.inputs.reference_mask
+                # If the settings specify a lesion mask...
+                if isdefined(self.inputs.lesion_mask):
+                    # ...and explicit masking is turned on...
+                    if self.inputs.explicit_masking:
+                        # Mask the fixed image;
+                        # Use the masked image as the fixed image for Registration;
+                        self.norm.inputs.fixed_image = mask(
+                            self.inputs.reference_image[0],
+                            self.inputs.reference_mask,
+                            "fixed_masked.nii.gz")
+                        # Create a global CFM and use this as the fixed mask.
+                        self.norm.inputs.fixed_image_mask = make_cfm(
+                            self.inputs.reference_mask,
+                            "fixed_cfm.nii.gz",
+                            self.inputs.lesion_mask)
+                    else:
+                        # Create a restricted CFM and use this as the fixed mask.
+                        self.norm.inputs.fixed_image_mask = make_cfm(
+                            self.inputs.reference_mask,
+                            "fixed_cfm.nii.gz",
+                            self.inputs.lesion_mask,
+                            whole_img=False)
+            # If no reference mask is provided...
+            else:
+                # ...but a lesion mask *is* provided...
+                if isdefined(self.inputs.lesion_mask):       
+                    # Create a global CFM and use this as the fixed mask.
+                    self.norm.inputs.fixed_image_mask = make_cfm(
+                        self.inputs.reference_image,
+                        "fixed_cfm.nii.gz",
+                        self.inputs.lesion_mask)
+
         else:
             # Get the template specified by the user.
             get_template = getattr(getters, 'get_{}'.format(self.inputs.template))
@@ -236,22 +265,50 @@ class RobustMNINormalization(BaseInterface):
             if self.inputs.testing:
                 resolution = 2
 
-            # If explicit masking is turned on...
-            if self.inputs.explicit_masking:
-                # Mask the template image with the pre-computed template mask;
-                # Use the masked image as the fixed image for Registration;
-                # Do not use a fixed image mask during registration.
-                self.norm.inputs.fixed_image = mask(op.join(
-                    mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference)),
-                    op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution),
-                    "fixed_masked.nii.gz")
+            # If the settings specify a lesion mask...
+            if isdefined(self.inputs.lesion_mask):
+                # If explicit masking is turned on...
+                if self.inputs.explicit_masking:
+                    # Mask the template image with the pre-computed template mask;
+                    # Use the masked image as the fixed image for Registration; 
+                    self.norm.inputs.fixed_image = mask(op.join(
+                        mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference)),
+                        op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution),
+                        "fixed_masked.nii.gz")
+                    # Create a global CFM and use this as the fixed mask.
+                    self.norm.inputs.fixed_image_mask = make_cfm(
+                        op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution),
+                        "fixed_cfm.nii.gz",
+                        self.inputs.lesion_mask)
+                else:
+                    # Use the raw template image for Registration.
+                    self.norm.inputs.fixed_image = op.join(
+                        mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
+                    # Create a restricted CFM and use this as the fixed mask.
+                    self.norm.inputs.fixed_image_mask = make_cfm(
+                        op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution),
+                        "fixed_cfm.nii.gz",
+                        self.inputs.lesion_mask,
+                        whole_img=False) 
+
+            # If no lesion mask is provided...
             else:
-                # Use the raw template image for Registration.
-                self.norm.inputs.fixed_image = op.join(
-                    mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
-                # Use the pre-computed mask for Registration.
-                self.norm.inputs.fixed_image_mask = op.join(
-                    mni_template, '%dmm_brainmask.nii.gz' % resolution)
+                # If explicit masking is turned on...
+                if self.inputs.explicit_masking:
+                    # Mask the template image with the pre-computed template mask;
+                    # Use the masked image as the fixed image for Registration;
+                    # Do not use a fixed image mask during registration.
+                    self.norm.inputs.fixed_image = mask(op.join(
+                        mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference)),
+                        op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution),
+                        "fixed_masked.nii.gz")
+                else:
+                    # Use the raw template image for Registration.
+                    self.norm.inputs.fixed_image = op.join(
+                        mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
+                    # Use the pre-computed mask for Registration.
+                    self.norm.inputs.fixed_image_mask = op.join(
+                        mni_template, '%dmm_brainmask.nii.gz' % resolution)
 
 
 
@@ -292,14 +349,14 @@ def mask(in_file, mask_file, new_name):
     new_nii.to_filename(new_name)
     return os.path.abspath(new_name)
 
-def make_cfm(ref_mask, out_path, lesion_mask, whole_img=True):
+def make_cfm(ref_img, out_path, lesion_mask, whole_img=True):
     """
     Create a mask to constrain registration.
 
     Parameters
     ----------
-    ref_mask : str
-        Path to an existing mask.
+    ref_img : str
+        Path to an existing image.
     out_path : str
         Path/filename for the new cost function mask.
     lesion_mask : str, optional
@@ -314,25 +371,25 @@ def make_cfm(ref_mask, out_path, lesion_mask, whole_img=True):
 
     Notes
     -----
-    ref_mask and lesion_mask must be in the same
+    ref_img and lesion_mask must be in the same
     image space and ahve the same dimensions
     """
     import nibabel as nb
-    from nilearn.image import import math_img
+    from nilearn.image import math_img
     import os
-    # Load the reference mask
-    ref_nii = nb.load(ref_mask)
+    # Load the reference image
+    ref_nii = nb.load(ref_img)
     ref_data = ref_nii.get_data()
     if whole_img is True:
-        # Set all voxels in the reference mask to 1
+        # Set all voxels in the reference image to 1
         ref_data[:] = 1
-        # Replace the original reference mask image.
+        # Replace the original reference image.
         ref_nii = nb.Nifti1Image(ref_data, ref_nii.affine, ref_nii.header)
     # If a lesion mask was provided...
     if lesion_mask is not None:
         # Load the lesion mask
         lm_nii = nb.load(lesion_mask)
-        # Subtract the lesion mask from the global mask
+        # Subtract the lesion mask from the reference image
         cfm_nii = math_img("img1 - img2", img1=ref_nii, img2=lm_nii)
     else:
         cfm_nii = global_nii
