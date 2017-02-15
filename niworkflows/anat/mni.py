@@ -27,6 +27,8 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     moving_mask = File(exists=True, desc='moving image mask')
     # Set the input file to be used as the reference mask.
     reference_mask = File(exists=True, desc='reference image mask')
+    # Set the input file to be used as the lesion mask.
+    lesion_mask = File(exists=True, desc='lesion mask image')
     # Number of threads to use for ANTs/ITK processes.
     num_threads = traits.Int(cpu_count(), usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
