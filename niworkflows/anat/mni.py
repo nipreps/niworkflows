@@ -168,7 +168,8 @@ class RobustMNINormalization(BaseInterface):
         if isdefined(self.inputs.moving_mask):
             # If the settings specify a lesion mask...
             if isdefined(self.inputs.lesion_mask):
-                    # create a whole-image mask based on the brian mask
+                # create a whole-image mask based on the brian mask
+
                     # subtract the lesion mask from the whole-image mask
 
                 # If explicit masking is turned on...
@@ -287,31 +288,47 @@ def mask(in_file, mask_file, new_name):
     new_nii.to_filename(new_name)
     return os.path.abspath(new_name)
 
-def make_global_mask(in_file, out_path):
+def make_cfm(ref_mask, out_path, lesion_mask):
     """
-    Create a global mask from an existing mask.
+    Create a mask to constrain registration.
 
     Parameters
     ----------
-    in_file : str
-                 Path to an existing brain mask.
+    ref_mask : str
+        Path to an existing mask.
     out_path : str
-               Path/filename for the global mask.
+        Path/filename for the new cost function mask.
+    lesion_mask : str, optional
+        Path to an existing binary lesion mask.
 
     Returns
     -------
     str
-        Absolute path of the new global mask.
+        Absolute path of the new cost function mask.
+
+    Notes
+    -----
+    ref_mask and lesion_mask must be in the same
+    image space and ahve the same dimensions
     """
     import nibabel as nb
+    from nilearn.image import import math_img
     import os
-    # Load the input mask
-    in_nii = nb.load(in_file)
-    data = in_nii.get_data()
-    # Set all voxels in the image to 1
-    data[:] = 1
-    # Save the new global mask image.
-    new_nii = nb.Nifti1Image(data, in_nii.affine, in_nii.header)
-    new_nii.to_filename(out_path)
+    # Load the reference mask
+    ref_nii = nb.load(ref_mask)
+    ref_data = ref_nii.get_data()
+    # Set all voxels in the reference mask to 1
+    ref_data[:] = 1
+    # Create the global mask image.
+    global_nii = nb.Nifti1Image(ref_data, ref_nii.affine, ref_nii.header)
+    # If a lesion mask was provided...
+    if lesion_mask is not None:
+        # Load the lesion mask
+        lm_nii = nb.load(lesion_mask)
+        # Subtract the lesion mask from the global mask
+        cfm_nii = math_img("img1 - img2", img1=global_nii, img2=lm_nii)
+    else:
+        cfm_nii = global_nii
+    cfm_nii.to_filename(out_path)
     return os.path.abspath(out_path)
 
