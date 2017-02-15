@@ -50,7 +50,7 @@ CLASSIFIERS = [
 ]
 
 REQUIRES = ['nipype', 'future', 'nilearn>=0.2.6', 'sklearn', 'pandas', 'matplotlib',
-            'jinja2', 'svgutils', 'tinycss', 'whichcraft']
+            'jinja2', 'svgutils', 'tinycss']
 SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 
