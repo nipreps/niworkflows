@@ -166,18 +166,37 @@ class RobustMNINormalization(BaseInterface):
        
         # If the settings specify a moving mask...
         if isdefined(self.inputs.moving_mask):
-            # ...and explicit masking is turned on...
-            if self.inputs.explicit_masking:
-                # Mask the moving image;
-                # Use the masked image as the moving image for Registration;
-                # Do not use the moving mask during registration.
-                self.norm.inputs.moving_image = mask(
-                    self.inputs.moving_image[0],
-                    self.inputs.moving_mask,
-                    "moving_masked.nii.gz")
+            # If the settings specify a lesion mask...
+            if isdefined(self.inputs.lesion_mask):
+                    # create a whole-image mask based on the brian mask
+                    # subtract the lesion mask from the whole-image mask
+
+                # If explicit masking is turned on...
+                if self.inputs.explicit_masking:
+                    # Mask the moving image;
+                    # Use the masked image as the moving image for Registration;
+                    self.norm.inputs.moving_image = mask(
+                        self.inputs.moving_image[0],
+                        self.inputs.moving_mask,
+                        "moving_masked.nii.gz")
+                    # use this mask as the moving image mask
+                else:
+                    # Use the moving mask during registration.
+                    self.norm.inputs.moving_image_mask = self.inputs.moving_mask
             else:
-                # Use the moving mask during registration.
-                self.norm.inputs.moving_image_mask = self.inputs.moving_mask
+                # If explicit masking is turned on...
+                if self.inputs.explicit_masking:
+                    # Mask the moving image;
+                    # Use the masked image as the moving image for Registration;
+                    # Do not use the moving mask during registration.
+                    self.norm.inputs.moving_image = mask(
+                        self.inputs.moving_image[0],
+                        self.inputs.moving_mask,
+                        "moving_masked.nii.gz")
+                else:
+                    # Use the moving mask during registration.
+                    self.norm.inputs.moving_image_mask = self.inputs.moving_mask
+
 
         # If the settings specify a reference image...
         if isdefined(self.inputs.reference_image):
@@ -267,4 +286,32 @@ def mask(in_file, mask_file, new_name):
     new_nii = nb.Nifti1Image(data, in_nii.affine, in_nii.header)
     new_nii.to_filename(new_name)
     return os.path.abspath(new_name)
+
+def make_global_mask(in_file, out_path):
+    """
+    Create a global mask from an existing mask.
+
+    Parameters
+    ----------
+    in_file : str
+                 Path to an existing brain mask.
+    out_path : str
+               Path/filename for the global mask.
+
+    Returns
+    -------
+    str
+        Absolute path of the new global mask.
+    """
+    import nibabel as nb
+    import os
+    # Load the input mask
+    in_nii = nb.load(in_file)
+    data = in_nii.get_data()
+    # Set all voxels in the image to 1
+    data[:] = 1
+    # Save the new global mask image.
+    new_nii = nb.Nifti1Image(data, in_nii.affine, in_nii.header)
+    new_nii.to_filename(out_path)
+    return os.path.abspath(out_path)
 
