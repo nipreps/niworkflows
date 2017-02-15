@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os.path as op
-import shutil
 import subprocess
 import base64
 import re
@@ -28,6 +27,7 @@ from niworkflows.viz.validators import HTMLValidator
 
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
+
 
 def robust_set_limits(data, plot_params):
     vmin = np.percentile(data, 15)
@@ -74,15 +74,20 @@ def svg_compress(image, compress='auto'):
     Performs compression (can be disabled). A bit hacky. '''
 
     # Compress the SVG file using SVGO
-    if (shutil.which("svgo") and compress == 'auto') or compress is True:
-
-        p = subprocess.run("svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues",
-                           input=image.encode('utf-8'), stdout=subprocess.PIPE,
-                           shell=True, check=True)
-        image = p.stdout.decode('utf-8')
+    if compress:
+        try:
+            p = subprocess.run(
+                "svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues",
+                input=image.encode('utf-8'), stdout=subprocess.PIPE,
+                shell=True, check=True)
+        except FileNotFoundError:
+            if compress is True:
+                raise
+        else:
+            image = p.stdout.decode('utf-8')
 
     # Convert all of the rasters inside the SVG file with 80% compressed WEBP
-    if (shutil.which("cwebp") and compress == 'auto') or compress == True:
+    if (_has_cwebp() and compress == 'auto') or compress == True:
         new_lines = []
         with StringIO(image) as fp:
             for line in fp:
@@ -150,7 +155,7 @@ def extract_svg(display_object, dpi=300, compress='auto'):
     end_idx = image_svg.rfind(end_tag)
     if start_idx is -1 or end_idx is -1:
         NIWORKFLOWS_LOG.info('svg tags not found in extract_svg')
-    # rfind gives the start index of the substr. We want this substr 
+    # rfind gives the start index of the substr. We want this substr
     # included in our return value so we add its length to the index.
     end_idx += len(end_tag)
     return image_svg[start_idx:end_idx]
@@ -395,3 +400,10 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
         with open(out_file, 'w' if PY3 else 'wb') as f:
             f.write('\n'.join(svg))
     return out_file
+
+def _has_cwebp():
+    try:
+        subprocess.run(['cwebp'], stdout=subprocess.DEVNULL)
+    except FileNotFoundError:
+        return False
+    return True
