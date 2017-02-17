@@ -24,3 +24,4 @@
     "output_transform_prefix": "epi_to_mni",
     "output_warped_image": true,
     "interpolation": "LanczosWindowedSinc"
+}
