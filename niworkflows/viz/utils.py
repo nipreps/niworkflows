@@ -403,7 +403,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
 
 def _which(cmd):
     try:
-        subprocess.run([cmd], stdout=subprocess.DEVNULL)
+        subprocess.run([cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except FileNotFoundError:
         return False
     return True
