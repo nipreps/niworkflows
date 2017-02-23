@@ -74,7 +74,7 @@ def svg_compress(image, compress='auto'):
     Performs compression (can be disabled). A bit hacky. '''
 
     # Compress the SVG file using SVGO
-    if compress:
+    if (_which('svgo') and compress == 'auto') or compress == True:
         try:
             p = subprocess.run(
                 "svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues",
@@ -87,7 +87,7 @@ def svg_compress(image, compress='auto'):
             image = p.stdout.decode('utf-8')
 
     # Convert all of the rasters inside the SVG file with 80% compressed WEBP
-    if (_has_cwebp() and compress == 'auto') or compress == True:
+    if (_which('cwebp') and compress == 'auto') or compress == True:
         new_lines = []
         with StringIO(image) as fp:
             for line in fp:
@@ -401,9 +401,9 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
             f.write('\n'.join(svg))
     return out_file
 
-def _has_cwebp():
+def _which(cmd):
     try:
-        subprocess.run(['cwebp'], stdout=subprocess.DEVNULL)
+        subprocess.run([cmd], stdout=subprocess.DEVNULL)
     except FileNotFoundError:
         return False
     return True
