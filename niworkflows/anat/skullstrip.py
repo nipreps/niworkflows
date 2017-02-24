@@ -6,7 +6,7 @@ from nipype.interfaces import fsl
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
 
-def afni_wf(name='AFNISkullStripWorkflow'):
+def afni_wf(name='AFNISkullStripWorkflow', bias_correct=True):
     """
     Skull-stripping workflow
 
@@ -23,8 +23,6 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105
     outputnode = pe.Node(niu.IdentityInterface(fields=['bias_corrected', 'out_file', 'out_mask']),
                          name='outputnode')
 
-    inu_n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3),
-                     name='CorrectINU')
  
     sstrip = pe.Node(afni.SkullStrip(outputtype='NIFTI_GZ'), name='skullstrip')
     sstrip_orig_vol = pe.Node(afni.Calc(
@@ -33,13 +31,24 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105
 
     workflow.connect([
         (inputnode, sstrip_orig_vol, [('in_file', 'in_file_a')]),
-        (inputnode, inu_n4, [('in_file', 'input_image')]),
-        (inu_n4, sstrip, [('output_image', 'in_file')]),
         (sstrip, sstrip_orig_vol, [('out_file', 'in_file_b')]),
         (sstrip_orig_vol, binarize, [('out_file', 'in_file')]),
         (sstrip_orig_vol, outputnode, [('out_file', 'out_file')]),
         (binarize, outputnode, [('out_file', 'out_mask')]),
-        (inu_n4, outputnode, [('output_image', 'bias_corrected')])
     ])
+
+    if bias_correct:
+        inu_n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3),
+                         name='CorrectINU')
+        workflow.connect([
+            (inputnode, inu_n4, [('in_file', 'input_image')]),
+            (inu_n4, sstrip, [('output_image', 'in_file')]),
+            (inu_n4, outputnode, [('output_image', 'bias_corrected')])
+        ])
+    else:
+        workflow.connect([
+            (inputnode, sstrip, [('in_file', 'in_file')])
+        ])
+
     return workflow
 
