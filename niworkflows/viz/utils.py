@@ -532,7 +532,11 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
 
 def _which(cmd):
     try:
-        subprocess.run([cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except FileNotFoundError:
-        return False
+        subprocess.run([cmd], stdin=subprocess.DEVNULL,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except OSError as e:
+        from errno import ENOENT
+        if e.errno == ENOENT:
+            return False
+        raise e
     return True
