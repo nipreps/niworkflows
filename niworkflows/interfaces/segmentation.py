@@ -7,6 +7,7 @@ ReportCapableInterfaces for segmentation tools
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 
+from nipype.interfaces.base import File
 from nipype.interfaces import fsl, freesurfer
 from niworkflows.common import report as nrc
 from niworkflows import NIWORKFLOWS_LOG
@@ -75,3 +76,37 @@ class ReconAllRPT(nrc.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):
 
         NIWORKFLOWS_LOG.info('Generating report for ReconAll (subject %s)',
                              outputs.subject_id)
+
+
+class MELODICInputSpecRPT(nrc.ReportCapableInputSpec,
+                          fsl.model.MELODICInputSpec):
+    out_report = File(
+        'melodic_reportlet.svg', usedefault=True, desc='Filename for the visual'
+                                                       ' report generated '
+                                                       'by Nipype.')
+
+class MELODICOutputSpecRPT(nrc.ReportCapableOutputSpec,
+                           fsl.model.MELODICOutputSpec):
+    pass
+
+
+class MELODICRPT(nrc.ReportCapableInterface, fsl.MELODIC):
+    input_spec = MELODICInputSpecRPT
+    output_spec = MELODICOutputSpecRPT
+
+    def _generate_report(self):
+        from niworkflows.viz.utils import plot_melodic_components
+        plot_melodic_components(melodic_dir=self._melodic_dir,
+                                in_file=self.inputs.in_files[0],
+                                tr=self.inputs.tr_sec,
+                                out_file=self.inputs.out_report,
+                                compress=self.inputs.compress_report)
+
+    def _post_run_hook(self, runtime):
+        ''' generates a report showing nine slices, three per axis, of an
+        arbitrary volume of `in_files`, with the resulting segmentation
+        overlaid '''
+        outputs = self.aggregate_outputs()
+        self._melodic_dir = outputs.out_dir
+
+        NIWORKFLOWS_LOG.info('Generating report for MELODIC')
