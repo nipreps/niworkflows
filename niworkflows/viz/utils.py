@@ -83,9 +83,10 @@ def svg_compress(image, compress='auto'):
             else:
                 p = subprocess.check_output(cmd, input=image.encode('utf-8'),
                                             shell=True, check=True)
-        except FileNotFoundError:
-            if compress is True:
-                raise
+        except OSError as e:
+            from errno import ENOENT
+            if compress is True and e.errno == ENOENT:
+                raise e
         else:
             image = p.decode('utf-8')
 
@@ -115,7 +116,7 @@ def svg_compress(image, compress='auto'):
                     else:
                         p = subprocess.check_output(cmd, input=base64.b64decode(png_b64),
                                                     shell=True, check=True)
-                    webpimg = base64.b64encode(p.stdout).decode('utf-8')
+                    webpimg = base64.b64encode(p).decode('utf-8')
                     new_lines.append(left + webpimg + right)
                 else:
                     new_lines.append(line)
