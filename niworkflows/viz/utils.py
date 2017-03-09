@@ -415,7 +415,7 @@ def _which(cmd):
         else:
             import os
             DEVNULL = open(os.devnull, 'w')
-            subprocess.check_output([cmd], stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
+            subprocess.check_output([cmd], stdin=DEVNULL, stderr=DEVNULL)
     except OSError as e:
         from errno import ENOENT
         if e.errno == ENOENT:
