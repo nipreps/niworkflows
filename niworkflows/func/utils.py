@@ -23,7 +23,7 @@ class Ants2FSL(BaseInterface):
     input_spec = Ants2FSLInputSpec
     output_spec = Ants2FSLOutputSpec
     def __init__(self, *args, **kwargs):
-        num_matrices = 0
+        self.num_matricies = 0
         return super(Ants2FSL, self).init(*args, **kwargs)
 
     def _run_interface(self, runtime):
