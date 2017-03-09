@@ -20,12 +20,12 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105
     workflow = pe.Workflow(name=name)
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file']),
                         name='inputnode')
-    outputnode = pe.Node(niu.IdentityInterface(fields=['bias_corrected', 'out_file', 'out_mask']),
-                         name='outputnode')
+    outputnode = pe.Node(niu.IdentityInterface(
+        fields=['bias_corrected', 'out_file', 'out_mask', 'bias_image']), name='outputnode')
 
-    inu_n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3),
+    inu_n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3, save_bias=True),
                      name='CorrectINU')
- 
+
     sstrip = pe.Node(afni.SkullStrip(outputtype='NIFTI_GZ'), name='skullstrip')
     sstrip_orig_vol = pe.Node(afni.Calc(
         expr='a*step(b)', outputtype='NIFTI_GZ'), name='sstrip_orig_vol')
@@ -39,7 +39,8 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105
         (sstrip_orig_vol, binarize, [('out_file', 'in_file')]),
         (sstrip_orig_vol, outputnode, [('out_file', 'out_file')]),
         (binarize, outputnode, [('out_file', 'out_mask')]),
-        (inu_n4, outputnode, [('output_image', 'bias_corrected')])
+        (inu_n4, outputnode, [('output_image', 'bias_corrected'),
+                              ('bias_image', 'bias_image')])
     ])
     return workflow
 
