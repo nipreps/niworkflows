@@ -23,8 +23,8 @@ class Ants2FSL(BaseInterface):
     input_spec = Ants2FSLInputSpec
     output_spec = Ants2FSLOutputSpec
     def __init__(self, *args, **kwargs):
-        self.num_matricies = 0
-        return super(Ants2FSL, self).init(*args, **kwargs)
+        self.num_matrcies = 0
+        super(Ants2FSL, self).init(*args, **kwargs)
 
     def _run_interface(self, runtime):
         in_file = self.inputs.in_file
@@ -45,7 +45,7 @@ class Ants2FSL(BaseInterface):
         par_line = "{:.8f}, {:.8f}, {:.8f}, {:.8f}, {:.8f}, {:.8f}\n"
         mat_line = "{:.8f} {:.8f} {:.8f} {:.8f}\n"
         for x in in_data:
-            fname = "MAT_{0:04d}".format(self.num_matricies)
+            fname = "MAT_{0:04d}".format(self.num_matrcies)
             t1 = math.atan2(float(x[7]), float(x[10]))
             c2 = math.sqrt((float(x[2]) * float(x[2])) + (float(x[3]) * float(x[3])))
             t2 = math.atan2(-float(x[4]), c2)
@@ -57,7 +57,7 @@ class Ants2FSL(BaseInterface):
             mat_out.write(mat_line.format(float(x[8]), float(x[9]), float(x[10]), float(x[13])))
             mat_out.write(mat_line.format(0, 0, 0, 1))
             mat_out.close()
-            self.num_matrices += 1
+            self.num_matrcies += 1
         return runtime
 
     def _list_outputs(self):
@@ -68,7 +68,7 @@ class Ants2FSL(BaseInterface):
 
         base = os.path.join(base, 'mats')
         outputs['mat_file'] = []
-        for t in range(self.num_matricies):
+        for t in range(self.num_matrcies):
             fname = "MAT_{0:04d}".format(t)
             outputs['mat_file'].append(os.path.join(base, fname))
 
