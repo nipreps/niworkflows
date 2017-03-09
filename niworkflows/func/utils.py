@@ -22,14 +22,13 @@ class Ants2FSL(BaseInterface):
         mat files'''
     input_spec = Ants2FSLInputSpec
     output_spec = Ants2FSLOutputSpec
-    def __init__(self, *args, **kwargs):
-        self.num_matrcies = 0
-        super(Ants2FSL, self).init(*args, **kwargs)
+    num_matrcies = 0
 
     def _run_interface(self, runtime):
         in_file = self.inputs.in_file
-        _, base, in_fname = split_filename(in_file)
-        par_out = os.path.join(base, in_fname + '.par')
+        path, base, _ = split_filename(in_file)
+        par_fname = os.path.join(path, base + '.par')
+        par_out = open(par_fname, 'w')
 
         base = os.path.join(base, 'mats')
 
@@ -58,18 +57,19 @@ class Ants2FSL(BaseInterface):
             mat_out.write(mat_line.format(0, 0, 0, 1))
             mat_out.close()
             self.num_matrcies += 1
+        par_out.close()
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         in_file = self.inputs.in_file
-        _, base, in_fname = split_filename(in_file)
-        outputs['par_out'] = os.path.join(base, in_fname + '.par')
+        path, base, _= split_filename(in_file)
+        outputs['par_file'] = os.path.join(path, base + '.par')
 
-        base = os.path.join(base, 'mats')
+        path = os.path.join(path, 'mats')
         outputs['mat_file'] = []
         for t in range(self.num_matrcies):
             fname = "MAT_{0:04d}".format(t)
-            outputs['mat_file'].append(os.path.join(base, fname))
+            outputs['mat_file'].append(os.path.join(path, fname))
 
         return outputs
