@@ -496,7 +496,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
         ax2.set_xlim([0, len(timeseries[:, i]) * tr])
         ax2.axes.get_yaxis().set_visible(False)
         ax2.autoscale_view('tight')
-        ax2.tick_params(axis='both', which='major', pad=3)
+        ax2.tick_params(axis='both', which='major', pad=1)
         sns.despine(left=True, bottom=True)
         zed = [tick.label.set_fontsize(6) for tick in
                ax2.xaxis.get_major_ticks()]
@@ -506,7 +506,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
         ax3.set_xlim([f[0], f.max()])
         ax3.axes.get_yaxis().set_visible(False)
         ax3.autoscale_view('tight')
-        ax3.tick_params(axis='both', which='major', pad=3)
+        ax3.tick_params(axis='both', which='major', pad=1)
         zed = [tick.label.set_fontsize(6) for tick in
                ax3.xaxis.get_major_ticks()]
         sns.despine(left=True, bottom=True)
