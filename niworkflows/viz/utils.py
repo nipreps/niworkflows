@@ -11,8 +11,7 @@ from sys import version_info
 import numpy as np
 import nibabel as nb
 from uuid import uuid4
-from io import open
-from io import StringIO
+from io import open, StringIO, BytesIO
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 
@@ -81,8 +80,8 @@ def svg_compress(image, compress='auto'):
                 p = subprocess.run(cmd, input=image.encode('utf-8'), stdout=subprocess.PIPE,
                                    shell=True, check=True).stdout
             else:
-                p = subprocess.check_output(cmd, input=image.encode('utf-8'),
-                                            shell=True, check=True)
+                p = subprocess.check_output(
+                    cmd, shell=True, input=BytesIO(image.encode('utf-8')))
         except OSError as e:
             from errno import ENOENT
             if compress is True and e.errno == ENOENT:
@@ -91,7 +90,7 @@ def svg_compress(image, compress='auto'):
             image = p.decode('utf-8')
 
     # Convert all of the rasters inside the SVG file with 80% compressed WEBP
-    if (_which('cwebp') and compress == 'auto') or compress == True:
+    if (_which('cwebp') and compress == 'auto') or compress is True:
         new_lines = []
         with StringIO(image) as fp:
             for line in fp:
@@ -114,8 +113,8 @@ def svg_compress(image, compress='auto'):
                         p = subprocess.run(cmd, input=base64.b64decode(png_b64), shell=True,
                                            stdout=subprocess.PIPE, check=True).stdout
                     else:
-                        p = subprocess.check_output(cmd, input=base64.b64decode(png_b64),
-                                                    shell=True, check=True)
+                        p = subprocess.check_output(
+                            cmd, shell=True, input=BytesIO(base64.b64decode(png_b64)))
                     webpimg = base64.b64encode(p).decode('utf-8')
                     new_lines.append(left + webpimg + right)
                 else:
