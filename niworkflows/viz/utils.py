@@ -443,7 +443,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     from nilearn.plotting import cm
 
     nifti_masker = NiftiMasker(mask_strategy='epi')
-    nifti_masker.fit(index_img(in_nii, 0))
+    nifti_masker.fit(index_img(in_nii, range(2)))
     mask_img = nifti_masker.mask_img_
 
     mask_sl = []
