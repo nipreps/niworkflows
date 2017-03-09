@@ -30,10 +30,10 @@ class Ants2FSL(BaseInterface):
         par_fname = os.path.join(path, base + '.par')
         par_out = open(par_fname, 'w')
 
-        base = os.path.join(base, 'mats')
+        path = os.path.join(path, 'mats')
 
         try:
-            os.makedirs(base)
+            os.makedirs(path)
         except OSError as exc:
             if exc.errno == EEXIST:
                 pass
@@ -50,7 +50,7 @@ class Ants2FSL(BaseInterface):
             t2 = math.atan2(-float(x[4]), c2)
             t3 = math.atan2(float(x[3]), float(x[2]))
             par_out.write(par_line.format(t1, t2, t3, float(x[11]), float(x[12]), float(x[13])))
-            mat_out = open(os.path.join(base, fname), 'w+')
+            mat_out = open(os.path.join(path, fname), 'w+')
             mat_out.write(mat_line.format(float(x[2]), float(x[3]), float(x[4]), float(x[11])))
             mat_out.write(mat_line.format(float(x[5]), float(x[6]), float(x[7]), float(x[12])))
             mat_out.write(mat_line.format(float(x[8]), float(x[9]), float(x[10]), float(x[13])))
