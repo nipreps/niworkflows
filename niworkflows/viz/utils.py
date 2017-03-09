@@ -75,16 +75,19 @@ def svg_compress(image, compress='auto'):
 
     # Compress the SVG file using SVGO
     if (_which('svgo') and compress == 'auto') or compress == True:
+        cmd = 'svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues'
         try:
-            p = subprocess.run(
-                "svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues",
-                input=image.encode('utf-8'), stdout=subprocess.PIPE,
-                shell=True, check=True)
+            if PY3:
+                p = subprocess.run(cmd, input=image.encode('utf-8'), stdout=subprocess.PIPE,
+                                   shell=True, check=True).stdout
+            else:
+                p = subprocess.check_output(cmd, input=image.encode('utf-8'),
+                                            shell=True, check=True)
         except FileNotFoundError:
             if compress is True:
                 raise
         else:
-            image = p.stdout.decode('utf-8')
+            image = p.decode('utf-8')
 
     # Convert all of the rasters inside the SVG file with 80% compressed WEBP
     if (_which('cwebp') and compress == 'auto') or compress == True:
@@ -105,10 +108,13 @@ def svg_compress(image, compress='auto'):
                     png_b64 = right.split('"')[0]
                     right = '"' + '"'.join(right.split('"')[1:])
 
-                    p = subprocess.run("cwebp -quiet -noalpha -q 80 -o - -- -",
-                                       input=base64.b64decode(png_b64),
-                                       stdout=subprocess.PIPE,
-                                       shell=True, check=True)
+                    cmd = "cwebp -quiet -noalpha -q 80 -o - -- -"
+                    if PY3:
+                        p = subprocess.run(cmd, input=base64.b64decode(png_b64), shell=True,
+                                           stdout=subprocess.PIPE, check=True).stdout
+                    else:
+                        p = subprocess.check_output(cmd, input=base64.b64decode(png_b64),
+                                                    shell=True, check=True)
                     webpimg = base64.b64encode(p.stdout).decode('utf-8')
                     new_lines.append(left + webpimg + right)
                 else:
@@ -403,8 +409,12 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
 
 def _which(cmd):
     try:
-        subprocess.run([cmd], stdin=subprocess.DEVNULL,
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if PY3:
+            subprocess.run([cmd], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL)
+        else:
+            subprocess.check_output([cmd], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL)
     except OSError as e:
         from errno import ENOENT
         if e.errno == ENOENT:
