@@ -82,7 +82,7 @@ def svg_compress(image, compress='auto'):
             else:
                 p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE)
-                pout, _ = p.communicate(BytesIO(image.encode('utf-8')))
+                pout, _ = p.communicate(input=image.encode('utf-8'))
         except OSError as e:
             from errno import ENOENT
             if compress is True and e.errno == ENOENT:
@@ -116,7 +116,7 @@ def svg_compress(image, compress='auto'):
                     else:
                         p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
                                              stdout=subprocess.PIPE)
-                        pout, _ = p.communicate(BytesIO(base64.b64decode(png_b64)))
+                        pout, _ = p.communicate(input=base64.b64decode(png_b64))
 
                     webpimg = base64.b64encode(pout).decode('utf-8')
                     new_lines.append(left + webpimg + right)
