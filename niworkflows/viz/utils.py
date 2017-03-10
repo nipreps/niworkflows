@@ -77,17 +77,18 @@ def svg_compress(image, compress='auto'):
         cmd = 'svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues'
         try:
             if PY3:
-                p = subprocess.run(cmd, input=image.encode('utf-8'), stdout=subprocess.PIPE,
-                                   shell=True, check=True).stdout
+                pout = subprocess.run(cmd, input=image.encode('utf-8'), stdout=subprocess.PIPE,
+                                      shell=True, check=True).stdout
             else:
-                p = subprocess.check_output(
-                    cmd, shell=True, stdin=BytesIO(image.encode('utf-8')))
+                p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
+                                     stdout=subprocess.PIPE)
+                pout, _ = p.communicate(BytesIO(image.encode('utf-8')))
         except OSError as e:
             from errno import ENOENT
             if compress is True and e.errno == ENOENT:
                 raise e
         else:
-            image = p.decode('utf-8')
+            image = pout.decode('utf-8')
 
     # Convert all of the rasters inside the SVG file with 80% compressed WEBP
     if (_which('cwebp') and compress == 'auto') or compress is True:
@@ -110,12 +111,14 @@ def svg_compress(image, compress='auto'):
 
                     cmd = "cwebp -quiet -noalpha -q 80 -o - -- -"
                     if PY3:
-                        p = subprocess.run(cmd, input=base64.b64decode(png_b64), shell=True,
+                        pout = subprocess.run(cmd, input=base64.b64decode(png_b64), shell=True,
                                            stdout=subprocess.PIPE, check=True).stdout
                     else:
-                        p = subprocess.check_output(
-                            cmd, shell=True, stdin=BytesIO(base64.b64decode(png_b64)))
-                    webpimg = base64.b64encode(p).decode('utf-8')
+                        p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
+                                             stdout=subprocess.PIPE)
+                        pout, _ = p.communicate(BytesIO(base64.b64decode(png_b64)))
+
+                    webpimg = base64.b64encode(pout).decode('utf-8')
                     new_lines.append(left + webpimg + right)
                 else:
                     new_lines.append(line)
