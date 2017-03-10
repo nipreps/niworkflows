@@ -48,8 +48,8 @@ RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda${PYTHON_MAJOR}-late
     /bin/bash Miniconda${PYTHON_MAJOR}-latest-Linux-x86_64.sh -b -p /usr/local/miniconda && \
     rm Miniconda${PYTHON_MAJOR}-latest-Linux-x86_64.sh
 ENV PATH=/usr/local/miniconda/bin:$PATH \
-    LANG=en_US.UTF-8 \
-    LC_ALL=en_US.UTF-8
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
 
 # Create conda environment
 RUN conda config --add channels conda-forge && \
