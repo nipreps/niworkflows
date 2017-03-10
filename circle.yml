@@ -13,16 +13,18 @@ dependencies:
   pre:
     - mkdir -p ~/data/ ~/docker
     - mkdir -p $SCRATCH && sudo setfacl -d -m group:ubuntu:rwx $SCRATCH && sudo setfacl -m group:ubuntu:rwx $SCRATCH
-
+    - mkdir -p $SCRATCH/py2 $SCRATCH/py3
   override:
     - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
-    - docker build --rm=false -t niworkflows:py35 .
-    - docker save niworkflows:py35 > ~/docker/image.tar
+    - docker build --rm=false -t niworkflows:py3 .
+    - docker build --rm=false -t niworkflows:py2 --build-arg PYTHON_MAJOR=2 .
+    - docker save poldracklab/neuroimaging-core:freesurfer-0.0.2 niworkflows:py3 niworkflows:py2 > ~/docker/image.tar
 test:
   override:
-    - docker run -ti -v /etc/localtime:/etc/localtime:ro --env SAVE_CIRCLE_ARTIFACTS="1" -v ${SCRATCH}:/scratch --rm --entrypoint=/usr/local/miniconda/bin/nosetests niworkflows:py35 /root/niworkflows:
+    - docker run -ti -v /etc/localtime:/etc/localtime:ro --env SAVE_CIRCLE_ARTIFACTS="1" -v ${SCRATCH}/py3:/scratch --rm --entrypoint=/usr/local/miniconda/bin/nosetests niworkflows:py3 /root/niworkflows:
         timeout: 36000
-
+    - docker run -ti -v /etc/localtime:/etc/localtime:ro --env SAVE_CIRCLE_ARTIFACTS="1" -v ${SCRATCH}/py2:/scratch --rm --entrypoint=/usr/local/miniconda/bin/nosetests niworkflows:py2 /root/niworkflows:
+        timeout: 36000
 general:
   artifacts:
     - "~/scratch"
