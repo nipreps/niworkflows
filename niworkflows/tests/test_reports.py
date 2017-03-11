@@ -39,8 +39,7 @@ def _smoke_test_report(report_interface, artifact_name):
         report_interface.run()
         out_report = report_interface.inputs.out_report
         stage_artifacts(out_report, artifact_name)
-        unittest.TestCase.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
-                                     .format(out_report))
+        assert os.path.isfile(out_report), 'Report does not exist'
 
 
 class TestRegistrationInterfaces(unittest.TestCase):

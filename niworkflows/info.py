@@ -55,7 +55,7 @@ SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 
 LINKS_REQUIRES = []
-TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist', 'nose']
+TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist', 'pytest']
 
 EXTRA_REQUIRES = {
     'doc': ['sphinx'],
