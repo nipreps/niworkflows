@@ -11,7 +11,7 @@ from sys import version_info
 import numpy as np
 import nibabel as nb
 from uuid import uuid4
-from io import open, StringIO, BytesIO
+from io import open, StringIO
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 
@@ -22,6 +22,31 @@ from nipype.utils import filemanip
 
 from niworkflows import NIWORKFLOWS_LOG
 from niworkflows.viz.validators import HTMLValidator
+
+try:
+    from shutil import which
+except ImportError:
+
+    def which(cmd):
+        """
+        A homemade which command
+
+        >>> from niworkflows.viz.utils import which
+        >>> which('ls')
+        True
+        >>> which('madeoutcommand')
+        False
+
+        """
+
+        try:
+            subprocess.run([cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except OSError as e:
+            from errno import ENOENT
+            if e.errno == ENOENT:
+                return False
+            raise e
+        return True
 
 
 SVGNS = "http://www.w3.org/2000/svg"
@@ -35,25 +60,22 @@ if version_info[0] < 3:
     def _run(args, input=None, stdout=None, stderr=None, shell=False, check=False):
         from collections import namedtuple
 
-        devnull = open(os.devnull, 'w')
+        devnull = open(os.devnull, 'r+')
         stdin = subprocess.PIPE if input is not None else None
 
-        if stdout is None:
-            stdout = subprocess.PIPE
-        elif stdout == subprocess.DEVNULL:
+        if stdout == subprocess.DEVNULL:
             stdout = devnull
 
-        if stderr is None:
-            stderr = subprocess.PIPE
-        elif stderr == subprocess.DEVNULL:
+        if stderr == subprocess.DEVNULL:
             stderr = devnull
 
         proc = subprocess.Popen(args, stdout=stdout, shell=shell, stdin=stdin)
         result = namedtuple('CompletedProcess', 'stdout stderr')
 
-        res = result(None, None)
         if not all((stdout == devnull, stderr == devnull)):
             res = result(*proc.communicate(input=input))
+        else:
+            res = result(*proc.communicate(b''))
 
         devnull.close()
 
@@ -109,8 +131,8 @@ def svg_compress(image, compress='auto'):
     Performs compression (can be disabled). A bit hacky. '''
 
     # Compress the SVG file using SVGO
-    has_svgo = _which('svgo')
-    has_cwebp = _which('cwebp')
+    has_svgo = which('svgo')
+    has_cwebp = which('cwebp')
 
     if compress is True and not all((has_svgo, has_cwebp)):
         raise RuntimeError('Compression is required, but svgo or cwebp are not installed')
@@ -440,13 +462,3 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
         with open(out_file, 'w' if PY3 else 'wb') as f:
             f.write('\n'.join(svg))
     return out_file
-
-def _which(cmd):
-    try:
-        subprocess.run([cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except OSError as e:
-        from errno import ENOENT
-        if e.errno == ENOENT:
-            return False
-        raise e
-    return True

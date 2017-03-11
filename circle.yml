@@ -22,7 +22,7 @@ dependencies:
     - docker save poldracklab/neuroimaging-core:freesurfer-0.0.2 niworkflows:py3 niworkflows:py2 > ~/docker/image.tar
 test:
   override:
-    - bash .circle/tests.sh :
+    - bash .circle/pytests.sh :
         timeout: 36000
         parallel: true
 
