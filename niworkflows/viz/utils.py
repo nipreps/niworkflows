@@ -2,7 +2,7 @@
 """Helper tools for visualization purposes"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os.path as op
+import os, os.path as op
 import subprocess
 import base64
 import re
@@ -26,6 +26,41 @@ from niworkflows.viz.validators import HTMLValidator
 
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
+
+# Patch subprocess in python 2
+if version_info[0] < 3:
+    setattr(subprocess, 'DEVNULL', 'null')
+
+    def _run(args, input=None, stdout=None, stderr=None, shell=False, check=False):
+        from collections import namedtuple
+
+        devnull = open(os.devnull, 'w')
+        stdin = subprocess.PIPE if input is not None else None
+
+        if stdout is None:
+            stdout = subprocess.PIPE
+        elif stdout == subprocess.DEVNULL:
+            stdout = devnull
+
+        if stderr is None:
+            stderr = subprocess.PIPE
+        elif stderr == subprocess.DEVNULL:
+            stderr = devnull
+
+        proc = subprocess.Popen(args, stdout=stdout, shell=shell, stdin=stdin)
+        result = namedtuple('CompletedProcess', 'stdout stderr')
+
+        res = result(None, None)
+        if not all((stdout == devnull, stderr == devnull)):
+            res = result(*proc.communicate(input=input))
+
+        devnull.close()
+
+        if check and proc.returncode != 0:
+            raise subprocess.CalledProcessError(proc.returncode, args)
+
+        return res
+    setattr(subprocess, 'run', _run)
 
 
 def robust_set_limits(data, plot_params):
@@ -73,16 +108,11 @@ def svg_compress(image, compress='auto'):
     Performs compression (can be disabled). A bit hacky. '''
 
     # Compress the SVG file using SVGO
-    if (_which('svgo') and compress == 'auto') or compress == True:
+    if (_which('svgo') and compress == 'auto') or compress is True:
         cmd = 'svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues'
         try:
-            if PY3:
-                pout = subprocess.run(cmd, input=image.encode('utf-8'), stdout=subprocess.PIPE,
-                                      shell=True, check=True).stdout
-            else:
-                p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
-                                     stdout=subprocess.PIPE)
-                pout, _ = p.communicate(input=image)
+            pout = subprocess.run(cmd, input=image.encode('utf-8'), stdout=subprocess.PIPE,
+                                  shell=True, check=True).stdout
         except OSError as e:
             from errno import ENOENT
             if compress is True and e.errno == ENOENT:
@@ -110,14 +140,8 @@ def svg_compress(image, compress='auto'):
                     right = '"' + '"'.join(right.split('"')[1:])
 
                     cmd = "cwebp -quiet -noalpha -q 80 -o - -- -"
-                    if PY3:
-                        pout = subprocess.run(cmd, input=base64.b64decode(png_b64), shell=True,
-                                           stdout=subprocess.PIPE, check=True).stdout
-                    else:
-                        p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
-                                             stdout=subprocess.PIPE)
-                        pout, _ = p.communicate(input=base64.b64decode(png_b64))
-
+                    pout = subprocess.run(cmd, input=base64.b64decode(png_b64), shell=True,
+                                       stdout=subprocess.PIPE, check=True).stdout
                     webpimg = base64.b64encode(pout).decode('utf-8')
                     new_lines.append(left + webpimg + right)
                 else:
@@ -412,13 +436,8 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
 
 def _which(cmd):
     try:
-        if PY3:
-            subprocess.run([cmd], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                           stderr=subprocess.DEVNULL)
-        else:
-            import os
-            DEVNULL = open(os.devnull, 'w')
-            subprocess.check_output([cmd], stdin=DEVNULL, stderr=DEVNULL)
+        subprocess.run([cmd], input=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL)
     except OSError as e:
         from errno import ENOENT
         if e.errno == ENOENT:
