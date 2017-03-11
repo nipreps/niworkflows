@@ -1,24 +1,23 @@
 # python cache
-__pycache__/**/*
 __pycache__
+**/__pycache__
 *.pyc
+**/*.pyc
 
 # python distribution
-build/**/*
-build
-dist/**/*
-dist
-niworkflows.egg-info/**/*
-niworkflows.egg-info
-.eggs/**/*
-.eggs
-src/**/*
+build/
+dist/
+niworkflows.egg-info/
+.eggs/
+docs/
 src/
 
 # git
 .gitignore
-.git/**/*
-.git
+.git/
+**/.git
 
-docs/**/*
-docs/
+# ci
+.travis.yml
+appveyor.yml
+circle.yml

@@ -200,9 +200,11 @@ class TestCompression(unittest.TestCase):
         compressed_int.run()
         compressed_report = compressed_int.inputs.out_report
 
-        unittest.TestCase.assertTrue(int(os.stat(uncompressed_report).st_size) > int(os.stat(compressed_report).st_size),
-                                     'An uncompressed report is bigger than '
-                                     'a compressed report')
+        size = int(os.stat(uncompressed_report).st_size)
+        size_compress = int(os.stat(compressed_report).st_size)
+
+        assert size >= size_compress, ('The uncompressed report is smaller (%d)'
+                                       'than the compressed report (%d)' % (size, size_compress))
 
 
 class TestReconAllRPT(unittest.TestCase):

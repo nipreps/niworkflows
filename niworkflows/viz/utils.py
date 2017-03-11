@@ -29,7 +29,8 @@ PY3 = version_info[0] > 2
 
 # Patch subprocess in python 2
 if version_info[0] < 3:
-    setattr(subprocess, 'DEVNULL', 'null')
+    print('patching subprocess')
+    setattr(subprocess, 'DEVNULL', -3)
 
     def _run(args, input=None, stdout=None, stderr=None, shell=False, check=False):
         from collections import namedtuple
@@ -442,8 +443,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
 
 def _which(cmd):
     try:
-        subprocess.run([cmd], input=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                       stderr=subprocess.DEVNULL)
+        subprocess.run([cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except OSError as e:
         from errno import ENOENT
         if e.errno == ENOENT:

@@ -69,6 +69,7 @@ COPY . niworkflows/
 RUN find /root/niworkflows/ -name "test*.py" -exec chmod a-x '{}' \;
 RUN cd niworkflows && \
     pip install -e .[all] && \
+    python -c 'from niworkflows.data.getters import get_mni_icbm152_linear; get_mni_icbm152_linear()' && \
     python -c 'from niworkflows.data.getters import get_mni_template_ras; get_mni_template_ras()' && \
     python -c 'from niworkflows.data.getters import get_ds003_downsampled; get_ds003_downsampled()' && \
     python -c 'from niworkflows.data.getters import get_ants_oasis_template_ras; get_ants_oasis_template_ras()' && \
