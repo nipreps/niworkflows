@@ -108,7 +108,13 @@ def svg_compress(image, compress='auto'):
     Performs compression (can be disabled). A bit hacky. '''
 
     # Compress the SVG file using SVGO
-    if (_which('svgo') and compress == 'auto') or compress is True:
+    has_svgo = _which('svgo')
+    has_cwebp = _which('cwebp')
+
+    if compress is True and not all((has_svgo, has_cwebp)):
+        raise RuntimeError('Compression is required, but svgo or cwebp are not installed')
+
+    if has_svgo and compress == 'auto':
         cmd = 'svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues'
         try:
             pout = subprocess.run(cmd, input=image.encode('utf-8'), stdout=subprocess.PIPE,
@@ -121,7 +127,7 @@ def svg_compress(image, compress='auto'):
             image = pout.decode('utf-8')
 
     # Convert all of the rasters inside the SVG file with 80% compressed WEBP
-    if (_which('cwebp') and compress == 'auto') or compress is True:
+    if has_cwebp and compress == 'auto':
         new_lines = []
         with StringIO(image) as fp:
             for line in fp:
