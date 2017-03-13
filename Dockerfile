@@ -32,26 +32,29 @@
 
 FROM poldracklab/neuroimaging-core:freesurfer-0.0.2
 
+# Install cwebp
+RUN curl -sSLO "http://downloads.webmproject.org/releases/webp/libwebp-0.5.2-linux-x86-64.tar.gz" && \
+  tar -xf libwebp-0.5.2-linux-x86-64.tar.gz && cd libwebp-0.5.2-linux-x86-64/bin && \
+  mv cwebp /usr/local/bin/ && rm -rf libwebp-0.5.2-linux-x86-64
+
+# Install nodejs -> svgo
+RUN curl -sL https://deb.nodesource.com/setup_7.x | bash -
+RUN apt-get install -y nodejs
+RUN npm install -g svgo
+
 # Install miniconda
-RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    /bin/bash Miniconda3-latest-Linux-x86_64.sh -b -p /usr/local/miniconda && \
-    rm Miniconda3-latest-Linux-x86_64.sh
+ARG PYTHON_MAJOR=3
+RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda${PYTHON_MAJOR}-latest-Linux-x86_64.sh && \
+    /bin/bash Miniconda${PYTHON_MAJOR}-latest-Linux-x86_64.sh -b -p /usr/local/miniconda && \
+    rm Miniconda${PYTHON_MAJOR}-latest-Linux-x86_64.sh
 ENV PATH=/usr/local/miniconda/bin:$PATH \
-	LANG=C.UTF-8 \
+    LANG=C.UTF-8 \
     LC_ALL=C.UTF-8
 
 # Create conda environment
 RUN conda config --add channels conda-forge && \
     conda install -y numpy scipy matplotlib pandas lxml libxslt nose mock && \
     python -c "from matplotlib import font_manager"
-
-RUN curl -sSLO "http://downloads.webmproject.org/releases/webp/libwebp-0.5.2-linux-x86-64.tar.gz" && \
-  tar -xf libwebp-0.5.2-linux-x86-64.tar.gz && cd libwebp-0.5.2-linux-x86-64/bin && \
-  mv cwebp /usr/local/bin/ && rm -rf libwebp-0.5.2-linux-x86-64
-
-RUN curl -sL https://deb.nodesource.com/setup_7.x | bash -
-RUN apt-get install -y nodejs
-RUN npm install -g svgo
 
 # Installing dev requirements (packages that are not in pypi)
 ADD requirements.txt requirements.txt
@@ -66,6 +69,7 @@ COPY . niworkflows/
 RUN find /root/niworkflows/ -name "test*.py" -exec chmod a-x '{}' \;
 RUN cd niworkflows && \
     pip install -e .[all] && \
+    python -c 'from niworkflows.data.getters import get_mni_icbm152_linear; get_mni_icbm152_linear()' && \
     python -c 'from niworkflows.data.getters import get_mni_template_ras; get_mni_template_ras()' && \
     python -c 'from niworkflows.data.getters import get_ds003_downsampled; get_ds003_downsampled()' && \
     python -c 'from niworkflows.data.getters import get_ants_oasis_template_ras; get_ants_oasis_template_ras()' && \
