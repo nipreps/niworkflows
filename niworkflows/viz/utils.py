@@ -126,16 +126,14 @@ def svg_compress(image, compress='auto'):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
     Performs compression (can be disabled). A bit hacky. '''
 
-    # Compress the SVG file using SVGO
-    has_svgo = which('svgo')
-    has_cwebp = which('cwebp')
-    has_compress = all((has_svgo, has_cwebp))
-
+    # Check availability of svgo and cwebp
+    has_compress = all((which('svgo'), which('cwebp')))
     if compress is True and not has_compress:
         raise RuntimeError('Compression is required, but svgo or cwebp are not installed')
     else:
         compress = (compress is True or compress == 'auto') and has_compress
 
+    # Compress the SVG file using SVGO
     if compress:
         cmd = 'svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues'
         try:
