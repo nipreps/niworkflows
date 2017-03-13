@@ -53,10 +53,10 @@ SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
 
 # Patch subprocess in python 2
-if version_info[0] < 3:
-    print('patching subprocess')
+if not hasattr(subprocess, 'DEVNULL'):
     setattr(subprocess, 'DEVNULL', -3)
 
+if not hasattr(subprocess, 'run'):
     def _run(args, input=None, stdout=None, stderr=None, shell=False, check=False):
         from collections import namedtuple
 
@@ -71,11 +71,7 @@ if version_info[0] < 3:
 
         proc = subprocess.Popen(args, stdout=stdout, shell=shell, stdin=stdin)
         result = namedtuple('CompletedProcess', 'stdout stderr')
-
-        if not all((stdout == devnull, stderr == devnull)):
-            res = result(*proc.communicate(input=input))
-        else:
-            res = result(*proc.communicate(b''))
+        res = result(*proc.communicate(input=input))
 
         devnull.close()
 
@@ -133,11 +129,14 @@ def svg_compress(image, compress='auto'):
     # Compress the SVG file using SVGO
     has_svgo = which('svgo')
     has_cwebp = which('cwebp')
+    has_compress = all((has_svgo, has_cwebp))
 
-    if compress is True and not all((has_svgo, has_cwebp)):
+    if compress is True and not has_compress:
         raise RuntimeError('Compression is required, but svgo or cwebp are not installed')
+    else:
+        compress = (compress is True or compress == 'auto') and has_compress
 
-    if has_svgo and compress == 'auto':
+    if compress:
         cmd = 'svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues'
         try:
             pout = subprocess.run(cmd, input=image.encode('utf-8'), stdout=subprocess.PIPE,
@@ -150,7 +149,7 @@ def svg_compress(image, compress='auto'):
             image = pout.decode('utf-8')
 
     # Convert all of the rasters inside the SVG file with 80% compressed WEBP
-    if has_cwebp and compress == 'auto':
+    if compress:
         new_lines = []
         with StringIO(image) as fp:
             for line in fp:
@@ -204,7 +203,7 @@ def extract_svg(display_object, dpi=300, compress='auto'):
     Removes the preamble of the svg files generated with nilearn
     """
     image_svg = svg2str(display_object, dpi)
-    if compress == True or compress == 'auto':
+    if compress is True or compress == 'auto':
         image_svg = svg_compress(image_svg, compress)
     image_svg = re.sub(' height="[0-9]+[a-z]*"', '', image_svg, count=1)
     image_svg = re.sub(' width="[0-9]+[a-z]*"', '', image_svg, count=1)
