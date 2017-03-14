@@ -1,7 +1,14 @@
 Version 0.0.6
 -------------
 
-* [FIX] Python 2.7 issues and testing (#135)
+* [FIX] Python 2.7 issues and testing (#130, #135)
+* [ENH] Compress surface segmentation reports (#133)
+* [ENH] Write bias image in skull-stripping workflow (#131)
+* [FIX] BBRegisterRPT: Use `inputs.subjects_dir` to find structurals (#128)
+* [ENH] Fetch full 2009c from OSF (#126)
+* [ENH] Coregistration tweaks (#125)
+* [FIX] Be more robust in detecting SVGO (#124)
+* [ENH] Enable Lanczos interpolation (#122)
 
 Version 0.0.5
 -------------
