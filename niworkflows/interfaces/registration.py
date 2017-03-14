@@ -169,13 +169,14 @@ class BBRegisterOutputSpecRPT(nrc.ReportCapableOutputSpec,
                               freesurfer.preprocess.BBRegisterOutputSpec):
     pass
 
+
 class BBRegisterRPT(nrc.RegistrationRC, freesurfer.BBRegister):
     input_spec = BBRegisterInputSpecRPT
     output_spec = BBRegisterOutputSpecRPT
 
     def _post_run_hook(self, runtime):
-        mri_dir = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id,
-                               'mri')
+        mri_dir = os.path.join(self.inputs.subjects_dir,
+                               self.inputs.subject_id, 'mri')
         self._fixed_image = os.path.join(mri_dir, 'brainmask.mgz')
         self._moving_image = self.aggregate_outputs().registered_file
         self._contour = os.path.join(mri_dir, 'ribbon.mgz')
