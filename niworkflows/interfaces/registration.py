@@ -5,6 +5,7 @@ ReportCapableInterfaces for registration tools
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
+from distutils.version import LooseVersion
 
 from nipype.interfaces import fsl, ants, freesurfer
 from niworkflows.anat import mni
@@ -154,9 +155,15 @@ class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
     output_spec = FLIRTOutputSpecRPT
 
 
-class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
-                             freesurfer.preprocess.BBRegisterInputSpec6):
-    pass
+if LooseVersion(freesurfer.preprocess.FSVersion) < LooseVersion("6.0.0"):
+    class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
+                                 freesurfer.preprocess.BBRegisterInputSpec):
+        pass
+else:
+    class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
+                                 freesurfer.preprocess.BBRegisterInputSpec6):
+        pass
+
 
 class BBRegisterOutputSpecRPT(nrc.ReportCapableOutputSpec,
                               freesurfer.preprocess.BBRegisterOutputSpec):
