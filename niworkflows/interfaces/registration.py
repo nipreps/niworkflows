@@ -155,7 +155,7 @@ class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
 
 
 class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
-                             freesurfer.preprocess.BBRegisterInputSpec):
+                             freesurfer.preprocess.BBRegisterInputSpec6):
     pass
 
 class BBRegisterOutputSpecRPT(nrc.ReportCapableOutputSpec,
