@@ -24,7 +24,7 @@ __email__ = 'crn.poldracklab@gmail.com'
 __status__ = 'Prototype'
 
 __description__ = """\
-NeuroImaging Workflows provides processing tools for magnetic resonance images
+NeuroImaging Workflows provides processing tools for magnetic resonance images \
 of the brain."""
 __longdesc__ = """\
 NeuroImaging Workflows (NIWorkflows) is a selection of image processing workflows for \
@@ -33,7 +33,7 @@ It is designed to provide an easily accessible, state-of-the-art interface that 
 robust to differences in scan acquisition protocols and that requires minimal user \
 input. \
 This open-source neuroimaging data processing tool is being developed as a part of \
-the MRI image analysis and reproducibility platform offered by the CRN.
+the MRI image analysis and reproducibility platform offered by the CRN.\
 """
 
 DOWNLOAD_URL = (
