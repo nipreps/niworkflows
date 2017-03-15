@@ -16,10 +16,12 @@ dependencies:
     - mkdir -p $SCRATCH && sudo setfacl -d -m group:ubuntu:rwx $SCRATCH && sudo setfacl -m group:ubuntu:rwx $SCRATCH
     - mkdir -p $SCRATCH/py2 $SCRATCH/py3
   override:
-    - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
+    - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi :
+        timeout: 6000
     - docker build --rm=false -t niworkflows:py3 .
     - docker build --rm=false -t niworkflows:py2 --build-arg PYTHON_MAJOR=2 .
-    - docker save poldracklab/neuroimaging-core:freesurfer-0.0.2 niworkflows:py3 niworkflows:py2 > ~/docker/image.tar
+    - docker save poldracklab/neuroimaging-core:freesurfer-0.0.2 niworkflows:py3 niworkflows:py2 > ~/docker/image.tar :
+        timeout: 6000
 test:
   override:
     - bash .circle/pytests.sh :
@@ -39,4 +41,4 @@ deployment:
       - printf "[distutils]\nindex-servers =\n    pypi\n\n[pypi]\nusername:$PYPI_USER\npassword:$PYPI_PASS\n" > ~/.pypirc
       - python setup.py sdist
       - twine upload dist/*
-      - cp -r dist/* ~/scratch/ || true
+      - cp -r dist/ ~/scratch/ || true
