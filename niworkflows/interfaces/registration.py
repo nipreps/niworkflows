@@ -156,7 +156,16 @@ class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
 
 class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
                              freesurfer.preprocess.BBRegisterInputSpec):
-    pass
+    if freesurfer.preprocess.FSVersion >= LooseVersion('6.0.0'):
+        init = traits.Enum(
+            'coreg', 'rr', 'spm', 'fsl', 'header', 'best',
+            argstr='--init-%s', usedefault=True, xor=['init_reg_file'],
+            desc='initialize registration with mri_coreg, spm, fsl, or header')
+    else:
+        init = traits.Enum(
+            'fsl', 'spm', 'header',
+            argstr='--init-%s', usedefault=True, xor=['init_reg_file'],
+            desc='initialize registration with fsl, spm, or header')
 
 class BBRegisterOutputSpecRPT(nrc.ReportCapableOutputSpec,
                               freesurfer.preprocess.BBRegisterOutputSpec):
