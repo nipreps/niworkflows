@@ -1,8 +1,9 @@
 # data
 include niworkflows/data/*.json
-recursive-include niworkflows/data/templates *
+include niworkflows/viz/*.tpl
 
 #Misc
-include requirements.txt
 include CHANGES.rst
 include LICENSE
+include README.rst
+include setup.py
