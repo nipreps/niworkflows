@@ -554,7 +554,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
         ax3 = fig.add_subplot(gs[l_row + 1, 3 + col * 5])
 
         ax2.plot(np.arange(len(timeseries[:, i])) * tr, timeseries[:, i],
-                 linewidth=max(200 / len(timeseries[:, i]), 1.0))
+                 linewidth=min(200 / len(timeseries[:, i]), 1.0))
         ax2.set_xlim([0, len(timeseries[:, i]) * tr])
         ax2.axes.get_yaxis().set_visible(False)
         ax2.autoscale_view('tight')
@@ -564,7 +564,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
                ax2.xaxis.get_major_ticks()]
 
         ax3.plot(f[0:], power[0:, i], color=current_palette[1],
-                 linewidth=max(100 / len(power[0:, i]), 1.0))
+                 linewidth=min(100 / len(power[0:, i]), 1.0))
         ax3.set_xlim([f[0], f.max()])
         ax3.axes.get_yaxis().set_visible(False)
         ax3.autoscale_view('tight')
