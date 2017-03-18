@@ -2,7 +2,7 @@
 """Helper tools for visualization purposes"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os.path as op
+import os, os.path as op
 import subprocess
 import base64
 import re
@@ -11,8 +11,7 @@ from sys import version_info
 import numpy as np
 import nibabel as nb
 from uuid import uuid4
-from io import open
-from io import StringIO
+from io import open, StringIO
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 
@@ -24,9 +23,63 @@ from nipype.utils import filemanip
 from niworkflows import NIWORKFLOWS_LOG
 from niworkflows.viz.validators import HTMLValidator
 
+try:
+    from shutil import which
+except ImportError:
+
+    def which(cmd):
+        """
+        A homemade which command
+
+        >>> from niworkflows.viz.utils import which
+        >>> which('ls')
+        True
+        >>> which('madeoutcommand')
+        False
+
+        """
+
+        try:
+            subprocess.run([cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except OSError as e:
+            from errno import ENOENT
+            if e.errno == ENOENT:
+                return False
+            raise e
+        return True
+
 
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
+
+# Patch subprocess in python 2
+if not hasattr(subprocess, 'DEVNULL'):
+    setattr(subprocess, 'DEVNULL', -3)
+
+if not hasattr(subprocess, 'run'):
+    def _run(args, input=None, stdout=None, stderr=None, shell=False, check=False):
+        from collections import namedtuple
+
+        devnull = open(os.devnull, 'r+')
+        stdin = subprocess.PIPE if input is not None else None
+
+        if stdout == subprocess.DEVNULL:
+            stdout = devnull
+
+        if stderr == subprocess.DEVNULL:
+            stderr = devnull
+
+        proc = subprocess.Popen(args, stdout=stdout, shell=shell, stdin=stdin)
+        result = namedtuple('CompletedProcess', 'stdout stderr')
+        res = result(*proc.communicate(input=input))
+
+        devnull.close()
+
+        if check and proc.returncode != 0:
+            raise subprocess.CalledProcessError(proc.returncode, args)
+
+        return res
+    setattr(subprocess, 'run', _run)
 
 
 def robust_set_limits(data, plot_params):
@@ -73,21 +126,28 @@ def svg_compress(image, compress='auto'):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
     Performs compression (can be disabled). A bit hacky. '''
 
+    # Check availability of svgo and cwebp
+    has_compress = all((which('svgo'), which('cwebp')))
+    if compress is True and not has_compress:
+        raise RuntimeError('Compression is required, but svgo or cwebp are not installed')
+    else:
+        compress = (compress is True or compress == 'auto') and has_compress
+
     # Compress the SVG file using SVGO
-    if (_which('svgo') and compress == 'auto') or compress == True:
+    if compress:
+        cmd = 'svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues'
         try:
-            p = subprocess.run(
-                "svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues",
-                input=image.encode('utf-8'), stdout=subprocess.PIPE,
-                shell=True, check=True)
-        except FileNotFoundError:
-            if compress is True:
-                raise
+            pout = subprocess.run(cmd, input=image.encode('utf-8'), stdout=subprocess.PIPE,
+                                  shell=True, check=True).stdout
+        except OSError as e:
+            from errno import ENOENT
+            if compress is True and e.errno == ENOENT:
+                raise e
         else:
-            image = p.stdout.decode('utf-8')
+            image = pout.decode('utf-8')
 
     # Convert all of the rasters inside the SVG file with 80% compressed WEBP
-    if (_which('cwebp') and compress == 'auto') or compress == True:
+    if compress:
         new_lines = []
         with StringIO(image) as fp:
             for line in fp:
@@ -105,11 +165,10 @@ def svg_compress(image, compress='auto'):
                     png_b64 = right.split('"')[0]
                     right = '"' + '"'.join(right.split('"')[1:])
 
-                    p = subprocess.run("cwebp -quiet -noalpha -q 80 -o - -- -",
-                                       input=base64.b64decode(png_b64),
-                                       stdout=subprocess.PIPE,
-                                       shell=True, check=True)
-                    webpimg = base64.b64encode(p.stdout).decode('utf-8')
+                    cmd = "cwebp -quiet -noalpha -q 80 -o - -- -"
+                    pout = subprocess.run(cmd, input=base64.b64decode(png_b64), shell=True,
+                                       stdout=subprocess.PIPE, check=True).stdout
+                    webpimg = base64.b64encode(pout).decode('utf-8')
                     new_lines.append(left + webpimg + right)
                 else:
                     new_lines.append(line)
@@ -142,7 +201,7 @@ def extract_svg(display_object, dpi=300, compress='auto'):
     Removes the preamble of the svg files generated with nilearn
     """
     image_svg = svg2str(display_object, dpi)
-    if compress == True or compress == 'auto':
+    if compress is True or compress == 'auto':
         image_svg = svg_compress(image_svg, compress)
     image_svg = re.sub(' height="[0-9]+[a-z]*"', '', image_svg, count=1)
     image_svg = re.sub(' width="[0-9]+[a-z]*"', '', image_svg, count=1)
