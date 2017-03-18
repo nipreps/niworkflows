@@ -421,7 +421,7 @@ def transform_to_2d(data, max_axis):
 
 def plot_melodic_components(melodic_dir, in_file, tr=None,
                             out_file='melodic_reportlet.svg',
-                            compress='auto'):
+                            compress='auto', report_mask=None):
     from nilearn.plotting import plot_glass_brain
     from nilearn.image import index_img, iter_img
     import nibabel as nb
@@ -442,9 +442,12 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     from nilearn.image.image import mean_img
     from nilearn.plotting import cm
 
-    nifti_masker = NiftiMasker(mask_strategy='epi')
-    nifti_masker.fit(index_img(in_nii, range(2)))
-    mask_img = nifti_masker.mask_img_
+    if not report_mask:
+        nifti_masker = NiftiMasker(mask_strategy='epi')
+        nifti_masker.fit(index_img(in_nii, range(2)))
+        mask_img = nifti_masker.mask_img_
+    else:
+        mask_img = nb.load(report_mask)
 
     mask_sl = []
     for j in range(3):

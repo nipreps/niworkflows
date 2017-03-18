@@ -84,6 +84,8 @@ class MELODICInputSpecRPT(nrc.ReportCapableInputSpec,
         'melodic_reportlet.svg', usedefault=True, desc='Filename for the visual'
                                                        ' report generated '
                                                        'by Nipype.')
+    report_mask = File(desc='Mask used to draw the outline on the reportlet. '
+                            'If not set the mask will be derived from the data.')
 
 class MELODICOutputSpecRPT(nrc.ReportCapableOutputSpec,
                            fsl.model.MELODICOutputSpec):
@@ -100,7 +102,8 @@ class MELODICRPT(nrc.ReportCapableInterface, fsl.MELODIC):
                                 in_file=self.inputs.in_files[0],
                                 tr=self.inputs.tr_sec,
                                 out_file=self.inputs.out_report,
-                                compress=self.inputs.compress_report)
+                                compress=self.inputs.compress_report,
+                                report_mask=self.inputs.report_mask)
 
     def _post_run_hook(self, runtime):
         ''' generates a report showing nine slices, three per axis, of an
