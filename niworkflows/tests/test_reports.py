@@ -31,8 +31,9 @@ def stage_artifacts(filename, new_filename):
     """ filename: the name of the file to be saved as an artifact.
         new_filename: what to call the artifact (which will be saved in the
        `/scratch` folder) """
-    if os.getenv('SAVE_CIRCLE_ARTIFACTS', False) == "1":
-        copy(filename, os.path.join('/scratch', new_filename))
+    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+    if save_artifacts:
+        copy(filename, os.path.join(save_artifacts, new_filename))
 
 def _smoke_test_report(report_interface, artifact_name):
     with InTemporaryDirectory():
