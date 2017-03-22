@@ -183,3 +183,36 @@ class BBRegisterRPT(nrc.RegistrationRC, freesurfer.BBRegister):
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',
             self._fixed_image, self._moving_image)
+
+
+class SimpleBeforeAfterInputSpecRPT(nrc.RegistrationRCInputSpec):
+    before = File(exists=True, mandatory=True, desc='file before')
+    after = File(exists=True, mandatory=True, desc='file after')
+    wm_seg = File(desc='reference white matter segmentation mask')
+
+
+class SimpleBeforeAfterOutputSpecRPT(nrc.ReportCapableOutputSpec):
+    pass
+
+class SimpleBeforeAfterRPT(nrc.RegistrationRC):
+    input_spec = SimpleBeforeAfterInputSpecRPT
+    output_spec = SimpleBeforeAfterOutputSpecRPT
+
+    def _run_interface(self, runtime):
+        """ there is not inner interface to run """
+        self._out_report = os.path.abspath(self.inputs.out_report)
+
+        self._fixed_image_label = "after"
+        self._moving_image_label = "before"
+        self._fixed_image = self.inputs.after
+        self._moving_image = self.inputs.before
+        self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
+        NIWORKFLOWS_LOG.info(
+            'Report - setting before (%s) and after (%s) images',
+            self._fixed_image, self._moving_image)
+
+        self._generate_report()
+        NIWORKFLOWS_LOG.info('Successfully created report (%s)', self._out_report)
+
+        return runtime
+
