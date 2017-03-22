@@ -460,7 +460,12 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
             f.write('\n'.join(svg))
     return out_file
 
+
 def transform_to_2d(data, max_axis):
+    """
+    Projects 3d data cube along one axis using maximum intensity with
+    preservation of the signs. Adapted from nilearn.
+    """
     import numpy as np
     # get the shape of the array we are projecting to
     new_shape = list(data.shape)
@@ -477,6 +482,7 @@ def transform_to_2d(data, max_axis):
     maximum_intensity_data = data[inds]
 
     return np.rot90(maximum_intensity_data)
+
 
 def plot_melodic_components(melodic_dir, in_file, tr=None,
                             out_file='melodic_reportlet.svg',
@@ -591,14 +597,3 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
 
     with open(out_file, 'w' if PY3 else 'wb') as f:
         f.write(image_svg)
-
-def _which(cmd):
-    try:
-        subprocess.run([cmd], stdin=subprocess.DEVNULL,
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except OSError as e:
-        from errno import ENOENT
-        if e.errno == ENOENT:
-            return False
-        raise e
-    return True
