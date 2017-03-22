@@ -7,4 +7,5 @@ from .registration import (FLIRTRPT as FLIRT,
                            ApplyXFMRPT as ApplyXFM,
                            RobustMNINormalizationRPT as RobustMNINormalization,
                            ANTSRegistrationRPT as Registration,
-                           ANTSApplyTransformsRPT as ApplyTransforms)
+                           ANTSApplyTransformsRPT as ApplyTransforms,
+                           SimpleBeforeAfterRPT as SimpleBeforeAfter)

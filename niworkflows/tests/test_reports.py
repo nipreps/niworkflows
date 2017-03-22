@@ -19,7 +19,7 @@ from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsample
 
 from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT,
-    ApplyXFMRPT)
+    ApplyXFMRPT, SimpleBeforeAfterRPT)
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
 from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT
 
@@ -69,6 +69,19 @@ class TestRegistrationInterfaces(unittest.TestCase):
             apply_xfm=True
         )
         _smoke_test_report(applyxfm_rpt, 'testApplyXFM.svg')
+
+
+    def test_SimpleBeforeAfterRPT(self):
+        """ the SimpleBeforeAfterRPT report capable test """
+        flirt_rpt = FLIRTRPT(generate_report=False, in_file=self.moving,
+                             reference=self.reference)
+
+        ba_rpt = SimpleBeforeAfterRPT(
+            generate_report=True,
+            before=self.reference,
+            after=flirt_rpt.run().outputs.out_file
+        )
+        _smoke_test_report(ba_rpt, 'test_SimpleBeforeAfterRPT.svg')
 
 
     def test_FLIRTRPT_w_BBR(self):
