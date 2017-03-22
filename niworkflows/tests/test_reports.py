@@ -19,7 +19,7 @@ from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsample
 
 from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT,
-    ApplyXFMRPT)
+    ApplyXFMRPT, SimpleBeforeAfterRPT)
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
 from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT
 
@@ -31,8 +31,9 @@ def stage_artifacts(filename, new_filename):
     """ filename: the name of the file to be saved as an artifact.
         new_filename: what to call the artifact (which will be saved in the
        `/scratch` folder) """
-    if os.getenv('SAVE_CIRCLE_ARTIFACTS', False) == "1":
-        copy(filename, os.path.join('/scratch', new_filename))
+    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+    if save_artifacts:
+        copy(filename, os.path.join(save_artifacts, new_filename))
 
 def _smoke_test_report(report_interface, artifact_name):
     with InTemporaryDirectory():
@@ -69,6 +70,19 @@ class TestRegistrationInterfaces(unittest.TestCase):
             apply_xfm=True
         )
         _smoke_test_report(applyxfm_rpt, 'testApplyXFM.svg')
+
+
+    def test_SimpleBeforeAfterRPT(self):
+        """ the SimpleBeforeAfterRPT report capable test """
+        flirt_rpt = FLIRTRPT(generate_report=False, in_file=self.moving,
+                             reference=self.reference)
+
+        ba_rpt = SimpleBeforeAfterRPT(
+            generate_report=True,
+            before=self.reference,
+            after=flirt_rpt.run().outputs.out_file
+        )
+        _smoke_test_report(ba_rpt, 'test_SimpleBeforeAfterRPT.svg')
 
 
     def test_FLIRTRPT_w_BBR(self):
