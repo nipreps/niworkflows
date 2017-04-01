@@ -284,6 +284,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
             plot_params['levels'] = [
                 0.5] if 'levels' not in plot_params else plot_params['levels']
             plot_params['alpha'] = 1
+            plot_params['linewidths'] = 0.5
             svg.add_contours(seg, **plot_params)
 
         svgs_list.append(extract_svg(svg, compress=compress))
