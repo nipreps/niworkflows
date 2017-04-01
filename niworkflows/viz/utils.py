@@ -23,6 +23,7 @@ from nipype.utils import filemanip
 from niworkflows import NIWORKFLOWS_LOG
 from niworkflows.viz.validators import HTMLValidator
 
+
 try:
     from shutil import which
 except ImportError:
@@ -275,16 +276,15 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
         plot_params = {} if plot_params is None else plot_params
 
         # anatomical
-        plot_params['alpha'] = .7
         svg = plot_anat(image, **plot_params)
 
         # segment contours
-        for seg, color in zip(segs, ['r', 'g', 'y']):
+        for seg, color in zip(segs, ['r', 'g', 'b']):
             plot_params['colors'] = color
             plot_params['levels'] = [
                 0.5] if 'levels' not in plot_params else plot_params['levels']
             plot_params['alpha'] = 1
-            plot_params['linewidths'] = 0.5
+            plot_params['linewidths'] = 0.7
             svg.add_contours(seg, **plot_params)
 
         svgs_list.append(extract_svg(svg, compress=compress))
