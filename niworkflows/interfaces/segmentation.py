@@ -37,7 +37,9 @@ class FASTRPT(nrc.SegmentationRC,
         overlaid '''
         self._anat_file = self.inputs.in_files[0],
         self._mask_file = self.aggregate_outputs().tissue_class_map
-        self._seg_files = self.aggregate_outputs().tissue_class_files
+        # We are skipping the CSF class because with combination with others
+        # it only shows the skullstriping mask
+        self._seg_files = self.aggregate_outputs().tissue_class_files[1:]
         self._masked = False
         self._report_title = "FAST: segmentation over anatomical"
 
