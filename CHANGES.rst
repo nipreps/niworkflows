@@ -1,3 +1,8 @@
+Version 0.0.7
+-------------
+
+* [ENH] Add a SimpleBeforeAfter report capable interface (#144)
+
 Version 0.0.6
 -------------
 

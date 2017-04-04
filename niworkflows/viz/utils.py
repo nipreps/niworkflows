@@ -23,6 +23,7 @@ from nipype.utils import filemanip
 from niworkflows import NIWORKFLOWS_LOG
 from niworkflows.viz.validators import HTMLValidator
 
+
 try:
     from shutil import which
 except ImportError:
@@ -275,15 +276,15 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
         plot_params = {} if plot_params is None else plot_params
 
         # anatomical
-        plot_params['alpha'] = .7
         svg = plot_anat(image, **plot_params)
 
         # segment contours
-        for seg, color in zip(segs, ['r', 'g', 'y']):
+        for seg, color in zip(segs, ['r', 'b']):
             plot_params['colors'] = color
             plot_params['levels'] = [
                 0.5] if 'levels' not in plot_params else plot_params['levels']
             plot_params['alpha'] = 1
+            plot_params['linewidths'] = 0.7
             svg.add_contours(seg, **plot_params)
 
         svgs_list.append(extract_svg(svg, compress=compress))
@@ -372,7 +373,8 @@ def plot_registration(anat_nii, div_id, plot_params=None,
             display.add_contours(white, colors='b', **kwargs)
             display.add_contours(pial, colors='r', **kwargs)
         elif contour is not None:
-            display.add_contours(contour, levels=[.9])
+            display.add_contours(contour, colors='b', levels=[0.5],
+                                 linewidths=0.5)
 
         svg = extract_svg(display, compress=compress)
         display.close()
@@ -459,3 +461,141 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
         with open(out_file, 'w' if PY3 else 'wb') as f:
             f.write('\n'.join(svg))
     return out_file
+
+
+def transform_to_2d(data, max_axis):
+    """
+    Projects 3d data cube along one axis using maximum intensity with
+    preservation of the signs. Adapted from nilearn.
+    """
+    import numpy as np
+    # get the shape of the array we are projecting to
+    new_shape = list(data.shape)
+    del new_shape[max_axis]
+
+    # generate a 3D indexing array that points to max abs value in the
+    # current projection
+    a1, a2 = np.indices(new_shape)
+    inds = [a1, a2]
+    inds.insert(max_axis, np.abs(data).argmax(axis=max_axis))
+
+    # take the values where the absolute value of the projection
+    # is the highest
+    maximum_intensity_data = data[inds]
+
+    return np.rot90(maximum_intensity_data)
+
+
+def plot_melodic_components(melodic_dir, in_file, tr=None,
+                            out_file='melodic_reportlet.svg',
+                            compress='auto', report_mask=None):
+    from nilearn.plotting import plot_glass_brain
+    from nilearn.image import index_img, iter_img
+    import nibabel as nb
+    import numpy as np
+    import pylab as plt
+    import seaborn as sns
+    from matplotlib.gridspec import GridSpec
+    import os
+    from io import StringIO
+    sns.set_style("white")
+    current_palette = sns.color_palette()
+    in_nii = nb.load(in_file)
+    if not tr:
+        tr = in_nii.header.get_zooms()[3]
+
+    from nilearn.input_data import NiftiMasker
+    from nilearn.plotting import plot_roi
+    from nilearn.image.image import mean_img
+    from nilearn.plotting import cm
+
+    if not report_mask:
+        nifti_masker = NiftiMasker(mask_strategy='epi')
+        nifti_masker.fit(index_img(in_nii, range(2)))
+        mask_img = nifti_masker.mask_img_
+    else:
+        mask_img = nb.load(report_mask)
+
+    mask_sl = []
+    for j in range(3):
+        mask_sl.append(transform_to_2d(mask_img.get_data(), j))
+
+    timeseries = np.loadtxt(os.path.join(melodic_dir, "melodic_mix"))
+    power = np.loadtxt(os.path.join(melodic_dir, "melodic_FTmix"))
+    stats = np.loadtxt(os.path.join(melodic_dir, "melodic_ICstats"))
+    n_components = stats.shape[0]
+    Fs = 1.0 / tr
+    Ny = Fs / 2
+    f = Ny * (np.array(list(range(1, power.shape[0] + 1)))) / (power.shape[0])
+
+    n_rows = int((n_components + (n_components % 2)) / 2)
+    fig = plt.figure(figsize=(6.5 * 1.5, n_rows * 0.85))
+    gs = GridSpec(n_rows * 2, 9,
+                  width_ratios=[1, 1, 1, 4, 0.001, 1, 1, 1, 4, ],
+                  height_ratios=[1.1, 1] * n_rows)
+
+    for i, img in enumerate(
+            iter_img(os.path.join(melodic_dir, "melodic_IC.nii.gz"))):
+
+        col = i % 2
+        row = int(i / 2)
+        l_row = row * 2
+
+        data = img.get_data()
+        for j in range(3):
+            ax1 = fig.add_subplot(gs[l_row:l_row + 2, j + col * 5])
+            sl = transform_to_2d(data, j)
+            m = np.abs(sl).max()
+            ax1.imshow(sl, vmin=-m, vmax=+m, cmap=cm.cold_white_hot,
+                       interpolation="nearest")
+            ax1.contour(mask_sl[j], levels=[0.5], colors='k', linewidths=0.5)
+            plt.axis("off")
+            ax1.autoscale_view('tight')
+            if j == 0:
+                ax1.set_title(
+                    "C%d: Tot. var. expl. %.2g%%" % (i + 1, stats[i, 1]), x=0,
+                    y=1.18, fontsize=7,
+                    horizontalalignment='left',
+                    verticalalignment='top')
+
+        ax2 = fig.add_subplot(gs[l_row, 3 + col * 5])
+        ax3 = fig.add_subplot(gs[l_row + 1, 3 + col * 5])
+
+        ax2.plot(np.arange(len(timeseries[:, i])) * tr, timeseries[:, i],
+                 linewidth=min(200 / len(timeseries[:, i]), 1.0))
+        ax2.set_xlim([0, len(timeseries[:, i]) * tr])
+        ax2.axes.get_yaxis().set_visible(False)
+        ax2.autoscale_view('tight')
+        ax2.tick_params(axis='both', which='major', pad=0)
+        sns.despine(left=True, bottom=True)
+        zed = [tick.label.set_fontsize(6) for tick in
+               ax2.xaxis.get_major_ticks()]
+
+        ax3.plot(f[0:], power[0:, i], color=current_palette[1],
+                 linewidth=min(100 / len(power[0:, i]), 1.0))
+        ax3.set_xlim([f[0], f.max()])
+        ax3.axes.get_yaxis().set_visible(False)
+        ax3.autoscale_view('tight')
+        ax3.tick_params(axis='both', which='major', pad=0)
+        zed = [tick.label.set_fontsize(6) for tick in
+               ax3.xaxis.get_major_ticks()]
+        sns.despine(left=True, bottom=True)
+
+    plt.subplots_adjust(hspace=0.5)
+
+    image_buf = StringIO()
+    fig.savefig(image_buf, dpi=300, format='svg', transparent=True,
+                bbox_inches='tight', pad_inches=0.01)
+    fig.clf()
+    image_svg = image_buf.getvalue()
+
+    if compress == True or compress == 'auto':
+        image_svg = svg_compress(image_svg, compress)
+    image_svg = re.sub(' height="[0-9]+[a-z]*"', '', image_svg, count=1)
+    image_svg = re.sub(' width="[0-9]+[a-z]*"', '', image_svg, count=1)
+    image_svg = re.sub(' viewBox',
+                       ' preseveAspectRation="xMidYMid meet" viewBox',
+                       image_svg, count=1)
+
+    with open(out_file, 'w' if PY3 else 'wb') as f:
+        f.write(image_svg)

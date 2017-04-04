@@ -68,7 +68,10 @@ class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
 
         brain_extraction_mask = self.aggregate_outputs().BrainExtractionMask
 
-        self._anat_file = self.inputs.anatomical_image
+        if isdefined(self.inputs.keep_temporary_files) and self.inputs.keep_temporary_files == 1:
+            self._anat_file = self.aggregate_outputs().N4Corrected0
+        else:
+            self._anat_file = self.inputs.anatomical_image
         self._mask_file = brain_extraction_mask
         self._seg_files = [brain_extraction_mask]
         self._masked = False
