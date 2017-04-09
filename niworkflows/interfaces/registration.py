@@ -7,7 +7,15 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 from distutils.version import LooseVersion
 
-from nipype.interfaces import fsl, ants, freesurfer
+import nibabel as nb
+import numpy as np
+from nipype.algorithms.confounds import is_outlier
+
+from nipype.interfaces.base import (traits, isdefined, TraitedSpec, BaseInterface,
+                                    BaseInterfaceInputSpec, File, InputMultiPath,
+                                    OutputMultiPath)
+
+from nipype.interfaces import fsl, ants, freesurfer, afni
 from niworkflows.anat import mni
 import niworkflows.common.report as nrc
 from niworkflows import NIWORKFLOWS_LOG
@@ -216,3 +224,62 @@ class SimpleBeforeAfterRPT(nrc.RegistrationRC):
 
         return runtime
 
+
+class EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True, desc="4D EPI file")
+
+
+class EstimateReferenceImageOutputSpec(TraitedSpec):
+    ref_image = File(exists=True, desc="3D reference image")
+    n_volumes_to_discard = traits.Int(desc="Number of detected non-steady "
+                                           "state volumes in the beginning of "
+                                           "the input file")
+
+
+class EstimateReferenceImage(SimpleInterface):
+    """
+    Given an 4D EPI file estimate an optimal reference image that could be later
+    used for motion estimation and coregistration purposes. If detected uses
+    T1 saturated volumes (non-steady state) otherwise a median of
+    of a subset of motion corrected volumes is used.
+    """
+    input_spec = EstimateReferenceImageInputSpec
+    output_spec = EstimateReferenceImageOutputSpec
+
+    def _run_interface(self, runtime):
+        in_nii = nb.load(self.inputs.in_file)
+        data_slice = in_nii.dataobj[:, :, :, :50]
+        global_signal = data_slice.mean(axis=0).mean(
+            axis=0).mean(axis=0)
+
+        n_volumes_to_discard = is_outlier(global_signal)
+
+        out_ref_fname = os.path.abspath("ref_image.nii.gz")
+
+        if n_volumes_to_discard == 0:
+            if in_nii.shape[-1] > 40:
+                slice = data_slice[:, :, :, 20:40]
+                slice_fname = os.path.abspath("slice.nii.gz")
+                nb.Nifti1Image(slice, in_nii.affine,
+                               in_nii.header).to_filename(slice_fname)
+            else:
+                slice_fname = self.inputs.in_file
+
+            res = afni.Volreg(in_file=slice_fname, args='-Fourier -twopass', zpad=4,
+                         outputtype='NIFTI_GZ').run()
+
+            mc_slice_nii = nb.load(res.outputs.out_file)
+
+            median_image_data = np.median(mc_slice_nii.get_data(), axis=3)
+            nb.Nifti1Image(median_image_data, mc_slice_nii.affine,
+                           mc_slice_nii.header).to_filename(out_ref_fname)
+        else:
+            median_image_data = np.median(
+                data_slice[:, :, :, :n_volumes_to_discard], axis=3)
+            nb.Nifti1Image(median_image_data, in_nii.affine,
+                           in_nii.header).to_filename(out_ref_fname)
+
+        self._results["ref_image"] = out_ref_fname
+        self._results["n_volumes_to_discard"] = n_volumes_to_discard
+
+        return runtime
