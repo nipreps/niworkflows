@@ -236,7 +236,7 @@ class EstimateReferenceImageOutputSpec(TraitedSpec):
                                            "the input file")
 
 
-class EstimateReferenceImage(SimpleInterface):
+class EstimateReferenceImage(BaseInterface):
     """
     Given an 4D EPI file estimate an optimal reference image that could be later
     used for motion estimation and coregistration purposes. If detected uses
@@ -279,7 +279,11 @@ class EstimateReferenceImage(SimpleInterface):
             nb.Nifti1Image(median_image_data, in_nii.affine,
                            in_nii.header).to_filename(out_ref_fname)
 
+        self._results = {}
         self._results["ref_image"] = out_ref_fname
         self._results["n_volumes_to_discard"] = n_volumes_to_discard
 
         return runtime
+
+    def _list_outputs(self):
+        return self._results
