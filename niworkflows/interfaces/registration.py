@@ -227,6 +227,8 @@ class SimpleBeforeAfterRPT(nrc.RegistrationRC):
 
 class EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="4D EPI file")
+    mc_method = traits.Enum("AFNI", "FSL", dsec="Which software to use to perform motion correction",
+                            usedefault=True)
 
 
 class EstimateReferenceImageOutputSpec(TraitedSpec):
@@ -265,10 +267,14 @@ class EstimateReferenceImage(BaseInterface):
             else:
                 slice_fname = self.inputs.in_file
 
-            res = afni.Volreg(in_file=slice_fname, args='-Fourier -twopass', zpad=4,
-                         outputtype='NIFTI_GZ').run()
-
+            if self.inputs.mc_method == "AFNI":
+                res = afni.Volreg(in_file=slice_fname, args='-Fourier -twopass',
+                                  zpad=4, outputtype='NIFTI_GZ').run()
+            elif self.inputs.mc_method == "FSL":
+                res = fsl.MCFLIRT(in_file=slice_fname,
+                                  ref_vol=0, interpolation='sinc').run()
             mc_slice_nii = nb.load(res.outputs.out_file)
+
 
             median_image_data = np.median(mc_slice_nii.get_data(), axis=3)
             nb.Nifti1Image(median_image_data, mc_slice_nii.affine,
