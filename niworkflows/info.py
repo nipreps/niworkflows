@@ -23,18 +23,8 @@ __maintainer__ = 'Oscar Esteban'
 __email__ = 'crn.poldracklab@gmail.com'
 __status__ = 'Prototype'
 
-__description__ = """\
-NeuroImaging Workflows provides processing tools for magnetic resonance images
-of the brain."""
-__longdesc__ = """\
-NeuroImaging Workflows (NIWorkflows) is a selection of image processing workflows for \
-magnetic resonance images of the brain. \
-It is designed to provide an easily accessible, state-of-the-art interface that is \
-robust to differences in scan acquisition protocols and that requires minimal user \
-input. \
-This open-source neuroimaging data processing tool is being developed as a part of \
-the MRI image analysis and reproducibility platform offered by the CRN.
-"""
+__description__ = "NeuroImaging Workflows provides processing tools for magnetic resonance images of the brain."
+__longdesc__ = "NeuroImaging Workflows (NIWorkflows) is a selection of image processing workflows for magnetic resonance images of the brain. It is designed to provide an easily accessible, state-of-the-art interface that is robust to differences in scan acquisition protocols and that requires minimal user input. This open-source neuroimaging data processing tool is being developed as a part of the MRI image analysis and reproducibility platform offered by the CRN."
 
 DOWNLOAD_URL = (
     'https://pypi.python.org/packages/source/{name[0]}/{name}/{name}-{ver}.tar.gz'.format(
@@ -55,7 +45,7 @@ SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 
 LINKS_REQUIRES = []
-TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist', 'nose']
+TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist', 'pytest']
 
 EXTRA_REQUIRES = {
     'doc': ['sphinx'],

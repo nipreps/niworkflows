@@ -235,7 +235,8 @@ class SurfaceSegmentationRC(ReportCapableInterface):
             plot_registration(anat, 'fixed-image',
                               estimate_brightness=True,
                               cuts=cuts,
-                              contour=contour_nii),
+                              contour=contour_nii,
+                              compress=self.inputs.compress_report),
             [],
             out_file=self._out_report
         )

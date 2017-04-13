@@ -1,6 +1,7 @@
 machine:
   environment:
     SCRATCH: "$HOME/scratch"
+    CIRCLE_NPROCS: 2
 
   services:
     - docker
@@ -11,17 +12,21 @@ dependencies:
     - "~/data"
 
   pre:
-    - mkdir -p ~/data/ ~/docker
+    - mkdir -p ~/data/ ~/docker ${CIRCLE_TEST_REPORTS}/py2 ${CIRCLE_TEST_REPORTS}/py3
     - mkdir -p $SCRATCH && sudo setfacl -d -m group:ubuntu:rwx $SCRATCH && sudo setfacl -m group:ubuntu:rwx $SCRATCH
-
+    - mkdir -p $SCRATCH/py2 $SCRATCH/py3
   override:
-    - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
-    - docker build --rm=false -t niworkflows:py35 .
-    - docker save niworkflows:py35 > ~/docker/image.tar
+    - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi :
+        timeout: 6000
+    - docker build --rm=false -t niworkflows:py3 .
+    - docker build --rm=false -t niworkflows:py2 --build-arg PYTHON_MAJOR=2 .
+    - docker save poldracklab/neuroimaging-core:freesurfer-0.0.2 niworkflows:py3 niworkflows:py2 > ~/docker/image.tar :
+        timeout: 6000
 test:
   override:
-    - docker run -ti -v /etc/localtime:/etc/localtime:ro --env SAVE_CIRCLE_ARTIFACTS="1" -v ${SCRATCH}:/scratch --rm --entrypoint=/usr/local/miniconda/bin/nosetests niworkflows:py35 /root/niworkflows:
+    - bash .circle/pytests.sh :
         timeout: 36000
+        parallel: true
 
 general:
   artifacts:
@@ -31,6 +36,6 @@ deployment:
   hub:
     tag: /.*/
     commands:
-      - printf "[distutils]\nindex-servers =\n    pypi\n\n[pypi]\nusername:$PYPI_USER\npassword:$PYPI_PASS\n" > ~/.pypirc
       - sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" niworkflows/info.py
+      - printf "[distutils]\nindex-servers =\n    pypi\n\n[pypi]\nusername:$PYPI_USER\npassword:$PYPI_PASS\n" > ~/.pypirc
       - python setup.py sdist upload -r pypi
