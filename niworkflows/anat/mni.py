@@ -161,7 +161,8 @@ class RobustMNINormalization(BaseInterface):
             moving_image=self.inputs.moving_image,
             num_threads=self.inputs.num_threads,
             from_file=ants_settings,
-            terminal_output='file'
+            terminal_output='file',
+            write_composite_transform=True
         )
        
         # If the settings specify a moving mask...

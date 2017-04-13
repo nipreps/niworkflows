@@ -2,7 +2,7 @@
 """Helper tools for visualization purposes"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os.path as op
+import os, os.path as op
 import subprocess
 import base64
 import re
@@ -11,8 +11,7 @@ from sys import version_info
 import numpy as np
 import nibabel as nb
 from uuid import uuid4
-from io import open
-from io import StringIO
+from io import open, StringIO
 import jinja2
 from pkg_resources import resource_filename as pkgrf
 
@@ -25,8 +24,63 @@ from niworkflows import NIWORKFLOWS_LOG
 from niworkflows.viz.validators import HTMLValidator
 
 
+try:
+    from shutil import which
+except ImportError:
+
+    def which(cmd):
+        """
+        A homemade which command
+
+        >>> from niworkflows.viz.utils import which
+        >>> which('ls')
+        True
+        >>> which('madeoutcommand')
+        False
+
+        """
+
+        try:
+            subprocess.run([cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except OSError as e:
+            from errno import ENOENT
+            if e.errno == ENOENT:
+                return False
+            raise e
+        return True
+
+
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
+
+# Patch subprocess in python 2
+if not hasattr(subprocess, 'DEVNULL'):
+    setattr(subprocess, 'DEVNULL', -3)
+
+if not hasattr(subprocess, 'run'):
+    def _run(args, input=None, stdout=None, stderr=None, shell=False, check=False):
+        from collections import namedtuple
+
+        devnull = open(os.devnull, 'r+')
+        stdin = subprocess.PIPE if input is not None else None
+
+        if stdout == subprocess.DEVNULL:
+            stdout = devnull
+
+        if stderr == subprocess.DEVNULL:
+            stderr = devnull
+
+        proc = subprocess.Popen(args, stdout=stdout, shell=shell, stdin=stdin)
+        result = namedtuple('CompletedProcess', 'stdout stderr')
+        res = result(*proc.communicate(input=input))
+
+        devnull.close()
+
+        if check and proc.returncode != 0:
+            raise subprocess.CalledProcessError(proc.returncode, args)
+
+        return res
+    setattr(subprocess, 'run', _run)
 
 
 def robust_set_limits(data, plot_params):
@@ -73,21 +127,28 @@ def svg_compress(image, compress='auto'):
     ''' takes an image as created by nilearn.plotting and returns a blob svg.
     Performs compression (can be disabled). A bit hacky. '''
 
+    # Check availability of svgo and cwebp
+    has_compress = all((which('svgo'), which('cwebp')))
+    if compress is True and not has_compress:
+        raise RuntimeError('Compression is required, but svgo or cwebp are not installed')
+    else:
+        compress = (compress is True or compress == 'auto') and has_compress
+
     # Compress the SVG file using SVGO
     if compress:
+        cmd = 'svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues'
         try:
-            p = subprocess.run(
-                "svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues",
-                input=image.encode('utf-8'), stdout=subprocess.PIPE,
-                shell=True, check=True)
-        except FileNotFoundError:
-            if compress is True:
-                raise
+            pout = subprocess.run(cmd, input=image.encode('utf-8'), stdout=subprocess.PIPE,
+                                  shell=True, check=True).stdout
+        except OSError as e:
+            from errno import ENOENT
+            if compress is True and e.errno == ENOENT:
+                raise e
         else:
-            image = p.stdout.decode('utf-8')
+            image = pout.decode('utf-8')
 
     # Convert all of the rasters inside the SVG file with 80% compressed WEBP
-    if (_has_cwebp() and compress == 'auto') or compress == True:
+    if compress:
         new_lines = []
         with StringIO(image) as fp:
             for line in fp:
@@ -105,11 +166,10 @@ def svg_compress(image, compress='auto'):
                     png_b64 = right.split('"')[0]
                     right = '"' + '"'.join(right.split('"')[1:])
 
-                    p = subprocess.run("cwebp -quiet -noalpha -q 80 -o - -- -",
-                                       input=base64.b64decode(png_b64),
-                                       stdout=subprocess.PIPE,
-                                       shell=True, check=True)
-                    webpimg = base64.b64encode(p.stdout).decode('utf-8')
+                    cmd = "cwebp -quiet -noalpha -q 80 -o - -- -"
+                    pout = subprocess.run(cmd, input=base64.b64decode(png_b64), shell=True,
+                                       stdout=subprocess.PIPE, check=True).stdout
+                    webpimg = base64.b64encode(pout).decode('utf-8')
                     new_lines.append(left + webpimg + right)
                 else:
                     new_lines.append(line)
@@ -142,7 +202,7 @@ def extract_svg(display_object, dpi=300, compress='auto'):
     Removes the preamble of the svg files generated with nilearn
     """
     image_svg = svg2str(display_object, dpi)
-    if compress == True or compress == 'auto':
+    if compress is True or compress == 'auto':
         image_svg = svg_compress(image_svg, compress)
     image_svg = re.sub(' height="[0-9]+[a-z]*"', '', image_svg, count=1)
     image_svg = re.sub(' width="[0-9]+[a-z]*"', '', image_svg, count=1)
@@ -216,15 +276,15 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
         plot_params = {} if plot_params is None else plot_params
 
         # anatomical
-        plot_params['alpha'] = .7
         svg = plot_anat(image, **plot_params)
 
         # segment contours
-        for seg, color in zip(segs, ['r', 'g', 'y']):
+        for seg, color in zip(segs, ['r', 'b']):
             plot_params['colors'] = color
             plot_params['levels'] = [
                 0.5] if 'levels' not in plot_params else plot_params['levels']
             plot_params['alpha'] = 1
+            plot_params['linewidths'] = 0.7
             svg.add_contours(seg, **plot_params)
 
         svgs_list.append(extract_svg(svg, compress=compress))
@@ -313,7 +373,8 @@ def plot_registration(anat_nii, div_id, plot_params=None,
             display.add_contours(white, colors='b', **kwargs)
             display.add_contours(pial, colors='r', **kwargs)
         elif contour is not None:
-            display.add_contours(contour, levels=[.9])
+            display.add_contours(contour, colors='b', levels=[0.5],
+                                 linewidths=0.5)
 
         svg = extract_svg(display, compress=compress)
         display.close()
@@ -401,9 +462,140 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
             f.write('\n'.join(svg))
     return out_file
 
-def _has_cwebp():
-    try:
-        subprocess.run(['cwebp'], stdout=subprocess.DEVNULL)
-    except FileNotFoundError:
-        return False
-    return True
+
+def transform_to_2d(data, max_axis):
+    """
+    Projects 3d data cube along one axis using maximum intensity with
+    preservation of the signs. Adapted from nilearn.
+    """
+    import numpy as np
+    # get the shape of the array we are projecting to
+    new_shape = list(data.shape)
+    del new_shape[max_axis]
+
+    # generate a 3D indexing array that points to max abs value in the
+    # current projection
+    a1, a2 = np.indices(new_shape)
+    inds = [a1, a2]
+    inds.insert(max_axis, np.abs(data).argmax(axis=max_axis))
+
+    # take the values where the absolute value of the projection
+    # is the highest
+    maximum_intensity_data = data[inds]
+
+    return np.rot90(maximum_intensity_data)
+
+
+def plot_melodic_components(melodic_dir, in_file, tr=None,
+                            out_file='melodic_reportlet.svg',
+                            compress='auto', report_mask=None):
+    from nilearn.plotting import plot_glass_brain
+    from nilearn.image import index_img, iter_img
+    import nibabel as nb
+    import numpy as np
+    import pylab as plt
+    import seaborn as sns
+    from matplotlib.gridspec import GridSpec
+    import os
+    from io import StringIO
+    sns.set_style("white")
+    current_palette = sns.color_palette()
+    in_nii = nb.load(in_file)
+    if not tr:
+        tr = in_nii.header.get_zooms()[3]
+
+    from nilearn.input_data import NiftiMasker
+    from nilearn.plotting import plot_roi
+    from nilearn.image.image import mean_img
+    from nilearn.plotting import cm
+
+    if not report_mask:
+        nifti_masker = NiftiMasker(mask_strategy='epi')
+        nifti_masker.fit(index_img(in_nii, range(2)))
+        mask_img = nifti_masker.mask_img_
+    else:
+        mask_img = nb.load(report_mask)
+
+    mask_sl = []
+    for j in range(3):
+        mask_sl.append(transform_to_2d(mask_img.get_data(), j))
+
+    timeseries = np.loadtxt(os.path.join(melodic_dir, "melodic_mix"))
+    power = np.loadtxt(os.path.join(melodic_dir, "melodic_FTmix"))
+    stats = np.loadtxt(os.path.join(melodic_dir, "melodic_ICstats"))
+    n_components = stats.shape[0]
+    Fs = 1.0 / tr
+    Ny = Fs / 2
+    f = Ny * (np.array(list(range(1, power.shape[0] + 1)))) / (power.shape[0])
+
+    n_rows = int((n_components + (n_components % 2)) / 2)
+    fig = plt.figure(figsize=(6.5 * 1.5, n_rows * 0.85))
+    gs = GridSpec(n_rows * 2, 9,
+                  width_ratios=[1, 1, 1, 4, 0.001, 1, 1, 1, 4, ],
+                  height_ratios=[1.1, 1] * n_rows)
+
+    for i, img in enumerate(
+            iter_img(os.path.join(melodic_dir, "melodic_IC.nii.gz"))):
+
+        col = i % 2
+        row = int(i / 2)
+        l_row = row * 2
+
+        data = img.get_data()
+        for j in range(3):
+            ax1 = fig.add_subplot(gs[l_row:l_row + 2, j + col * 5])
+            sl = transform_to_2d(data, j)
+            m = np.abs(sl).max()
+            ax1.imshow(sl, vmin=-m, vmax=+m, cmap=cm.cold_white_hot,
+                       interpolation="nearest")
+            ax1.contour(mask_sl[j], levels=[0.5], colors='k', linewidths=0.5)
+            plt.axis("off")
+            ax1.autoscale_view('tight')
+            if j == 0:
+                ax1.set_title(
+                    "C%d: Tot. var. expl. %.2g%%" % (i + 1, stats[i, 1]), x=0,
+                    y=1.18, fontsize=7,
+                    horizontalalignment='left',
+                    verticalalignment='top')
+
+        ax2 = fig.add_subplot(gs[l_row, 3 + col * 5])
+        ax3 = fig.add_subplot(gs[l_row + 1, 3 + col * 5])
+
+        ax2.plot(np.arange(len(timeseries[:, i])) * tr, timeseries[:, i],
+                 linewidth=min(200 / len(timeseries[:, i]), 1.0))
+        ax2.set_xlim([0, len(timeseries[:, i]) * tr])
+        ax2.axes.get_yaxis().set_visible(False)
+        ax2.autoscale_view('tight')
+        ax2.tick_params(axis='both', which='major', pad=0)
+        sns.despine(left=True, bottom=True)
+        zed = [tick.label.set_fontsize(6) for tick in
+               ax2.xaxis.get_major_ticks()]
+
+        ax3.plot(f[0:], power[0:, i], color=current_palette[1],
+                 linewidth=min(100 / len(power[0:, i]), 1.0))
+        ax3.set_xlim([f[0], f.max()])
+        ax3.axes.get_yaxis().set_visible(False)
+        ax3.autoscale_view('tight')
+        ax3.tick_params(axis='both', which='major', pad=0)
+        zed = [tick.label.set_fontsize(6) for tick in
+               ax3.xaxis.get_major_ticks()]
+        sns.despine(left=True, bottom=True)
+
+    plt.subplots_adjust(hspace=0.5)
+
+    image_buf = StringIO()
+    fig.savefig(image_buf, dpi=300, format='svg', transparent=True,
+                bbox_inches='tight', pad_inches=0.01)
+    fig.clf()
+    image_svg = image_buf.getvalue()
+
+    if compress == True or compress == 'auto':
+        image_svg = svg_compress(image_svg, compress)
+    image_svg = re.sub(' height="[0-9]+[a-z]*"', '', image_svg, count=1)
+    image_svg = re.sub(' width="[0-9]+[a-z]*"', '', image_svg, count=1)
+    image_svg = re.sub(' viewBox',
+                       ' preseveAspectRation="xMidYMid meet" viewBox',
+                       image_svg, count=1)
+
+    with open(out_file, 'w' if PY3 else 'wb') as f:
+        f.write(image_svg)

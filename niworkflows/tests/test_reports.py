@@ -19,7 +19,7 @@ from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsample
 
 from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT,
-    ApplyXFMRPT)
+    ApplyXFMRPT, SimpleBeforeAfterRPT)
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
 from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT
 
@@ -31,16 +31,16 @@ def stage_artifacts(filename, new_filename):
     """ filename: the name of the file to be saved as an artifact.
         new_filename: what to call the artifact (which will be saved in the
        `/scratch` folder) """
-    if os.getenv('SAVE_CIRCLE_ARTIFACTS', False) == "1":
-        copy(filename, os.path.join('/scratch', new_filename))
+    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+    if save_artifacts:
+        copy(filename, os.path.join(save_artifacts, new_filename))
 
 def _smoke_test_report(report_interface, artifact_name):
     with InTemporaryDirectory():
         report_interface.run()
         out_report = report_interface.inputs.out_report
         stage_artifacts(out_report, artifact_name)
-        unittest.TestCase.assertTrue(os.path.isfile(out_report), 'HTML report exists at {}'
-                                     .format(out_report))
+        assert os.path.isfile(out_report), 'Report does not exist'
 
 
 class TestRegistrationInterfaces(unittest.TestCase):
@@ -70,6 +70,19 @@ class TestRegistrationInterfaces(unittest.TestCase):
             apply_xfm=True
         )
         _smoke_test_report(applyxfm_rpt, 'testApplyXFM.svg')
+
+
+    def test_SimpleBeforeAfterRPT(self):
+        """ the SimpleBeforeAfterRPT report capable test """
+        flirt_rpt = FLIRTRPT(generate_report=False, in_file=self.moving,
+                             reference=self.reference)
+
+        ba_rpt = SimpleBeforeAfterRPT(
+            generate_report=True,
+            before=self.reference,
+            after=flirt_rpt.run().outputs.out_file
+        )
+        _smoke_test_report(ba_rpt, 'test_SimpleBeforeAfterRPT.svg')
 
 
     def test_FLIRTRPT_w_BBR(self):
@@ -201,9 +214,11 @@ class TestCompression(unittest.TestCase):
         compressed_int.run()
         compressed_report = compressed_int.inputs.out_report
 
-        unittest.TestCase.assertTrue(int(os.stat(uncompressed_report).st_size) > int(os.stat(compressed_report).st_size),
-                                     'An uncompressed report is bigger than '
-                                     'a compressed report')
+        size = int(os.stat(uncompressed_report).st_size)
+        size_compress = int(os.stat(compressed_report).st_size)
+
+        assert size >= size_compress, ('The uncompressed report is smaller (%d)'
+                                       'than the compressed report (%d)' % (size, size_compress))
 
 
 class TestReconAllRPT(unittest.TestCase):

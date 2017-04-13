@@ -5,8 +5,17 @@ ReportCapableInterfaces for registration tools
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
+from distutils.version import LooseVersion
 
-from nipype.interfaces import fsl, ants, freesurfer
+import nibabel as nb
+import numpy as np
+from nipype.algorithms.confounds import is_outlier
+
+from nipype.interfaces.base import (traits, isdefined, TraitedSpec, BaseInterface,
+                                    BaseInterfaceInputSpec, File, InputMultiPath,
+                                    OutputMultiPath)
+
+from nipype.interfaces import fsl, ants, freesurfer, afni
 from niworkflows.anat import mni
 import niworkflows.common.report as nrc
 from niworkflows import NIWORKFLOWS_LOG
@@ -154,24 +163,29 @@ class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
     output_spec = FLIRTOutputSpecRPT
 
 
-class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
-                             freesurfer.preprocess.BBRegisterInputSpec):
-    pass
+if LooseVersion(freesurfer.preprocess.FSVersion) < LooseVersion("6.0.0"):
+    class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
+                                 freesurfer.preprocess.BBRegisterInputSpec):
+        pass
+else:
+    class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
+                                 freesurfer.preprocess.BBRegisterInputSpec6):
+        pass
+
 
 class BBRegisterOutputSpecRPT(nrc.ReportCapableOutputSpec,
                               freesurfer.preprocess.BBRegisterOutputSpec):
     pass
+
 
 class BBRegisterRPT(nrc.RegistrationRC, freesurfer.BBRegister):
     input_spec = BBRegisterInputSpecRPT
     output_spec = BBRegisterOutputSpecRPT
 
     def _post_run_hook(self, runtime):
-        # bbregister takes a subject_id, so the target is likely to be the
-        # T1 anatomical
-        mri_dir = os.path.join(os.getenv('SUBJECTS_DIR'),
+        mri_dir = os.path.join(self.inputs.subjects_dir,
                                self.inputs.subject_id, 'mri')
-        self._fixed_image = os.path.join(mri_dir, 'T1.mgz')
+        self._fixed_image = os.path.join(mri_dir, 'brainmask.mgz')
         self._moving_image = self.aggregate_outputs().registered_file
         self._contour = os.path.join(mri_dir, 'ribbon.mgz')
         NIWORKFLOWS_LOG.info(
@@ -179,3 +193,102 @@ class BBRegisterRPT(nrc.RegistrationRC, freesurfer.BBRegister):
             self._fixed_image, self._moving_image)
 
 
+class SimpleBeforeAfterInputSpecRPT(nrc.RegistrationRCInputSpec):
+    before = File(exists=True, mandatory=True, desc='file before')
+    after = File(exists=True, mandatory=True, desc='file after')
+    wm_seg = File(desc='reference white matter segmentation mask')
+
+
+class SimpleBeforeAfterOutputSpecRPT(nrc.ReportCapableOutputSpec):
+    pass
+
+class SimpleBeforeAfterRPT(nrc.RegistrationRC):
+    input_spec = SimpleBeforeAfterInputSpecRPT
+    output_spec = SimpleBeforeAfterOutputSpecRPT
+
+    def _run_interface(self, runtime):
+        """ there is not inner interface to run """
+        self._out_report = os.path.abspath(self.inputs.out_report)
+
+        self._fixed_image_label = "after"
+        self._moving_image_label = "before"
+        self._fixed_image = self.inputs.after
+        self._moving_image = self.inputs.before
+        self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
+        NIWORKFLOWS_LOG.info(
+            'Report - setting before (%s) and after (%s) images',
+            self._fixed_image, self._moving_image)
+
+        self._generate_report()
+        NIWORKFLOWS_LOG.info('Successfully created report (%s)', self._out_report)
+
+        return runtime
+
+
+class EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True, desc="4D EPI file")
+    mc_method = traits.Enum("AFNI", "FSL", dsec="Which software to use to perform motion correction",
+                            usedefault=True)
+
+
+class EstimateReferenceImageOutputSpec(TraitedSpec):
+    ref_image = File(exists=True, desc="3D reference image")
+    n_volumes_to_discard = traits.Int(desc="Number of detected non-steady "
+                                           "state volumes in the beginning of "
+                                           "the input file")
+
+
+class EstimateReferenceImage(BaseInterface):
+    """
+    Given an 4D EPI file estimate an optimal reference image that could be later
+    used for motion estimation and coregistration purposes. If detected uses
+    T1 saturated volumes (non-steady state) otherwise a median of
+    of a subset of motion corrected volumes is used.
+    """
+    input_spec = EstimateReferenceImageInputSpec
+    output_spec = EstimateReferenceImageOutputSpec
+
+    def _run_interface(self, runtime):
+        in_nii = nb.load(self.inputs.in_file)
+        data_slice = in_nii.dataobj[:, :, :, :50]
+        global_signal = data_slice.mean(axis=0).mean(
+            axis=0).mean(axis=0)
+
+        n_volumes_to_discard = is_outlier(global_signal)
+
+        out_ref_fname = os.path.abspath("ref_image.nii.gz")
+
+        if n_volumes_to_discard == 0:
+            if in_nii.shape[-1] > 40:
+                slice = data_slice[:, :, :, 20:40]
+                slice_fname = os.path.abspath("slice.nii.gz")
+                nb.Nifti1Image(slice, in_nii.affine,
+                               in_nii.header).to_filename(slice_fname)
+            else:
+                slice_fname = self.inputs.in_file
+
+            if self.inputs.mc_method == "AFNI":
+                res = afni.Volreg(in_file=slice_fname, args='-Fourier -twopass',
+                                  zpad=4, outputtype='NIFTI_GZ').run()
+            elif self.inputs.mc_method == "FSL":
+                res = fsl.MCFLIRT(in_file=slice_fname,
+                                  ref_vol=0, interpolation='sinc').run()
+            mc_slice_nii = nb.load(res.outputs.out_file)
+
+            median_image_data = np.median(mc_slice_nii.get_data(), axis=3)
+            nb.Nifti1Image(median_image_data, mc_slice_nii.affine,
+                           mc_slice_nii.header).to_filename(out_ref_fname)
+        else:
+            median_image_data = np.median(
+                data_slice[:, :, :, :n_volumes_to_discard], axis=3)
+            nb.Nifti1Image(median_image_data, in_nii.affine,
+                           in_nii.header).to_filename(out_ref_fname)
+
+        self._results = dict()
+        self._results["ref_image"] = out_ref_fname
+        self._results["n_volumes_to_discard"] = n_volumes_to_discard
+
+        return runtime
+
+    def _list_outputs(self):
+        return self._results
