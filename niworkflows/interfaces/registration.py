@@ -15,7 +15,8 @@ from nipype.interfaces.base import (traits, isdefined, TraitedSpec, BaseInterfac
                                     BaseInterfaceInputSpec, File, InputMultiPath,
                                     OutputMultiPath)
 
-from nipype.interfaces import fsl, ants, freesurfer, afni
+from nipype.interfaces import freesurfer as fs
+from nipype.interfaces import fsl, ants, afni
 from niworkflows.anat import mni
 import niworkflows.common.report as nrc
 from niworkflows import NIWORKFLOWS_LOG
@@ -163,22 +164,22 @@ class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
     output_spec = FLIRTOutputSpecRPT
 
 
-if LooseVersion(freesurfer.preprocess.FSVersion) < LooseVersion("6.0.0"):
+if LooseVersion("0") < LooseVersion(fs.preprocess.FSVersion) < LooseVersion("6.0.0"):
     class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
-                                 freesurfer.preprocess.BBRegisterInputSpec):
+                                 fs.preprocess.BBRegisterInputSpec):
         pass
 else:
     class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
-                                 freesurfer.preprocess.BBRegisterInputSpec6):
+                                 fs.preprocess.BBRegisterInputSpec6):
         pass
 
 
 class BBRegisterOutputSpecRPT(nrc.ReportCapableOutputSpec,
-                              freesurfer.preprocess.BBRegisterOutputSpec):
+                              fs.preprocess.BBRegisterOutputSpec):
     pass
 
 
-class BBRegisterRPT(nrc.RegistrationRC, freesurfer.BBRegister):
+class BBRegisterRPT(nrc.RegistrationRC, fs.BBRegister):
     input_spec = BBRegisterInputSpecRPT
     output_spec = BBRegisterOutputSpecRPT
 
