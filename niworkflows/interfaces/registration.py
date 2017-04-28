@@ -11,15 +11,15 @@ import nibabel as nb
 import numpy as np
 from nipype.algorithms.confounds import is_outlier
 
-from nipype.interfaces.base import (traits, isdefined, TraitedSpec, BaseInterface,
-                                    BaseInterfaceInputSpec, File, InputMultiPath,
-                                    OutputMultiPath)
+from nipype.interfaces.base import (traits, isdefined, TraitedSpec,
+                                    BaseInterfaceInputSpec, File)
+from .base import SimpleInterface
 
-from nipype.interfaces import fsl, ants, freesurfer, afni
+from nipype.interfaces import freesurfer as fs
+from nipype.interfaces import fsl, ants, afni
 from niworkflows.anat import mni
 import niworkflows.common.report as nrc
 from niworkflows import NIWORKFLOWS_LOG
-from nipype.interfaces.base import isdefined, File
 from nilearn.image import index_img
 
 class RobustMNINormalizationInputSpecRPT(
@@ -163,22 +163,22 @@ class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
     output_spec = FLIRTOutputSpecRPT
 
 
-if LooseVersion(freesurfer.preprocess.FSVersion) < LooseVersion("6.0.0"):
+if LooseVersion("0.0.0") < fs.Info.looseversion() < LooseVersion("6.0.0"):
     class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
-                                 freesurfer.preprocess.BBRegisterInputSpec):
+                                 fs.preprocess.BBRegisterInputSpec):
         pass
 else:
     class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
-                                 freesurfer.preprocess.BBRegisterInputSpec6):
+                                 fs.preprocess.BBRegisterInputSpec6):
         pass
 
 
 class BBRegisterOutputSpecRPT(nrc.ReportCapableOutputSpec,
-                              freesurfer.preprocess.BBRegisterOutputSpec):
+                              fs.preprocess.BBRegisterOutputSpec):
     pass
 
 
-class BBRegisterRPT(nrc.RegistrationRC, freesurfer.BBRegister):
+class BBRegisterRPT(nrc.RegistrationRC, fs.BBRegister):
     input_spec = BBRegisterInputSpecRPT
     output_spec = BBRegisterOutputSpecRPT
 
@@ -238,7 +238,7 @@ class EstimateReferenceImageOutputSpec(TraitedSpec):
                                            "the input file")
 
 
-class EstimateReferenceImage(BaseInterface):
+class EstimateReferenceImage(SimpleInterface):
     """
     Given an 4D EPI file estimate an optimal reference image that could be later
     used for motion estimation and coregistration purposes. If detected uses
@@ -284,11 +284,7 @@ class EstimateReferenceImage(BaseInterface):
             nb.Nifti1Image(median_image_data, in_nii.affine,
                            in_nii.header).to_filename(out_ref_fname)
 
-        self._results = dict()
         self._results["ref_image"] = out_ref_fname
         self._results["n_volumes_to_discard"] = n_volumes_to_discard
 
         return runtime
-
-    def _list_outputs(self):
-        return self._results
