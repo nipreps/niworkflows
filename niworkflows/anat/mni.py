@@ -32,8 +32,6 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
                             desc='set the reference modality for registration')
     moving = traits.Enum('T1', 'EPI', usedefault=True, mandatory=True,
                          desc='registration type')
-    advanced_init = traits.Bool(False, usedefault=True,
-                                desc='use antsBrainExtraction.sh initialization style')
     template = traits.Enum(
         'mni_icbm152_linear',
         'mni_icbm152_nlin_asym_09c',
