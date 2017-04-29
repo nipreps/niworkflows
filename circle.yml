@@ -12,7 +12,7 @@ dependencies:
     - "~/data"
 
   pre:
-    - mkdir -p ${SCRATCH}/dist ~/data/ ~/docker ${CIRCLE_TEST_REPORTS}/py2 ${CIRCLE_TEST_REPORTS}/py3
+    - mkdir -p ~/data/ ~/docker ${CIRCLE_TEST_REPORTS}/py2 ${CIRCLE_TEST_REPORTS}/py3
     - mkdir -p $SCRATCH && sudo setfacl -d -m group:ubuntu:rwx $SCRATCH && sudo setfacl -m group:ubuntu:rwx $SCRATCH
     - mkdir -p $SCRATCH/py2 $SCRATCH/py3
   override:
@@ -36,9 +36,6 @@ deployment:
   hub:
     tag: /.*/
     commands:
-      - make clean
       - sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" niworkflows/info.py
       - printf "[distutils]\nindex-servers =\n    pypi\n\n[pypi]\nusername:$PYPI_USER\npassword:$PYPI_PASS\n" > ~/.pypirc
-      - python setup.py sdist
-      - pip install twine && twine upload dist/*
-      - cp dist/* ${SCRATCH}/dist || true
+      - python setup.py sdist upload -r pypi
