@@ -45,6 +45,7 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
                                         "that can drive the registration. "
                                         "Requires reliable and accurate masks."
                                         "See https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba")
+    initial_moving_transform = File(exists=True, desc='transform for initialization')
 
 
 class RobustMNINormalization(BaseInterface):
@@ -122,6 +123,12 @@ class RobustMNINormalization(BaseInterface):
             terminal_output='file',
             write_composite_transform=True
         )
+
+        if isdefined(self.inputs.initial_moving_transform):
+            self.norm.inputs.initial_moving_transform = self.inputs.initial_moving_transform
+        else:
+            self.norm.initial_moving_transform_com = 1
+
         if isdefined(self.inputs.moving_mask):
             if self.inputs.explicit_masking:
                 self.norm.inputs.moving_image = mask(
