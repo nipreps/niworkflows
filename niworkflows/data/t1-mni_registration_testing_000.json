@@ -8,7 +8,6 @@
     "transforms": ["Rigid", "Affine"],
     "transform_parameters": [[1.0], [1.0]],
     "number_of_iterations": [[20], [15]],
-    "initial_moving_transform_com": true,
     "sampling_strategy": ["Random", "Random"],
     "sampling_percentage": [0.2, 0.1],
     "smoothing_sigmas": [[4], [2]],
