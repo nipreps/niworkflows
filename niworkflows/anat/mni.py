@@ -26,6 +26,7 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     num_threads = traits.Int(cpu_count(), usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
     testing = traits.Bool(False, usedefault=True, desc='use testing settings')
+    faster = traits.Bool(False, usedefault=True, desc='use faster settings')
     orientation = traits.Enum('RAS', 'LAS', mandatory=True, usedefault=True,
                               desc='modify template orientation (should match input image)')
     reference = traits.Enum('T1', 'T2', 'PD', mandatory=True, usedefault=True,
@@ -73,6 +74,8 @@ class RobustMNINormalization(BaseInterface):
         filestart = '{}-mni_registration_'.format(self.inputs.moving.lower())
         if self.inputs.testing:
             filestart += 'testing_'
+        elif self.inputs.faster:
+            filestart += 'fast_'
 
         filenames = [i for i in pkgr.resource_listdir('niworkflows', 'data')
                      if i.startswith(filestart) and i.endswith('.json')]
