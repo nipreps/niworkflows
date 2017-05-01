@@ -25,8 +25,9 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     reference_mask = File(exists=True, desc='reference image mask')
     num_threads = traits.Int(cpu_count(), usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
-    testing = traits.Bool(False, usedefault=True, desc='use testing settings')
-    faster = traits.Bool(False, usedefault=True, desc='use faster settings')
+    testing = traits.Bool(False, deprecated=True, desc='use testing settings')
+    flavor = traits.Enum('precise', 'testing', 'fast', usedefault=True,
+                         desc='registration settings parameter set')
     orientation = traits.Enum('RAS', 'LAS', mandatory=True, usedefault=True,
                               desc='modify template orientation (should match input image)')
     reference = traits.Enum('T1', 'T2', 'PD', mandatory=True, usedefault=True,
@@ -71,11 +72,12 @@ class RobustMNINormalization(BaseInterface):
             NIWORKFLOWS_LOG.info('User-defined settings, overriding defaults')
             return self.inputs.settings
 
-        filestart = '{}-mni_registration_'.format(self.inputs.moving.lower())
-        if self.inputs.testing:
-            filestart += 'testing_'
-        elif self.inputs.faster:
-            filestart += 'fast_'
+        filestart = '{}-mni_registration_{}_'.format(
+            self.inputs.moving.lower(), self.inputs.flavor)
+
+        # For backwards compatibility
+        if isdefined(self.inputs.testing) and self.inputs.testing:
+            filestart = '{}-mni_registration_testing_'.format(self.inputs.moving.lower())
 
         filenames = [i for i in pkgr.resource_listdir('niworkflows', 'data')
                      if i.startswith(filestart) and i.endswith('.json')]
