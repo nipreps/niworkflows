@@ -25,7 +25,7 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     reference_mask = File(exists=True, desc='reference image mask')
     num_threads = traits.Int(cpu_count(), usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
-    testing = traits.Bool(False, deprecated=True, desc='use testing settings')
+    testing = traits.Bool(False, deprecated='99.99.99', desc='use testing settings')
     flavor = traits.Enum('precise', 'testing', 'fast', usedefault=True,
                          desc='registration settings parameter set')
     orientation = traits.Enum('RAS', 'LAS', mandatory=True, usedefault=True,
