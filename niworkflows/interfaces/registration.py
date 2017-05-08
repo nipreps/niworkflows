@@ -276,8 +276,8 @@ class EstimateReferenceImage(SimpleInterface):
             mc_slice_nii = nb.load(res.outputs.out_file)
 
             median_image_data = np.median(mc_slice_nii.get_data(), axis=3)
-            nb.Nifti1Image(median_image_data, mc_slice_nii.affine,
-                           mc_slice_nii.header).to_filename(out_ref_fname)
+            nb.Nifti1Image(median_image_data, in_nii.affine,
+                           in_nii.header).to_filename(out_ref_fname)
         else:
             median_image_data = np.median(
                 data_slice[:, :, :, :n_volumes_to_discard], axis=3)
