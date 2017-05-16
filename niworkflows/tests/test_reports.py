@@ -21,7 +21,8 @@ from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT,
     ApplyXFMRPT, SimpleBeforeAfterRPT)
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
-from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT
+from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT, \
+    SimpleShowMaskRPT
 
 MNI_DIR = get_mni_template_ras()
 MNI_2MM = os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz')
@@ -144,6 +145,20 @@ class TestBETRPT(unittest.TestCase):
         _smoke_test_report(BETRPT(in_file=mni_4d_file, generate_report=True, mask=True),
                            'testBET4d.html')
 
+
+def _template_name(filename):
+    return os.path.join(get_ants_oasis_template_ras(), filename)
+
+
+class TestSimpleShowMaskRPT(unittest.TestCase):
+
+    def test_generate_report(self):
+        ''' test of SimpleShowMaskRPT's report '''
+        _smoke_test_report(SimpleShowMaskRPT(background_file=_template_name('T_template0.nii.gz'),
+                                             mask_file=_template_name('T_template0_BrainCerebellumRegistrationMask.nii.gz')),
+                           'testSimpleShowMaskRPT.html')
+
+
 class TestBrainExtractionRPT(unittest.TestCase):
     ''' tests the report capable version of ANTS's BrainExtraction interface, using mni as input'''
 
@@ -153,8 +168,6 @@ class TestBrainExtractionRPT(unittest.TestCase):
                 - use_floatingpoint_precision=1,
                 - brain_template, brain_probability_mask, extraction_registration_mask from get_ants_oasis_template_ras()
         '''
-        def _template_name(filename):
-            return os.path.join(get_ants_oasis_template_ras(), filename)
 
         _smoke_test_report(
             BrainExtractionRPT(

@@ -205,3 +205,23 @@ class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
         NIWORKFLOWS_LOG.info('Generating report for tCompCor. file "%s", mask "%s"',
                              self.inputs.realigned_file,
                              self.aggregate_outputs().high_variance_masks)
+
+
+class SimpleShowMaskInputSpec(nrc.ReportCapableInputSpec):
+    background_file = File(exists=True, mandatory=True, desc='file before')
+    mask_file = File(exists=True, mandatory=True, desc='file before')
+    generate_report = traits.Bool(True, usedefault=True)
+
+
+class SimpleShowMaskRPT(nrc.SegmentationRC):
+    input_spec = SimpleShowMaskInputSpec
+    output_spec = nrc.ReportCapableOutputSpec
+
+    def _post_run_hook(self, runtime):
+        self._anat_file = self.inputs.background_file
+        self._mask_file = self.inputs.mask_file
+        self._seg_files = [self.inputs.mask_file]
+        self._masked = True
+        self._report_title = "Brain mask"
+
+        return runtime
