@@ -164,9 +164,9 @@ class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
     def _post_run_hook(self, runtime):
         ''' generates a report showing slices from each axis '''
 
-        assert(len(self.inputs.mask_files) == 1,
-               "ACompCorRPT only supports a single input mask. "
-               "A list %s was found." % self.inputs.mask_files)
+        assert len(self.inputs.mask_files) == 1, \
+            "ACompCorRPT only supports a single input mask. " \
+            "A list %s was found." % self.inputs.mask_files
         self._anat_file = self.inputs.realigned_file
         self._mask_file = self.inputs.mask_files[0]
         self._seg_files = self.inputs.mask_files
@@ -193,9 +193,9 @@ class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
 
         high_variance_masks = self.aggregate_outputs().high_variance_masks
 
-        assert (not isinstance(high_variance_masks, list),
-                "TCompCorRPT only supports a single output high variance mask. "
-                "A list %s was found." % str(high_variance_masks))
+        assert not isinstance(high_variance_masks, list),\
+            "TCompCorRPT only supports a single output high variance mask. " \
+            "A list %s was found." % str(high_variance_masks)
         self._anat_file = self.inputs.realigned_file
         self._mask_file = high_variance_masks
         self._seg_files = [high_variance_masks]
