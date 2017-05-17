@@ -11,6 +11,7 @@ from shutil import copy
 
 import nibabel as nb
 from nilearn import image
+from traits.trait_errors import TraitError
 from nipype.utils.tmpdirs import InTemporaryDirectory
 
 
@@ -107,15 +108,26 @@ class TestRegistrationInterfaces(unittest.TestCase):
     def test_RobustMNINormalizationRPT(self):
         """ the RobustMNINormalizationRPT report capable test """
         ants_rpt = RobustMNINormalizationRPT(
-            generate_report=True, moving_image=self.moving, testing=True)
+            generate_report=True, moving_image=self.moving, flavor='testing')
         _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT.svg')
 
     def test_RobustMNINormalizationRPT_masked(self):
         """ the RobustMNINormalizationRPT report capable test with masking """
         ants_rpt = RobustMNINormalizationRPT(
             generate_report=True, moving_image=self.moving,
-            reference_mask=self.reference_mask, testing=True)
+            reference_mask=self.reference_mask, flavor='testing')
         _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT_masked.svg')
+
+    def test_RobustMNINormalizationRPT_deprecation(self):
+        try:
+            ants_rpt = RobustMNINormalizationRPT(
+                generate_report=True, moving_image=self.moving, testing=True)
+        except TraitError as e:
+            if 'deprecated' not in e.msg:
+                raise
+        else:
+            raise Exception('RobustMNINormalizationRPT not raising trait error for '
+                            'input trait "testing"')
 
     def test_ANTSRegistrationRPT(self):
         """ the RobustMNINormalizationRPT report capable test """
