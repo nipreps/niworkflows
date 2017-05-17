@@ -8,11 +8,12 @@ import unittest
 import pkg_resources as pkgr
 from multiprocessing import cpu_count
 from shutil import copy
+import warnings
 
 import nibabel as nb
 from nilearn import image
-from traits.trait_errors import TraitError
 from nipype.utils.tmpdirs import InTemporaryDirectory
+from nibabel.testing import clear_and_catch_warnings
 
 
 from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsampled,
@@ -119,15 +120,12 @@ class TestRegistrationInterfaces(unittest.TestCase):
         _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT_masked.svg')
 
     def test_RobustMNINormalizationRPT_deprecation(self):
-        try:
-            ants_rpt = RobustMNINormalizationRPT(
+        with clear_and_catch_warnings() as w:
+            warnings.simplefilter('always', UserWarning)
+            assert len(w) == 0
+            RobustMNINormalizationRPT(
                 generate_report=True, moving_image=self.moving, testing=True)
-        except TraitError as e:
-            if 'deprecated' not in e.msg:
-                raise
-        else:
-            raise Exception('RobustMNINormalizationRPT not raising trait error for '
-                            'input trait "testing"')
+            assert len(w) == 1
 
     def test_ANTSRegistrationRPT(self):
         """ the RobustMNINormalizationRPT report capable test """
