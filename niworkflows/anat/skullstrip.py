@@ -8,7 +8,7 @@ from nipype.pipeline import engine as pe
 from niworkflows.interfaces.utils import CopyHeader
 
 
-def afni_wf(name='AFNISkullStripWorkflow', unifize=True, n4_nthreads=1):
+def afni_wf(name='AFNISkullStripWorkflow', unifize=False, n4_nthreads=1):
     """
     Skull-stripping workflow
 
