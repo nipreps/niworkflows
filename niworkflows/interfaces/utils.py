@@ -9,7 +9,7 @@ Utilities
 
 import os.path as op
 import nibabel as nb
-from nipype.interface.base import File, OutputMultiPath, BaseInterfaceInputSpec, TraitedSpec
+from nipype.interfaces.base import File, OutputMultiPath, BaseInterfaceInputSpec, TraitedSpec
 
 from .base import SimpleInterface
 
