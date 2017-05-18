@@ -157,7 +157,7 @@ class RobustMNINormalization(BaseInterface):
             if self.inputs.orientation == 'LAS':
                 raise NotImplementedError
 
-            mni_template = self._get_template()
+            mni_template = getters.get_dataset(self.inputs.template)
             resolution = self._get_resolution()
 
             if self.inputs.explicit_masking:
@@ -179,18 +179,13 @@ class RobustMNINormalization(BaseInterface):
             resolution = 2
         return resolution
 
-    def _get_template(self):
-        get_template = getattr(getters, 'get_{}'.format(self.inputs.template))
-        mni_template = get_template()
-        return mni_template
-
     def _validate_results(self):
         forward_transform = self._results['composite_transform']
         input_mask = self.inputs.moving_mask
         if isdefined(self.inputs.reference_mask):
             target_mask = self.inputs.reference_mask
         else:
-            mni_template = self._get_template()
+            mni_template = getters.get_dataset(self.inputs.template)
             resolution = self._get_resolution()
             target_mask = op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution)
 
