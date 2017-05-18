@@ -8,7 +8,7 @@ from os import path as op
 import shutil
 import pkg_resources as pkgr
 from multiprocessing import cpu_count
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 from nipype.interfaces.ants.registration import Registration, RegistrationOutputSpec
 from nipype.interfaces.ants.resampling import ApplyTransforms
@@ -19,7 +19,7 @@ from nipype.interfaces.base import (traits, isdefined, BaseInterface, BaseInterf
 from niworkflows.data import getters
 from niworkflows import __packagename__, NIWORKFLOWS_LOG, __version__
 
-niworkflows_version = LooseVersion(__version__)
+niworkflows_version = Version(__version__)
 
 
 import nibabel as nb
