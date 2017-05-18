@@ -10,11 +10,15 @@ import pkg_resources as pkgr
 from multiprocessing import cpu_count
 
 from nipype.interfaces.ants.registration import Registration, RegistrationOutputSpec
+from nipype.interfaces.ants.resampling import ApplyTransforms
 from nipype.interfaces.base import (traits, isdefined, BaseInterface, BaseInterfaceInputSpec,
                                     File, InputMultiPath)
 
 from niworkflows.data import getters
 from niworkflows import __packagename__, NIWORKFLOWS_LOG
+
+import nibabel as nb
+import numpy as np
 
 class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     moving_image = InputMultiPath(
@@ -100,7 +104,6 @@ class RobustMNINormalization(BaseInterface):
                 NIWORKFLOWS_LOG.warn(
                         'Retry #%d failed: %s.', self.retry, exc)
 
-
             errfile = op.join(runtime.cwd, 'stderr.nipype')
             outfile = op.join(runtime.cwd, 'stdout.nipype')
 
@@ -110,6 +113,8 @@ class RobustMNINormalization(BaseInterface):
             if interface_result is not None:
                 runtime.returncode = 0
                 self._results.update(interface_result.outputs.get())
+                if isdefined(self.inputs.moving_mask):
+                    self._validate_results()
                 NIWORKFLOWS_LOG.info(
                     'Successful spatial normalization (retry #%d).', self.retry)
                 return runtime
@@ -143,7 +148,6 @@ class RobustMNINormalization(BaseInterface):
             else:
                 self.norm.inputs.moving_image_mask = self.inputs.moving_mask
 
-
         if isdefined(self.inputs.reference_image):
             self.norm.inputs.fixed_image = self.inputs.reference_image
             if isdefined(self.inputs.reference_mask):
@@ -155,15 +159,11 @@ class RobustMNINormalization(BaseInterface):
                 else:
                     self.norm.inputs.fixed_image_mask = self.inputs.reference_mask
         else:
-            get_template = getattr(getters, 'get_{}'.format(self.inputs.template))
-            mni_template = get_template()
-
             if self.inputs.orientation == 'LAS':
                 raise NotImplementedError
 
-            resolution = self.inputs.template_resolution
-            if self.inputs.testing:
-                resolution = 2
+            mni_template = getters.get_dataset(self.inputs.template)
+            resolution = self._get_resolution()
 
             if self.inputs.explicit_masking:
                 self.norm.inputs.fixed_image = mask(op.join(
@@ -178,6 +178,37 @@ class RobustMNINormalization(BaseInterface):
                 self.norm.inputs.fixed_image_mask = op.join(
                     mni_template, '%dmm_brainmask.nii.gz' % resolution)
 
+    def _get_resolution(self):
+        resolution = self.inputs.template_resolution
+        if self.inputs.testing:
+            resolution = 2
+        return resolution
+
+    def _validate_results(self):
+        forward_transform = self._results['composite_transform']
+        input_mask = self.inputs.moving_mask
+        if isdefined(self.inputs.reference_mask):
+            target_mask = self.inputs.reference_mask
+        else:
+            mni_template = getters.get_dataset(self.inputs.template)
+            resolution = self._get_resolution()
+            target_mask = op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution)
+
+        res = ApplyTransforms(dimension=3,
+                              input_image=input_mask,
+                              reference_image=target_mask,
+                              transforms=forward_transform,
+                              interpolation='NearestNeighbor').run()
+        input_mask_data = (nb.load(res.outputs.output_image).get_data() != 0)
+        target_mask_data = (nb.load(target_mask).get_data() != 0)
+
+        overlap_voxel_count = np.logical_and(input_mask_data, target_mask_data)
+
+        overlap_perc = float(overlap_voxel_count.sum())/float(input_mask_data.sum())*100
+
+        assert overlap_perc > 50, \
+            "Normalization failed: only %d%% of the normalized moving image " \
+            "mask overlaps with the reference image mask."%overlap_perc
 
 
 def mask(in_file, mask_file, new_name):
