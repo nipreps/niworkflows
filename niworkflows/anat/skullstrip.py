@@ -32,7 +32,6 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
         ants.N4BiasFieldCorrection(dimension=3, save_bias=True, num_threads=n4_nthreads),
         n_procs=n4_nthreads,
         name='inu_n4')
-    orig_hdr = pe.Node(CopyHeader(), name='orig_hdr')
 
     sstrip = pe.Node(afni.SkullStrip(outputtype='NIFTI_GZ'), name='skullstrip')
     sstrip_orig_vol = pe.Node(afni.Calc(
@@ -44,8 +43,7 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
         inu_uni_0 = pe.Node(afni.Unifize(), name='Unifize_pre_skullstrip')
         inu_uni_1 = pe.Node(afni.Unifize(gm=True), name='Unifize_post_skullstrip')
         workflow.connect([
-            (inu_n4, orig_hdr, [('output_image', 'in_file')]),
-            (orig_hdr, inu_uni_0, [('out_file', 'in_file')]),
+            (inu_n4, inu_uni_0, [('output_image', 'in_file')]),
             (inu_uni_0, sstrip, [('out_file', 'in_file')]),
             (sstrip_orig_vol, inu_uni_1, [('out_file', 'in_file')]),
             (inu_uni_1, outputnode, [('out_file', 'out_file')]),
@@ -53,18 +51,16 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
         ])
     else:
         workflow.connect([
-            (inu_n4, orig_hdr, [('output_image', 'in_file')]),
-            (orig_hdr, sstrip, [('out_file', 'in_file')]),
+            (inu_n4, sstrip, [('output_image', 'in_file')]),
             (sstrip, sstrip_orig_vol, [('out_file', 'in_file_b')]),
             (sstrip_orig_vol, outputnode, [('out_file', 'out_file')]),
-            (orig_hdr, outputnode, [('out_file', 'bias_corrected')]),
+            (inu_n4, outputnode, [('output_image', 'bias_corrected')]),
         ])
 
 
     # Remaining connections
     workflow.connect([
         (inputnode, sstrip_orig_vol, [('in_file', 'in_file_a')]),
-        (inputnode, orig_hdr, [('in_file', 'hdr_file')]),
         (inputnode, inu_n4, [('in_file', 'input_image')]),
         (sstrip_orig_vol, binarize, [('out_file', 'in_file')]),
         (binarize, outputnode, [('out_file', 'out_mask')]),
