@@ -6,7 +6,7 @@ from nipype.interfaces import fsl
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
 
-def afni_wf(name='AFNISkullStripWorkflow', unifize=True):
+def afni_wf(name='AFNISkullStripWorkflow', unifize=False):
     """
     Skull-stripping workflow
 
