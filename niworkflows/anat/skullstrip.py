@@ -44,6 +44,7 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
         inu_uni_0 = pe.Node(afni.Unifize(), name='Unifize_pre_skullstrip')
         inu_uni_1 = pe.Node(afni.Unifize(gm=True), name='Unifize_post_skullstrip')
         workflow.connect([
+            (inu_n4, orig_hdr, [('output_image', 'in_file')]),
             (orig_hdr, inu_uni_0, [('out_file', 'in_file')]),
             (inu_uni_0, sstrip, [('out_file', 'in_file')]),
             (sstrip_orig_vol, inu_uni_1, [('out_file', 'in_file')]),
@@ -52,6 +53,7 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
         ])
     else:
         workflow.connect([
+            (inu_n4, orig_hdr, [('output_image', 'in_file')]),
             (orig_hdr, sstrip, [('out_file', 'in_file')]),
             (sstrip, sstrip_orig_vol, [('out_file', 'in_file_b')]),
             (sstrip_orig_vol, outputnode, [('out_file', 'out_file')]),
