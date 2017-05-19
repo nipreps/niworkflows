@@ -11,6 +11,7 @@ from multiprocessing import cpu_count
 
 from nipype.interfaces.ants.registration import Registration, RegistrationOutputSpec
 from nipype.interfaces.ants.resampling import ApplyTransforms
+from nipype.interfaces.ants import AffineInitializer
 from nipype.interfaces.base import (traits, isdefined, BaseInterface, BaseInterfaceInputSpec,
                                     File, InputMultiPath)
 
@@ -96,6 +97,11 @@ class RobustMNINormalization(BaseInterface):
 
             self._config_ants(ants_settings)
 
+            if not isdefined(self.inputs.initial_moving_transform):
+                self.norm.inputs.initial_moving_transform = AffineInitializer(fixed_image=self.norm.inputs.fixed_image[0],
+                                                                              moving_image=self.norm.inputs.moving_image[0],
+                                                                              num_threads=self.inputs.num_threads).run().outputs.out_file
+
             NIWORKFLOWS_LOG.info(
                 'Retry #%d, commandline: \n%s', self.retry, self.norm.cmdline)
             try:
@@ -131,13 +137,9 @@ class RobustMNINormalization(BaseInterface):
             num_threads=self.inputs.num_threads,
             from_file=ants_settings,
             terminal_output='file',
-            write_composite_transform=True
+            write_composite_transform=True,
+            initial_moving_transform=self.inputs.initial_moving_transform
         )
-
-        if isdefined(self.inputs.initial_moving_transform):
-            self.norm.inputs.initial_moving_transform = self.inputs.initial_moving_transform
-        else:
-            self.norm.initial_moving_transform_com = 1
 
         if isdefined(self.inputs.moving_mask):
             if self.inputs.explicit_masking:
