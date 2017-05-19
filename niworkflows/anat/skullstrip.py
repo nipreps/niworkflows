@@ -39,8 +39,10 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
 
     if unifize:
         # Add two unifize steps, pre- and post- skullstripping.
-        inu_uni_0 = pe.Node(afni.Unifize(), name='Unifize_pre_skullstrip')
-        inu_uni_1 = pe.Node(afni.Unifize(gm=True), name='Unifize_post_skullstrip')
+        inu_uni_0 = pe.Node(afni.Unifize(outputtype='NIFTI_GZ'),
+                            name='unifize_pre_skullstrip')
+        inu_uni_1 = pe.Node(afni.Unifize(gm=True, outputtype='NIFTI_GZ'),
+                            name='unifize_post_skullstrip')
         workflow.connect([
             (inu_n4, inu_uni_0, [('output_image', 'in_file')]),
             (inu_uni_0, sstrip, [('out_file', 'in_file')]),
