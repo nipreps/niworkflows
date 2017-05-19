@@ -6,7 +6,8 @@ from nipype.interfaces import fsl
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
 
-def afni_wf(name='AFNISkullStripWorkflow', unifize=False):
+
+def afni_wf(name='AFNISkullStripWorkflow', unifize=False, n4_nthreads=1):
     """
     Skull-stripping workflow
 
@@ -26,8 +27,11 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['bias_corrected', 'out_file', 'out_mask', 'bias_image']), name='outputnode')
 
-    inu_n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3, save_bias=True),
-                     name='CorrectINU')
+    inu_n4 = pe.Node(
+        ants.N4BiasFieldCorrection(dimension=3, save_bias=True, num_threads=n4_nthreads),
+        n_procs=n4_nthreads,
+        name='inu_n4')
+
     sstrip = pe.Node(afni.SkullStrip(outputtype='NIFTI_GZ'), name='skullstrip')
     sstrip_orig_vol = pe.Node(afni.Calc(
         expr='a*step(b)', outputtype='NIFTI_GZ'), name='sstrip_orig_vol')
