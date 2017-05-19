@@ -5,7 +5,6 @@ from nipype.interfaces import afni
 from nipype.interfaces import fsl
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
-from niworkflows.interfaces.utils import CopyHeader
 
 
 def afni_wf(name='AFNISkullStripWorkflow', unifize=False, n4_nthreads=1):
