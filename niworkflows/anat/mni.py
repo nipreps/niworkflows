@@ -92,15 +92,16 @@ class RobustMNINormalization(BaseInterface):
     def _run_interface(self, runtime):
         settings_files = self._get_settings()
 
+        if not isdefined(self.inputs.initial_moving_transform):
+            self.inputs.initial_moving_transform = AffineInitializer(
+                fixed_image=self.norm.inputs.fixed_image[0],
+                moving_image=self.norm.inputs.moving_image[0],
+                num_threads=self.inputs.num_threads).run().outputs.out_file
+
         for ants_settings in settings_files:
             interface_result = None
 
             self._config_ants(ants_settings)
-
-            if not isdefined(self.inputs.initial_moving_transform):
-                self.norm.inputs.initial_moving_transform = AffineInitializer(fixed_image=self.norm.inputs.fixed_image[0],
-                                                                              moving_image=self.norm.inputs.moving_image[0],
-                                                                              num_threads=self.inputs.num_threads).run().outputs.out_file
 
             NIWORKFLOWS_LOG.info(
                 'Retry #%d, commandline: \n%s', self.retry, self.norm.cmdline)
