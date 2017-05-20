@@ -182,6 +182,8 @@ class RobustMNINormalization(BaseInterface):
                 args['fixed_image_mask'] = op.join(
                     mni_template, '%dmm_brainmask.nii.gz' % resolution)
 
+        return args
+
     def _get_resolution(self):
         resolution = self.inputs.template_resolution
         if self.inputs.testing:
