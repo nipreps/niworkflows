@@ -92,8 +92,10 @@ class RobustMNINormalization(BaseInterface):
     def _run_interface(self, runtime):
         settings_files = self._get_settings()
 
-        if not isdefined(self.inputs.initial_moving_transform):
-            self.inputs.initial_moving_transform = AffineInitializer(
+        self._config_ants()
+
+        if not isdefined(self.norm.inputs.initial_moving_transform):
+            self.norm.inputs.initial_moving_transform = AffineInitializer(
                 fixed_image=self.norm.inputs.fixed_image[0],
                 moving_image=self.norm.inputs.moving_image[0],
                 num_threads=self.inputs.num_threads).run().outputs.out_file
@@ -101,7 +103,9 @@ class RobustMNINormalization(BaseInterface):
         for ants_settings in settings_files:
             interface_result = None
 
-            self._config_ants(ants_settings)
+            NIWORKFLOWS_LOG.info('Loading settings from file %s.',
+                                 ants_settings)
+            self.norm.inputs.from_file = ants_settings
 
             NIWORKFLOWS_LOG.info(
                 'Retry #%d, commandline: \n%s', self.retry, self.norm.cmdline)
@@ -131,12 +135,10 @@ class RobustMNINormalization(BaseInterface):
         raise RuntimeError(
             'Robust spatial normalization failed after %d retries.' % (self.retry - 1))
 
-    def _config_ants(self, ants_settings):
-        NIWORKFLOWS_LOG.info('Loading settings from file %s.', ants_settings)
+    def _config_ants(self):
         self.norm = Registration(
             moving_image=self.inputs.moving_image,
             num_threads=self.inputs.num_threads,
-            from_file=ants_settings,
             terminal_output='file',
             write_composite_transform=True,
             initial_moving_transform=self.inputs.initial_moving_transform
