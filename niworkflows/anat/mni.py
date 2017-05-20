@@ -92,13 +92,13 @@ class RobustMNINormalization(BaseInterface):
     def _run_interface(self, runtime):
         settings_files = self._get_settings()
 
-        self._config_ants()
+        ants_args = self._get_ants_args()
 
-        if not isdefined(self.norm.inputs.initial_moving_transform):
+        if not isdefined(self.inputs.initial_moving_transform):
             NIWORKFLOWS_LOG.info('Estimating initial transform using AffineInitializer')
-            self.norm.inputs.initial_moving_transform = AffineInitializer(
-                fixed_image=self.norm.inputs.fixed_image[0],
-                moving_image=self.norm.inputs.moving_image[0],
+            ants_args['initial_moving_transform'] = AffineInitializer(
+                fixed_image=ants_args['fixed_image'],
+                moving_image=ants_args['moving_image'],
                 num_threads=self.inputs.num_threads).run().outputs.out_file
 
         for ants_settings in settings_files:
@@ -106,7 +106,7 @@ class RobustMNINormalization(BaseInterface):
 
             NIWORKFLOWS_LOG.info('Loading settings from file %s.',
                                  ants_settings)
-            self.norm.inputs.from_file = ants_settings
+            self.norm = Registration(from_file=ants_settings, **ants_args)
 
             NIWORKFLOWS_LOG.info(
                 'Retry #%d, commandline: \n%s', self.retry, self.norm.cmdline)
@@ -136,34 +136,32 @@ class RobustMNINormalization(BaseInterface):
         raise RuntimeError(
             'Robust spatial normalization failed after %d retries.' % (self.retry - 1))
 
-    def _config_ants(self):
-        self.norm = Registration(
-            moving_image=self.inputs.moving_image,
-            num_threads=self.inputs.num_threads,
-            terminal_output='file',
-            write_composite_transform=True,
-            initial_moving_transform=self.inputs.initial_moving_transform
-        )
+    def _get_ants_args(self):
+        args = {'moving_image': self.inputs.moving_image,
+                'num_threads': self.inputs.num_threads,
+                'terminal_output': 'file',
+                'write_composite_transform': True,
+                'initial_moving_transform': self.inputs.initial_moving_transform}
 
         if isdefined(self.inputs.moving_mask):
             if self.inputs.explicit_masking:
-                self.norm.inputs.moving_image = mask(
+                args['moving_image'] = mask(
                     self.inputs.moving_image[0],
                     self.inputs.moving_mask,
                     "moving_masked.nii.gz")
             else:
-                self.norm.inputs.moving_image_mask = self.inputs.moving_mask
+                args['moving_image_mask'] = self.inputs.moving_mask
 
         if isdefined(self.inputs.reference_image):
-            self.norm.inputs.fixed_image = self.inputs.reference_image
+            args['fixed_image'] = self.inputs.reference_image
             if isdefined(self.inputs.reference_mask):
                 if self.inputs.explicit_masking:
-                    self.norm.inputs.fixed_image = mask(
+                    args['fixed_image'] = mask(
                         self.inputs.reference_image[0],
                         self.inputs.mreference_mask,
                         "fixed_masked.nii.gz")
                 else:
-                    self.norm.inputs.fixed_image_mask = self.inputs.reference_mask
+                    args['fixed_image_mask'] = self.inputs.reference_mask
         else:
             if self.inputs.orientation == 'LAS':
                 raise NotImplementedError
@@ -172,16 +170,16 @@ class RobustMNINormalization(BaseInterface):
             resolution = self._get_resolution()
 
             if self.inputs.explicit_masking:
-                self.norm.inputs.fixed_image = mask(op.join(
+                args['fixed_image'] = mask(op.join(
                     mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference)),
                     op.join(
                         mni_template, '%dmm_brainmask.nii.gz' % resolution),
                     "fixed_masked.nii.gz")
             else:
-                self.norm.inputs.fixed_image = op.join(
+                args['fixed_image'] = op.join(
                     mni_template,
                     '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
-                self.norm.inputs.fixed_image_mask = op.join(
+                args['fixed_image_mask'] = op.join(
                     mni_template, '%dmm_brainmask.nii.gz' % resolution)
 
     def _get_resolution(self):
