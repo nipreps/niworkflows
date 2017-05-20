@@ -137,7 +137,7 @@ class RobustMNINormalization(BaseInterface):
             'Robust spatial normalization failed after %d retries.' % (self.retry - 1))
 
     def _get_ants_args(self):
-        args = {'moving_image': self.inputs.moving_image,
+        args = {'moving_image': self.inputs.moving_image[0],
                 'num_threads': self.inputs.num_threads,
                 'terminal_output': 'file',
                 'write_composite_transform': True,
@@ -153,7 +153,7 @@ class RobustMNINormalization(BaseInterface):
                 args['moving_image_mask'] = self.inputs.moving_mask
 
         if isdefined(self.inputs.reference_image):
-            args['fixed_image'] = self.inputs.reference_image
+            args['fixed_image'] = self.inputs.reference_image[0]
             if isdefined(self.inputs.reference_mask):
                 if self.inputs.explicit_masking:
                     args['fixed_image'] = mask(
