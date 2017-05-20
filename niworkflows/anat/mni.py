@@ -22,10 +22,8 @@ import nibabel as nb
 import numpy as np
 
 class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
-    moving_image = InputMultiPath(
-        File(exists=True), mandatory=True, desc='image to apply transformation to')
-    reference_image = InputMultiPath(
-        File(exists=True), desc='override the reference image')
+    moving_image = File(exists=True, mandatory=True, desc='image to apply transformation to')
+    reference_image = File(exists=True, desc='override the reference image')
     moving_mask = File(exists=True, desc='moving image mask')
     reference_mask = File(exists=True, desc='reference image mask')
     num_threads = traits.Int(cpu_count(), usedefault=True, nohash=True,
@@ -137,7 +135,7 @@ class RobustMNINormalization(BaseInterface):
             'Robust spatial normalization failed after %d retries.' % (self.retry - 1))
 
     def _get_ants_args(self):
-        args = {'moving_image': self.inputs.moving_image[0],
+        args = {'moving_image': self.inputs.moving_image,
                 'num_threads': self.inputs.num_threads,
                 'terminal_output': 'file',
                 'write_composite_transform': True,
@@ -146,18 +144,18 @@ class RobustMNINormalization(BaseInterface):
         if isdefined(self.inputs.moving_mask):
             if self.inputs.explicit_masking:
                 args['moving_image'] = mask(
-                    self.inputs.moving_image[0],
+                    self.inputs.moving_image,
                     self.inputs.moving_mask,
                     "moving_masked.nii.gz")
             else:
                 args['moving_image_mask'] = self.inputs.moving_mask
 
         if isdefined(self.inputs.reference_image):
-            args['fixed_image'] = self.inputs.reference_image[0]
+            args['fixed_image'] = self.inputs.reference_image
             if isdefined(self.inputs.reference_mask):
                 if self.inputs.explicit_masking:
                     args['fixed_image'] = mask(
-                        self.inputs.reference_image[0],
+                        self.inputs.reference_image,
                         self.inputs.mreference_mask,
                         "fixed_masked.nii.gz")
                 else:
