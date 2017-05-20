@@ -95,6 +95,7 @@ class RobustMNINormalization(BaseInterface):
         self._config_ants()
 
         if not isdefined(self.norm.inputs.initial_moving_transform):
+            NIWORKFLOWS_LOG.info('Estimating initial transform using AffineInitializer')
             self.norm.inputs.initial_moving_transform = AffineInitializer(
                 fixed_image=self.norm.inputs.fixed_image[0],
                 moving_image=self.norm.inputs.moving_image[0],
