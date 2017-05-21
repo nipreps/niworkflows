@@ -1,1 +1,1 @@
--e git+https://github.com/nipy/nipype.git@f66a5a6f13a151517cd47b43d998c1fee840c55c#egg=nipype
+-e git+https://github.com/nipy/nipype.git@cda3fdc3be231f2c9d7bdbdbadee472a0bad9e92#egg=nipype
