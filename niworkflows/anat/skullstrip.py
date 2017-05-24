@@ -46,14 +46,15 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
         workflow.connect([
             (inu_n4, inu_uni_0, [('output_image', 'in_file')]),
             (inu_uni_0, sstrip, [('out_file', 'in_file')]),
+            (inu_uni_0, sstrip_orig_vol, [('out_file', 'in_file_a')]),
             (sstrip_orig_vol, inu_uni_1, [('out_file', 'in_file')]),
             (inu_uni_1, outputnode, [('out_file', 'out_file')]),
             (inu_uni_0, outputnode, [('out_file', 'bias_corrected')]),
         ])
     else:
         workflow.connect([
+            (inputnode, sstrip_orig_vol, [('in_file', 'in_file_a')]),
             (inu_n4, sstrip, [('output_image', 'in_file')]),
-            (sstrip, sstrip_orig_vol, [('out_file', 'in_file_b')]),
             (sstrip_orig_vol, outputnode, [('out_file', 'out_file')]),
             (inu_n4, outputnode, [('output_image', 'bias_corrected')]),
         ])
@@ -61,7 +62,7 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
 
     # Remaining connections
     workflow.connect([
-        (inputnode, sstrip_orig_vol, [('in_file', 'in_file_a')]),
+        (sstrip, sstrip_orig_vol, [('out_file', 'in_file_b')]),
         (inputnode, inu_n4, [('in_file', 'input_image')]),
         (sstrip_orig_vol, binarize, [('out_file', 'in_file')]),
         (binarize, outputnode, [('out_file', 'out_mask')]),
