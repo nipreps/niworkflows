@@ -9,7 +9,7 @@ Utilities
 
 import nibabel as nb
 from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import File, OutputMultiPath, BaseInterfaceInputSpec, TraitedSpec
+from nipype.interfaces.base import File, BaseInterfaceInputSpec, TraitedSpec
 from .base import SimpleInterface
 
 class CopyHeaderInputSpec(BaseInterfaceInputSpec):
@@ -17,7 +17,7 @@ class CopyHeaderInputSpec(BaseInterfaceInputSpec):
     hdr_file = File(exists=True, mandatory=True, desc='the file we get the header from')
 
 class CopyHeaderOutputSpec(TraitedSpec):
-    out_file = OutputMultiPath(File(exists=True, desc='written file path'))
+    out_file = File(exists=True, desc='written file path')
 
 class CopyHeader(SimpleInterface):
     input_spec = CopyHeaderInputSpec
@@ -25,7 +25,7 @@ class CopyHeader(SimpleInterface):
 
     def _run_interface(self, runtime):
         in_img = nb.load(self.inputs.hdr_file)
-        out_img = nb.load(self.inputs.in_file, mmap=False)
+        out_img = nb.load(self.inputs.in_file)
         new_img = out_img.__class__(out_img.get_data(), in_img.affine, in_img.header)
         new_img.set_data_dtype(out_img.get_data_dtype())
 
