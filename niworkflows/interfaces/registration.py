@@ -9,7 +9,9 @@ from distutils.version import LooseVersion
 
 import nibabel as nb
 import numpy as np
+from nilearn import image as nli
 from nipype.algorithms.confounds import is_outlier
+from nipype.utils.filemanip import fname_presuffix
 
 from nipype.interfaces.base import (traits, isdefined, TraitedSpec,
                                     BaseInterfaceInputSpec, File)
@@ -221,6 +223,42 @@ class SimpleBeforeAfterRPT(nrc.RegistrationRC):
 
         self._generate_report()
         NIWORKFLOWS_LOG.info('Successfully created report (%s)', self._out_report)
+
+        return runtime
+
+
+class ResampleBeforeAfterInputSpecRPT(SimpleBeforeAfterInputSpecRPT):
+    base = traits.Enum('before', 'after', usedefault=True, mandatory=True)
+
+
+class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
+    input_spec = ResampleBeforeAfterInputSpecRPT
+    def _run_interface(self, runtime):
+        """ there is not inner interface to run """
+        self._out_report = os.path.abspath(self.inputs.out_report)
+
+        self._fixed_image_label = "after"
+        self._moving_image_label = "before"
+        self._fixed_image = self.inputs.after
+        self._moving_image = self.inputs.before
+        if self.inputs.base == 'before':
+            resampled_after = nli.resample_to_img(self._fixed_image, self._moving_image)
+            fname = fname_presuffix(self._fixed_image, suffix='_resampled', newpath='.')
+            resampled_after.to_filename(fname)
+            self._fixed_image = os.path.abspath(fname)
+        else:
+            resampled_before = nli.resample_to_img(self._moving_image, self._fixed_image)
+            fname = fname_presuffix(self._moving_image, suffix='_resampled', newpath='.')
+            resampled_before.to_filename(fname)
+            self._moving_image = os.path.abspath(fname)
+        self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
+        NIWORKFLOWS_LOG.info(
+            'Report - setting before (%s) and after (%s) images',
+            self._fixed_image, self._moving_image)
+
+        self._generate_report()
+        NIWORKFLOWS_LOG.info('Successfully created report (%s)', self._out_report)
+        os.unlink(fname)
 
         return runtime
 
