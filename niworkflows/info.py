@@ -11,7 +11,7 @@ as well as for open-source software distribution.
 from __future__ import absolute_import, division, print_function
 import datetime
 
-__version__ = '0.0.7-dev'
+__version__ = '0.0.8-dev'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
