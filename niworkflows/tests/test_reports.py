@@ -8,10 +8,12 @@ import unittest
 import pkg_resources as pkgr
 from multiprocessing import cpu_count
 from shutil import copy
+import warnings
 
 import nibabel as nb
 from nilearn import image
 from nipype.utils.tmpdirs import InTemporaryDirectory
+from nibabel.testing import clear_and_catch_warnings
 
 
 from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsampled,
@@ -107,15 +109,23 @@ class TestRegistrationInterfaces(unittest.TestCase):
     def test_RobustMNINormalizationRPT(self):
         """ the RobustMNINormalizationRPT report capable test """
         ants_rpt = RobustMNINormalizationRPT(
-            generate_report=True, moving_image=self.moving, testing=True)
+            generate_report=True, moving_image=self.moving, flavor='testing')
         _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT.svg')
 
     def test_RobustMNINormalizationRPT_masked(self):
         """ the RobustMNINormalizationRPT report capable test with masking """
         ants_rpt = RobustMNINormalizationRPT(
             generate_report=True, moving_image=self.moving,
-            reference_mask=self.reference_mask, testing=True)
+            reference_mask=self.reference_mask, flavor='testing')
         _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT_masked.svg')
+
+    def test_RobustMNINormalizationRPT_deprecation(self):
+        with clear_and_catch_warnings() as w:
+            warnings.simplefilter('always', UserWarning)
+            assert len(w) == 0
+            RobustMNINormalizationRPT(
+                generate_report=True, moving_image=self.moving, testing=True)
+            assert len(w) == 1
 
     def test_ANTSRegistrationRPT(self):
         """ the RobustMNINormalizationRPT report capable test """

@@ -8,6 +8,7 @@ from os import path as op
 import shutil
 import pkg_resources as pkgr
 from multiprocessing import cpu_count
+from packaging.version import Version
 
 from nipype.interfaces.ants.registration import Registration, RegistrationOutputSpec
 from nipype.interfaces.ants.resampling import ApplyTransforms
@@ -16,19 +17,25 @@ from nipype.interfaces.base import (traits, isdefined, BaseInterface, BaseInterf
                                     File, InputMultiPath)
 
 from niworkflows.data import getters
-from niworkflows import __packagename__, NIWORKFLOWS_LOG
+from niworkflows import __packagename__, NIWORKFLOWS_LOG, __version__
+
+niworkflows_version = Version(__version__)
+
 
 import nibabel as nb
 import numpy as np
 
 class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
+    # Enable deprecation
+    package_version = niworkflows_version
+
     moving_image = File(exists=True, mandatory=True, desc='image to apply transformation to')
     reference_image = File(exists=True, desc='override the reference image')
     moving_mask = File(exists=True, desc='moving image mask')
     reference_mask = File(exists=True, desc='reference image mask')
     num_threads = traits.Int(cpu_count(), usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
-    testing = traits.Bool(False, deprecated='99.99.99', desc='use testing settings')
+    testing = traits.Bool(False, deprecated='0.0.7', desc='use testing settings')
     flavor = traits.Enum('precise', 'testing', 'fast', usedefault=True,
                          desc='registration settings parameter set')
     orientation = traits.Enum('RAS', 'LAS', mandatory=True, usedefault=True,
