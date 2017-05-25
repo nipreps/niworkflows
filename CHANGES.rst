@@ -1,7 +1,16 @@
 Version 0.0.7
 -------------
 
+* [ENH] Use AffineInitializer in RobustMNIRegistration (#169, #171)
+* [ENH] Add CopyHeader interface (#168)
+* [ENH] Add 3dUnifize to skull-stripping workflow (#167, #170)
+* [ENH] Give access to num_threads in N4BiasFieldCorrection (#166)
+* [ENH] Add a simple interface for visualising masks (#161)
+* [ENH] Add a family of faster registration settings (#157)
+* [ENH] More flexible settings for RobustMNIRegistration (#155)
+* [ENH] Add EstimateReferenceImage interface (#148)
 * [ENH] Add a SimpleBeforeAfter report capable interface (#144)
+* [ENH] Add MELODIC report interface (#134)
 
 Version 0.0.6
 -------------
