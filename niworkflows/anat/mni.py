@@ -35,7 +35,6 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     reference_mask = File(exists=True, desc='reference image mask')
     num_threads = traits.Int(cpu_count(), usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
-    testing = traits.Bool(False, deprecated='0.0.7', desc='use testing settings')
     flavor = traits.Enum('precise', 'testing', 'fast', usedefault=True,
                          desc='registration settings parameter set')
     orientation = traits.Enum('RAS', 'LAS', mandatory=True, usedefault=True,
@@ -84,10 +83,6 @@ class RobustMNINormalization(BaseInterface):
 
         filestart = '{}-mni_registration_{}_'.format(
             self.inputs.moving.lower(), self.inputs.flavor)
-
-        # For backwards compatibility
-        if isdefined(self.inputs.testing) and self.inputs.testing:
-            filestart = '{}-mni_registration_testing_'.format(self.inputs.moving.lower())
 
         filenames = [i for i in pkgr.resource_listdir('niworkflows', 'data')
                      if i.startswith(filestart) and i.endswith('.json')]
@@ -172,7 +167,7 @@ class RobustMNINormalization(BaseInterface):
                 raise NotImplementedError
 
             mni_template = getters.get_dataset(self.inputs.template)
-            resolution = self._get_resolution()
+            resolution = self.inputs.template_resolution
 
             if self.inputs.explicit_masking:
                 args['fixed_image'] = mask(op.join(
@@ -189,12 +184,6 @@ class RobustMNINormalization(BaseInterface):
 
         return args
 
-    def _get_resolution(self):
-        resolution = self.inputs.template_resolution
-        if self.inputs.testing:
-            resolution = 2
-        return resolution
-
     def _validate_results(self):
         forward_transform = self._results['composite_transform']
         input_mask = self.inputs.moving_mask
@@ -202,7 +191,7 @@ class RobustMNINormalization(BaseInterface):
             target_mask = self.inputs.reference_mask
         else:
             mni_template = getters.get_dataset(self.inputs.template)
-            resolution = self._get_resolution()
+            resolution = self.inputs.template_resolution
             target_mask = op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution)
 
         res = ApplyTransforms(dimension=3,
