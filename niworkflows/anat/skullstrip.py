@@ -28,7 +28,8 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
         fields=['bias_corrected', 'out_file', 'out_mask', 'bias_image']), name='outputnode')
 
     inu_n4 = pe.Node(
-        ants.N4BiasFieldCorrection(dimension=3, save_bias=True, num_threads=n4_nthreads),
+        ants.N4BiasFieldCorrection(dimension=3, save_bias=True, num_threads=n4_nthreads,
+                                   copy_header=True),
         n_procs=n4_nthreads,
         name='inu_n4')
 
