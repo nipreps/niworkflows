@@ -119,14 +119,6 @@ class TestRegistrationInterfaces(unittest.TestCase):
             reference_mask=self.reference_mask, flavor='testing')
         _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT_masked.svg')
 
-    def test_RobustMNINormalizationRPT_deprecation(self):
-        with clear_and_catch_warnings() as w:
-            warnings.simplefilter('always', UserWarning)
-            assert len(w) == 0
-            RobustMNINormalizationRPT(
-                generate_report=True, moving_image=self.moving, testing=True)
-            assert len(w) == 1
-
     def test_ANTSRegistrationRPT(self):
         """ the RobustMNINormalizationRPT report capable test """
         ants_rpt = ANTSRegistrationRPT(
