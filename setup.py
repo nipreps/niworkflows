@@ -7,25 +7,15 @@
 
 PACKAGE_NAME = 'niworkflows'
 
+
 def main():
     """ Install entry-point """
     from os import path as op
-    from glob import glob
-    from inspect import getfile, currentframe
     from setuptools import setup, find_packages
-    from io import open  # pylint: disable=W0622
+    import runpy
 
-    this_path = op.dirname(op.abspath(getfile(currentframe())))
-
-    # Python 3: use a locals dictionary
-    # http://stackoverflow.com/a/1463370/6820620
-    ldict = locals()
-
-    # Get version and release info, which is all stored in niworkflows/info.py
-    module_file = op.join(this_path, PACKAGE_NAME, 'info.py')
-    with open(module_file) as infofile:
-        pythoncode = [line for line in infofile.readlines() if not line.strip().startswith('#')]
-        exec('\n'.join(pythoncode), globals(), ldict)
+    ldict = runpy.run_path(op.join(op.abspath(op.dirname(__file__)),
+                                   'niworkflows', 'info.py'))
 
     setup(
         name=PACKAGE_NAME,
