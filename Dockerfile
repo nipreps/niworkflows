@@ -66,6 +66,7 @@ ENV CRN_SHARED_DATA /niworkflows_data
 
 WORKDIR /root/
 COPY . niworkflows/
+RUN cd niworkflows && git submodule update --init --recusrive
 RUN find /root/niworkflows/ -name "test*.py" -exec chmod a-x '{}' \;
 RUN cd niworkflows && \
     pip install -e .[all] && \
