@@ -6,11 +6,13 @@
 Utilities
 
 """
+from __future__ import absolute_import, unicode_literals
 
 import nibabel as nb
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import File, BaseInterfaceInputSpec, TraitedSpec
+from niworkflows.nipype.utils.filemanip import fname_presuffix
+from niworkflows.nipype.interfaces.base import File, BaseInterfaceInputSpec, TraitedSpec
 from .base import SimpleInterface
+
 
 class CopyHeaderInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='the file we get the data from')

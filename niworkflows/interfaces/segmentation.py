@@ -7,8 +7,8 @@ ReportCapableInterfaces for segmentation tools
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 
-from nipype.interfaces.base import File
-from nipype.interfaces import fsl, freesurfer
+from niworkflows.nipype.interfaces.base import File
+from niworkflows.nipype.interfaces import fsl, freesurfer
 from niworkflows.common import report as nrc
 from niworkflows import NIWORKFLOWS_LOG
 

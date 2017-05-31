@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
-from nipype.interfaces import ants
-from nipype.interfaces import afni
-from nipype.interfaces import fsl
-from nipype.interfaces import utility as niu
-from nipype.pipeline import engine as pe
+from niworkflows.nipype.interfaces import ants
+from niworkflows.nipype.interfaces import afni
+from niworkflows.nipype.interfaces import fsl
+from niworkflows.nipype.interfaces import utility as niu
+from niworkflows.nipype.pipeline import engine as pe
 
 
 def afni_wf(name='AFNISkullStripWorkflow', unifize=False, n4_nthreads=1):

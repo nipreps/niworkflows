@@ -7,10 +7,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 
-from nilearn.image import mean_img
-from nipype.interfaces import fsl, ants
-from nipype.interfaces.base import File, BaseInterfaceInputSpec, traits, isdefined
-from nipype.algorithms import confounds
+from niworkflows.nipype.interfaces import fsl, ants
+from niworkflows.nipype.interfaces.base import (
+    File, BaseInterfaceInputSpec, traits, isdefined)
+from niworkflows.nipype.algorithms import confounds
 from niworkflows.common import report as nrc
 from niworkflows import NIWORKFLOWS_LOG
 from nilearn.masking import compute_epi_mask

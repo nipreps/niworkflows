@@ -5,9 +5,10 @@
 # @Last Modified time: 2016-11-30 16:25:44
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from nipype.pipeline import engine as pe
-from nipype.interfaces import utility as niu
-from nipype.interfaces import afni
+from niworkflows.nipype.pipeline import engine as pe
+from niworkflows.nipype.interfaces import utility as niu
+from niworkflows.nipype.interfaces import afni
+
 
 def reorient_wf(name='ReorientWorkflow'):
     """A workflow to reorient images to 'RPI' orientation"""

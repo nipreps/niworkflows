@@ -10,20 +10,20 @@ import pkg_resources as pkgr
 from multiprocessing import cpu_count
 from packaging.version import Version
 
-from nipype.interfaces.ants.registration import Registration, RegistrationOutputSpec
-from nipype.interfaces.ants.resampling import ApplyTransforms
-from nipype.interfaces.ants import AffineInitializer
-from nipype.interfaces.base import (traits, isdefined, BaseInterface, BaseInterfaceInputSpec,
-                                    File, InputMultiPath)
+from niworkflows.nipype.interfaces.ants.registration import Registration, RegistrationOutputSpec
+from niworkflows.nipype.interfaces.ants.resampling import ApplyTransforms
+from niworkflows.nipype.interfaces.ants import AffineInitializer
+from niworkflows.nipype.interfaces.base import (
+    traits, isdefined, BaseInterface, BaseInterfaceInputSpec, File)
 
 from niworkflows.data import getters
-from niworkflows import __packagename__, NIWORKFLOWS_LOG, __version__
-
-niworkflows_version = Version(__version__)
-
+from niworkflows import NIWORKFLOWS_LOG, __version__
 
 import nibabel as nb
 import numpy as np
+
+niworkflows_version = Version(__version__)
+
 
 class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     # Enable deprecation
