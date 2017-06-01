@@ -15,7 +15,8 @@ dependencies:
     - mkdir -p ~/data/ ~/docker ${CIRCLE_TEST_REPORTS}/py2 ${CIRCLE_TEST_REPORTS}/py3
     - mkdir -p $SCRATCH && sudo setfacl -d -m group:ubuntu:rwx $SCRATCH && sudo setfacl -m group:ubuntu:rwx $SCRATCH
     - mkdir -p $SCRATCH/py2 $SCRATCH/py3
-    - git submodule update --init --recursive
+    - git submodule init && (git submodule update || true)
+    - git submodule sync && git -C nipype fetch origin && git submodule update
   override:
     - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi :
         timeout: 6000
