@@ -10,15 +10,15 @@ from distutils.version import LooseVersion
 import nibabel as nb
 import numpy as np
 from nilearn import image as nli
-from nipype.algorithms.confounds import is_outlier
-from nipype.utils.filemanip import fname_presuffix
+from niworkflows.nipype.algorithms.confounds import is_outlier
+from niworkflows.nipype.utils.filemanip import fname_presuffix
 
-from nipype.interfaces.base import (traits, isdefined, TraitedSpec,
-                                    BaseInterfaceInputSpec, File)
+from niworkflows.nipype.interfaces.base import (
+    traits, isdefined, TraitedSpec, BaseInterfaceInputSpec, File)
 from .base import SimpleInterface
 
-from nipype.interfaces import freesurfer as fs
-from nipype.interfaces import fsl, ants, afni
+from niworkflows.nipype.interfaces import freesurfer as fs
+from niworkflows.nipype.interfaces import fsl, ants, afni
 from niworkflows.anat import mni
 import niworkflows.common.report as nrc
 from niworkflows import NIWORKFLOWS_LOG

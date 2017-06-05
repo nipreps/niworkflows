@@ -8,13 +8,10 @@ import unittest
 import pkg_resources as pkgr
 from multiprocessing import cpu_count
 from shutil import copy
-import warnings
 
 import nibabel as nb
 from nilearn import image
-from nipype.utils.tmpdirs import InTemporaryDirectory
-from nibabel.testing import clear_and_catch_warnings
-
+from niworkflows.nipype.utils.tmpdirs import InTemporaryDirectory
 
 from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsampled,
                                       get_ants_oasis_template_ras)
@@ -30,6 +27,7 @@ MNI_DIR = get_mni_template_ras()
 MNI_2MM = os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz')
 DS003_DIR = get_ds003_downsampled()
 
+
 def stage_artifacts(filename, new_filename):
     """ filename: the name of the file to be saved as an artifact.
         new_filename: what to call the artifact (which will be saved in the
@@ -37,6 +35,7 @@ def stage_artifacts(filename, new_filename):
     save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
     if save_artifacts:
         copy(filename, os.path.join(save_artifacts, new_filename))
+
 
 def _smoke_test_report(report_interface, artifact_name):
     with InTemporaryDirectory():
