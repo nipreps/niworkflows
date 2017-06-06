@@ -1,3 +1,9 @@
+Version 0.1.0
+-------------
+
+* [ENH] Improve dependency management for users unable to use Docker/Singularity containers (#174)
+* [DEP] Removed RobustMNINormalization `testing` input; use `flavor='testing'` instead (#172)
+
 Version 0.0.7
 -------------
 
