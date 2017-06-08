@@ -1,3 +1,8 @@
+Version 0.1.1
+-------------
+
+* Hotfix release (updated manifest)
+
 Version 0.1.0
 -------------
 

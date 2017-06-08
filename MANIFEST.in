@@ -2,6 +2,10 @@
 include niworkflows/data/*.json
 recursive-include niworkflows/data/templates *
 
+# nipype report requirements
+include niworkflows/nipype/pipeline/engine/report_template.html
+include niworkflows/nipype/external/d3.js
+
 #Misc
 include requirements.txt
 include CHANGES.rst
