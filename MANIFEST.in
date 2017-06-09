@@ -1,6 +1,6 @@
 # data
 include niworkflows/data/*.json
-recursive-include niworkflows/data/templates *
+include niworkflows/viz/*.tpl
 
 # nipype report requirements
 include niworkflows/nipype/pipeline/engine/report_template.html
