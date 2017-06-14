@@ -42,7 +42,7 @@ class RobustMNINormalizationRPT(
         self._fixed_image = self.norm.inputs.fixed_image[0]  # and get first item
         if isdefined(self.norm.inputs.fixed_image_mask):
             self._fixed_image_mask = self.norm.inputs.fixed_image_mask
-        self._moving_image = self.aggregate_outputs().warped_image
+        self._moving_image = self.aggregate_outputs(runtime=runtime).warped_image
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
@@ -61,7 +61,7 @@ class ANTSRegistrationRPT(nrc.RegistrationRC, ants.Registration):
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.fixed_image[0]
-        self._moving_image = self.aggregate_outputs().warped_image
+        self._moving_image = self.aggregate_outputs(runtime=runtime).warped_image
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
@@ -80,7 +80,7 @@ class ANTSApplyTransformsRPT(nrc.RegistrationRC, ants.ApplyTransforms):
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference_image
-        self._moving_image = self.aggregate_outputs().output_image
+        self._moving_image = self.aggregate_outputs(runtime=runtime).output_image
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
@@ -103,7 +103,7 @@ class ApplyTOPUPRPT(nrc.RegistrationRC, fsl.ApplyTOPUP):
     def _post_run_hook(self, runtime):
         self._fixed_image_label = "after"
         self._moving_image_label = "before"
-        self._fixed_image = index_img(self.aggregate_outputs().out_corrected, 0)
+        self._fixed_image = index_img(self.aggregate_outputs(runtime=runtime).out_corrected, 0)
         self._moving_image = index_img(self.inputs.in_files[0], 0)
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
         NIWORKFLOWS_LOG.info('Report - setting corrected (%s) and warped (%s) images',
@@ -127,7 +127,7 @@ class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
     def _post_run_hook(self, runtime):
         self._fixed_image_label = "after"
         self._moving_image_label = "before"
-        self._fixed_image = self.aggregate_outputs().unwarped_file
+        self._fixed_image = self.aggregate_outputs(runtime=runtime).unwarped_file
         self._moving_image = self.inputs.in_file
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
         NIWORKFLOWS_LOG.info(
@@ -149,7 +149,7 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference
-        self._moving_image = self.aggregate_outputs().out_file
+        self._moving_image = self.aggregate_outputs(runtime=runtime).out_file
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',
@@ -188,7 +188,7 @@ class BBRegisterRPT(nrc.RegistrationRC, fs.BBRegister):
         mri_dir = os.path.join(self.inputs.subjects_dir,
                                self.inputs.subject_id, 'mri')
         self._fixed_image = os.path.join(mri_dir, 'brainmask.mgz')
-        self._moving_image = self.aggregate_outputs().registered_file
+        self._moving_image = self.aggregate_outputs(runtime=runtime).registered_file
         self._contour = os.path.join(mri_dir, 'ribbon.mgz')
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',

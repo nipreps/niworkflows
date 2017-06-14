@@ -36,18 +36,18 @@ class FASTRPT(nrc.SegmentationRC,
         arbitrary volume of `in_files`, with the resulting segmentation
         overlaid '''
         self._anat_file = self.inputs.in_files[0],
-        self._mask_file = self.aggregate_outputs().tissue_class_map
+        self._mask_file = self.aggregate_outputs(runtime=runtime).tissue_class_map
         # We are skipping the CSF class because with combination with others
         # it only shows the skullstriping mask
-        self._seg_files = self.aggregate_outputs().tissue_class_files[1:]
+        self._seg_files = self.aggregate_outputs(runtime=runtime).tissue_class_files[1:]
         self._masked = False
         self._report_title = "FAST: segmentation over anatomical"
 
         NIWORKFLOWS_LOG.info('Generating report for FAST (in_files %s, '
                              'segmentation %s, individual tissue classes %s).',
                              self.inputs.in_files,
-                             self.aggregate_outputs().tissue_class_map,
-                             self.aggregate_outputs().tissue_class_files)
+                             self.aggregate_outputs(runtime=runtime).tissue_class_map,
+                             self.aggregate_outputs(runtime=runtime).tissue_class_files)
 
 
 class ReconAllInputSpecRPT(nrc.ReportCapableInputSpec,
@@ -66,7 +66,7 @@ class ReconAllRPT(nrc.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):
         ''' generates a report showing nine slices, three per axis, of an
         arbitrary volume of `in_files`, with the resulting segmentation
         overlaid '''
-        outputs = self.aggregate_outputs()
+        outputs = self.aggregate_outputs(runtime=runtime)
         self._anat_file = os.path.join(outputs.subjects_dir,
                                        outputs.subject_id,
                                        'mri', 'brain.mgz')
@@ -111,7 +111,7 @@ class MELODICRPT(nrc.ReportCapableInterface, fsl.MELODIC):
         ''' generates a report showing nine slices, three per axis, of an
         arbitrary volume of `in_files`, with the resulting segmentation
         overlaid '''
-        outputs = self.aggregate_outputs()
+        outputs = self.aggregate_outputs(runtime=runtime)
         self._melodic_dir = outputs.out_dir
 
         NIWORKFLOWS_LOG.info('Generating report for MELODIC')

@@ -42,7 +42,7 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
         volume of in_file, with the resulting binary brain mask overlaid '''
 
         self._anat_file = self.inputs.in_file
-        self._mask_file = self.aggregate_outputs().mask_file
+        self._mask_file = self.aggregate_outputs(runtime=runtime).mask_file
         self._seg_files = [self._mask_file]
         self._masked = self.inputs.mask
         self._report_title = "BET: brain mask over anatomical input"
@@ -66,10 +66,10 @@ class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
     def _post_run_hook(self, runtime):
         ''' generates a report showing slices from each axis '''
 
-        brain_extraction_mask = self.aggregate_outputs().BrainExtractionMask
+        brain_extraction_mask = self.aggregate_outputs(runtime=runtime).BrainExtractionMask
 
         if isdefined(self.inputs.keep_temporary_files) and self.inputs.keep_temporary_files == 1:
-            self._anat_file = self.aggregate_outputs().N4Corrected0
+            self._anat_file = self.aggregate_outputs(runtime=runtime).N4Corrected0
         else:
             self._anat_file = self.inputs.anatomical_image
         self._mask_file = brain_extraction_mask
@@ -140,7 +140,7 @@ class ComputeEPIMask(nrc.SegmentationRC):
         volume of in_file, with the resulting binary brain mask overlaid '''
 
         self._anat_file = self.inputs.in_file
-        self._mask_file = self.aggregate_outputs().mask_file
+        self._mask_file = self.aggregate_outputs(runtime=runtime).mask_file
         self._seg_files = [self._mask_file]
         self._masked = True
         self._report_title = "nilearn.compute_epi_mask: brain mask over EPI input"
@@ -191,7 +191,7 @@ class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
     def _post_run_hook(self, runtime):
         ''' generates a report showing slices from each axis '''
 
-        high_variance_masks = self.aggregate_outputs().high_variance_masks
+        high_variance_masks = self.aggregate_outputs(runtime=runtime).high_variance_masks
 
         assert not isinstance(high_variance_masks, list),\
             "TCompCorRPT only supports a single output high variance mask. " \
@@ -204,7 +204,7 @@ class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
 
         NIWORKFLOWS_LOG.info('Generating report for tCompCor. file "%s", mask "%s"',
                              self.inputs.realigned_file,
-                             self.aggregate_outputs().high_variance_masks)
+                             self.aggregate_outputs(runtime=runtime).high_variance_masks)
 
 
 class SimpleShowMaskInputSpec(nrc.ReportCapableInputSpec):
