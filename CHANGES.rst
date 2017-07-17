@@ -1,3 +1,8 @@
+Version 0.1.4
+-------------
+
+* [ENH] Upgrade internal Nipype
+
 Version 0.1.3
 -------------
 
