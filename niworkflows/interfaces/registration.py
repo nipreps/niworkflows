@@ -292,15 +292,19 @@ class EstimateReferenceImage(SimpleInterface):
         global_signal = data_slice.mean(axis=0).mean(
             axis=0).mean(axis=0)
 
+        # Slicing may induce inconsistencies with shape-dependent values in extensions.
+        # For now, remove all. If this turns out to be a mistake, we can select extensions
+        # that don't break pipeline stages.
+        in_nii.header.extensions.clear()
+
         n_volumes_to_discard = is_outlier(global_signal)
 
         out_ref_fname = os.path.abspath("ref_image.nii.gz")
 
         if n_volumes_to_discard == 0:
             if in_nii.shape[-1] > 40:
-                slice = data_slice[:, :, :, 20:40]
                 slice_fname = os.path.abspath("slice.nii.gz")
-                nb.Nifti1Image(slice, in_nii.affine,
+                nb.Nifti1Image(data_slice[:, :, :, 20:40], in_nii.affine,
                                in_nii.header).to_filename(slice_fname)
             else:
                 slice_fname = self.inputs.in_file
