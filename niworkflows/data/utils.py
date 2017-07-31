@@ -172,8 +172,6 @@ def _fetch_file(url, dataset_dir, filetype=None, resume=True, overwrite=False,
         sys.stderr.write(' ...done. ({0:.0f} seconds, {1:.0f} min)\n'
                          .format(delta_t, delta_t // 60))
 
-
-
     if md5sum is not None:
         if _md5_sum_file(temp_full_name) != md5sum:
             raise ValueError("File {} checksum verification has failed."
@@ -188,8 +186,9 @@ def _fetch_file(url, dataset_dir, filetype=None, resume=True, overwrite=False,
     if filetype.startswith('.'):
         filetype = filetype[1:]
 
-    if filetype == 'tar':
-        sp.check_call(['tar', 'xf', temp_full_name], cwd=data_dir)
+    if filetype.startswith('tar'):
+        args = 'xf' if not filetype.endswith('gz') else 'xzf'
+        sp.check_call(['tar', args, temp_full_name], cwd=data_dir)
         os.remove(temp_full_name)
         return True
 
