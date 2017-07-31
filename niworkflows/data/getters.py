@@ -34,6 +34,9 @@ BIDS_EXAMPLES = {
     'BIDS-examples-1-1.0.0-rc3u5': (
         'https://github.com/chrisfilo/BIDS-examples-1/archive/1.0.0-rc3u5.tar.gz',
         '035fe54445c56eff5bd845ef3795fd56'),
+    'BIDS-examples-1-enh-ds054': (
+        'http://github.com/chrisfilo/BIDS-examples-1/archive/enh/ds054.zip',
+        '56cee272860624924bc23efbe868acb7'),
 }
 
 # Map names of templates to OSF_RESOURCES keys
@@ -154,15 +157,18 @@ def get_mni_icbm152_linear(data_dir=None, url=None, resume=True, verbose=1):
     """
     return get_dataset('mni_icbm152_linear', data_dir, url, resume, verbose)
 
-def get_bids_examples(data_dir=None, url=None, resume=True, verbose=1):
+def get_bids_examples(data_dir=None, url=None, resume=True, verbose=1, variant=None):
     """
     Download BIDS-examples-1
     """
 
+    if variant is None or variant not in BIDS_EXAMPLES:
+        variant = 'BIDS-examples-1-1.0.0-rc3u5'
+
     if url is None:
-        url = BIDS_EXAMPLES['BIDS-examples-1-1.0.0-rc3u5'][0]
-    md5 = BIDS_EXAMPLES['BIDS-examples-1-1.0.0-rc3u5'][1]
-    data_dir = _get_dataset_dir('BIDS-examples-1-1.0.0-rc3u5', data_dir=data_dir, verbose=verbose)
+        url = BIDS_EXAMPLES[variant][0]
+    md5 = BIDS_EXAMPLES[variant][1]
+    data_dir = _get_dataset_dir(variant, data_dir=data_dir, verbose=verbose)
 
     if _fetch_file(url, data_dir, filetype=None, resume=resume, verbose=verbose,
                    md5sum=md5):

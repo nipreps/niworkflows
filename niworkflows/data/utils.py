@@ -192,6 +192,15 @@ def _fetch_file(url, dataset_dir, filetype=None, resume=True, overwrite=False,
         os.remove(temp_full_name)
         return True
 
+    if filetype == 'zip':
+        import zipfile
+        sys.stderr.write('Unzipping package (%s) to data path (%s)...' % (
+            temp_full_name, data_dir))
+        with zipfile.ZipFile(temp_full_name, 'r') as zip_ref:
+            zip_ref.extractall(data_dir)
+        sys.stderr.write('done.\n')
+        return True
+
     return True
 
 def _get_dataset_dir(dataset_name, data_dir=None, default_paths=None,
