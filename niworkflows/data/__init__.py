@@ -17,4 +17,6 @@ from .getters import (get_brainweb_1mm_normal,
                       get_mni_icbm152_linear,
                       get_mni_icbm152_nlin_asym_09c,
                       get_dataset,
-                      TEMPLATE_MAP)
+                      get_bids_examples,
+                      TEMPLATE_MAP,
+)
