@@ -504,8 +504,17 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     if not tr:
         tr = in_nii.header.get_zooms()[3]
         units = in_nii.header.get_xyzt_units()
-        if units and units[-1] == 'msec':
-            tr = tr/1000.0
+        if units:
+            if units[-1] == 'msec':
+                tr = tr / 1000.0
+            elif units[-1] == 'usec':
+                tr = tr / 1000000.0
+            elif units[-1] != 'sec':
+                NIWORKFLOWS_LOG.warn('Unknown repetition time units '
+                                     'specified - assuming seconds')
+        else:
+            NIWORKFLOWS_LOG.warn(
+                'Repetition time units not specified - assuming seconds')
 
     from nilearn.input_data import NiftiMasker
     from nilearn.plotting import plot_roi
