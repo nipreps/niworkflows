@@ -488,7 +488,8 @@ def transform_to_2d(data, max_axis):
 
 def plot_melodic_components(melodic_dir, in_file, tr=None,
                             out_file='melodic_reportlet.svg',
-                            compress='auto', report_mask=None):
+                            compress='auto', report_mask=None,
+                            noise_components_file=None):
     from nilearn.plotting import plot_glass_brain
     from nilearn.image import index_img, iter_img
     import nibabel as nb
@@ -497,6 +498,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     import seaborn as sns
     from matplotlib.gridspec import GridSpec
     import os
+    import re
     from io import StringIO
     sns.set_style("white")
     current_palette = sns.color_palette()
@@ -534,12 +536,26 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
                   width_ratios=[1, 1, 1, 4, 0.001, 1, 1, 1, 4, ],
                   height_ratios=[1.1, 1] * n_rows)
 
+    if noise_components_file:
+        with open(noise_components_file) as cf:
+            noise_components = [int(c) for c in cf.read().split(",")]
+
     for i, img in enumerate(
             iter_img(os.path.join(melodic_dir, "melodic_IC.nii.gz"))):
 
         col = i % 2
         row = int(i / 2)
         l_row = row * 2
+
+        if noise_components_file:
+            if (i + 1) in noise_components:
+                color_title = color_time = color_power = 'r'
+            else:
+                color_title = color_time = color_power = 'g'
+        else:
+            color_title = 'k'
+            color_time = current_palette[0]
+            color_power = current_palette[1]
 
         data = img.get_data()
         for j in range(3):
@@ -556,29 +572,33 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
                     "C%d: Tot. var. expl. %.2g%%" % (i + 1, stats[i, 1]), x=0,
                     y=1.18, fontsize=7,
                     horizontalalignment='left',
-                    verticalalignment='top')
+                    verticalalignment='top',
+                    color=color_title)
 
         ax2 = fig.add_subplot(gs[l_row, 3 + col * 5])
         ax3 = fig.add_subplot(gs[l_row + 1, 3 + col * 5])
 
         ax2.plot(np.arange(len(timeseries[:, i])) * tr, timeseries[:, i],
-                 linewidth=min(200 / len(timeseries[:, i]), 1.0))
+                 linewidth=min(200 / len(timeseries[:, i]), 1.0),
+                 color=color_time)
         ax2.set_xlim([0, len(timeseries[:, i]) * tr])
         ax2.axes.get_yaxis().set_visible(False)
         ax2.autoscale_view('tight')
         ax2.tick_params(axis='both', which='major', pad=0)
         sns.despine(left=True, bottom=True)
-        zed = [tick.label.set_fontsize(6) for tick in
-               ax2.xaxis.get_major_ticks()]
+        for tick in ax2.xaxis.get_major_ticks():
+            tick.label.set_fontsize(6)
+            tick.label.set_color(color_time)
 
-        ax3.plot(f[0:], power[0:, i], color=current_palette[1],
+        ax3.plot(f[0:], power[0:, i], color=color_power,
                  linewidth=min(100 / len(power[0:, i]), 1.0))
         ax3.set_xlim([f[0], f.max()])
         ax3.axes.get_yaxis().set_visible(False)
         ax3.autoscale_view('tight')
         ax3.tick_params(axis='both', which='major', pad=0)
-        zed = [tick.label.set_fontsize(6) for tick in
-               ax3.xaxis.get_major_ticks()]
+        for tick in ax3.xaxis.get_major_ticks():
+            tick.label.set_fontsize(6)
+            tick.label.set_color(color_power)
         sns.despine(left=True, bottom=True)
 
     plt.subplots_adjust(hspace=0.5)
