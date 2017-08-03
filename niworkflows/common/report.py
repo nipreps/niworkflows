@@ -8,7 +8,8 @@ from sys import version_info
 from abc import abstractmethod
 from io import open
 
-from nipype.interfaces.base import File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
+from niworkflows.nipype.interfaces.base import (
+    File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec)
 from niworkflows import NIWORKFLOWS_LOG
 from nilearn.masking import apply_mask, unmask
 from nilearn.image import threshold_img, load_img

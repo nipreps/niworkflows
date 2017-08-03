@@ -7,10 +7,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 
-from nilearn.image import mean_img
-from nipype.interfaces import fsl, ants
-from nipype.interfaces.base import File, BaseInterfaceInputSpec, traits, isdefined
-from nipype.algorithms import confounds
+from niworkflows.nipype.interfaces import fsl, ants
+from niworkflows.nipype.interfaces.base import (
+    File, BaseInterfaceInputSpec, traits, isdefined)
+from niworkflows.nipype.algorithms import confounds
 from niworkflows.common import report as nrc
 from niworkflows import NIWORKFLOWS_LOG
 from nilearn.masking import compute_epi_mask
@@ -42,7 +42,7 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
         volume of in_file, with the resulting binary brain mask overlaid '''
 
         self._anat_file = self.inputs.in_file
-        self._mask_file = self.aggregate_outputs().mask_file
+        self._mask_file = self.aggregate_outputs(runtime=runtime).mask_file
         self._seg_files = [self._mask_file]
         self._masked = self.inputs.mask
         self._report_title = "BET: brain mask over anatomical input"
@@ -66,10 +66,10 @@ class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
     def _post_run_hook(self, runtime):
         ''' generates a report showing slices from each axis '''
 
-        brain_extraction_mask = self.aggregate_outputs().BrainExtractionMask
+        brain_extraction_mask = self.aggregate_outputs(runtime=runtime).BrainExtractionMask
 
         if isdefined(self.inputs.keep_temporary_files) and self.inputs.keep_temporary_files == 1:
-            self._anat_file = self.aggregate_outputs().N4Corrected0
+            self._anat_file = self.aggregate_outputs(runtime=runtime).N4Corrected0
         else:
             self._anat_file = self.inputs.anatomical_image
         self._mask_file = brain_extraction_mask
@@ -140,7 +140,7 @@ class ComputeEPIMask(nrc.SegmentationRC):
         volume of in_file, with the resulting binary brain mask overlaid '''
 
         self._anat_file = self.inputs.in_file
-        self._mask_file = self.aggregate_outputs().mask_file
+        self._mask_file = self.aggregate_outputs(runtime=runtime).mask_file
         self._seg_files = [self._mask_file]
         self._masked = True
         self._report_title = "nilearn.compute_epi_mask: brain mask over EPI input"
@@ -164,9 +164,12 @@ class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
     def _post_run_hook(self, runtime):
         ''' generates a report showing slices from each axis '''
 
+        assert len(self.inputs.mask_files) == 1, \
+            "ACompCorRPT only supports a single input mask. " \
+            "A list %s was found." % self.inputs.mask_files
         self._anat_file = self.inputs.realigned_file
-        self._mask_file = self.inputs.mask_file
-        self._seg_files = [self.inputs.mask_file]
+        self._mask_file = self.inputs.mask_files[0]
+        self._seg_files = self.inputs.mask_files
         self._masked = False
         self._report_title = 'aCompCor ROI'
 
@@ -188,12 +191,37 @@ class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
     def _post_run_hook(self, runtime):
         ''' generates a report showing slices from each axis '''
 
+        high_variance_masks = self.aggregate_outputs(runtime=runtime).high_variance_masks
+
+        assert not isinstance(high_variance_masks, list),\
+            "TCompCorRPT only supports a single output high variance mask. " \
+            "A list %s was found." % str(high_variance_masks)
         self._anat_file = self.inputs.realigned_file
-        self._mask_file = self.aggregate_outputs().high_variance_mask
-        self._seg_files = [self.aggregate_outputs().high_variance_mask]
+        self._mask_file = high_variance_masks
+        self._seg_files = [high_variance_masks]
         self._masked = False
         self._report_title = 'tCompCor - high variance voxels'
 
         NIWORKFLOWS_LOG.info('Generating report for tCompCor. file "%s", mask "%s"',
                              self.inputs.realigned_file,
-                             self.aggregate_outputs().high_variance_mask)
+                             self.aggregate_outputs(runtime=runtime).high_variance_masks)
+
+
+class SimpleShowMaskInputSpec(nrc.ReportCapableInputSpec):
+    background_file = File(exists=True, mandatory=True, desc='file before')
+    mask_file = File(exists=True, mandatory=True, desc='file before')
+    generate_report = traits.Bool(True, usedefault=True)
+
+
+class SimpleShowMaskRPT(nrc.SegmentationRC):
+    input_spec = SimpleShowMaskInputSpec
+    output_spec = nrc.ReportCapableOutputSpec
+
+    def _post_run_hook(self, runtime):
+        self._anat_file = self.inputs.background_file
+        self._mask_file = self.inputs.mask_file
+        self._seg_files = [self.inputs.mask_file]
+        self._masked = True
+        self._report_title = "Brain mask"
+
+        return runtime

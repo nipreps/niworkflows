@@ -30,6 +30,11 @@ OSF_RESOURCES = {
     'mni_icbm152_nlin_asym_09c': ('580705089ad5a101f17944a9', '002f9bf24dc5c32de50c03f01fa539ec')
 }
 
+# Map names of templates to OSF_RESOURCES keys
+TEMPLATE_MAP = {
+    'MNI152NLin2009cAsym': 'mni_icbm152_nlin_asym_09c',
+}
+
 def get_dataset(dataset_name, data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the BIDS-fied brainweb 1mm normal
 

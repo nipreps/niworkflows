@@ -11,8 +11,7 @@ from shutil import copy
 
 import nibabel as nb
 from nilearn import image
-from nipype.utils.tmpdirs import InTemporaryDirectory
-
+from niworkflows.nipype.utils.tmpdirs import InTemporaryDirectory
 
 from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsampled,
                                       get_ants_oasis_template_ras)
@@ -21,11 +20,13 @@ from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT,
     ApplyXFMRPT, SimpleBeforeAfterRPT)
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
-from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT
+from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT, \
+    SimpleShowMaskRPT
 
 MNI_DIR = get_mni_template_ras()
 MNI_2MM = os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz')
 DS003_DIR = get_ds003_downsampled()
+
 
 def stage_artifacts(filename, new_filename):
     """ filename: the name of the file to be saved as an artifact.
@@ -34,6 +35,7 @@ def stage_artifacts(filename, new_filename):
     save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
     if save_artifacts:
         copy(filename, os.path.join(save_artifacts, new_filename))
+
 
 def _smoke_test_report(report_interface, artifact_name):
     with InTemporaryDirectory():
@@ -106,14 +108,14 @@ class TestRegistrationInterfaces(unittest.TestCase):
     def test_RobustMNINormalizationRPT(self):
         """ the RobustMNINormalizationRPT report capable test """
         ants_rpt = RobustMNINormalizationRPT(
-            generate_report=True, moving_image=self.moving, testing=True)
+            generate_report=True, moving_image=self.moving, flavor='testing')
         _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT.svg')
 
     def test_RobustMNINormalizationRPT_masked(self):
         """ the RobustMNINormalizationRPT report capable test with masking """
         ants_rpt = RobustMNINormalizationRPT(
             generate_report=True, moving_image=self.moving,
-            reference_mask=self.reference_mask, testing=True)
+            reference_mask=self.reference_mask, flavor='testing')
         _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT_masked.svg')
 
     def test_ANTSRegistrationRPT(self):
@@ -144,6 +146,20 @@ class TestBETRPT(unittest.TestCase):
         _smoke_test_report(BETRPT(in_file=mni_4d_file, generate_report=True, mask=True),
                            'testBET4d.html')
 
+
+def _template_name(filename):
+    return os.path.join(get_ants_oasis_template_ras(), filename)
+
+
+class TestSimpleShowMaskRPT(unittest.TestCase):
+
+    def test_generate_report(self):
+        ''' test of SimpleShowMaskRPT's report '''
+        _smoke_test_report(SimpleShowMaskRPT(background_file=_template_name('T_template0.nii.gz'),
+                                             mask_file=_template_name('T_template0_BrainCerebellumRegistrationMask.nii.gz')),
+                           'testSimpleShowMaskRPT.html')
+
+
 class TestBrainExtractionRPT(unittest.TestCase):
     ''' tests the report capable version of ANTS's BrainExtraction interface, using mni as input'''
 
@@ -153,8 +169,6 @@ class TestBrainExtractionRPT(unittest.TestCase):
                 - use_floatingpoint_precision=1,
                 - brain_template, brain_probability_mask, extraction_registration_mask from get_ants_oasis_template_ras()
         '''
-        def _template_name(filename):
-            return os.path.join(get_ants_oasis_template_ras(), filename)
 
         _smoke_test_report(
             BrainExtractionRPT(

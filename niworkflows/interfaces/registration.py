@@ -9,18 +9,19 @@ from distutils.version import LooseVersion
 
 import nibabel as nb
 import numpy as np
-from nipype.algorithms.confounds import is_outlier
+from nilearn import image as nli
+from niworkflows.nipype.algorithms.confounds import is_outlier
+from niworkflows.nipype.utils.filemanip import fname_presuffix
 
-from nipype.interfaces.base import (traits, isdefined, TraitedSpec, BaseInterface,
-                                    BaseInterfaceInputSpec, File, InputMultiPath,
-                                    OutputMultiPath)
+from niworkflows.nipype.interfaces.base import (
+    traits, isdefined, TraitedSpec, BaseInterfaceInputSpec, File)
+from .base import SimpleInterface
 
-from nipype.interfaces import freesurfer as fs
-from nipype.interfaces import fsl, ants, afni
+from niworkflows.nipype.interfaces import freesurfer as fs
+from niworkflows.nipype.interfaces import fsl, ants, afni
 from niworkflows.anat import mni
 import niworkflows.common.report as nrc
 from niworkflows import NIWORKFLOWS_LOG
-from nipype.interfaces.base import isdefined, File
 from nilearn.image import index_img
 
 class RobustMNINormalizationInputSpecRPT(
@@ -41,7 +42,7 @@ class RobustMNINormalizationRPT(
         self._fixed_image = self.norm.inputs.fixed_image[0]  # and get first item
         if isdefined(self.norm.inputs.fixed_image_mask):
             self._fixed_image_mask = self.norm.inputs.fixed_image_mask
-        self._moving_image = self.aggregate_outputs().warped_image
+        self._moving_image = self.aggregate_outputs(runtime=runtime).warped_image
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
@@ -60,7 +61,7 @@ class ANTSRegistrationRPT(nrc.RegistrationRC, ants.Registration):
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.fixed_image[0]
-        self._moving_image = self.aggregate_outputs().warped_image
+        self._moving_image = self.aggregate_outputs(runtime=runtime).warped_image
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
@@ -79,7 +80,7 @@ class ANTSApplyTransformsRPT(nrc.RegistrationRC, ants.ApplyTransforms):
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference_image
-        self._moving_image = self.aggregate_outputs().output_image
+        self._moving_image = self.aggregate_outputs(runtime=runtime).output_image
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
@@ -102,7 +103,7 @@ class ApplyTOPUPRPT(nrc.RegistrationRC, fsl.ApplyTOPUP):
     def _post_run_hook(self, runtime):
         self._fixed_image_label = "after"
         self._moving_image_label = "before"
-        self._fixed_image = index_img(self.aggregate_outputs().out_corrected, 0)
+        self._fixed_image = index_img(self.aggregate_outputs(runtime=runtime).out_corrected, 0)
         self._moving_image = index_img(self.inputs.in_files[0], 0)
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
         NIWORKFLOWS_LOG.info('Report - setting corrected (%s) and warped (%s) images',
@@ -126,7 +127,7 @@ class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
     def _post_run_hook(self, runtime):
         self._fixed_image_label = "after"
         self._moving_image_label = "before"
-        self._fixed_image = self.aggregate_outputs().unwarped_file
+        self._fixed_image = self.aggregate_outputs(runtime=runtime).unwarped_file
         self._moving_image = self.inputs.in_file
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
         NIWORKFLOWS_LOG.info(
@@ -148,7 +149,7 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference
-        self._moving_image = self.aggregate_outputs().out_file
+        self._moving_image = self.aggregate_outputs(runtime=runtime).out_file
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',
@@ -164,7 +165,7 @@ class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
     output_spec = FLIRTOutputSpecRPT
 
 
-if LooseVersion("0") < fs.preprocess.FSVersion < LooseVersion("6.0.0"):
+if LooseVersion("0.0.0") < fs.Info.looseversion() < LooseVersion("6.0.0"):
     class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
                                  fs.preprocess.BBRegisterInputSpec):
         pass
@@ -187,7 +188,7 @@ class BBRegisterRPT(nrc.RegistrationRC, fs.BBRegister):
         mri_dir = os.path.join(self.inputs.subjects_dir,
                                self.inputs.subject_id, 'mri')
         self._fixed_image = os.path.join(mri_dir, 'brainmask.mgz')
-        self._moving_image = self.aggregate_outputs().registered_file
+        self._moving_image = self.aggregate_outputs(runtime=runtime).registered_file
         self._contour = os.path.join(mri_dir, 'ribbon.mgz')
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',
@@ -226,6 +227,42 @@ class SimpleBeforeAfterRPT(nrc.RegistrationRC):
         return runtime
 
 
+class ResampleBeforeAfterInputSpecRPT(SimpleBeforeAfterInputSpecRPT):
+    base = traits.Enum('before', 'after', usedefault=True, mandatory=True)
+
+
+class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
+    input_spec = ResampleBeforeAfterInputSpecRPT
+    def _run_interface(self, runtime):
+        """ there is not inner interface to run """
+        self._out_report = os.path.abspath(self.inputs.out_report)
+
+        self._fixed_image_label = "after"
+        self._moving_image_label = "before"
+        self._fixed_image = self.inputs.after
+        self._moving_image = self.inputs.before
+        if self.inputs.base == 'before':
+            resampled_after = nli.resample_to_img(self._fixed_image, self._moving_image)
+            fname = fname_presuffix(self._fixed_image, suffix='_resampled', newpath='.')
+            resampled_after.to_filename(fname)
+            self._fixed_image = os.path.abspath(fname)
+        else:
+            resampled_before = nli.resample_to_img(self._moving_image, self._fixed_image)
+            fname = fname_presuffix(self._moving_image, suffix='_resampled', newpath='.')
+            resampled_before.to_filename(fname)
+            self._moving_image = os.path.abspath(fname)
+        self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
+        NIWORKFLOWS_LOG.info(
+            'Report - setting before (%s) and after (%s) images',
+            self._fixed_image, self._moving_image)
+
+        self._generate_report()
+        NIWORKFLOWS_LOG.info('Successfully created report (%s)', self._out_report)
+        os.unlink(fname)
+
+        return runtime
+
+
 class EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="4D EPI file")
     mc_method = traits.Enum("AFNI", "FSL", dsec="Which software to use to perform motion correction",
@@ -239,7 +276,7 @@ class EstimateReferenceImageOutputSpec(TraitedSpec):
                                            "the input file")
 
 
-class EstimateReferenceImage(BaseInterface):
+class EstimateReferenceImage(SimpleInterface):
     """
     Given an 4D EPI file estimate an optimal reference image that could be later
     used for motion estimation and coregistration purposes. If detected uses
@@ -277,19 +314,15 @@ class EstimateReferenceImage(BaseInterface):
             mc_slice_nii = nb.load(res.outputs.out_file)
 
             median_image_data = np.median(mc_slice_nii.get_data(), axis=3)
-            nb.Nifti1Image(median_image_data, mc_slice_nii.affine,
-                           mc_slice_nii.header).to_filename(out_ref_fname)
+            nb.Nifti1Image(median_image_data, in_nii.affine,
+                           in_nii.header).to_filename(out_ref_fname)
         else:
             median_image_data = np.median(
                 data_slice[:, :, :, :n_volumes_to_discard], axis=3)
             nb.Nifti1Image(median_image_data, in_nii.affine,
                            in_nii.header).to_filename(out_ref_fname)
 
-        self._results = dict()
         self._results["ref_image"] = out_ref_fname
         self._results["n_volumes_to_discard"] = n_volumes_to_discard
 
         return runtime
-
-    def _list_outputs(self):
-        return self._results

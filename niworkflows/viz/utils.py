@@ -18,10 +18,10 @@ from pkg_resources import resource_filename as pkgrf
 from lxml import etree
 from nilearn import image as nlimage
 from nilearn.plotting import plot_anat
-from nipype.utils import filemanip
 
 from niworkflows import NIWORKFLOWS_LOG
 from niworkflows.viz.validators import HTMLValidator
+from niworkflows.nipype.utils import filemanip
 
 
 try:

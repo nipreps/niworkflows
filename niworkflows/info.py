@@ -10,8 +10,13 @@ as well as for open-source software distribution.
 """
 from __future__ import absolute_import, division, print_function
 import datetime
+from os import path as op
+import runpy
 
-__version__ = '99.99.99'
+nipype_info = runpy.run_path(op.join(op.abspath(op.dirname(__file__)),
+                                     'nipype', 'info.py'))
+
+__version__ = '0.1.3-dev'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
@@ -39,8 +44,9 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.5',
 ]
 
-REQUIRES = ['nipype', 'future', 'nilearn>=0.2.6', 'sklearn', 'pandas', 'matplotlib',
-            'jinja2', 'svgutils', 'tinycss']
+REQUIRES = nipype_info['REQUIRES'] + [
+    'nilearn>=0.2.6', 'sklearn', 'pandas', 'matplotlib', 'jinja2', 'svgutils',
+    'tinycss']
 SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 
