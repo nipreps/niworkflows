@@ -1,3 +1,19 @@
+Next release
+------------
+
+
+Version 0.1.5
+-------------
+
+* [ENH] Do not enforce float precision for ANTs (#187)
+* [ENH] Clear header extensions when making ref image (#188)
+* [ENH] Upgrade internal Nipype
+
+Version 0.1.4
+-------------
+
+* [ENH] Upgrade internal Nipype
+
 Version 0.1.3
 -------------
 

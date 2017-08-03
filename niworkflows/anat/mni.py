@@ -73,6 +73,7 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
                                         "Requires reliable and accurate masks."
                                         "See https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba")
     initial_moving_transform = File(exists=True, desc='transform for initialization')
+    float = traits.Bool(False, usedefault=True, desc='use single precision calculations')
 
 
 class RobustMNINormalization(BaseInterface):
@@ -176,6 +177,7 @@ class RobustMNINormalization(BaseInterface):
     def _get_ants_args(self):
         args = {'moving_image': self.inputs.moving_image,
                 'num_threads': self.inputs.num_threads,
+                'float': self.inputs.float,
                 'terminal_output': 'file',
                 'write_composite_transform': True,
                 'initial_moving_transform': self.inputs.initial_moving_transform}

@@ -1,6 +1,5 @@
 {
     "dimension": 3,
-    "float": true,
     "convergence_threshold": [ 1e-06, 1e-06, 1e-06 ],
     "convergence_window_size": [ 20, 20, 10 ],
     "metric": [ "Mattes", "Mattes", "Mattes" ],

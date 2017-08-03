@@ -1,6 +1,5 @@
 {
     "dimension": 3,
-    "float": true,
     "transforms": [ "Translation", "Rigid" ],
     "transform_parameters": [ [ 0.1 ], [ 0.01 ] ],
     "metric": [ "Mattes", "Mattes" ],
