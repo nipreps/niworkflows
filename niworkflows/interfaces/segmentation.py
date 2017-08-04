@@ -150,4 +150,4 @@ class ICA_AROMARPT(nrc.ReportCapableInterface, fsl.ICA_AROMA):
         self._noise_components_file = os.path.join(outputs.out_dir,
                                                    "classified_motion_ICs.txt")
 
-        NIWORKFLOWS_LOG.info('Generating report for MELODIC')
+        NIWORKFLOWS_LOG.info('Generating report for ICA AROMA')
