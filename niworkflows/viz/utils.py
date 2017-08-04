@@ -448,18 +448,24 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     out_file = op.abspath(out_file)
     fig.save(out_file)
 
+    # Post processing
+    with open(out_file, 'r' if PY3 else 'rb') as f:
+        svg = f.read().split('\n')
+
+    # Remove <?xml... line
+    if svg[0].startswith("<?xml"):
+        svg = svg[1:]
+
     # Add styles for the flicker animation
     if fg_svgs:
-        with open(out_file, 'r' if PY3 else 'rb') as f:
-            svg = f.read().split('\n')
-
         svg.insert(2, """<style type="text/css">
 @keyframes flickerAnimation%s { 0%% {opacity: 1;} 100%% { opacity: 0; }}
 .foreground-svg { animation: 1s ease-in-out 0s alternate none infinite paused flickerAnimation%s;}
 .foreground-svg:hover { animation-play-state: running;}
 </style>""" % tuple([uuid4()] * 2))
-        with open(out_file, 'w' if PY3 else 'wb') as f:
-            f.write('\n'.join(svg))
+
+    with open(out_file, 'w' if PY3 else 'wb') as f:
+        f.write('\n'.join(svg))
     return out_file
 
 
