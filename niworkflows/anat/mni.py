@@ -45,8 +45,10 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     # Number of threads to use for ANTs/ITK processes.
     num_threads = traits.Int(cpu_count(), usedefault=True, nohash=True,
                              desc="Number of ITK threads to use")
+    # ANTs parameter set to use.
     flavor = traits.Enum('precise', 'testing', 'fast', usedefault=True,
                          desc='registration settings parameter set')
+    # Template orientation.
     orientation = traits.Enum('RAS', 'LAS', mandatory=True, usedefault=True,
                               desc='modify template orientation (should match input image)')
     # Modality of the reference image.
@@ -182,42 +184,66 @@ class RobustMNINormalization(BaseInterface):
                 'write_composite_transform': True,
                 'initial_moving_transform': self.inputs.initial_moving_transform}
 
-
+        """
+        Moving image handling
+        """
+        # If a moving mask is provided...
         if isdefined(self.inputs.moving_mask):
             # If explicit masking is enabled...
             if self.inputs.explicit_masking:
+                # Mask the moving image.
+                # Do not use a moving mask during registration.
                 args['moving_image'] = mask(
                     self.inputs.moving_image,
                     self.inputs.moving_mask,
                     "moving_masked.nii.gz")
-            # But explicit masking is disabled...
+            
+            # If explicit masking is disabled...
             else:
+                # Use the moving mask during registration.
+                # Do not mask the moving image.
                 args['moving_image_mask'] = self.inputs.moving_mask
 
             # If a lesion mask is also provided...
             if isdefined(self.inputs.lesion_mask):
+                # Create a cost function mask with the form:
+                # [global mask - lesion mask] (if explicit masking is enabled)
+                # [moving mask - lesion mask] (if explicit masking is disabled)
+                # Use this as the moving mask.
                 args['moving_image_mask'] = create_cfm(
                     self.inputs.moving_mask,
                     "moving_cfm.nii.gz",
                     self.inputs.lesion_mask,
-                    global_mask=not self.inputs.explicit_masking)
-
+                    global_mask=self.inputs.explicit_masking)
+        
+        # If no moving mask is provided...
+        # But a lesion mask *IS* provided...
         elif isdefined(self.inputs.lesion_mask):
-            # If a lesion mask is also provided...
+            # Create a cost function mask with the form: [global mask - lesion mask]
+            # Use this as the moving mask.
             args['moving_image_mask'] = create_cfm(
                 self.inputs.moving_image,
                 "moving_cfm.nii.gz",
                 self.inputs.lesion_mask,
                 global_mask=True)
 
+        """
+        Reference image handling
+        """
+        # If a reference image is provided...
         if isdefined(self.inputs.reference_image):
+            # Use the reference image as the fixed image.
             args['fixed_image'] = self.inputs.reference_image
+
+            # If a reference mask is provided...
             if isdefined(self.inputs.reference_mask):
                 # If explicit masking is enabled...
                 if self.inputs.explicit_masking:
+                    # Mask the reference image.
+                    # Do not use a fixed mask during registration.
                     args['fixed_image'] = mask(
                         self.inputs.reference_image,
-                        self.inputs.mreference_mask,
+                        self.inputs.reference_mask,
                         "fixed_masked.nii.gz")
 
                     # If a lesion mask is also provided...
@@ -233,9 +259,12 @@ class RobustMNINormalization(BaseInterface):
                 # If a reference mask is provided...
                 # But explicit masking is disabled...
                 else:
+                    # Use the reference mask as the fixed mask during registration.
+                    # Do not mask the fixed image.
                     args['fixed_image_mask'] = self.inputs.reference_mask
 
-            # But a lesion mask "is" provided ...
+            # If no reference mask is provided...
+            # But a lesion mask *IS* provided ...
             elif isdefined(self.inputs.lesion_mask):
                 # Create a cost function mask with the form: [global mask]
                 # Use this as the fixed mask
@@ -245,24 +274,26 @@ class RobustMNINormalization(BaseInterface):
                     lesion_mask=None,
                     global_mask=True)
 
+        # If no reference image is provided, fall back to the default template.
         else:
-            # Raise an error if the user specifies an unsupported image orientation
+            # Raise an error if the user specifies an unsupported image orientation.
             if self.inputs.orientation == 'LAS':
                 raise NotImplementedError
 
             # Get the template specified by the user.
             mni_template = getters.get_dataset(self.inputs.template)
-            # Set the template resolution
+            # Set the template resolution.
             resolution = self.inputs.template_resolution
 
             # If explicit masking is enabled...
             if self.inputs.explicit_masking:
-                args['fixed_image'] = mask(op.join(
-                    mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference)),
-                    op.join(
-                        mni_template, '%dmm_brainmask.nii.gz' % resolution),
-                    "fixed_masked.nii.gz")
+                # Mask the template image with the template mask.
+                # Do not use a fixed mask during registration.
+                args['fixed_image'] = mask(
+                        op.join(mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference)),
+                        op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution), "fixed_masked.nii.gz")
 
+                # If a lesion mask is provided...
                 if isdefined(self.inputs.lesion_mask):
                     # Create a cost function mask with the form: [global mask]
                     # Use this as the fixed mask.
@@ -271,12 +302,15 @@ class RobustMNINormalization(BaseInterface):
                         "fixed_cfm.nii.gz",
                         lesion_mask=None,
                         global_mask=True)
+            
+            # If explicit masking is disabled...
             else:
+                # Use the raw template as the fixed image.
                 args['fixed_image'] = op.join(
-                    mni_template,
-                    '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
+                        mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
+                # Use the template mask as the fixed mask.
                 args['fixed_image_mask'] = op.join(
-                    mni_template, '%dmm_brainmask.nii.gz' % resolution)
+                        mni_template, '%dmm_brainmask.nii.gz' % resolution)
 
         return args
 
