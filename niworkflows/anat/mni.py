@@ -405,41 +405,39 @@ def create_cfm(in_file, out_path, lesion_mask, global_mask=True):
     in_file and lesion_mask must be in the same
     image space and have the same dimensions
     """
-    import nibabel as nb
     import os
-    import subprocess
-
+    import numpy as np
+    import nibabel as nb
+    
     # Load the input image
-    in_nii = nb.load(in_file)
+    in_img = nb.load(in_file)
+    in_data = in_img.get_data()
+
     # If we want a global mask, create one based on the input image.
     if global_mask is True:
-        in_data = in_nii.get_data()
-        # Set all voxels in the input image to 1
-        in_data[:] = 1
-        # Replace the original input image.
-        in_nii = nb.Nifti1Image(in_data, in_nii.affine, in_nii.header)
+        # Create a mask of ones with the shape of the input image.
+        in_data = np.ones_like(in_data, dtype=np.uint8)
 
     # If a lesion mask was provided, combine it with the secondary mask.
     if lesion_mask is not None:
-        # Reorient the lesion mask and write it to disk
-        lm_nii = nb.as_closest_canonical(nb.load(lesion_mask))
-        lm_nii.to_filename("lesion_mask_reorient.nii.gz")
-        lm_reorient = os.path.abspath("lesion_mask_reorient.nii.gz")
-        if global_mask is True:
-            # Write the global mask to disk
-            in_nii.to_filename("global_mask.nii.gz")
-            # Use this as the secondary mask
-            secondary_mask = os.path.abspath("global_mask.nii.gz")
-        else:
-            # Assume in_file is already a mask. Use this as the secondary mask.
-            secondary_mask = in_file
-        # Subtract the reoriented lesion mask from the secondary mask.
-        res = subprocess.call(["ImageMath", "3", out_path, "-",
-            secondary_mask, lm_reorient])
+        # Reorient the lesion mask and get the data.
+        lm_img = nb.as_closest_canonical(nb.load(lesion_mask))
+        lm_data = lm_img.get_data()
+
+        # Subtract the lesion mask from the secondary mask.
+        cfm_data = in_data - lm_data
+        cfm_data[cfm_data < 0] = 0
+
+        # Create the cost function mask image from the subtraction.
+        cfm_img = nb.Nifti1Image(cfm_data, in_img.affine, in_img.header)
     else:
+        # Confirm that global masking is enabled.
         assert (global_mask is True), "If no lesion mask is provided, global_mask must be True"
-        # Write the global mask to disk.
-        cfm_nii = in_nii
-        cfm_nii.to_filename(out_path)
+
+        # Create the cost function mask from the global mask.
+        cfm_img = nb.Nifti1Image(in_data, in_img.affine, in_img.header)
+
+    # Save the cost function mask.
+    cfm_img.to_filename(out_path)
 
     return os.path.abspath(out_path)
