@@ -1,6 +1,11 @@
-Next release
-------------
+Version 0.1.6
+-------------
 
+* [ENH] Add BIDS example getters (#189)
+* [ENH] Add NormalizeMotionParams interface (#190)
+* [ENH] Add ICA-AROMA reporting interface (#193)
+* [FIX] Correctly handle temporal units in MELODIC plotting (#192)
+* [ENH] Upgrade internal Nipype
 
 Version 0.1.5
 -------------
