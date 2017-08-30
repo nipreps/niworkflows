@@ -195,6 +195,37 @@ class BBRegisterRPT(nrc.RegistrationRC, fs.BBRegister):
             self._fixed_image, self._moving_image)
 
 
+class MRICoregInputSpecRPT(nrc.RegistrationRCInputSpec,
+                           fs.registration.MRICoregInputSpec):
+    pass
+
+
+class MRICoregOutputSpecRPT(nrc.ReportCapableOutputSpec,
+                            fs.registration.MRICoregOutputSpec):
+    pass
+
+
+class MRICoregRPT(nrc.RegistrationRC, fs.MRICoreg):
+    input_spec = MRICoregInputSpecRPT
+    output_spec = MRICoregOutputSpecRPT
+
+    def _post_run_hook(self, runtime):
+        outputs = self.aggregate_outputs(runtime=runtime)
+
+        # Apply transform for simplicity
+        mri_vol2vol = fs.ApplyVolTransform(
+            source_file=self.inputs.source_file,
+            target_file=self.inputs.reference_file,
+            lta_file=outputs.out_lta_file)
+        res = mri_vol2vol.run()
+
+        self._fixed_image = self.inputs.reference_file
+        self._moving_image = res.outputs.transformed_file
+        NIWORKFLOWS_LOG.info(
+            'Report - setting fixed (%s) and moving (%s) images',
+            self._fixed_image, self._moving_image)
+
+
 class SimpleBeforeAfterInputSpecRPT(nrc.RegistrationRCInputSpec):
     before = File(exists=True, mandatory=True, desc='file before')
     after = File(exists=True, mandatory=True, desc='file after')
