@@ -212,14 +212,21 @@ class MRICoregRPT(nrc.RegistrationRC, fs.MRICoreg):
     def _post_run_hook(self, runtime):
         outputs = self.aggregate_outputs(runtime=runtime)
 
+        if isdefined(self.inputs.reference_file):
+            target_file = self.inputs.reference_file
+        else:
+            target_file = os.path.join(self.inputs.subjects_dir,
+                                       self.inputs.subject_id, 'mri',
+                                       'brainmask.mgz')
+
         # Apply transform for simplicity
         mri_vol2vol = fs.ApplyVolTransform(
             source_file=self.inputs.source_file,
-            target_file=self.inputs.reference_file,
+            target_file=target_file,
             lta_file=outputs.out_lta_file)
         res = mri_vol2vol.run()
 
-        self._fixed_image = self.inputs.reference_file
+        self._fixed_image = target_file
         self._moving_image = res.outputs.transformed_file
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',
