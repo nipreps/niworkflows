@@ -18,7 +18,7 @@ from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsample
 
 from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT,
-    ApplyXFMRPT, SimpleBeforeAfterRPT)
+    MRICoregRPT, ApplyXFMRPT, SimpleBeforeAfterRPT)
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
 from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT, \
     SimpleShowMaskRPT
@@ -57,6 +57,14 @@ class TestRegistrationInterfaces(unittest.TestCase):
         flirt_rpt = FLIRTRPT(generate_report=True, in_file=self.moving,
                              reference=self.reference)
         _smoke_test_report(flirt_rpt, 'testFLIRT.svg')
+
+
+    def test_MRICoregRPT(self):
+        """ the FLIRT report capable test """
+        mri_coreg_rpt = MRICoregRPT(generate_report=True,
+                                    source_file=self.moving,
+                                    reference_file=self.reference)
+        _smoke_test_report(mri_coreg_rpt, 'testMRICoreg.svg')
 
 
     def test_ApplyXFMRPT(self):
