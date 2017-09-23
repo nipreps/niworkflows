@@ -1,3 +1,3 @@
 [submodule "niworkflows/nipype"]
 	path = nipype
-	url = https://github.com/djarecka/nipype.git
+	url = https://github.com/satra/nipype.git
