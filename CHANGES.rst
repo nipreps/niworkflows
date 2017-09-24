@@ -1,3 +1,8 @@
+Version 0.1.7
+-------------
+* [ENH] Reporting interface for `mri_coreg`
+* [ENH] Upgrade internal Nipype
+
 Version 0.1.6
 -------------
 
