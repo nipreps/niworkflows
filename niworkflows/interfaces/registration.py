@@ -10,7 +10,6 @@ from distutils.version import LooseVersion
 import nibabel as nb
 import numpy as np
 from nilearn import image as nli
-from niworkflows.nipype.algorithms.confounds import is_outlier
 from niworkflows.nipype.utils.filemanip import fname_presuffix
 
 from niworkflows.nipype.interfaces.base import (
@@ -327,15 +326,13 @@ class EstimateReferenceImage(SimpleInterface):
     def _run_interface(self, runtime):
         in_nii = nb.load(self.inputs.in_file)
         data_slice = in_nii.dataobj[:, :, :, :50]
-        global_signal = data_slice.mean(axis=0).mean(
-            axis=0).mean(axis=0)
 
         # Slicing may induce inconsistencies with shape-dependent values in extensions.
         # For now, remove all. If this turns out to be a mistake, we can select extensions
         # that don't break pipeline stages.
         in_nii.header.extensions.clear()
 
-        n_volumes_to_discard = is_outlier(global_signal)
+        n_volumes_to_discard = _get_vols_to_discard(in_nii)
 
         out_ref_fname = os.path.abspath("ref_image.nii.gz")
 
@@ -368,3 +365,10 @@ class EstimateReferenceImage(SimpleInterface):
         self._results["n_volumes_to_discard"] = n_volumes_to_discard
 
         return runtime
+
+
+def _get_vols_to_discard(img):
+    from niworkflows.nipype.algorithms.confounds import is_outlier
+    data_slice = img.dataobj[:, :, :, :50]
+    global_signal = data_slice.mean(axis=0).mean(axis=0).mean(axis=0)
+    return is_outlier(global_signal)
