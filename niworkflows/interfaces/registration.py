@@ -10,26 +10,29 @@ from distutils.version import LooseVersion
 import nibabel as nb
 import numpy as np
 from nilearn import image as nli
-from niworkflows.nipype.utils.filemanip import fname_presuffix
-
-from niworkflows.nipype.interfaces.base import (
-    traits, isdefined, TraitedSpec, BaseInterfaceInputSpec, File)
-from .base import SimpleInterface
-
-from niworkflows.nipype.interfaces import freesurfer as fs
-from niworkflows.nipype.interfaces import fsl, ants, afni
-from niworkflows.anat import mni
-import niworkflows.common.report as nrc
-from niworkflows import NIWORKFLOWS_LOG
 from nilearn.image import index_img
+from .. import NIWORKFLOWS_LOG
+from ..nipype.utils.filemanip import fname_presuffix
+from ..nipype.interfaces.base import (
+    traits, isdefined, TraitedSpec, BaseInterfaceInputSpec, File)
+from ..nipype.interfaces import freesurfer as fs
+from ..nipype.interfaces import fsl, ants, afni
+
+from ..common import report as nrc
+from ..anat import mni
+from .base import SimpleInterface
+from .fixes import FixHeaderApplyTransforms as ApplyTransforms
+
 
 class RobustMNINormalizationInputSpecRPT(
     nrc.RegistrationRCInputSpec, mni.RobustMNINormalizationInputSpec):
     pass
 
+
 class RobustMNINormalizationOutputSpecRPT(
     nrc.ReportCapableOutputSpec, mni.RegistrationOutputSpec):
     pass
+
 
 class RobustMNINormalizationRPT(
     nrc.RegistrationRC, mni.RobustMNINormalization):
@@ -50,9 +53,11 @@ class ANTSRegistrationInputSpecRPT(nrc.RegistrationRCInputSpec,
                                    ants.registration.RegistrationInputSpec):
     pass
 
+
 class ANTSRegistrationOutputSpecRPT(nrc.ReportCapableOutputSpec,
                                     ants.registration.RegistrationOutputSpec):
     pass
+
 
 class ANTSRegistrationRPT(nrc.RegistrationRC, ants.Registration):
     input_spec = ANTSRegistrationInputSpecRPT
@@ -69,11 +74,13 @@ class ANTSApplyTransformsInputSpecRPT(nrc.RegistrationRCInputSpec,
                                       ants.resampling.ApplyTransformsInputSpec):
     pass
 
+
 class ANTSApplyTransformsOutputSpecRPT(nrc.ReportCapableOutputSpec,
                                        ants.resampling.ApplyTransformsOutputSpec):
     pass
 
-class ANTSApplyTransformsRPT(nrc.RegistrationRC, ants.ApplyTransforms):
+
+class ANTSApplyTransformsRPT(nrc.RegistrationRC, ApplyTransforms):
     input_spec = ANTSApplyTransformsInputSpecRPT
     output_spec = ANTSApplyTransformsOutputSpecRPT
 
