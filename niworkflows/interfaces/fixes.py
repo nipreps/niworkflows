@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+import os
 import nibabel as nb
 
 from niworkflows.nipype.interfaces.ants.resampling import ApplyTransforms
@@ -20,7 +21,7 @@ class FixHeaderApplyTransforms(ApplyTransforms):
             runtime, correct_return_codes)
 
         # Read in reference and output
-        out_file = self._list_outputs()['output_image']
+        out_file = os.path.abspath(self._gen_filename('output_image'))
         orig = nb.load(self.inputs.input_image)
         resampled = nb.load(out_file)
 
