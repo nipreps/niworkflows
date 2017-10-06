@@ -20,7 +20,7 @@ class FixHeaderApplyTransforms(ApplyTransforms):
         runtime = super(FixHeaderApplyTransforms, self)._run_interface(
             runtime, correct_return_codes)
 
-        _copyheader(self.input.reference_image,
+        _copyheader(self.inputs.reference_image,
                     os.path.abspath(self._gen_filename('output_image')),
                     message=self.__class__.__name__)
         return runtime
