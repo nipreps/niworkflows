@@ -21,7 +21,7 @@ class FixHeaderApplyTransforms(ApplyTransforms):
             runtime, correct_return_codes)
 
         # Read in reference and output
-        out_file = os.path.abspath(self._gen_filename('output_image'))
+        out_file = os.path.abspath(self.inputs.output_file)
         orig = nb.load(self.inputs.input_image)
         resampled = nb.load(out_file)
 
