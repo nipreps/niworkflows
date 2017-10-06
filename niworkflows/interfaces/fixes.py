@@ -22,7 +22,7 @@ class FixHeaderApplyTransforms(ApplyTransforms):
 
         # Read in reference and output
         out_file = os.path.abspath(self.inputs.output_image)
-        orig = nb.load(self.inputs.input_image)
+        orig = nb.load(self.inputs.reference_image)
         resampled = nb.load(out_file)
 
         # Copy xform infos
