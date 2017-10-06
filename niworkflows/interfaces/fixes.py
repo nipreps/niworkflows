@@ -20,19 +20,24 @@ class FixHeaderApplyTransforms(ApplyTransforms):
         runtime = super(FixHeaderApplyTransforms, self)._run_interface(
             runtime, correct_return_codes)
 
-        # Read in reference and output
-        out_file = os.path.abspath(self.inputs.output_image)
-        orig = nb.load(self.inputs.reference_image)
-        resampled = nb.load(out_file)
-
-        # Copy xform infos
-        qform, qform_code = orig.header.get_qform(coded=True)
-        sform, sform_code = orig.header.get_sform(coded=True)
-        header = resampled.header.copy()
-        header.set_qform(qform, int(qform_code))
-        header.set_qform(sform, int(sform_code))
-        header['descrip'] = 'header fixed after ants.ApplyTransforms'
-
-        newimg = resampled.__class__(resampled.get_data(), orig.affine, header)
-        newimg.to_filename(out_file)
+        _copyheader(self.input.reference_image,
+                    os.path.abspath(self._gen_filename('output_image')),
+                    message=self.__class__.__name__)
         return runtime
+
+
+def _copyheader(ref_image, out_image, message=None):
+    # Read in reference and output
+    orig = nb.load(ref_image)
+    resampled = nb.load(out_image)
+
+    # Copy xform infos
+    qform, qform_code = orig.header.get_qform(coded=True)
+    sform, sform_code = orig.header.get_sform(coded=True)
+    header = resampled.header.copy()
+    header.set_qform(qform, int(qform_code))
+    header.set_qform(sform, int(sform_code))
+    header['descrip'] = 'header fixed (%s)' % (message or 'unknown')
+
+    newimg = resampled.__class__(resampled.get_data(), orig.affine, header)
+    newimg.to_filename(out_image)
