@@ -21,7 +21,8 @@ from ..nipype.interfaces import fsl, ants, afni
 from ..common import report as nrc
 from ..anat import mni
 from .base import SimpleInterface
-from .fixes import FixHeaderApplyTransforms as ApplyTransforms
+from .fixes import (FixHeaderApplyTransforms as ApplyTransforms,
+                    FixHeaderRegistration as Registration)
 
 
 class RobustMNINormalizationInputSpecRPT(
@@ -59,7 +60,7 @@ class ANTSRegistrationOutputSpecRPT(nrc.ReportCapableOutputSpec,
     pass
 
 
-class ANTSRegistrationRPT(nrc.RegistrationRC, ants.Registration):
+class ANTSRegistrationRPT(nrc.RegistrationRC, Registration):
     input_spec = ANTSRegistrationInputSpecRPT
     output_spec = ANTSRegistrationOutputSpecRPT
 
@@ -126,6 +127,7 @@ class FUGUEOutputSpecRPT(nrc.ReportCapableOutputSpec,
                          fsl.preprocess.FUGUEOutputSpec):
     pass
 
+
 class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
     input_spec = FUGUEInputSpecRPT
     output_spec = FUGUEOutputSpecRPT
@@ -144,6 +146,7 @@ class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
 class FLIRTInputSpecRPT(nrc.RegistrationRCInputSpec,
                         fsl.preprocess.FLIRTInputSpec):
     pass
+
 
 class FLIRTOutputSpecRPT(nrc.ReportCapableOutputSpec,
                          fsl.preprocess.FLIRTOutputSpec):

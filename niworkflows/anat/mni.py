@@ -10,12 +10,15 @@ import pkg_resources as pkgr
 from multiprocessing import cpu_count
 from packaging.version import Version
 
-from niworkflows.nipype.interfaces.ants.registration import Registration, RegistrationOutputSpec
-from niworkflows.nipype.interfaces.ants.resampling import ApplyTransforms
+from niworkflows.nipype.interfaces.ants.registration import RegistrationOutputSpec
 from niworkflows.nipype.interfaces.ants import AffineInitializer
 from niworkflows.nipype.interfaces.base import (
     traits, isdefined, BaseInterface, BaseInterfaceInputSpec, File)
 
+from niworkflows.interfaces.fixes import (
+    FixHeaderApplyTransforms as ApplyTransforms,
+    FixHeaderRegistration as Registration
+)
 from niworkflows.data import getters
 from niworkflows import NIWORKFLOWS_LOG, __version__
 
@@ -51,11 +54,11 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     template_resolution = traits.Enum(1, 2, mandatory=True, usedefault=True,
                                       desc='template resolution')
     explicit_masking = traits.Bool(True, usedefault=True,
-                                   desc="Set voxels outside the masks to zero"
-                                        "thus creating an artificial border"
-                                        "that can drive the registration. "
-                                        "Requires reliable and accurate masks."
-                                        "See https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba")
+                                   desc="""\
+Set voxels outside the masks to zero thus creating an artificial border
+that can drive the registration. Requires reliable and accurate masks.
+See https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba\
+""")
     initial_moving_transform = File(exists=True, desc='transform for initialization')
     float = traits.Bool(False, usedefault=True, desc='use single precision calculations')
 
@@ -75,6 +78,7 @@ class RobustMNINormalization(BaseInterface):
         self.norm = None
         self.retry = 0
         self._results = {}
+        self.terminal_output = 'file'
         super(RobustMNINormalization, self).__init__(**inputs)
 
     def _get_settings(self):
@@ -97,31 +101,36 @@ class RobustMNINormalization(BaseInterface):
 
         if not isdefined(self.inputs.initial_moving_transform):
             NIWORKFLOWS_LOG.info('Estimating initial transform using AffineInitializer')
-            ants_args['initial_moving_transform'] = AffineInitializer(
+            init = AffineInitializer(
                 fixed_image=ants_args['fixed_image'],
                 moving_image=ants_args['moving_image'],
-                num_threads=self.inputs.num_threads).run().outputs.out_file
+                num_threads=self.inputs.num_threads)
+            init.terminal_output = 'allatonce'
+            init_result = init.run()
+            # Save outputs (if available)
+            init_out = _write_outputs(init_result.runtime, '.nipype-init')
+            if init_out:
+                NIWORKFLOWS_LOG.info(
+                    'Terminal outputs of initialization saved (%s).',
+                    ', '.join(init_out))
+
+            ants_args['initial_moving_transform'] = init_result.outputs.out_file
 
         for ants_settings in settings_files:
             interface_result = None
 
             NIWORKFLOWS_LOG.info('Loading settings from file %s.',
                                  ants_settings)
-            self.norm = Registration(from_file=ants_settings, **ants_args)
+            self.norm = Registration(from_file=ants_settings,
+                                     **ants_args)
+            self.norm.terminal_output = self.terminal_output
 
             NIWORKFLOWS_LOG.info(
                 'Retry #%d, commandline: \n%s', self.retry, self.norm.cmdline)
             try:
                 interface_result = self.norm.run()
             except Exception as exc:
-                NIWORKFLOWS_LOG.warn(
-                        'Retry #%d failed: %s.', self.retry, exc)
-
-            errfile = op.join(runtime.cwd, 'stderr.nipype')
-            outfile = op.join(runtime.cwd, 'stdout.nipype')
-
-            shutil.move(errfile, errfile + '.%03d' % self.retry)
-            shutil.move(outfile, outfile + '.%03d' % self.retry)
+                NIWORKFLOWS_LOG.warning('Retry #%d failed: %s.', self.retry, exc)
 
             if interface_result is not None:
                 runtime.returncode = 0
@@ -131,6 +140,13 @@ class RobustMNINormalization(BaseInterface):
                 NIWORKFLOWS_LOG.info(
                     'Successful spatial normalization (retry #%d).', self.retry)
                 return runtime
+
+            # Save outputs (if available)
+            term_out = _write_outputs(interface_result.runtime,
+                                      '.nipype-%04d' % self.retry)
+            if term_out:
+                NIWORKFLOWS_LOG.warning(
+                    'Log of failed retry saved (%s).', ', '.join(term_out))
 
             self.retry += 1
 
@@ -225,3 +241,17 @@ def mask(in_file, mask_file, new_name):
     new_nii.to_filename(new_name)
     return os.path.abspath(new_name)
 
+
+def _write_outputs(runtime, out_fname=None):
+    if out_fname is None:
+        out_fname = '.nipype'
+
+    out_files = []
+    for name in ['stdout', 'stderr', 'merged']:
+        stream = getattr(runtime, name, '')
+        if stream:
+            out_file = op.join(runtime.cwd, name + out_fname)
+            with open(out_file, 'w') as outf:
+                print(stream, file=outf)
+            out_files.append(out_file)
+    return out_files
