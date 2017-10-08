@@ -40,7 +40,19 @@ class FixHeaderRegistration(Registration):
         runtime = super(FixHeaderRegistration, self)._run_interface(
             runtime, correct_return_codes)
 
-        _copyxform(self.inputs.fixed_image[0],
-                   os.path.abspath(self._get_outputfilenames(inverse=False)),
-                   message=self.__class__.__name__)
+        # Forward transform
+        out_file = self._get_outputfilenames(inverse=False)
+        if out_file is not None and out_file:
+            _copyxform(self.inputs.fixed_image[0],
+                       os.path.abspath(out_file),
+                       message=self.__class__.__name__)
+
+        # Inverse transform
+        out_file = self._get_outputfilenames(inverse=True)
+        if out_file is not None and out_file:
+            _copyxform(self.inputs.moving_image[0],
+                       os.path.abspath(out_file),
+                       message=self.__class__.__name__)
+
         return runtime
+
