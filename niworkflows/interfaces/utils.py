@@ -19,10 +19,9 @@ from ..nipype import logging
 from ..nipype.utils.filemanip import fname_presuffix
 from ..nipype.utils.misc import normalize_mc_params
 from ..nipype.interfaces.base import (
-    File, BaseInterfaceInputSpec, TraitedSpec, traits
+    File, BaseInterfaceInputSpec, TraitedSpec, traits, SimpleInterface
 )
 
-from .base import SimpleInterface
 
 LOG = logging.getLogger('interface')
 

@@ -14,13 +14,12 @@ from nilearn.image import index_img
 from .. import NIWORKFLOWS_LOG
 from ..nipype.utils.filemanip import fname_presuffix
 from ..nipype.interfaces.base import (
-    traits, isdefined, TraitedSpec, BaseInterfaceInputSpec, File)
+    traits, isdefined, TraitedSpec, BaseInterfaceInputSpec, File, SimpleInterface)
 from ..nipype.interfaces import freesurfer as fs
 from ..nipype.interfaces import fsl, ants, afni
 
 from ..common import report as nrc
 from ..anat import mni
-from .base import SimpleInterface
 from .fixes import (FixHeaderApplyTransforms as ApplyTransforms,
                     FixHeaderRegistration as Registration)
 
