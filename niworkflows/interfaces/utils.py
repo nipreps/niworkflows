@@ -12,6 +12,8 @@ import os
 import shutil
 import numpy as np
 import nibabel as nb
+from .. import __version__
+from ..nipype import logging
 from niworkflows.nipype.utils.filemanip import fname_presuffix
 from niworkflows.nipype.utils.misc import normalize_mc_params
 from niworkflows.nipype.interfaces.base import (
@@ -19,6 +21,8 @@ from niworkflows.nipype.interfaces.base import (
 )
 
 from .base import SimpleInterface
+
+LOG = logging.getLogger('interface')
 
 
 class CopyXFormInputSpec(BaseInterfaceInputSpec):
@@ -32,8 +36,7 @@ class CopyXFormOutputSpec(TraitedSpec):
 
 class CopyXForm(SimpleInterface):
     """
-    Copy a header from the `hdr_file` to `out_file` with data drawn from
-    `in_file`.
+    Copy the x-form matrices from `hdr_file` to `out_file`.
     """
     input_spec = CopyXFormInputSpec
     output_spec = CopyXFormOutputSpec
@@ -44,7 +47,8 @@ class CopyXForm(SimpleInterface):
                                    newpath=runtime.cwd)
         # Copy and replace header
         shutil.copy(self.inputs.in_file, out_name)
-        _copyxform(self.inputs.hdr_file, out_name, message='CopyXForm')
+        _copyxform(self.inputs.hdr_file, out_name,
+                   message='CopyXForm; niworkflows v%s' % __version__)
         self._results['out_file'] = out_name
         return runtime
 
@@ -110,8 +114,13 @@ class NormalizeMotionParams(SimpleInterface):
 
 def _copyxform(ref_image, out_image, message=None):
     # Read in reference and output
-    orig = nb.load(ref_image)
     resampled = nb.load(out_image)
+    orig = nb.load(ref_image)
+
+    if orig.affine != resampled.affine:
+        LOG.warning('Affines of input and reference images '
+                    'do not match, CopyXForm will probably '
+                    'make the input image useless.')
 
     # Copy xform infos
     qform, qform_code = orig.header.get_qform(coded=True)
@@ -119,9 +128,6 @@ def _copyxform(ref_image, out_image, message=None):
     header = resampled.header.copy()
     header.set_qform(qform, int(qform_code))
     header.set_sform(sform, int(sform_code))
-    for quatern in ['b', 'c', 'd']:
-        header['quatern_' + quatern] = orig.header['quatern_' + quatern]
-
     header['descrip'] = 'header fixed (%s)' % (message or 'unknown')
 
     newimg = resampled.__class__(resampled.get_data(), orig.affine, header)
