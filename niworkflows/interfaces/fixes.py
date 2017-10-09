@@ -4,6 +4,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 
+from .. import __version__
 from .utils import _copyxform
 
 from niworkflows.nipype.interfaces.ants.resampling import ApplyTransforms
@@ -24,7 +25,8 @@ class FixHeaderApplyTransforms(ApplyTransforms):
 
         _copyxform(self.inputs.reference_image,
                    os.path.abspath(self._gen_filename('output_image')),
-                   message=self.__class__.__name__)
+                   message='xform matrices modified by %s from niworkflows v%s.' % (
+                       self.__class__.__name__, __version__))
         return runtime
 
 
@@ -50,9 +52,9 @@ class FixHeaderRegistration(Registration):
         # Inverse transform
         out_file = self._get_outputfilenames(inverse=True)
         if out_file is not None and out_file:
-            _copyxform(self.inputs.moving_image[0],
-                       os.path.abspath(out_file),
-                       message=self.__class__.__name__)
+            _copyxform(
+                self.inputs.moving_image[0], os.path.abspath(out_file),
+                message='xform matrices modified by %s from niworkflows v%s.' % (
+                    self.__class__.__name__, __version__))
 
         return runtime
-
