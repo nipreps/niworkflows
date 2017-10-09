@@ -7,8 +7,8 @@ import os
 from .. import __version__
 from .utils import _copyxform
 
-from niworkflows.nipype.interfaces.ants.resampling import ApplyTransforms
-from niworkflows.nipype.interfaces.ants.registration import Registration
+from ..nipype.interfaces.ants.resampling import ApplyTransforms
+from ..nipype.interfaces.ants.registration import Registration
 
 
 class FixHeaderApplyTransforms(ApplyTransforms):
@@ -25,7 +25,7 @@ class FixHeaderApplyTransforms(ApplyTransforms):
 
         _copyxform(self.inputs.reference_image,
                    os.path.abspath(self._gen_filename('output_image')),
-                   message='xform matrices modified by %s from niworkflows v%s.' % (
+                   message='%s (niworkflows v%s)' % (
                        self.__class__.__name__, __version__))
         return runtime
 
@@ -45,16 +45,17 @@ class FixHeaderRegistration(Registration):
         # Forward transform
         out_file = self._get_outputfilenames(inverse=False)
         if out_file is not None and out_file:
-            _copyxform(self.inputs.fixed_image[0],
-                       os.path.abspath(out_file),
-                       message=self.__class__.__name__)
+            _copyxform(
+                self.inputs.fixed_image[0], os.path.abspath(out_file),
+                message='%s (niworkflows v%s)' % (
+                    self.__class__.__name__, __version__))
 
         # Inverse transform
         out_file = self._get_outputfilenames(inverse=True)
         if out_file is not None and out_file:
             _copyxform(
                 self.inputs.moving_image[0], os.path.abspath(out_file),
-                message='xform matrices modified by %s from niworkflows v%s.' % (
+                message='%s (niworkflows v%s)' % (
                     self.__class__.__name__, __version__))
 
         return runtime

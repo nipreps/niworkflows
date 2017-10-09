@@ -16,9 +16,9 @@ import nilearn.image as nli
 
 from .. import __version__
 from ..nipype import logging
-from niworkflows.nipype.utils.filemanip import fname_presuffix
-from niworkflows.nipype.utils.misc import normalize_mc_params
-from niworkflows.nipype.interfaces.base import (
+from ..nipype.utils.filemanip import fname_presuffix
+from ..nipype.utils.misc import normalize_mc_params
+from ..nipype.interfaces.base import (
     File, BaseInterfaceInputSpec, TraitedSpec, traits
 )
 
@@ -50,7 +50,7 @@ class CopyXForm(SimpleInterface):
         # Copy and replace header
         shutil.copy(self.inputs.in_file, out_name)
         _copyxform(self.inputs.hdr_file, out_name,
-                   message='CopyXForm; niworkflows v%s' % __version__)
+                   message='CopyXForm (niworkflows v%s)' % __version__)
         self._results['out_file'] = out_name
         return runtime
 
@@ -139,7 +139,7 @@ class GenerateSamplingReference(SimpleInterface):
             self.inputs.fixed_image,
             self.inputs.moving_image,
             force_xform_code=self.inputs.xform_code,
-            message='%s of niworkflows v%s' % (self.__class__.__name__, __version__))
+            message='%s (niworkflows v%s)' % (self.__class__.__name__, __version__))
         return runtime
 
 
@@ -159,7 +159,7 @@ def _copyxform(ref_image, out_image, message=None):
     header = resampled.header.copy()
     header.set_qform(qform, int(qform_code))
     header.set_sform(sform, int(sform_code))
-    header['descrip'] = 'header fixed (%s)' % (message or 'unknown')
+    header['descrip'] = 'xform matrices modified by %s.' % (message or '(unknown)')
 
     newimg = resampled.__class__(resampled.get_data(), orig.affine, header)
     newimg.to_filename(out_image)
