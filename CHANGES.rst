@@ -1,5 +1,14 @@
+Version 0.1.8
+-------------
+
+* [ENH] Add NKI template data grabber (#200)
+* [ENH] Enable sbref to be passed to EstimateReferenceImage (#199)
+* [ENH] Add utilities for fixing NIfTI qform/sform matrices (#202)
+* [ENH] Upgrade internal Nipype
+
 Version 0.1.7
 -------------
+
 * [ENH] Reporting interface for `mri_coreg`
 * [ENH] Upgrade internal Nipype
 
