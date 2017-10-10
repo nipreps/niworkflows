@@ -9,4 +9,4 @@ from .registration import (FLIRTRPT as FLIRT,
                            ANTSRegistrationRPT as Registration,
                            ANTSApplyTransformsRPT as ApplyTransforms,
                            SimpleBeforeAfterRPT as SimpleBeforeAfter)
-from .utils import CopyHeader, NormalizeMotionParams
+from .utils import CopyXForm, CopyHeader, NormalizeMotionParams
