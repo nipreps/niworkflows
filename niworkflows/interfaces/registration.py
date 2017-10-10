@@ -10,26 +10,29 @@ from distutils.version import LooseVersion
 import nibabel as nb
 import numpy as np
 from nilearn import image as nli
-from niworkflows.nipype.utils.filemanip import fname_presuffix
-
-from niworkflows.nipype.interfaces.base import (
-    traits, isdefined, TraitedSpec, BaseInterfaceInputSpec, File)
-from .base import SimpleInterface
-
-from niworkflows.nipype.interfaces import freesurfer as fs
-from niworkflows.nipype.interfaces import fsl, ants, afni
-from niworkflows.anat import mni
-import niworkflows.common.report as nrc
-from niworkflows import NIWORKFLOWS_LOG
 from nilearn.image import index_img
+from .. import NIWORKFLOWS_LOG
+from ..nipype.utils.filemanip import fname_presuffix
+from ..nipype.interfaces.base import (
+    traits, isdefined, TraitedSpec, BaseInterfaceInputSpec, File, SimpleInterface)
+from ..nipype.interfaces import freesurfer as fs
+from ..nipype.interfaces import fsl, ants, afni
+
+from ..common import report as nrc
+from ..anat import mni
+from .fixes import (FixHeaderApplyTransforms as ApplyTransforms,
+                    FixHeaderRegistration as Registration)
+
 
 class RobustMNINormalizationInputSpecRPT(
     nrc.RegistrationRCInputSpec, mni.RobustMNINormalizationInputSpec):
     pass
 
+
 class RobustMNINormalizationOutputSpecRPT(
     nrc.ReportCapableOutputSpec, mni.RegistrationOutputSpec):
     pass
+
 
 class RobustMNINormalizationRPT(
     nrc.RegistrationRC, mni.RobustMNINormalization):
@@ -50,11 +53,13 @@ class ANTSRegistrationInputSpecRPT(nrc.RegistrationRCInputSpec,
                                    ants.registration.RegistrationInputSpec):
     pass
 
+
 class ANTSRegistrationOutputSpecRPT(nrc.ReportCapableOutputSpec,
                                     ants.registration.RegistrationOutputSpec):
     pass
 
-class ANTSRegistrationRPT(nrc.RegistrationRC, ants.Registration):
+
+class ANTSRegistrationRPT(nrc.RegistrationRC, Registration):
     input_spec = ANTSRegistrationInputSpecRPT
     output_spec = ANTSRegistrationOutputSpecRPT
 
@@ -69,11 +74,13 @@ class ANTSApplyTransformsInputSpecRPT(nrc.RegistrationRCInputSpec,
                                       ants.resampling.ApplyTransformsInputSpec):
     pass
 
+
 class ANTSApplyTransformsOutputSpecRPT(nrc.ReportCapableOutputSpec,
                                        ants.resampling.ApplyTransformsOutputSpec):
     pass
 
-class ANTSApplyTransformsRPT(nrc.RegistrationRC, ants.ApplyTransforms):
+
+class ANTSApplyTransformsRPT(nrc.RegistrationRC, ApplyTransforms):
     input_spec = ANTSApplyTransformsInputSpecRPT
     output_spec = ANTSApplyTransformsOutputSpecRPT
 
@@ -119,6 +126,7 @@ class FUGUEOutputSpecRPT(nrc.ReportCapableOutputSpec,
                          fsl.preprocess.FUGUEOutputSpec):
     pass
 
+
 class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
     input_spec = FUGUEInputSpecRPT
     output_spec = FUGUEOutputSpecRPT
@@ -137,6 +145,7 @@ class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
 class FLIRTInputSpecRPT(nrc.RegistrationRCInputSpec,
                         fsl.preprocess.FLIRTInputSpec):
     pass
+
 
 class FLIRTOutputSpecRPT(nrc.ReportCapableOutputSpec,
                          fsl.preprocess.FLIRTOutputSpec):
@@ -302,6 +311,7 @@ class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
 
 class EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="4D EPI file")
+    sbref_file = File(exists=True, desc="Single band reference image")
     mc_method = traits.Enum("AFNI", "FSL", dsec="Which software to use to perform motion correction",
                             usedefault=True)
 
@@ -324,6 +334,10 @@ class EstimateReferenceImage(SimpleInterface):
     output_spec = EstimateReferenceImageOutputSpec
 
     def _run_interface(self, runtime):
+        if isdefined(self.inputs.sbref_file):
+            self._results['ref_image'] = self.inputs.sbref_file
+            return
+
         in_nii = nb.load(self.inputs.in_file)
         data_slice = in_nii.dataobj[:, :, :, :50]
 
@@ -353,13 +367,12 @@ class EstimateReferenceImage(SimpleInterface):
             mc_slice_nii = nb.load(res.outputs.out_file)
 
             median_image_data = np.median(mc_slice_nii.get_data(), axis=3)
-            nb.Nifti1Image(median_image_data, in_nii.affine,
-                           in_nii.header).to_filename(out_ref_fname)
         else:
             median_image_data = np.median(
                 data_slice[:, :, :, :n_volumes_to_discard], axis=3)
-            nb.Nifti1Image(median_image_data, in_nii.affine,
-                           in_nii.header).to_filename(out_ref_fname)
+
+        nb.Nifti1Image(median_image_data, in_nii.affine,
+                       in_nii.header).to_filename(out_ref_fname)
 
         self._results["ref_image"] = out_ref_fname
         self._results["n_volumes_to_discard"] = n_volumes_to_discard
