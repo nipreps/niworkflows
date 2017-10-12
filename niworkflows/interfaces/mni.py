@@ -19,7 +19,7 @@ from ..nipype.interfaces.base import (
 
 from ..data import getters
 from .. import NIWORKFLOWS_LOG, __version__
-from ..interfaces.fixes import (
+from .fixes import (
     FixHeaderApplyTransforms as ApplyTransforms,
     FixHeaderRegistration as Registration
 )
@@ -222,11 +222,11 @@ class RobustMNINormalization(BaseInterface):
 
         overlap_voxel_count = np.logical_and(input_mask_data, target_mask_data)
 
-        overlap_perc = float(overlap_voxel_count.sum())/float(input_mask_data.sum())*100
+        overlap_perc = float(overlap_voxel_count.sum()) / float(input_mask_data.sum()) * 100
 
         assert overlap_perc > 50, \
             "Normalization failed: only %d%% of the normalized moving image " \
-            "mask overlaps with the reference image mask."%overlap_perc
+            "mask overlaps with the reference image mask." % overlap_perc
 
 
 def mask(in_file, mask_file, new_name):

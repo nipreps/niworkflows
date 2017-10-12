@@ -21,23 +21,26 @@ from ..nipype.interfaces import freesurfer as fs
 from ..nipype.interfaces import fsl, ants, afni
 
 from ..common import report as nrc
-from ..anat import mni
+from .mni import (
+    RobustMNINormalizationInputSpec,
+    RobustMNINormalization
+)
 from .fixes import (FixHeaderApplyTransforms as ApplyTransforms,
                     FixHeaderRegistration as Registration)
 
 
 class RobustMNINormalizationInputSpecRPT(
-    nrc.RegistrationRCInputSpec, mni.RobustMNINormalizationInputSpec):
+    nrc.RegistrationRCInputSpec, RobustMNINormalizationInputSpec):
     pass
 
 
 class RobustMNINormalizationOutputSpecRPT(
-    nrc.ReportCapableOutputSpec, mni.RegistrationOutputSpec):
+    nrc.ReportCapableOutputSpec, ants.registration.RegistrationOutputSpec):
     pass
 
 
 class RobustMNINormalizationRPT(
-    nrc.RegistrationRC, mni.RobustMNINormalization):
+    nrc.RegistrationRC, RobustMNINormalization):
     input_spec = RobustMNINormalizationInputSpecRPT
     output_spec = RobustMNINormalizationOutputSpecRPT
 

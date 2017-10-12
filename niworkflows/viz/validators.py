@@ -21,7 +21,7 @@ class CSSValidator(object):
         stylesheet = self.parser.parse_stylesheet(css)
         for rule in stylesheet.rules:
             self.validate_no_fixed_position(rule)
-        if stylesheet.errors is not None and len(stylesheet.errors) > 0:
+        if stylesheet.errors:
             warnings.warn('CSS Validator encountered the following parser errors while parsing '
                           '(CSS starting `{}`). CSS may not be syntactically correct, and CSS '
                           'Validator may not have been able to do its job. \n{}'.format(
