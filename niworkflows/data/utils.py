@@ -2,12 +2,6 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-#
-# @Author: oesteban
-# @Date:   2016-01-05 11:29:40
-# @Email:  code@oscaresteban.es
-# @Last modified by:   oesteban
-# @Last Modified time: 2016-09-23 11:49:17
 """
 Utilities for data grabbers (from nilearn)
 """
@@ -33,7 +27,7 @@ except ImportError:
     from urllib import urlencode
     from urllib2 import urlopen, Request, HTTPError, URLError
 
-from niworkflows import NIWORKFLOWS_LOG
+from .. import NIWORKFLOWS_LOG
 
 PY3 = sys.version_info[0] > 2
 MAX_RETRIES = 20

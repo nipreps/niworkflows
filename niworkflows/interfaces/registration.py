@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 ReportCapableInterfaces for registration tools
 
@@ -151,6 +153,7 @@ class FLIRTOutputSpecRPT(nrc.ReportCapableOutputSpec,
                          fsl.preprocess.FLIRTOutputSpec):
     pass
 
+
 class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
     input_spec = FLIRTInputSpecRPT
     output_spec = FLIRTOutputSpecRPT
@@ -167,6 +170,7 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
 class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
                            fsl.preprocess.ApplyXFMInputSpec):
     pass
+
 
 class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
     input_spec = ApplyXFMInputSpecRPT
@@ -250,6 +254,7 @@ class SimpleBeforeAfterInputSpecRPT(nrc.RegistrationRCInputSpec):
 class SimpleBeforeAfterOutputSpecRPT(nrc.ReportCapableOutputSpec):
     pass
 
+
 class SimpleBeforeAfterRPT(nrc.RegistrationRC):
     input_spec = SimpleBeforeAfterInputSpecRPT
     output_spec = SimpleBeforeAfterOutputSpecRPT
@@ -279,6 +284,7 @@ class ResampleBeforeAfterInputSpecRPT(SimpleBeforeAfterInputSpecRPT):
 
 class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
     input_spec = ResampleBeforeAfterInputSpecRPT
+
     def _run_interface(self, runtime):
         """ there is not inner interface to run """
         self._out_report = os.path.abspath(self.inputs.out_report)

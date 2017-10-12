@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """ css/html validation """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -6,6 +8,7 @@ from html.parser import HTMLParser
 import tinycss
 import warnings
 from builtins import object
+
 
 class CSSValidator(object):
     ''' no attribute in CSS may be position: fixed
@@ -18,7 +21,7 @@ class CSSValidator(object):
         stylesheet = self.parser.parse_stylesheet(css)
         for rule in stylesheet.rules:
             self.validate_no_fixed_position(rule)
-        if not stylesheet.errors is None and len(stylesheet.errors) > 0:
+        if stylesheet.errors is not None and len(stylesheet.errors) > 0:
             warnings.warn('CSS Validator encountered the following parser errors while parsing '
                           '(CSS starting `{}`). CSS may not be syntactically correct, and CSS '
                           'Validator may not have been able to do its job. \n{}'.format(
@@ -71,7 +74,7 @@ class HTMLValidator(HTMLParser, object):
             self.bad_tags.append(tag)
         elif tag == 'style':
             self.in_style = True
-            if not 'scoped' in [attribute for attribute, value in attrs]:
+            if 'scoped' not in [attribute for attribute, value in attrs]:
                 self.bad_tags.append(tag)
         for attr, value in attrs:
             if attr == 'id':

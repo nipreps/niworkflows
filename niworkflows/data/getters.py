@@ -2,18 +2,12 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-#
-# @Author: oesteban
-# @Date:   2016-01-05 11:29:40
-# @Email:  code@oscaresteban.es
-# @Last modified by:   oesteban
-# @Last Modified time: 2016-11-11 14:34:29
 """
 Data grabbers
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-from niworkflows.data.utils import _get_dataset_dir, _fetch_file
+from ..data.utils import _get_dataset_dir, _fetch_file
 
 OSF_PROJECT_URL = ('https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/')
 OSF_RESOURCES = {

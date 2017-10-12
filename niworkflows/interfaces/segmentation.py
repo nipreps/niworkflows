@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 ReportCapableInterfaces for segmentation tools
 
@@ -7,18 +9,21 @@ ReportCapableInterfaces for segmentation tools
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 
-from niworkflows.nipype.interfaces.base import File
-from niworkflows.nipype.interfaces import fsl, freesurfer
-from niworkflows.common import report as nrc
-from niworkflows import NIWORKFLOWS_LOG
+from ..nipype.interfaces.base import File
+from ..nipype.interfaces import fsl, freesurfer
+from ..common import report as nrc
+from .. import NIWORKFLOWS_LOG
+
 
 class FASTInputSpecRPT(nrc.ReportCapableInputSpec,
                        fsl.preprocess.FASTInputSpec):
     pass
 
+
 class FASTOutputSpecRPT(nrc.ReportCapableOutputSpec,
                         fsl.preprocess.FASTOutputSpec):
     pass
+
 
 class FASTRPT(nrc.SegmentationRC,
               fsl.FAST):
@@ -54,9 +59,11 @@ class ReconAllInputSpecRPT(nrc.ReportCapableInputSpec,
                            freesurfer.preprocess.ReconAllInputSpec):
     pass
 
+
 class ReconAllOutputSpecRPT(nrc.ReportCapableOutputSpec,
                             freesurfer.preprocess.ReconAllOutputSpec):
     pass
+
 
 class ReconAllRPT(nrc.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):
     input_spec = ReconAllInputSpecRPT
@@ -88,6 +95,7 @@ class MELODICInputSpecRPT(nrc.ReportCapableInputSpec,
                                                        'by Nipype.')
     report_mask = File(desc='Mask used to draw the outline on the reportlet. '
                             'If not set the mask will be derived from the data.')
+
 
 class MELODICOutputSpecRPT(nrc.ReportCapableOutputSpec,
                            fsl.model.MELODICOutputSpec):
@@ -125,6 +133,7 @@ class ICA_AROMAInputSpecRPT(nrc.ReportCapableInputSpec,
                                                          'by Nipype.')
     report_mask = File(desc='Mask used to draw the outline on the reportlet. '
                             'If not set the mask will be derived from the data.')
+
 
 class ICA_AROMAOutputSpecRPT(nrc.ReportCapableOutputSpec,
                              fsl.aroma.ICA_AROMAOutputSpec):
