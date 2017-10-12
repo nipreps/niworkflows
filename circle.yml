@@ -1,4 +1,8 @@
 machine:
+  # Update docker to 1.9
+  pre:
+    - sudo curl -L -o /usr/bin/docker 'https://s3-external-1.amazonaws.com/circle-downloads/docker-1.9.1-circleci'
+    - sudo chmod 0755 /usr/bin/docker
   environment:
     SCRATCH: "$HOME/scratch"
     CIRCLE_NPROCS: 2
@@ -8,7 +12,6 @@ machine:
 
 dependencies:
   cache_directories:
-    - "~/docker"
     - "~/data"
 
   pre:
@@ -18,12 +21,9 @@ dependencies:
     - git submodule init && (git submodule update || true)
     - git submodule sync && git -C nipype fetch origin && git submodule update
   override:
-    - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi :
-        timeout: 6000
+    - docker pull poldracklab/fmriprep:latest || true
     - docker build --rm=false -t niworkflows:py3 .
     - docker build --rm=false -t niworkflows:py2 --build-arg PYTHON_MAJOR=2 .
-    - docker save poldracklab/neuroimaging-core:freesurfer-0.0.2 niworkflows:py3 niworkflows:py2 > ~/docker/image.tar :
-        timeout: 6000
 test:
   override:
     - bash .circle/pytests.sh :

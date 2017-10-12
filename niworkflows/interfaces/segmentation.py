@@ -115,3 +115,39 @@ class MELODICRPT(nrc.ReportCapableInterface, fsl.MELODIC):
         self._melodic_dir = outputs.out_dir
 
         NIWORKFLOWS_LOG.info('Generating report for MELODIC')
+
+
+class ICA_AROMAInputSpecRPT(nrc.ReportCapableInputSpec,
+                            fsl.aroma.ICA_AROMAInputSpec):
+    out_report = File(
+        'ica_aroma_reportlet.svg', usedefault=True, desc='Filename for the visual'
+                                                         ' report generated '
+                                                         'by Nipype.')
+    report_mask = File(desc='Mask used to draw the outline on the reportlet. '
+                            'If not set the mask will be derived from the data.')
+
+class ICA_AROMAOutputSpecRPT(nrc.ReportCapableOutputSpec,
+                             fsl.aroma.ICA_AROMAOutputSpec):
+    pass
+
+
+class ICA_AROMARPT(nrc.ReportCapableInterface, fsl.ICA_AROMA):
+    input_spec = ICA_AROMAInputSpecRPT
+    output_spec = ICA_AROMAOutputSpecRPT
+
+    def _generate_report(self):
+        from niworkflows.viz.utils import plot_melodic_components
+        plot_melodic_components(melodic_dir=self.inputs.melodic_dir,
+                                in_file=self.inputs.in_file,
+                                out_file=self.inputs.out_report,
+                                compress=self.inputs.compress_report,
+                                report_mask=self.inputs.report_mask,
+                                noise_components_file=self._noise_components_file
+                                )
+
+    def _post_run_hook(self, runtime):
+        outputs = self.aggregate_outputs(runtime=runtime)
+        self._noise_components_file = os.path.join(outputs.out_dir,
+                                                   "classified_motion_ICs.txt")
+
+        NIWORKFLOWS_LOG.info('Generating report for ICA AROMA')
