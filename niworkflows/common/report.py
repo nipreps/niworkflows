@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-# @Author: shoshber
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """ class mixin and utilities for enabling reports for nipype interfaces """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -8,13 +9,14 @@ from sys import version_info
 from abc import abstractmethod
 from io import open
 
-from niworkflows.nipype.interfaces.base import (
-    File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec)
-from niworkflows import NIWORKFLOWS_LOG
 from nilearn.masking import apply_mask, unmask
 from nilearn.image import threshold_img, load_img
 
-from niworkflows.viz.utils import cuts_from_bbox
+from ..nipype.interfaces.base import (
+    File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec)
+from .. import NIWORKFLOWS_LOG
+from ..viz.utils import cuts_from_bbox
+
 
 PY3 = version_info[0] > 2
 

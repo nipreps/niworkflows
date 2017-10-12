@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """Helper tools for visualization purposes"""
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os, os.path as op
+import os
+import os.path as op
 import subprocess
 import base64
 import re
@@ -19,9 +22,9 @@ from lxml import etree
 from nilearn import image as nlimage
 from nilearn.plotting import plot_anat
 
-from niworkflows import NIWORKFLOWS_LOG
-from niworkflows.viz.validators import HTMLValidator
-from niworkflows.nipype.utils import filemanip
+from .. import NIWORKFLOWS_LOG
+from ..viz.validators import HTMLValidator
+from ..nipype.utils import filemanip
 
 
 try:
@@ -168,7 +171,7 @@ def svg_compress(image, compress='auto'):
 
                     cmd = "cwebp -quiet -noalpha -q 80 -o - -- -"
                     pout = subprocess.run(cmd, input=base64.b64decode(png_b64), shell=True,
-                                       stdout=subprocess.PIPE, check=True).stdout
+                                          stdout=subprocess.PIPE, check=True).stdout
                     webpimg = base64.b64encode(pout).decode('utf-8')
                     new_lines.append(left + webpimg + right)
                 else:
@@ -186,6 +189,7 @@ def svg_compress(image, compress='auto'):
     image_svg = lines[svg_start:]  # strip out extra DOCTYPE, etc headers
     return ''.join(image_svg)  # straight up giant string
 
+
 def svg2str(display_object, dpi=300):
     """
     Serializes a nilearn display object as a string
@@ -196,6 +200,7 @@ def svg2str(display_object, dpi=300):
         image_buf, dpi=dpi, format='svg',
         facecolor='k', edgecolor='k')
     return image_buf.getvalue()
+
 
 def extract_svg(display_object, dpi=300, compress='auto'):
     """
@@ -219,6 +224,7 @@ def extract_svg(display_object, dpi=300, compress='auto'):
     # included in our return value so we add its length to the index.
     end_idx += len(end_tag)
     return image_svg[start_idx:end_idx]
+
 
 def cuts_from_bbox(mask_nii, cuts=3):
     """Finds equi-spaced cuts for presenting images"""
@@ -271,7 +277,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
     """
 
     def _plot_anat_with_contours(image, segs=None, **plot_params):
-        assert not segs is None
+        assert segs is not None
         assert len(segs) <= 3
         plot_params = {} if plot_params is None else plot_params
 
@@ -496,7 +502,6 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
                             out_file='melodic_reportlet.svg',
                             compress='auto', report_mask=None,
                             noise_components_file=None):
-    from nilearn.plotting import plot_glass_brain
     from nilearn.image import index_img, iter_img
     import nibabel as nb
     import numpy as np
@@ -525,8 +530,6 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
                 'Repetition time units not specified - assuming seconds')
 
     from nilearn.input_data import NiftiMasker
-    from nilearn.plotting import plot_roi
-    from nilearn.image.image import mean_img
     from nilearn.plotting import cm
 
     if not report_mask:

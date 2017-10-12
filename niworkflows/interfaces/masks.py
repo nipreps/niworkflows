@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 ReportCapableInterfaces for masks tools
 
@@ -6,26 +8,28 @@ ReportCapableInterfaces for masks tools
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
-
-from niworkflows.nipype.interfaces import fsl, ants
-from niworkflows.nipype.interfaces.base import (
-    File, BaseInterfaceInputSpec, traits, isdefined)
-from niworkflows.nipype.algorithms import confounds
-from niworkflows.common import report as nrc
-from niworkflows import NIWORKFLOWS_LOG
-from nilearn.masking import compute_epi_mask
-import scipy.ndimage as nd
 import numpy as np
 import nibabel as nb
+from nilearn.masking import compute_epi_mask
+import scipy.ndimage as nd
+
+from .. import NIWORKFLOWS_LOG
+from ..nipype.interfaces import fsl, ants
+from ..nipype.interfaces.base import (
+    File, BaseInterfaceInputSpec, traits, isdefined)
+from ..nipype.algorithms import confounds
+from ..common import report as nrc
 
 
 class BETInputSpecRPT(nrc.ReportCapableInputSpec,
                       fsl.preprocess.BETInputSpec):
     pass
 
+
 class BETOutputSpecRPT(nrc.ReportCapableOutputSpec,
                        fsl.preprocess.BETOutputSpec):
     pass
+
 
 class BETRPT(nrc.SegmentationRC, fsl.BET):
     input_spec = BETInputSpecRPT
@@ -55,9 +59,11 @@ class BrainExtractionInputSpecRPT(nrc.ReportCapableInputSpec,
                                   ants.segmentation.BrainExtractionInputSpec):
     pass
 
+
 class BrainExtractionOutputSpecRPT(nrc.ReportCapableOutputSpec,
                                    ants.segmentation.BrainExtractionOutputSpec):
     pass
+
 
 class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
     input_spec = BrainExtractionInputSpecRPT
@@ -145,17 +151,20 @@ class ComputeEPIMask(nrc.SegmentationRC):
         self._masked = True
         self._report_title = "nilearn.compute_epi_mask: brain mask over EPI input"
 
-        NIWORKFLOWS_LOG.info('Generating report for nilearn.compute_epi_mask. file "%s", and mask file "%s"',
-                             self._anat_file, self._mask_file)
+        NIWORKFLOWS_LOG.info(
+            'Generating report for nilearn.compute_epi_mask. file "%s", and mask file "%s"',
+            self._anat_file, self._mask_file)
 
 
 class ACompCorInputSpecRPT(nrc.ReportCapableInputSpec,
                            confounds.CompCorInputSpec):
     pass
 
+
 class ACompCorOutputSpecRPT(nrc.ReportCapableOutputSpec,
                             confounds.CompCorOutputSpec):
     pass
+
 
 class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
     input_spec = ACompCorInputSpecRPT
@@ -176,13 +185,16 @@ class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
         NIWORKFLOWS_LOG.info('Generating report for aCompCor. file "%s", mask "%s"',
                              self.inputs.realigned_file, self._mask_file)
 
+
 class TCompCorInputSpecRPT(nrc.ReportCapableInputSpec,
                            confounds.TCompCorInputSpec):
     pass
 
+
 class TCompCorOutputSpecRPT(nrc.ReportCapableOutputSpec,
                             confounds.TCompCorOutputSpec):
     pass
+
 
 class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
     input_spec = TCompCorInputSpecRPT

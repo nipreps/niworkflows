@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# @Author: oesteban
-# @Date:   2016-07-21 11:28:52
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """ A robust ANTs T1-to-MNI registration workflow with fallback retry """
 
 from __future__ import print_function, division, absolute_import, unicode_literals
@@ -9,21 +9,21 @@ from os import path as op
 import pkg_resources as pkgr
 from multiprocessing import cpu_count
 from packaging.version import Version
+import nibabel as nb
+import numpy as np
 
-from niworkflows.nipype.interfaces.ants.registration import RegistrationOutputSpec
-from niworkflows.nipype.interfaces.ants import AffineInitializer
-from niworkflows.nipype.interfaces.base import (
+from ..nipype.interfaces.ants.registration import RegistrationOutputSpec
+from ..nipype.interfaces.ants import AffineInitializer
+from ..nipype.interfaces.base import (
     traits, isdefined, BaseInterface, BaseInterfaceInputSpec, File)
 
-from niworkflows.interfaces.fixes import (
+from ..data import getters
+from .. import NIWORKFLOWS_LOG, __version__
+from .fixes import (
     FixHeaderApplyTransforms as ApplyTransforms,
     FixHeaderRegistration as Registration
 )
-from niworkflows.data import getters
-from niworkflows import NIWORKFLOWS_LOG, __version__
 
-import nibabel as nb
-import numpy as np
 
 niworkflows_version = Version(__version__)
 
@@ -222,11 +222,11 @@ class RobustMNINormalization(BaseInterface):
 
         overlap_voxel_count = np.logical_and(input_mask_data, target_mask_data)
 
-        overlap_perc = float(overlap_voxel_count.sum())/float(input_mask_data.sum())*100
+        overlap_perc = float(overlap_voxel_count.sum()) / float(input_mask_data.sum()) * 100
 
         assert overlap_perc > 50, \
             "Normalization failed: only %d%% of the normalized moving image " \
-            "mask overlaps with the reference image mask."%overlap_perc
+            "mask overlaps with the reference image mask." % overlap_perc
 
 
 def mask(in_file, mask_file, new_name):
