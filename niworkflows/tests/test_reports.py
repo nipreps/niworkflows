@@ -27,6 +27,8 @@ MNI_DIR = get_mni_template_ras()
 MNI_2MM = os.path.join(MNI_DIR, 'MNI152_T1_2mm.nii.gz')
 DS003_DIR = get_ds003_downsampled()
 
+# Tests are linear, so don't worry about leaving space for a control thread
+nthreads = min(8, cpu_count())
 
 def stage_artifacts(filename, new_filename):
     """ filename: the name of the file to be saved as an artifact.
@@ -63,7 +65,8 @@ class TestRegistrationInterfaces(unittest.TestCase):
         """ the FLIRT report capable test """
         mri_coreg_rpt = MRICoregRPT(generate_report=True,
                                     source_file=self.moving,
-                                    reference_file=self.reference)
+                                    reference_file=self.reference,
+                                    num_threads=nthreads)
         _smoke_test_report(mri_coreg_rpt, 'testMRICoreg.svg')
 
 
