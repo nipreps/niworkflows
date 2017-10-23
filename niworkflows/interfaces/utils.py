@@ -129,7 +129,16 @@ class GenerateSamplingReferenceOutputSpec(TraitedSpec):
 class GenerateSamplingReference(SimpleInterface):
     """
     Generates a reference grid for resampling one image keeping original resolution,
-    but moving data to a different space (e.g. MNI)
+    but moving data to a different space (e.g. MNI).
+
+    If the `fov_mask` optional input is provided, then the abbr:`FoV (field-of-view)`
+    is cropped to a bounding box containing the brain mask plus an offest of two
+    voxels along all dimensions. The `fov_mask` should be to the brain mask calculated
+    from the T1w, and should not contain the brain stem. The mask is resampled into
+    target space, and then the bounding box is calculated. Finally, the FoV is adjusted
+    to that bounding box.
+
+
     """
 
     input_spec = GenerateSamplingReferenceInputSpec
