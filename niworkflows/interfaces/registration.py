@@ -325,8 +325,9 @@ class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
 class EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="4D EPI file")
     sbref_file = File(exists=True, desc="Single band reference image")
-    mc_method = traits.Enum("AFNI", "FSL", dsec="Which software to use to perform motion correction",
-                            usedefault=True)
+    mc_method = traits.Enum(
+        "AFNI", "FSL", usedefault=True,
+        desc="Which software to use to perform motion correction")
 
 
 class EstimateReferenceImageOutputSpec(TraitedSpec):

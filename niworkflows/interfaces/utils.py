@@ -113,10 +113,13 @@ class NormalizeMotionParams(SimpleInterface):
 
 
 class GenerateSamplingReferenceInputSpec(BaseInterfaceInputSpec):
-    fixed_image = File(exists=True, mandatory=True, desc='the reference file')
+    fixed_image = File(exists=True, mandatory=True,
+                       desc='the reference file, defines the FoV')
     moving_image = File(exists=True, mandatory=True, desc='the pixel size reference')
     xform_code = traits.Enum(None, 2, 4, usedefault=True,
                              desc='force xform code')
+    fov_mask = traits.Either(None, File(exists=True), usedefault=True,
+                             desc='mask to clip field of view (in fixed_image space)')
 
 
 class GenerateSamplingReferenceOutputSpec(TraitedSpec):
@@ -126,7 +129,16 @@ class GenerateSamplingReferenceOutputSpec(TraitedSpec):
 class GenerateSamplingReference(SimpleInterface):
     """
     Generates a reference grid for resampling one image keeping original resolution,
-    but moving data to a different space (e.g. MNI)
+    but moving data to a different space (e.g. MNI).
+
+    If the `fov_mask` optional input is provided, then the abbr:`FoV (field-of-view)`
+    is cropped to a bounding box containing the brain mask plus an offest of two
+    voxels along all dimensions. The `fov_mask` should be to the brain mask calculated
+    from the T1w, and should not contain the brain stem. The mask is resampled into
+    target space, and then the bounding box is calculated. Finally, the FoV is adjusted
+    to that bounding box.
+
+
     """
 
     input_spec = GenerateSamplingReferenceInputSpec
@@ -136,6 +148,7 @@ class GenerateSamplingReference(SimpleInterface):
         self._results['out_file'] = _gen_reference(
             self.inputs.fixed_image,
             self.inputs.moving_image,
+            fov_mask=self.inputs.fov_mask,
             force_xform_code=self.inputs.xform_code,
             message='%s (niworkflows v%s)' % (self.__class__.__name__, __version__))
         return runtime
@@ -163,8 +176,8 @@ def _copyxform(ref_image, out_image, message=None):
     newimg.to_filename(out_image)
 
 
-def _gen_reference(fixed_image, moving_image, out_file=None, message=None,
-                   force_xform_code=None):
+def _gen_reference(fixed_image, moving_image, fov_mask=None, out_file=None,
+                   message=None, force_xform_code=None):
     """
     Generates a sampling reference, and makes sure xform matrices/codes are
     correct
@@ -178,11 +191,44 @@ def _gen_reference(fixed_image, moving_image, out_file=None, message=None,
     new_zooms = nli.load_img(moving_image).header.get_zooms()[:3]
     # Avoid small differences in reported resolution to cause changes to
     # FOV. See https://github.com/poldracklab/fmriprep/issues/512
-    new_zooms_round = np.round(new_zooms, 3)
+    new_affine = np.diag(np.round(new_zooms, 3))
 
     resampled = nli.resample_img(fixed_image,
-                                 target_affine=np.diag(new_zooms_round),
+                                 target_affine=new_affine,
                                  interpolation='nearest')
+
+    if fov_mask is not None:
+        # If we have a mask, resample again dropping (empty) samples
+        # out of the FoV.
+        fixednii = nb.load(fixed_image)
+        masknii = nb.load(fov_mask)
+        assert np.allclose(masknii.affine, fixednii.affine)
+        assert np.all(masknii.shape[:3] == fixednii.shape[:3])
+
+        # Get mask into reference space
+        masknii = nli.resample_img(fixed_image,
+                                   target_affine=new_affine,
+                                   interpolation='nearest')
+        res_shape = np.array(masknii.shape[:3])
+
+        # Calculate a bounding box for the input mask
+        # with an offset of 2 voxels per face
+        bbox = np.argwhere(masknii.get_data() > 0)
+        new_origin = np.clip(bbox.min(0) - 2, a_min=0, a_max=None)
+        new_end = np.clip(bbox.max(0) + 2, a_min=0,
+                          a_max=res_shape - 1)
+
+        # Find new origin, and set into new affine
+        new_affine_4 = resampled.affine.copy()
+        new_affine_4[:3, 3] = new_affine_4[:3, :3].dot(
+            new_origin) + new_affine_4[:3, 3]
+
+        # Calculate new shapes
+        new_shape = new_end - new_origin + 1
+        resampled = nli.resample_img(fixed_image,
+                                     target_affine=new_affine_4,
+                                     target_shape=new_shape.tolist(),
+                                     interpolation='nearest')
 
     xform = resampled.affine  # nibabel will pick the best affine
     _, qform_code = resampled.header.get_qform(coded=True)
