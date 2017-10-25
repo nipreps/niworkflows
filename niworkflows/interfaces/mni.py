@@ -105,6 +105,7 @@ class RobustMNINormalization(BaseInterface):
                 fixed_image=ants_args['fixed_image'],
                 moving_image=ants_args['moving_image'],
                 num_threads=self.inputs.num_threads)
+            init.resource_monitor = False
             init.terminal_output = 'allatonce'
             init_result = init.run()
             # Save outputs (if available)
@@ -123,6 +124,7 @@ class RobustMNINormalization(BaseInterface):
                                  ants_settings)
             self.norm = Registration(from_file=ants_settings,
                                      **ants_args)
+            self.norm.resource_monitor = False
             self.norm.terminal_output = self.terminal_output
 
             NIWORKFLOWS_LOG.info(
@@ -216,7 +218,8 @@ class RobustMNINormalization(BaseInterface):
                               input_image=input_mask,
                               reference_image=target_mask,
                               transforms=forward_transform,
-                              interpolation='NearestNeighbor').run()
+                              interpolation='NearestNeighbor',
+                              resource_monitor=False).run()
         input_mask_data = (nb.load(res.outputs.output_image).get_data() != 0)
         target_mask_data = (nb.load(target_mask).get_data() != 0)
 

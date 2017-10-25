@@ -26,6 +26,8 @@ from .. import NIWORKFLOWS_LOG
 from ..viz.validators import HTMLValidator
 from ..nipype.utils import filemanip
 
+from builtins import str
+
 
 try:
     from shutil import which
@@ -315,7 +317,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
 
     save_html(template='segmentation.tpl',
               report_file_name=out_file,
-              unique_string='seg' + str(uuid4()),
+              unique_string='seg%s' % uuid4(),
               base_image='<br />'.join(svgs_list),
               title=title)
 
@@ -354,9 +356,9 @@ def plot_registration(anat_nii, div_id, plot_params=None,
                                         plot_params)
 
     # FreeSurfer ribbon.mgz
-    ribbon = contour is not None and \
-            np.array_equal(np.unique(contour.get_data()),
-                           [0, 2, 3, 41, 42])
+    ribbon = contour is not None and np.array_equal(
+        np.unique(contour.get_data()), [0, 2, 3, 41, 42])
+
     if ribbon:
         contour_data = contour.get_data() % 39
         white = nlimage.new_img_like(contour, contour_data == 2)
@@ -364,7 +366,6 @@ def plot_registration(anat_nii, div_id, plot_params=None,
 
     # Plot each cut axis
     for i, mode in enumerate(list(order)):
-        out_file = '{}_{}.svg'.format(div_id, mode)
         plot_params['display_mode'] = mode
         plot_params['cut_coords'] = cuts[mode]
         if i == 0:
@@ -408,7 +409,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     import svgutils.transform as svgt
 
     # Read all svg files and get roots
-    svgs = [svgt.fromstring(f) for f in bg_svgs + fg_svgs]
+    svgs = [svgt.fromstring(str(f)) for f in bg_svgs + fg_svgs]
     roots = [f.getroot() for f in svgs]
 
     # Query the size of each
@@ -630,7 +631,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     fig.clf()
     image_svg = image_buf.getvalue()
 
-    if compress == True or compress == 'auto':
+    if compress is True or compress == 'auto':
         image_svg = svg_compress(image_svg, compress)
     image_svg = re.sub(' height="[0-9]+[a-z]*"', '', image_svg, count=1)
     image_svg = re.sub(' width="[0-9]+[a-z]*"', '', image_svg, count=1)
