@@ -202,8 +202,17 @@ def _gen_reference(fixed_image, moving_image, fov_mask=None, out_file=None,
         # out of the FoV.
         fixednii = nb.load(fixed_image)
         masknii = nb.load(fov_mask)
-        assert np.allclose(masknii.affine, fixednii.affine)
-        assert np.all(masknii.shape[:3] == fixednii.shape[:3])
+
+        if np.all(masknii.shape[:3] != fixednii.shape[:3]):
+            raise RuntimeError(
+                'Fixed image and mask do not have the same dimensions.')
+
+        if not np.allclose(masknii.affine, fixednii.affine, atol=1e-5):
+            raise RuntimeError(
+                'Fixed image and mask have different affines')
+
+        # Mask affine should be
+        masknii.affine = fixednii.affine
 
         # Get mask into reference space
         masknii = nli.resample_img(fixed_image,
