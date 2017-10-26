@@ -16,9 +16,6 @@ from niworkflows.nipype.utils.tmpdirs import InTemporaryDirectory
 from niworkflows.data.getters import (get_mni_template_ras, get_ds003_downsampled,
                                       get_ants_oasis_template_ras)
 
-from niworkflows.interfaces.registration import (
-    FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT,
-    MRICoregRPT, ApplyXFMRPT, SimpleBeforeAfterRPT)
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
 from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT, \
     SimpleShowMaskRPT
@@ -46,96 +43,6 @@ def _smoke_test_report(report_interface, artifact_name):
         stage_artifacts(out_report, artifact_name)
         assert os.path.isfile(out_report), 'Report does not exist'
 
-
-class TestRegistrationInterfaces(unittest.TestCase):
-    """ tests the interfaces derived from RegistrationRC """
-
-    reference = os.path.join(MNI_DIR, 'MNI152_T1_1mm.nii.gz')
-    reference_mask = os.path.join(MNI_DIR, 'MNI152_T1_1mm_brain_mask.nii.gz')
-    moving = os.path.join(DS003_DIR, 'sub-01/anat/sub-01_T1w.nii.gz')
-
-    def test_FLIRTRPT(self):
-        """ the FLIRT report capable test """
-        flirt_rpt = FLIRTRPT(generate_report=True, in_file=self.moving,
-                             reference=self.reference)
-        _smoke_test_report(flirt_rpt, 'testFLIRT.svg')
-
-
-    def test_MRICoregRPT(self):
-        """ the FLIRT report capable test """
-        mri_coreg_rpt = MRICoregRPT(generate_report=True,
-                                    source_file=self.moving,
-                                    reference_file=self.reference,
-                                    num_threads=nthreads)
-        _smoke_test_report(mri_coreg_rpt, 'testMRICoreg.svg')
-
-
-    def test_ApplyXFMRPT(self):
-        """ the ApplyXFM report capable test """
-        flirt_rpt = FLIRTRPT(generate_report=False, in_file=self.moving,
-                             reference=self.reference)
-
-        applyxfm_rpt = ApplyXFMRPT(
-            generate_report=True,
-            in_file=self.moving,
-            in_matrix_file=flirt_rpt.run().outputs.out_matrix_file,
-            reference=self.reference,
-            apply_xfm=True
-        )
-        _smoke_test_report(applyxfm_rpt, 'testApplyXFM.svg')
-
-
-    def test_SimpleBeforeAfterRPT(self):
-        """ the SimpleBeforeAfterRPT report capable test """
-        flirt_rpt = FLIRTRPT(generate_report=False, in_file=self.moving,
-                             reference=self.reference)
-
-        ba_rpt = SimpleBeforeAfterRPT(
-            generate_report=True,
-            before=self.reference,
-            after=flirt_rpt.run().outputs.out_file
-        )
-        _smoke_test_report(ba_rpt, 'test_SimpleBeforeAfterRPT.svg')
-
-
-    def test_FLIRTRPT_w_BBR(self):
-        """ test FLIRTRPT with input `wm_seg` set.
-        For the sake of testing ONLY, `wm_seg` is set to the filename of a brain mask """
-        flirt_rpt = FLIRTRPT(generate_report=True, in_file=self.moving,
-                             reference=self.reference, wm_seg=self.reference_mask)
-        _smoke_test_report(flirt_rpt, 'testFLIRTRPTBBR.svg')
-
-    def test_BBRegisterRPT(self):
-        """ the BBRegister report capable test """
-        subject_id = 'fsaverage'
-        bbregister_rpt = BBRegisterRPT(generate_report=True,
-                                       contrast_type='t1',
-                                       init='fsl',
-                                       source_file=self.moving,
-                                       subject_id=subject_id,
-                                       registered_file=True)
-        _smoke_test_report(bbregister_rpt, 'testBBRegister.svg')
-
-    def test_RobustMNINormalizationRPT(self):
-        """ the RobustMNINormalizationRPT report capable test """
-        ants_rpt = RobustMNINormalizationRPT(
-            generate_report=True, moving_image=self.moving, flavor='testing')
-        _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT.svg')
-
-    def test_RobustMNINormalizationRPT_masked(self):
-        """ the RobustMNINormalizationRPT report capable test with masking """
-        ants_rpt = RobustMNINormalizationRPT(
-            generate_report=True, moving_image=self.moving,
-            reference_mask=self.reference_mask, flavor='testing')
-        _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT_masked.svg')
-
-    def test_ANTSRegistrationRPT(self):
-        """ the RobustMNINormalizationRPT report capable test """
-        ants_rpt = ANTSRegistrationRPT(
-            generate_report=True, moving_image=self.moving, fixed_image=self.reference,
-            from_file=pkgr.resource_filename(
-                'niworkflows.data', 't1-mni_registration_testing_000.json'))
-        _smoke_test_report(ants_rpt, 'testANTSRegistrationRPT.svg')
 
 class TestBETRPT(unittest.TestCase):
     ''' tests it using mni as in_file '''
