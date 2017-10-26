@@ -343,6 +343,7 @@ def plot_registration(anat_nii, div_id, plot_params=None,
     Plots the foreground and background views
     Default order is: axial, coronal, sagittal
     """
+    from svgutils.transform import SVGFigure
 
     plot_params = {} if plot_params is None else plot_params
 
@@ -387,16 +388,17 @@ def plot_registration(anat_nii, div_id, plot_params=None,
         display.close()
 
         # Find and replace the figure_1 id.
-
         try:
             xml_data = etree.fromstring(svg)
         except etree.XMLSyntaxError as e:
             NIWORKFLOWS_LOG.info(e)
             return
-        find_text = etree.ETXPath("//{%s}g[@id='figure_1']" % (SVGNS))
+        find_text = etree.ETXPath("//{%s}g[@id='figure_1']" % SVGNS)
         find_text(xml_data)[0].set('id', '%s-%s-%s' % (div_id, mode, uuid4()))
 
-        out_files.append(etree.tostring(xml_data))
+        svg_fig = SVGFigure()
+        svg_fig.root = xml_data
+        out_files.append(svg_fig)
 
     return out_files
 
@@ -408,8 +410,8 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     """
     import svgutils.transform as svgt
 
-    # Read all svg files and get roots
-    svgs = [svgt.fromstring(str(f)) for f in bg_svgs + fg_svgs]
+    # Merge SVGs and get roots
+    svgs = bg_svgs + fg_svgs
     roots = [f.getroot() for f in svgs]
 
     # Query the size of each
@@ -524,10 +526,10 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
             elif units[-1] == 'usec':
                 tr = tr / 1000000.0
             elif units[-1] != 'sec':
-                NIWORKFLOWS_LOG.warn('Unknown repetition time units '
-                                     'specified - assuming seconds')
+                NIWORKFLOWS_LOG.warning('Unknown repetition time units '
+                                        'specified - assuming seconds')
         else:
-            NIWORKFLOWS_LOG.warn(
+            NIWORKFLOWS_LOG.warning(
                 'Repetition time units not specified - assuming seconds')
 
     from nilearn.input_data import NiftiMasker
