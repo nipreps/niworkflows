@@ -211,9 +211,6 @@ def _gen_reference(fixed_image, moving_image, fov_mask=None, out_file=None,
             raise RuntimeError(
                 'Fixed image and mask have different affines')
 
-        # Mask affine should be
-        masknii.affine = fixednii.affine
-
         # Get mask into reference space
         masknii = nli.resample_img(fixed_image,
                                    target_affine=new_affine,
