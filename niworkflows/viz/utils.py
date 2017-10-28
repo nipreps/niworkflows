@@ -46,7 +46,8 @@ except ImportError:
         """
 
         try:
-            subprocess.run([cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run([cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                           close_fds=True)
         except OSError as e:
             from errno import ENOENT
             if e.errno == ENOENT:
@@ -144,7 +145,7 @@ def svg_compress(image, compress='auto'):
         cmd = 'svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues'
         try:
             pout = subprocess.run(cmd, input=image.encode('utf-8'), stdout=subprocess.PIPE,
-                                  shell=True, check=True).stdout
+                                  shell=True, check=True, close_fds=True).stdout
         except OSError as e:
             from errno import ENOENT
             if compress is True and e.errno == ENOENT:
@@ -172,8 +173,9 @@ def svg_compress(image, compress='auto'):
                     right = '"' + '"'.join(right.split('"')[1:])
 
                     cmd = "cwebp -quiet -noalpha -q 80 -o - -- -"
-                    pout = subprocess.run(cmd, input=base64.b64decode(png_b64), shell=True,
-                                          stdout=subprocess.PIPE, check=True).stdout
+                    pout = subprocess.run(
+                        cmd, input=base64.b64decode(png_b64), shell=True,
+                        stdout=subprocess.PIPE, check=True, close_fds=True).stdout
                     webpimg = base64.b64encode(pout).decode('utf-8')
                     new_lines.append(left + webpimg + right)
                 else:
