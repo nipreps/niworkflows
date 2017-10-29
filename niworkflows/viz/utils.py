@@ -64,7 +64,8 @@ if not hasattr(subprocess, 'DEVNULL'):
     setattr(subprocess, 'DEVNULL', -3)
 
 if not hasattr(subprocess, 'run'):
-    def _run(args, input=None, stdout=None, stderr=None, shell=False, check=False):
+    def _run(args, input=None, stdout=None, stderr=None, shell=False, check=False,
+             close_fds=False):
         from collections import namedtuple
 
         devnull = open(os.devnull, 'r+')
@@ -76,7 +77,8 @@ if not hasattr(subprocess, 'run'):
         if stderr == subprocess.DEVNULL:
             stderr = devnull
 
-        proc = subprocess.Popen(args, stdout=stdout, shell=shell, stdin=stdin)
+        proc = subprocess.Popen(args, stdout=stdout, shell=shell, stdin=stdin,
+                                close_fds=close_fds)
         result = namedtuple('CompletedProcess', 'stdout stderr')
         res = result(*proc.communicate(input=input))
 
