@@ -1,5 +1,5 @@
-Next release
-------------
+Version 0.1.9
+-------------
 
 * [ENH] Display surface contours for MRICoregRPT if available (#204)
 * [ENH] Crop BOLD sampling reference to reduce output file size (#205)
