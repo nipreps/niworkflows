@@ -1,3 +1,11 @@
+Next release
+------------
+
+* [ENH] Display surface contours for MRICoregRPT if available (#204)
+* [ENH] Crop BOLD sampling reference to reduce output file size (#205)
+* [ENH] Close file descriptors where possible to avoid OS limits (#208)
+* [ENH] Upgrade internal Nipype
+
 Version 0.1.8
 -------------
 
