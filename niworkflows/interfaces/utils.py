@@ -160,9 +160,9 @@ def _copyxform(ref_image, out_image, message=None):
     orig = nb.load(ref_image)
 
     if not np.allclose(orig.affine, resampled.affine):
-        LOG.warning('Affines of input and reference images '
-                    'do not match, CopyXForm will probably '
-                    'make the input image useless.')
+        LOG.debug('Affines of input and reference images '
+                  'do not match, CopyXForm will probably '
+                  'make the input image useless.')
 
     # Copy xform infos
     qform, qform_code = orig.header.get_qform(coded=True)
