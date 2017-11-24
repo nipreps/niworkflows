@@ -163,8 +163,8 @@ def _copyxform(ref_image, out_image, message=None):
         LOG.debug(
             'Affines of input and reference images do not match, '
             'FMRIPREP will set the reference image headers. '
-            'Please, check that the x-form matrices of the input '
-            'dataset, and manually assess the orientation on results.')
+            'Please, check that the x-form matrices of the input dataset'
+            'are correct and manually assess the orientation on results.')
 
     # Copy xform infos
     qform, qform_code = orig.header.get_qform(coded=True)
