@@ -1,3 +1,8 @@
+Version 0.1.11
+--------------
+
+* [ENH] Update internal Nipype including merging nipy/nipype#2285 before nipype itself does.
+
 Version 0.1.10
 --------------
 
