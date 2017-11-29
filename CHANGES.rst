@@ -1,3 +1,10 @@
+Version 0.1.10
+--------------
+
+* [ENH] Lower priority of "Affines do not match" warning (#209)
+* [FIX] Increase tolerance in GenerateSamplingReference (#207)
+* [ENH] Upgrade internal Nipype
+
 Version 0.1.9
 -------------
 
