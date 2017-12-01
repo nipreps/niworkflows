@@ -11,7 +11,7 @@ import os
 
 from ..nipype.interfaces.base import File
 from ..nipype.interfaces import fsl, freesurfer
-from ..common import report as nrc
+from . import report_base as nrc
 from .. import NIWORKFLOWS_LOG
 
 

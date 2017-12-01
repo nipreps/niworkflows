@@ -15,8 +15,7 @@ from nilearn.image import threshold_img, load_img
 from ..nipype.interfaces.base import (
     File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec)
 from .. import NIWORKFLOWS_LOG
-from ..viz.utils import cuts_from_bbox
-
+from ..viz.utils import cuts_from_bbox, compose_view
 
 PY3 = version_info[0] > 2
 
@@ -25,7 +24,7 @@ class ReportCapableInputSpec(BaseInterfaceInputSpec):
     generate_report = traits.Bool(
         False, usedefault=True, desc="Set to true to enable report generation for node")
     out_report = File(
-        'report.html', usedefault=True, desc='filename for the visual report')
+        'report.svg', usedefault=True, desc='filename for the visual report')
     compress_report = traits.Enum('auto', True, False, usedefault=True,
                                   desc="Compress the reportlet using SVGO or"
                                        "WEBP. 'auto' - compress if relevant "
@@ -96,12 +95,12 @@ class ReportCapableInterface(BaseInterface):
     @abstractmethod
     def _generate_report(self):
         """
-        Saves an html object.
+        Saves an svg object.
         """
         raise NotImplementedError
 
     def _generate_error_report(self, errno=None):
-        """ Saves an html snippet """
+        """ Saves an svg snippet """
         # as of now we think this will be the same for every interface
         NIWORKFLOWS_LOG.warn('Report was not generated')
 
@@ -122,11 +121,6 @@ class ReportCapableInterface(BaseInterface):
         self._mock_run = value
 
 
-class RegistrationRCInputSpec(ReportCapableInputSpec):
-    out_report = File(
-        'report.svg', usedefault=True, desc='filename for the visual report')
-
-
 class RegistrationRC(ReportCapableInterface):
 
     """ An abstract mixin to registration nipype interfaces """
@@ -142,7 +136,7 @@ class RegistrationRC(ReportCapableInterface):
 
     def _generate_report(self):
         """ Generates the visual report """
-        from niworkflows.viz.utils import compose_view, plot_registration
+        from niworkflows.viz.utils import plot_registration
         NIWORKFLOWS_LOG.info('Generating visual report')
 
         fixed_image_nii = load_img(self._fixed_image)
@@ -192,14 +186,18 @@ class SegmentationRC(ReportCapableInterface):
 
     def _generate_report(self):
         from niworkflows.viz.utils import plot_segs
-        plot_segs(
-            image_nii=self._anat_file,
-            seg_niis=self._seg_files,
-            mask_nii=self._mask_file,
-            out_file=self.inputs.out_report,
-            masked=self._masked,
-            title=self._report_title,
-            compress=self.inputs.compress_report
+        compose_view(
+            plot_segs(
+                image_nii=self._anat_file,
+                seg_niis=self._seg_files,
+                mask_nii=self._mask_file,
+                out_file=self.inputs.out_report,
+                masked=self._masked,
+                title=self._report_title,
+                compress=self.inputs.compress_report
+            ),
+            fg_svgs=None,
+            out_file=self._out_report
         )
 
 
@@ -215,7 +213,7 @@ class SurfaceSegmentationRC(ReportCapableInterface):
 
     def _generate_report(self):
         """ Generates the visual report """
-        from niworkflows.viz.utils import compose_view, plot_registration
+        from niworkflows.viz.utils import plot_registration
         NIWORKFLOWS_LOG.info('Generating visual report')
 
         anat = load_img(self._anat_file)

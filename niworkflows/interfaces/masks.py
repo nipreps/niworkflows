@@ -18,7 +18,7 @@ from ..nipype.interfaces import fsl, ants
 from ..nipype.interfaces.base import (
     File, BaseInterfaceInputSpec, traits, isdefined)
 from ..nipype.algorithms import confounds
-from ..common import report as nrc
+from . import report_base as nrc
 
 
 class BETInputSpecRPT(nrc.ReportCapableInputSpec,

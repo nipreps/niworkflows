@@ -20,7 +20,7 @@ from ..nipype.interfaces.base import (
 from ..nipype.interfaces import freesurfer as fs
 from ..nipype.interfaces import fsl, ants, afni
 
-from ..common import report as nrc
+from . import report_base as nrc
 from .mni import (
     RobustMNINormalizationInputSpec,
     RobustMNINormalization
@@ -30,7 +30,7 @@ from .fixes import (FixHeaderApplyTransforms as ApplyTransforms,
 
 
 class RobustMNINormalizationInputSpecRPT(
-    nrc.RegistrationRCInputSpec, RobustMNINormalizationInputSpec):
+    nrc.ReportCapableInputSpec, RobustMNINormalizationInputSpec):
     pass
 
 
@@ -54,7 +54,7 @@ class RobustMNINormalizationRPT(
                              self._fixed_image, self._moving_image)
 
 
-class ANTSRegistrationInputSpecRPT(nrc.RegistrationRCInputSpec,
+class ANTSRegistrationInputSpecRPT(nrc.ReportCapableInputSpec,
                                    ants.registration.RegistrationInputSpec):
     pass
 
@@ -75,7 +75,7 @@ class ANTSRegistrationRPT(nrc.RegistrationRC, Registration):
                              self._fixed_image, self._moving_image)
 
 
-class ANTSApplyTransformsInputSpecRPT(nrc.RegistrationRCInputSpec,
+class ANTSApplyTransformsInputSpecRPT(nrc.ReportCapableInputSpec,
                                       ants.resampling.ApplyTransformsInputSpec):
     pass
 
@@ -96,7 +96,7 @@ class ANTSApplyTransformsRPT(nrc.RegistrationRC, ApplyTransforms):
                              self._fixed_image, self._moving_image)
 
 
-class ApplyTOPUPInputSpecRPT(nrc.RegistrationRCInputSpec,
+class ApplyTOPUPInputSpecRPT(nrc.ReportCapableInputSpec,
                              fsl.epi.ApplyTOPUPInputSpec):
     wm_seg = File(argstr='-wmseg %s',
                   desc='reference white matter segmentation mask')
@@ -121,7 +121,7 @@ class ApplyTOPUPRPT(nrc.RegistrationRC, fsl.ApplyTOPUP):
                              self._fixed_image, self._moving_image)
 
 
-class FUGUEInputSpecRPT(nrc.RegistrationRCInputSpec,
+class FUGUEInputSpecRPT(nrc.ReportCapableInputSpec,
                         fsl.preprocess.FUGUEInputSpec):
     wm_seg = File(argstr='-wmseg %s',
                   desc='reference white matter segmentation mask')
@@ -147,7 +147,7 @@ class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
             self._fixed_image, self._moving_image)
 
 
-class FLIRTInputSpecRPT(nrc.RegistrationRCInputSpec,
+class FLIRTInputSpecRPT(nrc.ReportCapableInputSpec,
                         fsl.preprocess.FLIRTInputSpec):
     pass
 
@@ -170,7 +170,7 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
             self._fixed_image, self._moving_image)
 
 
-class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
+class ApplyXFMInputSpecRPT(nrc.ReportCapableInputSpec,
                            fsl.preprocess.ApplyXFMInputSpec):
     pass
 
@@ -181,11 +181,11 @@ class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
 
 
 if LooseVersion("0.0.0") < fs.Info.looseversion() < LooseVersion("6.0.0"):
-    class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
+    class BBRegisterInputSpecRPT(nrc.ReportCapableInputSpec,
                                  fs.preprocess.BBRegisterInputSpec):
         pass
 else:
-    class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
+    class BBRegisterInputSpecRPT(nrc.ReportCapableInputSpec,
                                  fs.preprocess.BBRegisterInputSpec6):
         pass
 
@@ -210,7 +210,7 @@ class BBRegisterRPT(nrc.RegistrationRC, fs.BBRegister):
             self._fixed_image, self._moving_image)
 
 
-class MRICoregInputSpecRPT(nrc.RegistrationRCInputSpec,
+class MRICoregInputSpecRPT(nrc.ReportCapableInputSpec,
                            fs.registration.MRICoregInputSpec):
     pass
 
@@ -252,7 +252,7 @@ class MRICoregRPT(nrc.RegistrationRC, fs.MRICoreg):
             self._fixed_image, self._moving_image)
 
 
-class SimpleBeforeAfterInputSpecRPT(nrc.RegistrationRCInputSpec):
+class SimpleBeforeAfterInputSpecRPT(nrc.ReportCapableInputSpec):
     before = File(exists=True, mandatory=True, desc='file before')
     after = File(exists=True, mandatory=True, desc='file after')
     wm_seg = File(desc='reference white matter segmentation mask')

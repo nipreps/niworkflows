@@ -4,8 +4,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import unittest
 import mock
-
-from niworkflows.common import report
 from niworkflows.viz.validators import HTMLValidator, CSSValidator
 
 class TestValidator(unittest.TestCase):
