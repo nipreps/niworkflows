@@ -261,6 +261,9 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
         # anatomical
         display = plot_anat(image, **plot_params)
 
+        # remove plot_anat -specific parameters
+        plot_params.pop('display_mode')
+        plot_params.pop('cut_coords')
         # segment contours
         for seg, color in zip(segs, ['r', 'b']):
             plot_params['colors'] = color
@@ -291,7 +294,7 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
     for d in plot_params.pop('dimensions', ('z', 'x', 'y')):
         plot_params['display_mode'] = d
         plot_params['cut_coords'] = cuts[d]
-        svg = _plot_anat_with_contours(image_nii, **plot_params)
+        svg = _plot_anat_with_contours(image_nii, seg_niis, **plot_params)
 
         # Find and replace the figure_1 id.
         try:
@@ -381,6 +384,9 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     the CSS code for the flickering animation
     """
     import svgutils.transform as svgt
+
+    if fg_svgs is None:
+        fg_svgs = []
 
     # Merge SVGs and get roots
     svgs = bg_svgs + fg_svgs

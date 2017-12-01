@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" all tests """
+""" Registration tests """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -19,6 +19,7 @@ def _smoke_test_report(report_interface, artifact_name):
     if save_artifacts:
         copy(out_report, os.path.join(save_artifacts, artifact_name))
     assert os.path.isfile(out_report), 'Report does not exist'
+
 
 def test_FLIRTRPT(reference, moving):
     """ the FLIRT report capable test """
