@@ -15,8 +15,6 @@ import numpy as np
 import nibabel as nb
 from uuid import uuid4
 from io import open, StringIO
-import jinja2
-from pkg_resources import resource_filename as pkgrf
 
 from lxml import etree
 from nilearn import image as nlimage
@@ -24,11 +22,7 @@ from nilearn.plotting import plot_anat
 from svgutils.transform import SVGFigure
 
 from .. import NIWORKFLOWS_LOG
-from ..viz.validators import HTMLValidator
 from ..nipype.utils import filemanip
-
-from builtins import str
-
 
 try:
     from shutil import which

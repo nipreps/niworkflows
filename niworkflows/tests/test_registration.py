@@ -72,6 +72,7 @@ def test_FLIRTRPT_w_BBR(reference, reference_mask, moving):
                          reference=reference, wm_seg=reference_mask)
     _smoke_test_report(flirt_rpt, 'testFLIRTRPTBBR.svg')
 
+
 def test_BBRegisterRPT(moving):
     """ the BBRegister report capable test """
     subject_id = 'fsaverage'
@@ -83,11 +84,13 @@ def test_BBRegisterRPT(moving):
                                    registered_file=True)
     _smoke_test_report(bbregister_rpt, 'testBBRegister.svg')
 
+
 def test_RobustMNINormalizationRPT(moving):
     """ the RobustMNINormalizationRPT report capable test """
     ants_rpt = RobustMNINormalizationRPT(
         generate_report=True, moving_image=moving, flavor='testing')
     _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT.svg')
+
 
 def test_RobustMNINormalizationRPT_masked(moving, reference_mask):
     """ the RobustMNINormalizationRPT report capable test with masking """
@@ -95,6 +98,7 @@ def test_RobustMNINormalizationRPT_masked(moving, reference_mask):
         generate_report=True, moving_image=moving,
         reference_mask=reference_mask, flavor='testing')
     _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT_masked.svg')
+
 
 def test_ANTSRegistrationRPT(reference, moving):
     """ the RobustMNINormalizationRPT report capable test """
