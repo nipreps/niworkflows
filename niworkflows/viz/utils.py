@@ -15,19 +15,14 @@ import numpy as np
 import nibabel as nb
 from uuid import uuid4
 from io import open, StringIO
-import jinja2
-from pkg_resources import resource_filename as pkgrf
 
 from lxml import etree
 from nilearn import image as nlimage
 from nilearn.plotting import plot_anat
+from svgutils.transform import SVGFigure
 
 from .. import NIWORKFLOWS_LOG
-from ..viz.validators import HTMLValidator
 from ..nipype.utils import filemanip
-
-from builtins import str
-
 
 try:
     from shutil import which
@@ -99,36 +94,6 @@ def robust_set_limits(data, plot_params):
         plot_params['vmax'] = np.percentile(data[data > vmin], 99.8)
 
     return plot_params
-
-
-def save_html(template, report_file_name, unique_string, **kwargs):
-    ''' save an actual html file with name report_file_name. unique_string's
-    first character must be alphabetical; every call to save_html must have a
-    unique unique_string. kwargs should all contain valid html that will be sent
-    to the jinja2 renderer '''
-
-    if not unique_string[0].isalpha():
-        raise ValueError('unique_string must be a valid id value in html; '
-                         'the first character must be alphabetical. Received unique_string={}'
-                         .format(unique_string))
-
-    # validate html
-    validator = HTMLValidator(unique_string=unique_string)
-    for html in list(kwargs.keys()):
-        validator.feed(html)
-        validator.close()
-
-    searchpath = pkgrf('niworkflows', '/')
-    env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(searchpath=searchpath),
-        trim_blocks=True, lstrip_blocks=True
-    )
-    report_tpl = env.get_template('viz/' + template)
-    kwargs['unique_string'] = unique_string
-    report_render = report_tpl.render(kwargs)
-
-    with open(report_file_name, 'w' if PY3 else 'wb') as handle:
-        handle.write(report_render)
 
 
 def svg_compress(image, compress='auto'):
@@ -288,8 +253,11 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
         plot_params = {} if plot_params is None else plot_params
 
         # anatomical
-        svg = plot_anat(image, **plot_params)
+        display = plot_anat(image, **plot_params)
 
+        # remove plot_anat -specific parameters
+        plot_params.pop('display_mode')
+        plot_params.pop('cut_coords')
         # segment contours
         for seg, color in zip(segs, ['r', 'b']):
             plot_params['colors'] = color
@@ -297,10 +265,11 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
                 0.5] if 'levels' not in plot_params else plot_params['levels']
             plot_params['alpha'] = 1
             plot_params['linewidths'] = 0.7
-            svg.add_contours(seg, **plot_params)
+            display.add_contours(seg, **plot_params)
 
-        svgs_list.append(extract_svg(svg, compress=compress))
-        svg.close()
+        svg = extract_svg(display, compress=compress)
+        display.close()
+        return svg
 
     plot_params = {} if plot_params is None else plot_params
 
@@ -315,28 +284,26 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
 
     cuts = cuts_from_bbox(mask_nii, cuts=7)
 
-    svgs_list = []
-    plot_xyz(image_nii, _plot_anat_with_contours,
-             cuts, segs=seg_niis, **plot_params)
+    out_files = []
+    for d in plot_params.pop('dimensions', ('z', 'x', 'y')):
+        plot_params['display_mode'] = d
+        plot_params['cut_coords'] = cuts[d]
+        svg = _plot_anat_with_contours(image_nii, seg_niis, **plot_params)
 
-    save_html(template='segmentation.tpl',
-              report_file_name=out_file,
-              unique_string='seg%s' % uuid4(),
-              base_image='<br />'.join(svgs_list),
-              title=title)
+        # Find and replace the figure_1 id.
+        try:
+            xml_data = etree.fromstring(svg)
+        except etree.XMLSyntaxError as e:
+            NIWORKFLOWS_LOG.info(e)
+            return
+        find_text = etree.ETXPath("//{%s}g[@id='figure_1']" % SVGNS)
+        find_text(xml_data)[0].set('id', 'segmentation-%s-%s' % (d, uuid4()))
 
+        svg_fig = SVGFigure()
+        svg_fig.root = xml_data
+        out_files.append(svg_fig)
 
-def plot_xyz(image, plot_func, cuts, plot_params=None, dimensions=('z', 'x', 'y'), **kwargs):
-    """
-    plot_func must be a function that more-or-less conforms to nilearn's plot_* signature
-    """
-    plot_params = {} if plot_params is None else plot_params
-
-    for dimension in dimensions:
-        plot_params['display_mode'] = dimension
-        plot_params['cut_coords'] = cuts[dimension]
-        kwargs.update(plot_params)
-        plot_func(image, **kwargs)
+    return out_files
 
 
 def plot_registration(anat_nii, div_id, plot_params=None,
@@ -347,8 +314,6 @@ def plot_registration(anat_nii, div_id, plot_params=None,
     Plots the foreground and background views
     Default order is: axial, coronal, sagittal
     """
-    from svgutils.transform import SVGFigure
-
     plot_params = {} if plot_params is None else plot_params
 
     # Use default MNI cuts if none defined
@@ -414,6 +379,9 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     """
     import svgutils.transform as svgt
 
+    if fg_svgs is None:
+        fg_svgs = []
+
     # Merge SVGs and get roots
     svgs = bg_svgs + fg_svgs
     roots = [f.getroot() for f in svgs]
@@ -471,7 +439,8 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
 
     # Add styles for the flicker animation
     if fg_svgs:
-        svg.insert(2, """<style type="text/css">
+        svg.insert(2, """\
+<style type="text/css">
 @keyframes flickerAnimation%s { 0%% {opacity: 1;} 100%% { opacity: 0; }}
 .foreground-svg { animation: 1s ease-in-out 0s alternate none infinite paused flickerAnimation%s;}
 .foreground-svg:hover { animation-play-state: running;}
