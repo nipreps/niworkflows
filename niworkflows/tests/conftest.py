@@ -40,7 +40,7 @@ def moving():
 def nthreads():
     from multiprocessing import cpu_count
     # Tests are linear, so don't worry about leaving space for a control thread
-    return min(8, cpu_count())
+    return min(os.getenv('CIRCLE_NPROCS', 8), cpu_count())
 
 
 @pytest.fixture
