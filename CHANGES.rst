@@ -1,3 +1,9 @@
+Version 0.2.0
+-------------
+
+* [ENH] Generate SVGs only (#210)
+* [PIN] Upgrade internal Nipype to master after the v0.14.0 release.
+
 Version 0.1.11
 --------------
 
