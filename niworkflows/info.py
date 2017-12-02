@@ -45,8 +45,15 @@ CLASSIFIERS = [
 ]
 
 REQUIRES = nipype_info['REQUIRES'] + [
-    'nilearn>=0.2.6', 'sklearn', 'pandas', 'matplotlib', 'jinja2', 'svgutils',
-    'tinycss']
+    'nilearn>=0.2.6',
+    'sklearn',
+    'pandas',
+    'matplotlib',
+    'jinja2',
+    'svgutils',
+    'seaborn',
+]
+
 SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 

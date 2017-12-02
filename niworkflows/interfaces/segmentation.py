@@ -46,7 +46,6 @@ class FASTRPT(nrc.SegmentationRC,
         # it only shows the skullstriping mask
         self._seg_files = self.aggregate_outputs(runtime=runtime).tissue_class_files[1:]
         self._masked = False
-        self._report_title = "FAST: segmentation over anatomical"
 
         NIWORKFLOWS_LOG.info('Generating report for FAST (in_files %s, '
                              'segmentation %s, individual tissue classes %s).',
@@ -81,7 +80,6 @@ class ReconAllRPT(nrc.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):
                                      outputs.subject_id,
                                      'mri', 'ribbon.mgz')
         self._masked = False
-        self._report_title = "ReconAll: segmentation over anatomical"
 
         NIWORKFLOWS_LOG.info('Generating report for ReconAll (subject %s)',
                              outputs.subject_id)
