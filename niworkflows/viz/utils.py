@@ -88,12 +88,10 @@ if not hasattr(subprocess, 'run'):
 
 
 def robust_set_limits(data, plot_params):
-    vmin = np.percentile(data, 15)
-    if plot_params.get('vmin', None) is None:
-        plot_params['vmin'] = vmin
-    if plot_params.get('vmax', None) is None:
-        plot_params['vmax'] = np.percentile(data[data > vmin], 99.8)
-
+    plot_params['vmin'] = plot_params.get(
+        'vmin', np.percentile(data, 15))
+    plot_params['vmax'] = plot_params.get(
+        'vmax', np.percentile(data, 99.8))
     return plot_params
 
 
@@ -295,7 +293,8 @@ def _plot_anat_with_contours(image, segs=None, compress='auto',
     # remove plot_anat -specific parameters
     plot_params.pop('display_mode')
     plot_params.pop('cut_coords')
-    plot_params['levels'] = plot_params.get('levels', 0.5)
+    plot_params['levels'] = np.atleast_1d(
+        plot_params.get('levels', 0.5)).tolist()
     colors = ['r'] + color_palette("husl", len(segs) - 1)
     for i in range(len(segs)):
         plot_params['colors'] = [colors[i]]
