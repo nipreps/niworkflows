@@ -286,7 +286,7 @@ def _plot_anat_with_contours(image, segs=None, compress='auto',
     assert segs is not None
 
     plot_params = plot_params or {}
-    colors = plot_params.pop('colors', [])
+    colors = plot_params.pop('colors', []) or []  # colors should not be None
     nsegs = len(segs)
     missing = nsegs - len(colors)
     if missing:
