@@ -16,7 +16,7 @@ import scipy.ndimage as nd
 from .. import NIWORKFLOWS_LOG
 from ..nipype.interfaces import fsl, ants
 from ..nipype.interfaces.base import (
-    File, BaseInterfaceInputSpec, traits, isdefined, InputMultiPath)
+    File, BaseInterfaceInputSpec, traits, isdefined, InputMultiPath, Str)
 from ..nipype.algorithms import confounds
 from . import report_base as nrc
 
@@ -237,8 +237,10 @@ class ROIsPlotInputSpecRPT(nrc.ReportCapableInputSpec):
     in_file = File(exists=True, mandatory=True, desc='the volume where ROIs are defined')
     in_rois = InputMultiPath(File(exists=True), mandatory=True,
                              desc='a list of regions to be plotted')
-    in_mask = File(desc='a special region, eg. the brain mask')
+    in_mask = File(exists=True, desc='a special region, eg. the brain mask')
     masked = traits.Bool(False, usedefault=True, desc='mask in_file prior plotting')
+    colors = traits.Either(None, traits.List(Str), usedefault=True,
+                           desc='use specific colors for contours')
 
 
 class ROIsPlot(nrc.SegmentationRC):
@@ -247,14 +249,24 @@ class ROIsPlot(nrc.SegmentationRC):
 
     def _run_interface(self, runtime):
         """ there is not inner interface to run """
-        self._out_report = os.path.abspath(self.inputs.out_report)
-        self._anat_file = self.inputs.in_file
-        self._seg_files = self.inputs.in_rois
-        self._masked = self.inputs.masked
-
+        from niworkflows.viz.utils import plot_segs, compose_view
+        seg_files = self.inputs.in_rois
+        mask_file = None
         if isdefined(self.inputs.in_mask):
-            self._mask_file = self.inputs.in_mask
-            self._seg_files.insert(0, self.inputs.in_mask)
+            mask_file = self.inputs.in_mask
+            seg_files.insert(0, self.inputs.in_mask)
 
-        self._generate_report()
+        compose_view(
+            plot_segs(
+                image_nii=self.inputs.in_file,
+                seg_niis=seg_files,
+                bbox_nii=mask_file,
+                out_file=self.inputs.out_report,
+                masked=self.inputs.masked,
+                colors=self.inputs.colors,
+                compress=self.inputs.compress_report
+            ),
+            fg_svgs=None,
+            out_file=os.path.abspath(self.inputs.out_report)
+        )
         return runtime

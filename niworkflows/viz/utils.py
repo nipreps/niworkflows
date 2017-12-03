@@ -10,11 +10,11 @@ import subprocess
 import base64
 import re
 from sys import version_info
+from uuid import uuid4
+from io import open, StringIO
 
 import numpy as np
 import nibabel as nb
-from uuid import uuid4
-from io import open, StringIO
 
 from lxml import etree
 from nilearn import image as nlimage
@@ -239,13 +239,12 @@ def _3d_in_file(in_file):
 
 
 def plot_segs(image_nii, seg_niis, out_file, bbox_nii=None, masked=False,
-              compress='auto', **plot_params):
+              colors=None, compress='auto', **plot_params):
     """ plot segmentation as contours over the image (e.g. anatomical).
     seg_niis should be a list of files. mask_nii helps determine the cut
     coordinates. plot_params will be passed on to nilearn plot_* functions. If
     seg_niis is a list of size one, it behaves as if it was plotting the mask.
     """
-
     plot_params = {} if plot_params is None else plot_params
 
     image_nii = _3d_in_file(image_nii)
@@ -258,7 +257,7 @@ def plot_segs(image_nii, seg_niis, out_file, bbox_nii=None, masked=False,
         bbox_nii = nlimage.threshold_img(bbox_nii, 1e-3)
 
     cuts = cuts_from_bbox(bbox_nii, cuts=7)
-
+    plot_params['colors'] = colors or plot_params.get('colors', None)
     out_files = []
     for d in plot_params.pop('dimensions', ('z', 'x', 'y')):
         plot_params['display_mode'] = d
@@ -285,6 +284,7 @@ def plot_segs(image_nii, seg_niis, out_file, bbox_nii=None, masked=False,
 def _plot_anat_with_contours(image, segs=None, compress='auto',
                              **plot_params):
     assert segs is not None
+
     plot_params = {} if plot_params is None else plot_params
 
     # anatomical
@@ -295,8 +295,15 @@ def _plot_anat_with_contours(image, segs=None, compress='auto',
     plot_params.pop('cut_coords')
     plot_params['levels'] = np.atleast_1d(
         plot_params.get('levels', 0.5)).tolist()
-    colors = ['r'] + color_palette("husl", len(segs) - 1)
-    for i in range(len(segs)):
+    colors = plot_params.pop('colors', [])
+    nsegs = len(segs)
+
+    missing = nsegs - len(colors)
+    if missing:
+        colors = colors + color_palette("husl", missing)
+
+    print(colors)
+    for i in range(nsegs):
         plot_params['colors'] = [colors[i]]
         plot_params['linewidths'] = 0.6 if i > 0 else 1.1
         plot_params['alpha'] = 1 if i > 0 else 0.8

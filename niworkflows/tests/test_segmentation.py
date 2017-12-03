@@ -48,7 +48,8 @@ def test_ROIsPlot(oasis_dir):
         generate_report=True,
         in_file=os.path.join(oasis_dir, 'T_template0.nii.gz'),
         in_mask=out_files[-1],
-        in_rois=out_files[:-1]
+        in_rois=out_files[:-1],
+        colors=['r', 'darkblue', 'y']
     )
     _smoke_test_report(roi_rpt, 'testROIsPlot.svg')
 
