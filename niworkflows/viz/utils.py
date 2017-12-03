@@ -285,7 +285,12 @@ def _plot_anat_with_contours(image, segs=None, compress='auto',
                              **plot_params):
     assert segs is not None
 
-    plot_params = {} if plot_params is None else plot_params
+    plot_params = plot_params or {}
+    colors = plot_params.pop('colors', [])
+    nsegs = len(segs)
+    missing = nsegs - len(colors)
+    if missing:
+        colors = colors + color_palette("husl", missing)
 
     # anatomical
     display = plot_anat(image, **plot_params)
@@ -295,17 +300,10 @@ def _plot_anat_with_contours(image, segs=None, compress='auto',
     plot_params.pop('cut_coords')
     plot_params['levels'] = np.atleast_1d(
         plot_params.get('levels', 0.5)).tolist()
-    colors = plot_params.pop('colors', [])
-    nsegs = len(segs)
 
-    missing = nsegs - len(colors)
-    if missing:
-        colors = colors + color_palette("husl", missing)
-
-    print(colors)
     for i in range(nsegs):
         plot_params['colors'] = [colors[i]]
-        plot_params['linewidths'] = 0.6 if i > 0 else 1.1
+        plot_params['linewidths'] = 0.8 if i > 0 else 1.5
         plot_params['alpha'] = 1 if i > 0 else 0.8
         display.add_contours(segs[i], **plot_params)
 
