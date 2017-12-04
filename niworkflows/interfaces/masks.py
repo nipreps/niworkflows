@@ -256,6 +256,7 @@ class ROIsPlot(nrc.SegmentationRC):
             mask_file = self.inputs.in_mask
             seg_files.insert(0, self.inputs.in_mask)
 
+        self._out_report = os.path.abspath(self.inputs.out_report)
         compose_view(
             plot_segs(
                 image_nii=self.inputs.in_file,
@@ -267,6 +268,6 @@ class ROIsPlot(nrc.SegmentationRC):
                 compress=self.inputs.compress_report
             ),
             fg_svgs=None,
-            out_file=os.path.abspath(self.inputs.out_report)
+            out_file=self._out_report
         )
         return runtime
