@@ -289,7 +289,7 @@ def _plot_anat_with_contours(image, segs=None, compress='auto',
     colors = plot_params.pop('colors', []) or []  # colors should not be None
     nsegs = len(segs)
     missing = nsegs - len(colors)
-    if missing:
+    if missing > 0:  # missing may be negative
         colors = colors + color_palette("husl", missing)
 
     # anatomical
@@ -301,7 +301,7 @@ def _plot_anat_with_contours(image, segs=None, compress='auto',
     plot_params['levels'] = np.atleast_1d(
         plot_params.get('levels', 0.5)).tolist()
 
-    for i in range(nsegs):
+    for i in reversed(range(nsegs)):
         plot_params['colors'] = [colors[i]]
         plot_params['linewidths'] = 0.8 if i > 0 else 1.5
         plot_params['alpha'] = 1 if i > 0 else 0.8
