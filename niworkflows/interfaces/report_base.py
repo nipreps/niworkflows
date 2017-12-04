@@ -190,10 +190,9 @@ class SegmentationRC(ReportCapableInterface):
             plot_segs(
                 image_nii=self._anat_file,
                 seg_niis=self._seg_files,
-                mask_nii=self._mask_file,
+                bbox_nii=self._mask_file,
                 out_file=self.inputs.out_report,
                 masked=self._masked,
-                title=self._report_title,
                 compress=self.inputs.compress_report
             ),
             fg_svgs=None,

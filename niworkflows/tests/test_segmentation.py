@@ -8,8 +8,9 @@ from shutil import copy
 import pytest
 
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
-from niworkflows.interfaces.masks import BETRPT, BrainExtractionRPT, \
-    SimpleShowMaskRPT
+from niworkflows.interfaces.masks import (
+    BETRPT, BrainExtractionRPT, SimpleShowMaskRPT, ROIsPlot
+)
 
 
 def _smoke_test_report(report_interface, artifact_name):
@@ -26,6 +27,31 @@ def test_BETRPT(moving):
     """ the BET report capable test """
     bet_rpt = BETRPT(generate_report=True, in_file=moving)
     _smoke_test_report(bet_rpt, 'testBET.svg')
+
+
+def test_ROIsPlot(oasis_dir):
+    """ the BET report capable test """
+    import nibabel as nb
+    import numpy as np
+
+    labels = nb.load(os.path.join(oasis_dir, 'T_template0_glm_4labelsJointFusion.nii.gz'))
+    data = labels.get_data()
+    out_files = []
+    ldata = np.zeros_like(data)
+    for i, l in enumerate([1, 3, 4, 2]):
+        ldata[data == l] = 1
+        out_files.append(os.path.abspath('label%d.nii.gz' % i))
+        lfile = nb.Nifti1Image(ldata, labels.affine, labels.header)
+        lfile.to_filename(out_files[-1])
+
+    roi_rpt = ROIsPlot(
+        generate_report=True,
+        in_file=os.path.join(oasis_dir, 'T_template0.nii.gz'),
+        in_mask=out_files[-1],
+        in_rois=out_files[:-1],
+        colors=['g', 'y']
+    )
+    _smoke_test_report(roi_rpt, 'testROIsPlot.svg')
 
 
 def test_SimpleShowMaskRPT(oasis_dir):

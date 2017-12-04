@@ -10,16 +10,17 @@ import subprocess
 import base64
 import re
 from sys import version_info
+from uuid import uuid4
+from io import open, StringIO
 
 import numpy as np
 import nibabel as nb
-from uuid import uuid4
-from io import open, StringIO
 
 from lxml import etree
 from nilearn import image as nlimage
 from nilearn.plotting import plot_anat
 from svgutils.transform import SVGFigure
+from seaborn import color_palette
 
 from .. import NIWORKFLOWS_LOG
 from ..nipype.utils import filemanip
@@ -87,12 +88,10 @@ if not hasattr(subprocess, 'run'):
 
 
 def robust_set_limits(data, plot_params):
-    vmin = np.percentile(data, 15)
-    if plot_params.get('vmin', None) is None:
-        plot_params['vmin'] = vmin
-    if plot_params.get('vmax', None) is None:
-        plot_params['vmax'] = np.percentile(data[data > vmin], 99.8)
-
+    plot_params['vmin'] = plot_params.get(
+        'vmin', np.percentile(data, 15))
+    plot_params['vmax'] = plot_params.get(
+        'vmax', np.percentile(data, 99.8))
     return plot_params
 
 
@@ -239,38 +238,13 @@ def _3d_in_file(in_file):
     return nlimage.index_img(in_file, 0)
 
 
-def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
-              compress='auto', **plot_params):
+def plot_segs(image_nii, seg_niis, out_file, bbox_nii=None, masked=False,
+              colors=None, compress='auto', **plot_params):
     """ plot segmentation as contours over the image (e.g. anatomical).
     seg_niis should be a list of files. mask_nii helps determine the cut
     coordinates. plot_params will be passed on to nilearn plot_* functions. If
     seg_niis is a list of size one, it behaves as if it was plotting the mask.
     """
-
-    def _plot_anat_with_contours(image, segs=None, **plot_params):
-        assert segs is not None
-        assert len(segs) <= 3
-        plot_params = {} if plot_params is None else plot_params
-
-        # anatomical
-        display = plot_anat(image, **plot_params)
-
-        # remove plot_anat -specific parameters
-        plot_params.pop('display_mode')
-        plot_params.pop('cut_coords')
-        # segment contours
-        for seg, color in zip(segs, ['r', 'b']):
-            plot_params['colors'] = color
-            plot_params['levels'] = [
-                0.5] if 'levels' not in plot_params else plot_params['levels']
-            plot_params['alpha'] = 1
-            plot_params['linewidths'] = 0.7
-            display.add_contours(seg, **plot_params)
-
-        svg = extract_svg(display, compress=compress)
-        display.close()
-        return svg
-
     plot_params = {} if plot_params is None else plot_params
 
     image_nii = _3d_in_file(image_nii)
@@ -278,17 +252,18 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
 
     plot_params = robust_set_limits(data, plot_params)
 
-    seg_niis = filemanip.filename_to_list(seg_niis)
-    mask_nii = nb.load(
-        mask_nii) if masked else nlimage.threshold_img(mask_nii, 1e-3)
+    bbox_nii = nb.load(image_nii if bbox_nii is None else bbox_nii)
+    if masked:
+        bbox_nii = nlimage.threshold_img(bbox_nii, 1e-3)
 
-    cuts = cuts_from_bbox(mask_nii, cuts=7)
-
+    cuts = cuts_from_bbox(bbox_nii, cuts=7)
+    plot_params['colors'] = colors or plot_params.get('colors', None)
     out_files = []
     for d in plot_params.pop('dimensions', ('z', 'x', 'y')):
         plot_params['display_mode'] = d
         plot_params['cut_coords'] = cuts[d]
-        svg = _plot_anat_with_contours(image_nii, seg_niis, **plot_params)
+        svg = _plot_anat_with_contours(image_nii, segs=seg_niis, compress=compress,
+                                       **plot_params)
 
         # Find and replace the figure_1 id.
         try:
@@ -304,6 +279,37 @@ def plot_segs(image_nii, seg_niis, mask_nii, out_file, masked=False, title=None,
         out_files.append(svg_fig)
 
     return out_files
+
+
+def _plot_anat_with_contours(image, segs=None, compress='auto',
+                             **plot_params):
+    assert segs is not None
+
+    plot_params = plot_params or {}
+    colors = plot_params.pop('colors', []) or []  # colors should not be None
+    nsegs = len(segs)
+    missing = nsegs - len(colors)
+    if missing > 0:  # missing may be negative
+        colors = colors + color_palette("husl", missing)
+
+    # anatomical
+    display = plot_anat(image, **plot_params)
+
+    # remove plot_anat -specific parameters
+    plot_params.pop('display_mode')
+    plot_params.pop('cut_coords')
+    plot_params['levels'] = np.atleast_1d(
+        plot_params.get('levels', 0.5)).tolist()
+
+    for i in reversed(range(nsegs)):
+        plot_params['colors'] = [colors[i]]
+        plot_params['linewidths'] = 0.8 if i > 0 else 1.5
+        plot_params['alpha'] = 1 if i > 0 else 0.8
+        display.add_contours(segs[i], **plot_params)
+
+    svg = extract_svg(display, compress=compress)
+    display.close()
+    return svg
 
 
 def plot_registration(anat_nii, div_id, plot_params=None,
