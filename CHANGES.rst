@@ -1,3 +1,9 @@
+Version 0.2.1
+-------------
+
+* [ENH] Add new ROIsPlot interface (#211)
+* [PIN] Upgrade internal Nipype to current master.
+
 Version 0.2.0
 -------------
 
