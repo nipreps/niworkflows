@@ -1,3 +1,8 @@
+Version 0.2.2
+-------------
+
+* [PIN] Upgrade internal Nipype to current master + nipy/nipype#2325
+
 Version 0.2.1
 -------------
 
