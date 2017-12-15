@@ -183,11 +183,15 @@ class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
 if LooseVersion("0.0.0") < fs.Info.looseversion() < LooseVersion("6.0.0"):
     class BBRegisterInputSpecRPT(nrc.ReportCapableInputSpec,
                                  fs.preprocess.BBRegisterInputSpec):
-        pass
+        out_lta_file = traits.Either(traits.Bool, File, default=True, usedefault=True,
+                                     argstr="--lta %s", min_ver='5.2.0',
+                                     desc="write the transformation matrix in LTA format")
 else:
     class BBRegisterInputSpecRPT(nrc.ReportCapableInputSpec,
                                  fs.preprocess.BBRegisterInputSpec6):
-        pass
+        out_lta_file = traits.Either(traits.Bool, File, default=True, usedefault=True,
+                                     argstr="--lta %s", min_ver='5.2.0',
+                                     desc="write the transformation matrix in LTA format")
 
 
 class BBRegisterOutputSpecRPT(nrc.ReportCapableOutputSpec,
@@ -200,10 +204,21 @@ class BBRegisterRPT(nrc.RegistrationRC, fs.BBRegister):
     output_spec = BBRegisterOutputSpecRPT
 
     def _post_run_hook(self, runtime):
+        outputs = self.aggregate_outputs(runtime=runtime)
         mri_dir = os.path.join(self.inputs.subjects_dir,
                                self.inputs.subject_id, 'mri')
-        self._fixed_image = os.path.join(mri_dir, 'brainmask.mgz')
-        self._moving_image = self.aggregate_outputs(runtime=runtime).registered_file
+        target_file = os.path.join(mri_dir, 'brainmask.mgz')
+
+        # Apply transform for simplicity
+        mri_vol2vol = fs.ApplyVolTransform(
+            source_file=self.inputs.source_file,
+            target_file=target_file,
+            lta_file=outputs.out_lta_file,
+            interp='nearest')
+        res = mri_vol2vol.run()
+
+        self._fixed_image = target_file
+        self._moving_image = res.outputs.transformed_file
         self._contour = os.path.join(mri_dir, 'ribbon.mgz')
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',
@@ -240,7 +255,8 @@ class MRICoregRPT(nrc.RegistrationRC, fs.MRICoreg):
         mri_vol2vol = fs.ApplyVolTransform(
             source_file=self.inputs.source_file,
             target_file=target_file,
-            lta_file=outputs.out_lta_file)
+            lta_file=outputs.out_lta_file,
+            interp='nearest')
         res = mri_vol2vol.run()
 
         self._fixed_image = target_file
