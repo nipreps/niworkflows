@@ -301,10 +301,9 @@ def _plot_anat_with_contours(image, segs=None, compress='auto',
     plot_params['levels'] = np.atleast_1d(
         plot_params.get('levels', 0.5)).tolist()
 
+    plot_params['linewidths'] = 0.5
     for i in reversed(range(nsegs)):
         plot_params['colors'] = [colors[i]]
-        plot_params['linewidths'] = 0.8 if i > 0 else 1.5
-        plot_params['alpha'] = 1 if i > 0 else 0.8
         display.add_contours(segs[i], **plot_params)
 
     svg = extract_svg(display, compress=compress)
