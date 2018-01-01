@@ -1,3 +1,10 @@
+Version 0.2.3
+-------------
+
+* [PIN] Upgrade internal Nipype to current master + current nipy/nipype#2325
+* [ENH] Thinner lines in tissue segmentation (#215)
+* [ENH] Use nearest for coreg visualization (#214)
+
 Version 0.2.2
 -------------
 
