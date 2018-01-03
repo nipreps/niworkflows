@@ -1,3 +1,9 @@
+Version 0.2.4
+-------------
+
+* [FIX] Regression of poldracklab/fmriprep#868 - updated nipy/nipype#2325
+  to fix it.
+
 Version 0.2.3
 -------------
 
