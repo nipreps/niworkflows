@@ -1,3 +1,8 @@
+Version 0.2.5
+-------------
+
+* [PIN] Pinning nipype to nipy/nipype@master
+
 Version 0.2.4
 -------------
 
