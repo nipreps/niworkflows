@@ -1,3 +1,9 @@
+Version 0.2.6
+-------------
+
+* [PIN] Pinning nipype to oesteban/nipype (including
+  https://github.com/nipy/nipype/pull/2368)
+
 Version 0.2.5
 -------------
 
