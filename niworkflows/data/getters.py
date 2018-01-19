@@ -23,6 +23,7 @@ OSF_RESOURCES = {
     'mni_template_RAS': ('57f32a799ad5a101f977eb77', 'a4669f0e7acceae148bb39450b2b21b4'),
     'ants_oasis_template': ('57f32ae89ad5a101f977eb79', '34d39070b541c416333cc8b6c2fe993c'),
     'ants_oasis_template_ras': ('584123a29ad5a1020913609d', 'afa21f99c66ae1672320d8aa0408229a'),
+    'ants_nki_template_ras': ('59cd90f46c613b02b3d79782', 'e5debaee65b8f2c8971577db1327e314'),
     'mni_epi': ('57fa09cdb83f6901d93623a0', '9df727e1f742ec55213480434b4c4811'),
     'mni152_nlin_sym_las': ('57fa7fc89ad5a101e635eeef', '9c4c0cad2a2e99d6799f01abf4107f5a'),
     'mni152_nlin_sym_ras': ('57fa7fd09ad5a101df35eed0', '65d64ad5a980da86e7d07d95b3ed2ccb'),
@@ -129,6 +130,14 @@ def get_ants_oasis_template_ras(data_dir=None, url=None, resume=True, verbose=1)
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset('ants_oasis_template_ras', data_dir, url, resume, verbose)
+
+def get_ants_nki_template_ras(data_dir=None, url=None, resume=True, verbose=1):
+    """Download and load the necessary files from the ANTs template of the NKI dataset.
+    :param str data_dir: path of the data directory. Used to force data storage
+        in a non-standard location.
+    :param str url: download URL of the dataset. Overwrite the default URL.
+    """
+    return get_dataset('ants_nki_template_ras', data_dir, url, resume, verbose)
 
 def get_mni152_nlin_sym_las(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
