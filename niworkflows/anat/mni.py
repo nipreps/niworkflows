@@ -438,6 +438,7 @@ def create_cfm(in_file, out_path, lesion_mask, global_mask=True):
         cfm_img = nb.Nifti1Image(in_data, in_img.affine, in_img.header)
 
     # Save the cost function mask.
+    cfm_img.set_data_dtype(np.uint8)
     cfm_img.to_filename(out_path)
 
     return os.path.abspath(out_path)
