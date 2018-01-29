@@ -15,7 +15,7 @@ import runpy
 nipype_info = runpy.run_path(op.join(op.abspath(op.dirname(__file__)),
                                      'nipype', 'info.py'))
 
-__version__ = '0.3.0'
+__version__ = '0.3.1-dev'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
