@@ -76,7 +76,7 @@ class RobustMNINormalization(BaseInterface):
 
     def __init__(self, **inputs):
         self.norm = None
-        self.retry = 0
+        self.retry = 1
         self._results = {}
         self.terminal_output = 'file'
         super(RobustMNINormalization, self).__init__(**inputs)
@@ -118,7 +118,6 @@ class RobustMNINormalization(BaseInterface):
             ants_args['initial_moving_transform'] = init_result.outputs.out_file
 
         for ants_settings in settings_files:
-            interface_result = None
 
             NIWORKFLOWS_LOG.info('Loading settings from file %s.',
                                  ants_settings)
@@ -129,12 +128,18 @@ class RobustMNINormalization(BaseInterface):
 
             NIWORKFLOWS_LOG.info(
                 'Retry #%d, commandline: \n%s', self.retry, self.norm.cmdline)
-            try:
-                interface_result = self.norm.run()
-            except Exception as exc:
-                NIWORKFLOWS_LOG.warning('Retry #%d failed: %s.', self.retry, exc)
+            self.norm.ignore_exception = True
+            interface_result = self.norm.run()
 
-            if interface_result is not None:
+            if interface_result.runtime.returncode != 0:
+                NIWORKFLOWS_LOG.warning('Retry #%d failed.', self.retry)
+                # Save outputs (if available)
+                term_out = _write_outputs(interface_result.runtime,
+                                          '.nipype-%04d' % self.retry)
+                if term_out:
+                    NIWORKFLOWS_LOG.warning(
+                        'Log of failed retry saved (%s).', ', '.join(term_out))
+            else:
                 runtime.returncode = 0
                 self._results.update(interface_result.outputs.get())
                 if isdefined(self.inputs.moving_mask):
@@ -142,13 +147,6 @@ class RobustMNINormalization(BaseInterface):
                 NIWORKFLOWS_LOG.info(
                     'Successful spatial normalization (retry #%d).', self.retry)
                 return runtime
-
-            # Save outputs (if available)
-            term_out = _write_outputs(interface_result.runtime,
-                                      '.nipype-%04d' % self.retry)
-            if term_out:
-                NIWORKFLOWS_LOG.warning(
-                    'Log of failed retry saved (%s).', ', '.join(term_out))
 
             self.retry += 1
 
