@@ -1,3 +1,8 @@
+Version 0.3.1
+-------------
+
+* [FIX] broken normalization retries (https://github.com/poldracklab/niworkflows/pull/220)
+
 Version 0.3.0
 -------------
 
