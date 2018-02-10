@@ -394,14 +394,13 @@ class SanitizeImage(SimpleInterface):
         if save_file:
             snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (
             warning_txt, description)
+            with open(out_report, 'w') as fobj:
+                fobj.write(indent(snippet, '\t' * 3))
             # A new file will be written
             out_fname = fname_presuffix(self.inputs.in_file, suffix='_valid',
                                         newpath=runtime.cwd)
             self._results['out_file'] = out_fname
             img.to_filename(out_fname)
-
-        with open(out_report, 'w') as fobj:
-            fobj.write(indent(snippet, '\t' * 3))
 
         self._results['out_report'] = out_report
         return runtime
