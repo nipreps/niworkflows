@@ -261,7 +261,9 @@ def _gen_reference(fixed_image, moving_image, fov_mask=None, out_file=None,
 
 class SanitizeImageInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input image')
-    n_volumes_to_discard = traits.Int(desc='discard n first volumes')
+    n_volumes_to_discard = traits.Int(0, usedefault=True, desc='discard n first volumes')
+    force_float32 = traits.Bool(False, usedefault=True, desc='cast data to float32 if higher '
+                                        'precision is encountered')
 
 
 class SanitizeImageOutputSpec(TraitedSpec):
@@ -379,11 +381,15 @@ class SanitizeImage(SimpleInterface):
 
         snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (warning_txt, description)
 
-        if traits.isdefined(self.inputs.n_volumes_to_discard) and \
-                self.inputs.n_volumes_to_discard:
-            img = nb.Nifti1Image(img.get_data[:, :, :, self.inputs.n_volumes_to_discard:],
-                                 img.affine,
-                                 img.header)
+        if (self.inputs.force_float32 and np.dtype(img.get_data_dtype()).itemsize > 4) or self.inputs.n_volumes_to_discard:
+            in_data = img.get_data()
+
+            if (self.inputs.force_float32 and np.dtype(img.get_data_dtype()).itemsize > 4):
+                in_data = in_data.astype(np.float32)
+
+            img = nb.Nifti1Image(in_data[:, :, :, self.inputs.n_volumes_to_discard:],
+                                     img.affine,
+                                     img.header)
             save_file = True
 
         # Store new file and report
