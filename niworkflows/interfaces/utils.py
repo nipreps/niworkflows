@@ -288,8 +288,8 @@ class SanitizeImage(SimpleInterface):
 | sform, scode <- qform, qcode                   |
     +-------------------+------------------+------------------+------------------\
 +------------------------------------------------+
-    | *                 | *                | True             | False            \
-| qform, qcode <- sform, scode                   |
+    | *                 | True             | *                | False            \
+| sform, scode <- qform, qcode                   |
     +-------------------+------------------+------------------+------------------\
 +------------------------------------------------+
     | *                 | False            | True             | *                \
@@ -339,7 +339,7 @@ class SanitizeImage(SimpleInterface):
         self._results['out_file'] = out_fname
 
         # Row 2:
-        if valid_qform and qform_code > 0 and sform_code == 0:
+        if valid_qform and qform_code > 0:
             img.set_sform(img.get_qform(), qform_code)
             warning_txt = 'Note on orientation: sform matrix set'
             description = """\
