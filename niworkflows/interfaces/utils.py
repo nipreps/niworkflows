@@ -12,7 +12,7 @@ import shutil
 import numpy as np
 import nibabel as nb
 import nilearn.image as nli
-from textwrap3 import indent
+from textwrap import indent
 
 from .. import __version__
 from ..nipype import logging
