@@ -261,6 +261,7 @@ def _gen_reference(fixed_image, moving_image, fov_mask=None, out_file=None,
 
 class SanitizeImageInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input image')
+    n_volumes_to_discard = traits.Int(desc='discard n first volumes')
 
 
 class SanitizeImageOutputSpec(TraitedSpec):
@@ -327,20 +328,17 @@ class SanitizeImage(SimpleInterface):
         # Matching affines
         matching_affines = valid_qform and np.allclose(img.get_qform(), img.get_sform())
 
+        save_file = False
+
         # Both match, qform valid (implicit with match), codes okay -> do nothing, empty report
         if matching_affines and qform_code > 0 and sform_code > 0:
             self._results['out_file'] = self.inputs.in_file
             open(out_report, 'w').close()
-            self._results['out_report'] = out_report
-            return runtime
-
-        # A new file will be written
-        out_fname = fname_presuffix(self.inputs.in_file, suffix='_valid', newpath=runtime.cwd)
-        self._results['out_file'] = out_fname
 
         # Row 2:
-        if valid_qform and qform_code > 0:
+        elif valid_qform and qform_code > 0:
             img.set_sform(img.get_qform(), qform_code)
+            save_file = True
             warning_txt = 'Note on orientation: sform matrix set'
             description = """\
 <p class="elem-desc">The sform has been copied from qform.</p>
@@ -349,6 +347,7 @@ class SanitizeImage(SimpleInterface):
         # Note: if qform is not valid, matching_affines is False
         elif sform_code > 0 and (not matching_affines or qform_code == 0):
             img.set_qform(img.get_sform(), sform_code)
+            save_file = True
             warning_txt = 'Note on orientation: qform matrix overwritten'
             description = """\
 <p class="elem-desc">The qform has been copied from sform.</p>
@@ -368,6 +367,7 @@ class SanitizeImage(SimpleInterface):
             affine = img.affine
             img.set_sform(affine, nb.nifti1.xform_codes['scanner'])
             img.set_qform(affine, nb.nifti1.xform_codes['scanner'])
+            save_file = True
             warning_txt = 'WARNING - Missing orientation information'
             description = """\
 <p class="elem-desc">
@@ -376,9 +376,24 @@ class SanitizeImage(SimpleInterface):
     Analyses of this dataset MAY BE INVALID.
 </p>
 """
+
         snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (warning_txt, description)
+
+        if traits.isdefined(self.inputs.n_volumes_to_discard) and \
+                self.inputs.n_volumes_to_discard:
+            img = nb.Nifti1Image(img.get_data[:, :, :, self.inputs.n_volumes_to_discard:],
+                                 img.affine,
+                                 img.header)
+            save_file = True
+
         # Store new file and report
-        img.to_filename(out_fname)
+        if save_file:
+            # A new file will be written
+            out_fname = fname_presuffix(self.inputs.in_file, suffix='_valid',
+                                        newpath=runtime.cwd)
+            self._results['out_file'] = out_fname
+            img.to_filename(out_fname)
+
         with open(out_report, 'w') as fobj:
             fobj.write(indent(snippet, '\t' * 3))
 
