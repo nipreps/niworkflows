@@ -370,7 +370,7 @@ class ValidateImage(SimpleInterface):
             warning_txt = 'WARNING - Missing orientation information'
             description = """\
 <p class="elem-desc">
-    FMRIPREP could not retrieve orientation information from the image header.
+    Orientation information could not be retrieved from the image header.
     The qform and sform matrices have been set to a default, LAS-oriented affine.
     Analyses of this dataset MAY BE INVALID.
 </p>
