@@ -379,8 +379,6 @@ class SanitizeImage(SimpleInterface):
 </p>
 """
 
-        snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (warning_txt, description)
-
         if (self.inputs.force_float32 and np.dtype(img.get_data_dtype()).itemsize > 4) or self.inputs.n_volumes_to_discard:
             in_data = img.get_data()
 
@@ -394,6 +392,8 @@ class SanitizeImage(SimpleInterface):
 
         # Store new file and report
         if save_file:
+            snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (
+            warning_txt, description)
             # A new file will be written
             out_fname = fname_presuffix(self.inputs.in_file, suffix='_valid',
                                         newpath=runtime.cwd)
