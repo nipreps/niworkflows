@@ -259,18 +259,19 @@ def _gen_reference(fixed_image, moving_image, fov_mask=None, out_file=None,
     return out_file
 
 
-class ValidateImageInputSpec(BaseInterfaceInputSpec):
+class SanitizeImageInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input image')
 
 
-class ValidateImageOutputSpec(TraitedSpec):
+class SanitizeImageOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='validated image')
     out_report = File(exists=True, desc='HTML segment containing warning')
 
 
-class ValidateImage(SimpleInterface):
+class SanitizeImage(SimpleInterface):
     """
-    Check the correctness of x-form headers (matrix and code)
+    Check the correctness of x-form headers (matrix and code) and fixes
+    problematic combinations of values.
     This interface implements the `following logic
     <https://github.com/poldracklab/fmriprep/issues/873#issuecomment-349394544>`_:
     +-------------------+------------------+------------------+------------------\
@@ -304,8 +305,8 @@ class ValidateImage(SimpleInterface):
     +-------------------+------------------+------------------+------------------\
 +------------------------------------------------+
     """
-    input_spec = ValidateImageInputSpec
-    output_spec = ValidateImageOutputSpec
+    input_spec = SanitizeImageInputSpec
+    output_spec = SanitizeImageOutputSpec
 
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file)
