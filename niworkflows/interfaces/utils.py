@@ -331,6 +331,7 @@ class SanitizeImage(SimpleInterface):
         matching_affines = valid_qform and np.allclose(img.get_qform(), img.get_sform())
 
         save_file = False
+        warning_txt = ''
 
         # Both match, qform valid (implicit with match), codes okay -> do nothing, empty report
         if matching_affines and qform_code > 0 and sform_code > 0:
@@ -391,17 +392,18 @@ class SanitizeImage(SimpleInterface):
                                  img.header)
             save_file = True
 
-        # Store new file and report
+        # Store new file
         if save_file:
-            snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (
-            warning_txt, description)
-            with open(out_report, 'w') as fobj:
-                fobj.write(indent(snippet, '\t' * 3))
-            # A new file will be written
             out_fname = fname_presuffix(self.inputs.in_file, suffix='_valid',
                                         newpath=runtime.cwd)
             self._results['out_file'] = out_fname
             img.to_filename(out_fname)
+
+        if warning_txt:
+            snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (
+            warning_txt, description)
+            with open(out_report, 'w') as fobj:
+                fobj.write(indent(snippet, '\t' * 3))
 
         self._results['out_report'] = out_report
         return runtime
