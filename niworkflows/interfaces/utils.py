@@ -387,8 +387,8 @@ class SanitizeImage(SimpleInterface):
                 in_data = img.dataobj
 
             img = nb.Nifti1Image(in_data[:, :, :, self.inputs.n_volumes_to_discard:],
-                                     img.affine,
-                                     img.header)
+                                 img.affine,
+                                 img.header)
             save_file = True
 
         # Store new file and report
