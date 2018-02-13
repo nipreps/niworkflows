@@ -380,10 +380,10 @@ class SanitizeImage(SimpleInterface):
 """
 
         if (self.inputs.force_float32 and np.dtype(img.get_data_dtype()).itemsize > 4) or self.inputs.n_volumes_to_discard:
-            in_data = img.get_data()
-
             if (self.inputs.force_float32 and np.dtype(img.get_data_dtype()).itemsize > 4):
-                in_data = in_data.astype(np.float32)
+                in_data = img.get_fdata(dtype=np.float32)
+            else:
+                in_data = img.dataobj
 
             img = nb.Nifti1Image(in_data[:, :, :, self.inputs.n_volumes_to_discard:],
                                      img.affine,
