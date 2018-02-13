@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
@@ -16,7 +15,7 @@ import runpy
 nipype_info = runpy.run_path(op.join(op.abspath(op.dirname(__file__)),
                                      'nipype', 'info.py'))
 
-__version__ = '0.2.5-dev'
+__version__ = '0.3.2-dev'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(

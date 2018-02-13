@@ -1,3 +1,36 @@
+Version 0.3.1
+-------------
+
+* [FIX] broken normalization retries (https://github.com/poldracklab/niworkflows/pull/220)
+
+Version 0.3.0
+-------------
+
+* [PIN] Nipype 1.0.0
+
+Version 0.2.8
+-------------
+
+* [PIN] Pinning nipype to oesteban/nipype (including
+  nipy/nipype#2383, nipy/nipype#2384, nipy/nipype#2376)
+
+Version 0.2.7
+-------------
+
+* [PIN] Pinning nipype to nipy/nipype (including
+  https://github.com/nipy/nipype/pull/2373)
+
+Version 0.2.6
+-------------
+
+* [PIN] Pinning nipype to oesteban/nipype (including
+  https://github.com/nipy/nipype/pull/2368)
+
+Version 0.2.5
+-------------
+
+* [PIN] Pinning nipype to nipy/nipype@master
+
 Version 0.2.4
 -------------
 
