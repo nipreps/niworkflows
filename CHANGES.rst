@@ -1,3 +1,8 @@
+Version 0.3.2
+-------------
+
+* [ENH] Added SanitizeImage interface (https://github.com/poldracklab/niworkflows/pull/221)
+
 Version 0.3.1
 -------------
 
