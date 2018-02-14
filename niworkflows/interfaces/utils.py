@@ -262,8 +262,8 @@ def _gen_reference(fixed_image, moving_image, fov_mask=None, out_file=None,
 class SanitizeImageInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input image')
     n_volumes_to_discard = traits.Int(0, usedefault=True, desc='discard n first volumes')
-    force_float32 = traits.Bool(False, usedefault=True, desc='cast data to float32 if higher '
-                                        'precision is encountered')
+    max_32bit = traits.Bool(False, usedefault=True, desc='cast data to float32 if higher '
+                                                         'precision is encountered')
 
 
 class SanitizeImageOutputSpec(TraitedSpec):
@@ -380,9 +380,9 @@ class SanitizeImage(SimpleInterface):
 </p>
 """
 
-        if (self.inputs.force_float32 and np.dtype(img.get_data_dtype()).itemsize > 4) or self.inputs.n_volumes_to_discard:
+        if (self.inputs.max_32bit and np.dtype(img.get_data_dtype()).itemsize > 4) or self.inputs.n_volumes_to_discard:
             # force float32 only if 64 bit dtype is detected
-            if (self.inputs.force_float32 and np.dtype(img.get_data_dtype()).itemsize > 4):
+            if (self.inputs.max_32bit and np.dtype(img.get_data_dtype()).itemsize > 4):
                 in_data = img.get_fdata(dtype=np.float32)
             else:
                 in_data = img.dataobj
