@@ -55,7 +55,7 @@ jobs:
           command: |
             e=1 && for i in {1..5}; do
               docker build \
-                --cache-from=poldracklab/niworkflows \
+                --cache-from=niworkflows \
                 --rm=false \
                 -t niworkflows:py3 \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
