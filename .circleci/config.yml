@@ -105,9 +105,9 @@ jobs:
           command: |
             sudo setfacl -d -m group:ubuntu:rwx $PWD
             sudo setfacl -m group:ubuntu:rwx $PWD
-            docker run -ti --rm=false \
-              --env SAVE_CIRCLE_ARTIFACTS="/scratch" \
-              -v ${PWD}:/scratch -w /scratch \ 
+            docker run -it --rm=false \
+              -e SAVE_CIRCLE_ARTIFACTS="/scratch" \
+              -v ${PWD}:/scratch -w /scratch \
               --entrypoint=/usr/local/miniconda/bin/py.test \
               niworkflows:py3 /root/niworkflows \
               -n ${CIRCLE_NPROCS:-4} -v --junit-xml=/scratch/pytest.xml
