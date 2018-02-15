@@ -100,9 +100,26 @@ def test_BrainExtractionRPT(monkeypatch, oasis_dir, moving, nthreads):
 
 
 @pytest.mark.parametrize("segments", [True, False])
-def test_FASTRPT(segments, reference, reference_mask):
+def test_FASTRPT(monkeypatch, segments, reference, reference_mask):
     """ test FAST with the two options for segments """
     from niworkflows.nipype.interfaces.fsl.maths import ApplyMask
+
+    def _agg(objekt, runtime):
+        outputs = Bunch(tissue_class_map=os.path.join(
+            datadir, 'testFASTRPT-tissue_class_map.nii.gz'),
+            tissue_class_files=[
+                os.path.join(datadir, 'testFASTRPT-tissue_class_files0.nii.gz'),
+                os.path.join(datadir, 'testFASTRPT-tissue_class_files1.nii.gz'),
+                os.path.join(datadir, 'testFASTRPT-tissue_class_files2.nii.gz')]
+        )
+        return outputs
+
+    # Patch the _run_interface method
+    monkeypatch.setattr(FASTRPT, '_run_interface',
+                        _run_interface_mock)
+    monkeypatch.setattr(FASTRPT, 'aggregate_outputs',
+                        _agg)
+
     brain = ApplyMask(
         in_file=reference, mask_file=reference_mask).run().outputs.out_file
     fast_rpt = FASTRPT(

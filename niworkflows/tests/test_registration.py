@@ -31,8 +31,20 @@ def test_FLIRTRPT(reference, moving):
     _smoke_test_report(flirt_rpt, 'testFLIRT.svg')
 
 
-def test_MRICoregRPT(reference, moving, nthreads):
+def test_MRICoregRPT(monkeypatch, reference, moving, nthreads):
     """ the FLIRT report capable test """
+    def _agg(objekt, runtime):
+        outputs = Bunch(out_lta_file=os.path.join(
+            datadir, 'testMRICoregRPT-out_lta_file.lta'),
+        )
+        return outputs
+
+    # Patch the _run_interface method
+    monkeypatch.setattr(MRICoregRPT, '_run_interface',
+                        _run_interface_mock)
+    monkeypatch.setattr(MRICoregRPT, 'aggregate_outputs',
+                        _agg)
+
     mri_coreg_rpt = MRICoregRPT(generate_report=True,
                                 source_file=moving,
                                 reference_file=reference,
@@ -76,8 +88,20 @@ def test_FLIRTRPT_w_BBR(reference, reference_mask, moving):
     _smoke_test_report(flirt_rpt, 'testFLIRTRPTBBR.svg')
 
 
-def test_BBRegisterRPT(moving):
+def test_BBRegisterRPT(monkeypatch, moving):
     """ the BBRegister report capable test """
+    def _agg(objekt, runtime):
+        outputs = Bunch(out_lta_file=os.path.join(
+            datadir, 'testBBRegisterRPT-out_lta_file.lta'),
+        )
+        return outputs
+
+    # Patch the _run_interface method
+    monkeypatch.setattr(BBRegisterRPT, '_run_interface',
+                        _run_interface_mock)
+    monkeypatch.setattr(BBRegisterRPT, 'aggregate_outputs',
+                        _agg)
+
     subject_id = 'fsaverage'
     bbregister_rpt = BBRegisterRPT(generate_report=True,
                                    contrast_type='t1',
@@ -109,15 +133,40 @@ def test_RobustMNINormalizationRPT(monkeypatch, moving):
 
 def test_RobustMNINormalizationRPT_masked(monkeypatch, moving, reference_mask):
     """ the RobustMNINormalizationRPT report capable test with masking """
+    def _agg(objekt, runtime):
+        outputs = Bunch(warped_image=os.path.join(
+            datadir, 'testRobustMNINormalizationRPTMovingWarpedImage.nii.gz')
+        )
+        return outputs
+
+    # Patch the _run_interface method
+    monkeypatch.setattr(RobustMNINormalizationRPT, '_run_interface',
+                        _run_interface_mock)
+    monkeypatch.setattr(RobustMNINormalizationRPT, 'aggregate_outputs',
+                        _agg)
+
     ants_rpt = RobustMNINormalizationRPT(
         generate_report=True, moving_image=moving,
         reference_mask=reference_mask, flavor='testing')
     _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT_masked.svg')
 
 
-def test_ANTSRegistrationRPT(reference, moving):
+def test_ANTSRegistrationRPT(monkeypatch, reference, moving):
     """ the RobustMNINormalizationRPT report capable test """
     import pkg_resources as pkgr
+
+    def _agg(objekt, runtime):
+        outputs = Bunch(warped_image=os.path.join(
+            datadir, 'testANTSRegistrationRPT-warped_image.nii.gz')
+        )
+        return outputs
+
+    # Patch the _run_interface method
+    monkeypatch.setattr(ANTSRegistrationRPT, '_run_interface',
+                        _run_interface_mock)
+    monkeypatch.setattr(ANTSRegistrationRPT, 'aggregate_outputs',
+                        _agg)
+
     ants_rpt = ANTSRegistrationRPT(
         generate_report=True, moving_image=moving, fixed_image=reference,
         from_file=pkgr.resource_filename(

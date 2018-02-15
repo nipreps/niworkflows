@@ -40,18 +40,19 @@ class FASTRPT(nrc.SegmentationRC,
         ''' generates a report showing nine slices, three per axis, of an
         arbitrary volume of `in_files`, with the resulting segmentation
         overlaid '''
-        self._anat_file = self.inputs.in_files[0],
-        self._mask_file = self.aggregate_outputs(runtime=runtime).tissue_class_map
+        self._anat_file = self.inputs.in_files[0]
+        outputs = self.aggregate_outputs(runtime=runtime)
+        self._mask_file = outputs.tissue_class_map
         # We are skipping the CSF class because with combination with others
         # it only shows the skullstriping mask
-        self._seg_files = self.aggregate_outputs(runtime=runtime).tissue_class_files[1:]
+        self._seg_files = outputs.tissue_class_files[1:]
         self._masked = False
 
         NIWORKFLOWS_LOG.info('Generating report for FAST (in_files %s, '
                              'segmentation %s, individual tissue classes %s).',
                              self.inputs.in_files,
-                             self.aggregate_outputs(runtime=runtime).tissue_class_map,
-                             self.aggregate_outputs(runtime=runtime).tissue_class_files)
+                             outputs.tissue_class_map,
+                             outputs.tissue_class_files)
 
 
 class ReconAllInputSpecRPT(nrc.ReportCapableInputSpec,
