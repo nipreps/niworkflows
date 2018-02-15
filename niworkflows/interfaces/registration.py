@@ -46,9 +46,12 @@ class RobustMNINormalizationRPT(
 
     def _post_run_hook(self, runtime):
         # We need to dig into the internal ants.Registration interface
-        self._fixed_image = self.norm.inputs.fixed_image[0]  # and get first item
-        if isdefined(self.norm.inputs.fixed_image_mask):
-            self._fixed_image_mask = self.norm.inputs.fixed_image_mask
+        self._fixed_image = self._get_ants_args()['fixed_image']
+        if isinstance(self._fixed_image, (list, tuple)):
+            self._fixed_image = self._fixed_image[0]  # get first item if list
+
+        if self._get_ants_args().get('fixed_image_mask') is not None:
+            self._fixed_image_mask = self._get_ants_args().get('fixed_image_mask')
         self._moving_image = self.aggregate_outputs(runtime=runtime).warped_image
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)

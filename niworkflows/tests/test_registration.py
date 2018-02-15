@@ -5,10 +5,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 from shutil import copy
+import pytest
 
+from niworkflows.nipype.interfaces.base import Bunch
 from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT,
     MRICoregRPT, ApplyXFMRPT, SimpleBeforeAfterRPT)
+from .conftest import _run_interface_mock, datadir
 
 
 def _smoke_test_report(report_interface, artifact_name):
@@ -85,14 +88,26 @@ def test_BBRegisterRPT(moving):
     _smoke_test_report(bbregister_rpt, 'testBBRegister.svg')
 
 
-def test_RobustMNINormalizationRPT(moving):
+def test_RobustMNINormalizationRPT(monkeypatch, moving):
     """ the RobustMNINormalizationRPT report capable test """
+    def _agg(objekt, runtime):
+        outputs = Bunch(warped_image=os.path.join(
+            datadir, 'testRobustMNINormalizationRPTMovingWarpedImage.nii.gz')
+        )
+        return outputs
+
+    # Patch the _run_interface method
+    monkeypatch.setattr(RobustMNINormalizationRPT, '_run_interface',
+                        _run_interface_mock)
+    monkeypatch.setattr(RobustMNINormalizationRPT, 'aggregate_outputs',
+                        _agg)
+
     ants_rpt = RobustMNINormalizationRPT(
         generate_report=True, moving_image=moving, flavor='testing')
     _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT.svg')
 
 
-def test_RobustMNINormalizationRPT_masked(moving, reference_mask):
+def test_RobustMNINormalizationRPT_masked(monkeypatch, moving, reference_mask):
     """ the RobustMNINormalizationRPT report capable test with masking """
     ants_rpt = RobustMNINormalizationRPT(
         generate_report=True, moving_image=moving,
