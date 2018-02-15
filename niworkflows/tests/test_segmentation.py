@@ -6,11 +6,26 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 from shutil import copy
 import pytest
+from datetime import datetime as dt
 
+from niworkflows.nipype.interfaces.base import Bunch
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
 from niworkflows.interfaces.masks import (
     BETRPT, BrainExtractionRPT, SimpleShowMaskRPT, ROIsPlot
 )
+
+filepath = os.path.dirname(os.path.realpath(__file__))
+datadir = os.path.realpath(os.path.join(filepath, 'data'))
+
+
+def _run_interface_mock(objekt, runtime):
+    runtime.returncode = 0
+    runtime.endTime = dt.isoformat(dt.utcnow())
+
+    objekt._out_report = os.path.abspath(objekt.inputs.out_report)
+    objekt._post_run_hook(runtime)
+    objekt._generate_report()
+    return runtime
 
 
 def _smoke_test_report(report_interface, artifact_name):
@@ -20,7 +35,7 @@ def _smoke_test_report(report_interface, artifact_name):
     save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
     if save_artifacts:
         copy(out_report, os.path.join(save_artifacts, artifact_name))
-    assert os.path.isfile(out_report), 'Report does not exist'
+    assert os.path.isfile(out_report), 'Report "%s" does not exist' % out_report
 
 
 def test_BETRPT(moving):
@@ -65,8 +80,21 @@ def test_SimpleShowMaskRPT(oasis_dir):
     _smoke_test_report(msk_rpt, 'testSimpleMask.svg')
 
 
-def test_BrainExtractionRPT(oasis_dir, moving, nthreads):
+def test_BrainExtractionRPT(monkeypatch, oasis_dir, moving, nthreads):
     """ test antsBrainExtraction with reports"""
+
+    def _agg(objekt, runtime):
+        outputs = Bunch(BrainExtractionMask=os.path.join(
+            datadir, 'testBrainExtractionRPTBrainExtractionMask.nii.gz')
+        )
+        return outputs
+
+    # Patch the _run_interface method
+    monkeypatch.setattr(BrainExtractionRPT, '_run_interface',
+                        _run_interface_mock)
+    monkeypatch.setattr(BrainExtractionRPT, 'aggregate_outputs',
+                        _agg)
+
     bex_rpt = BrainExtractionRPT(
         generate_report=True,
         dimension=3,
@@ -78,9 +106,11 @@ def test_BrainExtractionRPT(oasis_dir, moving, nthreads):
         extraction_registration_mask=os.path.join(
             oasis_dir, 'T_template0_BrainCerebellumRegistrationMask.nii.gz'),
         out_prefix='testBrainExtractionRPT',
-        debug=True, # run faster for testing purposes
+        debug=True,  # run faster for testing purposes
         num_threads=nthreads
     )
+
+    print(bex_rpt.aggregate_outputs(None).BrainExtractionMask)
     _smoke_test_report(bex_rpt, 'testANTSBrainExtraction.svg')
 
 
