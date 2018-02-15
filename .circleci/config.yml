@@ -75,20 +75,25 @@ jobs:
          paths:
             - /tmp/cache/docker.tar.gz
 
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - cache/docker.tar.gz
-            - src/niworkflows
+#      - persist_to_workspace:
+#          root: /tmp
+#          paths:
+#            - cache/docker.tar.gz
 
   test_pytest:
     machine:
       image: circleci/classic:201711-01
     working_directory: /tmp/tests
     steps:
-      - attach_workspace:
-          at: /tmp
-      - run:
+#      - attach_workspace:
+#          at: /tmp
+       - restore_cache:
+          keys:
+            - docker-v1-{{ .Branch }}-{{ epoch }}
+            - docker-v1-{{ .Branch }}-
+            - docker-v1-master-
+            - docker-v1-
+       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
           command: |
@@ -115,14 +120,32 @@ jobs:
       - store_artifacts:
           path: /tmp/tests
 
+      - store_test_results:
+          path: /tmp/tests
+
 
   deploy:
     machine:
       image: circleci/classic:201711-01
     working_directory: /tmp/src/niworkflows
     steps:
-      - attach_workspace:
-          at: /tmp
+      - checkout
+      - run:
+          name: Checkout Nipype
+          command: |
+            git submodule init
+            git submodule update || true
+            git submodule sync
+            git -C nipype fetch origin
+            git submodule update
+
+      - run:
+          name: Update Niworkflows version
+          command: |
+            if [ "${CIRCLE_TAG}" != "" ]; then
+              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'${CIRCLE_TAG}'/" niworkflows/info.py
+            fi
+
       - run:
           name: Deploy to PyPi
           command: |
