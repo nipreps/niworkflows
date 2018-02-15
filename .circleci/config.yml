@@ -71,8 +71,8 @@ jobs:
             docker save ubuntu:xenial-20161213 niworkflows:py3 \
             | pigz -8 -p 3 > /tmp/cache/docker.tar.gz
       - save_cache:
-         key: docker-v1-{{ .Branch }}-{{ epoch }}
-         paths:
+          key: docker-v1-{{ .Branch }}-{{ epoch }}
+          paths:
             - /tmp/cache/docker.tar.gz
 
       # - persist_to_workspace:
@@ -87,13 +87,13 @@ jobs:
     steps:
       # - attach_workspace:
       #     at: /tmp
-       - restore_cache:
+      - restore_cache:
           keys:
             - docker-v1-{{ .Branch }}-{{ epoch }}
             - docker-v1-{{ .Branch }}-
             - docker-v1-master-
             - docker-v1-
-       - run:
+      - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
           command: |
