@@ -75,18 +75,18 @@ jobs:
          paths:
             - /tmp/cache/docker.tar.gz
 
-#      - persist_to_workspace:
-#          root: /tmp
-#          paths:
-#            - cache/docker.tar.gz
+      # - persist_to_workspace:
+      #     root: /tmp
+      #     paths:
+      #       - cache/docker.tar.gz
 
   test_pytest:
     machine:
       image: circleci/classic:201711-01
     working_directory: /tmp/tests
     steps:
-#      - attach_workspace:
-#          at: /tmp
+      # - attach_workspace:
+      #     at: /tmp
        - restore_cache:
           keys:
             - docker-v1-{{ .Branch }}-{{ epoch }}
