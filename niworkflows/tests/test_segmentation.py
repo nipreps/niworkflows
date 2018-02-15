@@ -96,8 +96,6 @@ def test_BrainExtractionRPT(monkeypatch, oasis_dir, moving, nthreads):
         debug=True,  # run faster for testing purposes
         num_threads=nthreads
     )
-
-    print(bex_rpt.aggregate_outputs(None).BrainExtractionMask)
     _smoke_test_report(bex_rpt, 'testANTSBrainExtraction.svg')
 
 
