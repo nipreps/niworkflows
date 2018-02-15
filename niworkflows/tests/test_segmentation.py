@@ -6,26 +6,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 from shutil import copy
 import pytest
-from datetime import datetime as dt
 
 from niworkflows.nipype.interfaces.base import Bunch
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
 from niworkflows.interfaces.masks import (
     BETRPT, BrainExtractionRPT, SimpleShowMaskRPT, ROIsPlot
 )
-
-filepath = os.path.dirname(os.path.realpath(__file__))
-datadir = os.path.realpath(os.path.join(filepath, 'data'))
-
-
-def _run_interface_mock(objekt, runtime):
-    runtime.returncode = 0
-    runtime.endTime = dt.isoformat(dt.utcnow())
-
-    objekt._out_report = os.path.abspath(objekt.inputs.out_report)
-    objekt._post_run_hook(runtime)
-    objekt._generate_report()
-    return runtime
+from .conftest import _run_interface_mock, datadir
 
 
 def _smoke_test_report(report_interface, artifact_name):
@@ -132,13 +119,16 @@ def test_FASTRPT(segments, reference, reference_mask):
         fast_rpt, 'testFAST_%ssegments.svg' % ('no' * int(not segments)))
 
 
-def test_ReconAllRPT():
+def test_ReconAllRPT(monkeypatch):
+    # Patch the _run_interface method
+    monkeypatch.setattr(ReconAllRPT, '_run_interface',
+                        _run_interface_mock)
+
     rall_rpt = ReconAllRPT(
         subject_id='fsaverage',
         directive='all',
         subjects_dir=os.getenv('SUBJECTS_DIR'),
         generate_report=True
     )
-    rall_rpt.mock_run = True
 
     _smoke_test_report(rall_rpt, 'testReconAll.svg')
