@@ -4,11 +4,25 @@
 """ py.test configuration file """
 import os
 from tempfile import mkdtemp
+from datetime import datetime as dt
 import pytest
 
 from niworkflows.data.getters import (
     get_mni_template_ras, get_ds003_downsampled, get_ants_oasis_template_ras
 )
+
+filepath = os.path.dirname(os.path.realpath(__file__))
+datadir = os.path.realpath(os.path.join(filepath, 'data'))
+
+
+def _run_interface_mock(objekt, runtime):
+    runtime.returncode = 0
+    runtime.endTime = dt.isoformat(dt.utcnow())
+
+    objekt._out_report = os.path.abspath(objekt.inputs.out_report)
+    objekt._post_run_hook(runtime)
+    objekt._generate_report()
+    return runtime
 
 
 def pytest_runtest_setup(item):

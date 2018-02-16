@@ -42,20 +42,15 @@ class ReportCapableInterface(BaseInterface):
 
     def __init__(self, **inputs):
         self._out_report = None
-        self._mock_run = None
         super(ReportCapableInterface, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
         """ delegates to base interface run method, then attempts to generate reports """
-
-        if not self._mock_run:
-            try:
-                runtime = super(
-                    ReportCapableInterface, self)._run_interface(runtime)
-            except NotImplementedError:
-                pass  # the interface is derived from BaseInterface
-        else:
-            runtime.returncode = 0
+        try:
+            runtime = super(
+                ReportCapableInterface, self)._run_interface(runtime)
+        except NotImplementedError:
+            pass  # the interface is derived from BaseInterface
 
         # leave early if there's nothing to do
         if not self.inputs.generate_report:
@@ -111,14 +106,6 @@ class ReportCapableInterface(BaseInterface):
         errorstr += '</div>\n'
         with open(self._out_report, 'w' if PY3 else 'wb') as outfile:
             outfile.write(errorstr)
-
-    @property
-    def mock_run(self):
-        return self._mock_run
-
-    @mock_run.setter
-    def mock_run(self, value):
-        self._mock_run = value
 
 
 class RegistrationRC(ReportCapableInterface):
