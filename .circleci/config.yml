@@ -1,0 +1,181 @@
+version: 2
+jobs:
+
+  build:
+    environment:
+      TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+      SCRATCH: "/scratch"
+    docker:
+      - image: docker:18.01.0-ce-git
+    working_directory: /tmp/src/niworkflows
+    steps:
+      - run:
+          name: Install parallel gzip
+          command: |
+            apk add --no-cache pigz
+      - restore_cache:
+          keys:
+            - docker-v1-{{ .Branch }}-{{ epoch }}
+            - docker-v1-{{ .Branch }}-
+            - docker-v1-master-
+            - docker-v1-
+          paths:
+            - /tmp/cache/docker.tar.gz
+            - /tmp/cache/ubuntu.tar.gz
+      - checkout
+      - run:
+          name: Checkout Nipype
+          command: |
+            git submodule init
+            git submodule update || true
+            git submodule sync
+            git -C nipype fetch origin
+            git submodule update
+
+      - run:
+          name: Update Niworkflows version
+          command: |
+            if [ "${CIRCLE_TAG}" != "" ]; then
+              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'${CIRCLE_TAG}'/" niworkflows/info.py
+            fi
+      - setup_remote_docker
+      - run:
+          name: Load Docker image layer cache
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            if [ -f /tmp/cache/docker.tar.gz ]; then
+              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+              docker images
+            fi
+      - run:
+          name: Build Docker image
+          no_output_timeout: 60m
+          command: |
+            e=1 && for i in {1..5}; do
+              docker build \
+                --cache-from=niworkflows:py3 \
+                --rm=false \
+                -t niworkflows:py3 \
+                --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+                --build-arg VCS_REF=`git rev-parse --short HEAD` \
+                --build-arg VERSION=${CIRCLE_TAG:-latest} . \
+              && e=0 && break || sleep 15
+            done && [ "$e" -eq "0" ]
+      - run:
+          name: Docker save
+          no_output_timeout: 40m
+          command: |
+            mkdir -p /tmp/cache
+            docker save ubuntu:xenial-20161213 niworkflows:py3 \
+            | pigz -8 -p 3 > /tmp/cache/docker.tar.gz
+      - save_cache:
+          key: docker-v1-{{ .Branch }}-{{ epoch }}
+          paths:
+            - /tmp/cache/docker.tar.gz
+
+      # - persist_to_workspace:
+      #     root: /tmp
+      #     paths:
+      #       - cache/docker.tar.gz
+
+  test_pytest:
+    machine:
+      image: circleci/classic:201711-01
+    working_directory: /tmp/tests
+    steps:
+      # - attach_workspace:
+      #     at: /tmp
+      - restore_cache:
+          keys:
+            - docker-v1-{{ .Branch }}-{{ epoch }}
+            - docker-v1-{{ .Branch }}-
+            - docker-v1-master-
+            - docker-v1-
+      - run:
+          name: Load Docker image layer cache
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            if [ -f /tmp/cache/docker.tar.gz ]; then
+              sudo apt update && sudo apt -y install pigz
+              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+              docker images
+            fi
+      - run:
+          name: Run Niworkflows tests
+          no_output_timeout: 2h
+          command: |
+            sudo setfacl -d -m group:ubuntu:rwx $PWD
+            sudo setfacl -m group:ubuntu:rwx $PWD
+            docker run -it --rm=false \
+              -e SAVE_CIRCLE_ARTIFACTS="/scratch" \
+              -v ${PWD}:/scratch -w /scratch \
+              --entrypoint=/usr/local/miniconda/bin/py.test \
+              niworkflows:py3 /root/niworkflows \
+              -n ${CIRCLE_NPROCS:-4} -v --junit-xml=/scratch/pytest.xml
+
+      - store_artifacts:
+          path: /tmp/tests
+
+      - store_test_results:
+          path: /tmp/tests
+
+
+  deploy:
+    machine:
+      image: circleci/classic:201711-01
+    working_directory: /tmp/src/niworkflows
+    steps:
+      - checkout
+      - run:
+          name: Checkout Nipype
+          command: |
+            git submodule init
+            git submodule update || true
+            git submodule sync
+            git -C nipype fetch origin
+            git submodule update
+
+      - run:
+          name: Update Niworkflows version
+          command: |
+            if [ "${CIRCLE_TAG}" != "" ]; then
+              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'${CIRCLE_TAG}'/" niworkflows/info.py
+            fi
+
+      - run:
+          name: Deploy to PyPi
+          command: |
+            pip install "setuptools>=27.0" twine
+            python setup.py sdist
+            twine upload dist/*
+
+workflows:
+  version: 2
+  build_test_deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+
+      - test_pytest:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /docs?\/.*/
+            tags:
+              only: /.*/
+      - deploy:
+          requires:
+            - build
+            - test_pytest
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
