@@ -94,9 +94,9 @@ RUN npm install -g svgo
 
 # Install miniconda
 ARG PYTHON_MAJOR=3
-RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda${PYTHON_MAJOR}-latest-Linux-x86_64.sh && \
-    /bin/bash Miniconda${PYTHON_MAJOR}-latest-Linux-x86_64.sh -b -p /usr/local/miniconda && \
-    rm Miniconda${PYTHON_MAJOR}-latest-Linux-x86_64.sh
+RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda${PYTHON_MAJOR}-4.3.31-Linux-x86_64.sh && \
+    /bin/bash Miniconda${PYTHON_MAJOR}-4.3.31-Linux-x86_64.sh -b -p /usr/local/miniconda && \
+    rm Miniconda${PYTHON_MAJOR}-4.3.31-Linux-x86_64.sh
 ENV PATH=/usr/local/miniconda/bin:$PATH \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8
