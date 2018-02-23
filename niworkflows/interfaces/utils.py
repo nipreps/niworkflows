@@ -274,7 +274,8 @@ class SanitizeImageOutputSpec(TraitedSpec):
 class SanitizeImage(SimpleInterface):
     """
     Check the correctness of x-form headers (matrix and code) and fixes
-    problematic combinations of values.
+    problematic combinations of values. Removes any extension form the header
+    if present.
     This interface implements the `following logic
     <https://github.com/poldracklab/fmriprep/issues/873#issuecomment-349394544>`_:
     +-------------------+------------------+------------------+------------------\
@@ -390,6 +391,10 @@ class SanitizeImage(SimpleInterface):
             img = nb.Nifti1Image(in_data[:, :, :, self.inputs.n_volumes_to_discard:],
                                  img.affine,
                                  img.header)
+            save_file = True
+
+        if len(img.header.extensions) != 0:
+            img.header.extensions.clear()
             save_file = True
 
         # Store new file
