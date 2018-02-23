@@ -1,10 +1,10 @@
 0.3.4 (February 22, 2018)
 =========================
 
-* [ENH] Remove extensions from the nifti header (https://github.com/nipy/nipype/pull/226)
-* [FIX] Fixing conda version (https://github.com/nipy/nipype/pull/227)
-* [TST] Speed-up long tests (https://github.com/nipy/nipype/pull/225)
-* [TST] Migrate to CircleCI 2.0 (https://github.com/nipy/nipype/pull/224)
+* [ENH] Remove extensions from the nifti header (`#226 <https://github.com/poldracklab/niworkflows/pull/226>`_)
+* [FIX] Fixing conda version (`#227 <https://github.com/poldracklab/niworkflows/pull/227>`_)
+* [TST] Speed-up long tests (`#225 <https://github.com/poldracklab/niworkflows/pull/225>`_)
+* [TST] Migrate to CircleCI 2.0 (`#224 <https://github.com/poldracklab/niworkflows/pull/224>`_)
 
 
 Version 0.3.3
