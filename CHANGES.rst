@@ -1,10 +1,10 @@
 0.3.4 (February 22, 2018)
 =========================
 
-  * [ENH] Remove extensions from the nifti header (https://github.com/nipy/nipype/pull/226)
-  * [FIX] Fixing conda version (https://github.com/nipy/nipype/pull/227)
-  * [TST] Speed-up long tests (https://github.com/nipy/nipype/pull/225)
-  * [TST] Migrate to CircleCI 2.0 (https://github.com/nipy/nipype/pull/224)
+* [ENH] Remove extensions from the nifti header (https://github.com/nipy/nipype/pull/226)
+* [FIX] Fixing conda version (https://github.com/nipy/nipype/pull/227)
+* [TST] Speed-up long tests (https://github.com/nipy/nipype/pull/225)
+* [TST] Migrate to CircleCI 2.0 (https://github.com/nipy/nipype/pull/224)
 
 
 Version 0.3.3
