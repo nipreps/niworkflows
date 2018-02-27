@@ -23,7 +23,7 @@ OSF_RESOURCES = {
     'mni152_nlin_sym_ras': ('57fa7fd09ad5a101df35eed0', '65d64ad5a980da86e7d07d95b3ed2ccb'),
     'mni_icbm152_linear': ('580705eb594d9001ed622649', '72be639e92532def7caad75cb4058e83'),
     'mni_icbm152_nlin_asym_09c': ('580705089ad5a101f17944a9', '002f9bf24dc5c32de50c03f01fa539ec'),
-    'oasis_dtk31_mni152': ('5a95995e91b689000ea221fe', '6eb144c5e3f5a375f23ffc3dc2d1cc2f'),
+    'oasis_dkt31_mni152': ('5a95995e91b689000ea221fe', '6eb144c5e3f5a375f23ffc3dc2d1cc2f'),
 }
 
 BIDS_EXAMPLES = {
@@ -180,11 +180,11 @@ def get_bids_examples(data_dir=None, url=None, resume=True, verbose=1, variant=N
     else:
         return None
 
-def get_oasis_dtk31_mni152(data_dir=None, url=None, resume=True, verbose=1):
-    """Download and load the necessary files from the Mindboggle DTK31 label
+def get_oasis_dkt31_mni152(data_dir=None, url=None, resume=True, verbose=1):
+    """Download and load the necessary files from the Mindboggle DKT31 label
     atlas in MNI152NLin2009cAsym space
     :param str data_dir: path of the data directory. Used to force data storage
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('oasis_dtk31_mni152', data_dir, url, resume, verbose)
+    return get_dataset('oasis_dkt31_mni152', data_dir, url, resume, verbose)
