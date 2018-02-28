@@ -1,3 +1,11 @@
+0.3.5 (February 28, 2018)
+=========================
+
+With thanks to @mgxd for the new atlas.
+
+* [PIN] Nipype-1.0.2
+* [ENH] Add OASIS joint-fusion label atlas (#228)
+
 0.3.4 (February 22, 2018)
 =========================
 
