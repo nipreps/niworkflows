@@ -17,5 +17,6 @@ def test_carpetplot():
         os.path.join(datadir, 'sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz'),
         nb.load(os.path.join(datadir,
             'sub-ds205s03_task-functionallocalizer_run-01_bold_parc.nii.gz')).get_data(),
-        output_file=out_file
+        output_file=out_file,
+        legend=True
     )
