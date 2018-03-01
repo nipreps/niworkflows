@@ -12,6 +12,7 @@ import shutil
 import numpy as np
 import nibabel as nb
 import nilearn.image as nli
+from textwrap import indent
 
 from .. import __version__
 from ..nipype import logging
@@ -256,3 +257,158 @@ def _gen_reference(fixed_image, moving_image, fov_mask=None, out_file=None,
         message or '(unknown software)')
     resampled.to_filename(out_file)
     return out_file
+
+
+class SanitizeImageInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True, desc='input image')
+    n_volumes_to_discard = traits.Int(0, usedefault=True, desc='discard n first volumes')
+    max_32bit = traits.Bool(False, usedefault=True, desc='cast data to float32 if higher '
+                                                         'precision is encountered')
+
+
+class SanitizeImageOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='validated image')
+    out_report = File(exists=True, desc='HTML segment containing warning')
+
+
+class SanitizeImage(SimpleInterface):
+    """
+    Check the correctness of x-form headers (matrix and code) and fixes
+    problematic combinations of values. Removes any extension form the header
+    if present.
+    This interface implements the `following logic
+    <https://github.com/poldracklab/fmriprep/issues/873#issuecomment-349394544>`_:
+    +-------------------+------------------+------------------+------------------\
++------------------------------------------------+
+    | valid quaternions | `qform_code > 0` | `sform_code > 0` | `qform == sform` \
+| actions                                        |
+    +===================+==================+==================+==================\
++================================================+
+    | True              | True             | True             | True             \
+| None                                           |
+    +-------------------+------------------+------------------+------------------\
++------------------------------------------------+
+    | True              | True             | False            | *                \
+| sform, scode <- qform, qcode                   |
+    +-------------------+------------------+------------------+------------------\
++------------------------------------------------+
+    | *                 | True             | *                | False            \
+| sform, scode <- qform, qcode                   |
+    +-------------------+------------------+------------------+------------------\
++------------------------------------------------+
+    | *                 | False            | True             | *                \
+| qform, qcode <- sform, scode                   |
+    +-------------------+------------------+------------------+------------------\
++------------------------------------------------+
+    | *                 | False            | False            | *                \
+| sform, qform <- best affine; scode, qcode <- 1 |
+    +-------------------+------------------+------------------+------------------\
++------------------------------------------------+
+    | False             | *                | False            | *                \
+| sform, qform <- best affine; scode, qcode <- 1 |
+    +-------------------+------------------+------------------+------------------\
++------------------------------------------------+
+    """
+    input_spec = SanitizeImageInputSpec
+    output_spec = SanitizeImageOutputSpec
+
+    def _run_interface(self, runtime):
+        img = nb.load(self.inputs.in_file)
+        out_report = os.path.join(runtime.cwd, 'report.html')
+
+        # Retrieve xform codes
+        sform_code = int(img.header._structarr['sform_code'])
+        qform_code = int(img.header._structarr['qform_code'])
+
+        # Check qform is valid
+        valid_qform = False
+        try:
+            img.get_qform()
+            valid_qform = True
+        except ValueError:
+            pass
+
+        # Matching affines
+        matching_affines = valid_qform and np.allclose(img.get_qform(), img.get_sform())
+
+        save_file = False
+        warning_txt = ''
+
+        # Both match, qform valid (implicit with match), codes okay -> do nothing, empty report
+        if matching_affines and qform_code > 0 and sform_code > 0:
+            self._results['out_file'] = self.inputs.in_file
+            open(out_report, 'w').close()
+
+        # Row 2:
+        elif valid_qform and qform_code > 0:
+            img.set_sform(img.get_qform(), qform_code)
+            save_file = True
+            warning_txt = 'Note on orientation: sform matrix set'
+            description = """\
+<p class="elem-desc">The sform has been copied from qform.</p>
+"""
+        # Rows 3-4:
+        # Note: if qform is not valid, matching_affines is False
+        elif sform_code > 0 and (not matching_affines or qform_code == 0):
+            img.set_qform(img.get_sform(), sform_code)
+            save_file = True
+            warning_txt = 'Note on orientation: qform matrix overwritten'
+            description = """\
+<p class="elem-desc">The qform has been copied from sform.</p>
+"""
+            if not valid_qform and qform_code > 0:
+                warning_txt = 'WARNING - Invalid qform information'
+                description = """\
+<p class="elem-desc">
+    The qform matrix found in the file header is invalid.
+    The qform has been copied from sform.
+    Checking the original qform information from the data produced
+    by the scanner is advised.
+</p>
+"""
+        # Rows 5-6:
+        else:
+            affine = img.affine
+            img.set_sform(affine, nb.nifti1.xform_codes['scanner'])
+            img.set_qform(affine, nb.nifti1.xform_codes['scanner'])
+            save_file = True
+            warning_txt = 'WARNING - Missing orientation information'
+            description = """\
+<p class="elem-desc">
+    Orientation information could not be retrieved from the image header.
+    The qform and sform matrices have been set to a default, LAS-oriented affine.
+    Analyses of this dataset MAY BE INVALID.
+</p>
+"""
+
+        if (self.inputs.max_32bit and np.dtype(img.get_data_dtype()).itemsize > 4) or self.inputs.n_volumes_to_discard:
+            # force float32 only if 64 bit dtype is detected
+            if (self.inputs.max_32bit and np.dtype(img.get_data_dtype()).itemsize > 4):
+                in_data = img.get_fdata(dtype=np.float32)
+            else:
+                in_data = img.dataobj
+
+            img = nb.Nifti1Image(in_data[:, :, :, self.inputs.n_volumes_to_discard:],
+                                 img.affine,
+                                 img.header)
+            save_file = True
+
+        if len(img.header.extensions) != 0:
+            img.header.extensions.clear()
+            save_file = True
+
+        # Store new file
+        if save_file:
+            out_fname = fname_presuffix(self.inputs.in_file, suffix='_valid',
+                                        newpath=runtime.cwd)
+            self._results['out_file'] = out_fname
+            img.to_filename(out_fname)
+
+        if warning_txt:
+            snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (
+            warning_txt, description)
+            with open(out_report, 'w') as fobj:
+                fobj.write(indent(snippet, '\t' * 3))
+
+        self._results['out_report'] = out_report
+        return runtime

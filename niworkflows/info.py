@@ -15,7 +15,7 @@ import runpy
 nipype_info = runpy.run_path(op.join(op.abspath(op.dirname(__file__)),
                                      'nipype', 'info.py'))
 
-__version__ = '0.3.2-dev'
+__version__ = '0.3.5'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
@@ -39,8 +39,8 @@ CLASSIFIERS = [
     'Intended Audience :: Science/Research',
     'Topic :: Scientific/Engineering :: Image Recognition',
     'License :: OSI Approved :: BSD License',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
 ]
 
 REQUIRES = nipype_info['REQUIRES'] + [
