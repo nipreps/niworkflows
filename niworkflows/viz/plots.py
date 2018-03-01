@@ -80,7 +80,7 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, long_cutoff=800,
         data = data[order, ::decimation]
 
     # If subplot is not defined
-    if subplot is not None:
+    if subplot is None:
         subplot = mgs.GridSpec(1, 1)[0]
 
     # Define nested GridSpec
@@ -139,8 +139,8 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, long_cutoff=800,
 
     if output_file is not None:
         figure = plt.gcf()
-        figure.savefig(output_file)
-        figure.close()
+        figure.savefig(output_file, bbox_inches='tight')
+        plt.close(figure)
         figure = None
         return output_file
 

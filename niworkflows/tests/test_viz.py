@@ -13,8 +13,6 @@ def test_carpetplot():
     save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
     if save_artifacts:
         out_file = os.path.join(save_artifacts, 'carpetplot.svg')
-
-
     viz.plot_carpet(
         os.path.join(datadir, 'sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz'),
         nb.load(os.path.join(datadir,
