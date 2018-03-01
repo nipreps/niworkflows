@@ -14,7 +14,7 @@ from nilearn._utils.niimg import _safe_get_data
 
 
 def plot_carpet(img, atlaslabels, detrend=True, nskip=0, long_cutoff=800,
-                axes=None, title=None, output_file=None):
+                subplot=None, axes=None, title=None, output_file=None):
     """
     Plot an image representation of voxel intensities across time also know
     as the "carpet plot" or "Power plot". See Jonathan Power Neuroimage
@@ -26,24 +26,24 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, long_cutoff=800,
         img : Niimg-like object
             See http://nilearn.github.io/manipulating_images/input_output.html
             4D input image
-        mask_img : Niimg-like object, optional
-            See http://nilearn.github.io/manipulating_images/input_output.html
-            Limit plotted voxels to those inside the provided mask. If not
-            specified a new mask will be derived from data.
+        atlaslabels: ndarray
+            A 3D array of integer labels from an atlas, resampled into ``img`` space.
         detrend : boolean, optional
             Detrend and standardize the data prior to plotting.
-        output_file : string, or None, optional
-            The name of an image file to export the plot to. Valid extensions
-            are .png, .pdf, .svg. If output_file is not None, the plot
-            is saved to a file, and the display is closed.
-        figure : matplotlib figure, optional
-            Matplotlib figure used. If None is given, a
-            new figure is created.
+        nskip : int
+            Number of volumes at the beginning of the scan marked as nonsteady state.
+        long_cutoff : int
+            Number of TRs to consider img too long (and decimate the time direction
+            to save memory)
         axes : matplotlib axes, optional
             The axes used to display the plot. If None, the complete
             figure is used.
         title : string, optional
             The title displayed on the figure.
+        output_file : string, or None, optional
+            The name of an image file to export the plot to. Valid extensions
+            are .png, .pdf, .svg. If output_file is not None, the plot
+            is saved to a file, and the display is closed.
     """
     img_nii = check_niimg_4d(img, dtype='auto')
     func_data = _safe_get_data(img_nii, ensure_finite=True)
@@ -79,8 +79,12 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, long_cutoff=800,
     if decimation:
         data = data[order, ::decimation]
 
+    # If subplot is not defined
+    if subplot is not None:
+        subplot = mgs.GridSpec(1, 1)[0]
+
     # Define nested GridSpec
-    gs = mgs.GridSpecFromSubplotSpec(1, 2, subplot_spec=axes,
+    gs = mgs.GridSpecFromSubplotSpec(1, 2, subplot_spec=subplot,
                                      width_ratios=[1, 100], wspace=0.0)
 
     # Segmentation colorbar
