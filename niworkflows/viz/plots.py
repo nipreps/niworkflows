@@ -153,7 +153,6 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, long_cutoff=800,
         epinii = nb.Nifti1Image(epiavg, img_nii.affine, img_nii.header)
         segnii = nb.Nifti1Image(newatlas, epinii.affine, epinii.header)
         segnii.set_data_dtype('uint8')
-        segnii.to_filename('/home/oesteban/tmp/out.nii.gz')
 
         nslices = epiavg.shape[-1]
         coords = np.linspace(int(0.10 * nslices), int(0.95 * nslices), 5).astype(np.uint8)

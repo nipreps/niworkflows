@@ -15,7 +15,8 @@ def test_carpetplot():
         out_file = os.path.join(save_artifacts, 'carpetplot.svg')
     viz.plot_carpet(
         os.path.join(datadir, 'sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz'),
-        nb.load(os.path.join(datadir,
+        nb.load(os.path.join(
+            datadir,
             'sub-ds205s03_task-functionallocalizer_run-01_bold_parc.nii.gz')).get_data(),
         output_file=out_file,
         legend=True
