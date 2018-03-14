@@ -36,7 +36,7 @@ jobs:
           name: Update Niworkflows version
           command: |
             if [ "${CIRCLE_TAG}" != "" ]; then
-              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'${CIRCLE_TAG}'/" niworkflows/info.py
+              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'${CIRCLE_TAG}'/" niworkflows/__about__.py
             fi
       - setup_remote_docker
       - run:
@@ -143,7 +143,7 @@ jobs:
           name: Update Niworkflows version
           command: |
             if [ "${CIRCLE_TAG}" != "" ]; then
-              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'${CIRCLE_TAG}'/" niworkflows/info.py
+              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'${CIRCLE_TAG}'/" niworkflows/__about__.py
             fi
 
       - run:
