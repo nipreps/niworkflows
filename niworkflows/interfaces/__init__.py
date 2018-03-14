@@ -12,3 +12,4 @@ from .registration import (FLIRTRPT as FLIRT,
                            ANTSApplyTransformsRPT as ApplyTransforms,
                            SimpleBeforeAfterRPT as SimpleBeforeAfter)
 from .utils import CopyXForm, CopyHeader, NormalizeMotionParams, SanitizeImage
+from .plotting import FMRISummary
