@@ -417,7 +417,10 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None, normalize=True,
         var_label = name
         if units is not None:
             var_label += (' [{}]' if no_scale else ' [{}/s]').format(units)
-        ax_ts.set_ylabel(var_label)
+
+        ax_ts.annotate(
+            var_label, xy=(0, 0), xytext=(10, -20),
+            textcoords='offset points', va='center', color=color, size=10)
 
     for side in ["top", "right"]:
         ax_ts.spines[side].set_color('none')
@@ -430,8 +433,10 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None, normalize=True,
         ax_ts.spines["bottom"].set_color('none')
         ax_ts.spines["bottom"].set_visible(False)
 
-    ax_ts.spines["left"].set_position(('outward', 30))
-    ax_ts.yaxis.set_ticks_position('left')
+    # ax_ts.spines["left"].set_position(('outward', 30))
+    ax_ts.spines["left"].set_color('none')
+    ax_ts.spines["left"].set_visible(False)
+    # ax_ts.yaxis.set_ticks_position('left')
 
     # Calculate Y limits
     def_ylims = [0.95 * tseries[~np.isnan(tseries)].min(),
