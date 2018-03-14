@@ -15,7 +15,7 @@ def main():
     import runpy
 
     ldict = runpy.run_path(op.join(op.abspath(op.dirname(__file__)),
-                                   'niworkflows', 'info.py'))
+                                   'niworkflows', '__about__.py'))
 
     setup(
         name=PACKAGE_NAME,
