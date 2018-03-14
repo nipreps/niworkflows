@@ -30,17 +30,17 @@ from .fixes import (FixHeaderApplyTransforms as ApplyTransforms,
 
 
 class RobustMNINormalizationInputSpecRPT(
-    nrc.ReportCapableInputSpec, RobustMNINormalizationInputSpec):
+        nrc.ReportCapableInputSpec, RobustMNINormalizationInputSpec):
     pass
 
 
 class RobustMNINormalizationOutputSpecRPT(
-    nrc.ReportCapableOutputSpec, ants.registration.RegistrationOutputSpec):
+        nrc.ReportCapableOutputSpec, ants.registration.RegistrationOutputSpec):
     pass
 
 
 class RobustMNINormalizationRPT(
-    nrc.RegistrationRC, RobustMNINormalization):
+        nrc.RegistrationRC, RobustMNINormalization):
     input_spec = RobustMNINormalizationInputSpecRPT
     output_spec = RobustMNINormalizationOutputSpecRPT
 

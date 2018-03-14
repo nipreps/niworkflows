@@ -16,15 +16,14 @@ import base64
 import hashlib
 import subprocess as sp
 from io import open
-from builtins import str, bytes
+from builtins import str
 
 try:
-    from urllib.parse import urlparse, urlencode
+    from urllib.parse import urlparse
     from urllib.request import urlopen, Request
     from urllib.error import HTTPError, URLError
 except ImportError:
     from urlparse import urlparse
-    from urllib import urlencode
     from urllib2 import urlopen, Request, HTTPError, URLError
 
 from .. import NIWORKFLOWS_LOG
@@ -197,6 +196,7 @@ def _fetch_file(url, dataset_dir, filetype=None, resume=True, overwrite=False,
 
     return True
 
+
 def _get_dataset_dir(dataset_name, data_dir=None, default_paths=None,
                      verbose=1):
     """ Create if necessary and returns data directory of given dataset.
@@ -358,6 +358,7 @@ def _chunk_read_(response, local_file, chunk_size=8192, report_hook=None,
 
     return
 
+
 def _chunk_report_(bytes_so_far, total_size, initial_size, t_0):
     """Show downloading percentage.
 
@@ -396,6 +397,7 @@ def _format_time(t_secs):
         return "{0:4.1f}min".format(t_secs / 60.)
     else:
         return " {0:5.1f}s".format(t_secs)
+
 
 def _md5_hash(string):
     m = hashlib.md5()

@@ -59,7 +59,6 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
             (inu_n4, outputnode, [('output_image', 'bias_corrected')]),
         ])
 
-
     # Remaining connections
     workflow.connect([
         (sstrip, sstrip_orig_vol, [('out_file', 'in_file_b')]),
@@ -69,4 +68,3 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
         (inu_n4, outputnode, [('bias_image', 'bias_image')]),
     ])
     return workflow
-

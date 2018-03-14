@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 from shutil import copy
-import pytest
 
 from niworkflows.nipype.interfaces.base import Bunch
 from niworkflows.interfaces.registration import (

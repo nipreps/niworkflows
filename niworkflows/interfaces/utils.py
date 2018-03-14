@@ -381,7 +381,8 @@ class SanitizeImage(SimpleInterface):
 </p>
 """
 
-        if (self.inputs.max_32bit and np.dtype(img.get_data_dtype()).itemsize > 4) or self.inputs.n_volumes_to_discard:
+        if (self.inputs.max_32bit and
+                np.dtype(img.get_data_dtype()).itemsize > 4) or self.inputs.n_volumes_to_discard:
             # force float32 only if 64 bit dtype is detected
             if (self.inputs.max_32bit and np.dtype(img.get_data_dtype()).itemsize > 4):
                 in_data = img.get_fdata(dtype=np.float32)
@@ -406,7 +407,7 @@ class SanitizeImage(SimpleInterface):
 
         if warning_txt:
             snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (
-            warning_txt, description)
+                warning_txt, description)
             with open(out_report, 'w') as fobj:
                 fobj.write(indent(snippet, '\t' * 3))
 

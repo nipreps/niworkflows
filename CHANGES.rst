@@ -1,3 +1,11 @@
+0.3.6 (March 14, 2018)
+======================
+
+Celebrating the 30th Anniversary of Pi Day!
+
+* [ENH] Migrate the summary plot to niworkflows (#229)
+* [ENH] Migrate carpetplot from MRIQC (#223)
+
 0.3.5 (February 28, 2018)
 =========================
 

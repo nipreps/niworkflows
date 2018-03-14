@@ -40,6 +40,7 @@ TEMPLATE_MAP = {
     'MNI152NLin2009cAsym': 'mni_icbm152_nlin_asym_09c',
 }
 
+
 def get_dataset(dataset_name, data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the BIDS-fied brainweb 1mm normal
 
@@ -61,6 +62,7 @@ def get_dataset(dataset_name, data_dir=None, url=None, resume=True, verbose=1):
     else:
         return None
 
+
 def get_brainweb_1mm_normal(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the BIDS-fied brainweb 1mm normal
 
@@ -71,6 +73,7 @@ def get_brainweb_1mm_normal(data_dir=None, url=None, resume=True, verbose=1):
 
     """
     return get_dataset('brainweb', data_dir, url, resume, verbose)
+
 
 def get_ds003_downsampled(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the BIDS-fied ds003_downsampled
@@ -83,6 +86,7 @@ def get_ds003_downsampled(data_dir=None, url=None, resume=True, verbose=1):
     """
     return get_dataset('ds003_downsampled', data_dir, url, resume, verbose)
 
+
 def get_mni_template(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
 
@@ -94,6 +98,7 @@ def get_mni_template(data_dir=None, url=None, resume=True, verbose=1):
     """
     return get_dataset('mni_template', data_dir, url, resume, verbose)
 
+
 def get_mni_template_ras(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
     :param str data_dir: path of the data directory. Used to force data storage
@@ -101,6 +106,7 @@ def get_mni_template_ras(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset('mni_template_RAS', data_dir, url, resume, verbose)
+
 
 def get_mni_epi(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
@@ -110,6 +116,7 @@ def get_mni_epi(data_dir=None, url=None, resume=True, verbose=1):
     """
     return get_dataset('mni_epi', data_dir, url, resume, verbose)
 
+
 def get_ants_oasis_template(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the ANTs template of the OASIS dataset.
     :param str data_dir: path of the data directory. Used to force data storage
@@ -117,6 +124,7 @@ def get_ants_oasis_template(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset('ants_oasis_template', data_dir, url, resume, verbose)
+
 
 def get_ants_oasis_template_ras(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the ANTs template of the OASIS dataset.
@@ -126,6 +134,7 @@ def get_ants_oasis_template_ras(data_dir=None, url=None, resume=True, verbose=1)
     """
     return get_dataset('ants_oasis_template_ras', data_dir, url, resume, verbose)
 
+
 def get_ants_nki_template_ras(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the ANTs template of the NKI dataset.
     :param str data_dir: path of the data directory. Used to force data storage
@@ -133,6 +142,7 @@ def get_ants_nki_template_ras(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset('ants_nki_template_ras', data_dir, url, resume, verbose)
+
 
 def get_mni152_nlin_sym_las(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
@@ -142,6 +152,7 @@ def get_mni152_nlin_sym_las(data_dir=None, url=None, resume=True, verbose=1):
     """
     return get_dataset('mni152_nlin_sym_las', data_dir, url, resume, verbose)
 
+
 def get_mni152_nlin_sym_ras(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
     :param str data_dir: path of the data directory. Used to force data storage
@@ -150,8 +161,10 @@ def get_mni152_nlin_sym_ras(data_dir=None, url=None, resume=True, verbose=1):
     """
     return get_dataset('mni152_nlin_sym_ras', data_dir, url, resume, verbose)
 
+
 def get_mni_icbm152_nlin_asym_09c(data_dir=None, url=None, resume=True, verbose=1):
     return get_dataset('mni_icbm152_nlin_asym_09c', data_dir, url, resume, verbose)
+
 
 def get_mni_icbm152_linear(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
@@ -160,6 +173,7 @@ def get_mni_icbm152_linear(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset('mni_icbm152_linear', data_dir, url, resume, verbose)
+
 
 def get_bids_examples(data_dir=None, url=None, resume=True, verbose=1, variant=None):
     """
@@ -179,6 +193,7 @@ def get_bids_examples(data_dir=None, url=None, resume=True, verbose=1, variant=N
         return data_dir
     else:
         return None
+
 
 def get_oasis_dkt31_mni152(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the Mindboggle DKT31 label

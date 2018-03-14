@@ -6,7 +6,6 @@ from .. import viz
 from .conftest import datadir
 
 
-
 def test_carpetplot():
     """Write a carpetplot"""
     out_file = None
