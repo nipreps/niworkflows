@@ -18,8 +18,8 @@ from nilearn._utils.niimg import _safe_get_data
 
 
 def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
-                subplot=None, axes=None, title=None, output_file=None,
-                legend=False, lut=None):
+                subplot=None, title=None, output_file=None, legend=False,
+                lut=None):
     """
     Plot an image representation of voxel intensities across time also know
     as the "carpet plot" or "Power plot". See Jonathan Power Neuroimage
@@ -117,7 +117,7 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
 
     # Carpet plot
     ax1 = plt.subplot(gs[1])
-    ax1.imshow(data, interpolation='nearest', aspect='auto', cmap='gray',
+    ax1.imshow(data[order, ...], interpolation='nearest', aspect='auto', cmap='gray',
                vmin=v[0], vmax=v[1])
 
     ax1.grid(False)
