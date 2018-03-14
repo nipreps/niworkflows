@@ -30,7 +30,7 @@ class fMRIPlot(object):
     """
 
     def __init__(self, func, mask, seg=None, tr=None,
-                 title=None, figsize=DINA4_LANDSCAPE):
+                 title=None, figsize=(11.69, 5)):
         self.func_name = func
         func_nii = nb.load(func)
         self.mask_data = nb.load(mask).get_data()
@@ -64,8 +64,8 @@ class fMRIPlot(object):
         nrows = 1 + nconfounds + nspikes
 
         # Create grid
-        grid = mgs.GridSpec(nrows, 1, wspace=0.0, hspace=0.2,
-                            height_ratios=[1] * (nrows - 1) + [3.5])
+        grid = mgs.GridSpec(nrows, 1, wspace=0.0, hspace=0.4,
+                            height_ratios=[1] * (nrows - 1) + [5])
 
         grid_id = 0
         for tsz, name, iszs in self.spikes:
@@ -298,8 +298,9 @@ def spikesplot(ts_z, outer_gs=None, tr=None, zscored=True, spike_thresh=6., titl
                 ['%.02f' % t for t in (tr * np.array(xticks)).tolist()])
 
     # Handle Y axis
+    ylabel = 'slice-wise signal intensity of background'
     if zscored:
-        ax.set_ylabel('z-score')
+        ylabel += ' (z-scored)'
         zs_max = np.abs(ts_z).max()
         ax.set_ylim((-(np.abs(ts_z[:, nskip:]).max()) * 1.05,
                      (np.abs(ts_z[:, nskip:]).max()) * 1.05))
@@ -320,20 +321,25 @@ def spikesplot(ts_z, outer_gs=None, tr=None, zscored=True, spike_thresh=6., titl
             ax.plot((0, ntsteps - 1), (-spike_thresh, -spike_thresh), 'k:')
             ax.plot((0, ntsteps - 1), (spike_thresh, spike_thresh), 'k:')
     else:
-        ax.set_ylabel('air sgn. intensity')
         yticks = [ts_z[:, nskip:].min(),
                   np.median(ts_z[:, nskip:]),
                   ts_z[:, nskip:].max()]
+        ax.set_ylim(0, max(yticks[-1] * 1.05, (yticks[-1] - yticks[0]) * 2.0 + yticks[-1]))
+        # ax.set_ylim(ts_z[:, nskip:].min() * 0.95,
+        #             ts_z[:, nskip:].max() * 1.05)
 
-        ax.set_ylim(ts_z[:, nskip:].min() * 0.95,
-                    ts_z[:, nskip:].max() * 1.05)
+    ax.annotate(
+        ylabel, xy=(0.01, 0.0), xytext=(0, -1), xycoords='axes fraction',
+        textcoords='offset points', va='center', color='gray', size=8)
+    ax.set_yticks([])
+    ax.set_yticklabels([])
 
-    if yticks:
-        ax.set_yticks(yticks)
-        ax.set_yticklabels(['%.02f' % y for y in yticks])
-        # Plot maximum and minimum horizontal lines
-        ax.plot((0, ntsteps - 1), (yticks[0], yticks[0]), 'k:')
-        ax.plot((0, ntsteps - 1), (yticks[-1], yticks[-1]), 'k:')
+    # if yticks:
+    #     # ax.set_yticks(yticks)
+    #     # ax.set_yticklabels(['%.02f' % y for y in yticks])
+    #     # Plot maximum and minimum horizontal lines
+    #     ax.plot((0, ntsteps - 1), (yticks[0], yticks[0]), 'k:')
+    #     ax.plot((0, ntsteps - 1), (yticks[-1], yticks[-1]), 'k:')
 
     for side in ["top", "right"]:
         ax.spines[side].set_color('none')
@@ -346,8 +352,10 @@ def spikesplot(ts_z, outer_gs=None, tr=None, zscored=True, spike_thresh=6., titl
         ax.spines["bottom"].set_color('none')
         ax.spines["bottom"].set_visible(False)
 
-    ax.spines["left"].set_position(('outward', 30))
-    ax.yaxis.set_ticks_position('left')
+    # ax.spines["left"].set_position(('outward', 30))
+    # ax.yaxis.set_ticks_position('left')
+    ax.spines["left"].set_visible(False)
+    ax.spines["left"].set_color(None)
 
     # labels = [label for label in ax.yaxis.get_ticklabels()]
     # labels[0].set_weight('bold')
@@ -414,13 +422,12 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None, normalize=True,
 
     no_scale = notr or not normalize
     if name is not None:
-        var_label = name
         if units is not None:
-            var_label += (' [{}]' if no_scale else ' [{}/s]').format(units)
+            name += (' [{}]' if no_scale else ' [{}/s]').format(units)
 
         ax_ts.annotate(
-            var_label, xy=(0, 0), xytext=(10, -20),
-            textcoords='offset points', va='center', color=color, size=10)
+            name, xy=(0.01, 0.0), xytext=(0, -4), xycoords='axes fraction',
+            textcoords='offset points', va='center', color=color, size=8)
 
     for side in ["top", "right"]:
         ax_ts.spines[side].set_color('none')
@@ -439,7 +446,7 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None, normalize=True,
     # ax_ts.yaxis.set_ticks_position('left')
 
     # Calculate Y limits
-    def_ylims = [0.95 * tseries[~np.isnan(tseries)].min(),
+    def_ylims = [tseries[~np.isnan(tseries)].min() - 0.1 * abs(tseries[~np.isnan(tseries)].min()),
                  1.1 * tseries[~np.isnan(tseries)].max()]
     if ylims is not None:
         if ylims[0] is not None:
@@ -448,9 +455,11 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None, normalize=True,
             def_ylims[1] = max([def_ylims[1], ylims[1]])
 
     ax_ts.set_ylim(def_ylims)
-    yticks = sorted(def_ylims)
-    ax_ts.set_yticks(yticks)
-    ax_ts.set_yticklabels(['%.02f' % y for y in yticks])
+    # yticks = sorted(def_ylims)
+    ax_ts.set_yticks([])
+    ax_ts.set_yticklabels([])
+    # ax_ts.set_yticks(yticks)
+    # ax_ts.set_yticklabels(['%.02f' % y for y in yticks])
     yrange = def_ylims[1] - def_ylims[0]
 
     # Plot average
