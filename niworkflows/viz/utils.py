@@ -394,7 +394,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     # Query the size of each
     sizes = []
     for f in svgs:
-        viewbox = f.root.get("viewBox").split(" ")
+        viewbox = [float(v) for v in f.root.get("viewBox").split(" ")]
         width = int(viewbox[2])
         height = int(viewbox[3])
         sizes.append((width, height))
