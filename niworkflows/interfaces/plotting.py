@@ -49,10 +49,12 @@ class FMRISummary(SimpleInterface):
         dataframe = pd.DataFrame({
             'outliers': np.loadtxt(
                 self.inputs.outliers, usecols=[0]).tolist(),
-            # Pick non-standardize dvars
-            'DVARS': np.loadtxt(
+            # Pick non-standardize dvars (col 1)
+            # First timepoint is NaN (difference)
+            'DVARS': [np.nan] + np.loadtxt(
                 self.inputs.dvars, skiprows=1, usecols=[1]).tolist(),
-            'FD': np.loadtxt(
+            # First timepoint is zero (reference volume)
+            'FD': [0.0] + np.loadtxt(
                 self.inputs.fd, skiprows=1, usecols=[0]).tolist(),
         })
 
@@ -64,7 +66,7 @@ class FMRISummary(SimpleInterface):
             tr=self.inputs.tr,
             data=dataframe[['outliers', 'DVARS', 'FD']],
             units={'outliers': '%', 'FD': 'mm'},
-            vlines={'FD': self.inputs.fd_thres},
+            vlines={'FD': [self.inputs.fd_thres]},
         ).plot()
         fig.savefig(self._results['out_file'], bbox_inches='tight')
         return runtime

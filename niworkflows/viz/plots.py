@@ -59,7 +59,7 @@ class fMRIPlot(object):
         if data is not None:
             for name in data.columns.ravel():
                 self.confounds[name] = {
-                    'values': [np.nan] + data[[name]].values.ravel().tolist(),
+                    'values': data[[name]].values.ravel().tolist(),
                     'units': units.get(name),
                     'cutoff': vlines.get(name)
                 }
