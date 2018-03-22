@@ -72,6 +72,7 @@ class fMRIPlot(object):
     def plot(self, figure=None):
         """Main plotter"""
         sns.set_style("whitegrid")
+        sns.set_context("paper", font_scale=0.8)
 
         if figure is None:
             figure = plt.gcf()
@@ -81,7 +82,7 @@ class fMRIPlot(object):
         nrows = 1 + nconfounds + nspikes
 
         # Create grid
-        grid = mgs.GridSpec(nrows, 1, wspace=0.0, hspace=0.4,
+        grid = mgs.GridSpec(nrows, 1, wspace=0.0, hspace=0.05,
                             height_ratios=[1] * (nrows - 1) + [5])
 
         grid_id = 0
@@ -218,7 +219,7 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
     ax1.set_xticks(xticks)
     ax1.set_xlabel('time (s)')
     labels = tr * (np.array(xticks)) * t_dec
-    ax1.set_xticklabels(['%.02f' % t for t in labels.tolist()])
+    ax1.set_xticklabels(['%.02f' % t for t in labels.tolist()], fontsize=5)
 
     # Remove and redefine spines
     for side in ["top", "right"]:
@@ -316,7 +317,7 @@ def spikesplot(ts_z, outer_gs=None, tr=None, zscored=True, spike_thresh=6., titl
                 ['%.02f' % t for t in (tr * np.array(xticks)).tolist()])
 
     # Handle Y axis
-    ylabel = 'slice-wise signal intensity of background'
+    ylabel = 'slice-wise noise average on background'
     if zscored:
         ylabel += ' (z-scored)'
         zs_max = np.abs(ts_z).max()
@@ -347,8 +348,11 @@ def spikesplot(ts_z, outer_gs=None, tr=None, zscored=True, spike_thresh=6., titl
         #             ts_z[:, nskip:].max() * 1.05)
 
     ax.annotate(
-        ylabel, xy=(0.01, 0.0), xytext=(0, -1), xycoords='axes fraction',
-        textcoords='offset points', va='center', color='gray', size=8)
+        ylabel, xy=(0.0, 0.7), xycoords='axes fraction',
+        xytext=(0, 0), textcoords='offset points',
+        va='center', ha='left', color='gray', size=4,
+        bbox={'boxstyle': 'round', 'fc': 'w', 'ec': 'none', 'color': 'none',
+              'lw': 0, 'alpha': 0.8})
     ax.set_yticks([])
     ax.set_yticklabels([])
 
@@ -364,7 +368,7 @@ def spikesplot(ts_z, outer_gs=None, tr=None, zscored=True, spike_thresh=6., titl
         ax.spines[side].set_visible(False)
 
     if not hide_x:
-        ax.spines["bottom"].set_position(('outward', 20))
+        ax.spines["bottom"].set_position(('outward', 10))
         ax.xaxis.set_ticks_position('bottom')
     else:
         ax.spines["bottom"].set_color('none')
@@ -416,8 +420,6 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
 
     ax_ts = plt.subplot(gs[1])
     ax_ts.grid(False)
-    ax_ts.plot(tseries, color=color)
-    ax_ts.set_xlim((0, ntsteps - 1))
 
     # Set 10 frame markers in X axis
     interval = max((ntsteps // 10, ntsteps // 5, 1))
@@ -436,11 +438,14 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
 
     if name is not None:
         if units is not None:
-            name += (' [{}]' if notr else ' [{}/s]').format(units)
+            name += ' [%s]' % units
 
         ax_ts.annotate(
-            name, xy=(0.01, 0.0), xytext=(0, -4), xycoords='axes fraction',
-            textcoords='offset points', va='center', color=color, size=8)
+            name, xy=(0.0, 0.7), xytext=(0, 0), xycoords='axes fraction',
+            textcoords='offset points', va='center', ha='left',
+            color=color, size=8,
+            bbox={'boxstyle': 'round', 'fc': 'w', 'ec': 'none',
+                  'color': 'none', 'lw': 0, 'alpha': 0.8})
 
     for side in ["top", "right"]:
         ax_ts.spines[side].set_color('none')
@@ -467,57 +472,54 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
         if ylims[1] is not None:
             def_ylims[1] = max([def_ylims[1], ylims[1]])
 
+    # Add space for plot title and mean/SD annotation
+    def_ylims[0] -= 0.1 * (def_ylims[1] - def_ylims[0])
+
     ax_ts.set_ylim(def_ylims)
     # yticks = sorted(def_ylims)
     ax_ts.set_yticks([])
     ax_ts.set_yticklabels([])
     # ax_ts.set_yticks(yticks)
     # ax_ts.set_yticklabels(['%.02f' % y for y in yticks])
-    yrange = def_ylims[1] - def_ylims[0]
 
-    # Plot average
+    # Annotate stats
+    maxv = tseries[~np.isnan(tseries)].max()
+    mean = tseries[~np.isnan(tseries)].mean()
+    stdv = tseries[~np.isnan(tseries)].std()
+    p95 = np.percentile(tseries[~np.isnan(tseries)], 95.0)
+
+    stats_label = (r'max: {max:.3f}{units} $\bullet$ mean: {mean:.3f}{units} '
+                   r'$\bullet$ $\sigma$: {sigma:.3f}').format(
+        max=maxv, mean=mean, units=units or '', sigma=stdv)
+    ax_ts.annotate(
+        stats_label, xy=(0.98, 0.7), xycoords='axes fraction',
+        xytext=(0, 0), textcoords='offset points',
+        va='center', ha='right', color=color, size=4,
+        bbox={'boxstyle': 'round', 'fc': 'w', 'ec': 'none', 'color': 'none',
+              'lw': 0, 'alpha': 0.8}
+    )
+
+    # Annotate percentile 95
+    ax_ts.plot((0, ntsteps - 1), [p95] * 2, linewidth=.1, color='lightgray')
+    ax_ts.annotate(
+        '%.2f' % p95, xy=(0, p95), xytext=(-1, 0),
+        textcoords='offset points', va='center', ha='right',
+        color='lightgray', size=3)
+
     if cutoff is None:
         cutoff = []
 
-    cutoff.insert(0, tseries[~np.isnan(tseries)].mean())
-
     for i, thr in enumerate(cutoff):
         ax_ts.plot((0, ntsteps - 1), [thr] * 2,
-                   linewidth=.75,
-                   linestyle='-' if i == 0 else ':',
-                   color=color if i == 0 else 'k')
+                   linewidth=.2, color='dimgray')
 
-        if i == 0:
-            mean_label = r'$\mu$=%.3f%s' % (thr, units if units is not None else '')
-            ax_ts.annotate(
-                mean_label, xy=(ntsteps - 1, thr), xytext=(11, 0),
-                textcoords='offset points', va='center', color='w', size=10,
-                bbox=dict(boxstyle='round', fc=color, ec='none', color='none', lw=0),
-                arrowprops=dict(
-                    arrowstyle='wedge,tail_width=0.8', lw=0, patchA=None, patchB=None,
-                    fc=color, ec='none', relpos=(0.01, 0.5)))
-        else:
-            y_off = [0.0, 0.0]
-            for pth in cutoff[:i]:
-                inc = abs(thr - pth)
-                if inc < yrange:
-                    factor = (- (inc / yrange) + 1) ** 2
-                    if (thr - pth) < 0.0:
-                        y_off[0] -= factor * 20
-                    else:
-                        y_off[1] += factor * 20
+        ax_ts.annotate(
+            '%.2f' % thr, xy=(0, thr), xytext=(-1, 0),
+            textcoords='offset points', va='center', ha='right',
+            color='dimgray', size=3)
 
-            offset = y_off[0] if abs(y_off[0]) > y_off[1] else y_off[1]
-
-            a_label = '%.2f%s' % (thr, units if units is not None else '')
-            ax_ts.annotate(
-                a_label, xy=(ntsteps - 1, thr), xytext=(11, offset),
-                textcoords='offset points', va='center',
-                color='w', size=10,
-                bbox=dict(boxstyle='round', fc='dimgray', ec='none', color='none', lw=0),
-                arrowprops=dict(
-                    arrowstyle='wedge,tail_width=.9', lw=0, patchA=None, patchB=None,
-                    fc='dimgray', ec='none', relpos=(.1, .5)))
+    ax_ts.plot(tseries, color=color, linewidth=.8)
+    ax_ts.set_xlim((0, ntsteps - 1))
 
     if gs_dist is not None:
         ax_dist = plt.subplot(gs_dist)
