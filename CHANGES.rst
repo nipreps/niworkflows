@@ -1,3 +1,8 @@
+0.3.7 (March 22, 2018)
+======================
+
+* [ENH] fMRI summary plot to take ``_confounds.tsv`` (#230)
+
 0.3.6 (March 14, 2018)
 ======================
 
