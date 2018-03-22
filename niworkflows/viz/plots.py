@@ -5,8 +5,9 @@
 
 import numpy as np
 import nibabel as nb
-import matplotlib.pyplot as plt
+import pandas as pd
 
+import matplotlib.pyplot as plt
 from matplotlib import gridspec as mgs
 import matplotlib.cm as cm
 from matplotlib.colors import ListedColormap, Normalize
@@ -21,44 +22,60 @@ import seaborn as sns
 from seaborn import color_palette
 
 DINA4_LANDSCAPE = (11.69, 8.27)
-sns.set_style("whitegrid")
 
 
 class fMRIPlot(object):
     """
     Generates the fMRI Summary Plot
     """
+    __slots__ = ['func_file', 'mask_data',
+                 'tr', 'seg_data', 'confounds', 'spikes']
 
-    def __init__(self, func, mask, seg=None, tr=None,
-                 title=None, figsize=(11.69, 5)):
-        self.func_name = func
-        func_nii = nb.load(func)
-        self.mask_data = nb.load(mask).get_data()
+    def __init__(self, func_file, mask_file=None, data=None, conf_file=None, seg_file=None,
+                 tr=None, usecols=None, units=None, vlines=None, spikes_files=None):
+        self.func_file = func_file
+        func_nii = nb.load(func_file)
+        self.tr = tr if tr is not None else func_nii.header.get_zooms()[-1]
 
-        self.ntsteps = func_nii.shape[-1]
-        self.tr = tr
-        if tr is None:
-            self.tr = func_nii.header.get_zooms()[-1]
+        self.mask_data = np.ones_like(func_nii.get_data(), dtype='uint8')
+        if mask_file:
+            self.mask_data = nb.load(mask_file).get_data().astype('uint8')
 
-        if seg is None:
-            self.seg_data = 2 * self.mask_data
-        else:
-            self.seg_data = nb.load(seg).get_data()
+        self.seg_data = None
+        if seg_file:
+            self.seg_data = nb.load(seg_file).get_data()
 
-        self.fig = plt.figure(figsize=figsize)
-        if title is not None:
-            self.fig.suptitle(title, fontsize=20)
+        if units is None:
+            units = {}
 
-        self.confounds = []
+        if vlines is None:
+            vlines = {}
+
+        self.confounds = {}
+        if data is None and conf_file:
+            data = pd.read_csv(conf_file, sep=r'[\t\s]+',
+                               usecols=usecols, index_col=False)
+
+        if data is not None:
+            for name in data.columns.ravel():
+                self.confounds[name] = {
+                    'values': [np.nan] + data[[name]].values.ravel().tolist(),
+                    'units': units.get(name),
+                    'cutoff': vlines.get(name)
+                }
+
         self.spikes = []
+        if spikes_files:
+            for sp_file in spikes_files:
+                self.spikes.append((np.loadtxt(sp_file), None, False))
 
-    def add_confounds(self, data, kwargs):
-        self.confounds.append((data, kwargs))
+    def plot(self, figure=None):
+        """Main plotter"""
+        sns.set_style("whitegrid")
 
-    def add_spikes(self, tsz, title=None, zscored=True):
-        self.spikes.append((tsz, title, zscored))
+        if figure is None:
+            figure = plt.gcf()
 
-    def plot(self):
         nconfounds = len(self.confounds)
         nspikes = len(self.spikes)
         nrows = 1 + nconfounds + nspikes
@@ -76,15 +93,16 @@ class fMRIPlot(object):
         if self.confounds:
             palette = color_palette("husl", nconfounds)
 
-        for i, (tseries, kwargs) in enumerate(self.confounds):
+        for i, (name, kwargs) in enumerate(self.confounds.items()):
+            tseries = kwargs.pop('values')
             confoundplot(
                 tseries, grid[grid_id], tr=self.tr, color=palette[i],
-                **kwargs)
+                name=name, **kwargs)
             grid_id += 1
 
-        plot_carpet(self.func_name, self.seg_data, subplot=grid[-1])
-        setattr(self, 'grid', grid)
+        plot_carpet(self.func_file, self.seg_data, subplot=grid[-1])
         # spikesplot_cb([0.7, 0.78, 0.2, 0.008])
+        return figure
 
 
 def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
@@ -380,7 +398,7 @@ def spikesplot_cb(position, cmap='viridis', fig=None):
     return cax
 
 
-def confoundplot(tseries, gs_ts, gs_dist=None, name=None, normalize=True,
+def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
                  units=None, tr=None, hide_x=True, color='b', nskip=0,
                  cutoff=None, ylims=None):
 
@@ -390,11 +408,7 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None, normalize=True,
         notr = True
         tr = 1.
     ntsteps = len(tseries)
-
-    # Normalize time series
     tseries = np.array(tseries)
-    if normalize:
-        tseries /= tr
 
     # Define nested GridSpec
     gs = mgs.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs_ts,
@@ -420,10 +434,9 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None, normalize=True,
     else:
         ax_ts.set_xticklabels([])
 
-    no_scale = notr or not normalize
     if name is not None:
         if units is not None:
-            name += (' [{}]' if no_scale else ' [{}/s]').format(units)
+            name += (' [{}]' if notr else ' [{}/s]').format(units)
 
         ax_ts.annotate(
             name, xy=(0.01, 0.0), xytext=(0, -4), xycoords='axes fraction',
@@ -514,5 +527,4 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None, normalize=True,
         ax_dist.set_yticklabels([])
 
         return [ax_ts, ax_dist], gs
-    else:
-        return ax_ts, gs
+    return ax_ts, gs

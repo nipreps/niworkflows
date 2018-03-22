@@ -6,6 +6,7 @@ Visualization tools
 
 """
 import numpy as np
+import pandas as pd
 
 from ..nipype.utils.filemanip import fname_presuffix
 from ..nipype.interfaces.base import (
@@ -23,6 +24,8 @@ class FMRISummaryInputSpec(BaseInterfaceInputSpec):
     fd_thres = traits.Float(0.2, usedefault=True, desc='')
     dvars = File(exists=True, mandatory=True, desc='')
     outliers = File(exists=True, mandatory=True, desc='')
+    tr = traits.Either(None, traits.Float, usedefault=True,
+                       desc='the TR')
 
 
 class FMRISummaryOutputSpec(TraitedSpec):
@@ -37,49 +40,31 @@ class FMRISummary(SimpleInterface):
     output_spec = FMRISummaryOutputSpec
 
     def _run_interface(self, runtime):
-        out_name = fname_presuffix(self.inputs.in_func,
-                                   suffix='_fmriplot.svg',
-                                   use_ext=False,
-                                   newpath=runtime.cwd)
-
-        # Compose plot
-        self._results['out_file'] = _big_plot(
+        self._results['out_file'] = fname_presuffix(
             self.inputs.in_func,
-            self.inputs.in_mask,
-            self.inputs.in_segm,
-            self.inputs.in_spikes_bg,
-            self.inputs.fd,
-            self.inputs.fd_thres,
-            self.inputs.dvars,
-            self.inputs.outliers,
-            out_name,
-        )
+            suffix='_fmriplot.svg',
+            use_ext=False,
+            newpath=runtime.cwd)
+
+        dataframe = pd.DataFrame({
+            'outliers': np.loadtxt(
+                self.inputs.outliers, usecols=[0]).tolist(),
+            # Pick non-standardize dvars
+            'DVARS': np.loadtxt(
+                self.inputs.dvars, skiprows=1, usecols=[1]).tolist(),
+            'FD': np.loadtxt(
+                self.inputs.fd, skiprows=1, usecols=[0]).tolist(),
+        })
+
+        fig = fMRIPlot(
+            self.inputs.in_func,
+            mask_file=self.inputs.in_mask,
+            seg_file=self.inputs.in_segm,
+            spikes_files=[self.inputs.in_spikes_bg],
+            tr=self.inputs.tr,
+            data=dataframe[['outliers', 'DVARS', 'FD']],
+            units={'outliers': '%', 'FD': 'mm'},
+            vlines={'FD': self.inputs.fd_thres},
+        ).plot()
+        fig.savefig(self._results['out_file'], bbox_inches='tight')
         return runtime
-
-
-def _big_plot(in_func, in_mask, in_segm, in_spikes_bg,
-              fd, fd_thres, dvars, outliers, out_file,
-              title='fMRI Summary plot'):
-    myplot = fMRIPlot(
-        in_func, in_mask, in_segm, title=title)
-    myplot.add_spikes(np.loadtxt(in_spikes_bg), zscored=False)
-
-    # Add AFNI outliers plot
-    myplot.add_confounds([np.nan] + np.loadtxt(outliers, usecols=[0]).tolist(),
-                         {'name': 'outliers', 'units': '%', 'normalize': False,
-                          'ylims': (0.0, None)})
-
-    # Pick non-standardize dvars
-    myplot.add_confounds([np.nan] + np.loadtxt(dvars, skiprows=1,
-                                               usecols=[1]).tolist(),
-                         {'name': 'DVARS', 'units': None, 'normalize': False})
-
-    # Add FD
-    myplot.add_confounds([np.nan] + np.loadtxt(fd, skiprows=1,
-                                               usecols=[0]).tolist(),
-                         {'name': 'FD', 'units': 'mm', 'normalize': False,
-                          'cutoff': [fd_thres], 'ylims': (0.0, fd_thres)})
-    myplot.plot()
-    myplot.fig.savefig(out_file, bbox_inches='tight')
-    myplot.fig.clf()
-    return out_file
