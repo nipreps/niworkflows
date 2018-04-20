@@ -1,3 +1,8 @@
+0.3.8 (April 20, 2018)
+======================
+
+* [PIN] Update nipype PIN to current master
+
 0.3.7 (March 22, 2018)
 ======================
 
