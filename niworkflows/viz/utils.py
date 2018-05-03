@@ -538,9 +538,10 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
                   width_ratios=[1, 1, 1, 4, 0.001, 1, 1, 1, 4, ],
                   height_ratios=[1.1, 1] * n_rows)
 
+    noise_components = None
     if noise_components_file:
-        with open(noise_components_file) as cf:
-            noise_components = [int(c) for c in cf.read().split(",")]
+        noise_components = np.loadtxt(noise_components_file,
+                                      dtype=int, delimiter=',', ndmin=1)
 
     for i, img in enumerate(
             iter_img(os.path.join(melodic_dir, "melodic_IC.nii.gz"))):
@@ -549,7 +550,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
         row = int(i / 2)
         l_row = row * 2
 
-        if noise_components_file:
+        if noise_components:
             if (i + 1) in noise_components:
                 color_title = color_time = color_power = 'r'
             else:
