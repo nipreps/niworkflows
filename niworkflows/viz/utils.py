@@ -550,15 +550,15 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
         row = int(i / 2)
         l_row = row * 2
 
-        if noise_components:
-            if (i + 1) in noise_components:
-                color_title = color_time = color_power = 'r'
-            else:
-                color_title = color_time = color_power = 'g'
-        else:
-            color_title = 'k'
-            color_time = current_palette[0]
-            color_power = current_palette[1]
+        # Set default colors
+        color_title = 'k'
+        color_time = current_palette[0]
+        color_power = current_palette[1]
+
+        if noise_components.size > 0:
+            # If a noise components list is provided, assign red/green
+            color_title = color_time = color_power = (
+                'r' if (i + 1) in noise_components else 'g')
 
         data = img.get_data()
         for j in range(3):
