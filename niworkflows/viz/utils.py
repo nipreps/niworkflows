@@ -555,7 +555,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
         color_time = current_palette[0]
         color_power = current_palette[1]
 
-        if noise_components.size > 0:
+        if noise_components is not None and noise_components.size > 0:
             # If a noise components list is provided, assign red/green
             color_title = color_time = color_power = (
                 'r' if (i + 1) in noise_components else 'g')
