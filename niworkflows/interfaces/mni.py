@@ -225,8 +225,7 @@ class RobustMNINormalization(BaseInterface):
                 # Use this as the moving mask.
                 args['moving_image_mask'] = create_cfm(
                     self.inputs.moving_mask,
-                    "moving_cfm.nii.gz",
-                    self.inputs.lesion_mask,
+                    lesion_mask=self.inputs.lesion_mask,
                     global_mask=self.inputs.explicit_masking)
 
         # If no moving mask is provided...
@@ -236,8 +235,7 @@ class RobustMNINormalization(BaseInterface):
             # Use this as the moving mask.
             args['moving_image_mask'] = create_cfm(
                 self.inputs.moving_image,
-                "moving_cfm.nii.gz",
-                self.inputs.lesion_mask,
+                lesion_mask=self.inputs.lesion_mask,
                 global_mask=True)
 
         """
@@ -265,7 +263,6 @@ class RobustMNINormalization(BaseInterface):
                         # Use this as the fixed mask.
                         args['fixed_image_mask'] = create_cfm(
                             self.inputs.reference_mask,
-                            "fixed_cfm.nii.gz",
                             lesion_mask=None,
                             global_mask=True)
 
@@ -283,7 +280,6 @@ class RobustMNINormalization(BaseInterface):
                 # Use this as the fixed mask
                 args['fixed_image_mask'] = create_cfm(
                     self.inputs.reference_image,
-                    "fixed_cfm.nii.gz",
                     lesion_mask=None,
                     global_mask=True)
 
@@ -314,7 +310,6 @@ class RobustMNINormalization(BaseInterface):
                     # Use this as the fixed mask.
                     args['fixed_image_mask'] = create_cfm(
                         op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution),
-                        "fixed_cfm.nii.gz",
                         lesion_mask=None,
                         global_mask=True)
 
@@ -396,7 +391,7 @@ def mask(in_file, mask_file, new_name):
     return os.path.abspath(new_name)
 
 
-def create_cfm(in_file, out_path, lesion_mask, global_mask=True):
+def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
     """
     Create a mask to constrain registration.
 
@@ -425,6 +420,12 @@ def create_cfm(in_file, out_path, lesion_mask, global_mask=True):
     import os
     import numpy as np
     import nibabel as nb
+    from nipype.utils.filemanip import fname_presuffix
+
+    if out_path is None:
+        out_path = fname_presuffix(in_file, suffix='_cfm', newpath=os.getcwd())
+    else:
+        out_path = os.path.abspath(out_path)
 
     # Load the input image
     in_img = nb.load(in_file)
@@ -458,7 +459,7 @@ def create_cfm(in_file, out_path, lesion_mask, global_mask=True):
     cfm_img.set_data_dtype(np.uint8)
     cfm_img.to_filename(out_path)
 
-    return os.path.abspath(out_path)
+    return out_path
 
 
 def _write_outputs(runtime, out_fname=None):
