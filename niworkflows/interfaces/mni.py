@@ -344,14 +344,14 @@ class RobustMNINormalization(BaseInterface):
             # Set the template resolution.
             resolution = self.inputs.template_resolution
 
+            _template_fmt = op.join(mni_template, '%dmm_%s.nii.gz')
             # If explicit masking is enabled...
             if self.inputs.explicit_masking:
                 # Mask the template image with the template mask.
                 # Do not use a fixed mask during registration.
-                _template_fmt = op.join(mni_template, '%dmm_%s.nii.gz')
                 args['fixed_image'] = mask(
                         _template_fmt % (resolution, self.inputs.reference),
-                        _template_fmt % (resolution, 'brainmask.nii.gz'),
+                        _template_fmt % (resolution, 'brainmask'),
                         "fixed_masked.nii.gz")
 
                 # If a lesion mask is provided...
@@ -359,19 +359,16 @@ class RobustMNINormalization(BaseInterface):
                     # Create a cost function mask with the form: [global mask]
                     # Use this as the fixed mask.
                     args['fixed_image_mask'] = create_cfm(
-                        op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution),
+                        _template_fmt % (resolution, 'brainmask'),
                         lesion_mask=None,
                         global_mask=True)
 
             # If explicit masking is disabled...
             else:
                 # Use the raw template as the fixed image.
-                args['fixed_image'] = op.join(
-                    mni_template,
-                    '%dmm_%s.nii.gz' % (resolution, self.inputs.reference))
+                args['fixed_image'] = _template_fmt % (resolution, self.inputs.reference)
                 # Use the template mask as the fixed mask.
-                args['fixed_image_mask'] = op.join(
-                    mni_template, '%dmm_brainmask.nii.gz' % resolution)
+                args['fixed_image_mask'] = _template_fmt % (resolution, 'brainmask')
 
         return args
 
