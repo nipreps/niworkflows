@@ -302,9 +302,11 @@ class RobustMNINormalization(BaseInterface):
             if self.inputs.explicit_masking:
                 # Mask the template image with the template mask.
                 # Do not use a fixed mask during registration.
+                _template_fmt = op.join(mni_template, '%dmm_%s.nii.gz')
                 args['fixed_image'] = mask(
-                        op.join(mni_template, '%dmm_%s.nii.gz' % (resolution, self.inputs.reference)),
-                        op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution), "fixed_masked.nii.gz")
+                        _template_fmt % (resolution, self.inputs.reference),
+                        _template_fmt % (resolution, 'brainmask.nii.gz'),
+                        "fixed_masked.nii.gz")
 
                 # If a lesion mask is provided...
                 if isdefined(self.inputs.lesion_mask):
