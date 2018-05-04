@@ -198,7 +198,32 @@ class RobustMNINormalization(BaseInterface):
                 'initial_moving_transform': self.inputs.initial_moving_transform}
 
         """
-        Moving image handling
+        Moving image handling - The following truth table maps out the intended action
+        sequence. Future refactoring may more directly encode this.
+
+        moving_mask and lesion_mask are files
+        True = file
+        False = None
+
+        | moving_mask | explicit_masking | lesion_mask | action
+        |-------------|------------------|-------------|-------------------------------------------
+        | True        | True             | True        | Update `moving_image` after applying
+        |             |                  |             | mask.
+        |             |                  |             | Set `moving_image_mask` applying
+        |             |                  |             | `create_cfm` with `global_mask=True`.
+        |-------------|------------------|-------------|-------------------------------------------
+        | True        | True             | False       | Update `moving_image` after applying
+        |             |                  |             | mask.
+        |-------------|------------------|-------------|-------------------------------------------
+        | True        | False            | True        | Set `moving_image_mask` applying
+        |             |                  |             | `create_cfm` with `global_mask=False`
+        |-------------|------------------|-------------|-------------------------------------------
+        | True        | False            | False       | args['moving_image_mask'] = moving_mask
+        |-------------|------------------|-------------|-------------------------------------------
+        | False       | *                | True        | Set `moving_image_mask` applying
+        |             |                  |             | `create_cfm` with `global_mask=True`
+        |-------------|------------------|-------------|-------------------------------------------
+        | False       | *                | False       | No action
         """
         # If a moving mask is provided...
         if isdefined(self.inputs.moving_mask):
@@ -239,7 +264,32 @@ class RobustMNINormalization(BaseInterface):
                 global_mask=True)
 
         """
-        Reference image handling
+        Reference image handling - The following truth table maps out the intended action
+        sequence. Future refactoring may more directly encode this.
+
+        reference_mask and lesion_mask are files
+        True = file
+        False = None
+
+        | reference_mask | explicit_masking | lesion_mask | action
+        |----------------|------------------|-------------|----------------------------------------
+        | True           | True             | True        | Update `fixed_image` after applying
+        |                |                  |             | mask.
+        |                |                  |             | Set `fixed_image_mask` applying
+        |                |                  |             | `create_cfm` with `global_mask=True`.
+        |----------------|------------------|-------------|----------------------------------------
+        | True           | True             | False       | Update `fixed_image` after applying
+        |                |                  |             | mask.
+        |----------------|------------------|-------------|----------------------------------------
+        | True           | False            | True        | Set `fixed_image_mask` applying
+        |                |                  |             | `create_cfm` with `global_mask=False`
+        |----------------|------------------|-------------|----------------------------------------
+        | True           | False            | False       | args['fixed_image_mask'] = fixed_mask
+        |----------------|------------------|-------------|----------------------------------------
+        | False          | *                | True        | Set `fixed_image_mask` applying
+        |                |                  |             | `create_cfm` with `global_mask=True`
+        |----------------|------------------|-------------|----------------------------------------
+        | False          | *                | False       | No action
         """
         # If a reference image is provided...
         if isdefined(self.inputs.reference_image):
@@ -406,6 +456,7 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
         Path to an existing binary lesion mask.
     global_mask : bool
         Create a whole-image mask (True) or limit to reference mask (False)
+        A whole image-mask is 1 everywhere
 
     Returns
     -------
