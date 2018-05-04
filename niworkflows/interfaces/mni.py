@@ -427,6 +427,11 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
     else:
         out_path = os.path.abspath(out_path)
 
+    if not global_mask and not lesion_mask:
+        NIWORKFLOWS_LOG.warning(
+            'No lesion mask was provided and global_mask not requested, '
+            'therefore the original mask will not be modified.')
+
     # Load the input image
     in_img = nb.load(in_file)
     in_data = in_img.get_data()
@@ -449,9 +454,6 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
         # Create the cost function mask image from the subtraction.
         cfm_img = nb.Nifti1Image(cfm_data, in_img.affine, in_img.header)
     else:
-        # Confirm that global masking is enabled.
-        assert (global_mask is True), "If no lesion mask is provided, global_mask must be True"
-
         # Create the cost function mask from the global mask.
         cfm_img = nb.Nifti1Image(in_data, in_img.affine, in_img.header)
 
