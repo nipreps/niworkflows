@@ -355,16 +355,16 @@ class RobustMNINormalization(BaseInterface):
 
 def mask(in_file, mask_file, new_name):
     """
-    Applies a binary mask to an image.
+    Apply a binary mask to an image.
 
     Parameters
     ----------
     in_file : str
-              Path to a NIfTI file.
+        Path to a NIfTI file to mask
     mask_file : str
-                Path to a NIfTI file.
+        Path to a binary mask
     new_name : str
-               Path/filename for the masked output image.
+        Path/filename for the masked output image.
 
     Returns
     -------
@@ -436,7 +436,7 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
     in_img = nb.load(in_file)
 
     # If we want a global mask, create one based on the input image.
-    if global_mask is True:
+    if global_mask:
         # Create a mask of ones with the shape of the input image.
         data = np.ones(in_img.shape, dtype=np.uint8)
     else:
