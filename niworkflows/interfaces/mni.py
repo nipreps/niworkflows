@@ -434,28 +434,25 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
 
     # Load the input image
     in_img = nb.load(in_file)
-    in_data = in_img.get_data()
 
     # If we want a global mask, create one based on the input image.
     if global_mask is True:
         # Create a mask of ones with the shape of the input image.
-        in_data = np.ones_like(in_data, dtype=np.uint8)
+        data = np.ones(in_img.shape, dtype=np.uint8)
+    else:
+        data = in_img.get_data()
 
     # If a lesion mask was provided, combine it with the secondary mask.
     if lesion_mask is not None:
         # Reorient the lesion mask and get the data.
         lm_img = nb.as_closest_canonical(nb.load(lesion_mask))
-        lm_data = lm_img.get_data()
 
-        # Subtract the lesion mask from the secondary mask.
-        cfm_data = in_data - lm_data
-        cfm_data[cfm_data < 0] = 0
+        # Subtract lesion mask from secondary mask, set negatives to 0
+        data = np.fmax(data - lm_img.get_data(), 0)
+        # Cost function mask will be created from subtraction
+    # Otherwise, CFM will be created from global mask
 
-        # Create the cost function mask image from the subtraction.
-        cfm_img = nb.Nifti1Image(cfm_data, in_img.affine, in_img.header)
-    else:
-        # Create the cost function mask from the global mask.
-        cfm_img = nb.Nifti1Image(in_data, in_img.affine, in_img.header)
+    cfm_img = nb.Nifti1Image(data, in_img.affine, in_img.header)
 
     # Save the cost function mask.
     cfm_img.set_data_dtype(np.uint8)
