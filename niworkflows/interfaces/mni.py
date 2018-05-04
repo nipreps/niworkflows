@@ -487,13 +487,9 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
     in_img = nb.load(in_file)
 
     # If we want a global mask, create one based on the input image.
-    if global_mask:
-        # Create a mask of ones with the shape of the input image.
-        data = np.ones(in_img.shape, dtype=np.uint8)
-    else:
-        data = in_img.get_data()
-        if set(np.unique(data)) - {0, 1}:
-            raise ValueError("`global_mask` must be true if `in_file` is not a binary mask")
+    data = np.ones(in_img.shape, dtype=np.uint8) if global_mask else in_img.get_data()
+    if set(np.unique(data)) - {0, 1}:
+        raise ValueError("`global_mask` must be true if `in_file` is not a binary mask")
 
     # If a lesion mask was provided, combine it with the secondary mask.
     if lesion_mask is not None:
