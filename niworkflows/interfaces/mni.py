@@ -209,18 +209,18 @@ class RobustMNINormalization(BaseInterface):
         |-------------|------------------|-------------|-------------------------------------------
         | True        | True             | True        | Update `moving_image` after applying
         |             |                  |             | mask.
-        |             |                  |             | Set `moving_image_mask` applying
+        |             |                  |             | Set `moving_image_masks` applying
         |             |                  |             | `create_cfm` with `global_mask=True`.
         |-------------|------------------|-------------|-------------------------------------------
         | True        | True             | False       | Update `moving_image` after applying
         |             |                  |             | mask.
         |-------------|------------------|-------------|-------------------------------------------
-        | True        | False            | True        | Set `moving_image_mask` applying
+        | True        | False            | True        | Set `moving_image_masks` applying
         |             |                  |             | `create_cfm` with `global_mask=False`
         |-------------|------------------|-------------|-------------------------------------------
-        | True        | False            | False       | args['moving_image_mask'] = moving_mask
+        | True        | False            | False       | args['moving_image_masks'] = moving_mask
         |-------------|------------------|-------------|-------------------------------------------
-        | False       | *                | True        | Set `moving_image_mask` applying
+        | False       | *                | True        | Set `moving_image_masks` applying
         |             |                  |             | `create_cfm` with `global_mask=True`
         |-------------|------------------|-------------|-------------------------------------------
         | False       | *                | False       | No action
@@ -240,7 +240,7 @@ class RobustMNINormalization(BaseInterface):
             else:
                 # Use the moving mask during registration.
                 # Do not mask the moving image.
-                args['moving_image_mask'] = self.inputs.moving_mask
+                args['moving_image_masks'] = self.inputs.moving_mask
 
             # If a lesion mask is also provided...
             if isdefined(self.inputs.lesion_mask):
@@ -248,7 +248,7 @@ class RobustMNINormalization(BaseInterface):
                 # [global mask - lesion mask] (if explicit masking is enabled)
                 # [moving mask - lesion mask] (if explicit masking is disabled)
                 # Use this as the moving mask.
-                args['moving_image_mask'] = create_cfm(
+                args['moving_image_masks'] = create_cfm(
                     self.inputs.moving_mask,
                     lesion_mask=self.inputs.lesion_mask,
                     global_mask=self.inputs.explicit_masking)
@@ -258,7 +258,7 @@ class RobustMNINormalization(BaseInterface):
         elif isdefined(self.inputs.lesion_mask):
             # Create a cost function mask with the form: [global mask - lesion mask]
             # Use this as the moving mask.
-            args['moving_image_mask'] = create_cfm(
+            args['moving_image_masks'] = create_cfm(
                 self.inputs.moving_image,
                 lesion_mask=self.inputs.lesion_mask,
                 global_mask=True)
@@ -275,18 +275,18 @@ class RobustMNINormalization(BaseInterface):
         |----------------|------------------|-------------|----------------------------------------
         | True           | True             | True        | Update `fixed_image` after applying
         |                |                  |             | mask.
-        |                |                  |             | Set `fixed_image_mask` applying
+        |                |                  |             | Set `fixed_image_masks` applying
         |                |                  |             | `create_cfm` with `global_mask=True`.
         |----------------|------------------|-------------|----------------------------------------
         | True           | True             | False       | Update `fixed_image` after applying
         |                |                  |             | mask.
         |----------------|------------------|-------------|----------------------------------------
-        | True           | False            | True        | Set `fixed_image_mask` applying
+        | True           | False            | True        | Set `fixed_image_masks` applying
         |                |                  |             | `create_cfm` with `global_mask=False`
         |----------------|------------------|-------------|----------------------------------------
-        | True           | False            | False       | args['fixed_image_mask'] = fixed_mask
+        | True           | False            | False       | args['fixed_image_masks'] = fixed_mask
         |----------------|------------------|-------------|----------------------------------------
-        | False          | *                | True        | Set `fixed_image_mask` applying
+        | False          | *                | True        | Set `fixed_image_masks` applying
         |                |                  |             | `create_cfm` with `global_mask=True`
         |----------------|------------------|-------------|----------------------------------------
         | False          | *                | False       | No action
@@ -311,7 +311,7 @@ class RobustMNINormalization(BaseInterface):
                     if isdefined(self.inputs.lesion_mask):
                         # Create a cost function mask with the form: [global mask]
                         # Use this as the fixed mask.
-                        args['fixed_image_mask'] = create_cfm(
+                        args['fixed_image_masks'] = create_cfm(
                             self.inputs.reference_mask,
                             lesion_mask=None,
                             global_mask=True)
@@ -321,14 +321,14 @@ class RobustMNINormalization(BaseInterface):
                 else:
                     # Use the reference mask as the fixed mask during registration.
                     # Do not mask the fixed image.
-                    args['fixed_image_mask'] = self.inputs.reference_mask
+                    args['fixed_image_masks'] = self.inputs.reference_mask
 
             # If no reference mask is provided...
             # But a lesion mask *IS* provided ...
             elif isdefined(self.inputs.lesion_mask):
                 # Create a cost function mask with the form: [global mask]
                 # Use this as the fixed mask
-                args['fixed_image_mask'] = create_cfm(
+                args['fixed_image_masks'] = create_cfm(
                     self.inputs.reference_image,
                     lesion_mask=None,
                     global_mask=True)
@@ -358,7 +358,7 @@ class RobustMNINormalization(BaseInterface):
                 if isdefined(self.inputs.lesion_mask):
                     # Create a cost function mask with the form: [global mask]
                     # Use this as the fixed mask.
-                    args['fixed_image_mask'] = create_cfm(
+                    args['fixed_image_masks'] = create_cfm(
                         _template_fmt % (resolution, 'brainmask'),
                         lesion_mask=None,
                         global_mask=True)
@@ -368,7 +368,7 @@ class RobustMNINormalization(BaseInterface):
                 # Use the raw template as the fixed image.
                 args['fixed_image'] = _template_fmt % (resolution, self.inputs.reference)
                 # Use the template mask as the fixed mask.
-                args['fixed_image_mask'] = _template_fmt % (resolution, 'brainmask')
+                args['fixed_image_masks'] = _template_fmt % (resolution, 'brainmask')
 
         return args
 
