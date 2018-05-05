@@ -14,10 +14,11 @@ from nilearn.masking import compute_epi_mask
 import scipy.ndimage as nd
 
 from .. import NIWORKFLOWS_LOG
+from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces import fsl, ants
 from nipype.interfaces.base import (
-    File, BaseInterfaceInputSpec, traits, isdefined, InputMultiPath, Str)
-from nipype.interfaces.mixins import reporting
+    SimpleInterface, BaseInterfaceInputSpec, TraitedSpec,
+    traits, isdefined, InputMultiPath, File, Str)
 from nipype.algorithms import confounds
 from . import report_base as nrc
 
@@ -189,6 +190,204 @@ class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
                              self.inputs.realigned_file, self._mask_file)
 
         return super(ACompCorRPT, self)._post_run_hook(runtime)
+
+
+class PrepareRegistrationImagesInputSpec(BaseInterfaceInputSpec):
+    fixed_file = File(exists=True)
+    moving_file = File(exists=True)
+    fixed_mask = File
+    moving_mask = File
+    lesion_mask = File
+    explicit_masking = traits.Bool(
+        True, usedefault=True,
+        desc='Set voxels outside the masks to zero thus creating an artificial border that can '
+             'that can drive the registration. Requires reliable and accurate masks. See '
+             'See https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba')
+
+
+class PrepareRegistrationImagesOutputSpec(TraitedSpec):
+    fixed_file = File(exists=True)
+    moving_file = File(exists=True)
+    fixed_mask = File
+    moving_mask = File
+
+
+class PrepareRegistrationImages(SimpleInterface):
+    input_spec = PrepareRegistrationImagesInputSpec
+    output_spec = PrepareRegistrationImagesOutputSpec
+
+    def _run_interface(self, runtime):
+        fixed_file = self.inputs.fixed_file
+        moving_file = self.inputs.moving_file
+        fixed_mask = self.inputs.fixed_mask
+        moving_mask = self.inputs.moving_mask
+        lesion_mask = self.inputs.lesion_mask
+        explicit_masking = self.inputs.explicit_masking
+
+        # Default behavior: pass-through
+        self._results = {
+            'fixed_file': fixed_file,
+            'moving_file': moving_file,
+            }
+
+        if explicit_masking:
+            if fixed_mask:
+                self._results['fixed_file'] = apply_mask(fixed_file, fixed_mask, cwd=runtime.cwd)
+            if moving_mask:
+                self._results['moving_file'] = apply_mask(moving_file, moving_mask,
+                                                          cwd=runtime.cwd)
+        else:
+            self._results.update({
+                'fixed_mask': fixed_mask,
+                'moving_mask': moving_mask,
+                })
+
+        if lesion_mask:
+            self._results['fixed_mask'] = create_cfm(
+                fixed_mask or fixed_file,
+                lesion_mask=None,
+                global_mask=True,
+                cwd=runtime.cwd)
+            self._results['moving_mask'] = create_cfm(
+                moving_mask or moving_file,
+                lesion_mask=lesion_mask,
+                global_mask=explicit_masking or not moving_mask,
+                cwd=runtime.cwd)
+
+        return runtime
+
+
+def apply_mask(in_file, mask_file, out_filename=None, cwd=None):
+    """
+    Apply a binary mask to an image.
+
+    Parameters
+    ----------
+    in_file : str
+        Path to an image to mask
+    mask_file : str
+        Path to a binary mask
+    out_filename : str (optional)
+        Base filename for output file - if ``None``, ``in_file`` is used
+    cwd : str (optional)
+        Working directory to create CFM in - if ``None``, ``os.getcwd()`` is used
+
+    Returns
+    -------
+    str
+        Absolute path of the masked output image.
+
+    Notes
+    -----
+    in_file and mask_file must be in the same
+    image space and have the same dimensions.
+    """
+    if cwd is None:
+        cwd = os.getcwd()
+
+    out_filename = fname_presuffix(out_filename or in_file, suffix='_masked', newpath=cwd)
+
+    img = nb.load(in_file)
+    mask = nb.load(mask_file)
+    try:
+        _check_space(img, mask)
+    except ValueError as err:
+        msg = err.args[0]
+        raise ValueError(msg + 'Files: {}, {}'.format(in_file, mask_file))
+    data = img.get_data() * (mask.get_data() > 0)
+
+    img.__class__(data, img.affine, img.header).to_filename(out_filename)
+
+    return out_filename
+
+
+def create_cfm(in_file, lesion_mask, global_mask, out_filename=None, cwd=None):
+    """
+    Create a cost function mask (CFM) to constrain registration.
+
+    Parameters
+    ----------
+    in_file : str
+        Path to an existing image (usually a mask).
+        If global_mask = True, this is used as a size/dimension reference.
+    lesion_mask : str, optional
+        Path to an existing binary lesion mask.
+    global_mask : bool
+        Create a whole-image mask (True) or limit to reference mask (False)
+        A whole image-mask is 1 everywhere
+    out_filename : str (optional)
+        Base filename for output file - if ``None``, ``in_file`` is used
+    cwd : str (optional)
+        Working directory to create CFM in - if ``None``, ``os.getcwd()`` is used
+
+    Returns
+    -------
+    str
+        Absolute path of the new cost function mask.
+
+    Notes
+    -----
+    in_file and lesion_mask must be in the same
+    image space and have the same dimensions
+    """
+    if cwd is None:
+        cwd = os.getcwd()
+
+    out_filename = fname_presuffix(out_filename or in_file, suffix='_cfm', newpath=cwd)
+
+    if not global_mask and not lesion_mask:
+        NIWORKFLOWS_LOG.warning(
+            'No lesion mask was provided and global_mask not requested, '
+            'therefore the original mask will not be modified.')
+
+    # Load the input image
+    img = nb.load(in_file)
+
+    # If we want a global mask, create one based on the input image.
+    mask = np.ones(img.shape, dtype=np.uint8) if global_mask else img.get_data()
+    if not is_binary(mask):
+        raise ValueError("`global_mask` must be true if `in_file` is not a binary mask")
+
+    # If a lesion mask was provided, combine it with the secondary mask.
+    if lesion_mask is not None:
+        # Reorient the lesion mask and get the data.
+        lm_img = nb.as_closest_canonical(nb.load(lesion_mask))
+
+        try:
+            _check_space(img, lm_img)
+        except ValueError as err:
+            msg = err.args[0]
+            raise ValueError(msg + 'Files: {}, {}'.format(in_file, lesion_mask))
+
+        if not is_binary(lm_img.get_data()):
+            raise ValueError('`lesion_mask` must be a binary mask')
+
+        # Subtract lesion mask from secondary mask, set negatives to 0
+        mask = np.fmax(mask - lm_img.get_data(), 0)
+
+    # Coerce to uint8, use np.asanyarray to avoid unnecessary copies
+    mask = np.asanyarray(mask, dtype=np.uint8)
+
+    # Use original image type to permit Nifti2, but check against the
+    # Nifti1 base class before using the Nifti-specific set_data_dtype
+    cfm_img = img.__class__(mask, img.affine, img.header)
+    if isinstance(cfm_img, nb.Nifti1Pair):
+        cfm_img.set_data_dtype(np.uint8)
+
+    cfm_img.to_filename(out_filename)
+
+    return out_filename
+
+
+def _check_space(img_a, img_b):
+    if img_a.shape != img_b.shape:
+        raise ValueError('Incompatible shapes: {!r}, {!r}'.format(img_a.shape, img_b.shape))
+    if not np.allclose(img_a.affine, img_b.affine):
+        raise ValueError('Mismatched affines')
+
+
+def is_binary(data):
+    return set(np.unique(data)).issubset({0, 1})
 
 
 class TCompCorInputSpecRPT(nrc.SVGReportCapableInputSpec,
