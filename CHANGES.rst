@@ -1,3 +1,10 @@
+0.3.12 (May 05, 2018)
+=====================
+
+With thanks to @danlurie for this new feature.
+
+* [ENH] Constrained cost-function masking for T1-MNI registration (#233)
+
 0.3.8 (April 20, 2018)
 ======================
 
