@@ -111,7 +111,7 @@ def test_BBRegisterRPT(monkeypatch, moving):
     _smoke_test_report(bbregister_rpt, 'testBBRegister.svg')
 
 
-def test_RobustMNINormalizationRPT(monkeypatch, moving):
+def test_RobustMNINormalizationRPT(monkeypatch, moving, reference):
     """ the RobustMNINormalizationRPT report capable test """
     def _agg(objekt, runtime):
         outputs = Bunch(warped_image=os.path.join(
@@ -126,11 +126,13 @@ def test_RobustMNINormalizationRPT(monkeypatch, moving):
                         _agg)
 
     ants_rpt = RobustMNINormalizationRPT(
-        generate_report=True, moving_image=moving, flavor='testing')
+        generate_report=True, moving_image=moving, reference_image=reference,
+        flavor='testing')
     _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT.svg')
 
 
-def test_RobustMNINormalizationRPT_masked(monkeypatch, moving, reference_mask):
+def test_RobustMNINormalizationRPT_masked(monkeypatch, moving, reference,
+                                          reference_mask):
     """ the RobustMNINormalizationRPT report capable test with masking """
     def _agg(objekt, runtime):
         outputs = Bunch(warped_image=os.path.join(
@@ -145,7 +147,7 @@ def test_RobustMNINormalizationRPT_masked(monkeypatch, moving, reference_mask):
                         _agg)
 
     ants_rpt = RobustMNINormalizationRPT(
-        generate_report=True, moving_image=moving,
+        generate_report=True, moving_image=moving, reference_image=reference,
         reference_mask=reference_mask, flavor='testing')
     _smoke_test_report(ants_rpt, 'testRobustMNINormalizationRPT_masked.svg')
 
