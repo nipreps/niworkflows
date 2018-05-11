@@ -1,3 +1,8 @@
+0.3.13 (May 11, 2018)
+=====================
+
+* [PIN] Update Nipype to current master in nipy/nipype
+
 0.3.12 (May 05, 2018)
 =====================
 
