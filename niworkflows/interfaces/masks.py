@@ -230,15 +230,8 @@ class SimpleShowMaskInputSpec(nrc.SVGReportCapableInputSpec):
     mask_file = File(exists=True, mandatory=True, desc='file before')
 
 
-class SimpleShowMaskRPT(nrc.SegmentationRC):
+class SimpleShowMaskRPT(nrc.SegmentationRC, nrc.ReportingInterface):
     input_spec = SimpleShowMaskInputSpec
-    output_spec = reporting.ReportCapableOutputSpec
-
-    def __init__(self, generate_report=True, **kwargs):
-        super(SimpleShowMaskRPT, self).__init__(generate_report=generate_report, **kwargs)
-
-    def _run_interface(self, runtime):
-        return runtime
 
     def _post_run_hook(self, runtime):
         self._anat_file = self.inputs.background_file
@@ -259,12 +252,8 @@ class ROIsPlotInputSpecRPT(nrc.SVGReportCapableInputSpec):
                            desc='use specific colors for contours')
 
 
-class ROIsPlot(reporting.ReportCapableInterface):
+class ROIsPlot(nrc.ReportingInterface):
     input_spec = ROIsPlotInputSpecRPT
-    output_spec = reporting.ReportCapableOutputSpec
-
-    def _run_interface(self, runtime):
-        return runtime
 
     def _generate_report(self):
         from niworkflows.viz.utils import plot_segs, compose_view

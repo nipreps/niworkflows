@@ -294,14 +294,13 @@ class SimpleBeforeAfterInputSpecRPT(nrc.SVGReportCapableInputSpec):
     wm_seg = File(desc='reference white matter segmentation mask')
 
 
-class SimpleBeforeAfterRPT(nrc.RegistrationRC):
+class SimpleBeforeAfterRPT(nrc.RegistrationRC, nrc.ReportingInterface):
     input_spec = SimpleBeforeAfterInputSpecRPT
-    output_spec = reporting.ReportCapableOutputSpec
 
     _fixed_image_label = "after"
     _moving_image_label = "before"
 
-    def _run_interface(self, runtime):
+    def _post_run_hook(self, runtime):
         """ there is not inner interface to run """
         self._fixed_image = self.inputs.after
         self._moving_image = self.inputs.before
@@ -310,7 +309,7 @@ class SimpleBeforeAfterRPT(nrc.RegistrationRC):
             'Report - setting before (%s) and after (%s) images',
             self._fixed_image, self._moving_image)
 
-        return runtime
+        return super(SimpleBeforeAfterRPT, self)._post_run_hook(runtime)
 
 
 class ResampleBeforeAfterInputSpecRPT(SimpleBeforeAfterInputSpecRPT):
@@ -319,9 +318,6 @@ class ResampleBeforeAfterInputSpecRPT(SimpleBeforeAfterInputSpecRPT):
 
 class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
     input_spec = ResampleBeforeAfterInputSpecRPT
-
-    def _run_interface(self, runtime):
-        return runtime
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.after

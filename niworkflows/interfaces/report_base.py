@@ -135,3 +135,17 @@ class SurfaceSegmentationRC(reporting.ReportCapableInterface):
             [],
             out_file=self._out_report
         )
+
+
+class ReportingInterface(reporting.ReportCapableInterface):
+    """Interface that always generates a report
+
+    A subclass must define an ``input_spec`` and override ``_generate_report``.
+    """
+    output_spec = reporting.ReportCapableOutputSpec
+
+    def __init__(self, generate_report=True, **kwargs):
+        super(ReportingInterface, self).__init__(generate_report=generate_report, **kwargs)
+
+    def _run_interface(self, runtime):
+        return runtime
