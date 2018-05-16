@@ -237,6 +237,9 @@ class SimpleShowMaskRPT(nrc.SegmentationRC):
     def __init__(self, generate_report=True, **kwargs):
         super(SimpleShowMaskRPT, self).__init__(generate_report=generate_report, **kwargs)
 
+    def _run_interface(self, runtime):
+        return runtime
+
     def _post_run_hook(self, runtime):
         self._anat_file = self.inputs.background_file
         self._mask_file = self.inputs.mask_file
