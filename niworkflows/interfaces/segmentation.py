@@ -106,7 +106,7 @@ class MELODICOutputSpecRPT(reporting.ReportCapableOutputSpec,
     pass
 
 
-class MELODICRPT(nrc.ReportCapableInterface, fsl.MELODIC):
+class MELODICRPT(reporting.ReportCapableInterface, fsl.MELODIC):
     input_spec = MELODICInputSpecRPT
     output_spec = MELODICOutputSpecRPT
 
@@ -146,7 +146,7 @@ class ICA_AROMAOutputSpecRPT(reporting.ReportCapableOutputSpec,
     pass
 
 
-class ICA_AROMARPT(nrc.ReportCapableInterface, fsl.ICA_AROMA):
+class ICA_AROMARPT(reporting.ReportCapableInterface, fsl.ICA_AROMA):
     input_spec = ICA_AROMAInputSpecRPT
     output_spec = ICA_AROMAOutputSpecRPT
 
