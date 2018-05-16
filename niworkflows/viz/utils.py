@@ -23,7 +23,7 @@ from svgutils.transform import SVGFigure
 from seaborn import color_palette
 
 from .. import NIWORKFLOWS_LOG
-from ..nipype.utils import filemanip
+from nipype.utils import filemanip
 
 try:
     from shutil import which

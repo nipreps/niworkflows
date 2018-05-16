@@ -15,10 +15,10 @@ import nilearn.image as nli
 from textwrap import indent
 
 from .. import __version__
-from ..nipype import logging
-from ..nipype.utils.filemanip import fname_presuffix
-from ..nipype.utils.misc import normalize_mc_params
-from ..nipype.interfaces.base import (
+from nipype import logging
+from nipype.utils.filemanip import fname_presuffix
+from nipype.utils.misc import normalize_mc_params
+from nipype.interfaces.base import (
     File, BaseInterfaceInputSpec, TraitedSpec, traits, SimpleInterface
 )
 
