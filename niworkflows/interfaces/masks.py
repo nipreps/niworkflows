@@ -37,7 +37,7 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
     output_spec = BETOutputSpecRPT
 
     def _run_interface(self, runtime):
-        if self.inputs.generate_report:
+        if self.generate_report:
             self.inputs.mask = True
 
         return super(BETRPT, self)._run_interface(runtime)
@@ -228,12 +228,14 @@ class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
 class SimpleShowMaskInputSpec(nrc.SVGReportCapableInputSpec):
     background_file = File(exists=True, mandatory=True, desc='file before')
     mask_file = File(exists=True, mandatory=True, desc='file before')
-    generate_report = traits.Bool(True, usedefault=True)
 
 
 class SimpleShowMaskRPT(nrc.SegmentationRC):
     input_spec = SimpleShowMaskInputSpec
     output_spec = reporting.ReportCapableOutputSpec
+
+    def __init__(self, generate_report=True, **kwargs):
+        super(SimpleShowMaskRPT, self).__init__(generate_report=generate_report, **kwargs)
 
     def _post_run_hook(self, runtime):
         self._anat_file = self.inputs.background_file
