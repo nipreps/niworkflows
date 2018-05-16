@@ -115,7 +115,7 @@ jobs:
               -v ${PWD}:/scratch -w /scratch \
               --entrypoint=/usr/local/miniconda/bin/py.test \
               niworkflows:py3 /root/niworkflows \
-              -n ${CIRCLE_NPROCS:-4} -v --junit-xml=/scratch/pytest.xml
+              -n auto -v --junit-xml=/scratch/pytest.xml
 
       - store_artifacts:
           path: /tmp/tests
