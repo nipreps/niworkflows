@@ -9,8 +9,6 @@ as well as for open-source software distribution.
 """
 from __future__ import absolute_import, division, print_function
 import datetime
-from os import path as op
-import runpy
 
 __version__ = '0.3.14-dev'
 __packagename__ = 'niworkflows'
