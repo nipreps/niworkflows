@@ -24,6 +24,7 @@ OSF_RESOURCES = {
     'mni_icbm152_linear': ('580705eb594d9001ed622649', '72be639e92532def7caad75cb4058e83'),
     'mni_icbm152_nlin_asym_09c': ('580705089ad5a101f17944a9', '002f9bf24dc5c32de50c03f01fa539ec'),
     'oasis_dkt31_mni152': ('5a95cd9591b689000ca5b6ab', 'e0bea438b9645c9e7c333a6edd859715'),
+    'hcp_fs_32k': ('5b05bfe1390c5f0011f4e063', '94f5d972c2014e672358a8d0e1900277'),
 }
 
 BIDS_EXAMPLES = {
@@ -203,3 +204,12 @@ def get_oasis_dkt31_mni152(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset('oasis_dkt31_mni152', data_dir, url, resume, verbose)
+
+
+def get_hcp_fs_32k(data_dir=None, url=None, resume=True, verbose=1):
+    """Download and load hcp 32k fs LR mesh and gifti files
+    :param str data_dir: path of the data directory. Used to force data storage
+        in a non-standard location.
+    :param str url: download URL of the dataset. Overwrite the default URL.
+    """
+    return get_dataset("hcp_fs_32k", data_dir, url, resume, verbose)

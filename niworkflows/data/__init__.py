@@ -18,6 +18,7 @@ from .getters import (
     get_mni_icbm152_linear,
     get_mni_icbm152_nlin_asym_09c,
     get_oasis_dkt31_mni152,
+    get_hcp_fs_32k,
     get_dataset,
     get_bids_examples,
     TEMPLATE_MAP,
