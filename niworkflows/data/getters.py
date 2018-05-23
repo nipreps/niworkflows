@@ -25,6 +25,7 @@ OSF_RESOURCES = {
     'mni_icbm152_nlin_asym_09c': ('580705089ad5a101f17944a9', '002f9bf24dc5c32de50c03f01fa539ec'),
     'oasis_dkt31_mni152': ('5a95cd9591b689000ca5b6ab', 'e0bea438b9645c9e7c333a6edd859715'),
     'hcp_fs_32k': ('5b05bfe1390c5f0011f4e063', '94f5d972c2014e672358a8d0e1900277'),
+    'conte69-fs32k-mesh': ('5b05cea6390c5f0010f4e2d8', 'ca5ae809d5f78b5a75f38ca760811e85'),
 }
 
 BIDS_EXAMPLES = {
@@ -213,3 +214,12 @@ def get_hcp_fs_32k(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset("hcp_fs_32k", data_dir, url, resume, verbose)
+
+
+def get_conte69_fs32k_mesh(data_dir=None, url=None, resume=True, verbose=1):
+    """Download and load conte69 fsLR 32k meshes with varying levels of inflation
+    :param str data_dir: path of the data directory. Used to force data storage
+        in a non-standard location.
+    :param str url: download URL of the dataset. Overwrite the default URL.
+    """
+    return get_dataset("conte69-fs32k-mesh", data_dir, url, resume, verbose)
