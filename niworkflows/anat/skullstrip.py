@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import absolute_import, division, print_function, unicode_literals
-from niworkflows.nipype.interfaces import ants
-from niworkflows.nipype.interfaces import afni
-from niworkflows.nipype.interfaces import fsl
-from niworkflows.nipype.interfaces import utility as niu
-from niworkflows.nipype.pipeline import engine as pe
+from ..nipype.interfaces import ants, afni, fsl, utility as niu
+from ..nipype.pipeline import engine as pe
 
 
 def afni_wf(name='AFNISkullStripWorkflow', unifize=False, n4_nthreads=1):
@@ -60,7 +59,6 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
             (inu_n4, outputnode, [('output_image', 'bias_corrected')]),
         ])
 
-
     # Remaining connections
     workflow.connect([
         (sstrip, sstrip_orig_vol, [('out_file', 'in_file_b')]),
@@ -70,4 +68,3 @@ quality-assessment-protocol/blob/master/qap/anatomical_preproc.py#L105>`_.
         (inu_n4, outputnode, [('bias_image', 'bias_image')]),
     ])
     return workflow
-

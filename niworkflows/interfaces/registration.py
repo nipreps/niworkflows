@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 ReportCapableInterfaces for registration tools
 
@@ -10,51 +12,62 @@ from distutils.version import LooseVersion
 import nibabel as nb
 import numpy as np
 from nilearn import image as nli
-from niworkflows.nipype.utils.filemanip import fname_presuffix
-
-from niworkflows.nipype.interfaces.base import (
-    traits, isdefined, TraitedSpec, BaseInterfaceInputSpec, File)
-from .base import SimpleInterface
-
-from niworkflows.nipype.interfaces import freesurfer as fs
-from niworkflows.nipype.interfaces import fsl, ants, afni
-from niworkflows.anat import mni
-import niworkflows.common.report as nrc
-from niworkflows import NIWORKFLOWS_LOG
 from nilearn.image import index_img
+from .. import NIWORKFLOWS_LOG
+from ..nipype.utils.filemanip import fname_presuffix
+from ..nipype.interfaces.base import (
+    traits, isdefined, TraitedSpec, BaseInterfaceInputSpec, File, SimpleInterface)
+from ..nipype.interfaces import freesurfer as fs
+from ..nipype.interfaces import fsl, ants, afni
+
+from . import report_base as nrc
+from .mni import (
+    RobustMNINormalizationInputSpec,
+    RobustMNINormalization
+)
+from .fixes import (FixHeaderApplyTransforms as ApplyTransforms,
+                    FixHeaderRegistration as Registration)
+
 
 class RobustMNINormalizationInputSpecRPT(
-    nrc.RegistrationRCInputSpec, mni.RobustMNINormalizationInputSpec):
+        nrc.ReportCapableInputSpec, RobustMNINormalizationInputSpec):
     pass
+
 
 class RobustMNINormalizationOutputSpecRPT(
-    nrc.ReportCapableOutputSpec, mni.RegistrationOutputSpec):
+        nrc.ReportCapableOutputSpec, ants.registration.RegistrationOutputSpec):
     pass
 
+
 class RobustMNINormalizationRPT(
-    nrc.RegistrationRC, mni.RobustMNINormalization):
+        nrc.RegistrationRC, RobustMNINormalization):
     input_spec = RobustMNINormalizationInputSpecRPT
     output_spec = RobustMNINormalizationOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         # We need to dig into the internal ants.Registration interface
-        self._fixed_image = self.norm.inputs.fixed_image[0]  # and get first item
-        if isdefined(self.norm.inputs.fixed_image_mask):
-            self._fixed_image_mask = self.norm.inputs.fixed_image_mask
+        self._fixed_image = self._get_ants_args()['fixed_image']
+        if isinstance(self._fixed_image, (list, tuple)):
+            self._fixed_image = self._fixed_image[0]  # get first item if list
+
+        if self._get_ants_args().get('fixed_image_mask') is not None:
+            self._fixed_image_mask = self._get_ants_args().get('fixed_image_mask')
         self._moving_image = self.aggregate_outputs(runtime=runtime).warped_image
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
 
-class ANTSRegistrationInputSpecRPT(nrc.RegistrationRCInputSpec,
+class ANTSRegistrationInputSpecRPT(nrc.ReportCapableInputSpec,
                                    ants.registration.RegistrationInputSpec):
     pass
+
 
 class ANTSRegistrationOutputSpecRPT(nrc.ReportCapableOutputSpec,
                                     ants.registration.RegistrationOutputSpec):
     pass
 
-class ANTSRegistrationRPT(nrc.RegistrationRC, ants.Registration):
+
+class ANTSRegistrationRPT(nrc.RegistrationRC, Registration):
     input_spec = ANTSRegistrationInputSpecRPT
     output_spec = ANTSRegistrationOutputSpecRPT
 
@@ -65,15 +78,17 @@ class ANTSRegistrationRPT(nrc.RegistrationRC, ants.Registration):
                              self._fixed_image, self._moving_image)
 
 
-class ANTSApplyTransformsInputSpecRPT(nrc.RegistrationRCInputSpec,
+class ANTSApplyTransformsInputSpecRPT(nrc.ReportCapableInputSpec,
                                       ants.resampling.ApplyTransformsInputSpec):
     pass
+
 
 class ANTSApplyTransformsOutputSpecRPT(nrc.ReportCapableOutputSpec,
                                        ants.resampling.ApplyTransformsOutputSpec):
     pass
 
-class ANTSApplyTransformsRPT(nrc.RegistrationRC, ants.ApplyTransforms):
+
+class ANTSApplyTransformsRPT(nrc.RegistrationRC, ApplyTransforms):
     input_spec = ANTSApplyTransformsInputSpecRPT
     output_spec = ANTSApplyTransformsOutputSpecRPT
 
@@ -84,7 +99,7 @@ class ANTSApplyTransformsRPT(nrc.RegistrationRC, ants.ApplyTransforms):
                              self._fixed_image, self._moving_image)
 
 
-class ApplyTOPUPInputSpecRPT(nrc.RegistrationRCInputSpec,
+class ApplyTOPUPInputSpecRPT(nrc.ReportCapableInputSpec,
                              fsl.epi.ApplyTOPUPInputSpec):
     wm_seg = File(argstr='-wmseg %s',
                   desc='reference white matter segmentation mask')
@@ -109,7 +124,7 @@ class ApplyTOPUPRPT(nrc.RegistrationRC, fsl.ApplyTOPUP):
                              self._fixed_image, self._moving_image)
 
 
-class FUGUEInputSpecRPT(nrc.RegistrationRCInputSpec,
+class FUGUEInputSpecRPT(nrc.ReportCapableInputSpec,
                         fsl.preprocess.FUGUEInputSpec):
     wm_seg = File(argstr='-wmseg %s',
                   desc='reference white matter segmentation mask')
@@ -118,6 +133,7 @@ class FUGUEInputSpecRPT(nrc.RegistrationRCInputSpec,
 class FUGUEOutputSpecRPT(nrc.ReportCapableOutputSpec,
                          fsl.preprocess.FUGUEOutputSpec):
     pass
+
 
 class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
     input_spec = FUGUEInputSpecRPT
@@ -134,13 +150,15 @@ class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
             self._fixed_image, self._moving_image)
 
 
-class FLIRTInputSpecRPT(nrc.RegistrationRCInputSpec,
+class FLIRTInputSpecRPT(nrc.ReportCapableInputSpec,
                         fsl.preprocess.FLIRTInputSpec):
     pass
+
 
 class FLIRTOutputSpecRPT(nrc.ReportCapableOutputSpec,
                          fsl.preprocess.FLIRTOutputSpec):
     pass
+
 
 class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
     input_spec = FLIRTInputSpecRPT
@@ -155,9 +173,10 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
             self._fixed_image, self._moving_image)
 
 
-class ApplyXFMInputSpecRPT(nrc.RegistrationRCInputSpec,
+class ApplyXFMInputSpecRPT(nrc.ReportCapableInputSpec,
                            fsl.preprocess.ApplyXFMInputSpec):
     pass
+
 
 class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
     input_spec = ApplyXFMInputSpecRPT
@@ -165,13 +184,17 @@ class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
 
 
 if LooseVersion("0.0.0") < fs.Info.looseversion() < LooseVersion("6.0.0"):
-    class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
+    class BBRegisterInputSpecRPT(nrc.ReportCapableInputSpec,
                                  fs.preprocess.BBRegisterInputSpec):
-        pass
+        out_lta_file = traits.Either(traits.Bool, File, default=True, usedefault=True,
+                                     argstr="--lta %s", min_ver='5.2.0',
+                                     desc="write the transformation matrix in LTA format")
 else:
-    class BBRegisterInputSpecRPT(nrc.RegistrationRCInputSpec,
+    class BBRegisterInputSpecRPT(nrc.ReportCapableInputSpec,
                                  fs.preprocess.BBRegisterInputSpec6):
-        pass
+        out_lta_file = traits.Either(traits.Bool, File, default=True, usedefault=True,
+                                     argstr="--lta %s", min_ver='5.2.0',
+                                     desc="write the transformation matrix in LTA format")
 
 
 class BBRegisterOutputSpecRPT(nrc.ReportCapableOutputSpec,
@@ -184,17 +207,28 @@ class BBRegisterRPT(nrc.RegistrationRC, fs.BBRegister):
     output_spec = BBRegisterOutputSpecRPT
 
     def _post_run_hook(self, runtime):
+        outputs = self.aggregate_outputs(runtime=runtime)
         mri_dir = os.path.join(self.inputs.subjects_dir,
                                self.inputs.subject_id, 'mri')
-        self._fixed_image = os.path.join(mri_dir, 'brainmask.mgz')
-        self._moving_image = self.aggregate_outputs(runtime=runtime).registered_file
+        target_file = os.path.join(mri_dir, 'brainmask.mgz')
+
+        # Apply transform for simplicity
+        mri_vol2vol = fs.ApplyVolTransform(
+            source_file=self.inputs.source_file,
+            target_file=target_file,
+            lta_file=outputs.out_lta_file,
+            interp='nearest')
+        res = mri_vol2vol.run()
+
+        self._fixed_image = target_file
+        self._moving_image = res.outputs.transformed_file
         self._contour = os.path.join(mri_dir, 'ribbon.mgz')
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',
             self._fixed_image, self._moving_image)
 
 
-class MRICoregInputSpecRPT(nrc.RegistrationRCInputSpec,
+class MRICoregInputSpecRPT(nrc.ReportCapableInputSpec,
                            fs.registration.MRICoregInputSpec):
     pass
 
@@ -210,29 +244,34 @@ class MRICoregRPT(nrc.RegistrationRC, fs.MRICoreg):
 
     def _post_run_hook(self, runtime):
         outputs = self.aggregate_outputs(runtime=runtime)
+        mri_dir = None
+        if isdefined(self.inputs.subject_id):
+            mri_dir = os.path.join(self.inputs.subjects_dir,
+                                   self.inputs.subject_id, 'mri')
 
         if isdefined(self.inputs.reference_file):
             target_file = self.inputs.reference_file
         else:
-            target_file = os.path.join(self.inputs.subjects_dir,
-                                       self.inputs.subject_id, 'mri',
-                                       'brainmask.mgz')
+            target_file = os.path.join(mri_dir, 'brainmask.mgz')
 
         # Apply transform for simplicity
         mri_vol2vol = fs.ApplyVolTransform(
             source_file=self.inputs.source_file,
             target_file=target_file,
-            lta_file=outputs.out_lta_file)
+            lta_file=outputs.out_lta_file,
+            interp='nearest')
         res = mri_vol2vol.run()
 
         self._fixed_image = target_file
         self._moving_image = res.outputs.transformed_file
+        if mri_dir is not None:
+            self._contour = os.path.join(mri_dir, 'ribbon.mgz')
         NIWORKFLOWS_LOG.info(
             'Report - setting fixed (%s) and moving (%s) images',
             self._fixed_image, self._moving_image)
 
 
-class SimpleBeforeAfterInputSpecRPT(nrc.RegistrationRCInputSpec):
+class SimpleBeforeAfterInputSpecRPT(nrc.ReportCapableInputSpec):
     before = File(exists=True, mandatory=True, desc='file before')
     after = File(exists=True, mandatory=True, desc='file after')
     wm_seg = File(desc='reference white matter segmentation mask')
@@ -240,6 +279,7 @@ class SimpleBeforeAfterInputSpecRPT(nrc.RegistrationRCInputSpec):
 
 class SimpleBeforeAfterOutputSpecRPT(nrc.ReportCapableOutputSpec):
     pass
+
 
 class SimpleBeforeAfterRPT(nrc.RegistrationRC):
     input_spec = SimpleBeforeAfterInputSpecRPT
@@ -270,6 +310,7 @@ class ResampleBeforeAfterInputSpecRPT(SimpleBeforeAfterInputSpecRPT):
 
 class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
     input_spec = ResampleBeforeAfterInputSpecRPT
+
     def _run_interface(self, runtime):
         """ there is not inner interface to run """
         self._out_report = os.path.abspath(self.inputs.out_report)
@@ -302,8 +343,10 @@ class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
 
 class EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="4D EPI file")
-    mc_method = traits.Enum("AFNI", "FSL", dsec="Which software to use to perform motion correction",
-                            usedefault=True)
+    sbref_file = File(exists=True, desc="Single band reference image")
+    mc_method = traits.Enum(
+        "AFNI", "FSL", usedefault=True,
+        desc="Which software to use to perform motion correction")
 
 
 class EstimateReferenceImageOutputSpec(TraitedSpec):
@@ -324,6 +367,10 @@ class EstimateReferenceImage(SimpleInterface):
     output_spec = EstimateReferenceImageOutputSpec
 
     def _run_interface(self, runtime):
+        if isdefined(self.inputs.sbref_file):
+            self._results['ref_image'] = self.inputs.sbref_file
+            return
+
         in_nii = nb.load(self.inputs.in_file)
         data_slice = in_nii.dataobj[:, :, :, :50]
 
@@ -353,13 +400,12 @@ class EstimateReferenceImage(SimpleInterface):
             mc_slice_nii = nb.load(res.outputs.out_file)
 
             median_image_data = np.median(mc_slice_nii.get_data(), axis=3)
-            nb.Nifti1Image(median_image_data, in_nii.affine,
-                           in_nii.header).to_filename(out_ref_fname)
         else:
             median_image_data = np.median(
                 data_slice[:, :, :, :n_volumes_to_discard], axis=3)
-            nb.Nifti1Image(median_image_data, in_nii.affine,
-                           in_nii.header).to_filename(out_ref_fname)
+
+        nb.Nifti1Image(median_image_data, in_nii.affine,
+                       in_nii.header).to_filename(out_ref_fname)
 
         self._results["ref_image"] = out_ref_fname
         self._results["n_volumes_to_discard"] = n_volumes_to_discard

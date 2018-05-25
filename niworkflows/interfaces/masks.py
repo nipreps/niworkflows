@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 ReportCapableInterfaces for masks tools
 
@@ -6,26 +8,28 @@ ReportCapableInterfaces for masks tools
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
-
-from niworkflows.nipype.interfaces import fsl, ants
-from niworkflows.nipype.interfaces.base import (
-    File, BaseInterfaceInputSpec, traits, isdefined)
-from niworkflows.nipype.algorithms import confounds
-from niworkflows.common import report as nrc
-from niworkflows import NIWORKFLOWS_LOG
-from nilearn.masking import compute_epi_mask
-import scipy.ndimage as nd
 import numpy as np
 import nibabel as nb
+from nilearn.masking import compute_epi_mask
+import scipy.ndimage as nd
+
+from .. import NIWORKFLOWS_LOG
+from ..nipype.interfaces import fsl, ants
+from ..nipype.interfaces.base import (
+    File, BaseInterfaceInputSpec, traits, isdefined, InputMultiPath, Str)
+from ..nipype.algorithms import confounds
+from . import report_base as nrc
 
 
 class BETInputSpecRPT(nrc.ReportCapableInputSpec,
                       fsl.preprocess.BETInputSpec):
     pass
 
+
 class BETOutputSpecRPT(nrc.ReportCapableOutputSpec,
                        fsl.preprocess.BETOutputSpec):
     pass
+
 
 class BETRPT(nrc.SegmentationRC, fsl.BET):
     input_spec = BETInputSpecRPT
@@ -45,7 +49,6 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
         self._mask_file = self.aggregate_outputs(runtime=runtime).mask_file
         self._seg_files = [self._mask_file]
         self._masked = self.inputs.mask
-        self._report_title = "BET: brain mask over anatomical input"
 
         NIWORKFLOWS_LOG.info('Generating report for BET. file "%s", and mask file "%s"',
                              self._anat_file, self._mask_file)
@@ -55,9 +58,11 @@ class BrainExtractionInputSpecRPT(nrc.ReportCapableInputSpec,
                                   ants.segmentation.BrainExtractionInputSpec):
     pass
 
+
 class BrainExtractionOutputSpecRPT(nrc.ReportCapableOutputSpec,
                                    ants.segmentation.BrainExtractionOutputSpec):
     pass
+
 
 class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
     input_spec = BrainExtractionInputSpecRPT
@@ -75,7 +80,6 @@ class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
         self._mask_file = brain_extraction_mask
         self._seg_files = [brain_extraction_mask]
         self._masked = False
-        self._report_title = 'ANTS BrainExtraction: brain mask over anatomical input'
 
         NIWORKFLOWS_LOG.info('Generating report for ANTS BrainExtraction. file "%s", mask "%s"',
                              self._anat_file, self._mask_file)
@@ -143,19 +147,21 @@ class ComputeEPIMask(nrc.SegmentationRC):
         self._mask_file = self.aggregate_outputs(runtime=runtime).mask_file
         self._seg_files = [self._mask_file]
         self._masked = True
-        self._report_title = "nilearn.compute_epi_mask: brain mask over EPI input"
 
-        NIWORKFLOWS_LOG.info('Generating report for nilearn.compute_epi_mask. file "%s", and mask file "%s"',
-                             self._anat_file, self._mask_file)
+        NIWORKFLOWS_LOG.info(
+            'Generating report for nilearn.compute_epi_mask. file "%s", and mask file "%s"',
+            self._anat_file, self._mask_file)
 
 
 class ACompCorInputSpecRPT(nrc.ReportCapableInputSpec,
                            confounds.CompCorInputSpec):
     pass
 
+
 class ACompCorOutputSpecRPT(nrc.ReportCapableOutputSpec,
                             confounds.CompCorOutputSpec):
     pass
+
 
 class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
     input_spec = ACompCorInputSpecRPT
@@ -171,18 +177,20 @@ class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
         self._mask_file = self.inputs.mask_files[0]
         self._seg_files = self.inputs.mask_files
         self._masked = False
-        self._report_title = 'aCompCor ROI'
 
         NIWORKFLOWS_LOG.info('Generating report for aCompCor. file "%s", mask "%s"',
                              self.inputs.realigned_file, self._mask_file)
+
 
 class TCompCorInputSpecRPT(nrc.ReportCapableInputSpec,
                            confounds.TCompCorInputSpec):
     pass
 
+
 class TCompCorOutputSpecRPT(nrc.ReportCapableOutputSpec,
                             confounds.TCompCorOutputSpec):
     pass
+
 
 class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
     input_spec = TCompCorInputSpecRPT
@@ -200,7 +208,6 @@ class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
         self._mask_file = high_variance_masks
         self._seg_files = [high_variance_masks]
         self._masked = False
-        self._report_title = 'tCompCor - high variance voxels'
 
         NIWORKFLOWS_LOG.info('Generating report for tCompCor. file "%s", mask "%s"',
                              self.inputs.realigned_file,
@@ -222,6 +229,45 @@ class SimpleShowMaskRPT(nrc.SegmentationRC):
         self._mask_file = self.inputs.mask_file
         self._seg_files = [self.inputs.mask_file]
         self._masked = True
-        self._report_title = "Brain mask"
 
+        return runtime
+
+
+class ROIsPlotInputSpecRPT(nrc.ReportCapableInputSpec):
+    in_file = File(exists=True, mandatory=True, desc='the volume where ROIs are defined')
+    in_rois = InputMultiPath(File(exists=True), mandatory=True,
+                             desc='a list of regions to be plotted')
+    in_mask = File(exists=True, desc='a special region, eg. the brain mask')
+    masked = traits.Bool(False, usedefault=True, desc='mask in_file prior plotting')
+    colors = traits.Either(None, traits.List(Str), usedefault=True,
+                           desc='use specific colors for contours')
+
+
+class ROIsPlot(nrc.SegmentationRC):
+    input_spec = ROIsPlotInputSpecRPT
+    output_spec = nrc.ReportCapableOutputSpec
+
+    def _run_interface(self, runtime):
+        """ there is not inner interface to run """
+        from niworkflows.viz.utils import plot_segs, compose_view
+        seg_files = self.inputs.in_rois
+        mask_file = None
+        if isdefined(self.inputs.in_mask):
+            mask_file = self.inputs.in_mask
+            seg_files.insert(0, self.inputs.in_mask)
+
+        self._out_report = os.path.abspath(self.inputs.out_report)
+        compose_view(
+            plot_segs(
+                image_nii=self.inputs.in_file,
+                seg_niis=seg_files,
+                bbox_nii=mask_file,
+                out_file=self.inputs.out_report,
+                masked=self.inputs.masked,
+                colors=self.inputs.colors,
+                compress=self.inputs.compress_report
+            ),
+            fg_svgs=None,
+            out_file=self._out_report
+        )
         return runtime

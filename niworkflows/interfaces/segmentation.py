@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 ReportCapableInterfaces for segmentation tools
 
@@ -7,18 +9,21 @@ ReportCapableInterfaces for segmentation tools
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 
-from niworkflows.nipype.interfaces.base import File
-from niworkflows.nipype.interfaces import fsl, freesurfer
-from niworkflows.common import report as nrc
-from niworkflows import NIWORKFLOWS_LOG
+from ..nipype.interfaces.base import File
+from ..nipype.interfaces import fsl, freesurfer
+from . import report_base as nrc
+from .. import NIWORKFLOWS_LOG
+
 
 class FASTInputSpecRPT(nrc.ReportCapableInputSpec,
                        fsl.preprocess.FASTInputSpec):
     pass
 
+
 class FASTOutputSpecRPT(nrc.ReportCapableOutputSpec,
                         fsl.preprocess.FASTOutputSpec):
     pass
+
 
 class FASTRPT(nrc.SegmentationRC,
               fsl.FAST):
@@ -35,28 +40,30 @@ class FASTRPT(nrc.SegmentationRC,
         ''' generates a report showing nine slices, three per axis, of an
         arbitrary volume of `in_files`, with the resulting segmentation
         overlaid '''
-        self._anat_file = self.inputs.in_files[0],
-        self._mask_file = self.aggregate_outputs(runtime=runtime).tissue_class_map
+        self._anat_file = self.inputs.in_files[0]
+        outputs = self.aggregate_outputs(runtime=runtime)
+        self._mask_file = outputs.tissue_class_map
         # We are skipping the CSF class because with combination with others
         # it only shows the skullstriping mask
-        self._seg_files = self.aggregate_outputs(runtime=runtime).tissue_class_files[1:]
+        self._seg_files = outputs.tissue_class_files[1:]
         self._masked = False
-        self._report_title = "FAST: segmentation over anatomical"
 
         NIWORKFLOWS_LOG.info('Generating report for FAST (in_files %s, '
                              'segmentation %s, individual tissue classes %s).',
                              self.inputs.in_files,
-                             self.aggregate_outputs(runtime=runtime).tissue_class_map,
-                             self.aggregate_outputs(runtime=runtime).tissue_class_files)
+                             outputs.tissue_class_map,
+                             outputs.tissue_class_files)
 
 
 class ReconAllInputSpecRPT(nrc.ReportCapableInputSpec,
                            freesurfer.preprocess.ReconAllInputSpec):
     pass
 
+
 class ReconAllOutputSpecRPT(nrc.ReportCapableOutputSpec,
                             freesurfer.preprocess.ReconAllOutputSpec):
     pass
+
 
 class ReconAllRPT(nrc.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):
     input_spec = ReconAllInputSpecRPT
@@ -74,7 +81,6 @@ class ReconAllRPT(nrc.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):
                                      outputs.subject_id,
                                      'mri', 'ribbon.mgz')
         self._masked = False
-        self._report_title = "ReconAll: segmentation over anatomical"
 
         NIWORKFLOWS_LOG.info('Generating report for ReconAll (subject %s)',
                              outputs.subject_id)
@@ -88,6 +94,7 @@ class MELODICInputSpecRPT(nrc.ReportCapableInputSpec,
                                                        'by Nipype.')
     report_mask = File(desc='Mask used to draw the outline on the reportlet. '
                             'If not set the mask will be derived from the data.')
+
 
 class MELODICOutputSpecRPT(nrc.ReportCapableOutputSpec,
                            fsl.model.MELODICOutputSpec):
@@ -125,6 +132,7 @@ class ICA_AROMAInputSpecRPT(nrc.ReportCapableInputSpec,
                                                          'by Nipype.')
     report_mask = File(desc='Mask used to draw the outline on the reportlet. '
                             'If not set the mask will be derived from the data.')
+
 
 class ICA_AROMAOutputSpecRPT(nrc.ReportCapableOutputSpec,
                              fsl.aroma.ICA_AROMAOutputSpec):
