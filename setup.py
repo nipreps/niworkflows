@@ -15,7 +15,7 @@ def main():
     import runpy
 
     ldict = runpy.run_path(op.join(op.abspath(op.dirname(__file__)),
-                                   'niworkflows', 'info.py'))
+                                   'niworkflows', '__about__.py'))
 
     setup(
         name=PACKAGE_NAME,
@@ -39,11 +39,12 @@ def main():
         tests_require=ldict['TESTS_REQUIRES'],
         extras_require=ldict['EXTRA_REQUIRES'],
         # Data
-        package_data={'niworkflows': ['data/t1-mni_registration*.json', 'viz/*.tpl',
+        package_data={'niworkflows': ['data/t1-mni_registration*.json',
                                       'nipype/pipeline/engine/report_template.html',
                                       'nipype/external/d3.js']},
         include_package_data=True,
     )
+
 
 if __name__ == '__main__':
     main()

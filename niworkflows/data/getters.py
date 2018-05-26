@@ -2,18 +2,12 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-#
-# @Author: oesteban
-# @Date:   2016-01-05 11:29:40
-# @Email:  code@oscaresteban.es
-# @Last modified by:   oesteban
-# @Last Modified time: 2016-11-11 14:34:29
 """
 Data grabbers
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-from niworkflows.data.utils import _get_dataset_dir, _fetch_file
+from ..data.utils import _get_dataset_dir, _fetch_file
 
 OSF_PROJECT_URL = ('https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/')
 OSF_RESOURCES = {
@@ -28,7 +22,8 @@ OSF_RESOURCES = {
     'mni152_nlin_sym_las': ('57fa7fc89ad5a101e635eeef', '9c4c0cad2a2e99d6799f01abf4107f5a'),
     'mni152_nlin_sym_ras': ('57fa7fd09ad5a101df35eed0', '65d64ad5a980da86e7d07d95b3ed2ccb'),
     'mni_icbm152_linear': ('580705eb594d9001ed622649', '72be639e92532def7caad75cb4058e83'),
-    'mni_icbm152_nlin_asym_09c': ('580705089ad5a101f17944a9', '002f9bf24dc5c32de50c03f01fa539ec')
+    'mni_icbm152_nlin_asym_09c': ('580705089ad5a101f17944a9', '002f9bf24dc5c32de50c03f01fa539ec'),
+    'oasis_dkt31_mni152': ('5a95cd9591b689000ca5b6ab', 'e0bea438b9645c9e7c333a6edd859715'),
 }
 
 BIDS_EXAMPLES = {
@@ -44,6 +39,7 @@ BIDS_EXAMPLES = {
 TEMPLATE_MAP = {
     'MNI152NLin2009cAsym': 'mni_icbm152_nlin_asym_09c',
 }
+
 
 def get_dataset(dataset_name, data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the BIDS-fied brainweb 1mm normal
@@ -66,6 +62,7 @@ def get_dataset(dataset_name, data_dir=None, url=None, resume=True, verbose=1):
     else:
         return None
 
+
 def get_brainweb_1mm_normal(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the BIDS-fied brainweb 1mm normal
 
@@ -76,6 +73,7 @@ def get_brainweb_1mm_normal(data_dir=None, url=None, resume=True, verbose=1):
 
     """
     return get_dataset('brainweb', data_dir, url, resume, verbose)
+
 
 def get_ds003_downsampled(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the BIDS-fied ds003_downsampled
@@ -88,6 +86,7 @@ def get_ds003_downsampled(data_dir=None, url=None, resume=True, verbose=1):
     """
     return get_dataset('ds003_downsampled', data_dir, url, resume, verbose)
 
+
 def get_mni_template(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
 
@@ -99,6 +98,7 @@ def get_mni_template(data_dir=None, url=None, resume=True, verbose=1):
     """
     return get_dataset('mni_template', data_dir, url, resume, verbose)
 
+
 def get_mni_template_ras(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
     :param str data_dir: path of the data directory. Used to force data storage
@@ -106,6 +106,7 @@ def get_mni_template_ras(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset('mni_template_RAS', data_dir, url, resume, verbose)
+
 
 def get_mni_epi(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
@@ -115,6 +116,7 @@ def get_mni_epi(data_dir=None, url=None, resume=True, verbose=1):
     """
     return get_dataset('mni_epi', data_dir, url, resume, verbose)
 
+
 def get_ants_oasis_template(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the ANTs template of the OASIS dataset.
     :param str data_dir: path of the data directory. Used to force data storage
@@ -122,6 +124,7 @@ def get_ants_oasis_template(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset('ants_oasis_template', data_dir, url, resume, verbose)
+
 
 def get_ants_oasis_template_ras(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the ANTs template of the OASIS dataset.
@@ -131,6 +134,7 @@ def get_ants_oasis_template_ras(data_dir=None, url=None, resume=True, verbose=1)
     """
     return get_dataset('ants_oasis_template_ras', data_dir, url, resume, verbose)
 
+
 def get_ants_nki_template_ras(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the ANTs template of the NKI dataset.
     :param str data_dir: path of the data directory. Used to force data storage
@@ -138,6 +142,7 @@ def get_ants_nki_template_ras(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset('ants_nki_template_ras', data_dir, url, resume, verbose)
+
 
 def get_mni152_nlin_sym_las(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
@@ -147,6 +152,7 @@ def get_mni152_nlin_sym_las(data_dir=None, url=None, resume=True, verbose=1):
     """
     return get_dataset('mni152_nlin_sym_las', data_dir, url, resume, verbose)
 
+
 def get_mni152_nlin_sym_ras(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
     :param str data_dir: path of the data directory. Used to force data storage
@@ -155,8 +161,10 @@ def get_mni152_nlin_sym_ras(data_dir=None, url=None, resume=True, verbose=1):
     """
     return get_dataset('mni152_nlin_sym_ras', data_dir, url, resume, verbose)
 
+
 def get_mni_icbm152_nlin_asym_09c(data_dir=None, url=None, resume=True, verbose=1):
     return get_dataset('mni_icbm152_nlin_asym_09c', data_dir, url, resume, verbose)
+
 
 def get_mni_icbm152_linear(data_dir=None, url=None, resume=True, verbose=1):
     """Download and load the necessary files from the mni template
@@ -165,6 +173,7 @@ def get_mni_icbm152_linear(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
     return get_dataset('mni_icbm152_linear', data_dir, url, resume, verbose)
+
 
 def get_bids_examples(data_dir=None, url=None, resume=True, verbose=1, variant=None):
     """
@@ -184,3 +193,13 @@ def get_bids_examples(data_dir=None, url=None, resume=True, verbose=1, variant=N
         return data_dir
     else:
         return None
+
+
+def get_oasis_dkt31_mni152(data_dir=None, url=None, resume=True, verbose=1):
+    """Download and load the necessary files from the Mindboggle DKT31 label
+    atlas in MNI152NLin2009cAsym space
+    :param str data_dir: path of the data directory. Used to force data storage
+        in a non-standard location.
+    :param str url: download URL of the dataset. Overwrite the default URL.
+    """
+    return get_dataset('oasis_dkt31_mni152', data_dir, url, resume, verbose)
