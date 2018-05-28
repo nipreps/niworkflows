@@ -38,6 +38,8 @@ BIDS_EXAMPLES = {
 # Map names of templates to OSF_RESOURCES keys
 TEMPLATE_MAP = {
     'MNI152NLin2009cAsym': 'mni_icbm152_nlin_asym_09c',
+    'OASIS': 'ants_oasis_template_ras',
+    'NKI': 'ants_nki_template_ras',
 }
 
 

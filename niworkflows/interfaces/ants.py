@@ -6,7 +6,7 @@
 Nipype interfaces for ANTs commands
 """
 
-
+import os
 from ..nipype.interfaces import base
 from ..nipype.interfaces.ants.base import ANTSCommandInputSpec, ANTSCommand
 from ..nipype.interfaces.base import traits
@@ -16,7 +16,8 @@ class ImageMathInputSpec(ANTSCommandInputSpec):
     dimension = traits.Int(3, usedefault=True, position=1, argstr='%d',
                            desc='dimension of output image')
     output_image = base.File(position=2, argstr='%s', name_source=['op1'],
-                             name_template='%s_maths', desc='output image file')
+                             name_template='%s_maths', desc='output image file',
+                             keep_extension=True)
     operation = base.Str(mandatory=True, position=3, argstr='%s',
                          desc='operations and intputs')
     op1 = base.File(exists=True, mandatory=True, position=-2, argstr='%s',
@@ -38,7 +39,7 @@ class ImageMath(ANTSCommand):
 
     """
 
-    _cmd = 'ImageMaths'
+    _cmd = 'ImageMath'
     input_spec = ImageMathInputSpec
     output_spec = ImageMathOuputSpec
 
@@ -49,7 +50,8 @@ class ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
     input_image = base.File(exists=True, mandatory=True, position=2, argstr='%s',
                             desc='input image file')
     output_image = base.File(position=3, argstr='%s', name_source=['input_image'],
-                             name_template='%s_resampled', desc='output image file')
+                             name_template='%s_resampled', desc='output image file',
+                             keep_extension=True)
     out_spacing = traits.Either(
         traits.List(traits.Float, minlen=2, maxlen=3),
         traits.Tuple(traits.Float, traits.Float, traits.Float),
@@ -62,6 +64,10 @@ class ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
                         desc='addvox pads each dimension by addvox')
     nn_interp = traits.Bool(argstr='%d', desc='nn interpolation',
                             position=-1, requires=['addvox'])
+
+
+class ResampleImageBySpacingOutputSpec(base.TraitedSpec):
+    output_image = traits.File(exists=True, desc='resampled file')
 
 
 class ResampleImageBySpacing(ANTSCommand):
@@ -96,6 +102,7 @@ class ResampleImageBySpacing(ANTSCommand):
     """
     _cmd = 'ResampleImageBySpacing'
     input_spec = ResampleImageBySpacingInputSpec
+    output_spec = ResampleImageBySpacingOutputSpec
 
     def _format_arg(self, name, trait_spec, value):
         if name == 'out_spacing':
@@ -153,9 +160,13 @@ class AIInputSpec(ANTSCommandInputSpec):
         traits.Range(low=1, high=100, value=10),
         usedefault=True, argstr='-c [%d,%f,%d]', desc='convergence')
 
+    output_transform = traits.File(
+        'initialization.mat', usedefault=True, argstr='-o %s',
+        desc='output file name')
+
 
 class AIOuputSpec(base.TraitedSpec):
-    output_image = base.File(exists=True, desc='output image file')
+    output_transform = traits.File(exists=True, desc='output file name')
 
 
 class AI(ANTSCommand):
@@ -171,6 +182,17 @@ class AI(ANTSCommand):
     input_spec = AIInputSpec
     output_spec = AIOuputSpec
 
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
+        runtime = super(AI, self)._run_interface(
+            runtime, correct_return_codes)
+
+        setattr(self, '_output', {
+            'output_transform': os.path.join(
+                runtime.cwd,
+                os.path.basename(self.inputs.output_transform))
+        })
+        return runtime
+
     def _format_arg(self, opt, spec, val):
         if opt == 'metric':
             val = '%s[{fixed_image},{moving_image},%d,%s,%f]' % val
@@ -180,3 +202,6 @@ class AI(ANTSCommand):
             return spec.argstr % val
 
         return super(AI, self)._format_arg(opt, spec, val)
+
+    def _list_outputs(self):
+        return getattr(self, '_output')

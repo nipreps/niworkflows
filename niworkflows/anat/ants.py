@@ -11,9 +11,12 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 import os
 from multiprocessing import cpu_count
+from pkg_resources import resource_filename as pkgr_fn
+from ..data import TEMPLATE_MAP, get_dataset
 from ..nipype.pipeline import engine as pe
 from ..nipype.interfaces import ants, utility as niu
-from ..interfaces.ants import ImageMath, ResampleImageBySpacing
+from ..interfaces.ants import ImageMath, ResampleImageBySpacing, AI
+from ..interfaces.fixes import FixHeaderRegistration as Registration
 
 
 def brain_extraction(name='antsBrainExtraction',
@@ -72,9 +75,18 @@ def brain_extraction(name='antsBrainExtraction',
     """
     wf = pe.Workflow(name)
 
-    if (in_template not in ('OASIS', 'NKI', 'MNI152AsymNlin2009c') and
-       not os.path.exists(in_template)):
-        raise RuntimeError
+    template_path = None
+    if in_template in TEMPLATE_MAP:
+        template_path = get_dataset(TEMPLATE_MAP[in_template])
+    else:
+        template_path = in_template
+
+    # Append template modality
+    template_path = os.path.join(template_path,
+                                 '1mm_%s.nii.gz' % in_segmentation_model[:2].upper())
+
+    if not os.path.exists(template_path):
+        raise ValueError(f'Template path "{template_path}" not found.')
 
     if in_segmentation_model.lower() not in ('t1', 't1w', 't2', 't2w', 'flair'):
         raise NotImplementedError
@@ -82,7 +94,7 @@ def brain_extraction(name='antsBrainExtraction',
     if omp_nthreads is None or omp_nthreads < 1:
         omp_nthreads = cpu_count()
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_template', 'in_mask']),
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_mask']),
                         name='inputnode')
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['bias_corrected', 'out_file', 'out_mask', 'bias_image']), name='outputnode')
@@ -98,15 +110,32 @@ def brain_extraction(name='antsBrainExtraction',
 
     res_tmpl = pe.Node(ResampleImageBySpacing(out_spacing=(4, 4, 4),
                        apply_smoothing=True), name='res_tmpl')
-    res_tmpl.inputs.input_image = in_template
+    res_tmpl.inputs.input_image = template_path
     res_target = pe.Node(ResampleImageBySpacing(out_spacing=(4, 4, 4),
                          apply_smoothing=True), name='res_target')
 
     lap_tmpl = pe.Node(ImageMath(operation='Laplacian', op2='1.5 1'),
                        name='lap_tmpl')
-    lap_tmpl.inputs.input_image = in_template
+    lap_tmpl.inputs.op1 = template_path
     lap_target = pe.Node(ImageMath(operation='Laplacian', op2='1.5 1'),
                          name='lap_target')
+    mrg_tmpl = pe.Node(niu.Merge(2), name='mrg_tmpl')
+    mrg_tmpl.inputs.in1 = template_path
+    mrg_target = pe.Node(niu.Merge(2), name='mrg_target')
+
+    # TODO: add extraction registration mask
+    init_aff = pe.Node(AI(
+        metric=('Mattes', 32, 'Regular', 0.2),
+        transform=('Affine', 0.1),
+        search_factor=(20, 0.12),
+        # TODO search_grid=(40, (0, 40, 40)),
+        principal_axes=False,
+        convergence=(10, 1e-6, 10),
+        verbose=True), name='init_aff', n_procs=omp_nthreads)
+
+    norm = pe.Node(Registration(
+        from_file=pkgr_fn('niworkflows.data', 'antsBrainExtraction_precise.json')),
+        name='norm')
 
     wf.connect([
         (inputnode, trunc, [('in_file', 'op1')]),
@@ -116,7 +145,15 @@ def brain_extraction(name='antsBrainExtraction',
             (('output_image', _pop), 'input_image')]),
         (inu_n4, lap_target, [
             (('output_image', _pop), 'op1')]),
+        (res_tmpl, init_aff, [('output_image', 'fixed_image')]),
+        (res_target, init_aff, [('output_image', 'moving_image')]),
+        (inu_n4, mrg_target, [('output_image', 'in1')]),
+        (lap_tmpl, mrg_tmpl, [('output_image', 'in2')]),
+        (lap_target, mrg_target, [('output_image', 'in2')]),
 
+        (init_aff, norm, [('output_transform', 'initial_moving_transform')]),
+        (mrg_tmpl, norm, [('out', 'fixed_image')]),
+        (mrg_target, norm, [('out', 'moving_image')]),
     ])
     return wf
 
