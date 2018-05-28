@@ -10,6 +10,8 @@
     "metric": [ "MI", "MI", [ "CC", "CC" ] ],
     "metric_weight": [ 1, 1, [ 0.5, 0.5 ] ],
     "radius_or_number_of_bins": [ 32, 32, [ 4, 4 ] ],
+    "sampling_strategy": [ "Regular", "Regular", [ "None", "None" ] ],
+    "sampling_percentage": [ 0.25, 0.25, [ 1, 1 ] ],
     "convergence_threshold": [ 1e-08, 1e-08, 1e-09 ],
     "number_of_iterations": [ [ 1000, 500, 250, 100 ], [ 1000, 500, 250, 100 ], [50, 10, 0] ],
     "convergence_window_size": [ 10, 10, 15 ],
