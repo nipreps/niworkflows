@@ -42,53 +42,98 @@ def brain_extraction(name='antsBrainExtraction',
                      debug=False,
                      omp_nthreads=None,
                      mem_gb=3.0,
-                     in_segmentation_model='T1',
+                     modality='T1',
+                     atropos_refine=True,
                      atropos_use_random_seed=True,
-                     atropos_refine=True):
+                     atropos_model=None):
     """
-    The official antsBrainExtraction.sh workflow converted into Nipype,
-    only for 3D images.
+    A Nipype implementation of the official ANTs' ``antsBrainExtraction.sh``
+    workflow (only for 3D images).
 
-    Inputs
-    ------
+    The official workflow is built as follows (and this implementation
+    follows the same organization):
 
-    `in_file`
-        The input anatomical image to be segmented, typically T1-weighted.
-        If a list of anatomical images is provided, subsequently specified
-        images are used during the segmentation process.
-        However, only the first image is used in the registration of priors.
-        Our suggestion would be to specify the T1w as the first image.
+      1. Step 1 performs several clerical tasks (adding padding, calculating
+         the Laplacian of inputs, affine initialization) and the core
+         spatial normalization.
+      2. Maps the brain mask into target space using the normalization
+         calculated in 1.
+      3. Superstep 1b: smart binarization of the brain mask
+      4. Superstep 6: apply ATROPOS and massage its outputs
+      5. Superstep 7: use results from 4 to refine the brain mask
 
 
-    `in_template`
-        The brain template from which regions will be projected
-        Anatomical template created using e.g. LPBA40 data set with
-        buildtemplateparallel.sh in ANTs.
+    .. workflow::
+        :graph2use: orig
+        :simple_form: yes
+        from niworkflows.anat import brain_extraction
+        wf = brain_extraction()
 
-    `in_mask`
-        Brain probability mask created using e.g. LPBA40 data set which
-        have brain masks defined, and warped to anatomical template and
-        averaged resulting in a probability image.
 
-    Optional Inputs
-    ---------------
+    **Parameters**
 
-    `in_segmentation_model`
-        A k-means segmentation is run to find gray or white matter around
-        the edge of the initial brain mask warped from the template.
-        This produces a segmentation image with K classes, ordered by mean
-        intensity in increasing order. With this option, you can control
-        K and tell the script which classes represent CSF, gray and white matter.
-        Format (K, csfLabel, gmLabel, wmLabel)
-        Examples:
-        -c 3,1,2,3 for T1 with K=3, CSF=1, GM=2, WM=3 (default)
-        -c 3,3,2,1 for T2 with K=3, CSF=3, GM=2, WM=1
-        -c 3,1,3,2 for FLAIR with K=3, CSF=1 GM=3, WM=2
-        -c 4,4,2,3 uses K=4, CSF=4, GM=2, WM=3
+        in_template : str
+            Name of the skull-stripping template ('OASIS', 'NKI', or
+            path).
+            The brain template from which regions will be projected
+            Anatomical template created using e.g. LPBA40 data set with
+            ``buildtemplateparallel.sh`` in ANTs.
+            The workflow will automatically search for a brain probability
+            mask created using e.g. LPBA40 data set which have brain masks
+            defined, and warped to anatomical template and
+            averaged resulting in a probability image.
+        use_float : bool
+            Whether single precision should be used
+        debug : bool
+            Whether this is a debug run (faster registration parameters)
+        omp_nthreads : int
+            Maximum number of threads an individual process may use
+        mem_gb : float
+            Estimated peak memory consumption of the most hungry nodes
+            in the workflow
+        modality : str
+            Sequence type of the first input image ('T1', 'T2', or 'FLAIR')
+        atropos_refine : bool
+            Enables or disables the whole ATROPOS sub-workflow
+        atropos_use_random_seed : bool
+            Whether ATROPOS should generate a random seed based on the
+            system's clock
+        atropos_model : tuple or None
+            Allows to specify a particular segmentation model, overwriting
+            the defaults based on ``modality``
+        name : str, optional
+            Workflow name (default: antsBrainExtraction)
 
-    `registration_mask`
-        Mask used for registration to limit the metric computation to
-        a specific region.
+
+    **Inputs**
+
+        in_files
+            List of input anatomical images to be brain-extracted,
+            typically T1-weighted.
+            If a list of anatomical images is provided, subsequently
+            specified images are used during the segmentation process.
+            However, only the first image is used in the registration
+            of priors.
+            Our suggestion would be to specify the T1w as the first image.
+        in_mask
+            (optional) Mask used for registration to limit the metric
+            computation to a specific region.
+
+
+    **Outputs**
+
+        bias_corrected
+            The ``in_files`` input images, after :abbr:`INU (intensity non-uniformity)`
+            correction.
+        out_mask
+            Calculated brain mask
+        bias_image
+            The :abbr:`INU (intensity non-uniformity)` field estimated for each
+            input in ``in_files``
+        out_segm
+            Output segmentation by ATROPOS
+        out_tpms
+            Output :abbr:`TPMs (tissue probability maps)` by ATROPOS
 
 
     """
@@ -102,10 +147,16 @@ def brain_extraction(name='antsBrainExtraction',
 
     # Append template modality
     tpl_target_path = os.path.join(template_path,
-                                   '1mm_%s.nii.gz' % in_segmentation_model[:2].upper())
+                                   '1mm_%s.nii.gz' % modality[:2].upper())
 
     if not os.path.exists(tpl_target_path):
         raise ValueError('Template path "%s" not found.' % template_path)
+
+    tpl_mask_path = os.path.join(template_path, '1mm_brainprobmask.nii.gz')
+    if not os.path.exists(tpl_mask_path):
+        raise ValueError(
+            'Probability map for the brain mask associated to this template '
+            '"%s" not found.' % tpl_mask_path)
 
     if omp_nthreads is None or omp_nthreads < 1:
         omp_nthreads = cpu_count()
@@ -165,14 +216,13 @@ def brain_extraction(name='antsBrainExtraction',
         name='map_brainmask',
         mem_gb=1
     )
-    map_brainmask.inputs.input_image = os.path.join(
-        template_path, '1mm_brainprobmask.nii.gz')
+    map_brainmask.inputs.input_image = tpl_mask_path
 
     thr_brainmask = pe.Node(ThresholdImage(
         dimension=3, th_low=0.5, th_high=1.0, inside_value=1,
         outside_value=0), name='thr_brainmask')
 
-    # Morpholgical dilation, radius=2
+    # Morphological dilation, radius=2
     dil_brainmask = pe.Node(ImageMath(operation='MD', op2='2'),
                             name='dil_brainmask')
     # Get largest connected component
@@ -220,7 +270,7 @@ def brain_extraction(name='antsBrainExtraction',
             use_random_seed=atropos_use_random_seed,
             omp_nthreads=omp_nthreads,
             mem_gb=mem_gb,
-            in_segmentation_model=in_segmentation_model
+            in_segmentation_model=atropos_model or ATROPOS_MODELS[modality]
         )
 
         wf.disconnect([
@@ -236,7 +286,9 @@ def brain_extraction(name='antsBrainExtraction',
                 ('outputnode.out_mask', 'out_mask')]),
             (atropos_wf, apply_mask, [
                 ('outputnode.out_mask', 'mask_file')]),
-
+            (atropos_wf, outputnode, [
+                ('outputnode.out_segm', 'out_segm'),
+                ('outputnode.out_tpms', 'out_tpms')])
         ])
     return wf
 
@@ -246,21 +298,65 @@ def atropos_workflow(name='atropos_wf',
                      omp_nthreads=None,
                      mem_gb=3.0,
                      padding=10,
-                     in_segmentation_model='T1'):
+                     in_segmentation_model=ATROPOS_MODELS['T1']):
     """
-    Implements superstep 6 of ``antsBrainExtraction.sh``
+    Implements supersteps 6 and 7 of ``antsBrainExtraction.sh``,
+    which refine the mask previously computed with the spatial
+    normalization to the template.
+
+    **Parameters**
+
+        use_random_seed : bool
+            Whether ATROPOS should generate a random seed based on the
+            system's clock
+        omp_nthreads : int
+            Maximum number of threads an individual process may use
+        mem_gb : float
+            Estimated peak memory consumption of the most hungry nodes
+            in the workflow
+        padding : int
+            Pad images with zeros before processing
+        in_segmentation_model : tuple
+            A k-means segmentation is run to find gray or white matter
+            around the edge of the initial brain mask warped from the
+            template.
+            This produces a segmentation image with :math:`$K$` classes,
+            ordered by mean intensity in increasing order.
+            With this option, you can control  :math:`$K$` and tell
+            the script which classes represent CSF, gray and white matter.
+            Format (K, csfLabel, gmLabel, wmLabel).
+            Examples:
+              - ``(3,1,2,3)`` for T1 with K=3, CSF=1, GM=2, WM=3 (default)
+              - ``(3,3,2,1)`` for T2 with K=3, CSF=3, GM=2, WM=1
+              - ``(3,1,3,2)`` for FLAIR with K=3, CSF=1 GM=3, WM=2
+              - ``(4,4,2,3)`` uses K=4, CSF=4, GM=2, WM=3
+        name : str, optional
+            Workflow name (default: atropos_wf)
+
+
+    **Inputs**
+
+        in_files
+            :abbr:`INU (intensity non-uniformity)`-corrected files.
+        in_mask
+            Brain mask calculated previously
+
+
+    **Outputs**
+        out_mask
+            Refined brain mask
+        out_segm
+            Output segmentation
+        out_tpms
+            Output :abbr:`TPMs (tissue probability maps)`
+
     """
     wf = pe.Workflow(name)
 
-    if in_segmentation_model.upper() not in ATROPOS_MODELS:
-        raise NotImplementedError
-    else:
-        in_segmentation_model = ATROPOS_MODELS[in_segmentation_model.upper()]
-
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 'in_mask']),
                         name='inputnode')
-    outputnode = pe.Node(niu.IdentityInterface(fields=['out_mask']),
-                         name='outputnode')
+    outputnode = pe.Node(niu.IdentityInterface(
+        fields=['out_mask', 'out_segm', 'out_tpms']), name='outputnode')
 
     # Run atropos (core node)
     atropos = pe.Node(Atropos(
@@ -273,84 +369,88 @@ def atropos_workflow(name='atropos_wf',
         mrf_smoothing_factor=0.1,
         likelihood_model='Gaussian',
         use_random_seed=use_random_seed),
-        name='atropos', n_procs=omp_nthreads, mem_gb=mem_gb)
+        name='01_atropos', n_procs=omp_nthreads, mem_gb=mem_gb)
 
     # massage outputs
     pad_segm = pe.Node(ImageMath(operation='PadImage', op2='%d' % padding),
-                       name='pad_segm')
+                       name='02_pad_segm')
     pad_mask = pe.Node(ImageMath(operation='PadImage', op2='%d' % padding),
-                       name='pad_mask')
+                       name='03_pad_mask')
 
     # Split segmentation in binary masks
     sel_labels = pe.Node(niu.Function(function=_select_labels,
                          output_names=['out_wm', 'out_gm', 'out_csf']),
-                         name='sel_labels')
+                         name='04_sel_labels')
     sel_labels.inputs.labels = list(reversed(in_segmentation_model[1:]))
 
     # Select largest components (GM, WM)
     # ImageMath ${DIMENSION} ${EXTRACTION_WM} GetLargestComponent ${EXTRACTION_WM}
     get_wm = pe.Node(ImageMath(operation='GetLargestComponent'),
-                     name='get_wm')
+                     name='05_get_wm')
     get_gm = pe.Node(ImageMath(operation='GetLargestComponent'),
-                     name='get_gm')
+                     name='06_get_gm')
 
     # Fill holes and calculate intersection
     # ImageMath ${DIMENSION} ${EXTRACTION_TMP} FillHoles ${EXTRACTION_GM} 2
     # MultiplyImages ${DIMENSION} ${EXTRACTION_GM} ${EXTRACTION_TMP} ${EXTRACTION_GM}
     fill_gm = pe.Node(ImageMath(operation='FillHoles', op2='2'),
-                      name='fill_gm')
-    mult_gm = pe.Node(MultiplyImages(dimension=3), name='mult_gm')
+                      name='07_fill_gm')
+    mult_gm = pe.Node(MultiplyImages(dimension=3), name='08_mult_gm')
 
     # MultiplyImages ${DIMENSION} ${EXTRACTION_WM} ${ATROPOS_WM_CLASS_LABEL} ${EXTRACTION_WM}
     # ImageMath ${DIMENSION} ${EXTRACTION_TMP} ME ${EXTRACTION_CSF} 10
-    mult_wm = pe.Node(MultiplyImages(dimension=3, second_input=in_segmentation_model[-1]),
-                      name='mult_wm')
-    me_gm = pe.Node(ImageMath(operation='ME', op2='10'), name='me_gm')
+    relabel_wm = pe.Node(MultiplyImages(dimension=3, second_input=in_segmentation_model[-1]),
+                         name='09_relabel_wm')
+    me_csf = pe.Node(ImageMath(operation='ME', op2='10'), name='10_me_csf')
 
     # ImageMath ${DIMENSION} ${EXTRACTION_GM} addtozero ${EXTRACTION_GM} ${EXTRACTION_TMP}
     # MultiplyImages ${DIMENSION} ${EXTRACTION_GM} ${ATROPOS_GM_CLASS_LABEL} ${EXTRACTION_GM}
     # ImageMath ${DIMENSION} ${EXTRACTION_SEGMENTATION} addtozero ${EXTRACTION_WM} ${EXTRACTION_GM}
-    add_gm = pe.Node(ImageMath(operation='addtozero'), name='add_gm')
-    relabel = pe.Node(MultiplyImages(dimension=3, second_input=in_segmentation_model[-2]),
-                      name='relabel')
-    add_label = pe.Node(ImageMath(operation='addtozero'), name='add_label')
+    add_gm = pe.Node(ImageMath(operation='addtozero'),
+                     name='11_add_gm')
+    relabel_gm = pe.Node(MultiplyImages(dimension=3, second_input=in_segmentation_model[-2]),
+                         name='12_relabel_gm')
+    add_gm_wm = pe.Node(ImageMath(operation='addtozero'),
+                        name='13_add_gm_wm')
 
     # Superstep 7
     # Split segmentation in binary masks
     sel_labels2 = pe.Node(niu.Function(function=_select_labels,
                           output_names=['out_wm', 'out_gm', 'out_csf']),
-                          name='sel_labels2')
+                          name='14_sel_labels2')
     sel_labels2.inputs.labels = list(reversed(in_segmentation_model[1:]))
 
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} addtozero ${EXTRACTION_MASK} ${EXTRACTION_TMP}
-    add_7 = pe.Node(ImageMath(operation='addtozero'), name='add_7')
+    add_7 = pe.Node(ImageMath(operation='addtozero'), name='15_add_7')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} ME ${EXTRACTION_MASK} 2
-    me_7 = pe.Node(ImageMath(operation='ME', op2='2'), name='me_7')
+    me_7 = pe.Node(ImageMath(operation='ME', op2='2'), name='16_me_7')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} GetLargestComponent ${EXTRACTION_MASK}
-    comp_7 = pe.Node(ImageMath(operation='GetLargestComponent'), name='comp_7')
+    comp_7 = pe.Node(ImageMath(operation='GetLargestComponent'),
+                     name='17_comp_7')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} MD ${EXTRACTION_MASK} 4
-    md_7 = pe.Node(ImageMath(operation='MD', op2='4'), name='md_7')
+    md_7 = pe.Node(ImageMath(operation='MD', op2='4'), name='18_md_7')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} FillHoles ${EXTRACTION_MASK} 2
-    fill_7 = pe.Node(ImageMath(operation='FillHoles', op2='2'), name='fill_7')
+    fill_7 = pe.Node(ImageMath(operation='FillHoles', op2='2'),
+                     name='19_fill_7')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} addtozero ${EXTRACTION_MASK} \
     # ${EXTRACTION_MASK_PRIOR_WARPED}
-    add_7_2 = pe.Node(ImageMath(operation='addtozero'), name='add_7_2')
+    add_7_2 = pe.Node(ImageMath(operation='addtozero'), name='20_add_7_2')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} MD ${EXTRACTION_MASK} 5
-    md_7_2 = pe.Node(ImageMath(operation='MD', op2='5'), name='md_7_2')
+    md_7_2 = pe.Node(ImageMath(operation='MD', op2='5'), name='21_md_7_2')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} ME ${EXTRACTION_MASK} 5
-    me_7_2 = pe.Node(ImageMath(operation='ME', op2='5'), name='me_7_2')
+    me_7_2 = pe.Node(ImageMath(operation='ME', op2='5'), name='22_me_7_2')
 
     # De-pad
     depad_mask = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
-                         name='depad_mask')
+                         name='23_depad_mask')
     depad_segm = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
-                         name='depad_segm')
+                         name='24_depad_segm')
     depad_gm = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
-                       name='depad_gm')
+                       name='25_depad_gm')
     depad_wm = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
-                       name='depad_wm')
+                       name='26_depad_wm')
     depad_csf = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
-                        name='depad_csf')
+                        name='27_depad_csf')
     wf.connect([
         (inputnode, pad_mask, [('in_mask', 'op1')]),
         (inputnode, atropos, [('in_files', 'intensity_images'),
@@ -363,16 +463,16 @@ def atropos_workflow(name='atropos_wf',
         (get_gm, mult_gm, [('output_image', 'first_input'),
                            (('output_image', _gen_name), 'output_product_image')]),
         (fill_gm, mult_gm, [('output_image', 'second_input')]),
-        (get_wm, mult_wm, [('output_image', 'first_input'),
-                           (('output_image', _gen_name), 'output_product_image')]),
-        (fill_gm, me_gm, [('output_image', 'op1')]),
+        (get_wm, relabel_wm, [('output_image', 'first_input'),
+                              (('output_image', _gen_name), 'output_product_image')]),
+        (sel_labels, me_csf, [('out_csf', 'op1')]),
         (mult_gm, add_gm, [('output_product_image', 'op1')]),
-        (fill_gm, add_gm, [('output_image', 'op2')]),
-        (add_gm, relabel, [('output_image', 'first_input'),
-                           (('output_image', _gen_name), 'output_product_image')]),
-        (mult_wm, add_label, [('output_product_image', 'op1')]),
-        (relabel, add_label, [('output_product_image', 'op2')]),
-        (add_label, sel_labels2, [('output_image', 'in_segm')]),
+        (me_csf, add_gm, [('output_image', 'op2')]),
+        (add_gm, relabel_gm, [('output_image', 'first_input'),
+                              (('output_image', _gen_name), 'output_product_image')]),
+        (relabel_wm, add_gm_wm, [('output_product_image', 'op1')]),
+        (relabel_gm, add_gm_wm, [('output_product_image', 'op2')]),
+        (add_gm_wm, sel_labels2, [('output_image', 'in_segm')]),
         (sel_labels2, add_7, [('out_wm', 'op1'),
                               ('out_gm', 'op2')]),
         (add_7, me_7, [('output_image', 'op1')]),
@@ -384,9 +484,9 @@ def atropos_workflow(name='atropos_wf',
         (add_7_2, md_7_2, [('output_image', 'op1')]),
         (md_7_2, me_7_2, [('output_image', 'op1')]),
         (me_7_2, depad_mask, [('output_image', 'op1')]),
-        (add_label, depad_segm, [('output_image', 'op1')]),
-        (mult_wm, depad_wm, [('output_product_image', 'op1')]),
-        (relabel, depad_gm, [('output_product_image', 'op1')]),
+        (add_gm_wm, depad_segm, [('output_image', 'op1')]),
+        (relabel_wm, depad_wm, [('output_product_image', 'op1')]),
+        (relabel_gm, depad_gm, [('output_product_image', 'op1')]),
         (sel_labels, depad_csf, [('out_csf', 'op1')]),
         (depad_mask, outputnode, [('output_image', 'out_mask')]),
     ])
