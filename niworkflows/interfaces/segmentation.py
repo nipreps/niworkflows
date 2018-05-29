@@ -11,16 +11,17 @@ import os
 
 from ..nipype.interfaces.base import File
 from ..nipype.interfaces import fsl, freesurfer
+from ..nipype.interfaces.mixins import reporting
 from . import report_base as nrc
 from .. import NIWORKFLOWS_LOG
 
 
-class FASTInputSpecRPT(nrc.ReportCapableInputSpec,
+class FASTInputSpecRPT(nrc.SVGReportCapableInputSpec,
                        fsl.preprocess.FASTInputSpec):
     pass
 
 
-class FASTOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class FASTOutputSpecRPT(reporting.ReportCapableOutputSpec,
                         fsl.preprocess.FASTOutputSpec):
     pass
 
@@ -31,7 +32,7 @@ class FASTRPT(nrc.SegmentationRC,
     output_spec = FASTOutputSpecRPT
 
     def _run_interface(self, runtime):
-        if self.inputs.generate_report:
+        if self.generate_report:
             self.inputs.segments = True
 
         return super(FASTRPT, self)._run_interface(runtime)
@@ -54,13 +55,15 @@ class FASTRPT(nrc.SegmentationRC,
                              outputs.tissue_class_map,
                              outputs.tissue_class_files)
 
+        return super(FASTRPT, self)._post_run_hook(runtime)
 
-class ReconAllInputSpecRPT(nrc.ReportCapableInputSpec,
+
+class ReconAllInputSpecRPT(nrc.SVGReportCapableInputSpec,
                            freesurfer.preprocess.ReconAllInputSpec):
     pass
 
 
-class ReconAllOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class ReconAllOutputSpecRPT(reporting.ReportCapableOutputSpec,
                             freesurfer.preprocess.ReconAllOutputSpec):
     pass
 
@@ -85,8 +88,10 @@ class ReconAllRPT(nrc.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):
         NIWORKFLOWS_LOG.info('Generating report for ReconAll (subject %s)',
                              outputs.subject_id)
 
+        return super(ReconAllRPT, self)._post_run_hook(runtime)
 
-class MELODICInputSpecRPT(nrc.ReportCapableInputSpec,
+
+class MELODICInputSpecRPT(nrc.SVGReportCapableInputSpec,
                           fsl.model.MELODICInputSpec):
     out_report = File(
         'melodic_reportlet.svg', usedefault=True, desc='Filename for the visual'
@@ -96,12 +101,12 @@ class MELODICInputSpecRPT(nrc.ReportCapableInputSpec,
                             'If not set the mask will be derived from the data.')
 
 
-class MELODICOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class MELODICOutputSpecRPT(reporting.ReportCapableOutputSpec,
                            fsl.model.MELODICOutputSpec):
     pass
 
 
-class MELODICRPT(nrc.ReportCapableInterface, fsl.MELODIC):
+class MELODICRPT(reporting.ReportCapableInterface, fsl.MELODIC):
     input_spec = MELODICInputSpecRPT
     output_spec = MELODICOutputSpecRPT
 
@@ -123,8 +128,10 @@ class MELODICRPT(nrc.ReportCapableInterface, fsl.MELODIC):
 
         NIWORKFLOWS_LOG.info('Generating report for MELODIC')
 
+        return super(MELODICRPT, self)._post_run_hook(runtime)
 
-class ICA_AROMAInputSpecRPT(nrc.ReportCapableInputSpec,
+
+class ICA_AROMAInputSpecRPT(nrc.SVGReportCapableInputSpec,
                             fsl.aroma.ICA_AROMAInputSpec):
     out_report = File(
         'ica_aroma_reportlet.svg', usedefault=True, desc='Filename for the visual'
@@ -134,12 +141,12 @@ class ICA_AROMAInputSpecRPT(nrc.ReportCapableInputSpec,
                             'If not set the mask will be derived from the data.')
 
 
-class ICA_AROMAOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class ICA_AROMAOutputSpecRPT(reporting.ReportCapableOutputSpec,
                              fsl.aroma.ICA_AROMAOutputSpec):
     pass
 
 
-class ICA_AROMARPT(nrc.ReportCapableInterface, fsl.ICA_AROMA):
+class ICA_AROMARPT(reporting.ReportCapableInterface, fsl.ICA_AROMA):
     input_spec = ICA_AROMAInputSpecRPT
     output_spec = ICA_AROMAOutputSpecRPT
 
@@ -159,3 +166,5 @@ class ICA_AROMARPT(nrc.ReportCapableInterface, fsl.ICA_AROMA):
                                                    "classified_motion_ICs.txt")
 
         NIWORKFLOWS_LOG.info('Generating report for ICA AROMA')
+
+        return super(ICA_AROMARPT, self)._post_run_hook(runtime)

@@ -17,6 +17,7 @@ from .. import NIWORKFLOWS_LOG
 from ..nipype.utils.filemanip import fname_presuffix
 from ..nipype.interfaces.base import (
     traits, isdefined, TraitedSpec, BaseInterfaceInputSpec, File, SimpleInterface)
+from ..nipype.interfaces.mixins import reporting
 from ..nipype.interfaces import freesurfer as fs
 from ..nipype.interfaces import fsl, ants, afni
 
@@ -30,12 +31,12 @@ from .fixes import (FixHeaderApplyTransforms as ApplyTransforms,
 
 
 class RobustMNINormalizationInputSpecRPT(
-        nrc.ReportCapableInputSpec, RobustMNINormalizationInputSpec):
+        nrc.SVGReportCapableInputSpec, RobustMNINormalizationInputSpec):
     pass
 
 
 class RobustMNINormalizationOutputSpecRPT(
-        nrc.ReportCapableOutputSpec, ants.registration.RegistrationOutputSpec):
+        reporting.ReportCapableOutputSpec, ants.registration.RegistrationOutputSpec):
     pass
 
 
@@ -56,13 +57,15 @@ class RobustMNINormalizationRPT(
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
+        return super(RobustMNINormalizationRPT, self)._post_run_hook(runtime)
 
-class ANTSRegistrationInputSpecRPT(nrc.ReportCapableInputSpec,
+
+class ANTSRegistrationInputSpecRPT(nrc.SVGReportCapableInputSpec,
                                    ants.registration.RegistrationInputSpec):
     pass
 
 
-class ANTSRegistrationOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class ANTSRegistrationOutputSpecRPT(reporting.ReportCapableOutputSpec,
                                     ants.registration.RegistrationOutputSpec):
     pass
 
@@ -77,13 +80,15 @@ class ANTSRegistrationRPT(nrc.RegistrationRC, Registration):
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
+        return super(ANTSRegistrationRPT, self)._post_run_hook(runtime)
 
-class ANTSApplyTransformsInputSpecRPT(nrc.ReportCapableInputSpec,
+
+class ANTSApplyTransformsInputSpecRPT(nrc.SVGReportCapableInputSpec,
                                       ants.resampling.ApplyTransformsInputSpec):
     pass
 
 
-class ANTSApplyTransformsOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class ANTSApplyTransformsOutputSpecRPT(reporting.ReportCapableOutputSpec,
                                        ants.resampling.ApplyTransformsOutputSpec):
     pass
 
@@ -98,14 +103,16 @@ class ANTSApplyTransformsRPT(nrc.RegistrationRC, ApplyTransforms):
         NIWORKFLOWS_LOG.info('Report - setting fixed (%s) and moving (%s) images',
                              self._fixed_image, self._moving_image)
 
+        return super(ANTSApplyTransformsRPT, self)._post_run_hook(runtime)
 
-class ApplyTOPUPInputSpecRPT(nrc.ReportCapableInputSpec,
+
+class ApplyTOPUPInputSpecRPT(nrc.SVGReportCapableInputSpec,
                              fsl.epi.ApplyTOPUPInputSpec):
     wm_seg = File(argstr='-wmseg %s',
                   desc='reference white matter segmentation mask')
 
 
-class ApplyTOPUPOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class ApplyTOPUPOutputSpecRPT(reporting.ReportCapableOutputSpec,
                               fsl.epi.ApplyTOPUPOutputSpec):
     pass
 
@@ -123,14 +130,16 @@ class ApplyTOPUPRPT(nrc.RegistrationRC, fsl.ApplyTOPUP):
         NIWORKFLOWS_LOG.info('Report - setting corrected (%s) and warped (%s) images',
                              self._fixed_image, self._moving_image)
 
+        return super(ApplyTOPUPRPT, self)._post_run_hook(runtime)
 
-class FUGUEInputSpecRPT(nrc.ReportCapableInputSpec,
+
+class FUGUEInputSpecRPT(nrc.SVGReportCapableInputSpec,
                         fsl.preprocess.FUGUEInputSpec):
     wm_seg = File(argstr='-wmseg %s',
                   desc='reference white matter segmentation mask')
 
 
-class FUGUEOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class FUGUEOutputSpecRPT(reporting.ReportCapableOutputSpec,
                          fsl.preprocess.FUGUEOutputSpec):
     pass
 
@@ -149,13 +158,15 @@ class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
             'Report - setting corrected (%s) and warped (%s) images',
             self._fixed_image, self._moving_image)
 
+        return super(FUGUERPT, self)._post_run_hook(runtime)
 
-class FLIRTInputSpecRPT(nrc.ReportCapableInputSpec,
+
+class FLIRTInputSpecRPT(nrc.SVGReportCapableInputSpec,
                         fsl.preprocess.FLIRTInputSpec):
     pass
 
 
-class FLIRTOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class FLIRTOutputSpecRPT(reporting.ReportCapableOutputSpec,
                          fsl.preprocess.FLIRTOutputSpec):
     pass
 
@@ -172,8 +183,10 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
             'Report - setting fixed (%s) and moving (%s) images',
             self._fixed_image, self._moving_image)
 
+        return super(FLIRTRPT, self)._post_run_hook(runtime)
 
-class ApplyXFMInputSpecRPT(nrc.ReportCapableInputSpec,
+
+class ApplyXFMInputSpecRPT(nrc.SVGReportCapableInputSpec,
                            fsl.preprocess.ApplyXFMInputSpec):
     pass
 
@@ -184,20 +197,20 @@ class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
 
 
 if LooseVersion("0.0.0") < fs.Info.looseversion() < LooseVersion("6.0.0"):
-    class BBRegisterInputSpecRPT(nrc.ReportCapableInputSpec,
-                                 fs.preprocess.BBRegisterInputSpec):
-        out_lta_file = traits.Either(traits.Bool, File, default=True, usedefault=True,
-                                     argstr="--lta %s", min_ver='5.2.0',
-                                     desc="write the transformation matrix in LTA format")
+    _BBRegisterInputSpec = fs.preprocess.BBRegisterInputSpec
 else:
-    class BBRegisterInputSpecRPT(nrc.ReportCapableInputSpec,
-                                 fs.preprocess.BBRegisterInputSpec6):
-        out_lta_file = traits.Either(traits.Bool, File, default=True, usedefault=True,
-                                     argstr="--lta %s", min_ver='5.2.0',
-                                     desc="write the transformation matrix in LTA format")
+    _BBRegisterInputSpec = fs.preprocess.BBRegisterInputSpec6
 
 
-class BBRegisterOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class BBRegisterInputSpecRPT(nrc.SVGReportCapableInputSpec,
+                             _BBRegisterInputSpec):
+    # Adds default=True, usedefault=True
+    out_lta_file = traits.Either(traits.Bool, File, default=True, usedefault=True,
+                                 argstr="--lta %s", min_ver='5.2.0',
+                                 desc="write the transformation matrix in LTA format")
+
+
+class BBRegisterOutputSpecRPT(reporting.ReportCapableOutputSpec,
                               fs.preprocess.BBRegisterOutputSpec):
     pass
 
@@ -227,13 +240,15 @@ class BBRegisterRPT(nrc.RegistrationRC, fs.BBRegister):
             'Report - setting fixed (%s) and moving (%s) images',
             self._fixed_image, self._moving_image)
 
+        return super(BBRegisterRPT, self)._post_run_hook(runtime)
 
-class MRICoregInputSpecRPT(nrc.ReportCapableInputSpec,
+
+class MRICoregInputSpecRPT(nrc.SVGReportCapableInputSpec,
                            fs.registration.MRICoregInputSpec):
     pass
 
 
-class MRICoregOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class MRICoregOutputSpecRPT(reporting.ReportCapableOutputSpec,
                             fs.registration.MRICoregOutputSpec):
     pass
 
@@ -270,27 +285,23 @@ class MRICoregRPT(nrc.RegistrationRC, fs.MRICoreg):
             'Report - setting fixed (%s) and moving (%s) images',
             self._fixed_image, self._moving_image)
 
+        return super(MRICoregRPT, self)._post_run_hook(runtime)
 
-class SimpleBeforeAfterInputSpecRPT(nrc.ReportCapableInputSpec):
+
+class SimpleBeforeAfterInputSpecRPT(nrc.SVGReportCapableInputSpec):
     before = File(exists=True, mandatory=True, desc='file before')
     after = File(exists=True, mandatory=True, desc='file after')
     wm_seg = File(desc='reference white matter segmentation mask')
 
 
-class SimpleBeforeAfterOutputSpecRPT(nrc.ReportCapableOutputSpec):
-    pass
-
-
-class SimpleBeforeAfterRPT(nrc.RegistrationRC):
+class SimpleBeforeAfterRPT(nrc.RegistrationRC, nrc.ReportingInterface):
     input_spec = SimpleBeforeAfterInputSpecRPT
-    output_spec = SimpleBeforeAfterOutputSpecRPT
 
-    def _run_interface(self, runtime):
+    _fixed_image_label = "after"
+    _moving_image_label = "before"
+
+    def _post_run_hook(self, runtime):
         """ there is not inner interface to run """
-        self._out_report = os.path.abspath(self.inputs.out_report)
-
-        self._fixed_image_label = "after"
-        self._moving_image_label = "before"
         self._fixed_image = self.inputs.after
         self._moving_image = self.inputs.before
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
@@ -298,10 +309,7 @@ class SimpleBeforeAfterRPT(nrc.RegistrationRC):
             'Report - setting before (%s) and after (%s) images',
             self._fixed_image, self._moving_image)
 
-        self._generate_report()
-        NIWORKFLOWS_LOG.info('Successfully created report (%s)', self._out_report)
-
-        return runtime
+        return super(SimpleBeforeAfterRPT, self)._post_run_hook(runtime)
 
 
 class ResampleBeforeAfterInputSpecRPT(SimpleBeforeAfterInputSpecRPT):
@@ -311,22 +319,17 @@ class ResampleBeforeAfterInputSpecRPT(SimpleBeforeAfterInputSpecRPT):
 class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
     input_spec = ResampleBeforeAfterInputSpecRPT
 
-    def _run_interface(self, runtime):
-        """ there is not inner interface to run """
-        self._out_report = os.path.abspath(self.inputs.out_report)
-
-        self._fixed_image_label = "after"
-        self._moving_image_label = "before"
+    def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.after
         self._moving_image = self.inputs.before
         if self.inputs.base == 'before':
             resampled_after = nli.resample_to_img(self._fixed_image, self._moving_image)
-            fname = fname_presuffix(self._fixed_image, suffix='_resampled', newpath='.')
+            fname = fname_presuffix(self._fixed_image, suffix='_resampled', newpath=runtime.cwd)
             resampled_after.to_filename(fname)
             self._fixed_image = os.path.abspath(fname)
         else:
             resampled_before = nli.resample_to_img(self._moving_image, self._fixed_image)
-            fname = fname_presuffix(self._moving_image, suffix='_resampled', newpath='.')
+            fname = fname_presuffix(self._moving_image, suffix='_resampled', newpath=runtime.cwd)
             resampled_before.to_filename(fname)
             self._moving_image = os.path.abspath(fname)
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
@@ -334,7 +337,7 @@ class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
             'Report - setting before (%s) and after (%s) images',
             self._fixed_image, self._moving_image)
 
-        self._generate_report()
+        runtime = super(ResampleBeforeAfterRPT, self)._post_run_hook(runtime)
         NIWORKFLOWS_LOG.info('Successfully created report (%s)', self._out_report)
         os.unlink(fname)
 

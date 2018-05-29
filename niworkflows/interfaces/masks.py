@@ -17,16 +17,17 @@ from .. import NIWORKFLOWS_LOG
 from ..nipype.interfaces import fsl, ants
 from ..nipype.interfaces.base import (
     File, BaseInterfaceInputSpec, traits, isdefined, InputMultiPath, Str)
+from ..nipype.interfaces.mixins import reporting
 from ..nipype.algorithms import confounds
 from . import report_base as nrc
 
 
-class BETInputSpecRPT(nrc.ReportCapableInputSpec,
+class BETInputSpecRPT(nrc.SVGReportCapableInputSpec,
                       fsl.preprocess.BETInputSpec):
     pass
 
 
-class BETOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class BETOutputSpecRPT(reporting.ReportCapableOutputSpec,
                        fsl.preprocess.BETOutputSpec):
     pass
 
@@ -36,7 +37,7 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
     output_spec = BETOutputSpecRPT
 
     def _run_interface(self, runtime):
-        if self.inputs.generate_report:
+        if self.generate_report:
             self.inputs.mask = True
 
         return super(BETRPT, self)._run_interface(runtime)
@@ -53,13 +54,15 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
         NIWORKFLOWS_LOG.info('Generating report for BET. file "%s", and mask file "%s"',
                              self._anat_file, self._mask_file)
 
+        return super(BETRPT, self)._post_run_hook(runtime)
 
-class BrainExtractionInputSpecRPT(nrc.ReportCapableInputSpec,
+
+class BrainExtractionInputSpecRPT(nrc.SVGReportCapableInputSpec,
                                   ants.segmentation.BrainExtractionInputSpec):
     pass
 
 
-class BrainExtractionOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class BrainExtractionOutputSpecRPT(reporting.ReportCapableOutputSpec,
                                    ants.segmentation.BrainExtractionOutputSpec):
     pass
 
@@ -84,15 +87,17 @@ class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
         NIWORKFLOWS_LOG.info('Generating report for ANTS BrainExtraction. file "%s", mask "%s"',
                              self._anat_file, self._mask_file)
 
+        return super(BrainExtractionRPT, self)._post_run_hook(runtime)
+
 
 # TODO: move this interface to nipype.interfaces.nilearn
-class ComputeEPIMaskInputSpec(nrc.ReportCapableInputSpec,
+class ComputeEPIMaskInputSpec(nrc.SVGReportCapableInputSpec,
                               BaseInterfaceInputSpec):
     in_file = File(exists=True, desc="3D or 4D EPI file")
     dilation = traits.Int(desc="binary dilation on the nilearn output")
 
 
-class ComputeEPIMaskOutputSpec(nrc.ReportCapableOutputSpec):
+class ComputeEPIMaskOutputSpec(reporting.ReportCapableOutputSpec):
     mask_file = File(exists=True, desc="Binary brain mask")
 
 
@@ -152,13 +157,15 @@ class ComputeEPIMask(nrc.SegmentationRC):
             'Generating report for nilearn.compute_epi_mask. file "%s", and mask file "%s"',
             self._anat_file, self._mask_file)
 
+        return super(ComputeEPIMask, self)._post_run_hook(runtime)
 
-class ACompCorInputSpecRPT(nrc.ReportCapableInputSpec,
+
+class ACompCorInputSpecRPT(nrc.SVGReportCapableInputSpec,
                            confounds.CompCorInputSpec):
     pass
 
 
-class ACompCorOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class ACompCorOutputSpecRPT(reporting.ReportCapableOutputSpec,
                             confounds.CompCorOutputSpec):
     pass
 
@@ -181,13 +188,15 @@ class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
         NIWORKFLOWS_LOG.info('Generating report for aCompCor. file "%s", mask "%s"',
                              self.inputs.realigned_file, self._mask_file)
 
+        return super(ACompCorRPT, self)._post_run_hook(runtime)
 
-class TCompCorInputSpecRPT(nrc.ReportCapableInputSpec,
+
+class TCompCorInputSpecRPT(nrc.SVGReportCapableInputSpec,
                            confounds.TCompCorInputSpec):
     pass
 
 
-class TCompCorOutputSpecRPT(nrc.ReportCapableOutputSpec,
+class TCompCorOutputSpecRPT(reporting.ReportCapableOutputSpec,
                             confounds.TCompCorOutputSpec):
     pass
 
@@ -213,16 +222,16 @@ class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
                              self.inputs.realigned_file,
                              self.aggregate_outputs(runtime=runtime).high_variance_masks)
 
+        return super(TCompCorRPT, self)._post_run_hook(runtime)
 
-class SimpleShowMaskInputSpec(nrc.ReportCapableInputSpec):
+
+class SimpleShowMaskInputSpec(nrc.SVGReportCapableInputSpec):
     background_file = File(exists=True, mandatory=True, desc='file before')
     mask_file = File(exists=True, mandatory=True, desc='file before')
-    generate_report = traits.Bool(True, usedefault=True)
 
 
-class SimpleShowMaskRPT(nrc.SegmentationRC):
+class SimpleShowMaskRPT(nrc.SegmentationRC, nrc.ReportingInterface):
     input_spec = SimpleShowMaskInputSpec
-    output_spec = nrc.ReportCapableOutputSpec
 
     def _post_run_hook(self, runtime):
         self._anat_file = self.inputs.background_file
@@ -230,10 +239,10 @@ class SimpleShowMaskRPT(nrc.SegmentationRC):
         self._seg_files = [self.inputs.mask_file]
         self._masked = True
 
-        return runtime
+        return super(SimpleShowMaskRPT, self)._post_run_hook(runtime)
 
 
-class ROIsPlotInputSpecRPT(nrc.ReportCapableInputSpec):
+class ROIsPlotInputSpecRPT(nrc.SVGReportCapableInputSpec):
     in_file = File(exists=True, mandatory=True, desc='the volume where ROIs are defined')
     in_rois = InputMultiPath(File(exists=True), mandatory=True,
                              desc='a list of regions to be plotted')
@@ -243,12 +252,10 @@ class ROIsPlotInputSpecRPT(nrc.ReportCapableInputSpec):
                            desc='use specific colors for contours')
 
 
-class ROIsPlot(nrc.SegmentationRC):
+class ROIsPlot(nrc.ReportingInterface):
     input_spec = ROIsPlotInputSpecRPT
-    output_spec = nrc.ReportCapableOutputSpec
 
-    def _run_interface(self, runtime):
-        """ there is not inner interface to run """
+    def _generate_report(self):
         from niworkflows.viz.utils import plot_segs, compose_view
         seg_files = self.inputs.in_rois
         mask_file = None
@@ -270,4 +277,3 @@ class ROIsPlot(nrc.SegmentationRC):
             fg_svgs=None,
             out_file=self._out_report
         )
-        return runtime
