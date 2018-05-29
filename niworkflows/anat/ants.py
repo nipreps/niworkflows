@@ -114,7 +114,8 @@ def brain_extraction(name='antsBrainExtraction',
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 'in_mask']),
                         name='inputnode')
     outputnode = pe.Node(niu.IdentityInterface(
-        fields=['bias_corrected', 'out_file', 'out_mask', 'bias_image']), name='outputnode')
+        fields=['bias_corrected', 'out_mask', 'bias_image', 'out_segm']),
+        name='outputnode')
 
     trunc = pe.MapNode(ImageMath(operation='TruncateImageIntensity', op2='0.01 0.999 256'),
                        name='truncate_images', iterfield=['op1'])
@@ -212,9 +213,11 @@ def brain_extraction(name='antsBrainExtraction',
         (get_brainmask, apply_mask, [('output_image', 'mask_file')]),
         (get_brainmask, outputnode, [('output_image', 'out_mask')]),
         (apply_mask, outputnode, [('out_file', 'bias_corrected')]),
+        (inu_n4, outputnode, [('bias_image', 'bias_image')]),
     ])
 
     if atropos_refine:
+        # TODO: connect output segmentation to 'outputnode.out_segm'
         atropos_wf = atropos_workflow(
             use_random_seed=atropos_use_random_seed,
             omp_nthreads=omp_nthreads,
