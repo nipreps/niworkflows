@@ -105,8 +105,7 @@ def brain_extraction(name='antsBrainExtraction',
                                    '1mm_%s.nii.gz' % in_segmentation_model[:2].upper())
 
     if not os.path.exists(tpl_target_path):
-        raise ValueError(f'Template path "{tpl_target_path}" not found.')
-
+        raise ValueError('Template path "%s" not found.' % template_path)
 
     if omp_nthreads is None or omp_nthreads < 1:
         omp_nthreads = cpu_count()
@@ -182,7 +181,6 @@ def brain_extraction(name='antsBrainExtraction',
 
     # Apply mask
     apply_mask = pe.MapNode(ApplyMask(), iterfield=['in_file'], name='apply_mask')
-
 
     wf.connect([
         (inputnode, trunc, [('in_files', 'op1')]),
@@ -318,8 +316,6 @@ def atropos_workflow(name='atropos_wf',
     add_label = pe.Node(ImageMath(operation='addtozero'), name='add_label')
 
     # Superstep 7
-    # ThresholdImage ${DIMENSION} ${EXTRACTION_SEGMENTATION} ${EXTRACTION_MASK} ${ATROPOS_WM_CLASS_LABEL} ${ATROPOS_WM_CLASS_LABEL} 1 0
-    # ThresholdImage ${DIMENSION} ${EXTRACTION_SEGMENTATION} ${EXTRACTION_TMP} ${ATROPOS_GM_CLASS_LABEL} ${ATROPOS_GM_CLASS_LABEL} 1 0
     # Split segmentation in binary masks
     sel_labels2 = pe.Node(niu.Function(function=_select_labels,
                           output_names=['out_wm', 'out_gm', 'out_csf']),
@@ -336,7 +332,8 @@ def atropos_workflow(name='atropos_wf',
     md_7 = pe.Node(ImageMath(operation='MD', op2='4'), name='md_7')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} FillHoles ${EXTRACTION_MASK} 2
     fill_7 = pe.Node(ImageMath(operation='FillHoles', op2='2'), name='fill_7')
-    # ImageMath ${DIMENSION} ${EXTRACTION_MASK} addtozero ${EXTRACTION_MASK} ${EXTRACTION_MASK_PRIOR_WARPED}
+    # ImageMath ${DIMENSION} ${EXTRACTION_MASK} addtozero ${EXTRACTION_MASK} \
+    # ${EXTRACTION_MASK_PRIOR_WARPED}
     add_7_2 = pe.Node(ImageMath(operation='addtozero'), name='add_7_2')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} MD ${EXTRACTION_MASK} 5
     md_7_2 = pe.Node(ImageMath(operation='MD', op2='5'), name='md_7_2')
