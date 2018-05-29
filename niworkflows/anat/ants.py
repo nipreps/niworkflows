@@ -16,7 +16,7 @@ from packaging.version import parse as parseversion, Version
 from ..data import TEMPLATE_MAP, get_dataset
 from ..nipype.pipeline import engine as pe
 from ..nipype.interfaces import utility as niu
-from ..nipype.interfaces.ants import N4BiasFieldCorrection, Atropos
+from ..nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
 from ..interfaces.ants import (
     ImageMath,
     ResampleImageBySpacing,
@@ -43,7 +43,7 @@ def brain_extraction(name='antsBrainExtraction',
                      mem_gb=3.0,
                      in_segmentation_model='T1',
                      atropos_use_random_seed=True,
-                     atropos_workflow=False):
+                     atropos_refine=True):
     """
     The official antsBrainExtraction.sh workflow converted into Nipype,
     only for 3D images.
@@ -206,18 +206,37 @@ def brain_extraction(name='antsBrainExtraction',
         (dil_brainmask, get_brainmask, [('output_image', 'op1')]),
         (get_brainmask, outputnode, [('output_image', 'out_mask')]),
     ])
+
+    if atropos_refine:
+        atropos_wf = atropos_workflow(
+            use_random_seed=atropos_use_random_seed,
+            omp_nthreads=omp_nthreads,
+            mem_gb=mem_gb,
+            in_segmentation_model=in_segmentation_model
+        )
+
+        wf.disconnect([
+            (get_brainmask, outputnode, [('output_image', 'out_mask')]),
+        ])
+        wf.connect([
+            (inu_n4, atropos_wf, [
+                ('output_image', 'inputnode.in_files')]),
+            (get_brainmask, atropos_wf, [
+                ('output_image', 'inputnode.in_mask')]),
+            (atropos_wf, outputnode, [
+                ('outputnode.out_mask', 'out_mask')]),
+        ])
+
+
     return wf
 
 
 def atropos_workflow(name='atropos_wf',
-                     use_float=True,
-                     debug=False,
                      use_random_seed=True,
                      omp_nthreads=None,
                      mem_gb=3.0,
                      padding=10,
-                     in_segmentation_model='T1',
-                     run_atropos_workflow=False):
+                     in_segmentation_model='T1'):
     """
     Implements superstep 6 of ``antsBrainExtraction.sh``
     """
@@ -230,6 +249,8 @@ def atropos_workflow(name='atropos_wf',
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 'in_mask']),
                         name='inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_mask']),
+                         name='outputnode')
 
     # Run atropos (core node)
     atropos = pe.Node(Atropos(
@@ -251,40 +272,114 @@ def atropos_workflow(name='atropos_wf',
                        name='pad_mask')
 
     # Split segmentation in binary masks
-    select_labels = pe.MapNode(niu.Function(function=_select_labels),
-                               iterfield=['label'])
-    select_labels.label = list(reversed(in_segmentation_model[1:]))
-
-    # Select WM (element 0)
-    sel_wm = pe.Node(niu.Select(index=[0]), name='sel_wm',
-                     run_without_submitting=True)
-    # Select GM (element 1)
-    sel_gm = pe.Node(niu.Select(index=[1]), name='sel_gm',
-                     run_without_submitting=True)
+    sel_labels = pe.Node(niu.Function(function=_select_labels,
+                         output_names=['out_wm', 'out_gm', 'out_csf']),
+                         name='sel_labels')
+    sel_labels.inputs.labels = list(reversed(in_segmentation_model[1:]))
 
     # Select largest components (GM, WM)
     # ImageMath ${DIMENSION} ${EXTRACTION_WM} GetLargestComponent ${EXTRACTION_WM}
+    get_wm = pe.Node(ImageMath(operation='GetLargestComponent'),
+                     name='get_wm')
+    get_gm = pe.Node(ImageMath(operation='GetLargestComponent'),
+                     name='get_gm')
 
     # Fill holes and calculate intersection
     # ImageMath ${DIMENSION} ${EXTRACTION_TMP} FillHoles ${EXTRACTION_GM} 2
     # MultiplyImages ${DIMENSION} ${EXTRACTION_GM} ${EXTRACTION_TMP} ${EXTRACTION_GM}
+    fill_gm = pe.Node(ImageMath(operation='FillHoles', op2='2'),
+                      name='fill_gm')
+    mult_gm = pe.Node(MultiplyImages(dimension=3), name='mult_gm')
 
     # MultiplyImages ${DIMENSION} ${EXTRACTION_WM} ${ATROPOS_WM_CLASS_LABEL} ${EXTRACTION_WM}
     # ImageMath ${DIMENSION} ${EXTRACTION_TMP} ME ${EXTRACTION_CSF} 10
+    mult_wm = pe.Node(MultiplyImages(dimension=3, second_input=in_segmentation_model[-1]),
+                      name='mult_wm')
+    me_gm = pe.Node(ImageMath(operation='ME', op2='10'), name='me_gm')
 
     # ImageMath ${DIMENSION} ${EXTRACTION_GM} addtozero ${EXTRACTION_GM} ${EXTRACTION_TMP}
     # MultiplyImages ${DIMENSION} ${EXTRACTION_GM} ${ATROPOS_GM_CLASS_LABEL} ${EXTRACTION_GM}
     # ImageMath ${DIMENSION} ${EXTRACTION_SEGMENTATION} addtozero ${EXTRACTION_WM} ${EXTRACTION_GM}
+    add_gm = pe.Node(ImageMath(operation='addtozero'), name='add_gm')
+    relabel = pe.Node(MultiplyImages(dimension=3, second_input=in_segmentation_model[-2]),
+                      name='relabel')
+    add_label = pe.Node(ImageMath(operation='addtozero'), name='add_label')
 
+    # Superstep 7
+    # ThresholdImage ${DIMENSION} ${EXTRACTION_SEGMENTATION} ${EXTRACTION_MASK} ${ATROPOS_WM_CLASS_LABEL} ${ATROPOS_WM_CLASS_LABEL} 1 0
+    # ThresholdImage ${DIMENSION} ${EXTRACTION_SEGMENTATION} ${EXTRACTION_TMP} ${ATROPOS_GM_CLASS_LABEL} ${ATROPOS_GM_CLASS_LABEL} 1 0
+    # Split segmentation in binary masks
+    sel_labels2 = pe.Node(niu.Function(function=_select_labels,
+                          output_names=['out_wm', 'out_gm', 'out_csf']),
+                          name='sel_labels2')
+    sel_labels2.inputs.labels = list(reversed(in_segmentation_model[1:]))
+
+    # ImageMath ${DIMENSION} ${EXTRACTION_MASK} addtozero ${EXTRACTION_MASK} ${EXTRACTION_TMP}
+    add_7 = pe.Node(ImageMath(operation='addtozero'), name='add_7')
+    # ImageMath ${DIMENSION} ${EXTRACTION_MASK} ME ${EXTRACTION_MASK} 2
+    me_7 = pe.Node(ImageMath(operation='ME', op2='2'), name='me_7')
+    # ImageMath ${DIMENSION} ${EXTRACTION_MASK} GetLargestComponent ${EXTRACTION_MASK}
+    comp_7 = pe.Node(ImageMath(operation='GetLargestComponent'), name='comp_7')
+    # ImageMath ${DIMENSION} ${EXTRACTION_MASK} MD ${EXTRACTION_MASK} 4
+    md_7 = pe.Node(ImageMath(operation='MD', op2='4'), name='md_7')
+    # ImageMath ${DIMENSION} ${EXTRACTION_MASK} FillHoles ${EXTRACTION_MASK} 2
+    fill_7 = pe.Node(ImageMath(operation='FillHoles', op2='2'), name='fill_7')
+    # ImageMath ${DIMENSION} ${EXTRACTION_MASK} addtozero ${EXTRACTION_MASK} ${EXTRACTION_MASK_PRIOR_WARPED}
+    add_7_2 = pe.Node(ImageMath(operation='addtozero'), name='add_7_2')
+    # ImageMath ${DIMENSION} ${EXTRACTION_MASK} MD ${EXTRACTION_MASK} 5
+    md_7_2 = pe.Node(ImageMath(operation='MD', op2='5'), name='md_7_2')
+    # ImageMath ${DIMENSION} ${EXTRACTION_MASK} ME ${EXTRACTION_MASK} 5
+    me_7_2 = pe.Node(ImageMath(operation='ME', op2='5'), name='me_7_2')
+
+    # De-pad
+    depad_mask = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
+                         name='depad_mask')
+    depad_segm = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
+                         name='depad_segm')
+    depad_gm = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
+                       name='depad_gm')
+    depad_wm = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
+                       name='depad_wm')
+    depad_csf = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
+                        name='depad_csf')
     wf.connect([
         (inputnode, pad_mask, [('in_mask', 'op1')]),
         (inputnode, atropos, [('in_files', 'intensity_images'),
                               ('in_mask', 'mask_image')]),
-        (atropos, pad_mask, [('classified_image', 'op1')]),
-        (atropos, select_labels, [('classified_image', 'in_labels')]),
-        (select_labels, sel_wm, [('out', 'inlist')]),
-        (select_labels, sel_gm, [('out', 'inlist')]),
-
+        (atropos, pad_segm, [('classified_image', 'op1')]),
+        (pad_segm, sel_labels, [('output_image', 'in_segm')]),
+        (sel_labels, get_wm, [('out_wm', 'op1')]),
+        (sel_labels, get_gm, [('out_gm', 'op1')]),
+        (get_gm, fill_gm, [('output_image', 'op1')]),
+        (get_gm, mult_gm, [('output_image', 'first_input'),
+                           (('output_image', _gen_name), 'output_product_image')]),
+        (fill_gm, mult_gm, [('output_image', 'second_input')]),
+        (get_wm, mult_wm, [('output_image', 'first_input'),
+                           (('output_image', _gen_name), 'output_product_image')]),
+        (fill_gm, me_gm, [('output_image', 'op1')]),
+        (mult_gm, add_gm, [('output_product_image', 'op1')]),
+        (fill_gm, add_gm, [('output_image', 'op2')]),
+        (add_gm, relabel, [('output_image', 'first_input'),
+                           (('output_image', _gen_name), 'output_product_image')]),
+        (mult_wm, add_label, [('output_product_image', 'op1')]),
+        (relabel, add_label, [('output_product_image', 'op2')]),
+        (add_label, sel_labels2, [('output_image', 'in_segm')]),
+        (sel_labels2, add_7, [('out_wm', 'op1'),
+                              ('out_gm', 'op2')]),
+        (add_7, me_7, [('output_image', 'op1')]),
+        (me_7, comp_7, [('output_image', 'op1')]),
+        (comp_7, md_7, [('output_image', 'op1')]),
+        (md_7, fill_7, [('output_image', 'op1')]),
+        (fill_7, add_7_2, [('output_image', 'op1')]),
+        (pad_mask, add_7_2, [('output_image', 'op2')]),
+        (add_7_2, md_7_2, [('output_image', 'op1')]),
+        (md_7_2, me_7_2, [('output_image', 'op1')]),
+        (me_7_2, depad_mask, [('output_image', 'op1')]),
+        (add_label, depad_segm, [('output_image', 'op1')]),
+        (mult_wm, depad_wm, [('output_product_image', 'op1')]),
+        (relabel, depad_gm, [('output_product_image', 'op1')]),
+        (sel_labels, depad_csf, [('out_csf', 'op1')]),
+        (depad_mask, outputnode, [('output_image', 'out_mask')]),
     ])
     return wf
 
@@ -301,16 +396,26 @@ def _pop(in_files):
     return in_files
 
 
-def _select_labels(in_labels, label):
+def _select_labels(in_segm, labels):
     import numpy as np
     import nibabel as nb
     from niworkflows.nipype.utils.filemanip import fname_presuffix
 
-    nii = nb.load(in_labels)
-    data = np.zeros(nii.shape)
-    data[nii.get_data() == label] = 1
-    newnii = nii.__class__(data, nii.affine, nii.header)
-    newnii.set_data_dtype('uint8')
-    out_file = fname_presuffix(in_labels, suffix='_class-%02d' % label)
-    newnii.to_filename(out_file)
-    return out_file
+    out_files = []
+
+    nii = nb.load(in_segm)
+    for l in labels:
+        data = np.zeros(nii.shape)
+        data[nii.get_data() == l] = 1
+        newnii = nii.__class__(data, nii.affine, nii.header)
+        newnii.set_data_dtype('uint8')
+        out_file = fname_presuffix(in_segm, suffix='class-%02d' % l)
+        newnii.to_filename(out_file)
+        out_files.append(out_file)
+    return out_files
+
+
+def _gen_name(in_file):
+    import os
+    from niworkflows.nipype.utils.filemanip import fname_presuffix
+    return os.path.basename(fname_presuffix(in_file, suffix='processed'))
