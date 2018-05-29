@@ -237,7 +237,7 @@ def _get_dataset_dir(dataset_name, data_dir=None, default_paths=None,
     # Search possible system paths
     if default_paths is not None:
         for default_path in default_paths:
-            paths.extend([(d, True) for d in default_path.split(os.pathsep)])
+            paths.extend([(d, True) for d in default_paths.split(os.pathsep)])
 
     # If data_dir has not been specified, then we crawl default locations
     if data_dir is None:

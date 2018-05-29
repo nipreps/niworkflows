@@ -7,10 +7,14 @@ Data grabbers
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+from pathlib import Path
 from ..data.utils import _get_dataset_dir, _fetch_file
+
 
 OSF_PROJECT_URL = ('https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/')
 OSF_RESOURCES = {
+    'MNI152NLin2009cAsym': ('5b0dbce20f461a000db8fa3d', '5d386d7db9c1dec30230623db25e05e1'),
+    'OASIS30ANTs': ('5b0dbce34c28ef0012c7f788', 'f625a0390eb32a7852c7b0d71ac428cd'),
     'brainweb': ('57f32b96b83f6901f194c3ca', '384263fbeadc8e2cca92ced98f224c4b'),
     'ds003_downsampled': ('57f328f6b83f6901ef94cf70', '5a558961c1eb5e5f162696d8afa956e8'),
     'mni_template': ('57f32ab29ad5a101fb77fd89', 'debfa882b8c301cd6d75dd769e73f727'),
@@ -37,8 +41,8 @@ BIDS_EXAMPLES = {
 
 # Map names of templates to OSF_RESOURCES keys
 TEMPLATE_MAP = {
-    'MNI152NLin2009cAsym': 'mni_icbm152_nlin_asym_09c',
-    'OASIS': 'ants_oasis_template_ras',
+    'MNI152NLin2009cAsym': 'MNI152NLin2009cAsym',
+    'OASIS': 'OASIS30ANTs',
     'NKI': 'ants_nki_template_ras',
 }
 
@@ -52,11 +56,16 @@ def get_dataset(dataset_name, data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
 
     """
+    data_dir = _get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
+
+    if dataset_name in TEMPLATE_MAP:
+        dataset_name = TEMPLATE_MAP.get(dataset_name, dataset_name)
+        data_dir = str(Path(data_dir).parent / (
+            'tpl-%s' % dataset_name))
+
     file_id, md5 = OSF_RESOURCES[dataset_name]
     if url is None:
         url = '{}/{}'.format(OSF_PROJECT_URL, file_id)
-
-    data_dir = _get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
 
     if _fetch_file(url, data_dir, filetype='tar', resume=resume, verbose=verbose,
                    md5sum=md5):
