@@ -9,7 +9,7 @@ Nipype interfaces for ANTs commands
 import os
 from ..nipype.interfaces import base
 from ..nipype.interfaces.ants.base import ANTSCommandInputSpec, ANTSCommand
-from ..nipype.interfaces.base import traits
+from ..nipype.interfaces.base import traits, isdefined
 
 
 class ImageMathInputSpec(ANTSCommandInputSpec):
@@ -22,7 +22,7 @@ class ImageMathInputSpec(ANTSCommandInputSpec):
                          desc='operations and intputs')
     op1 = base.File(exists=True, mandatory=True, position=-2, argstr='%s',
                     desc='first operator')
-    op2 = traits.Either(base.File(exists=True), base.Str, mandatory=True, position=-1,
+    op2 = traits.Either(base.File(exists=True), base.Str, position=-1,
                         argstr='%s', desc='second operator')
 
 
@@ -115,6 +115,66 @@ class ResampleImageBySpacing(ANTSCommand):
             name, trait_spec, value)
 
 
+class ThresholdImageInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Int(3, usedefault=True, position=1, argstr='%d',
+                           desc='dimension of output image')
+    input_image = base.File(exists=True, mandatory=True, position=2, argstr='%s',
+                            desc='input image file')
+    output_image = base.File(position=3, argstr='%s', name_source=['input_image'],
+                             name_template='%s_resampled', desc='output image file',
+                             keep_extension=True)
+
+    mode = traits.Enum('Otsu', 'Kmeans', argstr='%s', position=4,
+                       requires=['num_thresholds'], xor=['th_low', 'th_high'],
+                       desc='whether to run Otsu / Kmeans thresholding')
+    num_thresholds = traits.Int(position=5, argstr='%d',
+                                desc='number of thresholds')
+    input_mask = base.File(exists=True, requires=['num_thresholds'], argstr='%s',
+                           desc='input mask for Otsu, Kmeans')
+
+    th_low = traits.Float(position=4, argstr='%f', xor=['mode'],
+                          desc='lower threshold')
+    th_high = traits.Float(position=5, argstr='%f', xor=['mode'],
+                           desc='upper threshold')
+    inside_value = traits.Float(1, position=6, argstr='%f', requires=['th_low'],
+                                desc='inside value')
+    outside_value = traits.Float(0, position=7, argstr='%f', requires=['th_low'],
+                                 desc='outside value')
+
+
+class ThresholdImageOutputSpec(base.TraitedSpec):
+    output_image = traits.File(exists=True, desc='resampled file')
+
+
+class ThresholdImage(ANTSCommand):
+    """
+    Resamples an image with a given spacing
+
+    Example:
+    --------
+
+    >>> res = ThresholdImage(dimension=3)
+    >>> res.inputs.input_image = 'input.nii.gz'
+    >>> res.inputs.output_image = 'output.nii.gz'
+    >>> res.inputs.th_low = 0.5
+    >>> res.inputs.th_high = 1.0
+    >>> res.inputs.inside_val = 1.0
+    >>> res.inputs.outside_val = 0.0
+    'ThresholdImage input.nii.gz output.nii.gz 0.50000 1.00000 1.00000 0.00000'
+
+    >>> res = ThresholdImage(dimension=3)
+    >>> res.inputs.input_image = 'input.nii.gz'
+    >>> res.inputs.output_image = 'output.nii.gz'
+    >>> res.inputs.mode = 'Kmeans'
+    >>> res.inputs.num_thresholds = 4
+    'ThresholdImage input.nii.gz output.nii.gz Kmeans 4'
+
+    """
+    _cmd = 'ThresholdImage'
+    input_spec = ThresholdImageInputSpec
+    output_spec = ThresholdImageOutputSpec
+
+
 class AIInputSpec(ANTSCommandInputSpec):
     dimension = traits.Int(3, usedefault=True, argstr='-d %d',
                            desc='dimension of output image')
@@ -127,6 +187,12 @@ class AIInputSpec(ANTSCommandInputSpec):
     moving_image = traits.File(
         exists=True, mandatory=True,
         desc='Image that will be transformed to fixed_image')
+
+    fixed_image_mask = traits.File(
+        exists=True, argstr='-x %s', desc='fixed mage mask')
+    moving_image_mask = traits.File(
+        exists=True, requires='fixed_image_mask',
+        desc='moving mage mask')
 
     metric_trait = (
         traits.Enum("Mattes", "GC", "MI"),
@@ -152,7 +218,7 @@ class AIInputSpec(ANTSCommandInputSpec):
     search_grid = traits.Either(
         traits.Tuple(traits.Float, traits.Tuple(traits.Float, traits.Float, traits.Float)),
         traits.Tuple(traits.Float, traits.Tuple(traits.Float, traits.Float)),
-        argstr='-g [%f,%fx%fx%f]', desc='Translation search grid in mm')
+        argstr='-g %s', desc='Translation search grid in mm')
 
     convergence = traits.Tuple(
         traits.Range(low=1, high=10000, value=10),
@@ -200,6 +266,16 @@ class AI(ANTSCommand):
                 fixed_image=self.inputs.fixed_image,
                 moving_image=self.inputs.moving_image)
             return spec.argstr % val
+
+        if opt == 'search_grid':
+            val1 = 'x'.join(['%f' % v for v in val[1]])
+            fmtval = '[%s]' % ','.join([str(val[0]), val1])
+            return spec.argstr % fmtval
+
+        if opt == 'fixed_image_mask':
+            if isdefined(self.inputs.moving_image_mask):
+                return spec.argstr % ('[%s,%s]' % (
+                    val, self.inputs.moving_image_mask))
 
         return super(AI, self)._format_arg(opt, spec, val)
 

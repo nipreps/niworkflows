@@ -61,6 +61,7 @@ REQUIRES = nipype_info['REQUIRES'] + [
     'jinja2',
     'svgutils',
     'seaborn',
+    'packaging',
 ]
 
 SETUP_REQUIRES = []
