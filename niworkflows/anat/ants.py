@@ -16,6 +16,7 @@ from packaging.version import parse as parseversion, Version
 from ..data import TEMPLATE_MAP, get_dataset
 from ..nipype.pipeline import engine as pe
 from ..nipype.interfaces import utility as niu
+from ..nipype.interfaces.fsl.maths import ApplyMask
 from ..nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
 from ..interfaces.ants import (
     ImageMath,
@@ -110,7 +111,7 @@ def brain_extraction(name='antsBrainExtraction',
     if omp_nthreads is None or omp_nthreads < 1:
         omp_nthreads = cpu_count()
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_mask']),
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 'in_mask']),
                         name='inputnode')
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['bias_corrected', 'out_file', 'out_mask', 'bias_image']), name='outputnode')
@@ -178,13 +179,16 @@ def brain_extraction(name='antsBrainExtraction',
     get_brainmask = pe.Node(ImageMath(operation='GetLargestComponent'),
                             name='get_brainmask')
 
+    # Apply mask
+    apply_mask = pe.MapNode(ApplyMask(), iterfield=['in_file'], name='apply_mask')
+
+
     wf.connect([
-        (inputnode, trunc, [('in_file', 'op1')]),
+        (inputnode, trunc, [('in_files', 'op1')]),
         (inputnode, init_aff, [('in_mask', 'fixed_image_mask')]),
         (inputnode, norm, [('in_mask', 'fixed_image_mask')]),
-        (inputnode, map_brainmask, [(('in_file', _pop), 'reference_image')]),
+        (inputnode, map_brainmask, [(('in_files', _pop), 'reference_image')]),
         (trunc, inu_n4, [('output_image', 'input_image')]),
-        (inu_n4, outputnode, [('output_image', 'bias_corrected')]),
         (inu_n4, res_target, [
             (('output_image', _pop), 'input_image')]),
         (inu_n4, lap_target, [
@@ -204,7 +208,10 @@ def brain_extraction(name='antsBrainExtraction',
         (map_brainmask, thr_brainmask, [('output_image', 'input_image')]),
         (thr_brainmask, dil_brainmask, [('output_image', 'op1')]),
         (dil_brainmask, get_brainmask, [('output_image', 'op1')]),
+        (inu_n4, apply_mask, [('output_image', 'in_file')]),
+        (get_brainmask, apply_mask, [('output_image', 'mask_file')]),
         (get_brainmask, outputnode, [('output_image', 'out_mask')]),
+        (apply_mask, outputnode, [('out_file', 'bias_corrected')]),
     ])
 
     if atropos_refine:
@@ -217,6 +224,7 @@ def brain_extraction(name='antsBrainExtraction',
 
         wf.disconnect([
             (get_brainmask, outputnode, [('output_image', 'out_mask')]),
+            (get_brainmask, apply_mask, [('output_image', 'mask_file')]),
         ])
         wf.connect([
             (inu_n4, atropos_wf, [
@@ -225,9 +233,10 @@ def brain_extraction(name='antsBrainExtraction',
                 ('output_image', 'inputnode.in_mask')]),
             (atropos_wf, outputnode, [
                 ('outputnode.out_mask', 'out_mask')]),
+            (atropos_wf, apply_mask, [
+                ('outputnode.out_mask', 'mask_file')]),
+
         ])
-
-
     return wf
 
 
