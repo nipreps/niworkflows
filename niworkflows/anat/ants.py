@@ -13,6 +13,7 @@ import os
 from multiprocessing import cpu_count
 from pkg_resources import resource_filename as pkgr_fn
 from packaging.version import parse as parseversion, Version
+from pathlib import Path
 from ..data import TEMPLATE_MAP, get_dataset
 from ..nipype.pipeline import engine as pe
 from ..nipype.interfaces import utility as niu
@@ -39,7 +40,7 @@ ATROPOS_MODELS = {
 def brain_extraction(name='antsBrainExtraction',
                      in_template='OASIS',
                      use_float=True,
-                     debug=False,
+                     normalization_quality='precise',
                      omp_nthreads=None,
                      mem_gb=3.0,
                      modality='T1',
@@ -84,8 +85,9 @@ def brain_extraction(name='antsBrainExtraction',
             averaged resulting in a probability image.
         use_float : bool
             Whether single precision should be used
-        debug : bool
-            Whether this is a debug run (faster registration parameters)
+        normalization_quality : str
+            Use more precise or faster registration parameters
+            (default: ``precise``, other possible values: ``testing``)
         omp_nthreads : int
             Maximum number of threads an individual process may use
         mem_gb : float
@@ -141,18 +143,28 @@ def brain_extraction(name='antsBrainExtraction',
 
     template_path = None
     if in_template in TEMPLATE_MAP:
-        template_path = get_dataset(TEMPLATE_MAP[in_template])
+        template_path = get_dataset(in_template)
     else:
         template_path = in_template
 
+    mod = ('%sw' % modality[:2].upper()
+           if modality.upper().startswith('T') else modality.upper())
+
     # Append template modality
-    tpl_target_path = os.path.join(template_path,
-                                   '1mm_%s.nii.gz' % modality[:2].upper())
+    potential_targets = list(Path(template_path).glob('*_%s.nii.gz' % mod))
+    if not potential_targets:
+        raise ValueError(
+            'No %s template was found under "%s".' % (mod, template_path))
 
-    if not os.path.exists(tpl_target_path):
-        raise ValueError('Template path "%s" not found.' % template_path)
+    tpl_target_path = str(potential_targets[0])
+    target_basename = '_'.join(tpl_target_path.split('_')[:-1])
 
-    tpl_mask_path = os.path.join(template_path, '1mm_brainprobmask.nii.gz')
+    # Get probabilistic brain mask if available
+    tpl_mask_path = '%s_class-brainmask_probtissue.nii.gz' % target_basename
+    # Fall-back to a binary mask just in case
+    if not os.path.exists(tpl_mask_path):
+        tpl_mask_path = '%s_brainmask.nii.gz' % target_basename
+
     if not os.path.exists(tpl_mask_path):
         raise ValueError(
             'Probability map for the brain mask associated to this template '
@@ -163,6 +175,12 @@ def brain_extraction(name='antsBrainExtraction',
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 'in_mask']),
                         name='inputnode')
+
+    # Try to find a registration mask, set if available
+    tpl_regmask_path = '%s_label-BrainCerebellumRegistration_roi.nii.gz' % target_basename
+    if os.path.exists(tpl_regmask_path):
+        inputnode.inputs.in_mask = tpl_regmask_path
+
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['bias_corrected', 'out_mask', 'bias_image', 'out_segm']),
         name='outputnode')
@@ -191,6 +209,7 @@ def brain_extraction(name='antsBrainExtraction',
     mrg_tmpl.inputs.in1 = tpl_target_path
     mrg_target = pe.Node(niu.Merge(2), name='mrg_target')
 
+    # Initialize transforms with antsAI
     init_aff = pe.Node(AI(
         metric=('Mattes', 32, 'Regular', 0.2),
         transform=('Affine', 0.1),
@@ -204,12 +223,18 @@ def brain_extraction(name='antsBrainExtraction',
     if parseversion(Registration().version) > Version('2.2.0'):
         init_aff.inputs.search_grid = (40, (0, 40, 40))
 
+    # Set up spatial normalization
     norm = pe.Node(Registration(
-        from_file=pkgr_fn('niworkflows.data', 'antsBrainExtraction_precise.json')),
+        from_file=pkgr_fn(
+            'niworkflows.data',
+            'antsBrainExtraction_%s.json' % normalization_quality)),
         name='norm',
         n_procs=omp_nthreads,
         mem_gb=mem_gb)
     norm.inputs.float = use_float
+    fixed_mask_trait = 'fixed_image_mask'
+    if parseversion(Registration().version) >= Version('2.2.0'):
+        fixed_mask_trait += 's'
 
     map_brainmask = pe.Node(
         ApplyTransforms(interpolation='Gaussian', float=True),
@@ -235,7 +260,7 @@ def brain_extraction(name='antsBrainExtraction',
     wf.connect([
         (inputnode, trunc, [('in_files', 'op1')]),
         (inputnode, init_aff, [('in_mask', 'fixed_image_mask')]),
-        (inputnode, norm, [('in_mask', 'fixed_image_mask')]),
+        (inputnode, norm, [('in_mask', fixed_mask_trait)]),
         (inputnode, map_brainmask, [(('in_files', _pop), 'reference_image')]),
         (trunc, inu_n4, [('output_image', 'input_image')]),
         (inu_n4, res_target, [

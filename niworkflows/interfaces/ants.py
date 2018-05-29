@@ -191,7 +191,7 @@ class AIInputSpec(ANTSCommandInputSpec):
     fixed_image_mask = traits.File(
         exists=True, argstr='-x %s', desc='fixed mage mask')
     moving_image_mask = traits.File(
-        exists=True, requires='fixed_image_mask',
+        exists=True, requires=['fixed_image_mask'],
         desc='moving mage mask')
 
     metric_trait = (
