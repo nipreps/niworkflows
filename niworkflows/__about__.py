@@ -49,7 +49,7 @@ CLASSIFIERS = [
 ]
 
 REQUIRES = [
-    'nipype>=1.0.3',
+    'nipype>=1.0.4',
     'nilearn>=0.2.6',
     'sklearn',
     'pandas',
