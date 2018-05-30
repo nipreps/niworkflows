@@ -37,16 +37,16 @@ ATROPOS_MODELS = {
 }
 
 
-def brain_extraction(name='antsBrainExtraction',
-                     in_template='OASIS',
-                     use_float=True,
-                     normalization_quality='precise',
-                     omp_nthreads=None,
-                     mem_gb=3.0,
-                     modality='T1',
-                     atropos_refine=True,
-                     atropos_use_random_seed=True,
-                     atropos_model=None):
+def init_brain_extraction_wf(name='brain_extraction_wf',
+                             in_template='OASIS',
+                             use_float=True,
+                             normalization_quality='precise',
+                             omp_nthreads=None,
+                             mem_gb=3.0,
+                             modality='T1',
+                             atropos_refine=True,
+                             atropos_use_random_seed=True,
+                             atropos_model=None):
     """
     A Nipype implementation of the official ANTs' ``antsBrainExtraction.sh``
     workflow (only for 3D images).
@@ -67,8 +67,8 @@ def brain_extraction(name='antsBrainExtraction',
     .. workflow::
         :graph2use: orig
         :simple_form: yes
-        from niworkflows.anat import brain_extraction
-        wf = brain_extraction()
+        from niworkflows.anat import init_brain_extraction_wf
+        wf = init_brain_extraction_wf()
 
 
     **Parameters**
@@ -290,8 +290,7 @@ def brain_extraction(name='antsBrainExtraction',
     ])
 
     if atropos_refine:
-        # TODO: connect output segmentation to 'outputnode.out_segm'
-        atropos_wf = atropos_workflow(
+        atropos_wf = init_atropos_wf(
             use_random_seed=atropos_use_random_seed,
             omp_nthreads=omp_nthreads,
             mem_gb=mem_gb,
@@ -318,12 +317,12 @@ def brain_extraction(name='antsBrainExtraction',
     return wf
 
 
-def atropos_workflow(name='atropos_wf',
-                     use_random_seed=True,
-                     omp_nthreads=None,
-                     mem_gb=3.0,
-                     padding=10,
-                     in_segmentation_model=ATROPOS_MODELS['T1']):
+def init_atropos_wf(name='atropos_wf',
+                    use_random_seed=True,
+                    omp_nthreads=None,
+                    mem_gb=3.0,
+                    padding=10,
+                    in_segmentation_model=ATROPOS_MODELS['T1']):
     """
     Implements supersteps 6 and 7 of ``antsBrainExtraction.sh``,
     which refine the mask previously computed with the spatial
@@ -539,7 +538,7 @@ def _select_labels(in_segm, labels):
 
     nii = nb.load(in_segm)
     for l in labels:
-        data = np.zeros(nii.shape)
+        data = np.zeros(nii.shape, dtype=np.uint8)
         data[nii.get_data() == l] = 1
         newnii = nii.__class__(data, nii.affine, nii.header)
         newnii.set_data_dtype('uint8')

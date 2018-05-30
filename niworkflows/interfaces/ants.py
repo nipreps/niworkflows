@@ -148,7 +148,7 @@ class ThresholdImageOutputSpec(base.TraitedSpec):
 
 class ThresholdImage(ANTSCommand):
     """
-    Resamples an image with a given spacing
+    Apply thresholds on images
 
     Example:
     --------
@@ -237,7 +237,7 @@ class AIOuputSpec(base.TraitedSpec):
 
 class AI(ANTSCommand):
     """
-    Operations over images
+    The replacement for ``AffineInitializer``.
 
     Example:
     --------
