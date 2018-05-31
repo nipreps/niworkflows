@@ -7,7 +7,7 @@ import os
 from shutil import copy
 import pytest
 
-from niworkflows.nipype.interfaces.base import Bunch
+from nipype.interfaces.base import Bunch
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
 from niworkflows.interfaces.masks import (
     BETRPT, BrainExtractionRPT, SimpleShowMaskRPT, ROIsPlot
@@ -102,7 +102,7 @@ def test_BrainExtractionRPT(monkeypatch, oasis_dir, moving, nthreads):
 @pytest.mark.parametrize("segments", [True, False])
 def test_FASTRPT(monkeypatch, segments, reference, reference_mask):
     """ test FAST with the two options for segments """
-    from niworkflows.nipype.interfaces.fsl.maths import ApplyMask
+    from nipype.interfaces.fsl.maths import ApplyMask
 
     def _agg(objekt, runtime):
         outputs = Bunch(tissue_class_map=os.path.join(

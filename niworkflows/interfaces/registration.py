@@ -14,12 +14,12 @@ import numpy as np
 from nilearn import image as nli
 from nilearn.image import index_img
 from .. import NIWORKFLOWS_LOG
-from ..nipype.utils.filemanip import fname_presuffix
-from ..nipype.interfaces.base import (
+from nipype.utils.filemanip import fname_presuffix
+from nipype.interfaces.base import (
     traits, isdefined, TraitedSpec, BaseInterfaceInputSpec, File, SimpleInterface)
-from ..nipype.interfaces.mixins import reporting
-from ..nipype.interfaces import freesurfer as fs
-from ..nipype.interfaces import fsl, ants, afni
+from nipype.interfaces.mixins import reporting
+from nipype.interfaces import freesurfer as fs
+from nipype.interfaces import fsl, ants, afni
 
 from . import report_base as nrc
 from .mni import (
@@ -417,7 +417,7 @@ class EstimateReferenceImage(SimpleInterface):
 
 
 def _get_vols_to_discard(img):
-    from niworkflows.nipype.algorithms.confounds import is_outlier
+    from nipype.algorithms.confounds import is_outlier
     data_slice = img.dataobj[:, :, :, :50]
     global_signal = data_slice.mean(axis=0).mean(axis=0).mean(axis=0)
     return is_outlier(global_signal)
