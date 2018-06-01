@@ -9,16 +9,21 @@ Nipype translation of ANTs workflows
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+# general purpose
 import os
 from multiprocessing import cpu_count
 from pkg_resources import resource_filename as pkgr_fn
 from packaging.version import parse as parseversion, Version
 from pathlib import Path
+
+# nipype
+from nipype.pipeline import engine as pe
+from nipype.interfaces import utility as niu
+from nipype.interfaces.fsl.maths import ApplyMask
+from nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
+
+# niworkflows
 from ..data import TEMPLATE_MAP, get_dataset
-from ..nipype.pipeline import engine as pe
-from ..nipype.interfaces import utility as niu
-from ..nipype.interfaces.fsl.maths import ApplyMask
-from ..nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
 from ..interfaces.ants import (
     ImageMath,
     ResampleImageBySpacing,
@@ -532,7 +537,7 @@ def _pop(in_files):
 def _select_labels(in_segm, labels):
     import numpy as np
     import nibabel as nb
-    from niworkflows.nipype.utils.filemanip import fname_presuffix
+    from nipype.utils.filemanip import fname_presuffix
 
     out_files = []
 
@@ -550,5 +555,5 @@ def _select_labels(in_segm, labels):
 
 def _gen_name(in_file):
     import os
-    from niworkflows.nipype.utils.filemanip import fname_presuffix
+    from nipype.utils.filemanip import fname_presuffix
     return os.path.basename(fname_presuffix(in_file, suffix='processed'))
