@@ -9,18 +9,14 @@ as well as for open-source software distribution.
 """
 from __future__ import absolute_import, division, print_function
 import datetime
-from os import path as op
-import runpy
 
-nipype_info = runpy.run_path(op.join(op.abspath(op.dirname(__file__)),
-                                     'nipype', 'info.py'))
-
-__version__ = '0.3.14-dev'
+__version__ = '0.4.0'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
     datetime.datetime.now().year)
-__credits__ = ['Oscar Esteban', 'Ross Blair', 'Shoshana L. Berleant', 'Chris Gorgolewski',
+__credits__ = ['Oscar Esteban', 'Ross Blair', 'Shoshana L. Berleant',
+               'Christopher J. Markiewicz', 'Chris Gorgolewski',
                'Russell A. Poldrack']
 __license__ = '3-clause BSD'
 __maintainer__ = 'Oscar Esteban'
@@ -53,7 +49,8 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.6',
 ]
 
-REQUIRES = nipype_info['REQUIRES'] + [
+REQUIRES = [
+    'nipype>=1.0.4',
     'nilearn>=0.2.6',
     'sklearn',
     'pandas',

@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 from shutil import copy
 
-from niworkflows.nipype.interfaces.base import Bunch
+from nipype.interfaces.base import Bunch
 from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT,
     MRICoregRPT, ApplyXFMRPT, SimpleBeforeAfterRPT)
