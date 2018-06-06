@@ -23,7 +23,7 @@ OSF_RESOURCES = {
     'mni152_nlin_sym_ras': ('57fa7fd09ad5a101df35eed0', '65d64ad5a980da86e7d07d95b3ed2ccb'),
     'mni_icbm152_linear': ('580705eb594d9001ed622649', '72be639e92532def7caad75cb4058e83'),
     'mni_icbm152_nlin_asym_09c': ('580705089ad5a101f17944a9', '002f9bf24dc5c32de50c03f01fa539ec'),
-    'oasis_dkt31_mni152': ('5a95cd9591b689000ca5b6ab', 'e0bea438b9645c9e7c333a6edd859715'),
+    'tpl-OASISTRT20': ('5b16f17aeca4a80012bd7542', '1b5389bc3a895b2bd5c0d47401107176'),
 }
 
 BIDS_EXAMPLES = {
@@ -202,4 +202,4 @@ def get_oasis_dkt31_mni152(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('oasis_dkt31_mni152', data_dir, url, resume, verbose)
+    return get_dataset('tpl-OASISTRT20', data_dir, url, resume, verbose)
