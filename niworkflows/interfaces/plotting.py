@@ -8,8 +8,8 @@ Visualization tools
 import numpy as np
 import pandas as pd
 
-from ..nipype.utils.filemanip import fname_presuffix
-from ..nipype.interfaces.base import (
+from nipype.utils.filemanip import fname_presuffix
+from nipype.interfaces.base import (
     File, BaseInterfaceInputSpec, TraitedSpec, SimpleInterface, traits
 )
 from ..viz.plots import fMRIPlot

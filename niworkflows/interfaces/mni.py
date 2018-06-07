@@ -12,9 +12,9 @@ from packaging.version import Version
 import nibabel as nb
 import numpy as np
 
-from ..nipype.interfaces.ants.registration import RegistrationOutputSpec
-from ..nipype.interfaces.ants import AffineInitializer
-from ..nipype.interfaces.base import (
+from nipype.interfaces.ants.registration import RegistrationOutputSpec
+from nipype.interfaces.ants import AffineInitializer
+from nipype.interfaces.base import (
     traits, isdefined, BaseInterface, BaseInterfaceInputSpec, File)
 
 from ..data import getters

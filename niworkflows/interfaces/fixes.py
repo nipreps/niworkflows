@@ -7,8 +7,8 @@ import os
 from .. import __version__
 from .utils import _copyxform
 
-from ..nipype.interfaces.ants.resampling import ApplyTransforms
-from ..nipype.interfaces.ants.registration import Registration
+from nipype.interfaces.ants.resampling import ApplyTransforms
+from nipype.interfaces.ants.registration import Registration
 
 
 class FixHeaderApplyTransforms(ApplyTransforms):

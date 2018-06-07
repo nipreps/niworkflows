@@ -24,15 +24,6 @@ jobs:
             - /tmp/cache/ubuntu.tar.gz
       - checkout
       - run:
-          name: Checkout Nipype
-          command: |
-            git submodule init
-            git submodule update || true
-            git submodule sync
-            git -C nipype fetch origin
-            git submodule update
-
-      - run:
           name: Update Niworkflows version
           command: |
             if [ "${CIRCLE_TAG}" != "" ]; then
@@ -115,7 +106,7 @@ jobs:
               -v ${PWD}:/scratch -w /scratch \
               --entrypoint=/usr/local/miniconda/bin/py.test \
               niworkflows:py3 /root/niworkflows \
-              -n ${CIRCLE_NPROCS:-4} -v --junit-xml=/scratch/pytest.xml
+              -n auto -v --junit-xml=/scratch/pytest.xml
 
       - store_artifacts:
           path: /tmp/tests
@@ -130,14 +121,6 @@ jobs:
     working_directory: /tmp/src/niworkflows
     steps:
       - checkout
-      - run:
-          name: Checkout Nipype
-          command: |
-            git submodule init
-            git submodule update || true
-            git submodule sync
-            git -C nipype fetch origin
-            git submodule update
 
       - run:
           name: Update Niworkflows version

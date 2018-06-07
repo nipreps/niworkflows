@@ -1,3 +1,15 @@
+0.4.1 (June 7, 2018)
+====================
+
+* [FIX] Standardize DTK template name 
+
+0.4.0 (May 31, 2018)
+====================
+
+* [ENH] Resume external nipype dependency at version 1.0.4 (#241)
+* [REF] Use nipype's ReportCapableInterface mixin (#238)
+* [MNT] Enable running tests in parallel (#240)
+
 0.3.13 (May 11, 2018)
 =====================
 
