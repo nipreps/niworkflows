@@ -25,7 +25,7 @@ OSF_RESOURCES = {
     'mni_icbm152_nlin_asym_09c': ('580705089ad5a101f17944a9', '002f9bf24dc5c32de50c03f01fa539ec'),
     'tpl-OASISTRT20': ('5b16f17aeca4a80012bd7542', '1b5389bc3a895b2bd5c0d47401107176'),
     'tpl-hcpLR32k': ('5b198ec6b796ba000f3e4858', '0ba9adcaa42fa88616a4cea5a1ce0c5a'),
-    'tpl-conte69': ('5b198ec5ec24e20011b48548', '0162a84b8c639fe3fe1429d71797c272'),
+    'tpl-conte69': ('5b198ec5ec24e20011b48548', 'bd944e3f9f343e0e51e562b440960529'),
 }
 
 BIDS_EXAMPLES = {
