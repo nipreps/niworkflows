@@ -157,7 +157,8 @@ class GenerateSamplingReference(SimpleInterface):
 
 def _copyxform(ref_image, out_image, message=None):
     # Read in reference and output
-    resampled = nb.load(out_image)
+    # Use mmap=False because we will be overwriting the output image
+    resampled = nb.load(out_image, mmap=False)
     orig = nb.load(ref_image)
 
     if not np.allclose(orig.affine, resampled.affine):
