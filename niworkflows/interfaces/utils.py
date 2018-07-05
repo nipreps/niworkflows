@@ -23,7 +23,7 @@ from nipype.interfaces.base import (
 )
 
 
-LOG = logging.getLogger('interface')
+LOG = logging.getLogger('nipype.interface')
 
 
 class CopyXFormInputSpec(BaseInterfaceInputSpec):
