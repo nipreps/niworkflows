@@ -384,11 +384,11 @@ class EstimateReferenceImage(SimpleInterface):
 
         n_volumes_to_discard = _get_vols_to_discard(in_nii)
 
-        out_ref_fname = os.path.abspath("ref_image.nii.gz")
+        out_ref_fname = os.path.join(runtime.cwd, "ref_image.nii.gz")
 
         if n_volumes_to_discard == 0:
             if in_nii.shape[-1] > 40:
-                slice_fname = os.path.abspath("slice.nii.gz")
+                slice_fname = os.path.join(runtime.cwd, "slice.nii.gz")
                 nb.Nifti1Image(data_slice[:, :, :, 20:40], in_nii.affine,
                                in_nii.header).to_filename(slice_fname)
             else:
