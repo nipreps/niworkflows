@@ -108,7 +108,7 @@ class NormalizeMotionParams(SimpleInterface):
             func1d=normalize_mc_params,
             axis=1, arr=mpars,
             source=self.inputs.format)
-        self._results['out_file'] = os.path.abspath("motion_params.txt")
+        self._results['out_file'] = os.path.join(runtime.cwd, "motion_params.txt")
         np.savetxt(self._results['out_file'], mpars)
         return runtime
 
