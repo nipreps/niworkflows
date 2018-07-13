@@ -11,6 +11,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 # general purpose
 import os
+from collections import OrderedDict
 from multiprocessing import cpu_count
 from pkg_resources import resource_filename as pkgr_fn
 from packaging.version import parse as parseversion, Version
@@ -36,9 +37,24 @@ from ..interfaces.fixes import (
 )
 
 ATROPOS_MODELS = {
-    'T1': (3, 1, 2, 3),
-    'T2': (3, 3, 2, 1),
-    'FLAIR': (3, 1, 3, 2),
+    'T1': OrderedDict([
+        ('nclasses', 3),
+        ('csf', 1),
+        ('gm', 2),
+        ('wm', 3),
+    ]),
+    'T2': OrderedDict([
+        ('nclasses', 3),
+        ('csf', 3),
+        ('gm', 2),
+        ('wm', 1),
+    ]),
+    'FLAIR': OrderedDict([
+        ('nclasses', 3),
+        ('csf', 1),
+        ('gm', 3),
+        ('wm', 2),
+    ]),
 }
 
 
@@ -299,7 +315,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
             use_random_seed=atropos_use_random_seed,
             omp_nthreads=omp_nthreads,
             mem_gb=mem_gb,
-            in_segmentation_model=atropos_model or ATROPOS_MODELS[modality]
+            in_segmentation_model=atropos_model or list(ATROPOS_MODELS[modality].values())
         )
 
         wf.disconnect([
@@ -327,7 +343,7 @@ def init_atropos_wf(name='atropos_wf',
                     omp_nthreads=None,
                     mem_gb=3.0,
                     padding=10,
-                    in_segmentation_model=ATROPOS_MODELS['T1']):
+                    in_segmentation_model=list(ATROPOS_MODELS['T1'].values())):
     """
     Implements supersteps 6 and 7 of ``antsBrainExtraction.sh``,
     which refine the mask previously computed with the spatial
@@ -480,6 +496,8 @@ def init_atropos_wf(name='atropos_wf',
                        name='26_depad_wm')
     depad_csf = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
                         name='27_depad_csf')
+
+    merge_tpms = pe.Node(niu.Merge(in_segmentation_model[0]), name='merge_tpms')
     wf.connect([
         (inputnode, pad_mask, [('in_mask', 'op1')]),
         (inputnode, atropos, [('in_files', 'intensity_images'),
@@ -517,15 +535,14 @@ def init_atropos_wf(name='atropos_wf',
         (relabel_wm, depad_wm, [('output_product_image', 'op1')]),
         (relabel_gm, depad_gm, [('output_product_image', 'op1')]),
         (sel_labels, depad_csf, [('out_csf', 'op1')]),
+        (depad_csf, merge_tpms, [('output_image', 'in1')]),
+        (depad_gm, merge_tpms, [('output_image', 'in2')]),
+        (depad_wm, merge_tpms, [('output_image', 'in3')]),
         (depad_mask, outputnode, [('output_image', 'out_mask')]),
+        (depad_segm, outputnode, [('output_image', 'out_segm')]),
+        (merge_tpms, outputnode, [('out', 'out_tpms')]),
     ])
     return wf
-
-
-def _list(in_files):
-    if isinstance(in_files, (bytes, str)):
-        return [in_files]
-    return in_files
 
 
 def _pop(in_files):
@@ -535,19 +552,21 @@ def _pop(in_files):
 
 
 def _select_labels(in_segm, labels):
+    from os import getcwd
     import numpy as np
     import nibabel as nb
     from nipype.utils.filemanip import fname_presuffix
 
     out_files = []
 
+    cwd = getcwd()
     nii = nb.load(in_segm)
     for l in labels:
-        data = np.zeros(nii.shape, dtype=np.uint8)
-        data[nii.get_data() == l] = 1
+        data = (nii.get_data() == l).astype(np.uint8)
         newnii = nii.__class__(data, nii.affine, nii.header)
         newnii.set_data_dtype('uint8')
-        out_file = fname_presuffix(in_segm, suffix='class-%02d' % l)
+        out_file = fname_presuffix(in_segm, suffix='class-%02d' % l,
+                                   newpath=cwd)
         newnii.to_filename(out_file)
         out_files.append(out_file)
     return out_files
