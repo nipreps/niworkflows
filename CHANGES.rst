@@ -1,3 +1,15 @@
+0.4.2 (July 5, 2018)
+====================
+
+* [ENH] Add fs-32k template (#243)
+* [FIX] Avoid mmap when overwriting input in copyxform (#247)
+* [PIN] nipype 1.1.0 (#248)
+
+0.4.1 (June 7, 2018)
+====================
+
+* [FIX] Standardize DTK template name 
+
 0.4.0 (May 31, 2018)
 ====================
 

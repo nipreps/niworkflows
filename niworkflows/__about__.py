@@ -10,7 +10,7 @@ as well as for open-source software distribution.
 from __future__ import absolute_import, division, print_function
 import datetime
 
-__version__ = '0.4.0'
+__version__ = '0.4.3-dev'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
@@ -50,7 +50,7 @@ CLASSIFIERS = [
 ]
 
 REQUIRES = [
-    'nipype>=1.0.4',
+    'nipype>=1.1.0',
     'nilearn>=0.2.6',
     'sklearn',
     'pandas',

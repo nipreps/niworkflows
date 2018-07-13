@@ -18,6 +18,8 @@ from .getters import (
     get_mni_icbm152_linear,
     get_mni_icbm152_nlin_asym_09c,
     get_oasis_dkt31_mni152,
+    get_hcp32k_files,
+    get_conte69_mesh,
     get_dataset,
     get_bids_examples,
     TEMPLATE_MAP,

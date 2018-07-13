@@ -326,12 +326,12 @@ class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
             resampled_after = nli.resample_to_img(self._fixed_image, self._moving_image)
             fname = fname_presuffix(self._fixed_image, suffix='_resampled', newpath=runtime.cwd)
             resampled_after.to_filename(fname)
-            self._fixed_image = os.path.abspath(fname)
+            self._fixed_image = fname
         else:
             resampled_before = nli.resample_to_img(self._moving_image, self._fixed_image)
             fname = fname_presuffix(self._moving_image, suffix='_resampled', newpath=runtime.cwd)
             resampled_before.to_filename(fname)
-            self._moving_image = os.path.abspath(fname)
+            self._moving_image = fname
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
         NIWORKFLOWS_LOG.info(
             'Report - setting before (%s) and after (%s) images',
@@ -384,11 +384,11 @@ class EstimateReferenceImage(SimpleInterface):
 
         n_volumes_to_discard = _get_vols_to_discard(in_nii)
 
-        out_ref_fname = os.path.abspath("ref_image.nii.gz")
+        out_ref_fname = os.path.join(runtime.cwd, "ref_image.nii.gz")
 
         if n_volumes_to_discard == 0:
             if in_nii.shape[-1] > 40:
-                slice_fname = os.path.abspath("slice.nii.gz")
+                slice_fname = os.path.join(runtime.cwd, "slice.nii.gz")
                 nb.Nifti1Image(data_slice[:, :, :, 20:40], in_nii.affine,
                                in_nii.header).to_filename(slice_fname)
             else:

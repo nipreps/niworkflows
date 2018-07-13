@@ -134,7 +134,7 @@ class ComputeEPIMask(nrc.SegmentationRC):
         better_mask.set_data_dtype(np.uint8)
         better_mask.to_filename("mask_file.nii.gz")
 
-        self._mask_file = os.path.abspath("mask_file.nii.gz")
+        self._mask_file = os.path.join(runtime.cwd, "mask_file.nii.gz")
 
         runtime.returncode = 0
         return super(ComputeEPIMask, self)._run_interface(runtime)

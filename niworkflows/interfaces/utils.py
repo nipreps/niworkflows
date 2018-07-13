@@ -23,7 +23,7 @@ from nipype.interfaces.base import (
 )
 
 
-LOG = logging.getLogger('interface')
+LOG = logging.getLogger('nipype.interface')
 
 
 class CopyXFormInputSpec(BaseInterfaceInputSpec):
@@ -108,7 +108,7 @@ class NormalizeMotionParams(SimpleInterface):
             func1d=normalize_mc_params,
             axis=1, arr=mpars,
             source=self.inputs.format)
-        self._results['out_file'] = os.path.abspath("motion_params.txt")
+        self._results['out_file'] = os.path.join(runtime.cwd, "motion_params.txt")
         np.savetxt(self._results['out_file'], mpars)
         return runtime
 
@@ -157,7 +157,8 @@ class GenerateSamplingReference(SimpleInterface):
 
 def _copyxform(ref_image, out_image, message=None):
     # Read in reference and output
-    resampled = nb.load(out_image)
+    # Use mmap=False because we will be overwriting the output image
+    resampled = nb.load(out_image, mmap=False)
     orig = nb.load(ref_image)
 
     if not np.allclose(orig.affine, resampled.affine):
