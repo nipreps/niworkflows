@@ -58,6 +58,7 @@ REQUIRES = [
     'jinja2',
     'svgutils',
     'seaborn',
+    'packaging',
 ]
 
 SETUP_REQUIRES = []
