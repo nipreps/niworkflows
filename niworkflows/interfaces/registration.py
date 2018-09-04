@@ -372,7 +372,7 @@ class EstimateReferenceImage(SimpleInterface):
     def _run_interface(self, runtime):
         if isdefined(self.inputs.sbref_file):
             self._results['ref_image'] = self.inputs.sbref_file
-            return
+            return runtime
 
         in_nii = nb.load(self.inputs.in_file)
         data_slice = in_nii.dataobj[:, :, :, :50]
