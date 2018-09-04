@@ -1,3 +1,10 @@
+0.4.3 (September 4, 2018)
+=========================
+
+* [FIX] Return runtime from EstimateReferenceImage._run_interface (#251)
+* [ENH] Add nipype reimplementation of antsBrainExtraction (#244)
+* [REF] Use runtime.cwd when possible in interfaces (#249)
+
 0.4.2 (July 5, 2018)
 ====================
 
