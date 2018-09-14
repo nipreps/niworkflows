@@ -12,7 +12,7 @@ from distutils.version import LooseVersion
 import nibabel as nb
 import numpy as np
 from nilearn import image as nli
-from nilearn.image import index_img
+from nilearn.image import index_img, resample_to_img
 from .. import NIWORKFLOWS_LOG
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
@@ -370,9 +370,13 @@ class EstimateReferenceImage(SimpleInterface):
     output_spec = EstimateReferenceImageOutputSpec
 
     def _run_interface(self, runtime):
+        out_ref_fname = os.path.abspath("ref_image.nii.gz")
+
         if isdefined(self.inputs.sbref_file):
-            self._results['ref_image'] = self.inputs.sbref_file
-            return runtime
+            resampled_sbref_nii = resample_to_img(self.inputs.sbref_file, self.inputs.in_file)
+            resampled_sbref_nii.to_filename(out_ref_fname)
+            self._results['ref_image'] = out_ref_fname
+            return
 
         in_nii = nb.load(self.inputs.in_file)
         data_slice = in_nii.dataobj[:, :, :, :50]
@@ -383,8 +387,6 @@ class EstimateReferenceImage(SimpleInterface):
         in_nii.header.extensions.clear()
 
         n_volumes_to_discard = _get_vols_to_discard(in_nii)
-
-        out_ref_fname = os.path.join(runtime.cwd, "ref_image.nii.gz")
 
         if n_volumes_to_discard == 0:
             if in_nii.shape[-1] > 40:
