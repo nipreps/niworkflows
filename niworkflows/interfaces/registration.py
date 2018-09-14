@@ -371,14 +371,21 @@ class EstimateReferenceImage(SimpleInterface):
 
     def _run_interface(self, runtime):
         out_ref_fname = os.path.abspath("ref_image.nii.gz")
+        in_nii = nb.load(self.inputs.in_file)
 
         if isdefined(self.inputs.sbref_file):
-            resampled_sbref_nii = resample_to_img(self.inputs.sbref_file, self.inputs.in_file)
-            resampled_sbref_nii.to_filename(out_ref_fname)
-            self._results['ref_image'] = out_ref_fname
+            sbref_nii = nb.load(self.inputs.sbref_file)
+
+            # resample SBRef to match the input file if they don't match
+            if (sbref_nii.shape[:3] != in_nii.shape[:3]
+                    or sbref_nii.header.get_zooms()[:3] != in_nii.shape.get_zooms()[:3]):
+                resampled_sbref_nii = resample_to_img(self.inputs.sbref_file, self.inputs.in_file)
+                resampled_sbref_nii.to_filename(out_ref_fname)
+                self._results['ref_image'] = out_ref_fname
+            else:
+                self._results['ref_image'] = self.inputs.sbref_file
             return
 
-        in_nii = nb.load(self.inputs.in_file)
         data_slice = in_nii.dataobj[:, :, :, :50]
 
         # Slicing may induce inconsistencies with shape-dependent values in extensions.
