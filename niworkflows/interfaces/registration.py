@@ -378,7 +378,8 @@ class EstimateReferenceImage(SimpleInterface):
 
             # resample SBRef to match the input file if they don't match
             if (sbref_nii.shape[:3] != in_nii.shape[:3]
-                    or sbref_nii.header.get_zooms()[:3] != in_nii.shape.get_zooms()[:3]):
+                    or sbref_nii.header.get_zooms()[:3] != in_nii.shape.get_zooms()[:3]
+                    or nb.aff2axcodes(sbref_nii.affine) != nb.aff2axcodes(in_nii.affine)):
                 resampled_sbref_nii = resample_to_img(self.inputs.sbref_file, self.inputs.in_file)
                 resampled_sbref_nii.to_filename(out_ref_fname)
                 self._results['ref_image'] = out_ref_fname
