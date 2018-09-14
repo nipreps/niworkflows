@@ -12,7 +12,7 @@ from distutils.version import LooseVersion
 import nibabel as nb
 import numpy as np
 from nilearn import image as nli
-from nilearn.image import index_img
+from nilearn.image import index_img, resample_to_img
 from .. import NIWORKFLOWS_LOG
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
@@ -370,11 +370,23 @@ class EstimateReferenceImage(SimpleInterface):
     output_spec = EstimateReferenceImageOutputSpec
 
     def _run_interface(self, runtime):
-        if isdefined(self.inputs.sbref_file):
-            self._results['ref_image'] = self.inputs.sbref_file
-            return runtime
-
+        out_ref_fname = os.path.abspath("ref_image.nii.gz")
         in_nii = nb.load(self.inputs.in_file)
+
+        if isdefined(self.inputs.sbref_file):
+            sbref_nii = nb.load(self.inputs.sbref_file)
+
+            # resample SBRef to match the input file if they don't match
+            if (sbref_nii.shape[:3] != in_nii.shape[:3]
+                    or sbref_nii.header.get_zooms()[:3] != in_nii.shape.get_zooms()[:3]
+                    or nb.aff2axcodes(sbref_nii.affine) != nb.aff2axcodes(in_nii.affine)):
+                resampled_sbref_nii = resample_to_img(self.inputs.sbref_file, self.inputs.in_file)
+                resampled_sbref_nii.to_filename(out_ref_fname)
+                self._results['ref_image'] = out_ref_fname
+            else:
+                self._results['ref_image'] = self.inputs.sbref_file
+            return
+
         data_slice = in_nii.dataobj[:, :, :, :50]
 
         # Slicing may induce inconsistencies with shape-dependent values in extensions.
@@ -383,8 +395,6 @@ class EstimateReferenceImage(SimpleInterface):
         in_nii.header.extensions.clear()
 
         n_volumes_to_discard = _get_vols_to_discard(in_nii)
-
-        out_ref_fname = os.path.join(runtime.cwd, "ref_image.nii.gz")
 
         if n_volumes_to_discard == 0:
             if in_nii.shape[-1] > 40:
