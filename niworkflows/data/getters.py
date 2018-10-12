@@ -13,20 +13,21 @@ from ..data.utils import _get_dataset_dir, _fetch_file
 
 OSF_PROJECT_URL = ('https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/')
 OSF_RESOURCES = {
-    'MNI152NLin2009cAsym': ('5b0dbce20f461a000db8fa3d', '5d386d7db9c1dec30230623db25e05e1'),
-    'OASIS30ANTs': ('5b0dbce34c28ef0012c7f788', 'f625a0390eb32a7852c7b0d71ac428cd'),
-    'brainweb': ('57f32b96b83f6901f194c3ca', '384263fbeadc8e2cca92ced98f224c4b'),
-    'ds003_downsampled': ('57f328f6b83f6901ef94cf70', '5a558961c1eb5e5f162696d8afa956e8'),
-    'mni_template': ('57f32ab29ad5a101fb77fd89', 'debfa882b8c301cd6d75dd769e73f727'),
-    'mni_template_RAS': ('57f32a799ad5a101f977eb77', 'a4669f0e7acceae148bb39450b2b21b4'),
     'ants_oasis_template': ('57f32ae89ad5a101f977eb79', '34d39070b541c416333cc8b6c2fe993c'),
     'ants_oasis_template_ras': ('584123a29ad5a1020913609d', 'afa21f99c66ae1672320d8aa0408229a'),
     'ants_nki_template_ras': ('59cd90f46c613b02b3d79782', 'e5debaee65b8f2c8971577db1327e314'),
+    'brainweb': ('57f32b96b83f6901f194c3ca', '384263fbeadc8e2cca92ced98f224c4b'),
+    'ds003_downsampled': ('57f328f6b83f6901ef94cf70', '5a558961c1eb5e5f162696d8afa956e8'),
+    'fMRIPrep': ('5bc12155ac011000176bff82', '1aec4d286bd89f4f90316ce2cde63218'),
+    'MNI152NLin2009cAsym': ('5b0dbce20f461a000db8fa3d', '5d386d7db9c1dec30230623db25e05e1'),
+    'mni_template': ('57f32ab29ad5a101fb77fd89', 'debfa882b8c301cd6d75dd769e73f727'),
+    'mni_template_RAS': ('57f32a799ad5a101f977eb77', 'a4669f0e7acceae148bb39450b2b21b4'),
     'mni_epi': ('57fa09cdb83f6901d93623a0', '9df727e1f742ec55213480434b4c4811'),
     'mni152_nlin_sym_las': ('57fa7fc89ad5a101e635eeef', '9c4c0cad2a2e99d6799f01abf4107f5a'),
     'mni152_nlin_sym_ras': ('57fa7fd09ad5a101df35eed0', '65d64ad5a980da86e7d07d95b3ed2ccb'),
     'mni_icbm152_linear': ('580705eb594d9001ed622649', '72be639e92532def7caad75cb4058e83'),
     'mni_icbm152_nlin_asym_09c': ('580705089ad5a101f17944a9', '002f9bf24dc5c32de50c03f01fa539ec'),
+    'OASIS30ANTs': ('5b0dbce34c28ef0012c7f788', 'f625a0390eb32a7852c7b0d71ac428cd'),
     'tpl-OASISTRT20': ('5b16f17aeca4a80012bd7542', '1b5389bc3a895b2bd5c0d47401107176'),
     'tpl-hcpLR32k': ('5b198ec6b796ba000f3e4858', '0ba9adcaa42fa88616a4cea5a1ce0c5a'),
     'tpl-conte69': ('5b198ec5ec24e20011b48548', 'bd944e3f9f343e0e51e562b440960529'),
@@ -44,8 +45,8 @@ BIDS_EXAMPLES = {
 # Map names of templates to OSF_RESOURCES keys
 TEMPLATE_MAP = {
     'MNI152NLin2009cAsym': 'MNI152NLin2009cAsym',
-    'OASIS': 'OASIS30ANTs',
     'NKI': 'ants_nki_template_ras',
+    'OASIS': 'OASIS30ANTs',
 }
 
 
