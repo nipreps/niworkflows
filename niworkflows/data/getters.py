@@ -7,8 +7,7 @@ Data grabbers
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 
-from pathlib import Path
-from ..data.utils import _get_dataset_dir, _fetch_file
+from ..data.utils import fetch_file
 
 
 OSF_PROJECT_URL = ('https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/')
@@ -43,6 +42,7 @@ BIDS_EXAMPLES = {
 
 # Map names of templates to OSF_RESOURCES keys
 TEMPLATE_MAP = {
+    'fMRIPrep': 'fMRIPrep',
     'MNI152NLin2009cAsym': 'MNI152NLin2009cAsym',
     'OASIS': 'OASIS30ANTs',
     'NKI': 'ants_nki_template_ras',
@@ -58,22 +58,12 @@ def get_dataset(dataset_name, data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
 
     """
-    data_dir = _get_dataset_dir(dataset_name, data_dir=data_dir, verbose=verbose)
-
-    if dataset_name in TEMPLATE_MAP:
-        dataset_name = TEMPLATE_MAP.get(dataset_name, dataset_name)
-        data_dir = str(Path(data_dir).parent / (
-            'tpl-%s' % dataset_name))
-
     file_id, md5 = OSF_RESOURCES[dataset_name]
     if url is None:
         url = '{}/{}'.format(OSF_PROJECT_URL, file_id)
 
-    if _fetch_file(url, data_dir, filetype='tar', resume=resume, verbose=verbose,
-                   md5sum=md5):
-        return data_dir
-    else:
-        return None
+    return fetch_file(dataset_name, url, data_dir, filetype='tar',
+                      resume=resume, verbose=verbose, md5sum=md5)
 
 
 def get_brainweb_1mm_normal(data_dir=None, url=None, resume=True, verbose=1):
