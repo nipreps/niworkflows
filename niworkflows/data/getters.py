@@ -18,6 +18,7 @@ OSF_RESOURCES = {
     'brainweb': ('57f32b96b83f6901f194c3ca', '384263fbeadc8e2cca92ced98f224c4b'),
     'conte69': ('5b198ec5ec24e20011b48548', 'bd944e3f9f343e0e51e562b440960529'),
     'ds003_downsampled': ('57f328f6b83f6901ef94cf70', '5a558961c1eb5e5f162696d8afa956e8'),
+    'fMRIPrep': ('5bc12155ac011000176bff82', '1aec4d286bd89f4f90316ce2cde63218'),
     'hcpLR32k': ('5b198ec6b796ba000f3e4858', '0ba9adcaa42fa88616a4cea5a1ce0c5a'),
     'mni_epi': ('57fa09cdb83f6901d93623a0', '9df727e1f742ec55213480434b4c4811'),
     'mni_icbm152_linear': ('580705eb594d9001ed622649', '72be639e92532def7caad75cb4058e83'),
