@@ -22,7 +22,6 @@ def test_get_data_path(monkeypatch):
     # niworkflows default location
     assert utils._get_data_path() == [utils.NIWORKFLOWS_CACHE_DIR]
 
-
     monkeypatch.setenv('CRN_DATA', '~/.crn-data')
     # pass explicit folders
     assert utils._get_data_path('/some/path') == [Path('/some/path')]

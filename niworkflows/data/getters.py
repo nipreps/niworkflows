@@ -69,11 +69,10 @@ def get_dataset(dataset_name, dataset_prefix=None, data_dir=None,
 def get_template(template_name, data_dir=None, url=None, resume=True, verbose=1):
     """Download and load a template"""
     if template_name.startswith('tpl-'):
-        template_name =  template_name[4:]
+        template_name = template_name[4:]
 
     # An aliasing mechanism. Please avoid
-    if template_name in TEMPLATE_MAP:
-        template_name = TEMPLATE_MAP[template_name]
+    template_name = TEMPLATE_MAP.get(template_name, template_name)
     return get_dataset(template_name, dataset_prefix='tpl-', data_dir=data_dir,
                        url=url, resume=resume, verbose=verbose)
 
@@ -190,24 +189,17 @@ def get_mni_icbm152_linear(data_dir=None, url=None, resume=True, verbose=1):
     return get_dataset('mni_icbm152_linear', data_dir, url, resume, verbose)
 
 
-def get_bids_examples(data_dir=None, url=None, resume=True, verbose=1, variant=None):
+def get_bids_examples(data_dir=None, url=None, resume=True, verbose=1,
+                      variant='BIDS-examples-1-1.0.0-rc3u5'):
     """
     Download BIDS-examples-1
     """
-
-    if variant is None or variant not in BIDS_EXAMPLES:
-        variant = 'BIDS-examples-1-1.0.0-rc3u5'
-
+    variant = 'BIDS-examples-1-1.0.0-rc3u5' if variant not in BIDS_EXAMPLES else variant
     if url is None:
         url = BIDS_EXAMPLES[variant][0]
     md5 = BIDS_EXAMPLES[variant][1]
-    data_dir = _get_dataset_dir(variant, data_dir=data_dir, verbose=verbose)
-
-    if _fetch_file(url, data_dir, filetype=None, resume=resume, verbose=verbose,
-                   md5sum=md5):
-        return data_dir
-    else:
-        return None
+    return fetch_file(variant, url, data_dir, filetype='tar',
+                      resume=resume, verbose=verbose, md5sum=md5)
 
 
 def get_oasis_dkt31_mni152(data_dir=None, url=None, resume=True, verbose=1):
@@ -217,7 +209,7 @@ def get_oasis_dkt31_mni152(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('tpl-OASISTRT20', data_dir, url, resume, verbose)
+    return get_template('OASISTRT20', data_dir, url, resume, verbose)
 
 
 def get_hcp32k_files(data_dir=None, url=None, resume=True, verbose=1):
@@ -227,7 +219,7 @@ def get_hcp32k_files(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('tpl-hcpLR32k', data_dir, url, resume, verbose)
+    return get_template('hcpLR32k', data_dir, url, resume, verbose)
 
 
 def get_conte69_mesh(data_dir=None, url=None, resume=True, verbose=1):
@@ -236,4 +228,4 @@ def get_conte69_mesh(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('tpl-conte69', data_dir, url, resume, verbose)
+    return get_template('conte69', data_dir, url, resume, verbose)
