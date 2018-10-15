@@ -135,7 +135,8 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
                 NIWORKFLOWS_LOG.warn(
                     'Resuming failed, try to download the whole file.')
             return fetch_file(
-                url, dataset_dir, resume=False, overwrite=overwrite,
+                dataset_name, url, dataset_dir,
+                resume=False, overwrite=overwrite,
                 md5sum=md5sum, username=username, password=password,
                 verbose=verbose)
         local_file = open(temp_part_name, "ab")
@@ -150,7 +151,7 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
                                          retry + 1)
                 time.sleep(5)
                 return fetch_file(
-                    url, dataset_dir, resume=False, overwrite=overwrite,
+                    dataset_name, url, dataset_dir, resume=False, overwrite=overwrite,
                     md5sum=md5sum, username=username, password=password,
                     verbose=verbose, retry=retry + 1)
             else:
