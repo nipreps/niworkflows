@@ -9,6 +9,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import os.path as op
+from pathlib import Path
 import sys
 import shutil
 import time
@@ -30,12 +31,13 @@ from .. import NIWORKFLOWS_LOG
 
 PY3 = sys.version_info[0] > 2
 MAX_RETRIES = 20
-NIWORKFLOWS_CACHE_DIR = op.expanduser('~/.cache/stanford-crn')
+NIWORKFLOWS_CACHE_DIR = (Path.home() / '.cache' / 'stanford-crn').resolve()
 
 
-def _fetch_file(url, dataset_dir, filetype=None, resume=True, overwrite=False,
-                md5sum=None, username=None, password=None, retry=0,
-                verbose=1, temp_downloads=None):
+def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
+               default_paths=None, filetype=None, resume=True, overwrite=False,
+               md5sum=None, username=None, password=None, retry=0,
+               verbose=1, temp_downloads=None):
     """Load requested file, downloading it if needed or requested.
 
     :param str url: contains the url of the file to be downloaded.
@@ -58,13 +60,16 @@ def _fetch_file(url, dataset_dir, filetype=None, resume=True, overwrite=False,
 
 
     """
-    if not overwrite and os.listdir(dataset_dir):
-        return True
+    final_path, cached = _get_dataset(dataset_name, dataset_prefix=dataset_prefix,
+                                      data_dir=dataset_dir, default_paths=default_paths,
+                                      verbose=verbose)
+    if cached and not overwrite:
+        return final_path
 
-    data_dir, _ = op.split(dataset_dir)
+    data_dir = final_path.parent
 
     if temp_downloads is None:
-        temp_downloads = op.join(NIWORKFLOWS_CACHE_DIR, 'downloads')
+        temp_downloads = str(NIWORKFLOWS_CACHE_DIR / 'downloads')
 
     # Determine data path
     if not op.exists(temp_downloads):
@@ -129,7 +134,7 @@ def _fetch_file(url, dataset_dir, filetype=None, resume=True, overwrite=False,
             if verbose > 0:
                 NIWORKFLOWS_LOG.warn(
                     'Resuming failed, try to download the whole file.')
-            return _fetch_file(
+            return fetch_file(
                 url, dataset_dir, resume=False, overwrite=overwrite,
                 md5sum=md5sum, username=username, password=password,
                 verbose=verbose)
@@ -144,7 +149,7 @@ def _fetch_file(url, dataset_dir, filetype=None, resume=True, overwrite=False,
                     NIWORKFLOWS_LOG.warn('Download failed, retrying (attempt %d)',
                                          retry + 1)
                 time.sleep(5)
-                return _fetch_file(
+                return fetch_file(
                     url, dataset_dir, resume=False, overwrite=overwrite,
                     md5sum=md5sum, username=username, password=password,
                     verbose=verbose, retry=retry + 1)
@@ -183,7 +188,7 @@ def _fetch_file(url, dataset_dir, filetype=None, resume=True, overwrite=False,
         args = 'xf' if not filetype.endswith('gz') else 'xzf'
         sp.check_call(['tar', args, temp_full_name], cwd=data_dir)
         os.remove(temp_full_name)
-        return True
+        return final_path
 
     if filetype == 'zip':
         import zipfile
@@ -192,22 +197,50 @@ def _fetch_file(url, dataset_dir, filetype=None, resume=True, overwrite=False,
         with zipfile.ZipFile(temp_full_name, 'r') as zip_ref:
             zip_ref.extractall(data_dir)
         sys.stderr.write('done.\n')
-        return True
+        return final_path
 
-    return True
+    return final_path
 
 
-def _get_dataset_dir(dataset_name, data_dir=None, default_paths=None,
-                     verbose=1):
+def _get_data_path(data_dir=None):
+    """ Get data storage directory
+
+    data_dir: str
+      Path of the data directory. Used to force data storage in
+      a specified location.
+
+    :returns:
+        a list of paths where the dataset could be stored,
+        ordered by priority
+
+    """
+    data_dir = data_dir or ''
+
+    default_dirs = [Path(d).expanduser().resolve()
+                    for d in os.getenv('CRN_SHARED_DATA', '').split(os.pathsep)
+                    if d.strip()]
+    default_dirs += [Path(d).expanduser().resolve()
+                     for d in os.getenv('CRN_DATA', '').split(os.pathsep)
+                     if d.strip()]
+    default_dirs += [NIWORKFLOWS_CACHE_DIR]
+
+    return [Path(d).expanduser().resolve()
+            for d in data_dir.split(os.pathsep) if d.strip()] or default_dirs
+
+
+def _get_dataset(dataset_name, dataset_prefix=None,
+                 data_dir=None, default_paths=None,
+                 verbose=1):
     """ Create if necessary and returns data directory of given dataset.
 
-    :param str dataset_name: The unique name of the dataset.
-    :param str data_dir: Path of the data directory. Used to force data storage in
+    data_dir: str
+      Path of the data directory. Used to force data storage in
       a specified location.
-    :param list(str) default_paths: Default system paths in which the dataset
-      may already have been installed by a third party software. They will be
-      checked first.
-    :param int verbose: verbosity level (0 means no message).
+    default_paths: list(str)
+      Default system paths in which the dataset may already have been installed
+      by a third party software. They will be checked first.
+    verbose: int
+      verbosity level (0 means no message).
 
     :returns: the path of the given dataset directory.
     :rtype: str
@@ -225,65 +258,28 @@ def _get_dataset_dir(dataset_name, data_dir=None, default_paths=None,
 
 
     """
-    # We build an array of successive paths by priority
-    # The boolean indicates if it is a pre_dir: in that case, we won't add the
-    # dataset name to the path.
-    paths = []
 
-    # Check data_dir which force storage in a specific location
-    if data_dir is not None:
-        paths.extend([(d, False) for d in data_dir.split(os.pathsep)])
+    dataset_folder = dataset_name if not dataset_prefix \
+        else '%s%s' % (dataset_prefix, dataset_name)
+    default_paths = default_paths or ''
+    paths = [p / dataset_folder for p in _get_data_path(data_dir)]
+    all_paths = [Path(p) / dataset_folder
+                 for p in default_paths.split(os.pathsep)] + paths
 
-    # Search possible system paths
-    if default_paths is not None:
-        for default_path in default_paths:
-            paths.extend([(d, True) for d in default_path.split(os.pathsep)])
-
-    # If data_dir has not been specified, then we crawl default locations
-    if data_dir is None:
-        global_data = os.getenv('CRN_SHARED_DATA')
-        if global_data is not None:
-            paths.extend([(d, False) for d in global_data.split(os.pathsep)])
-
-        local_data = os.getenv('CRN_DATA')
-        if local_data is not None:
-            paths.extend([(d, False) for d in local_data.split(os.pathsep)])
-
-        paths.append((NIWORKFLOWS_CACHE_DIR, False))
-
-    if verbose > 2:
-        NIWORKFLOWS_LOG.info('Dataset search paths: %s', str(paths))
-
-    # Check if the dataset exists somewhere
-    for path, is_pre_dir in paths:
-        if not is_pre_dir:
-            path = op.join(path, dataset_name)
-        if op.islink(path):
-            # Resolve path
-            path = readlinkabs(path)
-        if op.exists(path) and op.isdir(path):
+    # Check if the dataset folder exists somewhere and is not empty
+    for path in all_paths:
+        if path.is_dir() and list(path.iterdir()):
             if verbose > 1:
-                NIWORKFLOWS_LOG.info('Dataset already cached in %s', path)
-            return path
+                NIWORKFLOWS_LOG.info(
+                    'Dataset "%s" already cached in %s', dataset_name, path)
+            return path, True
 
-    # If not, create a folder in the first writeable directory
-    errors = []
-    for (path, is_pre_dir) in paths:
-        if not is_pre_dir:
-            path = op.join(path, dataset_name)
-        if not op.exists(path):
-            try:
-                os.makedirs(path)
-                if verbose > 0:
-                    NIWORKFLOWS_LOG.info('Dataset created in %s', path)
-                return path
-            except Exception as exc:
-                short_error_message = getattr(exc, 'strerror', str(exc))
-                errors.append('\n -{0} ({1})'.format(
-                    path, short_error_message))
-
-    raise OSError('niworkflows tried to store the dataset in the following '
-                  'directories, but:' + ''.join(errors))
+    for path in paths:
+        if verbose > 0:
+            NIWORKFLOWS_LOG.info(
+                'Dataset "%s" not cached, downloading to %s', dataset_name, path)
+        path.mkdir(parents=True, exist_ok=True)
+        return path, False
 
 
 def readlinkabs(link):
