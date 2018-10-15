@@ -35,7 +35,7 @@ NIWORKFLOWS_CACHE_DIR = (Path.home() / '.cache' / 'stanford-crn').resolve()
 
 
 def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
-               filetype=None, resume=True, overwrite=False,
+               default_paths=None, filetype=None, resume=True, overwrite=False,
                md5sum=None, username=None, password=None, retry=0,
                verbose=1, temp_downloads=None):
     """Load requested file, downloading it if needed or requested.
@@ -61,12 +61,12 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
 
     """
     final_path, cached = _get_dataset(dataset_name, dataset_prefix=dataset_prefix,
-                                      data_dir=data_dir, default_paths=default_paths,
+                                      data_dir=dataset_dir, default_paths=default_paths,
                                       verbose=verbose)
-    if not overwrite and os.listdir(dataset_dir):
-        return True
+    if cached and not overwrite:
+        return final_path
 
-    data_dir, _ = op.split(dataset_dir)
+    data_dir = final_path.parent
 
     if temp_downloads is None:
         temp_downloads = str(NIWORKFLOWS_CACHE_DIR / 'downloads')
@@ -134,7 +134,7 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
             if verbose > 0:
                 NIWORKFLOWS_LOG.warn(
                     'Resuming failed, try to download the whole file.')
-            return _fetch_file(
+            return fetch_file(
                 url, dataset_dir, resume=False, overwrite=overwrite,
                 md5sum=md5sum, username=username, password=password,
                 verbose=verbose)
@@ -149,7 +149,7 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
                     NIWORKFLOWS_LOG.warn('Download failed, retrying (attempt %d)',
                                          retry + 1)
                 time.sleep(5)
-                return _fetch_file(
+                return fetch_file(
                     url, dataset_dir, resume=False, overwrite=overwrite,
                     md5sum=md5sum, username=username, password=password,
                     verbose=verbose, retry=retry + 1)
@@ -188,7 +188,7 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
         args = 'xf' if not filetype.endswith('gz') else 'xzf'
         sp.check_call(['tar', args, temp_full_name], cwd=data_dir)
         os.remove(temp_full_name)
-        return True
+        return final_path
 
     if filetype == 'zip':
         import zipfile
@@ -197,9 +197,9 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
         with zipfile.ZipFile(temp_full_name, 'r') as zip_ref:
             zip_ref.extractall(data_dir)
         sys.stderr.write('done.\n')
-        return True
+        return final_path
 
-    return True
+    return final_path
 
 
 def _get_data_path(data_dir=None):
@@ -259,7 +259,9 @@ def _get_dataset(dataset_name, dataset_prefix=None,
 
     """
 
-    dataset_folder = None if not dataset_prefix else '%s%s' % (dataset_prefix, dataset_name)
+    dataset_folder = dataset_name if not dataset_prefix \
+        else '%s%s' % (dataset_prefix, dataset_name)
+    default_paths = default_paths or ''
     paths = [p / dataset_folder for p in _get_data_path(data_dir)]
     all_paths = [Path(p) / dataset_folder
                  for p in default_paths.split(os.pathsep)] + paths

@@ -21,6 +21,7 @@ from .getters import (
     get_hcp32k_files,
     get_conte69_mesh,
     get_dataset,
+    get_template,
     get_bids_examples,
     TEMPLATE_MAP,
 )
