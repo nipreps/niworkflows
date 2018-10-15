@@ -211,8 +211,8 @@ def get_bids_examples(data_dir=None, url=None, resume=True, verbose=1,
     if url is None:
         url = BIDS_EXAMPLES[variant][0]
     md5 = BIDS_EXAMPLES[variant][1]
-    return fetch_file(variant, url, data_dir, filetype='tar',
-                      resume=resume, verbose=verbose, md5sum=md5)
+    return fetch_file(variant, url, data_dir, resume=resume, verbose=verbose,
+                      md5sum=md5)
 
 
 def get_oasis_dkt31_mni152(data_dir=None, url=None, resume=True, verbose=1):
