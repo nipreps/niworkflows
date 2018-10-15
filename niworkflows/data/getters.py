@@ -86,7 +86,8 @@ def get_brainweb_1mm_normal(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
 
     """
-    return get_dataset('brainweb', data_dir, url, resume, verbose)
+    return get_dataset('brainweb', data_dir=data_dir, url=url,
+                       resume=resume, verbose=verbose)
 
 
 def get_ds003_downsampled(data_dir=None, url=None, resume=True, verbose=1):
@@ -98,7 +99,8 @@ def get_ds003_downsampled(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
 
     """
-    return get_dataset('ds003_downsampled', data_dir, url, resume, verbose)
+    return get_dataset('ds003_downsampled', data_dir=data_dir, url=url,
+                       resume=resume, verbose=verbose)
 
 
 def get_mni_template(data_dir=None, url=None, resume=True, verbose=1):
@@ -110,7 +112,8 @@ def get_mni_template(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
 
     """
-    return get_dataset('mni_template', data_dir, url, resume, verbose)
+    return get_dataset('mni_template', data_dir=data_dir, url=url,
+                       resume=resume, verbose=verbose)
 
 
 def get_mni_template_ras(data_dir=None, url=None, resume=True, verbose=1):
@@ -119,7 +122,8 @@ def get_mni_template_ras(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('mni_template_RAS', data_dir, url, resume, verbose)
+    return get_dataset('mni_template_RAS', data_dir=data_dir, url=url,
+                       resume=resume, verbose=verbose)
 
 
 def get_mni_epi(data_dir=None, url=None, resume=True, verbose=1):
@@ -128,7 +132,8 @@ def get_mni_epi(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('mni_epi', data_dir, url, resume, verbose)
+    return get_dataset('mni_epi', data_dir=data_dir, url=url,
+                       resume=resume, verbose=verbose)
 
 
 def get_ants_oasis_template(data_dir=None, url=None, resume=True, verbose=1):
@@ -137,7 +142,8 @@ def get_ants_oasis_template(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('ants_oasis_template', data_dir, url, resume, verbose)
+    return get_dataset('ants_oasis_template', data_dir=data_dir, url=url,
+                       resume=resume, verbose=verbose)
 
 
 def get_ants_oasis_template_ras(data_dir=None, url=None, resume=True, verbose=1):
@@ -146,7 +152,8 @@ def get_ants_oasis_template_ras(data_dir=None, url=None, resume=True, verbose=1)
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('ants_oasis_template_ras', data_dir, url, resume, verbose)
+    return get_dataset('ants_oasis_template_ras', data_dir=data_dir, url=url,
+                       resume=resume, verbose=verbose)
 
 
 def get_ants_nki_template_ras(data_dir=None, url=None, resume=True, verbose=1):
@@ -155,7 +162,8 @@ def get_ants_nki_template_ras(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('ants_nki_template_ras', data_dir, url, resume, verbose)
+    return get_dataset('ants_nki_template_ras', data_dir=data_dir, url=url,
+                       resume=resume, verbose=verbose)
 
 
 def get_mni152_nlin_sym_las(data_dir=None, url=None, resume=True, verbose=1):
@@ -164,7 +172,8 @@ def get_mni152_nlin_sym_las(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('mni152_nlin_sym_las', data_dir, url, resume, verbose)
+    return get_dataset('mni152_nlin_sym_las', data_dir=data_dir, url=url,
+                       resume=resume, verbose=verbose)
 
 
 def get_mni152_nlin_sym_ras(data_dir=None, url=None, resume=True, verbose=1):
@@ -173,11 +182,13 @@ def get_mni152_nlin_sym_ras(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('mni152_nlin_sym_ras', data_dir, url, resume, verbose)
+    return get_dataset('mni152_nlin_sym_ras', data_dir=data_dir, url=url,
+                       resume=resume, verbose=verbose)
 
 
 def get_mni_icbm152_nlin_asym_09c(data_dir=None, url=None, resume=True, verbose=1):
-    return get_dataset('mni_icbm152_nlin_asym_09c', data_dir, url, resume, verbose)
+    return get_dataset('mni_icbm152_nlin_asym_09c', data_dir=data_dir, url=url,
+                       resume=resume, verbose=verbose)
 
 
 def get_mni_icbm152_linear(data_dir=None, url=None, resume=True, verbose=1):
@@ -186,7 +197,8 @@ def get_mni_icbm152_linear(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_dataset('mni_icbm152_linear', data_dir, url, resume, verbose)
+    return get_dataset('mni_icbm152_linear', data_dir=data_dir, url=url,
+                       resume=resume, verbose=verbose)
 
 
 def get_bids_examples(data_dir=None, url=None, resume=True, verbose=1,
@@ -209,7 +221,8 @@ def get_oasis_dkt31_mni152(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_template('OASISTRT20', data_dir, url, resume, verbose)
+    return get_template('OASISTRT20', data_dir=data_dir, url=url,
+                        resume=resume, verbose=verbose)
 
 
 def get_hcp32k_files(data_dir=None, url=None, resume=True, verbose=1):
@@ -219,7 +232,8 @@ def get_hcp32k_files(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_template('hcpLR32k', data_dir, url, resume, verbose)
+    return get_template('hcpLR32k', data_dir=data_dir, url=url,
+                        resume=resume, verbose=verbose)
 
 
 def get_conte69_mesh(data_dir=None, url=None, resume=True, verbose=1):
@@ -228,4 +242,5 @@ def get_conte69_mesh(data_dir=None, url=None, resume=True, verbose=1):
         in a non-standard location.
     :param str url: download URL of the dataset. Overwrite the default URL.
     """
-    return get_template('conte69', data_dir, url, resume, verbose)
+    return get_template('conte69', data_dir=data_dir, url=url,
+                        resume=resume, verbose=verbose)
