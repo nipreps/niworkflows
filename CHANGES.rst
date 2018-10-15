@@ -1,3 +1,9 @@
+0.4.4 (October 15, 2018)
+========================
+
+* [ENH] Add "fMRIPrep" template, with new boldref template (#255)
+* [ENH/MAINT] Refactor downloads, update NKI (#256)
+
 0.4.3 (September 4, 2018)
 =========================
 
