@@ -24,7 +24,7 @@ from nipype.interfaces.fsl.maths import ApplyMask
 from nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
 
 # niworkflows
-from ..data import TEMPLATE_MAP, get_dataset
+from ..data import TEMPLATE_MAP, get_template
 from ..interfaces.ants import (
     ImageMath,
     ResampleImageBySpacing,
@@ -164,15 +164,15 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
     template_path = None
     if in_template in TEMPLATE_MAP:
-        template_path = get_dataset(in_template)
+        template_path = get_template(in_template)
     else:
-        template_path = in_template
+        template_path = Path(in_template)
 
     mod = ('%sw' % modality[:2].upper()
            if modality.upper().startswith('T') else modality.upper())
 
     # Append template modality
-    potential_targets = list(Path(template_path).glob('*_%s.nii.gz' % mod))
+    potential_targets = list(template_path.glob('*_%s.nii.gz' % mod))
     if not potential_targets:
         raise ValueError(
             'No %s template was found under "%s".' % (mod, template_path))
