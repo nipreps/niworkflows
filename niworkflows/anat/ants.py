@@ -13,9 +13,9 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import os
 from collections import OrderedDict
 from multiprocessing import cpu_count
+from pathlib import Path
 from pkg_resources import resource_filename as pkgr_fn
 from packaging.version import parse as parseversion, Version
-from pathlib import Path
 
 # nipype
 from nipype.pipeline import engine as pe
