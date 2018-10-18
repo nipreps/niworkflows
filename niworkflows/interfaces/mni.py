@@ -58,7 +58,7 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     reference = traits.Enum('T1w', 'T2w', 'boldref', 'PDw', mandatory=True, usedefault=True,
                             desc='set the reference modality for registration')
     # T1 or EPI registration?
-    moving = traits.Enum('T1w', 'EPI', usedefault=True, mandatory=True,
+    moving = traits.Enum('T1w', 'bold', usedefault=True, mandatory=True,
                          desc='registration type')
     # Template to use as the default reference image.
     template = traits.Enum(
