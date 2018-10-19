@@ -27,6 +27,7 @@ OSF_RESOURCES = {
     'mni_template_RAS': ('57f32a799ad5a101f977eb77', 'a4669f0e7acceae148bb39450b2b21b4'),
     'mni152_nlin_sym_las': ('57fa7fc89ad5a101e635eeef', '9c4c0cad2a2e99d6799f01abf4107f5a'),
     'mni152_nlin_sym_ras': ('57fa7fd09ad5a101df35eed0', '65d64ad5a980da86e7d07d95b3ed2ccb'),
+    'MNI152Lin': ('5bc91ec811fd9d001a9528d8', '53b22844fd650dd67a0d39287b183376'),
     'MNI152NLin2009cAsym': ('5b0dbce20f461a000db8fa3d', '5d386d7db9c1dec30230623db25e05e1'),
     'NKI': ('5bc3fad82aa873001bc5a553', '092e56fb3700f9f57b8917a0db887db6'),
     'OASIS30ANTs': ('5b0dbce34c28ef0012c7f788', 'f625a0390eb32a7852c7b0d71ac428cd'),
@@ -44,6 +45,7 @@ BIDS_EXAMPLES = {
 
 # Map names of templates to OSF_RESOURCES keys
 TEMPLATE_MAP = {
+    'MNI152Lin': 'MNI152Lin',
     'MNI152NLin2009cAsym': 'MNI152NLin2009cAsym',
     'OASIS': 'OASIS30ANTs',
     'NKI': 'NKI',
