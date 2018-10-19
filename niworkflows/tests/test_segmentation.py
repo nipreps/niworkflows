@@ -36,7 +36,7 @@ def test_ROIsPlot(oasis_dir):
     import nibabel as nb
     import numpy as np
 
-    labels = nb.load(os.path.join(oasis_dir, 'T_template0_glm_4labelsJointFusion.nii.gz'))
+    labels = nb.load(str(oasis_dir / 'tpl-OASIS30ANTs_res-01_variant-4_dtissue.nii.gz'))
     data = labels.get_data()
     out_files = []
     ldata = np.zeros_like(data)
@@ -48,7 +48,7 @@ def test_ROIsPlot(oasis_dir):
 
     roi_rpt = ROIsPlot(
         generate_report=True,
-        in_file=os.path.join(oasis_dir, 'T_template0.nii.gz'),
+        in_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
         in_mask=out_files[-1],
         in_rois=out_files[:-1],
         colors=['g', 'y']
@@ -61,8 +61,9 @@ def test_SimpleShowMaskRPT(oasis_dir):
 
     msk_rpt = SimpleShowMaskRPT(
         generate_report=True,
-        background_file=os.path.join(oasis_dir, 'T_template0.nii.gz'),
-        mask_file=os.path.join(oasis_dir, 'T_template0_BrainCerebellumRegistrationMask.nii.gz')
+        background_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
+        mask_file=str(oasis_dir /
+                      'tpl-OASIS30ANTs_res-01_label-BrainCerebellumRegistration_roi.nii.gz')
     )
     _smoke_test_report(msk_rpt, 'testSimpleMask.svg')
 
@@ -87,11 +88,13 @@ def test_BrainExtractionRPT(monkeypatch, oasis_dir, moving, nthreads):
         dimension=3,
         use_floatingpoint_precision=1,
         anatomical_image=moving,
-        brain_template=os.path.join(oasis_dir, 'T_template0.nii.gz'),
-        brain_probability_mask=os.path.join(
-            oasis_dir, 'T_template0_BrainCerebellumProbabilityMask.nii.gz'),
-        extraction_registration_mask=os.path.join(
-            oasis_dir, 'T_template0_BrainCerebellumRegistrationMask.nii.gz'),
+        brain_template=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
+        brain_probability_mask=str(
+            oasis_dir /
+            'tpl-OASIS30ANTs_res-01_class-brainmask_probtissue.nii.gz'),
+        extraction_registration_mask=str(
+            oasis_dir /
+            'tpl-OASIS30ANTs_res-01_label-BrainCerebellumRegistration_roi.nii.gz'),
         out_prefix='testBrainExtractionRPT',
         debug=True,  # run faster for testing purposes
         num_threads=nthreads

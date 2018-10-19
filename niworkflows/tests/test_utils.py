@@ -12,15 +12,17 @@ def test_compression(oasis_dir):
 
     uncompressed = SimpleShowMaskRPT(
         generate_report=True,
-        background_file=os.path.join(oasis_dir, 'T_template0.nii.gz'),
-        mask_file=os.path.join(oasis_dir, 'T_template0_BrainCerebellumRegistrationMask.nii.gz'),
+        background_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
+        mask_file=str(oasis_dir /
+                      'tpl-OASIS30ANTs_res-01_label-BrainCerebellumRegistration_roi.nii.gz'),
         compress_report=False
     ).run().outputs.out_report
 
     compressed = SimpleShowMaskRPT(
         generate_report=True,
-        background_file=os.path.join(oasis_dir, 'T_template0.nii.gz'),
-        mask_file=os.path.join(oasis_dir, 'T_template0_BrainCerebellumRegistrationMask.nii.gz'),
+        background_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
+        mask_file=str(oasis_dir /
+                      'tpl-OASIS30ANTs_res-01_label-BrainCerebellumRegistration_roi.nii.gz'),
         compress_report=True
     ).run().outputs.out_report
 
