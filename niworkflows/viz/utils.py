@@ -285,9 +285,11 @@ def _plot_anat_with_contours(image, segs=None, compress='auto',
                              **plot_params):
     assert segs is not None
 
+    nsegs = len(segs)
     plot_params = plot_params or {}
     colors = plot_params.pop('colors', []) or []  # colors should not be None
-    nsegs = len(segs)
+    levels = np.atleast_1d(
+        plot_params.pop('levels') or ([0.5] * nsegs)).tolist()
     missing = nsegs - len(colors)
     if missing > 0:  # missing may be negative
         colors = colors + color_palette("husl", missing)
@@ -298,13 +300,12 @@ def _plot_anat_with_contours(image, segs=None, compress='auto',
     # remove plot_anat -specific parameters
     plot_params.pop('display_mode')
     plot_params.pop('cut_coords')
-    plot_params['levels'] = np.atleast_1d(
-        plot_params.get('levels', 0.5)).tolist()
 
     plot_params['linewidths'] = 0.5
     for i in reversed(range(nsegs)):
         plot_params['colors'] = [colors[i]]
-        display.add_contours(segs[i], **plot_params)
+        display.add_contours(segs[i], levels=[levels[i]],
+                             **plot_params)
 
     svg = extract_svg(display, compress=compress)
     display.close()

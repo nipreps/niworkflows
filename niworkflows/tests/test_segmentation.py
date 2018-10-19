@@ -37,7 +37,7 @@ def test_ROIsPlot(oasis_dir):
     import numpy as np
 
     labels = nb.load(str(oasis_dir / 'tpl-OASIS30ANTs_res-01_variant-4_dtissue.nii.gz'))
-    data = labels.get_data()
+    data = labels.get_data().astype('uint8')
     out_files = []
     ldata = np.zeros_like(data)
     for i, l in enumerate([1, 3, 4, 2]):
@@ -49,9 +49,10 @@ def test_ROIsPlot(oasis_dir):
     roi_rpt = ROIsPlot(
         generate_report=True,
         in_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
-        in_mask=out_files[-1],
-        in_rois=out_files[:-1],
-        colors=['g', 'y']
+        in_mask=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_brainmask.nii.gz'),
+        in_rois=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_variant-4_dtissue.nii.gz'),
+        colors=['g', 'y'],
+        levels=[0.5, 2.5, 3.5, 1.5],
     )
     _smoke_test_report(roi_rpt, 'testROIsPlot.svg')
 

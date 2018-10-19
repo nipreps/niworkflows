@@ -250,6 +250,8 @@ class ROIsPlotInputSpecRPT(nrc.SVGReportCapableInputSpec):
     masked = traits.Bool(False, usedefault=True, desc='mask in_file prior plotting')
     colors = traits.Either(None, traits.List(Str), usedefault=True,
                            desc='use specific colors for contours')
+    levels = traits.Either(None, traits.Float, traits.List(traits.Float),
+                           usedefault=True, desc='pass levels to nilearn.plotting')
 
 
 class ROIsPlot(nrc.ReportingInterface):
@@ -272,7 +274,8 @@ class ROIsPlot(nrc.ReportingInterface):
                 out_file=self.inputs.out_report,
                 masked=self.inputs.masked,
                 colors=self.inputs.colors,
-                compress=self.inputs.compress_report
+                compress=self.inputs.compress_report,
+                levels=self.inputs.levels,
             ),
             fg_svgs=None,
             out_file=self._out_report
