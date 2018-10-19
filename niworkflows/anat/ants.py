@@ -24,7 +24,7 @@ from nipype.interfaces.fsl.maths import ApplyMask
 from nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
 
 # niworkflows
-from ..data import TEMPLATE_MAP, get_template
+from ..data import OSF_RESOURCES, TEMPLATE_ALIASES, get_template
 from ..interfaces.ants import (
     ImageMath,
     ResampleImageBySpacing,
@@ -163,7 +163,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     wf = pe.Workflow(name)
 
     template_path = None
-    if in_template in TEMPLATE_MAP:
+    if in_template in TEMPLATE_ALIASES or in_template in OSF_RESOURCES:
         template_path = get_template(in_template)
     else:
         template_path = Path(in_template)
