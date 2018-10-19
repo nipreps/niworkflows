@@ -19,7 +19,7 @@ OSF_RESOURCES = {
     'fMRIPrep': ('5bc12155ac011000176bff82', '1aec4d286bd89f4f90316ce2cde63218'),
     # conversion between fsaverage5/6 and fs_LR(32k)
     'hcpLR32k': ('5b198ec6b796ba000f3e4858', '0ba9adcaa42fa88616a4cea5a1ce0c5a'),
-    'MNI152Lin': ('5bc91ec811fd9d001a9528d8', '53b22844fd650dd67a0d39287b183376'),
+    'MNI152Lin': ('5bc984f8ccdb6b0018abb993', 'a1eb0a121d2aa68fc8a6e75ab148f1db'),
     'MNI152NLin2009cAsym': ('5b0dbce20f461a000db8fa3d', '5d386d7db9c1dec30230623db25e05e1'),
     'NKI': ('5bc3fad82aa873001bc5a553', '092e56fb3700f9f57b8917a0db887db6'),
     'OASIS30ANTs': ('5b0dbce34c28ef0012c7f788', 'f625a0390eb32a7852c7b0d71ac428cd'),
