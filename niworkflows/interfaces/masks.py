@@ -20,6 +20,7 @@ from nipype.interfaces.base import (
 from nipype.interfaces.mixins import reporting
 from nipype.algorithms import confounds
 from . import report_base as nrc
+from seaborn import color_palette
 
 
 class BETInputSpecRPT(nrc.SVGReportCapableInputSpec,
@@ -261,9 +262,27 @@ class ROIsPlot(nrc.ReportingInterface):
         from niworkflows.viz.utils import plot_segs, compose_view
         seg_files = self.inputs.in_rois
         mask_file = None
+        levels = self.inputs.levels or []
+        colors = self.inputs.colors or []
+
+        nsegs = len(seg_files)
+        if nsegs == 1 and not levels:
+            levels = np.unique(nb.load(seg_files[0]).get_data())
+            levels = (levels[levels > 0] - 0.5).tolist()
+            nsegs = len(levels)
+
+        if nsegs > 1 and not levels:
+            levels = [0.5] * nsegs
+
         if isdefined(self.inputs.in_mask):
             mask_file = self.inputs.in_mask
             seg_files.insert(0, self.inputs.in_mask)
+            levels.insert(0, 0.5)
+            nsegs += 1
+
+        missing = nsegs - len(colors)
+        if missing > 0:
+            colors = colors + color_palette("husl", missing)
 
         self._out_report = os.path.abspath(self.inputs.out_report)
         compose_view(
