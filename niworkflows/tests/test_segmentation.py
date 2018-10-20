@@ -56,9 +56,7 @@ def test_ROIsPlot(oasis_dir):
         in_rois=[out_file],
         colors=['r']
     )
-    print(os.getcwd())
     _smoke_test_report(roi_rpt, 'testROIsPlot.svg')
-
 
 
 def test_SimpleShowMaskRPT(oasis_dir):
