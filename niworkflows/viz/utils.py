@@ -283,16 +283,19 @@ def plot_segs(image_nii, seg_niis, out_file, bbox_nii=None, masked=False,
 
 def _plot_anat_with_contours(image, segs=None, compress='auto',
                              **plot_params):
-    assert segs is not None
-
-    nsegs = len(segs)
+    nsegs = len(segs or [])
     plot_params = plot_params or {}
-    colors = plot_params.pop('colors', []) or []  # colors should not be None
-    levels = np.atleast_1d(
-        plot_params.pop('levels', None) or ([0.5] * nsegs)).tolist()
+    colors = plot_params.pop('colors', None) or []
+    levels = plot_params.pop('levels', None) or []
     missing = nsegs - len(colors)
     if missing > 0:  # missing may be negative
         colors = colors + color_palette("husl", missing)
+
+    colors = [[c] if not isinstance(c, list) else c
+              for c in colors]
+
+    if not levels:
+        levels = [[0.5]] * nsegs
 
     # anatomical
     display = plot_anat(image, **plot_params)
@@ -303,8 +306,8 @@ def _plot_anat_with_contours(image, segs=None, compress='auto',
 
     plot_params['linewidths'] = 0.5
     for i in reversed(range(nsegs)):
-        plot_params['colors'] = [colors[i]]
-        display.add_contours(segs[i], levels=[levels[i]],
+        plot_params['colors'] = colors[i]
+        display.add_contours(segs[i], levels=levels[i],
                              **plot_params)
 
     svg = extract_svg(display, compress=compress)

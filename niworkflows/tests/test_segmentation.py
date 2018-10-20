@@ -36,13 +36,29 @@ def test_ROIsPlot(oasis_dir):
     import nibabel as nb
     import numpy as np
 
+    im = nb.load(str(oasis_dir / 'tpl-OASIS30ANTs_res-01_variant-4_dtissue.nii.gz'))
+    lookup = np.zeros(5, dtype=int)
+    lookup[1] = 1
+    lookup[2] = 4
+    lookup[3] = 2
+    lookup[4] = 3
+    newdata = lookup[np.round(im.get_data()).astype(int)]
+    hdr = im.header.copy()
+    hdr.set_data_dtype('int16')
+    hdr['scl_slope'] = 1
+    hdr['scl_inter'] = 0
+    out_file = os.path.abspath('segments.nii.gz')
+    nb.Nifti1Image(newdata, im.affine, hdr).to_filename(out_file)
     roi_rpt = ROIsPlot(
         generate_report=True,
         in_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
         in_mask=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_brainmask.nii.gz'),
-        in_rois=[str(oasis_dir / 'tpl-OASIS30ANTs_res-01_variant-4_dtissue.nii.gz')]
+        in_rois=[out_file],
+        colors=['r']
     )
+    print(os.getcwd())
     _smoke_test_report(roi_rpt, 'testROIsPlot.svg')
+
 
 
 def test_SimpleShowMaskRPT(oasis_dir):

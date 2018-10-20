@@ -266,35 +266,46 @@ class ROIsPlot(nrc.ReportingInterface):
         colors = self.inputs.colors or []
 
         nsegs = len(seg_files)
-        if nsegs == 1 and not levels:
-            levels = np.unique(nb.load(seg_files[0]).get_data())
-            levels = (levels[levels > 0] - 0.5).tolist()
+        if nsegs == 1:
+            if not levels:  # Segmentation
+                levels = np.unique(np.round(
+                    nb.load(seg_files[0]).get_data()).astype(int))
+                levels = (levels[levels > 0] - 0.5).tolist()
             nsegs = len(levels)
-
-        if nsegs > 1 and not levels:
-            levels = [0.5] * nsegs
+        else:
+            if not levels:
+                levels = [0.5] * nsegs
+        levels = [levels]
 
         if isdefined(self.inputs.in_mask):
             mask_file = self.inputs.in_mask
             seg_files.insert(0, self.inputs.in_mask)
-            levels.insert(0, 0.5)
+            levels.insert(0, [0.5])
             nsegs += 1
 
         missing = nsegs - len(colors)
         if missing > 0:
             colors = colors + color_palette("husl", missing)
 
+        sortedc = []
+        start = 0
+        for l in levels:
+            end = start + len(l)
+            sortedc.append(colors[start:end])
+            start = end
+
+        print(levels, sortedc)
         self._out_report = os.path.abspath(self.inputs.out_report)
         compose_view(
             plot_segs(
                 image_nii=self.inputs.in_file,
                 seg_niis=seg_files,
                 bbox_nii=mask_file,
+                levels=levels,
+                colors=sortedc,
                 out_file=self.inputs.out_report,
                 masked=self.inputs.masked,
-                colors=self.inputs.colors,
                 compress=self.inputs.compress_report,
-                levels=self.inputs.levels,
             ),
             fg_svgs=None,
             out_file=self._out_report
