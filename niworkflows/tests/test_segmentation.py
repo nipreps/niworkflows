@@ -54,7 +54,8 @@ def test_ROIsPlot(oasis_dir):
         in_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
         in_mask=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_brainmask.nii.gz'),
         in_rois=[out_file],
-        colors=['r']
+        levels=[1.5, 2.5, 3.5],
+        colors=['gold', 'magenta', 'b'],
     )
     _smoke_test_report(roi_rpt, 'testROIsPlot.svg')
 
@@ -88,7 +89,7 @@ def test_ROIsPlot2(oasis_dir):
         in_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
         in_mask=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_brainmask.nii.gz'),
         in_rois=out_files,
-        colors=['r', 'magenta', 'gold', 'navyblue', 'g']
+        colors=['gold', 'lightblue', 'b', 'g']
     )
     _smoke_test_report(roi_rpt, 'testROIsPlot2.svg')
 
