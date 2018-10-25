@@ -272,15 +272,15 @@ class ROIsPlot(nrc.ReportingInterface):
                     nb.load(seg_files[0]).get_data()).astype(int))
                 levels = (levels[levels > 0] - 0.5).tolist()
             nsegs = len(levels)
-        else:
-            if not levels:
-                levels = [0.5] * nsegs
-        levels = [levels]
+
+        if levels:
+            levels = [levels]
 
         if isdefined(self.inputs.in_mask):
             mask_file = self.inputs.in_mask
             seg_files.insert(0, self.inputs.in_mask)
-            levels.insert(0, [0.5])
+            if levels:
+                levels.insert(0, [0.5])
             nsegs += 1
 
         missing = nsegs - len(colors)
@@ -294,7 +294,6 @@ class ROIsPlot(nrc.ReportingInterface):
             sortedc.append(colors[start:end])
             start = end
 
-        print(levels, sortedc)
         self._out_report = os.path.abspath(self.inputs.out_report)
         compose_view(
             plot_segs(

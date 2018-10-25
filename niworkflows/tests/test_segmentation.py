@@ -59,6 +59,40 @@ def test_ROIsPlot(oasis_dir):
     _smoke_test_report(roi_rpt, 'testROIsPlot.svg')
 
 
+def test_ROIsPlot2(oasis_dir):
+    """ the BET report capable test """
+    import nibabel as nb
+    import numpy as np
+
+    im = nb.load(str(oasis_dir / 'tpl-OASIS30ANTs_res-01_variant-4_dtissue.nii.gz'))
+    lookup = np.zeros(5, dtype=int)
+    lookup[1] = 1
+    lookup[2] = 4
+    lookup[3] = 2
+    lookup[4] = 3
+    newdata = lookup[np.round(im.get_data()).astype(int)]
+    hdr = im.header.copy()
+    hdr.set_data_dtype('int16')
+    hdr['scl_slope'] = 1
+    hdr['scl_inter'] = 0
+
+    out_files = []
+    for i in range(1, 5):
+        seg = np.zeros_like(newdata, dtype='uint8')
+        seg[(newdata > 0) & (newdata <= i)] = 1
+        out_file = os.path.abspath('segments%02d.nii.gz' % i)
+        nb.Nifti1Image(seg, im.affine, hdr).to_filename(out_file)
+        out_files.append(out_file)
+    roi_rpt = ROIsPlot(
+        generate_report=True,
+        in_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
+        in_mask=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_brainmask.nii.gz'),
+        in_rois=out_files,
+        colors=['r', 'magenta', 'gold', 'navyblue', 'g']
+    )
+    _smoke_test_report(roi_rpt, 'testROIsPlot2.svg')
+
+
 def test_SimpleShowMaskRPT(oasis_dir):
     """ the BET report capable test """
 
