@@ -10,7 +10,7 @@ as well as for open-source software distribution.
 from __future__ import absolute_import, division, print_function
 import datetime
 
-__version__ = '0.4.4'
+__version__ = '0.5.0'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
@@ -20,7 +20,7 @@ __credits__ = ['Oscar Esteban', 'Ross Blair', 'Shoshana L. Berleant',
                'Russell A. Poldrack']
 __license__ = '3-clause BSD'
 __maintainer__ = 'Oscar Esteban'
-__email__ = 'crn.poldracklab@gmail.com'
+__email__ = 'code@oscaresteban.es'
 __status__ = 'Prototype'
 
 __description__ = """\
@@ -74,4 +74,4 @@ EXTRA_REQUIRES = {
 }
 
 # Enable a handle to install all extra dependencies at once
-EXTRA_REQUIRES['all'] = [val for _, val in list(EXTRA_REQUIRES.items())]
+EXTRA_REQUIRES['all'] = list(EXTRA_REQUIRES.values())
