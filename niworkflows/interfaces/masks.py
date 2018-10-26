@@ -20,6 +20,7 @@ from nipype.interfaces.base import (
 from nipype.interfaces.mixins import reporting
 from nipype.algorithms import confounds
 from . import report_base as nrc
+from seaborn import color_palette
 
 
 class BETInputSpecRPT(nrc.SVGReportCapableInputSpec,
@@ -250,6 +251,9 @@ class ROIsPlotInputSpecRPT(nrc.SVGReportCapableInputSpec):
     masked = traits.Bool(False, usedefault=True, desc='mask in_file prior plotting')
     colors = traits.Either(None, traits.List(Str), usedefault=True,
                            desc='use specific colors for contours')
+    levels = traits.Either(None, traits.List(traits.Float),
+                           usedefault=True, desc='pass levels to nilearn.plotting')
+    mask_color = Str('r', usedefault=True, desc='color for mask')
 
 
 class ROIsPlot(nrc.ReportingInterface):
@@ -258,10 +262,39 @@ class ROIsPlot(nrc.ReportingInterface):
     def _generate_report(self):
         from niworkflows.viz.utils import plot_segs, compose_view
         seg_files = self.inputs.in_rois
-        mask_file = None
-        if isdefined(self.inputs.in_mask):
-            mask_file = self.inputs.in_mask
-            seg_files.insert(0, self.inputs.in_mask)
+        mask_file = None if not isdefined(self.inputs.in_mask) \
+            else self.inputs.in_mask
+
+        # Remove trait decoration and replace None with []
+        levels = [l for l in self.inputs.levels or []]
+        colors = [c for c in self.inputs.colors or []]
+
+        if len(seg_files) == 1:  # in_rois is a segmentation
+            nsegs = len(levels)
+            if nsegs == 0:
+                levels = np.unique(np.round(
+                    nb.load(seg_files[0]).get_data()).astype(int))
+                levels = (levels[levels > 0] - 0.5).tolist()
+                nsegs = len(levels)
+
+            levels = [levels]
+            missing = nsegs - len(colors)
+            if missing > 0:
+                colors = colors + color_palette("husl", missing)
+            colors = [colors]
+        else:  # in_rois is a list of masks
+            nsegs = len(seg_files)
+            levels = [[0.5]] * nsegs
+            missing = nsegs - len(colors)
+            if missing > 0:
+                colors = [[c] for c in colors + color_palette("husl", missing)]
+
+        if mask_file:
+            seg_files.insert(0, mask_file)
+            if levels:
+                levels.insert(0, [0.5])
+            colors.insert(0, [self.inputs.mask_color])
+            nsegs += 1
 
         self._out_report = os.path.abspath(self.inputs.out_report)
         compose_view(
@@ -269,10 +302,11 @@ class ROIsPlot(nrc.ReportingInterface):
                 image_nii=self.inputs.in_file,
                 seg_niis=seg_files,
                 bbox_nii=mask_file,
+                levels=levels,
+                colors=colors,
                 out_file=self.inputs.out_report,
                 masked=self.inputs.masked,
-                colors=self.inputs.colors,
-                compress=self.inputs.compress_report
+                compress=self.inputs.compress_report,
             ),
             fg_svgs=None,
             out_file=self._out_report

@@ -55,15 +55,17 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     orientation = traits.Enum('RAS', 'LAS', mandatory=True, usedefault=True,
                               desc='modify template orientation (should match input image)')
     # Modality of the reference image.
-    reference = traits.Enum('T1', 'T2', 'PD', mandatory=True, usedefault=True,
+    reference = traits.Enum('T1w', 'T2w', 'boldref', 'PDw', mandatory=True, usedefault=True,
                             desc='set the reference modality for registration')
     # T1 or EPI registration?
-    moving = traits.Enum('T1', 'EPI', usedefault=True, mandatory=True,
+    moving = traits.Enum('T1w', 'bold', usedefault=True, mandatory=True,
                          desc='registration type')
     # Template to use as the default reference image.
     template = traits.Enum(
+        'MNI152NLin2009cAsym',
+        'OASIS',
+        'NKI',
         'mni_icbm152_linear',
-        'mni_icbm152_nlin_asym_09c',
         usedefault=True, desc='define the template to be used')
     # Load other settings from file.
     settings = traits.List(File(exists=True), desc='pass on the list of settings files')
@@ -340,35 +342,36 @@ class RobustMNINormalization(BaseInterface):
                 raise NotImplementedError
 
             # Get the template specified by the user.
-            mni_template = getters.get_dataset(self.inputs.template)
+            template = getters.get_template(self.inputs.template)
             # Set the template resolution.
             resolution = self.inputs.template_resolution
+            _tpl_fmt = 'tpl-{}*_res-%02d_%s.nii.gz'.format(self.inputs.template)
 
-            _template_fmt = op.join(mni_template, '%dmm_%s.nii.gz')
-            # If explicit masking is enabled...
+            # Find actual files
+            ref_template = str(
+                list(template.glob(_tpl_fmt % (resolution, self.inputs.reference)))[0])
+            ref_mask = str(
+                list(template.glob(_tpl_fmt % (resolution, 'brainmask')))[0])
+
+            # Default is explicit masking disabled
+            args['fixed_image'] = ref_template
+            # Use the template mask as the fixed mask.
+            args['fixed_image_masks'] = ref_mask
+
+            # Overwrite defaults if explicit masking
             if self.inputs.explicit_masking:
                 # Mask the template image with the template mask.
+                args['fixed_image'] = mask(ref_template, ref_mask,
+                                           "fixed_masked.nii.gz")
                 # Do not use a fixed mask during registration.
-                args['fixed_image'] = mask(
-                        _template_fmt % (resolution, self.inputs.reference),
-                        _template_fmt % (resolution, 'brainmask'),
-                        "fixed_masked.nii.gz")
+                args.pop('fixed_image_masks', None)
 
                 # If a lesion mask is provided...
                 if isdefined(self.inputs.lesion_mask):
                     # Create a cost function mask with the form: [global mask]
                     # Use this as the fixed mask.
                     args['fixed_image_masks'] = create_cfm(
-                        _template_fmt % (resolution, 'brainmask'),
-                        lesion_mask=None,
-                        global_mask=True)
-
-            # If explicit masking is disabled...
-            else:
-                # Use the raw template as the fixed image.
-                args['fixed_image'] = _template_fmt % (resolution, self.inputs.reference)
-                # Use the template mask as the fixed mask.
-                args['fixed_image_masks'] = _template_fmt % (resolution, 'brainmask')
+                        ref_mask, lesion_mask=None, global_mask=True)
 
         return args
 
@@ -378,9 +381,11 @@ class RobustMNINormalization(BaseInterface):
         if isdefined(self.inputs.reference_mask):
             target_mask = self.inputs.reference_mask
         else:
-            mni_template = getters.get_dataset(self.inputs.template)
+            template = getters.get_template(self.inputs.template)
             resolution = self.inputs.template_resolution
-            target_mask = op.join(mni_template, '%dmm_brainmask.nii.gz' % resolution)
+            target_mask = str(
+                list(template.glob('tpl-%s*_res-%02d_brainmask.nii.gz' % (
+                     self.inputs.template, resolution)))[0])
 
         res = ApplyTransforms(dimension=3,
                               input_image=input_mask,

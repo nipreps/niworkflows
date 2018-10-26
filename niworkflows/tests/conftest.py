@@ -6,10 +6,7 @@ import os
 from tempfile import mkdtemp
 from datetime import datetime as dt
 import pytest
-
-from niworkflows.data.getters import (
-    get_mni_template_ras, get_ds003_downsampled, get_ants_oasis_template_ras
-)
+from niworkflows.data.getters import get_template, get_ds003_downsampled
 
 filepath = os.path.dirname(os.path.realpath(__file__))
 datadir = os.path.realpath(os.path.join(filepath, 'data'))
@@ -32,17 +29,22 @@ def pytest_runtest_setup(item):
 
 @pytest.fixture
 def mni_dir():
-    return get_mni_template_ras()
+    return get_template('MNI152Lin')
+
+
+@pytest.fixture
+def oasis_dir():
+    return get_template('OASIS')
 
 
 @pytest.fixture
 def reference():
-    return os.path.join(get_mni_template_ras(), 'MNI152_T1_2mm.nii.gz')
+    return str(get_template('MNI152Lin') / 'tpl-MNI152Lin_space-MNI_res-02_T1w.nii.gz')
 
 
 @pytest.fixture
 def reference_mask():
-    return os.path.join(get_mni_template_ras(), 'MNI152_T1_2mm_brain_mask.nii.gz')
+    return str(get_template('MNI152Lin') / 'tpl-MNI152Lin_space-MNI_res-02_brainmask.nii.gz')
 
 
 @pytest.fixture
@@ -55,8 +57,3 @@ def nthreads():
     from multiprocessing import cpu_count
     # Tests are linear, so don't worry about leaving space for a control thread
     return min(int(os.getenv('CIRCLE_NPROCS', '8')), cpu_count())
-
-
-@pytest.fixture
-def oasis_dir():
-    return get_ants_oasis_template_ras()

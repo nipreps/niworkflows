@@ -169,5 +169,5 @@ def test_ANTSRegistrationRPT(monkeypatch, reference, moving):
     ants_rpt = ANTSRegistrationRPT(
         generate_report=True, moving_image=moving, fixed_image=reference,
         from_file=pkgr.resource_filename(
-            'niworkflows.data', 't1-mni_registration_testing_000.json'))
+            'niworkflows.data', 't1w-mni_registration_testing_000.json'))
     _smoke_test_report(ants_rpt, 'testANTSRegistrationRPT.svg')
