@@ -370,26 +370,26 @@ class EstimateReferenceImage(SimpleInterface):
     output_spec = EstimateReferenceImageOutputSpec
 
     def _run_interface(self, runtime):
+        in_nii = nb.load(self.inputs.in_file)
+        n_volumes_to_discard = _get_vols_to_discard(in_nii)
+
+        self._results["n_volumes_to_discard"] = n_volumes_to_discard
+
         if isdefined(self.inputs.sbref_file):
             self._results['ref_image'] = self.inputs.sbref_file
             return runtime
-
-        in_nii = nb.load(self.inputs.in_file)
-        data_slice = in_nii.dataobj[:, :, :, :50]
 
         # Slicing may induce inconsistencies with shape-dependent values in extensions.
         # For now, remove all. If this turns out to be a mistake, we can select extensions
         # that don't break pipeline stages.
         in_nii.header.extensions.clear()
 
-        n_volumes_to_discard = _get_vols_to_discard(in_nii)
-
         out_ref_fname = os.path.join(runtime.cwd, "ref_image.nii.gz")
 
         if n_volumes_to_discard == 0:
             if in_nii.shape[-1] > 40:
                 slice_fname = os.path.join(runtime.cwd, "slice.nii.gz")
-                nb.Nifti1Image(data_slice[:, :, :, 20:40], in_nii.affine,
+                nb.Nifti1Image(in_nii.dataobj[:, :, :, 20:40], in_nii.affine,
                                in_nii.header).to_filename(slice_fname)
             else:
                 slice_fname = self.inputs.in_file
@@ -405,13 +405,12 @@ class EstimateReferenceImage(SimpleInterface):
             median_image_data = np.median(mc_slice_nii.get_data(), axis=3)
         else:
             median_image_data = np.median(
-                data_slice[:, :, :, :n_volumes_to_discard], axis=3)
+                in_nii.dataobj[:, :, :, :n_volumes_to_discard], axis=3)
 
         nb.Nifti1Image(median_image_data, in_nii.affine,
                        in_nii.header).to_filename(out_ref_fname)
 
         self._results["ref_image"] = out_ref_fname
-        self._results["n_volumes_to_discard"] = n_volumes_to_discard
 
         return runtime
 
