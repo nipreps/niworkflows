@@ -1,3 +1,9 @@
+0.5.1 (November 8, 2018)
+========================
+
+* [FIX] Count non-steady-state volumes even if sbref is passed  (#258)
+* [FIX] Remove empty nipype file (#259)
+
 0.5.0 (October 26, 2018)
 ========================
 
