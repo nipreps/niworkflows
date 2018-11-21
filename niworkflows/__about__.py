@@ -10,7 +10,7 @@ as well as for open-source software distribution.
 from __future__ import absolute_import, division, print_function
 import datetime
 
-__version__ = '0.5.0'
+__version__ = '0.5.1-1'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
