@@ -188,10 +188,10 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     target_basename = '_'.join(tpl_target_path.split('_')[:-1])
 
     # Get probabilistic brain mask if available
-    tpl_mask_path = '%s_class-brainmask_probtissue.nii.gz' % target_basename
+    tpl_mask_path = '%s_label-brain_probseg.nii.gz' % target_basename
     # Fall-back to a binary mask just in case
     if not os.path.exists(tpl_mask_path):
-        tpl_mask_path = '%s_brainmask.nii.gz' % target_basename
+        tpl_mask_path = '%s_desc-brain_mask.nii.gz' % target_basename
 
     if not os.path.exists(tpl_mask_path):
         raise ValueError(
@@ -205,7 +205,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                         name='inputnode')
 
     # Try to find a registration mask, set if available
-    tpl_regmask_path = '%s_label-BrainCerebellumRegistration_roi.nii.gz' % target_basename
+    tpl_regmask_path = '%s_desc-BrainCerebellumRegistration_mask.nii.gz' % target_basename
     if os.path.exists(tpl_regmask_path):
         inputnode.inputs.in_mask = tpl_regmask_path
 
