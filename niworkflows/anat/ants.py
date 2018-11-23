@@ -68,7 +68,8 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                              atropos_refine=True,
                              atropos_use_random_seed=True,
                              atropos_model=None,
-                             use_laplacian=True):
+                             use_laplacian=True,
+                             bspline_fitting_distance=200):
     """
     A Nipype implementation of the official ANTs' ``antsBrainExtraction.sh``
     workflow (only for 3D images).
@@ -128,6 +129,8 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         use_laplacian : bool
             Enables or disables alignment of the Laplacian as an additional
             criterion for image registration quality (default: True)
+        bspline_fitting_distance : float
+            The size of the b-spline mesh grid elements, in mm (default: 200)
         name : str, optional
             Workflow name (default: antsBrainExtraction)
 
@@ -216,7 +219,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         N4BiasFieldCorrection(
             dimension=3, save_bias=True, copy_header=True,
             n_iterations=[50] * 4, convergence_threshold=1e-7, shrink_factor=4,
-            bspline_fitting_distance=200),
+            bspline_fitting_distance=bspline_fitting_distance),
         n_procs=omp_nthreads, name='inu_n4', iterfield=['input_image'])
 
     res_tmpl = pe.Node(ResampleImageBySpacing(out_spacing=(4, 4, 4),
