@@ -67,7 +67,8 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                              modality='T1',
                              atropos_refine=True,
                              atropos_use_random_seed=True,
-                             atropos_model=None):
+                             atropos_model=None,
+                             use_laplacian=True):
     """
     A Nipype implementation of the official ANTs' ``antsBrainExtraction.sh``
     workflow (only for 3D images).
@@ -124,6 +125,9 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         atropos_model : tuple or None
             Allows to specify a particular segmentation model, overwriting
             the defaults based on ``modality``
+        use_laplacian : bool
+            Enables or disables alignment of the Laplacian as an additional
+            criterion for image registration quality (default: True)
         name : str, optional
             Workflow name (default: antsBrainExtraction)
 
@@ -286,13 +290,9 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         (trunc, inu_n4, [('output_image', 'input_image')]),
         (inu_n4, res_target, [
             (('output_image', _pop), 'input_image')]),
-        (inu_n4, lap_target, [
-            (('output_image', _pop), 'op1')]),
         (res_tmpl, init_aff, [('output_image', 'fixed_image')]),
         (res_target, init_aff, [('output_image', 'moving_image')]),
         (inu_n4, mrg_target, [('output_image', 'in1')]),
-        (lap_tmpl, mrg_tmpl, [('output_image', 'in2')]),
-        (lap_target, mrg_target, [('output_image', 'in2')]),
 
         (init_aff, norm, [('output_transform', 'initial_moving_transform')]),
         (mrg_tmpl, norm, [('out', 'fixed_image')]),
@@ -309,6 +309,14 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         (apply_mask, outputnode, [('out_file', 'bias_corrected')]),
         (inu_n4, outputnode, [('bias_image', 'bias_image')]),
     ])
+
+    if use_laplacian:
+        wf.connect([
+            (inu_n4, lap_target, [
+                (('output_image', _pop), 'op1')]),
+            (lap_tmpl, mrg_tmpl, [('output_image', 'in2')]),
+            (lap_target, mrg_target, [('output_image', 'in2')])
+        ])
 
     if atropos_refine:
         atropos_wf = init_atropos_wf(
