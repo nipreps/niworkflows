@@ -108,7 +108,7 @@ class fMRIPlot(object):
 
 def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
                 subplot=None, title=None, output_file=None, legend=False,
-                lut=None,tr=None):
+                lut=None, tr=None):
     """
     Plot an image representation of voxel intensities across time also know
     as the "carpet plot" or "Power plot". See Jonathan Power Neuroimage
