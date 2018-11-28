@@ -141,8 +141,9 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
         legend : bool
             Whether to render the average functional series with ``atlaslabels`` as
             overlay.
-        tr : float , optional 
-            Specify the TR, if specified it uses this value. If left as None, # Frames is plotted instead of time.  
+        tr : float , optional
+            Specify the TR, if specified it uses this value. If left as None, 
+            # Frames is plotted instead of time. 
     """
 
     # Define TR and number of frames
