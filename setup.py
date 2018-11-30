@@ -41,6 +41,9 @@ def main():
         # Data
         package_data={'niworkflows': ['data/t1-mni_registration*.json']},
         include_package_data=True,
+        entry_points={'console_scripts': [
+            'templateflow=niworkflows.anat.templateflow:cli'
+        ]},
     )
 
 

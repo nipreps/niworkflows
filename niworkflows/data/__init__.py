@@ -12,4 +12,5 @@ from .getters import (
     get_template,
     get_bids_examples,
     TEMPLATE_ALIASES,
+    OSF_RESOURCES,
 )

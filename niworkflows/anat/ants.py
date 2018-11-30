@@ -157,6 +157,11 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
             Output segmentation by ATROPOS
         out_tpms
             Output :abbr:`TPMs (tissue probability maps)` by ATROPOS
+        out_fwd_xfm
+            Output transform that maps from the input image to
+            the template
+        out_bwd_xfm
+            Inverse of ``out_fwd_xfm``
 
 
     """
@@ -203,7 +208,8 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         inputnode.inputs.in_mask = tpl_regmask_path
 
     outputnode = pe.Node(niu.IdentityInterface(
-        fields=['bias_corrected', 'out_mask', 'bias_image', 'out_segm']),
+        fields=['bias_corrected', 'out_mask', 'bias_image', 'out_segm',
+                'out_fwd_xfm', 'out_bwd_xfm']),
         name='outputnode')
 
     trunc = pe.MapNode(ImageMath(operation='TruncateImageIntensity', op2='0.01 0.999 256'),
@@ -257,6 +263,15 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     if parseversion(Registration().version) >= Version('2.2.0'):
         fixed_mask_trait += 's'
 
+    if omp_nthreads is not None:
+        environ = {
+            'NSLOTS': '%d' % omp_nthreads,
+            'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS': '%d' % omp_nthreads,
+            'OMP_NUM_THREADS': '%d' % omp_nthreads,
+        }
+        init_aff.inputs.environ = environ
+        norm.inputs.environ = environ
+
     map_brainmask = pe.Node(
         ApplyTransforms(interpolation='Gaussian', float=True),
         name='map_brainmask',
@@ -298,8 +313,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         (mrg_tmpl, norm, [('out', 'fixed_image')]),
         (mrg_target, norm, [('out', 'moving_image')]),
         (norm, map_brainmask, [
-            ('reverse_invert_flags', 'invert_transform_flags'),
-            ('reverse_transforms', 'transforms')]),
+            ('inverse_composite_transform', 'transforms')]),
         (map_brainmask, thr_brainmask, [('output_image', 'input_image')]),
         (thr_brainmask, dil_brainmask, [('output_image', 'op1')]),
         (dil_brainmask, get_brainmask, [('output_image', 'op1')]),
@@ -308,6 +322,9 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         (get_brainmask, outputnode, [('output_image', 'out_mask')]),
         (apply_mask, outputnode, [('out_file', 'bias_corrected')]),
         (inu_n4, outputnode, [('bias_image', 'bias_image')]),
+        (init_aff, outputnode, [('output_transform', 'out_fwd_xfm')]),
+        # (norm, outputnode, [('composite_transform', 'out_fwd_xfm')]),
+        # (norm, outputnode, [('inverse_composite_transform', 'out_bwd_xfm')]),
     ])
 
     if atropos_refine:
@@ -497,8 +514,11 @@ def init_atropos_wf(name='atropos_wf',
     depad_csf = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
                         name='27_depad_csf')
 
+    msk_conform = pe.Node(niu.Function(function=_conform_mask), name='msk_conform')
+
     merge_tpms = pe.Node(niu.Merge(in_segmentation_model[0]), name='merge_tpms')
     wf.connect([
+        (inputnode, msk_conform, [(('in_files', _pop), 'in_reference')]),
         (inputnode, pad_mask, [('in_mask', 'op1')]),
         (inputnode, atropos, [('in_files', 'intensity_images'),
                               ('in_mask', 'mask_image')]),
@@ -538,7 +558,8 @@ def init_atropos_wf(name='atropos_wf',
         (depad_csf, merge_tpms, [('output_image', 'in1')]),
         (depad_gm, merge_tpms, [('output_image', 'in2')]),
         (depad_wm, merge_tpms, [('output_image', 'in3')]),
-        (depad_mask, outputnode, [('output_image', 'out_mask')]),
+        (depad_mask, msk_conform, [('output_image', 'in_mask')]),
+        (msk_conform, outputnode, [('out', 'out_mask')]),
         (depad_segm, outputnode, [('output_image', 'out_segm')]),
         (merge_tpms, outputnode, [('out', 'out_tpms')]),
     ])
@@ -576,3 +597,34 @@ def _gen_name(in_file):
     import os
     from nipype.utils.filemanip import fname_presuffix
     return os.path.basename(fname_presuffix(in_file, suffix='processed'))
+
+
+def _conform_mask(in_mask, in_reference):
+    from pathlib import Path
+    import nibabel as nb
+    from nipype.utils.filemanip import fname_presuffix
+
+    ref = nb.load(in_reference)
+    nii = nb.load(in_mask)
+    hdr = nii.header.copy()
+    hdr.set_data_dtype('int16')
+    hdr.set_slope_inter(1, 0)
+
+    qform, qcode = ref.header.get_qform(coded=True)
+    if qcode is not None:
+        hdr.set_qform(qform, int(qcode))
+
+    sform, scode = ref.header.get_sform(coded=True)
+    if scode is not None:
+        hdr.set_sform(sform, int(scode))
+
+    if '_maths' in in_mask:
+        ext = ''.join(Path(in_mask).suffixes)
+        basename = Path(in_mask).name
+        in_mask = basename.split('_maths')[0] + ext
+
+    out_file = fname_presuffix(in_mask, suffix='_mask',
+                               newpath=str(Path()))
+    nii.__class__(nii.get_data().astype('int16'), ref.affine,
+                  hdr).to_filename(out_file)
+    return out_file
