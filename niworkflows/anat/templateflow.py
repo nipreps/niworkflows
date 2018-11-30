@@ -23,27 +23,50 @@ from ..data import get_template
 from .ants import init_brain_extraction_wf, AI
 from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
-#     FixHeaderApplyTransforms as ApplyTransforms,
+    # FixHeaderApplyTransforms as ApplyTransforms,
 )
 
 
 def init_templateflow_wf(
     in_files,
     mov_template,
-    name='templateflow_wf',
     ref_template='MNI152NLin2009cAsym',
     use_float=True,
     omp_nthreads=None,
     mem_gb=3.0,
     modality='T1w',
     normalization_quality='precise',
+    name='templateflow_wf',
 ):
     """
-    A Nipype workflow to perform image registration between templates
+    A Nipype workflow to perform image registration between two templates
+    *R* and *M*. *R* is the *reference template*, selected by a templateflow
+    identifier such as ``MNI152NLin2009cAsym``, and *M* is the *moving
+    template* (e.g., ``MNI152Lin``). This workflows maps data defined on
+    template-*M* space onto template-*R* space.
+
 
     1. Run the subrogate images through ``antsBrainExtraction``.
+    2. Recompute :abbr:`INU (intensity non-uniformity)` correction using
+        the mask obtained in 1).
+    3. Independently, run spatial normalization of every
+       :abbr:`INU (intensity non-uniformity)` corrected image
+       (supplied via ``in_files``) to both templates.
+    4. Calculate an initialization between both templates, using them directly.
+    5. Run multi-channel image registration of the images resulting from
+        3). Both sets of images (one registered to *R* and another to *M*)
+        are then used as reference and moving images in the registration
+        framework.
 
     **Parameters**
+
+    in_files: list of files
+        a list of paths pointing to the images that will be used as surrogates
+    mov_template: str
+        a templateflow identifier for template-*M*
+    ref_template: str
+        a templateflow identifier for template-*R* (default: ``MNI152NLin2009cAsym``).
+
 
     """
 
@@ -148,10 +171,11 @@ def init_templateflow_wf(
                 'niworkflows.data', 't1w-mni_registration_%s_000.json' % normalization_quality)),
         name='flow_norm', n_procs=omp_nthreads,
     )
-    flow.inputs.fixed_image_masks = [tpl_ref_mask] * ninputs
-    flow.inputs.moving_image_masks = [tpl_mov_mask] * ninputs
+    flow.inputs.fixed_image_masks = tpl_ref_mask
+    flow.inputs.moving_image_masks = tpl_mov_mask
     flow.inputs.metric = [[v] * ninputs for v in flow.inputs.metric]
-    flow.inputs.metric_weight = [[1 / ninputs] * ninputs for _ in in_files]
+    flow.inputs.metric_weight = [[1 / ninputs] * ninputs
+                                 for _ in flow.inputs.metric_weight]
     flow.inputs.radius_or_number_of_bins = [
         [v] * ninputs for v in flow.inputs.radius_or_number_of_bins]
     flow.inputs.sampling_percentage = [
