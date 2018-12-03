@@ -11,9 +11,11 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 
 # general purpose
 import pkg_resources as pkgr
+import logging
 from multiprocessing import cpu_count
 
 # nipype
+from nipype import logging as nlogging
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces.ants import N4BiasFieldCorrection
@@ -230,18 +232,29 @@ def cli():
                         default=cpu_count(), help='number of threads')
     parser.add_argument('--testing', action='store_true',
                         default=False, help='run in testing mode')
+    parser.add_argument("-v", "--verbose", dest="verbose_count", action="count", default=0,
+                        help="increases log verbosity for each occurence, debug level is -vvv")
+    parser.add_argument('--legacy', action='store_true', default=False,
+                        help='use LegacyMultiProc')
     opts = parser.parse_args()
 
     plugin_settings = {'plugin': 'Linear'}
     if opts.cpu_count > 1:
         plugin_settings = {
-            'plugin': 'LegacyMultiProc',
+            'plugin': 'LegacyMultiProc' if opts.legacy else 'MultiProc',
             'plugin_args': {
                 'raise_insufficient': False,
                 'maxtasksperchild': 1,
                 'n_procs': opts.cpu_count,
             }
         }
+
+    # Retrieve logging level
+    log_level = int(max(25 - 5 * opts.verbose_count, logging.DEBUG))
+    # Set logging
+    nlogging.getLogger('nipype.workflow').setLevel(log_level)
+    nlogging.getLogger('nipype.interface').setLevel(log_level)
+    nlogging.getLogger('nipype.utils').setLevel(log_level)
 
     tf = init_templateflow_wf(
         [[str(f)] for f in opts.input_files],
