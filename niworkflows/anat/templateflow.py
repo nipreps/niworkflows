@@ -203,7 +203,8 @@ def init_templateflow_wf(
     fssource = pe.Node(
         FreeSurferSource(subjects_dir=str(fs_subjects_dir)),
         name='fssource', run_without_submitting=True)
-    tonative = pe.Node(fs.Label2Vol(), name='tonative')
+    tonative = pe.Node(fs.Label2Vol(subjects_dir=str(fs_subjects_dir)),
+                       name='tonative')
     tonii = pe.Node(
         fs.MRIConvert(out_type='niigz', resample_type='nearest'),
         name='tonii')

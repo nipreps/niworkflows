@@ -494,22 +494,19 @@ class AntsJointFusion(ANTSCommand):
             outputs['out_label_fusion'] = os.path.abspath(
                 self.inputs.out_label_fusion)
         if isdefined(self.inputs.out_intensity_fusion_name_format):
-            outputs['out_intensity_fusion'] = glob(
-                os.path.abspath(
-                    self.inputs.out_intensity_fusion_name_format.replace(
-                        '%d', '*') + '.nii.gz')
+            outputs['out_intensity_fusion'] = glob(os.path.abspath(
+                self.inputs.out_intensity_fusion_name_format.replace(
+                    '%d', '*'))
             )
         if isdefined(self.inputs.out_label_post_prob_name_format):
-            outputs['out_label_post_prob'] = glob(
-                os.path.abspath(
-                    self.inputs.out_label_post_prob_name_format.replace(
-                        '%d', '*') + '.nii.gz')
+            outputs['out_label_post_prob'] = glob(os.path.abspath(
+                self.inputs.out_label_post_prob_name_format.replace(
+                    '%d', '*'))
             )
         if isdefined(self.inputs.out_atlas_voting_weight_name_format):
-            outputs['out_atlas_voting_weight'] = glob(
-                os.path.abspath(
-                    self.inputs.out_atlas_voting_weight_name_format.replace(
-                        '%d', '*') + '.nii.gz')
+            outputs['out_atlas_voting_weight'] = glob(os.path.abspath(
+                self.inputs.out_atlas_voting_weight_name_format.replace(
+                    '%d', '*'))
             )
 
         return outputs
