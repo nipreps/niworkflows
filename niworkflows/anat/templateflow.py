@@ -19,12 +19,13 @@ from nipype import logging as nlogging
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces import freesurfer as fs
-from nipype.interfaces.ants import N4BiasFieldCorrection, AntsJointFusion
-from nipype.interfaces.io import FreeSurferSource, DataSink
+from nipype.interfaces.ants import N4BiasFieldCorrection
+from nipype.interfaces.io import FreeSurferSource
 
 # niworkflows
 from ..data import get_template
-from .ants import init_brain_extraction_wf, AI
+from .ants import init_brain_extraction_wf
+from ..interfaces.ants import AI, AntsJointFusion
 from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
     FixHeaderApplyTransforms as ApplyTransforms,
@@ -248,13 +249,14 @@ def init_templateflow_wf(
             source_file='group/tpl-{0}_T1w.nii.gz'.format(ref_template)),
         name='ref_join_labels_ds', run_without_submitting=True)
 
-    # ref_join_probs_ds = pe.Node(
-    #     DerivativesDataSink(
-    #         base_directory=str(output_dir.parent),
-    #         out_path_base=output_dir.name, space=ref_template,
-    #         suffix='probtissue', desc='aparc', keep_dtype=False,
-    #         source_file='group/tpl-{0}_T1w.nii.gz'.format(ref_template)),
-    #     name='ref_join_probs_ds', run_without_submitting=True)
+    ref_join_probs_ds = pe.MapNode(
+        DerivativesDataSink(
+            base_directory=str(output_dir.parent),
+            out_path_base=output_dir.name, space=ref_template,
+            suffix='probtissue', desc='aparc', keep_dtype=False,
+            source_file='group/tpl-{0}_T1w.nii.gz'.format(ref_template)),
+        name='ref_join_probs_ds', run_without_submitting=True,
+        iterfield=['in_file'])
 
     # ref_join_voting_ds = pe.Node(
     #     DerivativesDataSink(
@@ -290,6 +292,15 @@ def init_templateflow_wf(
             suffix='dtissue', desc='aparc', keep_dtype=False,
             source_file='group/tpl-{0}_T1w.nii.gz'.format(mov_template)),
         name='mov_join_labels_ds', run_without_submitting=True)
+
+    mov_join_probs_ds = pe.MapNode(
+        DerivativesDataSink(
+            base_directory=str(output_dir.parent),
+            out_path_base=output_dir.name, space=mov_template,
+            suffix='probtissue', desc='aparc', keep_dtype=False,
+            source_file='group/tpl-{0}_T1w.nii.gz'.format(mov_template)),
+        name='mov_join_probs_ds', run_without_submitting=True,
+        iterfield=['in_file'])
 
     # Datasinking
     ref_norm_ds = pe.Node(
@@ -360,11 +371,13 @@ def init_templateflow_wf(
             ('aparc', 'atlas_segmentation_image')]),
         # Datasinks
         (ref_join_labels, ref_join_labels_ds, [('out_label_fusion', 'in_file')]),
-        # (ref_join_labels, ref_join_probs_ds, [
-        #     ('out_label_post_prob_name_format', 'in_file')]),
+        (ref_join_labels, ref_join_probs_ds, [
+            ('out_label_post_prob', 'in_file')]),
         # (ref_join_labels, ref_join_voting_ds, [
         #     ('out_atlas_voting_weight_name_format', 'in_file')]),
         (mov_join_labels, mov_join_labels_ds, [('out_label_fusion', 'in_file')]),
+        (mov_join_labels, mov_join_probs_ds, [
+            ('out_label_post_prob', 'in_file')]),
         (pick_file, ref_norm_ds, [('out', 'source_file')]),
         (ref_norm, ref_norm_ds, [('warped_image', 'in_file')]),
         (pick_file, mov_norm_ds, [('out', 'source_file')]),
