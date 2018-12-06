@@ -93,6 +93,12 @@ def init_templateflow_wf(
         tpl_mov_root / ('tpl-%s_space-MNI_res-01_brainmask.nii.gz' % mov_template))
     ninputs = len(participant_label)
 
+    ants_env = {
+        'NSLOTS': '%d' % omp_nthreads,
+        'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS': '%d' % omp_nthreads,
+        'OMP_NUM_THREADS': '%d' % omp_nthreads,
+    }
+
     wf = pe.Workflow(name)
     inputnode = pe.Node(niu.IdentityInterface(fields=['participant_label']),
                         name='inputnode')
@@ -122,37 +128,27 @@ def init_templateflow_wf(
         N4BiasFieldCorrection(
             dimension=3, save_bias=True, copy_header=True,
             n_iterations=[50] * 5, convergence_threshold=1e-7, shrink_factor=4,
-            bspline_fitting_distance=200),
+            bspline_fitting_distance=200, environ=ants_env),
         n_procs=omp_nthreads, name='ref_inu')
 
-    ref_norm = pe.MapNode(
+    ref_norm = pe.Node(
         Registration(
             from_file=pkgr.resource_filename(
                 'niworkflows.data', 't1w-mni_registration_%s_000.json' % normalization_quality)),
-        name='ref_norm', n_procs=omp_nthreads,
-        iterfield=['moving_image', 'moving_image_masks', 'initial_moving_transform'])
+        name='ref_norm', n_procs=omp_nthreads)
     ref_norm.inputs.fixed_image = tpl_ref
     ref_norm.inputs.fixed_image_masks = tpl_ref_mask
-    ref_norm.inputs.environ = {
-        'NSLOTS': '%d' % omp_nthreads,
-        'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS': '%d' % omp_nthreads,
-        'OMP_NUM_THREADS': '%d' % omp_nthreads,
-    }
+    ref_norm.inputs.environ = ants_env
 
     # Register the INU-corrected image to the other template
-    mov_norm = pe.MapNode(
+    mov_norm = pe.Node(
         Registration(
             from_file=pkgr.resource_filename(
                 'niworkflows.data', 't1w-mni_registration_%s_000.json' % normalization_quality)),
-        name='mov_norm', n_procs=omp_nthreads,
-        iterfield=['moving_image', 'moving_image_masks', 'initial_moving_transform'])
+        name='mov_norm', n_procs=omp_nthreads)
     mov_norm.inputs.fixed_image = tpl_mov
     mov_norm.inputs.fixed_image_masks = tpl_mov_mask
-    mov_norm.inputs.environ = {
-        'NSLOTS': '%d' % omp_nthreads,
-        'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS': '%d' % omp_nthreads,
-        'OMP_NUM_THREADS': '%d' % omp_nthreads,
-    }
+    mov_norm.inputs.environ = ants_env
 
     # Initialize between-templates transform with antsAI
     init_aff = pe.Node(AI(
@@ -161,13 +157,13 @@ def init_templateflow_wf(
         search_factor=(20, 0.12),
         principal_axes=False,
         convergence=(10, 1e-6, 10),
-        verbose=True),
-        name='init_aff',
-        n_procs=omp_nthreads)
-    init_aff.inputs.fixed_image = tpl_ref
-    init_aff.inputs.fixed_image_mask = tpl_ref_mask
-    init_aff.inputs.moving_image = tpl_mov
-    init_aff.inputs.moving_image_mask = tpl_mov_mask
+        verbose=True,
+        fixed_image=tpl_ref,
+        fixed_image_mask=tpl_ref_mask,
+        moving_image=tpl_mov,
+        moving_image_mask=tpl_mov_mask,
+        environ=ants_env,
+    ), name='init_aff', n_procs=omp_nthreads)
 
     ref_buffer = pe.JoinNode(niu.IdentityInterface(
         fields=['fixed_image']),
@@ -194,11 +190,7 @@ def init_templateflow_wf(
         [v] * ninputs for v in flow.inputs.sampling_percentage]
     flow.inputs.sampling_strategy = [
         [v] * ninputs for v in flow.inputs.sampling_strategy]
-    flow.inputs.environ = {
-        'NSLOTS': '%d' % omp_nthreads,
-        'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS': '%d' % omp_nthreads,
-        'OMP_NUM_THREADS': '%d' % omp_nthreads,
-    }
+    flow.inputs.environ = ants_env
 
     fssource = pe.Node(
         FreeSurferSource(subjects_dir=str(fs_subjects_dir)),
@@ -211,16 +203,14 @@ def init_templateflow_wf(
 
     ref_aparc = pe.Node(
         ApplyTransforms(interpolation='MultiLabel', float=True,
-                        reference_image=tpl_ref),
-        name='ref_aparc',
-        mem_gb=1
+                        reference_image=tpl_ref, environ=ants_env),
+        name='ref_aparc', mem_gb=1, n_procs=omp_nthreads
     )
 
     mov_aparc = pe.Node(
         ApplyTransforms(interpolation='MultiLabel', float=True,
-                        reference_image=tpl_mov),
-        name='mov_aparc',
-        mem_gb=1
+                        reference_image=tpl_mov, environ=ants_env),
+        name='mov_aparc', mem_gb=1, n_procs=omp_nthreads
     )
 
     ref_aparc_buffer = pe.JoinNode(
@@ -234,30 +224,25 @@ def init_templateflow_wf(
             out_intensity_fusion_name_format='merged_aparc_intensity_%d.nii.gz',
             out_label_post_prob_name_format='merged_aparc_posterior_%d.nii.gz',
             out_atlas_voting_weight_name_format='merged_aparc_weight_%d.nii.gz',
+            environ=ants_env,
         ),
         name='ref_join_labels', n_procs=omp_nthreads)
-    ref_join_labels.inputs.environ = {
-        'NSLOTS': '%d' % omp_nthreads,
-        'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS': '%d' % omp_nthreads,
-        'OMP_NUM_THREADS': '%d' % omp_nthreads,
-    }
 
     ref_join_labels_ds = pe.Node(
         DerivativesDataSink(
             base_directory=str(output_dir.parent),
-            out_path_base=output_dir.name, space=ref_template,
+            out_path_base=output_dir.name,
             suffix='dtissue', desc='aparc', keep_dtype=False,
             source_file='group/tpl-{0}_T1w.nii.gz'.format(ref_template)),
         name='ref_join_labels_ds', run_without_submitting=True)
 
-    ref_join_probs_ds = pe.MapNode(
+    ref_join_probs_ds = pe.Node(
         DerivativesDataSink(
             base_directory=str(output_dir.parent),
-            out_path_base=output_dir.name, space=ref_template,
+            out_path_base=output_dir.name,
             suffix='probtissue', desc='aparc', keep_dtype=False,
             source_file='group/tpl-{0}_T1w.nii.gz'.format(ref_template)),
-        name='ref_join_probs_ds', run_without_submitting=True,
-        iterfield=['in_file'])
+        name='ref_join_probs_ds', run_without_submitting=True)
 
     # ref_join_voting_ds = pe.Node(
     #     DerivativesDataSink(
@@ -278,30 +263,25 @@ def init_templateflow_wf(
             out_intensity_fusion_name_format='merged_aparc_intensity_%d.nii.gz',
             out_label_post_prob_name_format='merged_aparc_posterior_%d.nii.gz',
             out_atlas_voting_weight_name_format='merged_aparc_weight_%d.nii.gz',
+            environ=ants_env,
         ),
         name='mov_join_labels', n_procs=omp_nthreads)
-    mov_join_labels.inputs.environ = {
-        'NSLOTS': '%d' % omp_nthreads,
-        'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS': '%d' % omp_nthreads,
-        'OMP_NUM_THREADS': '%d' % omp_nthreads,
-    }
 
     mov_join_labels_ds = pe.Node(
         DerivativesDataSink(
             base_directory=str(output_dir.parent),
-            out_path_base=output_dir.name, space=mov_template,
+            out_path_base=output_dir.name,
             suffix='dtissue', desc='aparc', keep_dtype=False,
             source_file='group/tpl-{0}_T1w.nii.gz'.format(mov_template)),
         name='mov_join_labels_ds', run_without_submitting=True)
 
-    mov_join_probs_ds = pe.MapNode(
+    mov_join_probs_ds = pe.Node(
         DerivativesDataSink(
             base_directory=str(output_dir.parent),
-            out_path_base=output_dir.name, space=mov_template,
+            out_path_base=output_dir.name,
             suffix='probtissue', desc='aparc', keep_dtype=False,
             source_file='group/tpl-{0}_T1w.nii.gz'.format(mov_template)),
-        name='mov_join_probs_ds', run_without_submitting=True,
-        iterfield=['in_file'])
+        name='mov_join_probs_ds', run_without_submitting=True)
 
     # Datasinking
     ref_norm_ds = pe.Node(
@@ -349,8 +329,8 @@ def init_templateflow_wf(
         (init_aff, flow, [('output_transform', 'initial_moving_transform')]),
         (ref_norm, ref_buffer, [('warped_image', 'fixed_image')]),
         (mov_norm, mov_buffer, [('warped_image', 'moving_image')]),
-        (ref_buffer, flow, [(('fixed_image', _flatten), 'fixed_image')]),
-        (mov_buffer, flow, [(('moving_image', _flatten), 'moving_image')]),
+        (ref_buffer, flow, [('fixed_image', 'fixed_image')]),
+        (mov_buffer, flow, [('moving_image', 'moving_image')]),
         # Select DKT aparc
         (fssource, tonative, [(('aparc_aseg', _last), 'seg_file'),
                               ('rawavg', 'template_file'),
@@ -361,19 +341,20 @@ def init_templateflow_wf(
         (ref_norm, ref_aparc, [('composite_transform', 'transforms')]),
         (mov_norm, mov_aparc, [('composite_transform', 'transforms')]),
         (ref_buffer, ref_join_labels, [
-            (('fixed_image', _flatten), 'atlas_image')]),
+            ('fixed_image', 'atlas_image')]),
         (ref_aparc, ref_aparc_buffer, [('output_image', 'aparc')]),
         (ref_aparc_buffer, ref_join_labels, [
             ('aparc', 'atlas_segmentation_image')]),
         (mov_buffer, mov_join_labels, [
-            (('moving_image', _flatten), 'atlas_image')]),
+            ('moving_image', 'atlas_image')]),
         (mov_aparc, mov_aparc_buffer, [('output_image', 'aparc')]),
         (mov_aparc_buffer, mov_join_labels, [
             ('aparc', 'atlas_segmentation_image')]),
         # Datasinks
         (ref_join_labels, ref_join_labels_ds, [('out_label_fusion', 'in_file')]),
         (ref_join_labels, ref_join_probs_ds, [
-            ('out_label_post_prob', 'in_file')]),
+            ('out_label_post_prob', 'in_file'),
+            (('out_label_post_prob', _get_extra), 'extra_values')]),
         # (ref_join_labels, ref_join_voting_ds, [
         #     ('out_atlas_voting_weight_name_format', 'in_file')]),
         (mov_join_labels, mov_join_labels_ds, [('out_label_fusion', 'in_file')]),
@@ -399,11 +380,6 @@ def _flatten(inlist):
     return [item for sublist in inlist for item in sublist]
 
 
-def _extract_id(in_file):
-    from pathlib import Path
-    return Path(in_file).name.split('_')[0]
-
-
 def _bids_pick(participant_label, bids_root):
     return str(bids_root / ('sub-%s' % participant_label) / 'anat' /
                ('sub-%s_T1w.nii.gz' % participant_label))
@@ -411,6 +387,11 @@ def _bids_pick(participant_label, bids_root):
 
 def _sub_decorate(label):
     return "sub-%s" % label
+
+
+def _get_extra(inlist):
+    return ['class-%s' % s.rstrip(
+        '.gz').rstrip('.nii').split('_')[-1] for s in inlist]
 
 
 def cli():

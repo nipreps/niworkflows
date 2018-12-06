@@ -133,7 +133,7 @@ desc-preproc_bold.nii.gz'
         out_path.mkdir(exist_ok=True, parents=True)
         base_fname = str(out_path / src_fname)
 
-        formatstr = '{bname}{space}{desc}{suffix}{dtype}{ext}'
+        formatstr = '{bname}{space}{desc}{extra}{suffix}{dtype}{ext}'
         if len(self.inputs.in_file) > 1 and not isdefined(self.inputs.extra_values):
             formatstr = '{bname}{space}{desc}{suffix}{i:04d}{dtype}{ext}'
 
@@ -144,16 +144,19 @@ desc-preproc_bold.nii.gz'
 
         self._results['compression'] = []
         for i, fname in enumerate(self.inputs.in_file):
+            extra = ''
+            if isdefined(self.inputs.extra_values):
+                extra = '_{}'.format(self.inputs.extra_values[i])
             out_file = formatstr.format(
                 bname=base_fname,
                 space=space,
                 desc=desc,
+                extra=extra,
                 suffix=suffix,
                 i=i,
                 dtype=dtype,
-                ext=ext)
-            if isdefined(self.inputs.extra_values):
-                out_file = out_file.format(extra_value=self.inputs.extra_values[i])
+                ext=ext,
+            )
             self._results['out_file'].append(out_file)
             self._results['compression'].append(_copy_any(fname, out_file))
         return runtime

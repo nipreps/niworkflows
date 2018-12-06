@@ -508,5 +508,4 @@ class AntsJointFusion(ANTSCommand):
                 self.inputs.out_atlas_voting_weight_name_format.replace(
                     '%d', '*'))
             )
-
         return outputs
