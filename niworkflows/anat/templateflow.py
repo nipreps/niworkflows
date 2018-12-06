@@ -31,6 +31,7 @@ from ..interfaces.fixes import (
     FixHeaderApplyTransforms as ApplyTransforms,
 )
 from ..interfaces.bids import DerivativesDataSink
+from .freesurfer import init_gifti_surface_wf
 
 
 def init_templateflow_wf(
@@ -312,9 +313,16 @@ def init_templateflow_wf(
         name='mov_aparc_ds', run_without_submitting=True
     )
 
+    cifti_wf = init_gifti_surface_wf(
+        name='cifti_surfaces',
+        subjects_dir=str(fs_subjects_dir))
+
     wf.connect([
         (inputnode, pick_file, [('participant_label', 'participant_label')]),
         (inputnode, fssource, [(('participant_label', _sub_decorate), 'subject_id')]),
+        (inputnode, cifti_wf, [
+            (('participant_label', _sub_decorate), 'inputnode.subject_id')]),
+        (pick_file, cifti_wf, [('out', 'inputnode.in_t1w')]),
         (pick_file, ref_bex, [('out', 'inputnode.in_files')]),
         (pick_file, mov_bex, [('out', 'inputnode.in_files')]),
         (pick_file, ref_inu, [('out', 'input_image')]),
