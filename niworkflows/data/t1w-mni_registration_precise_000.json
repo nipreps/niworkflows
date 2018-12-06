@@ -41,5 +41,5 @@
   "use_histogram_matching": [true, true, true],
   "winsorize_lower_quantile": 0.005,
   "winsorize_upper_quantile": 0.995,
-  "write_composite_transform": false
+  "write_composite_transform": true
 }
