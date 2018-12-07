@@ -113,8 +113,9 @@ def splitext(fname):
 
     """
     from pathlib import Path
-    basename = Path(Path(str(fname).lstrip('.gz')).name).stem
-    return basename, fname[len(basename):]
+    basename = str(Path(fname).name)
+    stem = Path(basename.rstrip('.gz')).stem
+    return stem, basename[len(stem):]
 
 
 def _copy_any(src, dst):
