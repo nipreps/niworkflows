@@ -35,10 +35,6 @@ from ..utils.misc import splitext as _splitext, _copy_any
 LOGGER = logging.getLogger('nipype.interface')
 
 
-class FileNotFoundError(IOError):
-    pass
-
-
 class BIDSInfoInputSpec(BaseInterfaceInputSpec):
     in_file = File(mandatory=True, desc='input file, part of a BIDS tree')
 

@@ -18,10 +18,9 @@ import scipy.ndimage as nd
 from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
 from nipype.utils.misc import normalize_mc_params
-from nipype.interfaces.io import add_traits
 from nipype.interfaces.base import (
     traits, isdefined, File, InputMultiPath,
-    TraitedSpec, DynamicTraitedSpec, BaseInterfaceInputSpec, SimpleInterface
+    TraitedSpec, BaseInterfaceInputSpec, SimpleInterface
 )
 from .. import __version__
 
@@ -539,7 +538,7 @@ class AddTSVHeaderOutputSpec(TraitedSpec):
 
 
 class AddTSVHeader(SimpleInterface):
-    """Add a header row to a TSV file
+    r"""Add a header row to a TSV file
 
     .. testsetup::
 
@@ -563,7 +562,7 @@ class AddTSVHeader(SimpleInterface):
     >>> addheader.inputs.in_file = 'data.tsv'
     >>> addheader.inputs.columns = ['a', 'b', 'c', 'd', 'e']
     >>> res = addheader.run()
-    >>> pd.read_csv(res.outputs.out_file, sep='\s+', index_col=None,
+    >>> pd.read_csv(res.outputs.out_file, sep=r'\s+', index_col=None,
     ...             engine='python')  # doctest: +NORMALIZE_WHITESPACE
           a     b     c     d     e
     0   0.0   1.0   2.0   3.0   4.0
@@ -604,7 +603,7 @@ class JoinTSVColumnsOutputSpec(TraitedSpec):
 
 
 class JoinTSVColumns(SimpleInterface):
-    """Add a header row to a TSV file
+    r"""Add a header row to a TSV file
 
     .. testsetup::
 
@@ -633,7 +632,7 @@ class JoinTSVColumns(SimpleInterface):
     >>> res = join.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
     '...data_joined.tsv'
-    >>> pd.read_csv(res.outputs.out_file, sep='\s+', index_col=None,
+    >>> pd.read_csv(res.outputs.out_file, sep=r'\s+', index_col=None,
     ...             engine='python')  # doctest: +NORMALIZE_WHITESPACE
           a     b     c     d     e
     0   0.0   1.0   2.0   3.0   4.0
@@ -647,7 +646,7 @@ class JoinTSVColumns(SimpleInterface):
     >>> join.inputs.in_file = 'data.tsv'
     >>> join.inputs.join_file = 'add.tsv'
     >>> res = join.run()
-    >>> pd.read_csv(res.outputs.out_file, sep='\s+', index_col=None,
+    >>> pd.read_csv(res.outputs.out_file, sep=r'\s+', index_col=None,
     ...             engine='python')  # doctest: +NORMALIZE_WHITESPACE
         0.0   1.0   2.0   3.0   4.0
     0   5.0   6.0   7.0   8.0   9.0
@@ -662,7 +661,7 @@ class JoinTSVColumns(SimpleInterface):
     >>> join.inputs.side = 'left'
     >>> join.inputs.columns = ['a', 'b', 'c', 'd', 'e']
     >>> res = join.run()
-    >>> pd.read_csv(res.outputs.out_file, sep='\s+', index_col=None,
+    >>> pd.read_csv(res.outputs.out_file, sep=r'\s+', index_col=None,
     ...             engine='python')  # doctest: +NORMALIZE_WHITESPACE
           a     b     c    d     e
     0   3.0   4.0  0.0   1.0   2.0
@@ -709,44 +708,6 @@ class JoinTSVColumns(SimpleInterface):
             ofh.write('\n'.join(merged))
 
         self._results['out_file'] = out_file
-        return runtime
-
-
-class ConcatAffinesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    invert = traits.Bool(False, usedefault=True, desc='Invert output transform')
-
-
-class ConcatAffinesOutputSpec(TraitedSpec):
-    out_mat = File(exists=True, desc='Output transform')
-
-
-class ConcatAffines(SimpleInterface):
-    input_spec = ConcatAffinesInputSpec
-    output_spec = ConcatAffinesOutputSpec
-
-    def __init__(self, num_affines=0, *args, **kwargs):
-        super(ConcatAffines, self).__init__(*args, **kwargs)
-        self._num_affines = num_affines
-        trait_type = File(exists=True)
-        if num_affines == 0:
-            add_traits(self.inputs, ['mat_list'], trait_type)
-        elif num_affines < 26:
-            add_traits(self.inputs, self._get_names(num_affines), trait_type)
-
-    @staticmethod
-    def _get_names(num_affines):
-        A = ord('A') - 1
-        return ['mat_{}to{}'.format(chr(X), chr(X + 1))
-                for X in range(A + num_affines, A, -1)]
-
-    def _run_interface(self, runtime):
-        out_mat = os.path.join(runtime.cwd, 'concat.mat')
-        in_list = [self.inputs.get()[name] for name in self._get_names(self._num_affines)]
-
-        out_xfm = _concat_xfms(in_list, invert=self.inputs.invert)
-        np.savetxt(out_mat, out_xfm, fmt=str('%.12g'))
-
-        self._results['out_mat'] = out_mat
         return runtime
 
 
@@ -802,15 +763,3 @@ def _tpm2roi(in_tpm, in_mask, mask_erosion_mm=None, erosion_mm=None,
     roi_img.set_data_dtype(np.uint8)
     roi_img.to_filename(roi_fname)
     return roi_fname, eroded_mask_file or in_mask
-
-
-def _concat_xfms(in_list, invert):
-    transforms = [np.loadtxt(in_mat) for in_mat in in_list]
-    out_xfm = transforms.pop(0)
-    for xfm in transforms:
-        out_xfm = out_xfm.dot(xfm)
-
-    if invert:
-        out_xfm = np.linalg.inv(out_xfm)
-
-    return out_xfm
