@@ -7,7 +7,6 @@ These pipelines are developed by the Poldrack lab at Stanford University
 the Center for Reproducible Neuroscience (http://reproducibility.stanford.edu/),
 as well as for open-source software distribution.
 """
-from __future__ import absolute_import, division, print_function
 import datetime
 
 from ._version import get_versions
@@ -38,11 +37,11 @@ acquisition protocols and that requires minimal user input. \
 This open-source neuroimaging data processing tool is being developed as a part of \
 the MRI image analysis and reproducibility platform offered by the CRN.\
 """
+__url__ = 'https://github.com/poldracklab/{}'.format(__packagename__)
 
 DOWNLOAD_URL = (
     'https://pypi.python.org/packages/source/{name[0]}/{name}/{name}-{ver}.tar.gz'.format(
         name=__packagename__, ver=__version__))
-URL = 'https://github.com/poldracklab/{}'.format(__packagename__)
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Science/Research',
