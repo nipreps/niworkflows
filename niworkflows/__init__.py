@@ -19,6 +19,21 @@ from .__about__ import (
     __description__, __longdesc__)
 
 
+__all__ = [
+    '__version__',
+    '__packagename__',
+    '__author__',
+    '__copyright__',
+    '__credits__',
+    '__license__',
+    '__maintainer__',
+    '__email__',
+    '__status__',
+    '__description__',
+    '__longdesc__',
+    'NIWORKFLOWS_LOG',
+]
+
 NIWORKFLOWS_LOG = logging.getLogger(__packagename__)
 NIWORKFLOWS_LOG.setLevel(logging.INFO)
 
