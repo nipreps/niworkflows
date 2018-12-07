@@ -10,7 +10,6 @@ from .. import __version__
 from .utils import _copyxform
 
 
-
 class FixHeaderApplyTransforms(ApplyTransforms):
     """
     A replacement for nipype.interfaces.ants.resampling.ApplyTransforms that

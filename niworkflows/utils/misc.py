@@ -10,6 +10,7 @@ Miscellaneous utilities
 __all__ = ['fix_multi_T1w_source_name', 'add_suffix', 'read_crashfile',
            'splitext', '_copy_any']
 
+
 def fix_multi_T1w_source_name(in_files):
     """
     Make up a generic source name when there are multiple T1s
