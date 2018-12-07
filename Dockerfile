@@ -116,9 +116,13 @@ ENV CRN_SHARED_DATA /niworkflows_data
 
 WORKDIR /src/
 COPY . niworkflows/
-RUN find /src/niworkflows/ -name "test*.py" -exec chmod a-x '{}' \;
-RUN cd niworkflows && \
-    pip install -e .[all]
+ARG VERSION=dev
+# Force static versioning within container
+RUN echo "${VERSION}" > /src/niworkflows/niworkflows/VERSION && \
+    find /src/niworkflows/ -name "test*.py" -exec chmod a-x {} + && \
+    cd /src/niworkflows && \
+    pip install .[all] && \
+    rm -rf ~/.cache/pip
 
 # Pre-install templates and data
 RUN python -c 'from niworkflows.data.getters import get_template; get_template("MNI152Lin")' && \
@@ -126,4 +130,15 @@ RUN python -c 'from niworkflows.data.getters import get_template; get_template("
     python -c 'from niworkflows.data.getters import get_template; get_template("OASIS")' && \
     python -c 'from niworkflows.data.getters import get_ds003_downsampled; get_ds003_downsampled()'
 
-WORKDIR /scratch/
+WORKDIR /tmp
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+LABEL org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.name="niworkflows" \
+      org.label-schema.description="niworkflows - NeuroImaging workflows" \
+      org.label-schema.url="https://github.com/poldracklab/niworkflows" \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url="https://github.com/poldracklab/niworkflows" \
+      org.label-schema.version=$VERSION \
+      org.label-schema.schema-version="1.0"
