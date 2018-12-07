@@ -5,6 +5,13 @@
 Helpers for handling BIDS-like neuroimaging structures
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Fetch some example data:
+
+    >>> import os
+    >>> from niworkflows import data
+    >>> data_root = data.get_bids_examples(variant='BIDS-examples-1-enh-ds054')
+    >>> os.chdir(data_root)
+
 """
 from pathlib import Path
 from itertools import groupby
@@ -48,12 +55,15 @@ def collect_participants(bids_dir, participant_label=None, strict=False):
     Requesting all subjects in a BIDS directory root:
     >>> collect_participants('ds114')
     ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
+
     Requesting two subjects, given their IDs:
     >>> collect_participants('ds114', participant_label=['02', '04'])
     ['02', '04']
+
     Requesting two subjects, given their IDs (works with 'sub-' prefixes):
     >>> collect_participants('ds114', participant_label=['sub-02', 'sub-04'])
     ['02', '04']
+
     Requesting two subjects, but one does not exist:
     >>> collect_participants('ds114', participant_label=['02', '14'])
     ['02']

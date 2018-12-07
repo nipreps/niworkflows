@@ -12,11 +12,6 @@ Fetch some example data:
     >>> data_root = data.get_bids_examples(variant='BIDS-examples-1-enh-ds054')
     >>> os.chdir(data_root)
 
-Disable warnings:
-
-    >>> from nipype import logging
-    >>> logging.getLogger('nipype.interface').setLevel('ERROR')
-
 """
 
 import os

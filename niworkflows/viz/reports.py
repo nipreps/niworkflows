@@ -309,26 +309,27 @@ def generate_name_title(filename):
 
 
 def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, sentry_sdk=None,
-                pkg_name=None):
+                pkg_name=None, config=None):
     """
     Runs the reports
 
-    >>> import os
+    >>> from pathlib import Path
+    >>> from os import chdir
     >>> from shutil import copytree
     >>> from tempfile import TemporaryDirectory
-    >>> filepath = os.path.dirname(os.path.realpath(__file__))
-    >>> test_data_path = os.path.realpath(os.path.join(filepath,
-    ...                                   '../data/tests/work'))
-    >>> curdir = os.getcwd()
+    >>> niw_path = Path(__file__).resolve().parent.parent
+    >>> test_data_path = niw_path / 'data' / 'tests' / 'work'
+    >>> curdir = Path().resolve()
     >>> tmpdir = TemporaryDirectory()
-    >>> os.chdir(tmpdir.name)
-    >>> data_dir = copytree(test_data_path, os.path.abspath('work'))
-    >>> os.makedirs('out/fmriprep', exist_ok=True)
-    >>> run_reports(os.path.abspath('work/reportlets'),
-    ...             os.path.abspath('out'),
-    ...             '01', 'madeoutuuid')
+    >>> chdir(tmpdir.name)
+    >>> testdir = Path().resolve()
+    >>> data_dir = copytree(test_data_path, testdir / 'work')
+    >>> (testdir / 'fmriprep').mkdir(parents=True, exist_ok=True)
+    >>> run_reports(str(testdir / 'work' / 'reportlets'),
+    ...             str(testdir / 'out'), '01', 'madeoutuuid',
+    ...             pkg_name='fmriprep', config='work/config.json')
     0
-    >>> os.chdir(curdir)
+    >>> chdir(curdir)
     >>> tmpdir.cleanup()
 
     """
@@ -336,11 +337,11 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, sentry_sdk=Non
     if pkg_name:
         reportlet_path = reportlet_path / pkg_name
     reportlet_path = str(reportlet_path / ("sub-%s" % subject_label))
-    config = pkgrf(pkg_name, 'viz/config.json')
+    config = config or pkgrf(pkg_name, 'viz/config.json')
 
     out_filename = 'sub-{}.html'.format(subject_label)
     report = Report(reportlet_path, config, out_dir, run_uuid, out_filename,
-                    sentry_sdk=sentry_sdk)
+                    sentry_sdk=sentry_sdk, packagename=pkg_name)
     return report.generate_report()
 
 
