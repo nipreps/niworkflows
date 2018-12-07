@@ -183,7 +183,7 @@ class Report(object):
                             break
 
                     message = issue_title + '\n\n'
-                    message += exception_text[-(8192-len(message)):]
+                    message += exception_text[-(8192 - len(message)):]
                     if fingerprint:
                         self.sentry_sdk.add_breadcrumb([fingerprint], 'fatal')
                     else:
