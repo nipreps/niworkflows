@@ -7,6 +7,9 @@ Miscellaneous utilities
 """
 
 
+__all__ = ['fix_multi_T1w_source_name', 'add_suffix', 'read_crashfile',
+           'splitext', '_copy_any']
+
 def fix_multi_T1w_source_name(in_files):
     """
     Make up a generic source name when there are multiple T1s
@@ -93,6 +96,48 @@ def _read_txt(path):
         data['node_dir'] = "Node crashed before execution"
     data['traceback'] = ''.join(lines[traceback_start:]).strip()
     return data
+
+
+def splitext(fname):
+    """Splits filename and extension (.gz safe)
+
+    >>> splitext('some/file.nii.gz')
+    ('file', '.nii.gz')
+    >>> splitext('some/other/file.nii')
+    ('file', '.nii')
+    >>> splitext('otherext.tar.gz')
+    ('otherext', '.tar.gz')
+    >>> splitext('text.txt')
+    ('text', '.txt')
+
+    """
+    from pathlib import Path
+    basename = Path(Path(str(fname).lstrip('.gz')).name).stem
+    return basename, fname[len(basename):]
+
+
+def _copy_any(src, dst):
+    import os
+    import gzip
+    from shutil import copyfileobj
+    from nipype.utils.filemanip import copyfile
+
+    src_isgz = src.endswith('.gz')
+    dst_isgz = dst.endswith('.gz')
+    if src_isgz == dst_isgz:
+        copyfile(src, dst, copy=True, use_hardlink=True)
+        return False  # Make sure we do not reuse the hardlink later
+
+    # Unlink target (should not exist)
+    if os.path.exists(dst):
+        os.unlink(dst)
+
+    src_open = gzip.open if src_isgz else open
+    dst_open = gzip.open if dst_isgz else open
+    with src_open(src, 'rb') as f_in:
+        with dst_open(dst, 'wb') as f_out:
+            copyfileobj(f_in, f_out)
+    return True
 
 
 if __name__ == '__main__':
