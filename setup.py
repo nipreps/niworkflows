@@ -5,8 +5,6 @@
 # @Last Modified by:   oesteban
 """ niworkflows setup script """
 
-PACKAGE_NAME = 'niworkflows'
-
 
 def main():
     """ Install entry-point """
@@ -18,7 +16,7 @@ def main():
                                    'niworkflows', '__about__.py'))
 
     setup(
-        name=PACKAGE_NAME,
+        name=ldict['__packagename__'],
         version=ldict['__version__'],
         description=ldict['__description__'],
         long_description=ldict['__longdesc__'],
@@ -39,7 +37,10 @@ def main():
         tests_require=ldict['TESTS_REQUIRES'],
         extras_require=ldict['EXTRA_REQUIRES'],
         # Data
-        package_data={'niworkflows': ['data/t1-mni_registration*.json']},
+        package_data={'niworkflows': [
+            'data/t1-mni_registration*.json',
+            'data/bold-mni_registration*.json',
+        ]},
         include_package_data=True,
     )
 
