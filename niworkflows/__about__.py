@@ -52,6 +52,8 @@ CLASSIFIERS = [
 REQUIRES = [
     'nipype>=1.1.0',
     'nilearn>=0.2.6',
+    'grabbit==0.2.3',
+    'pybids==0.6.5',
     'sklearn',
     'pandas',
     'matplotlib',
