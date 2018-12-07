@@ -62,6 +62,7 @@ REQUIRES = [
     'svgutils',
     'seaborn',
     'packaging',
+    'versioneer',
 ]
 
 SETUP_REQUIRES = []
