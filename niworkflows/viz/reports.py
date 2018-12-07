@@ -24,6 +24,7 @@ class Element(object):
     """
     Just a basic component of a report
     """
+
     def __init__(self, name, title=None):
         self.name = name
         self.title = title
@@ -33,6 +34,7 @@ class Reportlet(Element):
     """
     A reportlet has title, description and a list of graphical components
     """
+
     def __init__(self, name, file_pattern=None, title=None, description=None, raw=False):
         self.name = name
         self.file_pattern = re.compile(file_pattern)
@@ -47,6 +49,7 @@ class SubReport(Element):
     """
     SubReports are sections within a Report
     """
+
     def __init__(self, name, reportlets=None, title=''):
         self.name = name
         self.title = title
@@ -60,6 +63,7 @@ class Report(object):
     """
     The full report object
     """
+
     def __init__(self, path, config, out_dir, run_uuid, out_filename='report.html',
                  sentry_sdk=None, packagename=None):
         self.root = path
@@ -119,7 +123,7 @@ class Report(object):
                     title=subrep_cfg.get('title'))
                 self.sections.append(order_by_run(sub_report))
 
-        error_dir = self.out_dir / "fmriprep" / subject / 'log' / self.run_uuid
+        error_dir = self.out_dir / self.packagename / subject / 'log' / self.run_uuid
         if error_dir.is_dir():
             self.index_error_dir(error_dir)
 
@@ -160,16 +164,18 @@ class Report(object):
                     scope.level = 'fatal'
 
                     # Group common events with pre specified fingerprints
-                    fingerprint_dict = {'permission-denied': [
-                                            "PermissionError: [Errno 13] Permission denied"],
-                                        'memory-error': ["MemoryError", "Cannot allocate memory"],
-                                        'reconall-already-running': [
-                                            "ERROR: it appears that recon-all is already running"],
-                                        'no-disk-space': [
-                                            "OSError: [Errno 28] No space left on device",
-                                            "[Errno 122] Disk quota exceeded"],
-                                        'sigkill': ["Return code: 137"],
-                                        'keyboard-interrupt': ["KeyboardInterrupt"]}
+                    fingerprint_dict = {
+                        'permission-denied': [
+                            "PermissionError: [Errno 13] Permission denied"],
+                        'memory-error': ["MemoryError", "Cannot allocate memory"],
+                        'reconall-already-running': [
+                            "ERROR: it appears that recon-all is already running"],
+                        'no-disk-space': [
+                            "OSError: [Errno 28] No space left on device",
+                            "[Errno 122] Disk quota exceeded"],
+                        'sigkill': ["Return code: 137"],
+                        'keyboard-interrupt': ["KeyboardInterrupt"],
+                    }
 
                     fingerprint = ''
                     issue_title = node_name + ': ' + gist
