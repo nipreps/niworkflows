@@ -7,14 +7,13 @@ These pipelines are developed by the Poldrack lab at Stanford University
 the Center for Reproducible Neuroscience (http://reproducibility.stanford.edu/),
 as well as for open-source software distribution.
 """
-from __future__ import absolute_import, division, print_function
-import datetime
+from datetime import datetime
 
 __version__ = '0.5.2dev'
 __packagename__ = 'niworkflows'
 __author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
-    datetime.datetime.now().year)
+    datetime.now().year)
 __credits__ = ['Oscar Esteban', 'Ross Blair', 'Shoshana L. Berleant',
                'Christopher J. Markiewicz', 'Chris Gorgolewski',
                'Russell A. Poldrack']
@@ -47,6 +46,7 @@ CLASSIFIERS = [
     'License :: OSI Approved :: BSD License',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
 ]
 
 REQUIRES = [
