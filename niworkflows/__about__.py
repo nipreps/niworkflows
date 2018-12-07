@@ -61,6 +61,9 @@ REQUIRES = [
     'svgutils',
     'seaborn',
     'packaging',
+    'scikit-image',
+    'scipy',
+    'jinja2',
 ]
 
 SETUP_REQUIRES = []
