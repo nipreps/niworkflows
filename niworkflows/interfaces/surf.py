@@ -90,7 +90,7 @@ class GiftiNameSourceOutputSpec(TraitedSpec):
 
 
 class GiftiNameSource(SimpleInterface):
-    """Construct a new filename based on an input filename, a matching pattern,
+    r"""Construct a new filename based on an input filename, a matching pattern,
     and a related template.
 
     This interface is intended for use with GIFTI files, to generate names
