@@ -114,9 +114,9 @@ RUN pip install -r requirements.txt && \
 RUN mkdir /niworkflows_data
 ENV CRN_SHARED_DATA /niworkflows_data
 
-WORKDIR /root/
+WORKDIR /src/
 COPY . niworkflows/
-RUN find /root/niworkflows/ -name "test*.py" -exec chmod a-x '{}' \;
+RUN find /src/niworkflows/ -name "test*.py" -exec chmod a-x '{}' \;
 RUN cd niworkflows && \
     pip install -e .[all]
 
@@ -125,3 +125,5 @@ RUN python -c 'from niworkflows.data.getters import get_template; get_template("
     python -c 'from niworkflows.data.getters import get_template; get_template("MNI152NLin2009cAsym")' && \
     python -c 'from niworkflows.data.getters import get_template; get_template("OASIS")' && \
     python -c 'from niworkflows.data.getters import get_ds003_downsampled; get_ds003_downsampled()'
+
+WORKDIR /scratch/

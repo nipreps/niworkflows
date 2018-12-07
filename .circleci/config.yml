@@ -105,8 +105,9 @@ jobs:
               -e SAVE_CIRCLE_ARTIFACTS="/scratch" \
               -v ${PWD}:/scratch -w /scratch \
               --entrypoint=/usr/local/miniconda/bin/py.test \
-              niworkflows:py3 /root/niworkflows \
-              -n auto -v --junit-xml=/scratch/pytest.xml
+              niworkflows:py3 /src/niworkflows \
+              -svx --doctest-modules -n auto --junit-xml=/scratch/pytest.xml \
+              --ignore=/src/niworkflows/docs --ignore=setup.py
 
       - store_artifacts:
           path: /tmp/tests
