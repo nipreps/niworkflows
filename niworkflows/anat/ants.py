@@ -24,7 +24,7 @@ from nipype.interfaces.fsl.maths import ApplyMask
 from nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
 
 # niworkflows
-from ..data import OSF_RESOURCES, TEMPLATE_ALIASES, get_template
+from ..data.getters import OSF_RESOURCES, TEMPLATE_ALIASES, get_template
 from ..interfaces.ants import (
     ImageMath,
     ResampleImageBySpacing,

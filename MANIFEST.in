@@ -6,3 +6,5 @@ include niworkflows/viz/*.tpl
 include requirements.txt
 include CHANGES.rst
 include LICENSE
+include versioneer.py
+include niworkflows/_version.py
