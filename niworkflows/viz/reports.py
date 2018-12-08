@@ -326,6 +326,8 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config,
     """
     Runs the reports
 
+    .. testsetup::
+
     >>> from shutil import copytree
     >>> from tempfile import TemporaryDirectory
     >>> new_path = Path(__file__).resolve().parent.parent
@@ -335,10 +337,16 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config,
     >>> testdir = Path().resolve()
     >>> data_dir = copytree(test_data_path, testdir / 'work')
     >>> (testdir / 'fmriprep').mkdir(parents=True, exist_ok=True)
+
+    .. doctest::
+
     >>> run_reports(str(testdir / 'work' / 'reportlets'),
     ...             str(testdir / 'out'), '01', 'madeoutuuid',
     ...             'work/config.json')
     0
+
+    .. testcleanup::
+
     >>> tmpdir.cleanup()
 
     """

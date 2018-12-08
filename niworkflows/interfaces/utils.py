@@ -542,9 +542,7 @@ class AddTSVHeader(SimpleInterface):
 
     .. testsetup::
 
-    >>> import os
     >>> import pandas as pd
-    >>> import numpy as np
     >>> from tempfile import TemporaryDirectory
     >>> tmpdir = TemporaryDirectory()
     >>> os.chdir(tmpdir.name)
@@ -561,8 +559,8 @@ class AddTSVHeader(SimpleInterface):
     >>> addheader.inputs.in_file = 'data.tsv'
     >>> addheader.inputs.columns = ['a', 'b', 'c', 'd', 'e']
     >>> res = addheader.run()
-    >>> pd.read_csv(res.outputs.out_file, sep=r'\s+', index_col=None,
-    ...             engine='python')  # doctest: +NORMALIZE_WHITESPACE
+    >>> pd.read_csv(res.outputs.out_file, delim_whitespace=True,
+    ...             index_col=None)   # doctest: +ELLIPSIS
           a     b     c     d     e
     0   0.0   1.0   2.0   3.0   4.0
     1   5.0   6.0   7.0   8.0   9.0
