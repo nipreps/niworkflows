@@ -21,3 +21,7 @@ src/
 .travis.yml
 appveyor.yml
 circle.yml
+
+# testing
+.pytest_cache
+.cache
