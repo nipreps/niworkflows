@@ -326,15 +326,12 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config,
     """
     Runs the reports
 
-    >>> from pathlib import Path
-    >>> from os import chdir
     >>> from shutil import copytree
     >>> from tempfile import TemporaryDirectory
-    >>> niw_path = Path(__file__).resolve().parent.parent
-    >>> test_data_path = niw_path / 'data' / 'tests' / 'work'
-    >>> curdir = Path().resolve()
+    >>> new_path = Path(__file__).resolve().parent.parent
+    >>> test_data_path = new_path / 'data' / 'tests' / 'work'
     >>> tmpdir = TemporaryDirectory()
-    >>> chdir(tmpdir.name)
+    >>> os.chdir(tmpdir.name)
     >>> testdir = Path().resolve()
     >>> data_dir = copytree(test_data_path, testdir / 'work')
     >>> (testdir / 'fmriprep').mkdir(parents=True, exist_ok=True)
@@ -342,7 +339,6 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config,
     ...             str(testdir / 'out'), '01', 'madeoutuuid',
     ...             'work/config.json')
     0
-    >>> chdir(curdir)
     >>> tmpdir.cleanup()
 
     """

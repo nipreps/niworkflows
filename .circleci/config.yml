@@ -91,18 +91,27 @@ jobs:
               docker images
             fi
       - run:
-          name: Run Niworkflows tests
+          name: Run unit tests
           no_output_timeout: 2h
           command: |
             sudo setfacl -d -m group:ubuntu:rwx $PWD
             sudo setfacl -m group:ubuntu:rwx $PWD
             docker run -it --rm=false \
-              -e SAVE_CIRCLE_ARTIFACTS="/scratch" \
-              -v ${PWD}:/scratch -w /scratch \
-              --entrypoint=/usr/local/miniconda/bin/py.test \
-              niworkflows:py3 /src/niworkflows/niworkflows \
-              --junit-xml=/scratch/pytest.xml \
-              --ignore=/src/niworkflows/niworkflows/interfaces/ants.py              
+              -v ${PWD}:/tmp niworkflows:py3 \
+              pytest --junit-xml=/tmp/pytest.xml \
+              --ignore=/src/niworkflows/niworkflows/tests/ \
+              --ignore=/src/niworkflows/niworkflows/interfaces/ants.py \
+              /src/niworkflows/niworkflows
+
+      - run:
+          name: Run reportlet tests
+          no_output_timeout: 2h
+          command: |
+            docker run -it --rm=false \
+              -e SAVE_CIRCLE_ARTIFACTS="/tmp" \
+              -v ${PWD}:/tmp niworkflows:py3 \
+              pytest -n auto --junit-xml=/tmp/reportlets.xml \
+              /src/niworkflows/niworkflows/tests/
 
       - store_artifacts:
           path: /tmp/tests

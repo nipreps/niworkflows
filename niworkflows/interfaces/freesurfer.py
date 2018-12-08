@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -28,10 +26,10 @@ from .registration import BBRegisterRPT, MRICoregRPT
 
 
 class StructuralReference(fs.RobustTemplate):
-    """ Variation on RobustTemplate that simply copies the source if a single
+    """Variation on RobustTemplate that simply copies the source if a single
     volume is provided.
 
-    >>> from niworkflows.utils.bids import collect_data
+    >>> from ..utils.bids import collect_data
     >>> t1w = collect_data(str(datadir / 'ds114'), '01')[0]['t1w']
     >>> template = StructuralReference()
     >>> template.inputs.in_files = t1w
