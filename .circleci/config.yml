@@ -102,7 +102,7 @@ jobs:
               --entrypoint=/usr/local/miniconda/bin/py.test \
               niworkflows:py3 /src/niworkflows/niworkflows \
               --junit-xml=/scratch/pytest.xml \
-              --ignore=/src/niworkflows/interfaces/ants.py              
+              --ignore=/src/niworkflows/niworkflows/interfaces/ants.py              
 
       - store_artifacts:
           path: /tmp/tests
