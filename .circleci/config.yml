@@ -10,9 +10,9 @@ jobs:
     working_directory: /tmp/src/niworkflows
     steps:
       - run:
-          name: Install parallel gzip
+          name: Install parallel gzip and python3
           command: |
-            apk add --no-cache pigz
+            apk add --no-cache pigz python3
       - restore_cache:
           keys:
             - docker-v1-{{ .Branch }}-{{ epoch }}
@@ -101,8 +101,8 @@ jobs:
               -v ${PWD}:/scratch -w /scratch \
               --entrypoint=/usr/local/miniconda/bin/py.test \
               niworkflows:py3 /src/niworkflows/niworkflows \
-              -svx --doctest-modules -n auto --junit-xml=/scratch/pytest.xml \
-              --ignore=niworkflows/interfaces/ants.py              
+              --junit-xml=/scratch/pytest.xml \
+              --ignore=/src/niworkflows/niworkflows/interfaces/ants.py              
 
       - store_artifacts:
           path: /tmp/tests
