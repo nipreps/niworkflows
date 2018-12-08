@@ -107,7 +107,6 @@ class GiftiNameSource(SimpleInterface):
 
     .. doctest::
 
-    >>> from fmriprep.interfaces import GiftiNameSource
     >>> surf_namer = GiftiNameSource()
     >>> surf_namer.inputs.pattern = r'(?P<LR>[lr])h.(?P<surf>\w+).gii'
     >>> surf_namer.inputs.template = r'{surf}.{LR}.surf'

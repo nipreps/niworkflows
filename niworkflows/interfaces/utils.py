@@ -557,7 +557,6 @@ class AddTSVHeader(SimpleInterface):
 
     Add headers:
 
-    >>> from fmriprep.interfaces import AddTSVHeader
     >>> addheader = AddTSVHeader()
     >>> addheader.inputs.in_file = 'data.tsv'
     >>> addheader.inputs.columns = ['a', 'b', 'c', 'd', 'e']
@@ -624,7 +623,6 @@ class JoinTSVColumns(SimpleInterface):
 
     Add headers:
 
-    >>> from fmriprep.interfaces import JoinTSVColumns
     >>> join = JoinTSVColumns()
     >>> join.inputs.in_file = 'data.tsv'
     >>> join.inputs.join_file = 'add.tsv'

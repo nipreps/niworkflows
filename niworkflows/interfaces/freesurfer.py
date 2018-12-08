@@ -6,18 +6,6 @@
 FreeSurfer tools interfaces
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Fetch some example data:
-
-    >>> import os
-    >>> from niworkflows import data
-    >>> data_root = data.get_bids_examples(variant='BIDS-examples-1-enh-ds054')
-    >>> os.chdir(data_root)
-
-Disable warnings:
-
-    >>> from nipype import logging
-    >>> logging.getLogger('nipype.interface').setLevel('ERROR')
-
 """
 
 import os.path as op
@@ -43,8 +31,8 @@ class StructuralReference(fs.RobustTemplate):
     """ Variation on RobustTemplate that simply copies the source if a single
     volume is provided.
 
-    >>> from fmriprep.utils.bids import collect_data
-    >>> t1w = collect_data('ds114', '01')[0]['t1w']
+    >>> from niworkflows.utils.bids import collect_data
+    >>> t1w = collect_data(str(datadir / 'ds114'), '01')[0]['t1w']
     >>> template = StructuralReference()
     >>> template.inputs.in_files = t1w
     >>> template.inputs.auto_detect_sensitivity = True

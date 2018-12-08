@@ -5,12 +5,6 @@
 Interfaces for handling BIDS-like neuroimaging structures
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Fetch some example data:
-
-    >>> import os
-    >>> from niworkflows import data
-    >>> data_root = data.get_bids_examples(variant='BIDS-examples-1-enh-ds054')
-    >>> os.chdir(data_root)
 
 """
 
@@ -50,10 +44,9 @@ class BIDSInfo(SimpleInterface):
     This interface uses only the basename, not the path, to determine the
     subject, session, task, run, acquisition or reconstruction.
 
-    >>> from fmriprep.interfaces import BIDSInfo
-    >>> from fmriprep.utils.bids import collect_data
+    >>> from niworkflows.utils.bids import collect_data
     >>> bids_info = BIDSInfo()
-    >>> bids_info.inputs.in_file = collect_data('ds114', '01')[0]['bold'][0]
+    >>> bids_info.inputs.in_file = collect_data(str(datadir / 'ds114'), '01')[0]['bold'][0]
     >>> bids_info.inputs.in_file  # doctest: +ELLIPSIS
     '.../ds114/sub-01/ses-retest/func/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz'
     >>> res = bids_info.run()
@@ -99,10 +92,9 @@ class BIDSDataGrabber(SimpleInterface):
     """
     Collect files from a BIDS directory structure
 
-    >>> from fmriprep.interfaces import BIDSDataGrabber
-    >>> from fmriprep.utils.bids import collect_data
+    >>> from niworkflows.utils.bids import collect_data
     >>> bids_src = BIDSDataGrabber(anat_only=False)
-    >>> bids_src.inputs.subject_data = collect_data('ds114', '01')[0]
+    >>> bids_src.inputs.subject_data = collect_data(str(datadir / 'ds114'), '01')[0]
     >>> bids_src.inputs.subject_id = 'ds114'
     >>> res = bids_src.run()
     >>> res.outputs.t1w  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
@@ -171,18 +163,18 @@ class DerivativesDataSink(SimpleInterface):
 
     >>> from pathlib import Path
     >>> import tempfile
-    >>> from fmriprep.utils.bids import collect_data
+    >>> from niworkflows.utils.bids import collect_data
     >>> tmpdir = Path(tempfile.mkdtemp())
     >>> tmpfile = tmpdir / 'a_temp_file.nii.gz'
     >>> tmpfile.open('w').close()  # "touch" the file
     >>> dsink = DerivativesDataSink(base_directory=str(tmpdir))
     >>> dsink.inputs.in_file = str(tmpfile)
-    >>> dsink.inputs.source_file = collect_data('ds114', '01')[0]['t1w'][0]
+    >>> dsink.inputs.source_file = collect_data(str(datadir / 'ds114'), '01')[0]['t1w'][0]
     >>> dsink.inputs.keep_dtype = True
     >>> dsink.inputs.suffix = 'target-mni'
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
-    '.../fmriprep/sub-01/ses-retest/anat/sub-01_ses-retest_target-mni_T1w.nii.gz'
+    '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_target-mni_T1w.nii.gz'
 
     >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
     >>> bids_dir.mkdir(parents=True, exist_ok=True)
@@ -195,13 +187,13 @@ class DerivativesDataSink(SimpleInterface):
     >>> dsink.inputs.desc = 'preproc'
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
-    '.../fmriprep/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
 desc-preproc_bold.nii.gz'
 
     """
     input_spec = DerivativesDataSinkInputSpec
     output_spec = DerivativesDataSinkOutputSpec
-    out_path_base = "fmriprep"
+    out_path_base = "niworkflows"
     _always_run = True
 
     def __init__(self, out_path_base=None, **inputs):

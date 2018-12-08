@@ -65,25 +65,33 @@ class Report(object):
     """
 
     def __init__(self, path, config, out_dir, run_uuid, out_filename='report.html',
-                 sentry_sdk=None, packagename=None):
+                 sentry_sdk=None):
         self.root = path
         self.sections = []
         self.errors = []
         self.out_dir = Path(out_dir)
-        self.packagename = packagename
-        if packagename:
-            self.out_dir = self.out_dir / packagename
         self.out_filename = out_filename
         self.run_uuid = run_uuid
         self.sentry_sdk = sentry_sdk
+        self.template_path = None
+        self.packagename = None
 
         self._load_config(config)
 
     def _load_config(self, config):
-        with open(config, 'r') as configfh:
-            config = json.load(configfh)
+        config = Path(config)
+        with config.open('r') as configfh:
+            settings = json.load(configfh)
 
-        self.index(config['sections'])
+        self.packagename = settings.get('package', None)
+        if self.packagename:
+            self.out_dir = self.out_dir / self.packagename
+
+        template_path = Path(settings.get('template_path', 'report.tpl'))
+        if not str(template_path).startswith('/'):
+            template_path = config.parent / template_path
+        self.template_path = template_path.resolve()
+        self.index(settings['sections'])
 
     def index(self, config):
         fig_dir = 'figures'
@@ -239,12 +247,11 @@ class Report(object):
             boilerplate.append((boiler_idx, 'LaTeX', text))
             boiler_idx += 1
 
-        searchpath = pkgrf(self.packagename, '/')
         env = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(searchpath=searchpath),
+            loader=jinja2.FileSystemLoader(searchpath=str(self.template_path.parent)),
             trim_blocks=True, lstrip_blocks=True
         )
-        report_tpl = env.get_template('viz/report.tpl')
+        report_tpl = env.get_template(self.template_path.name)
         report_render = report_tpl.render(sections=self.sections, errors=self.errors,
                                           boilerplate=boilerplate)
 
@@ -314,8 +321,8 @@ def generate_name_title(filename):
     return name.strip('_'), title
 
 
-def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, sentry_sdk=None,
-                pkg_name=None, config=None):
+def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config,
+                sentry_sdk=None):
     """
     Runs the reports
 
@@ -333,31 +340,28 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, sentry_sdk=Non
     >>> (testdir / 'fmriprep').mkdir(parents=True, exist_ok=True)
     >>> run_reports(str(testdir / 'work' / 'reportlets'),
     ...             str(testdir / 'out'), '01', 'madeoutuuid',
-    ...             pkg_name='fmriprep', config='work/config.json')
+    ...             'work/config.json')
     0
     >>> chdir(curdir)
     >>> tmpdir.cleanup()
 
     """
     reportlet_path = Path(reportlets_dir)
-    if pkg_name:
-        reportlet_path = reportlet_path / pkg_name
     reportlet_path = str(reportlet_path / ("sub-%s" % subject_label))
-    config = config or pkgrf(pkg_name, 'viz/config.json')
-
     out_filename = 'sub-{}.html'.format(subject_label)
     report = Report(reportlet_path, config, out_dir, run_uuid, out_filename,
-                    sentry_sdk=sentry_sdk, packagename=pkg_name)
+                    sentry_sdk=sentry_sdk)
     return report.generate_report()
 
 
-def generate_reports(subject_list, output_dir, work_dir, run_uuid, sentry_sdk=None):
+def generate_reports(subject_list, output_dir, work_dir, run_uuid, config,
+                     sentry_sdk=None):
     """
     A wrapper to run_reports on a given ``subject_list``
     """
     reports_dir = str(Path(work_dir) / 'reportlets')
     report_errors = [
-        run_reports(reports_dir, output_dir, subject_label, run_uuid=run_uuid,
+        run_reports(reports_dir, output_dir, subject_label, run_uuid, config,
                     sentry_sdk=sentry_sdk)
         for subject_label in subject_list
     ]

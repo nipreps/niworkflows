@@ -1,4 +1,6 @@
 {
+"package": "niworkflows",
+"template_path": "report.tpl",
 "sections":
 [
     {
