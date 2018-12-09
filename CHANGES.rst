@@ -1,3 +1,12 @@
+0.5.2 (December 8, 2018)
+=========================
+
+With thanks to @wiheto for contributions.
+
+  * [ENH] Upstream work from fMRIPrep (prep. sMRIPrep) (#263)
+  * [ENH] Integrate versioneer (#264)
+  * [FIX] X axis label for fMRIPlot - better respect TR and default to frame number (#261)
+
 0.5.1 (November 8, 2018)
 ========================
 
