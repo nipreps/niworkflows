@@ -1,6 +1,6 @@
 # data
 include niworkflows/data/*.json
-include niworkflows/viz/*.tpl
+include niworkflows/data/tests/work/*
 
 # misc
 include requirements.txt
