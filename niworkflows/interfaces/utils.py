@@ -614,10 +614,25 @@ class JoinTSVColumns(SimpleInterface):
     An example TSV:
 
     >>> data = np.arange(30).reshape((6, 5))
-    >>> np.savetxt('data.tsv', data[:, :3], delimiter='\t', fmt='%.1f')
-    >>> np.savetxt('add.tsv', data[:, 3:], delimiter='\t', fmt='%.1f')
+    >>> np.savetxt('data.tsv', data[:, :3], delimiter='\t')
+    >>> np.savetxt('add.tsv', data[:, 3:], delimiter='\t')
 
-    Add headers:
+    Join without naming headers:
+
+    >>> join = JoinTSVColumns()
+    >>> join.inputs.in_file = 'data.tsv'
+    >>> join.inputs.join_file = 'add.tsv'
+    >>> res = join.run()
+    >>> df = pd.read_csv(res.outputs.out_file, delim_whitespace=True,
+    ...                  index_col=None, dtype=float, header=None)
+    >>> df.columns.ravel().tolist() == list(range(5))
+    True
+
+    >>> np.all(df.values.astype(int) == data)
+    True
+
+
+    Adding column names:
 
     >>> join = JoinTSVColumns()
     >>> join.inputs.in_file = 'data.tsv'
@@ -626,28 +641,13 @@ class JoinTSVColumns(SimpleInterface):
     >>> res = join.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
     '...data_joined.tsv'
-    >>> pd.read_csv(res.outputs.out_file, sep=r'\s+', index_col=None,
-    ...             engine='python')  # doctest: +NORMALIZE_WHITESPACE
-          a     b     c     d     e
-    0   0.0   1.0   2.0   3.0   4.0
-    1   5.0   6.0   7.0   8.0   9.0
-    2  10.0  11.0  12.0  13.0  14.0
-    3  15.0  16.0  17.0  18.0  19.0
-    4  20.0  21.0  22.0  23.0  24.0
-    5  25.0  26.0  27.0  28.0  29.0
+    >>> df = pd.read_csv(res.outputs.out_file, delim_whitespace=True,
+    ...                  index_col=None)
+    >>> df.columns.ravel().tolist()
+    ['a', 'b', 'c', 'd', 'e']
 
-    >>> join = JoinTSVColumns()
-    >>> join.inputs.in_file = 'data.tsv'
-    >>> join.inputs.join_file = 'add.tsv'
-    >>> res = join.run()
-    >>> pd.read_csv(res.outputs.out_file, sep=r'\s+', index_col=None,
-    ...             engine='python')  # doctest: +NORMALIZE_WHITESPACE
-        0.0   1.0   2.0   3.0   4.0
-    0   5.0   6.0   7.0   8.0   9.0
-    1  10.0  11.0  12.0  13.0  14.0
-    2  15.0  16.0  17.0  18.0  19.0
-    3  20.0  21.0  22.0  23.0  24.0
-    4  25.0  26.0  27.0  28.0  29.0
+    >>> np.all(df.values == np.arange(30).reshape((6, 5)))
+    True
 
     >>> join = JoinTSVColumns()
     >>> join.inputs.in_file = 'data.tsv'
@@ -655,15 +655,13 @@ class JoinTSVColumns(SimpleInterface):
     >>> join.inputs.side = 'left'
     >>> join.inputs.columns = ['a', 'b', 'c', 'd', 'e']
     >>> res = join.run()
-    >>> pd.read_csv(res.outputs.out_file, sep=r'\s+', index_col=None,
-    ...             engine='python')  # doctest: +NORMALIZE_WHITESPACE
-          a     b     c    d     e
-    0   3.0   4.0  0.0   1.0   2.0
-    1   8.0   9.0  5.0   6.0   7.0
-    2  13.0  14.0 10.0  11.0  12.0
-    3  18.0  19.0 15.0  16.0  17.0
-    4  23.0  24.0 20.0  21.0  22.0
-    5  28.0  29.0 25.0  26.0  27.0
+    >>> df = pd.read_csv(res.outputs.out_file, delim_whitespace=True,
+    ...                  index_col=None)
+    >>> df.columns.ravel().tolist()
+    ['a', 'b', 'c', 'd', 'e']
+
+    >>> np.all(df.values == np.hstack((data[:, 3:], data[:, :3])))
+    True
 
     .. testcleanup::
 
