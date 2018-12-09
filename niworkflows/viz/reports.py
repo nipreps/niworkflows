@@ -333,7 +333,7 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config,
     >>> new_path = Path(__file__).resolve().parent.parent
     >>> test_data_path = new_path / 'data' / 'tests' / 'work'
     >>> tmpdir = TemporaryDirectory()
-    >>> os.chdir(tmpdir.name)
+    >>> os.chdir(tmpdir.name)  #noqa
     >>> testdir = Path().resolve()
     >>> data_dir = copytree(test_data_path, testdir / 'work')
     >>> (testdir / 'fmriprep').mkdir(parents=True, exist_ok=True)
