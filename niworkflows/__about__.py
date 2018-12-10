@@ -52,33 +52,37 @@ CLASSIFIERS = [
 ]
 
 REQUIRES = [
-    'nipype>=1.1.0',
-    'nilearn>=0.2.6',
     'grabbit==0.2.3',
-    'pybids==0.6.5',
-    'sklearn',
-    'pandas',
-    'matplotlib',
     'jinja2',
-    'svgutils',
-    'seaborn',
+    'matplotlib>=2.2.0',
+    'nilearn>=0.2.6',
+    'nipype>=1.1.6',
     'packaging',
+    'pandas',
+    'pybids==0.6.5',
     'scikit-image',
     'scipy',
-    'jinja2',
-    'versioneer',
+    'seaborn',
+    'svgutils',
 ]
 
 SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 
 LINKS_REQUIRES = []
-TESTS_REQUIRES = ['mock', 'codecov', 'pytest-xdist', 'pytest']
+TESTS_REQUIRES = [
+    'pytest',
+    'pytest-xdist',
+]
 
 EXTRA_REQUIRES = {
-    'doc': ['sphinx'],
+    'doc': [
+        'sphinx>=1.5.3',
+        'pydotplus',
+        'pydot>=1.2.3',
+    ],
+    'duecredit': ['duecredit'],
     'tests': TESTS_REQUIRES,
-    'duecredit': ['duecredit']
 }
 
 # Enable a handle to install all extra dependencies at once
