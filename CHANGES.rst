@@ -1,3 +1,13 @@
+0.5.2.post1 (December 10, 2018)
+===============================
+
+A hotfix release that ensures version is correctly reported when installed
+via Pypi.
+
+  * [MAINT] Clean-up dependencies (7a76a45)
+  * [HOTFIX] Ensure VERSION file is created at deployment (3e3a2f3)
+  * [TST] Add tests missed out in #263 (#266)
+
 0.5.2 (December 8, 2018)
 =========================
 
