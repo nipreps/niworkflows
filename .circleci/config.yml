@@ -131,6 +131,7 @@ jobs:
           command: |
             pip install "setuptools>=27.0" twine docutils
             echo "${CIRCLE_TAG}" > niworkflows/VERSION
+            echo "include niworkflows/VERSION" >> MANIFEST.in
             python setup.py check -r -s
             python setup.py sdist
             twine upload dist/*

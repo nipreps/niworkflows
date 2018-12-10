@@ -137,6 +137,7 @@ COPY . niworkflows/
 ARG VERSION=dev
 # Force static versioning within container
 RUN echo "${VERSION}" > /src/niworkflows/niworkflows/VERSION && \
+    echo "include niworkflows/VERSION" >> MANIFEST.in && \
     find /src/niworkflows/ -name "test*.py" -exec chmod a-x {} + && \
     cd /src/niworkflows && \
     pip install .[all] && \
