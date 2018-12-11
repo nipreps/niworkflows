@@ -9,6 +9,7 @@ Interfaces for handling BIDS-like neuroimaging structures
 
 import os
 import os.path as op
+from pathlib import Path
 from shutil import copytree, rmtree
 
 from nipype import logging
