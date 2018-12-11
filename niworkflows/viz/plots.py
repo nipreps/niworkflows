@@ -101,14 +101,14 @@ class fMRIPlot(object):
                 name=name, **kwargs)
             grid_id += 1
 
-        plot_carpet(self.func_file, self.seg_data, subplot=grid[-1])
+        plot_carpet(self.func_file, self.seg_data, subplot=grid[-1], tr=self.tr)
         # spikesplot_cb([0.7, 0.78, 0.2, 0.008])
         return figure
 
 
 def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
                 subplot=None, title=None, output_file=None, legend=False,
-                lut=None):
+                lut=None, tr=None):
     """
     Plot an image representation of voxel intensities across time also know
     as the "carpet plot" or "Power plot". See Jonathan Power Neuroimage
@@ -141,12 +141,19 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
         legend : bool
             Whether to render the average functional series with ``atlaslabels`` as
             overlay.
+        tr : float , optional
+            Specify the TR, if specified it uses this value. If left as None,
+            # Frames is plotted instead of time.
     """
-    img_nii = check_niimg_4d(img, dtype='auto')
-    func_data = _safe_get_data(img_nii, ensure_finite=True)
 
     # Define TR and number of frames
-    tr = img_nii.header.get_zooms()[-1]
+    notr = False
+    if tr is None:
+        notr = True
+        tr = 1.
+
+    img_nii = check_niimg_4d(img, dtype='auto',)
+    func_data = _safe_get_data(img_nii, ensure_finite=True)
     ntsteps = func_data.shape[-1]
 
     data = func_data[atlaslabels > 0].reshape(-1, ntsteps)
@@ -217,7 +224,10 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
     interval = max((int(data.shape[-1] + 1) // 10, int(data.shape[-1] + 1) // 5, 1))
     xticks = list(range(0, data.shape[-1])[::interval])
     ax1.set_xticks(xticks)
-    ax1.set_xlabel('time (s)')
+    if notr:
+        ax1.set_xlabel('time (frame #)')
+    else:
+        ax1.set_xlabel('time (s)')
     labels = tr * (np.array(xticks)) * t_dec
     ax1.set_xticklabels(['%.02f' % t for t in labels.tolist()], fontsize=5)
 
