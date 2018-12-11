@@ -244,7 +244,8 @@ class CSVToGifti(SimpleInterface):
         gii = nb.load(self.inputs.gii_file)
         data = np.loadtxt(self.inputs.in_file, delimiter=',',
                           skiprows=1, usecols=(0, 1, 2))
-        gii.darrays[0].data = data
+        gii.darrays[0].data = data.astype(
+            gii.darrays[0].data.dtype)
         out_file = fname_presuffix(
             self.inputs.gii_file,
             newpath=runtime.cwd,
