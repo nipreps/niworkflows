@@ -13,9 +13,10 @@ import re
 import numpy as np
 import nibabel as nb
 
+from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec, TraitedSpec, File, traits, isdefined,
-    SimpleInterface
+    SimpleInterface, InputMultiPath,
 )
 
 
@@ -185,6 +186,101 @@ class GiftiSetAnatomicalStructure(SimpleInterface):
             img.meta.data.insert(0, nb.gifti.GiftiNVPairs('AnatomicalStructurePrimary', asp))
             out_file = os.path.join(runtime.cwd, fname)
             img.to_filename(out_file)
+        self._results['out_file'] = out_file
+        return runtime
+
+
+class GiftiToCSVInputSpec(BaseInterfaceInputSpec):
+    in_file = File(mandatory=True, exists=True, desc='GIFTI file')
+
+
+class GiftiToCSVOutputSpec(TraitedSpec):
+    out_file = File(desc='output csv file')
+
+
+class GiftiToCSV(SimpleInterface):
+    """Converts GIfTI files to CSV to make them ammenable to use with
+    ``antsApplyTransformsToPoints``."""
+    input_spec = GiftiToCSVInputSpec
+    output_spec = GiftiToCSVOutputSpec
+
+    def _run_interface(self, runtime):
+        gii = nb.load(self.inputs.in_file)
+        data = gii.darrays[0].data
+
+        # antsApplyTransformsToPoints requires 5 cols with headers
+        csvdata = np.hstack((data, np.zeros((data.shape[0], 3))))
+
+        out_file = fname_presuffix(
+            self.inputs.in_file,
+            newpath=runtime.cwd,
+            use_ext=False,
+            suffix='points.csv')
+        np.savetxt(
+            out_file, csvdata,
+            delimiter=',',
+            header='x,y,z,t,label,comment',
+            fmt=['%.5f'] * 4 + ['%d'] * 2)
+        self._results['out_file'] = out_file
+        return runtime
+
+
+class CSVToGiftiInputSpec(BaseInterfaceInputSpec):
+    in_file = File(mandatory=True, exists=True, desc='CSV file')
+    gii_file = File(mandatory=True, exists=True, desc='reference GIfTI file')
+
+
+class CSVToGiftiOutputSpec(TraitedSpec):
+    out_file = File(desc='output GIfTI file')
+
+
+class CSVToGifti(SimpleInterface):
+    """Converts GIfTI files to CSV to make them ammenable to use with
+    ``antsApplyTransformsToPoints``."""
+    input_spec = CSVToGiftiInputSpec
+    output_spec = CSVToGiftiOutputSpec
+
+    def _run_interface(self, runtime):
+        gii = nb.load(self.inputs.gii_file)
+        data = np.loadtxt(self.inputs.in_file, delimiter=',',
+                          skiprows=1, usecols=(0, 1, 2))
+        gii.darrays[0].data = data
+        out_file = fname_presuffix(
+            self.inputs.gii_file,
+            newpath=runtime.cwd,
+            suffix='.transformed')
+        gii.to_filename(out_file)
+        self._results['out_file'] = out_file
+        return runtime
+
+
+class GiftiAverageInputSpec(BaseInterfaceInputSpec):
+    in_files = InputMultiPath(File(exists=True), mandatory=True,
+                              desc='input GIFTI files')
+
+
+class GiftiAverageOutputSpec(TraitedSpec):
+    out_file = File(desc='output csv file')
+
+
+class GiftiAverage(SimpleInterface):
+    """Converts GIfTI files to CSV to make them ammenable to use with
+    ``antsApplyTransformsToPoints``."""
+    input_spec = GiftiAverageInputSpec
+    output_spec = GiftiAverageOutputSpec
+
+    def _run_interface(self, runtime):
+        giis = [nb.load(f) for f in self.inputs.in_files]
+        data = np.dstack([gii.darrays[0].data for gii in giis]).mean(-1)
+
+        newgii = giis[0]
+        newgii.darrays[0].data = data
+
+        out_file = fname_presuffix(
+            self.inputs.in_files[0],
+            newpath=runtime.cwd,
+            suffix='.averaged')
+        newgii.to_filename(out_file)
         self._results['out_file'] = out_file
         return runtime
 

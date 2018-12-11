@@ -19,7 +19,7 @@ from nipype import logging as nlogging
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces import freesurfer as fs
-from nipype.interfaces.ants import N4BiasFieldCorrection
+from nipype.interfaces.ants import N4BiasFieldCorrection, ApplyTransformsToPoints
 from nipype.interfaces.io import FreeSurferSource
 
 # niworkflows
@@ -31,6 +31,7 @@ from ..interfaces.fixes import (
     FixHeaderApplyTransforms as ApplyTransforms,
 )
 from ..interfaces.bids import DerivativesDataSink
+from ..interfaces.surf import GiftiToCSV, CSVToGifti, GiftiAverage
 from .freesurfer import init_gifti_surface_wf
 
 
@@ -313,9 +314,47 @@ def init_templateflow_wf(
         name='mov_aparc_ds', run_without_submitting=True
     )
 
+    # Extract surfaces
     cifti_wf = init_gifti_surface_wf(
         name='cifti_surfaces',
         subjects_dir=str(fs_subjects_dir))
+
+    # Move surfaces to template spaces
+    gii2csv = pe.MapNode(GiftiToCSV(), iterfield=['in_file'], name='gii2csv')
+    ref_map_surf = pe.MapNode(
+        ApplyTransformsToPoints(dimension=3, environ=ants_env),
+        n_procs=omp_nthreads, name='ref_map_surf', iterfield=['input_file'])
+    ref_csv2gii = pe.MapNode(CSVToGifti(), name='ref_csv2gii',
+                             iterfield=['in_file', 'gii_file'])
+    ref_surfs_buffer = pe.JoinNode(
+        niu.IdentityInterface(fields=['surfaces']),
+        joinsource='inputnode', joinfield='surfaces', name='ref_surfs_buffer')
+
+    ref_surfs_ds = pe.Node(
+        DerivativesDataSink(
+            base_directory=str(output_dir.parent),
+            out_path_base=output_dir.name, space=ref_template,
+            keep_dtype=False, compress=False),
+        name='ref_surfs_ds', run_without_submitting=True)
+
+    mov_map_surf = pe.MapNode(
+        ApplyTransformsToPoints(dimension=3, environ=ants_env),
+        n_procs=omp_nthreads, name='mov_map_surf', iterfield=['input_file'])
+    mov_csv2gii = pe.MapNode(CSVToGifti(), name='mov_csv2gii',
+                             iterfield=['in_file', 'gii_file'])
+    mov_surfs_buffer = pe.JoinNode(
+        niu.IdentityInterface(fields=['surfaces']),
+        joinsource='inputnode', joinfield='surfaces', name='mov_surfs_buffer')
+
+    mov_surfs_ds = pe.Node(
+        DerivativesDataSink(
+            base_directory=str(output_dir.parent),
+            out_path_base=output_dir.name, space=mov_template,
+            keep_dtype=False, compress=False),
+        name='mov_surfs_ds', run_without_submitting=True)
+
+    # ref_surfs_avg = pe.MapNode(
+    #     GiftiAverage(), name='ref_surfs_avg', iterfield=['in_files'])
 
     wf.connect([
         (inputnode, pick_file, [('participant_label', 'participant_label')]),
@@ -376,8 +415,40 @@ def init_templateflow_wf(
         (ref_aparc, ref_aparc_ds, [('output_image', 'in_file')]),
         (pick_file, mov_aparc_ds, [('out', 'source_file')]),
         (mov_aparc, mov_aparc_ds, [('output_image', 'in_file')]),
+        (cifti_wf, gii2csv, [
+            (('outputnode.surfaces', _discard_inflated), 'in_file')]),
+        # Mapping surfaces
+        (gii2csv, ref_map_surf, [('out_file', 'input_file')]),
+        (ref_norm, ref_map_surf, [
+            (('inverse_composite_transform', _ensure_list), 'transforms')]),
+        (ref_map_surf, ref_csv2gii, [('output_file', 'in_file')]),
+        (cifti_wf, ref_csv2gii, [
+            (('outputnode.surfaces', _discard_inflated), 'gii_file')]),
+        (pick_file, ref_surfs_ds, [('out', 'source_file')]),
+        (ref_csv2gii, ref_surfs_ds, [
+            ('out_file', 'in_file'),
+            (('out_file', _get_surf_extra), 'extra_values')]),
+        (ref_csv2gii, ref_surfs_buffer, [('out_file', 'surfaces')]),
+        (gii2csv, mov_map_surf, [('out_file', 'input_file')]),
+        (mov_norm, mov_map_surf, [
+            (('inverse_composite_transform', _ensure_list), 'transforms')]),
+        (mov_map_surf, mov_csv2gii, [('output_file', 'in_file')]),
+        (cifti_wf, mov_csv2gii, [
+            (('outputnode.surfaces', _discard_inflated), 'gii_file')]),
+        (pick_file, mov_surfs_ds, [('out', 'source_file')]),
+        (mov_csv2gii, mov_surfs_ds, [
+            ('out_file', 'in_file'),
+            (('out_file', _get_surf_extra), 'extra_values')]),
+        (mov_csv2gii, mov_surfs_buffer, [('out_file', 'surfaces')]),
     ])
     return wf
+
+def _ensure_list(value):
+    if isinstance(value, list):
+        return value
+    if isinstance(value, (str, bytes)):
+        return [value]
+    return list(value)
 
 
 def _last(inlist):
@@ -400,6 +471,29 @@ def _sub_decorate(label):
 def _get_extra(inlist):
     return ['class-%s' % s.rstrip(
         '.gz').rstrip('.nii').split('_')[-1] for s in inlist]
+
+
+def _get_surf_extra(inlist):
+    newlist = []
+    for item in inlist:
+        desc = None
+        hemi = 'L'
+        if 'rh' in item:
+            hemi = 'R'
+        if 'smoothwm' in item:
+            desc = 'smoothwm'
+        elif 'pial' in item:
+            desc = 'pial'
+        elif 'midthickness' in item:
+            desc = 'midthickness'
+        else:
+            raise RuntimeError("Unknown surface %s" % item)
+        newlist.append('hemi-%s_%s.surf' % (hemi, desc))
+    return newlist
+
+
+def _discard_inflated(inlist):
+    return [s for s in inlist if 'inflated' not in s]
 
 
 def cli():
