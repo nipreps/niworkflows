@@ -18,7 +18,6 @@ from nipype.interfaces.base import (
     BaseInterfaceInputSpec, TraitedSpec, File, traits, isdefined,
     SimpleInterface, InputMultiPath, CommandLine, CommandLineInputSpec
 )
-from .freesurfer import mri_info
 
 
 class NormalizeSurfInputSpec(BaseInterfaceInputSpec):

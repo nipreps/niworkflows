@@ -31,7 +31,7 @@ from ..interfaces.fixes import (
     FixHeaderApplyTransforms as ApplyTransforms,
 )
 from ..interfaces.bids import DerivativesDataSink
-from ..interfaces.surf import GiftiToCSV, CSVToGifti, GiftiAverage
+from ..interfaces.surf import GiftiToCSV, CSVToGifti
 from .freesurfer import init_gifti_surface_wf
 
 
@@ -355,9 +355,6 @@ def init_templateflow_wf(
             out_path_base=output_dir.name, space=mov_template,
             keep_dtype=False, compress=False),
         name='mov_surfs_ds', run_without_submitting=True)
-
-    # ref_surfs_avg = pe.MapNode(
-    #     GiftiAverage(), name='ref_surfs_avg', iterfield=['in_files'])
 
     wf.connect([
         (inputnode, pick_file, [('participant_label', 'participant_label')]),
