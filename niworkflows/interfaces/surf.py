@@ -16,7 +16,7 @@ import nibabel as nb
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec, TraitedSpec, File, traits, isdefined,
-    SimpleInterface, InputMultiPath,
+    SimpleInterface, InputMultiPath, CommandLine, CommandLineInputSpec
 )
 from .freesurfer import mri_info
 
@@ -261,39 +261,55 @@ class CSVToGifti(SimpleInterface):
             newpath=runtime.cwd,
             suffix='.transformed')
         gii.to_filename(out_file)
-        self._results['out_file'] = out_file
-        return runtime
 
 
-class GiftiAverageInputSpec(BaseInterfaceInputSpec):
+class SurfacesToPointCloudInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
-                              desc='input GIFTI files')
+                              desc='input GIfTI files')
+    out_file = File('pointcloud.ply')
 
 
-class GiftiAverageOutputSpec(TraitedSpec):
-    out_file = File(desc='output csv file')
+class SurfacesToPointCloudOutputSpec(TraitedSpec):
+    out_file = File(desc='output pointcloud in PLY format')
 
 
-class GiftiAverage(SimpleInterface):
-    """Converts GIfTI files to CSV to make them ammenable to use with
-    ``antsApplyTransformsToPoints``."""
-    input_spec = GiftiAverageInputSpec
-    output_spec = GiftiAverageOutputSpec
+class SurfacesToPointCloud(SimpleInterface):
+    """Converts multiple surfaces into a pointcloud with corresponding normals
+    to then apply Poisson reconstruction"""
+    input_spec = SurfacesToPointCloudInputSpec
+    output_spec = SurfacesToPointCloudOutputSpec
 
     def _run_interface(self, runtime):
-        giis = [nb.load(f) for f in self.inputs.in_files]
-        data = np.dstack([gii.darrays[0].data for gii in giis]).mean(-1)
+        from pathlib import Path
 
-        newgii = giis[0]
-        newgii.darrays[0].data = data
-
-        out_file = fname_presuffix(
-            self.inputs.in_files[0],
-            newpath=runtime.cwd,
-            suffix='.averaged')
-        newgii.to_filename(out_file)
+        giis = [nb.load(g) for g in self.inputs.in_files]
+        vertices = np.vstack([g.darrays[0].data for g in giis])
+        norms = np.vstack([vertex_normals(
+            g.darrays[0].data, g.darrays[1].data) for g in giis])
+        out_file = Path(self.inputs.out_file).resolve()
+        pointcloud2ply(vertices, norms, out_file=out_file)
         self._results['out_file'] = out_file
         return runtime
+
+
+class PoissonReconInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, mandatory=True, argstr='--in %s',
+                   desc='input PLY pointcloud (vertices + normals)')
+    out_file = File(exists=True, argstr='--out %s', keep_extension=True,
+                    name_source=['in_file'], name_template='%s_avg',
+                    desc='output PLY triangular mesh')
+
+
+class PoissonReconOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output PLY triangular mesh')
+
+
+class PoissonRecon(CommandLine):
+    """Converts multiple surfaces into a pointcloud with corresponding normals
+    to then apply Poisson reconstruction"""
+    input_spec = PoissonReconInputSpec
+    output_spec = PoissonReconOutputSpec
+    _cmd = 'PoissonRecon'
 
 
 def normalize_surfs(in_file, transform_file, newpath=None):
@@ -372,3 +388,80 @@ def load_transform(fname):
         return np.genfromtxt(lines)
 
     raise ValueError("Unknown transform type; pass FSL (.mat) or LTA (.lta)")
+
+
+def vertex_normals(vertices, faces):
+    """Calculates the normals of a triangular mesh"""
+
+    def normalize_v3(arr):
+        ''' Normalize a numpy array of 3 component vectors shape=(n,3) '''
+        lens = np.sqrt(arr[:, 0]**2 + arr[:, 1]**2 + arr[:, 2]**2)
+        arr[:, 0] /= lens
+        arr[:, 1] /= lens
+        arr[:, 2] /= lens
+
+    tris = vertices[faces]
+    facenorms = np.cross(tris[::, 1] - tris[::, 0], tris[::, 2] - tris[::, 0])
+    normalize_v3(facenorms)
+
+    norm = np.zeros(vertices.shape, dtype=vertices.dtype)
+    norm[faces[:, 0]] += facenorms
+    norm[faces[:, 1]] += facenorms
+    norm[faces[:, 2]] += facenorms
+    return normalize_v3(norm)
+
+
+def pointcloud2ply(vertices, normals, out_file=None):
+    """Converts the file to PLY format"""
+    from pathlib import Path
+    import pandas as pd
+    from pyntcloud import PyntCloud
+    df = pd.DataFrame(np.hstack((vertices, normals)))
+    df.columns = ['x', 'y', 'z', 'nx', 'ny', 'nz']
+    cloud = PyntCloud(df)
+
+    if out_file is None:
+        out_file = Path('pointcloud.ply').resolve()
+
+    cloud.to_file(str(out_file))
+    return out_file
+
+
+def ply2gii(in_file, metadata, out_file=None):
+    """Convert from ply to GIfTI"""
+    from pathlib import Path
+    from numpy import eye
+    from nibabel.gifti import GiftiMetaData, GiftiCoordSystem, GiftiImage
+    from nipype.utils.filemanip import fname_presuffix
+    from pyntcloud import PyntCloud
+
+    in_file = Path(in_file)
+    surf = PyntCloud.from_file(str(in_file))
+
+    # Update centroid metadata
+    metadata.update(
+        zip(('SurfaceCenterX', 'SurfaceCenterY', 'SurfaceCenterZ'),
+            surf.centroid)
+    )
+
+    # Prepare data arrays
+    da = (
+        nb.gifti.GiftiDataArray(
+            data=surf.xyz.astype('float32'),
+            datatype='NIFTI_TYPE_FLOAT32',
+            intent='NIFTI_INTENT_POINTSET',
+            meta=GiftiMetaData(metadata),
+            coordsys=GiftiCoordSystem(xform=eye(4), xformspace=3)),
+        nb.gifti.GiftiDataArray(
+            data=surf.mesh.values,
+            datatype='NIFTI_TYPE_INT32',
+            intent='NIFTI_INTENT_TRIANGLE',
+            coordsys=None))
+    surfgii = GiftiImage(darrays=da)
+
+    if out_file is None:
+        out_file = fname_presuffix(
+            in_file.name, suffix='.gii', use_ext=False, newpath=str(Path.cwd()))
+
+    surfgii.to_filename(str(out_file))
+    return out_file
