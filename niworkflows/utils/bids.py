@@ -184,7 +184,17 @@ def collect_data(dataset, participant_label, task=None, echo=None):
 
 
 def get_metadata_for_nifti(in_file):
-    """Fetch metadata for a given nifti file"""
+    """Fetch metadata for a given nifti file
+
+    >>> fmap = bids_collect_data(
+    ...     str(datadir / 'ds054'), '100185')[0]['fmap'][-1]
+    >>> metadata = get_metadata_for_nifti(fmap)
+    >>> metadata['Manufacturer']
+    'SIEMENS'
+
+    >>>
+
+    """
     in_file = Path(in_file).resolve()
     fname = splitext(in_file)[0]
     fname_comps = fname.split("_")
@@ -207,21 +217,22 @@ def get_metadata_for_nifti(in_file):
                 else:
                     top_comp_list.append(comp)
 
-    bids_dir = in_file.parent.parent
+    jsonext = '{}.json'.format
+    bids_dir = in_file.parent.parent.parent  # go up 3 levels
     if any([comp.startswith('ses') for comp in fname_comps]):
-        bids_dir = bids_dir.parent
+        bids_dir = bids_dir.parent  # one more if multisession
 
-    top_json = bids_dir / "_".join(top_comp_list)
+    top_json = bids_dir / jsonext("_".join(top_comp_list))
     potential_json = [top_json]
 
-    subject_json = bids_dir / sub / "_".join(subject_comp_list)
+    subject_json = bids_dir / sub / jsonext("_".join(subject_comp_list))
     potential_json.append(subject_json)
 
     if ses:
-        session_json = bids_dir / sub / ses / "_".join(session_comp_list)
+        session_json = bids_dir / sub / ses / jsonext("_".join(session_comp_list))
         potential_json.append(session_json)
 
-    potential_json.append(Path(fname + '.json'))  # Sidecar json
+    potential_json.append(in_file.parent / jsonext(fname))  # Sidecar json
 
     merged_param_dict = {}
     for json_file_path in potential_json:
