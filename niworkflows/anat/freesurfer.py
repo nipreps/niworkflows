@@ -55,7 +55,7 @@ def init_gifti_surface_wf(name='gifti_surface_wf',
     inputnode = pe.Node(niu.IdentityInterface(
         ['in_t1w', 'subject_id']), name='inputnode')
     outputnode = pe.Node(niu.IdentityInterface(
-        ['surfaces', 'fsnative_to_t1w_xfm']), name='outputnode')
+        ['surfaces', 'surf_norm', 'fsnative_to_t1w_xfm']), name='outputnode')
 
     fssource = pe.Node(nio.FreeSurferSource(subjects_dir=subjects_dir),
                        name='fssource', run_without_submitting=True)
@@ -96,8 +96,9 @@ def init_gifti_surface_wf(name='gifti_surface_wf',
         (surface_list, fs_2_gii, [('out', 'in_file')]),
         (fs_2_gii, fix_surfs, [('converted', 'in_file')]),
         (fsnative_2_t1_xfm, fix_surfs, [('out_reg_file', 'transform_file')]),
-        (fix_surfs, outputnode, [('out_file', 'surfaces')]),
         (fsnative_2_t1_xfm, outputnode, [('out_reg_file', 'fsnative_to_t1w_xfm')]),
+        (fix_surfs, outputnode, [('out_file', 'surf_norm')]),
+        (fs_2_gii, outputnode, [('converted', 'surfaces')]),
     ])
 
     return workflow

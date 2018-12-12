@@ -18,6 +18,7 @@ from nipype.interfaces.base import (
     BaseInterfaceInputSpec, TraitedSpec, File, traits, isdefined,
     SimpleInterface, InputMultiPath,
 )
+from .freesurfer import mri_info
 
 
 class NormalizeSurfInputSpec(BaseInterfaceInputSpec):
@@ -192,6 +193,7 @@ class GiftiSetAnatomicalStructure(SimpleInterface):
 
 class GiftiToCSVInputSpec(BaseInterfaceInputSpec):
     in_file = File(mandatory=True, exists=True, desc='GIFTI file')
+    itk_lps = traits.Bool(False, usedefault=True, desc='flip XY axes')
 
 
 class GiftiToCSVOutputSpec(TraitedSpec):
@@ -207,6 +209,9 @@ class GiftiToCSV(SimpleInterface):
     def _run_interface(self, runtime):
         gii = nb.load(self.inputs.in_file)
         data = gii.darrays[0].data
+
+        if self.inputs.itk_lps:  # ITK: flip X and Y around 0
+            data[:, :2] *= -1
 
         # antsApplyTransformsToPoints requires 5 cols with headers
         csvdata = np.hstack((data, np.zeros((data.shape[0], 3))))
@@ -228,6 +233,7 @@ class GiftiToCSV(SimpleInterface):
 class CSVToGiftiInputSpec(BaseInterfaceInputSpec):
     in_file = File(mandatory=True, exists=True, desc='CSV file')
     gii_file = File(mandatory=True, exists=True, desc='reference GIfTI file')
+    itk_lps = traits.Bool(False, usedefault=True, desc='flip XY axes')
 
 
 class CSVToGiftiOutputSpec(TraitedSpec):
@@ -244,7 +250,11 @@ class CSVToGifti(SimpleInterface):
         gii = nb.load(self.inputs.gii_file)
         data = np.loadtxt(self.inputs.in_file, delimiter=',',
                           skiprows=1, usecols=(0, 1, 2))
-        gii.darrays[0].data = data.astype(
+
+        if self.inputs.itk_lps:  # ITK: flip X and Y around 0
+            data[:, :2] *= -1
+
+        gii.darrays[0].data = data[:, :3].astype(
             gii.darrays[0].data.dtype)
         out_file = fname_presuffix(
             self.inputs.gii_file,

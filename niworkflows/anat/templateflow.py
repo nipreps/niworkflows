@@ -320,12 +320,14 @@ def init_templateflow_wf(
         subjects_dir=str(fs_subjects_dir))
 
     # Move surfaces to template spaces
-    gii2csv = pe.MapNode(GiftiToCSV(), iterfield=['in_file'], name='gii2csv')
+    gii2csv = pe.MapNode(GiftiToCSV(itk_lps=True),
+                         iterfield=['in_file'], name='gii2csv')
     ref_map_surf = pe.MapNode(
         ApplyTransformsToPoints(dimension=3, environ=ants_env),
         n_procs=omp_nthreads, name='ref_map_surf', iterfield=['input_file'])
-    ref_csv2gii = pe.MapNode(CSVToGifti(), name='ref_csv2gii',
-                             iterfield=['in_file', 'gii_file'])
+    ref_csv2gii = pe.MapNode(
+        CSVToGifti(itk_lps=True),
+        name='ref_csv2gii', iterfield=['in_file', 'gii_file'])
     ref_surfs_buffer = pe.JoinNode(
         niu.IdentityInterface(fields=['surfaces']),
         joinsource='inputnode', joinfield='surfaces', name='ref_surfs_buffer')
@@ -340,8 +342,9 @@ def init_templateflow_wf(
     mov_map_surf = pe.MapNode(
         ApplyTransformsToPoints(dimension=3, environ=ants_env),
         n_procs=omp_nthreads, name='mov_map_surf', iterfield=['input_file'])
-    mov_csv2gii = pe.MapNode(CSVToGifti(), name='mov_csv2gii',
-                             iterfield=['in_file', 'gii_file'])
+    mov_csv2gii = pe.MapNode(
+        CSVToGifti(itk_lps=True),
+        name='mov_csv2gii', iterfield=['in_file', 'gii_file'])
     mov_surfs_buffer = pe.JoinNode(
         niu.IdentityInterface(fields=['surfaces']),
         joinsource='inputnode', joinfield='surfaces', name='mov_surfs_buffer')
@@ -415,15 +418,15 @@ def init_templateflow_wf(
         (ref_aparc, ref_aparc_ds, [('output_image', 'in_file')]),
         (pick_file, mov_aparc_ds, [('out', 'source_file')]),
         (mov_aparc, mov_aparc_ds, [('output_image', 'in_file')]),
-        (cifti_wf, gii2csv, [
-            (('outputnode.surfaces', _discard_inflated), 'in_file')]),
         # Mapping surfaces
+        (cifti_wf, gii2csv, [
+            (('outputnode.surf_norm', _discard_inflated), 'in_file')]),
         (gii2csv, ref_map_surf, [('out_file', 'input_file')]),
         (ref_norm, ref_map_surf, [
             (('inverse_composite_transform', _ensure_list), 'transforms')]),
         (ref_map_surf, ref_csv2gii, [('output_file', 'in_file')]),
         (cifti_wf, ref_csv2gii, [
-            (('outputnode.surfaces', _discard_inflated), 'gii_file')]),
+            (('outputnode.surf_norm', _discard_inflated), 'gii_file')]),
         (pick_file, ref_surfs_ds, [('out', 'source_file')]),
         (ref_csv2gii, ref_surfs_ds, [
             ('out_file', 'in_file'),
@@ -434,7 +437,7 @@ def init_templateflow_wf(
             (('inverse_composite_transform', _ensure_list), 'transforms')]),
         (mov_map_surf, mov_csv2gii, [('output_file', 'in_file')]),
         (cifti_wf, mov_csv2gii, [
-            (('outputnode.surfaces', _discard_inflated), 'gii_file')]),
+            (('outputnode.surf_norm', _discard_inflated), 'gii_file')]),
         (pick_file, mov_surfs_ds, [('out', 'source_file')]),
         (mov_csv2gii, mov_surfs_ds, [
             ('out_file', 'in_file'),
