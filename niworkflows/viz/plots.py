@@ -473,30 +473,35 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
     ax_ts.spines["left"].set_visible(False)
     # ax_ts.yaxis.set_ticks_position('left')
 
-    # Calculate Y limits
-    def_ylims = [tseries[~np.isnan(tseries)].min() - 0.1 * abs(tseries[~np.isnan(tseries)].min()),
-                 1.1 * tseries[~np.isnan(tseries)].max()]
-    if ylims is not None:
-        if ylims[0] is not None:
-            def_ylims[0] = min([def_ylims[0], ylims[0]])
-        if ylims[1] is not None:
-            def_ylims[1] = max([def_ylims[1], ylims[1]])
 
-    # Add space for plot title and mean/SD annotation
-    def_ylims[0] -= 0.1 * (def_ylims[1] - def_ylims[0])
-
-    ax_ts.set_ylim(def_ylims)
-    # yticks = sorted(def_ylims)
     ax_ts.set_yticks([])
     ax_ts.set_yticklabels([])
-    # ax_ts.set_yticks(yticks)
-    # ax_ts.set_yticklabels(['%.02f' % y for y in yticks])
 
-    # Annotate stats
-    maxv = tseries[~np.isnan(tseries)].max()
-    mean = tseries[~np.isnan(tseries)].mean()
-    stdv = tseries[~np.isnan(tseries)].std()
-    p95 = np.percentile(tseries[~np.isnan(tseries)], 95.0)
+    nonnan = tseries[~np.isnan(tseries)]
+    if nonnan.size > 0:
+        # Calculate Y limits
+        def_ylims = [nonnan.min() - 0.1 * abs(nonnan.min()), 1.1 * nonnan.max()]
+        if ylims is not None:
+            if ylims[0] is not None:
+                def_ylims[0] = min([def_ylims[0], ylims[0]])
+            if ylims[1] is not None:
+                def_ylims[1] = max([def_ylims[1], ylims[1]])
+
+        # Add space for plot title and mean/SD annotation
+        def_ylims[0] -= 0.1 * (def_ylims[1] - def_ylims[0])
+
+        ax_ts.set_ylim(def_ylims)
+
+        # Annotate stats
+        maxv = nonnan.max()
+        mean = nonnan.mean()
+        stdv = nonnan.std()
+        p95 = np.percentile(nonnan, 95.0)
+    else:
+        maxv = 0
+        mean = 0
+        stdv = 0
+        p95 = 0
 
     stats_label = (r'max: {max:.3f}{units} $\bullet$ mean: {mean:.3f}{units} '
                    r'$\bullet$ $\sigma$: {sigma:.3f}').format(
