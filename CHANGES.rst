@@ -1,3 +1,8 @@
+0.5.2.post2 (December 12, 2018)
+===============================
+
+  * [FIX] ``get_metadata_for_nifti`` broken in transfer from fmriprep (#267)
+
 0.5.2.post1 (December 10, 2018)
 ===============================
 
