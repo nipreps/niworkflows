@@ -9,6 +9,7 @@ Handling surfaces
 """
 import os
 import re
+from collections import defaultdict
 
 import numpy as np
 import nibabel as nb
@@ -16,8 +17,15 @@ import nibabel as nb
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec, TraitedSpec, File, traits, isdefined,
-    SimpleInterface, InputMultiPath, CommandLine, CommandLineInputSpec
+    SimpleInterface, CommandLine, CommandLineInputSpec,
+    InputMultiPath, OutputMultiPath,
 )
+
+SECONDARY_ANAT_STRUC = {
+    'smoothwm': 'GrayWhite',
+    'pial': 'Pial',
+    'midthickness': 'GrayMid'
+}
 
 
 class NormalizeSurfInputSpec(BaseInterfaceInputSpec):
@@ -260,12 +268,15 @@ class CSVToGifti(SimpleInterface):
             newpath=runtime.cwd,
             suffix='.transformed')
         gii.to_filename(out_file)
+        self._results['out_file'] = out_file
+        return runtime
 
 
 class SurfacesToPointCloudInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
                               desc='input GIfTI files')
-    out_file = File('pointcloud.ply')
+    out_file = File('pointcloud.ply', usedefault=True,
+                    desc='output file name')
 
 
 class SurfacesToPointCloudOutputSpec(TraitedSpec):
@@ -287,14 +298,14 @@ class SurfacesToPointCloud(SimpleInterface):
             g.darrays[0].data, g.darrays[1].data) for g in giis])
         out_file = Path(self.inputs.out_file).resolve()
         pointcloud2ply(vertices, norms, out_file=out_file)
-        self._results['out_file'] = out_file
+        self._results['out_file'] = str(out_file)
         return runtime
 
 
 class PoissonReconInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, mandatory=True, argstr='--in %s',
                    desc='input PLY pointcloud (vertices + normals)')
-    out_file = File(exists=True, argstr='--out %s', keep_extension=True,
+    out_file = File(argstr='--out %s', keep_extension=True,
                     name_source=['in_file'], name_template='%s_avg',
                     desc='output PLY triangular mesh')
 
@@ -309,6 +320,90 @@ class PoissonRecon(CommandLine):
     input_spec = PoissonReconInputSpec
     output_spec = PoissonReconOutputSpec
     _cmd = 'PoissonRecon'
+
+
+class PLYtoGiftiInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True, desc='input PLY file')
+    surf_key = traits.Str(mandatory=True, desc='reference GIfTI file')
+
+
+class PLYtoGiftiOutputSpec(TraitedSpec):
+    out_file = File(desc='output GIfTI file')
+
+
+class PLYtoGifti(SimpleInterface):
+    """Converts multiple surfaces into a pointcloud with corresponding normals
+    to then apply Poisson reconstruction"""
+    input_spec = PLYtoGiftiInputSpec
+    output_spec = PLYtoGiftiOutputSpec
+
+    def _run_interface(self, runtime):
+        from pathlib import Path
+        meta = {
+            'GeometricType': 'Anatomical',
+            'VolGeomWidth': '256',
+            'VolGeomHeight': '256',
+            'VolGeomDepth': '256',
+            'VolGeomXsize': '1.0',
+            'VolGeomYsize': '1.0',
+            'VolGeomZsize': '1.0',
+            'VolGeomX_R': '1.0',
+            'VolGeomX_A': '0.0',
+            'VolGeomX_S': '0.0',
+            'VolGeomY_R': '0.0',
+            'VolGeomY_A': '1.0',
+            'VolGeomY_S': '0.0',
+            'VolGeomZ_R': '0.0',
+            'VolGeomZ_A': '0.0',
+            'VolGeomZ_S': '1.0',
+            'VolGeomC_R': '0.0',
+            'VolGeomC_A': '0.0',
+            'VolGeomC_S': '0.0',
+        }
+        meta['AnatomicalStructurePrimary'] = 'Cortex%s' % (
+            'Left' if self.inputs.surf_key.startswith('lh') else 'Right')
+        meta['AnatomicalStructureSecondary'] = SECONDARY_ANAT_STRUC[
+            self.inputs.surf_key.split('.')[-1]]
+        meta['Name'] = '%s_average.gii' % self.inputs.surf_key
+
+        out_file = Path(runtime.cwd) / meta['Name']
+        out_file = ply2gii(self.inputs.in_file, meta, out_file=out_file)
+        self._results['out_file'] = str(out_file)
+        return runtime
+
+
+class UnzipJoinedSurfacesInputSpec(BaseInterfaceInputSpec):
+    in_files = traits.List(
+        InputMultiPath(File(exists=True), mandatory=True,
+                       desc='input GIfTI files'))
+
+
+class UnzipJoinedSurfacesOutputSpec(TraitedSpec):
+    out_files = traits.List(
+        OutputMultiPath(File(exists=True),
+                        desc='output pointcloud in PLY format'))
+    surf_keys = traits.List(traits.Str, desc='surface identifier keys')
+
+
+class UnzipJoinedSurfaces(SimpleInterface):
+    """Converts multiple surfaces into a pointcloud with corresponding normals
+    to then apply Poisson reconstruction"""
+    input_spec = UnzipJoinedSurfacesInputSpec
+    output_spec = UnzipJoinedSurfacesOutputSpec
+
+    def _run_interface(self, runtime):
+        from pathlib import Path
+        groups = defaultdict(list)
+        in_files = [it for items in self.inputs.in_files for it in items]
+
+        for f in in_files:
+            bname = Path(f).name
+            groups[bname.split('_')[0]].append(f)
+
+        self._results['out_files'] = [sorted(els) for els in groups.values()]
+        self._results['surf_keys'] = list(groups.keys())
+
+        return runtime
 
 
 def normalize_surfs(in_file, transform_file, newpath=None):
@@ -395,9 +490,7 @@ def vertex_normals(vertices, faces):
     def normalize_v3(arr):
         ''' Normalize a numpy array of 3 component vectors shape=(n,3) '''
         lens = np.sqrt(arr[:, 0]**2 + arr[:, 1]**2 + arr[:, 2]**2)
-        arr[:, 0] /= lens
-        arr[:, 1] /= lens
-        arr[:, 2] /= lens
+        arr /= lens[:, np.newaxis]
 
     tris = vertices[faces]
     facenorms = np.cross(tris[::, 1] - tris[::, 0], tris[::, 2] - tris[::, 0])
@@ -407,7 +500,8 @@ def vertex_normals(vertices, faces):
     norm[faces[:, 0]] += facenorms
     norm[faces[:, 1]] += facenorms
     norm[faces[:, 2]] += facenorms
-    return normalize_v3(norm)
+    normalize_v3(norm)
+    return norm
 
 
 def pointcloud2ply(vertices, normals, out_file=None):
@@ -430,7 +524,9 @@ def ply2gii(in_file, metadata, out_file=None):
     """Convert from ply to GIfTI"""
     from pathlib import Path
     from numpy import eye
-    from nibabel.gifti import GiftiMetaData, GiftiCoordSystem, GiftiImage
+    from nibabel.gifti import (
+        GiftiMetaData, GiftiCoordSystem, GiftiImage, GiftiDataArray,
+    )
     from nipype.utils.filemanip import fname_presuffix
     from pyntcloud import PyntCloud
 
@@ -440,18 +536,18 @@ def ply2gii(in_file, metadata, out_file=None):
     # Update centroid metadata
     metadata.update(
         zip(('SurfaceCenterX', 'SurfaceCenterY', 'SurfaceCenterZ'),
-            surf.centroid)
+            ['%.4f' % c for c in surf.centroid])
     )
 
     # Prepare data arrays
     da = (
-        nb.gifti.GiftiDataArray(
+        GiftiDataArray(
             data=surf.xyz.astype('float32'),
             datatype='NIFTI_TYPE_FLOAT32',
             intent='NIFTI_INTENT_POINTSET',
-            meta=GiftiMetaData(metadata),
+            meta=GiftiMetaData.from_dict(metadata),
             coordsys=GiftiCoordSystem(xform=eye(4), xformspace=3)),
-        nb.gifti.GiftiDataArray(
+        GiftiDataArray(
             data=surf.mesh.values,
             datatype='NIFTI_TYPE_INT32',
             intent='NIFTI_INTENT_TRIANGLE',
@@ -464,3 +560,12 @@ def ply2gii(in_file, metadata, out_file=None):
 
     surfgii.to_filename(str(out_file))
     return out_file
+
+
+def get_gii_meta(in_file):
+    from nibabel import load
+
+    if isinstance(in_file, list):
+        in_file = in_file[0]
+    gii = load(in_file)
+    return gii.darrays[0].meta.metadata

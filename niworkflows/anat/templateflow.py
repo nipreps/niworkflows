@@ -7,7 +7,6 @@ TemplateFlow: registration workflows
 ------------------------------------
 
 """
-from __future__ import print_function, division, absolute_import, unicode_literals
 
 # general purpose
 import pkg_resources as pkgr
@@ -31,7 +30,10 @@ from ..interfaces.fixes import (
     FixHeaderApplyTransforms as ApplyTransforms,
 )
 from ..interfaces.bids import DerivativesDataSink
-from ..interfaces.surf import GiftiToCSV, CSVToGifti
+from ..interfaces.surf import (
+    GiftiToCSV, CSVToGifti, SurfacesToPointCloud, PoissonRecon,
+    UnzipJoinedSurfaces, PLYtoGifti,
+)
 from .freesurfer import init_gifti_surface_wf
 
 
@@ -331,6 +333,16 @@ def init_templateflow_wf(
     ref_surfs_buffer = pe.JoinNode(
         niu.IdentityInterface(fields=['surfaces']),
         joinsource='inputnode', joinfield='surfaces', name='ref_surfs_buffer')
+    ref_surfs_unzip = pe.Node(UnzipJoinedSurfaces(), name='ref_surfs_unzip',
+                              run_without_submitting=True)
+    ref_ply = pe.MapNode(SurfacesToPointCloud(), name='ref_ply',
+                         iterfield=['in_files'])
+    ref_recon = pe.MapNode(PoissonRecon(), name='ref_recon',
+                           iterfield=['in_file'])
+    ref_avggii = pe.MapNode(PLYtoGifti(), name='ref_avggii',
+                            iterfield=['in_file', 'surf_key'])
+    ref_smooth = pe.MapNode(fs.SmoothTessellation(), name='ref_smooth',
+                            iterfield=['in_file'])
 
     ref_surfs_ds = pe.Node(
         DerivativesDataSink(
@@ -338,6 +350,13 @@ def init_templateflow_wf(
             out_path_base=output_dir.name, space=ref_template,
             keep_dtype=False, compress=False),
         name='ref_surfs_ds', run_without_submitting=True)
+    ref_avg_ds = pe.Node(
+        DerivativesDataSink(
+            base_directory=str(output_dir.parent),
+            out_path_base=output_dir.name, space=ref_template,
+            keep_dtype=False, compress=False,
+            source_file='group/tpl-{0}_T1w.nii.gz'.format(ref_template)),
+        name='ref_avg_ds', run_without_submitting=True)
 
     mov_map_surf = pe.MapNode(
         ApplyTransformsToPoints(dimension=3, environ=ants_env),
@@ -348,6 +367,16 @@ def init_templateflow_wf(
     mov_surfs_buffer = pe.JoinNode(
         niu.IdentityInterface(fields=['surfaces']),
         joinsource='inputnode', joinfield='surfaces', name='mov_surfs_buffer')
+    mov_surfs_unzip = pe.Node(UnzipJoinedSurfaces(), name='mov_surfs_unzip',
+                              run_without_submitting=True)
+    mov_ply = pe.MapNode(SurfacesToPointCloud(), name='mov_ply',
+                         iterfield=['in_files'])
+    mov_recon = pe.MapNode(PoissonRecon(), name='mov_recon',
+                           iterfield=['in_file'])
+    mov_avggii = pe.MapNode(PLYtoGifti(), name='mov_avggii',
+                            iterfield=['in_file', 'surf_key'])
+    mov_smooth = pe.MapNode(fs.SmoothTessellation(), name='mov_smooth',
+                            iterfield=['in_file'])
 
     mov_surfs_ds = pe.Node(
         DerivativesDataSink(
@@ -355,6 +384,13 @@ def init_templateflow_wf(
             out_path_base=output_dir.name, space=mov_template,
             keep_dtype=False, compress=False),
         name='mov_surfs_ds', run_without_submitting=True)
+    mov_avg_ds = pe.Node(
+        DerivativesDataSink(
+            base_directory=str(output_dir.parent),
+            out_path_base=output_dir.name, space=mov_template,
+            keep_dtype=False, compress=False,
+            source_file='group/tpl-{0}_T1w.nii.gz'.format(mov_template)),
+        name='mov_avg_ds', run_without_submitting=True)
 
     wf.connect([
         (inputnode, pick_file, [('participant_label', 'participant_label')]),
@@ -415,7 +451,7 @@ def init_templateflow_wf(
         (ref_aparc, ref_aparc_ds, [('output_image', 'in_file')]),
         (pick_file, mov_aparc_ds, [('out', 'source_file')]),
         (mov_aparc, mov_aparc_ds, [('output_image', 'in_file')]),
-        # Mapping surfaces
+        # Mapping ref surfaces
         (cifti_wf, gii2csv, [
             (('outputnode.surf_norm', _discard_inflated), 'in_file')]),
         (gii2csv, ref_map_surf, [('out_file', 'input_file')]),
@@ -429,6 +465,17 @@ def init_templateflow_wf(
             ('out_file', 'in_file'),
             (('out_file', _get_surf_extra), 'extra_values')]),
         (ref_csv2gii, ref_surfs_buffer, [('out_file', 'surfaces')]),
+        (ref_surfs_buffer, ref_surfs_unzip, [('surfaces', 'in_files')]),
+        (ref_surfs_unzip, ref_ply, [('out_files', 'in_files')]),
+        (ref_ply, ref_recon, [('out_file', 'in_file')]),
+        (ref_recon, ref_avggii, [('out_file', 'in_file')]),
+        (ref_surfs_unzip, ref_avggii, [('surf_keys', 'surf_key')]),
+        (ref_avggii, ref_smooth, [('out_file', 'in_file')]),
+        (ref_smooth, ref_avg_ds, [
+            ('surface', 'in_file'),
+            (('surface', _get_surf_extra), 'extra_values')]),
+
+        # Mapping mov surfaces
         (gii2csv, mov_map_surf, [('out_file', 'input_file')]),
         (mov_norm, mov_map_surf, [
             (('inverse_composite_transform', _ensure_list), 'transforms')]),
@@ -440,8 +487,18 @@ def init_templateflow_wf(
             ('out_file', 'in_file'),
             (('out_file', _get_surf_extra), 'extra_values')]),
         (mov_csv2gii, mov_surfs_buffer, [('out_file', 'surfaces')]),
+        (mov_surfs_buffer, mov_surfs_unzip, [('surfaces', 'in_files')]),
+        (mov_surfs_unzip, mov_ply, [('out_files', 'in_files')]),
+        (mov_ply, mov_recon, [('out_file', 'in_file')]),
+        (mov_recon, mov_avggii, [('out_file', 'in_file')]),
+        (mov_surfs_unzip, mov_avggii, [('surf_keys', 'surf_key')]),
+        (mov_avggii, mov_smooth, [('out_file', 'in_file')]),
+        (mov_smooth, mov_avg_ds, [
+            ('surface', 'in_file'),
+            (('surface', _get_surf_extra), 'extra_values')]),
     ])
     return wf
+
 
 def _ensure_list(value):
     if isinstance(value, list):
