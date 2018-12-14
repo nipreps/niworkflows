@@ -1,3 +1,8 @@
+0.5.2.post5 (December 14, 2018)
+===============================
+
+  * [FIX] ``read_crashfile`` stopped working after migration (#270)
+
 0.5.2.post4 (December 13, 2018)
 ===============================
 
