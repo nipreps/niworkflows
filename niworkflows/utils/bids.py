@@ -76,7 +76,7 @@ def collect_participants(bids_dir, participant_label=None, strict=False):
         raise BIDSError(
             'Could not find participants. Please make sure the BIDS data '
             'structure is present and correct. Datasets can be validated online '
-            'using the BIDS Validator (http://incf.github.io/bids-validator/).\n'
+            'using the BIDS Validator (http://bids-standard.github.io/bids-validator/).\n'
             'If you are using Docker for Mac or Docker for Windows, you '
             'may need to adjust your "File sharing" preferences.', bids_dir)
 
