@@ -79,6 +79,9 @@ def _read_txt(path):
         cur_key = ''
         cur_val = ''
         for i, line in enumerate(lines[5:]):
+            if not line.strip():
+                continue
+
             if line[0].isspace():
                 cur_val += line
                 continue
@@ -95,7 +98,7 @@ def _read_txt(path):
         data['inputs'] = sorted(inputs)
     else:
         data['node_dir'] = "Node crashed before execution"
-    data['traceback'] = ''.join(lines[traceback_start:]).strip()
+    data['traceback'] = '\n'.join(lines[traceback_start:]).strip()
     return data
 
 
