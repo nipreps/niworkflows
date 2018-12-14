@@ -38,7 +38,6 @@ class LiterateWorkflow(pe.Workflow):
 
         for node in pe.utils.topological_sort(self._graph)[0]:
             if isinstance(node, LiterateWorkflow):
-                print('%s is literate', node.name)
                 add_desc = node.visit_desc()
                 if add_desc not in desc:
                     desc.append(add_desc)
