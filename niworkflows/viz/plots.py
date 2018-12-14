@@ -473,7 +473,6 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
     ax_ts.spines["left"].set_visible(False)
     # ax_ts.yaxis.set_ticks_position('left')
 
-
     ax_ts.set_yticks([])
     ax_ts.set_yticklabels([])
 

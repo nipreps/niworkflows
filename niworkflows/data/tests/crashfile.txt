@@ -1,0 +1,33 @@
+Node: fmriprep_wf.single_subject_100185_wf.func_preproc_task_machinegame_run_02_wf.carpetplot_wf.conf_plot
+Working directory: /home/oesteban/tmp/fmriprep-ds005/work/fmriprep_wf/single_subject_100185_wf/func_preproc_task_machinegame_run_02_wf/carpetplot_wf/conf_plot
+
+Node inputs:
+
+confounds_file = /home/oesteban/tmp/fmriprep-ds005/work/fmriprep_wf/single_subject_100185_wf/func_preproc_task_machinegame_run_02_wf/bold_confounds_wf/concat/confounds.tsv
+confounds_list = [('global_signal', None, 'GS'), ('csf', None, 'GSCSF'), ('white_matter', None, 'GSWM'), ('std_dvars', None, 'DVARS'), ('framewise_displacement', 'mm', 'FD')]
+in_func = /home/oesteban/tmp/fmriprep-ds005/work/fmriprep_wf/single_subject_100185_wf/func_preproc_task_machinegame_run_02_wf/bold_bold_trans_wf/merge/vol0000_xform-00000_merged.nii.gz
+in_mask = /home/oesteban/tmp/fmriprep-ds005/work/fmriprep_wf/single_subject_100185_wf/func_preproc_task_machinegame_run_02_wf/bold_bold_trans_wf/bold_reference_wf/enhance_and_skullstrip_bold_wf/combine_masks/ref_image_valid_corrected_brain_mask_maths.nii.gz
+in_segm = /home/oesteban/tmp/fmriprep-ds005/work/fmriprep_wf/single_subject_100185_wf/func_preproc_task_machinegame_run_02_wf/carpetplot_wf/resample_parc/tpl-MNI152NLin2009cAsym_space-MNI_res-01_label-carpet_atlas_trans.nii.gz
+str_or_tuple = <undefined>
+tr = 1.0
+
+Traceback (most recent call last):
+  File "/home/oesteban/workspace/nipype/nipype/pipeline/plugins/multiproc.py", line 69, in run_node
+    result['result'] = node.run(updatehash=updatehash)
+  File "/home/oesteban/workspace/nipype/nipype/pipeline/engine/nodes.py", line 473, in run
+    result = self._run_interface(execute=True)
+  File "/home/oesteban/workspace/nipype/nipype/pipeline/engine/nodes.py", line 557, in _run_interface
+    return self._run_command(execute)
+  File "/home/oesteban/workspace/nipype/nipype/pipeline/engine/nodes.py", line 637, in _run_command
+    result = self._interface.run(cwd=outdir)
+  File "/home/oesteban/workspace/nipype/nipype/interfaces/base/core.py", line 511, in run
+    runtime = self._run_interface(runtime)
+  File "/home/oesteban/workspace/fmriprep/fmriprep/interfaces/confounds.py", line 342, in _run_interface
+    units=units,
+  File "/home/oesteban/workspace/niworkflows/niworkflows/viz/plots.py", line 101, in plot
+    name=name, **kwargs)
+  File "/home/oesteban/workspace/niworkflows/niworkflows/viz/plots.py", line 483, in confoundplot
+    def_ylims = [nonnan.min() - 0.1 * abs(nonnan.min()), 1.1 * nonnan.max()]
+  File "/home/oesteban/.anaconda3/lib/python3.7/site-packages/numpy/core/_methods.py", line 32, in _amin
+    return umr_minimum(a, axis, None, out, keepdims, initial)
+ValueError: zero-size array to reduction operation minimum which has no identity

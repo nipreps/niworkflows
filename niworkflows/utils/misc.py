@@ -68,9 +68,20 @@ def _read_pkl(path):
 
 
 def _read_txt(path):
+    """Read a txt crashfile
+
+    >>> new_path = Path(__file__).resolve().parent.parent
+    >>> test_data_path = new_path / 'data' / 'tests'
+    >>> info = _read_txt(test_data_path / 'crashfile.txt')
+    >>> info['node']  # doctest: +ELLIPSIS
+    '...func_preproc_task_machinegame_run_02_wf.carpetplot_wf.conf_plot'
+    >>> info['traceback']  # doctest: +ELLIPSIS
+    '...ValueError: zero-size array to reduction operation minimum which has no identity'
+
+    """
     from pathlib import Path
     lines = Path(path).read_text().splitlines()
-    data = {'file': path}
+    data = {'file': str(path)}
     traceback_start = 0
     if lines[0].startswith('Node'):
         data['node'] = lines[0].split(': ', 1)[1].strip()
