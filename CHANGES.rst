@@ -1,3 +1,18 @@
+0.5.2.post5 (December 14, 2018)
+===============================
+
+  * [FIX] ``read_crashfile`` stopped working after migration (#270)
+
+0.5.2.post4 (December 13, 2018)
+===============================
+
+  * [HOTFIX] ``LiterateWorkflow`` returning empty desc (#269)
+
+0.5.2.post3 (December 13, 2018)
+===============================
+
+  * [FIX] Summary fMRIPlot chokes when confounds are all-nan (#268)
+
 0.5.2.post2 (December 12, 2018)
 ===============================
 
