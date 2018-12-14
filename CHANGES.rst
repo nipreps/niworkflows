@@ -1,3 +1,8 @@
+0.5.2.post4 (December 13, 2018)
+===============================
+
+  * [HOTFIX] ``LiterateWorkflow`` returning empty desc (#269)
+
 0.5.2.post3 (December 13, 2018)
 ===============================
 
