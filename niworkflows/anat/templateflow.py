@@ -442,7 +442,8 @@ def init_templateflow_wf(
         #     ('out_atlas_voting_weight_name_format', 'in_file')]),
         (mov_join_labels, mov_join_labels_ds, [('out_label_fusion', 'in_file')]),
         (mov_join_labels, mov_join_probs_ds, [
-            ('out_label_post_prob', 'in_file')]),
+            ('out_label_post_prob', 'in_file'),
+            (('out_label_post_prob', _get_extra), 'extra_values')]),
         (pick_file, ref_norm_ds, [('out', 'source_file')]),
         (ref_norm, ref_norm_ds, [('warped_image', 'in_file')]),
         (pick_file, mov_norm_ds, [('out', 'source_file')]),
