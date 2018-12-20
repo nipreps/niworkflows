@@ -92,19 +92,37 @@ RUN curl -sL https://deb.nodesource.com/setup_7.x | bash -
 RUN apt-get install -y nodejs
 RUN npm install -g svgo
 
-# Install miniconda
-ARG PYTHON_MAJOR=3
-RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda${PYTHON_MAJOR}-4.3.31-Linux-x86_64.sh && \
-    /bin/bash Miniconda${PYTHON_MAJOR}-4.3.31-Linux-x86_64.sh -b -p /usr/local/miniconda && \
-    rm Miniconda${PYTHON_MAJOR}-4.3.31-Linux-x86_64.sh
+# Installing and setting up miniconda
+RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh && \
+    bash Miniconda3-4.5.11-Linux-x86_64.sh -b -p /usr/local/miniconda && \
+    rm Miniconda3-4.5.11-Linux-x86_64.sh
+
 ENV PATH=/usr/local/miniconda/bin:$PATH \
     LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8
+    LC_ALL=C.UTF-8 \
+    PYTHONNOUSERSITE=1
 
-# Create conda environment
-RUN conda config --add channels conda-forge && \
-    conda install -y numpy scipy matplotlib pandas lxml libxslt nose mock && \
-    python -c "from matplotlib import font_manager"
+# Installing precomputed python packages
+RUN conda install -y python=3.7.1 \
+                     mkl=2018.0.3 \
+                     mkl-service \
+                     numpy=1.15.4 \
+                     scipy=1.1.0 \
+                     scikit-learn=0.19.1 \
+                     matplotlib=2.2.2 \
+                     pandas=0.23.4 \
+                     libxml2=2.9.8 \
+                     libxslt=1.1.32 \
+                     graphviz=2.40.1 \
+                     traits=4.6.0; sync &&  \
+    chmod -R a+rX /usr/local/miniconda; sync && \
+    chmod +x /usr/local/miniconda/bin/*; sync && \
+    conda clean --all -y; sync && \
+    conda clean -tipsy && sync
+
+# Precaching fonts, set 'Agg' as default backend for matplotlib
+RUN python -c "from matplotlib import font_manager" && \
+    sed -i 's/\(backend *: \).*$/\1Agg/g' $( python -c "import matplotlib; print(matplotlib.matplotlib_fname())" )
 
 # Installing dev requirements (packages that are not in pypi)
 ADD requirements.txt requirements.txt
@@ -114,14 +132,32 @@ RUN pip install -r requirements.txt && \
 RUN mkdir /niworkflows_data
 ENV CRN_SHARED_DATA /niworkflows_data
 
-WORKDIR /root/
+WORKDIR /src/
 COPY . niworkflows/
-RUN find /root/niworkflows/ -name "test*.py" -exec chmod a-x '{}' \;
-RUN cd niworkflows && \
-    pip install -e .[all]
+ARG VERSION=dev
+# Force static versioning within container
+RUN echo "${VERSION}" > /src/niworkflows/niworkflows/VERSION && \
+    echo "include niworkflows/VERSION" >> MANIFEST.in && \
+    find /src/niworkflows/ -name "test*.py" -exec chmod a-x {} + && \
+    cd /src/niworkflows && \
+    pip install .[all] && \
+    rm -rf ~/.cache/pip
 
 # Pre-install templates and data
 RUN python -c 'from niworkflows.data.getters import get_template; get_template("MNI152Lin")' && \
     python -c 'from niworkflows.data.getters import get_template; get_template("MNI152NLin2009cAsym")' && \
     python -c 'from niworkflows.data.getters import get_template; get_template("OASIS")' && \
     python -c 'from niworkflows.data.getters import get_ds003_downsampled; get_ds003_downsampled()'
+
+WORKDIR /tmp
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+LABEL org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.name="niworkflows" \
+      org.label-schema.description="niworkflows - NeuroImaging workflows" \
+      org.label-schema.url="https://github.com/poldracklab/niworkflows" \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url="https://github.com/poldracklab/niworkflows" \
+      org.label-schema.version=$VERSION \
+      org.label-schema.schema-version="1.0"

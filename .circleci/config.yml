@@ -10,9 +10,9 @@ jobs:
     working_directory: /tmp/src/niworkflows
     steps:
       - run:
-          name: Install parallel gzip
+          name: Install parallel gzip and python3
           command: |
-            apk add --no-cache pigz
+            apk add --no-cache pigz python3
       - restore_cache:
           keys:
             - docker-v1-{{ .Branch }}-{{ epoch }}
@@ -23,12 +23,6 @@ jobs:
             - /tmp/cache/docker.tar.gz
             - /tmp/cache/ubuntu.tar.gz
       - checkout
-      - run:
-          name: Update Niworkflows version
-          command: |
-            if [ "${CIRCLE_TAG}" != "" ]; then
-              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'${CIRCLE_TAG}'/" niworkflows/__about__.py
-            fi
       - setup_remote_docker
       - run:
           name: Load Docker image layer cache
@@ -44,6 +38,7 @@ jobs:
           name: Build Docker image
           no_output_timeout: 60m
           command: |
+            THISVERSION=$( python3 get_version.py )
             e=1 && for i in {1..5}; do
               docker build \
                 --cache-from=niworkflows:py3 \
@@ -51,7 +46,7 @@ jobs:
                 -t niworkflows:py3 \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
                 --build-arg VCS_REF=`git rev-parse --short HEAD` \
-                --build-arg VERSION=${CIRCLE_TAG:-latest} . \
+                --build-arg VERSION=${CIRCLE_TAG:-$THISVERSION} . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
       - run:
@@ -96,17 +91,27 @@ jobs:
               docker images
             fi
       - run:
-          name: Run Niworkflows tests
+          name: Run unit tests
           no_output_timeout: 2h
           command: |
             sudo setfacl -d -m group:ubuntu:rwx $PWD
             sudo setfacl -m group:ubuntu:rwx $PWD
             docker run -it --rm=false \
-              -e SAVE_CIRCLE_ARTIFACTS="/scratch" \
-              -v ${PWD}:/scratch -w /scratch \
-              --entrypoint=/usr/local/miniconda/bin/py.test \
-              niworkflows:py3 /root/niworkflows \
-              -n auto -v --junit-xml=/scratch/pytest.xml
+              -v ${PWD}:/tmp niworkflows:py3 \
+              pytest --junit-xml=/tmp/pytest.xml \
+              --ignore=/src/niworkflows/niworkflows/tests/ \
+              --ignore=/src/niworkflows/niworkflows/interfaces/ants.py \
+              /src/niworkflows/niworkflows
+
+      - run:
+          name: Run reportlet tests
+          no_output_timeout: 2h
+          command: |
+            docker run -it --rm=false \
+              -e SAVE_CIRCLE_ARTIFACTS="/tmp" \
+              -v ${PWD}:/tmp niworkflows:py3 \
+              pytest -n auto --junit-xml=/tmp/reportlets.xml \
+              /src/niworkflows/niworkflows/tests/
 
       - store_artifacts:
           path: /tmp/tests
@@ -121,18 +126,13 @@ jobs:
     working_directory: /tmp/src/niworkflows
     steps:
       - checkout
-
-      - run:
-          name: Update Niworkflows version
-          command: |
-            if [ "${CIRCLE_TAG}" != "" ]; then
-              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'${CIRCLE_TAG}'/" niworkflows/__about__.py
-            fi
-
       - run:
           name: Deploy to PyPi
           command: |
-            pip install "setuptools>=27.0" twine
+            pip install "setuptools>=27.0" twine docutils
+            echo "${CIRCLE_TAG}" > niworkflows/VERSION
+            echo "include niworkflows/VERSION" >> MANIFEST.in
+            python setup.py check -r -s
             python setup.py sdist
             twine upload dist/*
 

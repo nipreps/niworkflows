@@ -101,14 +101,14 @@ class fMRIPlot(object):
                 name=name, **kwargs)
             grid_id += 1
 
-        plot_carpet(self.func_file, self.seg_data, subplot=grid[-1])
+        plot_carpet(self.func_file, self.seg_data, subplot=grid[-1], tr=self.tr)
         # spikesplot_cb([0.7, 0.78, 0.2, 0.008])
         return figure
 
 
 def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
                 subplot=None, title=None, output_file=None, legend=False,
-                lut=None):
+                lut=None, tr=None):
     """
     Plot an image representation of voxel intensities across time also know
     as the "carpet plot" or "Power plot". See Jonathan Power Neuroimage
@@ -141,12 +141,19 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
         legend : bool
             Whether to render the average functional series with ``atlaslabels`` as
             overlay.
+        tr : float , optional
+            Specify the TR, if specified it uses this value. If left as None,
+            # Frames is plotted instead of time.
     """
-    img_nii = check_niimg_4d(img, dtype='auto')
-    func_data = _safe_get_data(img_nii, ensure_finite=True)
 
     # Define TR and number of frames
-    tr = img_nii.header.get_zooms()[-1]
+    notr = False
+    if tr is None:
+        notr = True
+        tr = 1.
+
+    img_nii = check_niimg_4d(img, dtype='auto',)
+    func_data = _safe_get_data(img_nii, ensure_finite=True)
     ntsteps = func_data.shape[-1]
 
     data = func_data[atlaslabels > 0].reshape(-1, ntsteps)
@@ -217,7 +224,10 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
     interval = max((int(data.shape[-1] + 1) // 10, int(data.shape[-1] + 1) // 5, 1))
     xticks = list(range(0, data.shape[-1])[::interval])
     ax1.set_xticks(xticks)
-    ax1.set_xlabel('time (s)')
+    if notr:
+        ax1.set_xlabel('time (frame #)')
+    else:
+        ax1.set_xlabel('time (s)')
     labels = tr * (np.array(xticks)) * t_dec
     ax1.set_xticklabels(['%.02f' % t for t in labels.tolist()], fontsize=5)
 
@@ -463,30 +473,34 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
     ax_ts.spines["left"].set_visible(False)
     # ax_ts.yaxis.set_ticks_position('left')
 
-    # Calculate Y limits
-    def_ylims = [tseries[~np.isnan(tseries)].min() - 0.1 * abs(tseries[~np.isnan(tseries)].min()),
-                 1.1 * tseries[~np.isnan(tseries)].max()]
-    if ylims is not None:
-        if ylims[0] is not None:
-            def_ylims[0] = min([def_ylims[0], ylims[0]])
-        if ylims[1] is not None:
-            def_ylims[1] = max([def_ylims[1], ylims[1]])
-
-    # Add space for plot title and mean/SD annotation
-    def_ylims[0] -= 0.1 * (def_ylims[1] - def_ylims[0])
-
-    ax_ts.set_ylim(def_ylims)
-    # yticks = sorted(def_ylims)
     ax_ts.set_yticks([])
     ax_ts.set_yticklabels([])
-    # ax_ts.set_yticks(yticks)
-    # ax_ts.set_yticklabels(['%.02f' % y for y in yticks])
 
-    # Annotate stats
-    maxv = tseries[~np.isnan(tseries)].max()
-    mean = tseries[~np.isnan(tseries)].mean()
-    stdv = tseries[~np.isnan(tseries)].std()
-    p95 = np.percentile(tseries[~np.isnan(tseries)], 95.0)
+    nonnan = tseries[~np.isnan(tseries)]
+    if nonnan.size > 0:
+        # Calculate Y limits
+        def_ylims = [nonnan.min() - 0.1 * abs(nonnan.min()), 1.1 * nonnan.max()]
+        if ylims is not None:
+            if ylims[0] is not None:
+                def_ylims[0] = min([def_ylims[0], ylims[0]])
+            if ylims[1] is not None:
+                def_ylims[1] = max([def_ylims[1], ylims[1]])
+
+        # Add space for plot title and mean/SD annotation
+        def_ylims[0] -= 0.1 * (def_ylims[1] - def_ylims[0])
+
+        ax_ts.set_ylim(def_ylims)
+
+        # Annotate stats
+        maxv = nonnan.max()
+        mean = nonnan.mean()
+        stdv = nonnan.std()
+        p95 = np.percentile(nonnan, 95.0)
+    else:
+        maxv = 0
+        mean = 0
+        stdv = 0
+        p95 = 0
 
     stats_label = (r'max: {max:.3f}{units} $\bullet$ mean: {mean:.3f}{units} '
                    r'$\bullet$ $\sigma$: {sigma:.3f}').format(

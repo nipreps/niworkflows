@@ -5,42 +5,74 @@
 # @Last Modified by:   oesteban
 """ niworkflows setup script """
 
-PACKAGE_NAME = 'niworkflows'
-
 
 def main():
     """ Install entry-point """
     from os import path as op
+    from inspect import getfile, currentframe
     from setuptools import setup, find_packages
-    import runpy
+    from niworkflows.__about__ import (
+        __packagename__,
+        __author__,
+        __email__,
+        __maintainer__,
+        __license__,
+        __description__,
+        __longdesc__,
+        __url__,
+        DOWNLOAD_URL,
+        CLASSIFIERS,
+        REQUIRES,
+        SETUP_REQUIRES,
+        LINKS_REQUIRES,
+        TESTS_REQUIRES,
+        EXTRA_REQUIRES,
+    )
 
-    ldict = runpy.run_path(op.join(op.abspath(op.dirname(__file__)),
-                                   'niworkflows', '__about__.py'))
+    pkg_data = {
+        'niworkflows': [
+            'data/t1-mni_registration*.json',
+            'data/bold-mni_registration*.json',
+        ]}
+
+    root_dir = op.dirname(op.abspath(getfile(currentframe())))
+    version = None
+    cmdclass = {}
+    if op.isfile(op.join(root_dir, __packagename__, 'VERSION')):
+        with open(op.join(root_dir, __packagename__, 'VERSION')) as vfile:
+            version = vfile.readline().strip()
+        pkg_data[__packagename__].insert(0, 'VERSION')
+
+    if version is None:
+        import versioneer
+        version = versioneer.get_version()
+        cmdclass = versioneer.get_cmdclass()
 
     setup(
-        name=PACKAGE_NAME,
-        version=ldict['__version__'],
-        description=ldict['__description__'],
-        long_description=ldict['__longdesc__'],
-        author=ldict['__author__'],
-        author_email=ldict['__email__'],
-        maintainer=ldict['__maintainer__'],
-        maintainer_email=ldict['__email__'],
-        license=ldict['__license__'],
-        url=ldict['URL'],
-        download_url=ldict['DOWNLOAD_URL'],
-        classifiers=ldict['CLASSIFIERS'],
+        name=__packagename__,
+        version=version,
+        description=__description__,
+        long_description=__longdesc__,
+        author=__author__,
+        author_email=__email__,
+        maintainer=__maintainer__,
+        maintainer_email=__email__,
+        license=__license__,
+        url=__url__,
+        download_url=DOWNLOAD_URL,
+        classifiers=CLASSIFIERS,
         packages=find_packages(exclude=['*.tests']),
         zip_safe=False,
         # Dependencies handling
-        setup_requires=ldict['SETUP_REQUIRES'],
-        install_requires=list(set(ldict['REQUIRES'])),
-        dependency_links=ldict['LINKS_REQUIRES'],
-        tests_require=ldict['TESTS_REQUIRES'],
-        extras_require=ldict['EXTRA_REQUIRES'],
+        setup_requires=SETUP_REQUIRES,
+        install_requires=list(set(REQUIRES)),
+        dependency_links=LINKS_REQUIRES,
+        tests_require=TESTS_REQUIRES,
+        extras_require=EXTRA_REQUIRES,
         # Data
-        package_data={'niworkflows': ['data/t1-mni_registration*.json']},
+        package_data=pkg_data,
         include_package_data=True,
+        cmdclass=cmdclass,
     )
 
 

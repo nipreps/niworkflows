@@ -1,3 +1,42 @@
+0.5.2.post5 (December 14, 2018)
+===============================
+
+  * [FIX] ``read_crashfile`` stopped working after migration (#270)
+
+0.5.2.post4 (December 13, 2018)
+===============================
+
+  * [HOTFIX] ``LiterateWorkflow`` returning empty desc (#269)
+
+0.5.2.post3 (December 13, 2018)
+===============================
+
+  * [FIX] Summary fMRIPlot chokes when confounds are all-nan (#268)
+
+0.5.2.post2 (December 12, 2018)
+===============================
+
+  * [FIX] ``get_metadata_for_nifti`` broken in transfer from fmriprep (#267)
+
+0.5.2.post1 (December 10, 2018)
+===============================
+
+A hotfix release that ensures version is correctly reported when installed
+via Pypi.
+
+  * [MAINT] Clean-up dependencies (7a76a45)
+  * [HOTFIX] Ensure VERSION file is created at deployment (3e3a2f3)
+  * [TST] Add tests missed out in #263 (#266)
+
+0.5.2 (December 8, 2018)
+=========================
+
+With thanks to @wiheto for contributions.
+
+  * [ENH] Upstream work from fMRIPrep (prep. sMRIPrep) (#263)
+  * [ENH] Integrate versioneer (#264)
+  * [FIX] X axis label for fMRIPlot - better respect TR and default to frame number (#261)
+
 0.5.1 (November 8, 2018)
 ========================
 
