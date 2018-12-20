@@ -167,7 +167,7 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
                          .format(delta_t, delta_t // 60))
 
     if md5sum is not None:
-        if _md5_sum_file(str(temp_full_path)) != md5sum:
+        if _md5_sum_file(temp_full_path) != md5sum:
             raise ValueError("File {!s} checksum verification has failed."
                              " Dataset fetching aborted.".format(temp_full_path))
 
@@ -292,7 +292,7 @@ def readlinkabs(link):
 def _md5_sum_file(path):
     """ Calculates the MD5 sum of a file.
     """
-    with open(path, 'rb') as fhandle:
+    with Path(path).open('rb') as fhandle:
         md5sum = hashlib.md5()
         while True:
             data = fhandle.read(8192)
