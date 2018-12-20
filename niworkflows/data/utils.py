@@ -116,7 +116,7 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
         NIWORKFLOWS_LOG.info('Downloading data from %s ...', displayed_url)
     if resume and temp_part_path.exists():
         # Download has been interrupted, we try to resume it.
-        local_file_size = op.getsize(str(temp_part_path))
+        local_file_size = temp_part_path.stat().st_size
         # If the file exists, then only download the remainder
         request.add_header("Range", "bytes={}-".format(local_file_size))
         try:
