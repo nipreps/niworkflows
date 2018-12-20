@@ -16,7 +16,6 @@ import time
 import base64
 import hashlib
 import subprocess as sp
-from io import open
 from builtins import str
 
 try:
@@ -31,7 +30,7 @@ from .. import NIWORKFLOWS_LOG
 
 PY3 = sys.version_info[0] > 2
 MAX_RETRIES = 20
-NIWORKFLOWS_CACHE_DIR = (Path.home() / '.cache' / 'stanford-crn')
+NIWORKFLOWS_CACHE_DIR = Path.home() / '.cache' / 'stanford-crn'
 
 
 def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
