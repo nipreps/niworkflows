@@ -156,7 +156,7 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
                 raise
         mode = 'wb'
 
-    with temp_part_path.open('wb') as local_file:
+    with temp_part_path.open(mode) as local_file:
         _chunk_read_(data, local_file, report_hook=(verbose > 0),
                      initial_size=initial_size, verbose=verbose)
     temp_part_path.replace(temp_full_path)
@@ -167,12 +167,12 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
                          .format(delta_t, delta_t // 60))
 
     if md5sum is not None:
-        if _md5_sum_file(temp_full_name) != md5sum:
-            raise ValueError("File {} checksum verification has failed."
-                             " Dataset fetching aborted.".format(local_file))
+        if _md5_sum_file(str(temp_full_path)) != md5sum:
+            raise ValueError("File {!s} checksum verification has failed."
+                             " Dataset fetching aborted.".format(temp_full_path))
 
     if filetype is None:
-        fname, filetype = op.splitext(op.basename(temp_full_name))
+        fname, filetype = op.splitext(temp_full_path.name)
         if filetype == '.gz':
             fname, ext = op.splitext(fname)
             filetype = ext + filetype
@@ -182,15 +182,15 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
 
     if filetype.startswith('tar'):
         args = 'xf' if not filetype.endswith('gz') else 'xzf'
-        sp.check_call(['tar', args, temp_full_name], cwd=data_dir)
-        os.remove(temp_full_name)
+        sp.check_call(['tar', args, str(temp_full_path)], cwd=data_dir)
+        temp_full_path.unlink()
         return final_path
 
     if filetype == 'zip':
         import zipfile
         sys.stderr.write('Unzipping package (%s) to data path (%s)...' % (
-            temp_full_name, data_dir))
-        with zipfile.ZipFile(temp_full_name, 'r') as zip_ref:
+            temp_full_path, data_dir))
+        with zipfile.ZipFile(str(temp_full_path), 'r') as zip_ref:
             zip_ref.extractall(data_dir)
         sys.stderr.write('done.\n')
         return final_path
