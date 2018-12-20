@@ -87,7 +87,7 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
     temp_part_path = temp_full_path.with_name(file_name + '.part')
 
     if overwrite:
-        shutil.rmtree(dataset_dir, ignore_errors=True)
+        shutil.rmtree(str(dataset_dir), ignore_errors=True)
 
     if overwrite and temp_full_path.exists():
         temp_full_path.unlink()
