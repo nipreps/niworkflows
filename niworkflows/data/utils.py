@@ -31,7 +31,7 @@ from .. import NIWORKFLOWS_LOG
 
 PY3 = sys.version_info[0] > 2
 MAX_RETRIES = 20
-NIWORKFLOWS_CACHE_DIR = (Path.home() / '.cache' / 'stanford-crn').resolve()
+NIWORKFLOWS_CACHE_DIR = (Path.home() / '.cache' / 'stanford-crn')
 
 
 def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
@@ -69,11 +69,10 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
     data_dir = final_path.parent
 
     if temp_downloads is None:
-        temp_downloads = str(NIWORKFLOWS_CACHE_DIR / 'downloads')
+        temp_downloads = NIWORKFLOWS_CACHE_DIR / 'downloads'
+    temp_downloads = Path(temp_downloads)
 
-    # Determine data path
-    if not op.exists(temp_downloads):
-        os.makedirs(temp_downloads)
+    temp_downloads.mkdir(parents=True, exist_ok=True)
 
     # Determine filename using URL
     parse = urlparse(url)
@@ -84,15 +83,14 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
         if filetype is not None:
             file_name += filetype
 
-    temp_full_name = op.join(temp_downloads, file_name)
-    temp_part_name = temp_full_name + ".part"
+    temp_full_path = temp_downloads / file_name
+    temp_part_path = temp_full_path.with_name(file_name + '.part')
 
     if overwrite:
         shutil.rmtree(dataset_dir, ignore_errors=True)
 
-    if op.exists(temp_full_name):
-        if overwrite:
-            os.remove(temp_full_name)
+    if overwrite and temp_full_path.exists():
+        temp_full_path.unlink()
 
     t_0 = time.time()
     local_file = None
@@ -116,9 +114,9 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
     if verbose > 0:
         displayed_url = url.split('?')[0] if verbose == 1 else url
         NIWORKFLOWS_LOG.info('Downloading data from %s ...', displayed_url)
-    if resume and op.exists(temp_part_name):
+    if resume and temp_part_path.exists():
         # Download has been interrupted, we try to resume it.
-        local_file_size = op.getsize(temp_part_name)
+        local_file_size = op.getsize(str(temp_part_path))
         # If the file exists, then only download the remainder
         request.add_header("Range", "bytes={}-".format(local_file_size))
         try:
@@ -139,8 +137,8 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
                 resume=False, overwrite=overwrite,
                 md5sum=md5sum, username=username, password=password,
                 verbose=verbose)
-        local_file = open(temp_part_name, "ab")
         initial_size = local_file_size
+        mode = 'ab'
     else:
         try:
             data = urlopen(request)
@@ -156,15 +154,12 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
                     verbose=verbose, retry=retry + 1)
             else:
                 raise
+        mode = 'wb'
 
-        local_file = open(temp_part_name, "wb")
-
-    _chunk_read_(data, local_file, report_hook=(verbose > 0),
-                 initial_size=initial_size, verbose=verbose)
-    # temp file must be closed prior to the move
-    if not local_file.closed:
-        local_file.close()
-    shutil.move(temp_part_name, temp_full_name)
+    with temp_part_path.open('wb') as local_file:
+        _chunk_read_(data, local_file, report_hook=(verbose > 0),
+                     initial_size=initial_size, verbose=verbose)
+    temp_part_path.replace(temp_full_path)
     delta_t = time.time() - t_0
     if verbose > 0:
         # Complete the reporting hook
@@ -225,7 +220,7 @@ def _get_data_path(data_dir=None):
                      if d.strip()]
     default_dirs += [NIWORKFLOWS_CACHE_DIR]
 
-    return [Path(d).expanduser().resolve()
+    return [Path(d).expanduser()
             for d in data_dir.split(os.pathsep) if d.strip()] or default_dirs
 
 
