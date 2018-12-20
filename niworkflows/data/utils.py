@@ -89,8 +89,8 @@ def fetch_file(dataset_name, url, dataset_dir, dataset_prefix=None,
     if overwrite:
         shutil.rmtree(str(dataset_dir), ignore_errors=True)
 
-    if overwrite and temp_full_path.exists():
-        temp_full_path.unlink()
+        if temp_full_path.exists():
+            temp_full_path.unlink()
 
     t_0 = time.time()
     local_file = None
