@@ -253,12 +253,17 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
     # Set up spatial normalization
     norm = pe.Node(Registration(
-        from_file=pkgr_fn(
-            'niworkflows.data',
-            'antsBrainExtraction_%s.json' % normalization_quality)),
         name='norm',
         n_procs=omp_nthreads,
-        mem_gb=mem_gb)
+        mem_gb=mem_gb))
+    if use_laplacian:
+        norm.inputs.from_file = pkgr_fn(
+            'niworkflows.data',
+            'antsBrainExtraction_%s.json' % normalization_quality)
+    else:
+        norm.inputs.from_file = pkgr_fn(
+            'niworkflows.data',
+            'antsBrainExtractionNoLaplacian_%s.json' % normalization_quality)
     norm.inputs.float = use_float
     fixed_mask_trait = 'fixed_image_mask'
     if parseversion(Registration().version) >= Version('2.2.0'):
