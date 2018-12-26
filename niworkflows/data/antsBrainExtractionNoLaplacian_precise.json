@@ -8,7 +8,7 @@
     "write_composite_transform": false,
     "verbose": true,
     "metric": [ "MI", "MI", "CC" ],
-    "metric_weight": [ 1, 1, 0.5 ],
+    "metric_weight": [ 1, 1, 1 ],
     "radius_or_number_of_bins": [ 32, 32, 4 ],
     "sampling_strategy": [ "Regular", "Regular", "None" ],
     "sampling_percentage": [ 0.25, 0.25, 1 ],
