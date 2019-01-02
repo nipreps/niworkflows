@@ -295,11 +295,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
             (('output_image', _pop), 'input_image')]),
         (res_tmpl, init_aff, [('output_image', 'fixed_image')]),
         (res_target, init_aff, [('output_image', 'moving_image')]),
-        (inu_n4, mrg_target, [('output_image', 'in1')]),
-
         (init_aff, norm, [('output_transform', 'initial_moving_transform')]),
-        (mrg_tmpl, norm, [('out', 'fixed_image')]),
-        (mrg_target, norm, [('out', 'moving_image')]),
         (norm, map_brainmask, [
             ('reverse_invert_flags', 'invert_transform_flags'),
             ('reverse_transforms', 'transforms')]),
@@ -314,11 +310,28 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     ])
 
     if use_laplacian:
+        lap_tmpl = pe.Node(ImageMath(operation='Laplacian', op2='1.5 1'),
+                           name='lap_tmpl')
+        lap_tmpl.inputs.op1 = tpl_target_path
+        lap_target = pe.Node(ImageMath(operation='Laplacian', op2='1.5 1'),
+                             name='lap_target')
+        mrg_tmpl = pe.Node(niu.Merge(2), name='mrg_tmpl')
+        mrg_tmpl.inputs.in1 = tpl_target_path
+        mrg_target = pe.Node(niu.Merge(2), name='mrg_target')
         wf.connect([
             (inu_n4, lap_target, [
                 (('output_image', _pop), 'op1')]),
             (lap_tmpl, mrg_tmpl, [('output_image', 'in2')]),
-            (lap_target, mrg_target, [('output_image', 'in2')])
+            (inu_n4, mrg_target, [('output_image', 'in1')]),
+            (lap_target, mrg_target, [('output_image', 'in2')]),
+            (mrg_tmpl, norm, [('out', 'fixed_image')]),
+            (mrg_target, norm, [('out', 'moving_image')]),
+        ])
+    else:
+        norm.inputs.fixed_image = tpl_target_path
+        wf.connect([
+            (inu_n4, norm, [
+                (('output_image', _pop), 'moving_image')]),
         ])
 
     if atropos_refine:
