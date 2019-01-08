@@ -64,9 +64,11 @@ class Report(object):
     The full report object
     """
 
-    def __init__(self, path, config, out_dir, run_uuid, out_filename='report.html',
+    def __init__(self, reportlets_dir, config, out_dir, run_uuid,
+                 subject_id=None,
+                 out_filename='report.html',
                  sentry_sdk=None):
-        self.root = path
+        self.root = reportlets_dir
         self.sections = []
         self.errors = []
         self.out_dir = Path(out_dir)
@@ -75,6 +77,12 @@ class Report(object):
         self.sentry_sdk = sentry_sdk
         self.template_path = None
         self.packagename = None
+        self.subject_id = subject_id
+        if subject_id is not None and subject_id.startswith('sub-'):
+            self.subject_id = self.subject_id[4:]
+
+        if self.subject_id is not None:
+            self.out_filename = 'sub-{}.html'.format(self.subject_id)
 
         self._load_config(config)
 
@@ -82,10 +90,14 @@ class Report(object):
         config = Path(config)
         with config.open('r') as configfh:
             settings = json.load(configfh)
-
         self.packagename = settings.get('package', None)
-        if self.packagename:
+
+        if self.packagename is not None:
+            self.root = self.root / self.packagename
             self.out_dir = self.out_dir / self.packagename
+
+        if self.subject_id is not None:
+            self.root = self.root / 'sub-{}'.format(self.subject_id)
 
         template_path = Path(settings.get('template_path', 'report.tpl'))
         if not str(template_path).startswith('/'):
@@ -95,9 +107,8 @@ class Report(object):
 
     def index(self, config):
         fig_dir = 'figures'
-        subject_dir = self.root.split('/')[-1]
-        subject = re.search('^(?P<subject_id>sub-[a-zA-Z0-9]+)$', subject_dir).group()
-        svg_dir = self.out_dir / self.packagename / subject / fig_dir
+        subject = 'sub-{}'.format(self.subject_id)
+        svg_dir = self.out_dir / subject / fig_dir
         svg_dir.mkdir(parents=True, exist_ok=True)
         reportlet_list = list(sorted([str(f) for f in Path(self.root).glob('**/*.*')]))
 
@@ -350,10 +361,8 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config,
     >>> tmpdir.cleanup()
 
     """
-    reportlet_path = Path(reportlets_dir)
-    reportlet_path = str(reportlet_path / ("sub-%s" % subject_label))
-    out_filename = 'sub-{}.html'.format(subject_label)
-    report = Report(reportlet_path, config, out_dir, run_uuid, out_filename,
+    report = Report(Path(reportlets_dir), config, out_dir, run_uuid,
+                    subject_id=subject_label,
                     sentry_sdk=sentry_sdk)
     return report.generate_report()
 
