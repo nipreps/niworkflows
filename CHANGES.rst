@@ -1,3 +1,11 @@
+0.5.3 (January 08, 2019)
+========================
+
+  * [RF] Improve generalization of Reports generation (#275)
+  * [RF] Improve implementation of DerivativesDataSink (#274)
+  * [RF] Conform names to updated TemplateFlow, add options conducive to small animal neuroimaging (#271)
+  * [FIX] Do not resolve non-existent Paths (#272)
+
 0.5.2.post5 (December 14, 2018)
 ===============================
 
