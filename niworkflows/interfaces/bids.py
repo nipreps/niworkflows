@@ -5,11 +5,11 @@
 Interfaces for handling BIDS-like neuroimaging structures
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
 """
 
 import os
 import os.path as op
+from pathlib import Path
 from shutil import copytree, rmtree
 
 from nipype import logging
@@ -140,11 +140,11 @@ class DerivativesDataSinkInputSpec(BaseInterfaceInputSpec):
     in_file = InputMultiPath(File(exists=True), mandatory=True,
                              desc='the object to be saved')
     source_file = File(exists=False, mandatory=True, desc='the input func file')
-    space = traits.Str('', usedefault=True, desc='Label for space field')
-    desc = traits.Str('', usedefault=True, desc='Label for description field')
-    suffix = traits.Str('', usedefault=True, desc='suffix appended to source_file')
+    space = Str('', usedefault=True, desc='Label for space field')
+    desc = Str('', usedefault=True, desc='Label for description field')
+    suffix = Str('', usedefault=True, desc='suffix appended to source_file')
     keep_dtype = traits.Bool(False, usedefault=True, desc='keep datatype suffix')
-    extra_values = traits.List(traits.Str)
+    extra_values = traits.List(Str)
     compress = traits.Bool(desc="force compression (True) or uncompression (False)"
                                 " of the output file (default: same as input)")
 
@@ -161,7 +161,6 @@ class DerivativesDataSink(SimpleInterface):
     Saves the `in_file` into a BIDS-Derivatives folder provided
     by `base_directory`, given the input reference `source_file`.
 
-    >>> from pathlib import Path
     >>> import tempfile
     >>> from niworkflows.utils.bids import collect_data
     >>> tmpdir = Path(tempfile.mkdtemp())
@@ -213,24 +212,24 @@ desc-preproc_bold.nii.gz'
 
         m = BIDS_NAME.search(src_fname)
 
-        mod = op.basename(op.dirname(self.inputs.source_file))
+        mod = Path(self.inputs.source_file).parent.name
 
         base_directory = runtime.cwd
         if isdefined(self.inputs.base_directory):
-            base_directory = op.abspath(self.inputs.base_directory)
+            base_directory = self.inputs.base_directory
 
-        out_path = '{}/{subject_id}'.format(self.out_path_base, **m.groupdict())
+        base_directory = Path(base_directory).resolve()
+        out_path = base_directory / self.out_path_base / \
+            '{subject_id}'.format(**m.groupdict())
+
         if m.groupdict().get('session_id') is not None:
-            out_path += '/{session_id}'.format(**m.groupdict())
-        out_path += '/{}'.format(mod)
+            out_path = out_path / '{session_id}'.format(**m.groupdict())
 
-        out_path = op.join(base_directory, out_path)
+        out_path = out_path / '{}'.format(mod)
+        out_path.mkdir(exist_ok=True, parents=True)
+        base_fname = str(out_path / src_fname)
 
-        os.makedirs(out_path, exist_ok=True)
-
-        base_fname = op.join(out_path, src_fname)
-
-        formatstr = '{bname}{space}{desc}{suffix}{dtype}{ext}'
+        formatstr = '{bname}{space}{desc}{extra}{suffix}{dtype}{ext}'
         if len(self.inputs.in_file) > 1 and not isdefined(self.inputs.extra_values):
             formatstr = '{bname}{space}{desc}{suffix}{i:04d}{dtype}{ext}'
 
@@ -241,16 +240,19 @@ desc-preproc_bold.nii.gz'
 
         self._results['compression'] = []
         for i, fname in enumerate(self.inputs.in_file):
+            extra = ''
+            if isdefined(self.inputs.extra_values):
+                extra = '_{}'.format(self.inputs.extra_values[i])
             out_file = formatstr.format(
                 bname=base_fname,
                 space=space,
                 desc=desc,
+                extra=extra,
                 suffix=suffix,
                 i=i,
                 dtype=dtype,
-                ext=ext)
-            if isdefined(self.inputs.extra_values):
-                out_file = out_file.format(extra_value=self.inputs.extra_values[i])
+                ext=ext,
+            )
             self._results['out_file'].append(out_file)
             self._results['compression'].append(_copy_any(fname, out_file))
         return runtime
