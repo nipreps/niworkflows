@@ -67,7 +67,9 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                              modality='T1',
                              atropos_refine=True,
                              atropos_use_random_seed=True,
-                             atropos_model=None):
+                             atropos_model=None,
+                             use_laplacian=True,
+                             bspline_fitting_distance=200):
     """
     A Nipype implementation of the official ANTs' ``antsBrainExtraction.sh``
     workflow (only for 3D images).
@@ -124,6 +126,11 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         atropos_model : tuple or None
             Allows to specify a particular segmentation model, overwriting
             the defaults based on ``modality``
+        use_laplacian : bool
+            Enables or disables alignment of the Laplacian as an additional
+            criterion for image registration quality (default: True)
+        bspline_fitting_distance : float
+            The size of the b-spline mesh grid elements, in mm (default: 200)
         name : str, optional
             Workflow name (default: antsBrainExtraction)
 
@@ -186,10 +193,10 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     target_basename = '_'.join(tpl_target_path.split('_')[:-1])
 
     # Get probabilistic brain mask if available
-    tpl_mask_path = '%s_class-brainmask_probtissue.nii.gz' % target_basename
+    tpl_mask_path = '%s_label-brain_probseg.nii.gz' % target_basename
     # Fall-back to a binary mask just in case
     if not os.path.exists(tpl_mask_path):
-        tpl_mask_path = '%s_brainmask.nii.gz' % target_basename
+        tpl_mask_path = '%s_desc-brain_mask.nii.gz' % target_basename
 
     if not os.path.exists(tpl_mask_path):
         raise ValueError(
@@ -203,7 +210,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                         name='inputnode')
 
     # Try to find a registration mask, set if available
-    tpl_regmask_path = '%s_label-BrainCerebellumRegistration_roi.nii.gz' % target_basename
+    tpl_regmask_path = '%s_desc-BrainCerebellumRegistration_mask.nii.gz' % target_basename
     if os.path.exists(tpl_regmask_path):
         inputnode.inputs.in_mask = tpl_regmask_path
 
@@ -218,7 +225,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         N4BiasFieldCorrection(
             dimension=3, save_bias=True, copy_header=True,
             n_iterations=[50] * 4, convergence_threshold=1e-7, shrink_factor=4,
-            bspline_fitting_distance=200),
+            bspline_fitting_distance=bspline_fitting_distance),
         n_procs=omp_nthreads, name='inu_n4', iterfield=['input_image'])
 
     res_tmpl = pe.Node(ResampleImageBySpacing(out_spacing=(4, 4, 4),
@@ -251,10 +258,10 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         init_aff.inputs.search_grid = (40, (0, 40, 40))
 
     # Set up spatial normalization
-    norm = pe.Node(Registration(
-        from_file=pkgr_fn(
-            'niworkflows.data',
-            'antsBrainExtraction_%s.json' % normalization_quality)),
+    settings_file = 'antsBrainExtraction_%s.json' if use_laplacian \
+        else 'antsBrainExtractionNoLaplacian_%s.json'
+    norm = pe.Node(Registration(from_file=pkgr_fn(
+        'niworkflows.data', settings_file % normalization_quality)),
         name='norm',
         n_procs=omp_nthreads,
         mem_gb=mem_gb)
@@ -301,17 +308,9 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         (trunc, inu_n4, [('output_image', 'input_image')]),
         (inu_n4, res_target, [
             (('output_image', _pop), 'input_image')]),
-        (inu_n4, lap_target, [
-            (('output_image', _pop), 'op1')]),
         (res_tmpl, init_aff, [('output_image', 'fixed_image')]),
         (res_target, init_aff, [('output_image', 'moving_image')]),
-        (inu_n4, mrg_target, [('output_image', 'in1')]),
-        (lap_tmpl, mrg_tmpl, [('output_image', 'in2')]),
-        (lap_target, mrg_target, [('output_image', 'in2')]),
-
         (init_aff, norm, [('output_transform', 'initial_moving_transform')]),
-        (mrg_tmpl, norm, [('out', 'fixed_image')]),
-        (mrg_target, norm, [('out', 'moving_image')]),
         (norm, map_brainmask, [
             ('inverse_composite_transform', 'transforms')]),
         (map_brainmask, thr_brainmask, [('output_image', 'input_image')]),
@@ -326,6 +325,31 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         # (norm, outputnode, [('composite_transform', 'out_fwd_xfm')]),
         # (norm, outputnode, [('inverse_composite_transform', 'out_bwd_xfm')]),
     ])
+
+    if use_laplacian:
+        lap_tmpl = pe.Node(ImageMath(operation='Laplacian', op2='1.5 1'),
+                           name='lap_tmpl')
+        lap_tmpl.inputs.op1 = tpl_target_path
+        lap_target = pe.Node(ImageMath(operation='Laplacian', op2='1.5 1'),
+                             name='lap_target')
+        mrg_tmpl = pe.Node(niu.Merge(2), name='mrg_tmpl')
+        mrg_tmpl.inputs.in1 = tpl_target_path
+        mrg_target = pe.Node(niu.Merge(2), name='mrg_target')
+        wf.connect([
+            (inu_n4, lap_target, [
+                (('output_image', _pop), 'op1')]),
+            (lap_tmpl, mrg_tmpl, [('output_image', 'in2')]),
+            (inu_n4, mrg_target, [('output_image', 'in1')]),
+            (lap_target, mrg_target, [('output_image', 'in2')]),
+            (mrg_tmpl, norm, [('out', 'fixed_image')]),
+            (mrg_target, norm, [('out', 'moving_image')]),
+        ])
+    else:
+        norm.inputs.fixed_image = tpl_target_path
+        wf.connect([
+            (inu_n4, norm, [
+                (('output_image', _pop), 'moving_image')]),
+        ])
 
     if atropos_refine:
         atropos_wf = init_atropos_wf(
