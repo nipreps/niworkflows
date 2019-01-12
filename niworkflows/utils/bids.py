@@ -19,9 +19,13 @@ from .misc import splitext
 __all__ = ['BIDS_NAME']
 
 BIDS_NAME = re.compile(
-    r'^(.*\/)?(?P<subject_id>sub-[a-zA-Z0-9]+)(_(?P<session_id>ses-[a-zA-Z0-9]+))?'
-    '(_(?P<task_id>task-[a-zA-Z0-9]+))?(_(?P<acq_id>acq-[a-zA-Z0-9]+))?'
-    '(_(?P<rec_id>rec-[a-zA-Z0-9]+))?(_(?P<run_id>run-[a-zA-Z0-9]+))?')
+    r'^(.*\/)?'
+    '(?P<subject_id>sub-[a-zA-Z0-9]+)'
+    '(_(?P<session_id>ses-[a-zA-Z0-9]+))?'
+    '(_(?P<task_id>task-[a-zA-Z0-9]+))?'
+    '(_(?P<acq_id>acq-[a-zA-Z0-9]+))?'
+    '(_(?P<rec_id>rec-[a-zA-Z0-9]+))?'
+    '(_(?P<run_id>run-[a-zA-Z0-9]+))?')
 
 
 class BIDSError(ValueError):
