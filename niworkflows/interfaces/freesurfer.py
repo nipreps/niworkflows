@@ -2,11 +2,13 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 FreeSurfer tools interfaces
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===========================
 
 """
 
+
 import os.path as op
+from pathlib import Path
 import nibabel as nb
 import numpy as np
 
@@ -94,15 +96,15 @@ class MakeMidthickness(fs.MRIsExpand):
         # Prefer midthickness to graymid, require to be of the same hemisphere
         # as input
         source = None
-        in_base = op.basename(self.inputs.in_file)
+        in_base = Path(self.inputs.in_file).name
         mt = self._associated_file(in_base, 'midthickness')
         gm = self._associated_file(in_base, 'graymid')
 
         for surf in self.inputs.graymid:
-            if op.basename(surf) == mt:
+            if Path(surf).name == mt:
                 source = surf
                 break
-            if op.basename(surf) == gm:
+            if Path(surf).name == gm:
                 source = surf
 
         if source is None:
@@ -204,12 +206,10 @@ class TruncateLTA(object):
             if not isdefined(lta_file):
                 continue
 
-            with open(lta_file, 'r') as f:
-                lines = f.readlines()
+            lines = Path(lta_file).read_text().splitlines()
 
             fixed = False
             newfile = []
-
             for line in lines:
                 if line.startswith('filename = ') and len(line.strip("\n")) >= 255:
                     fixed = True
@@ -218,11 +218,9 @@ class TruncateLTA(object):
                     newfile.append(line)
 
             if fixed:
-                with open(lta_file, 'w') as f:
-                    f.write(''.join(newfile))
+                Path(lta_file).write_text(''.join(newfile))
 
         runtime = super(TruncateLTA, self)._post_run_hook(runtime)
-
         return runtime
 
 
@@ -465,3 +463,15 @@ def medial_wall_to_nan(in_file, subjects_dir, target_subject, newpath=None):
     out_file = os.path.join(newpath or os.getcwd(), fn)
     func.to_filename(out_file)
     return out_file
+
+
+def mri_info(fname, argument):
+    import subprocess as sp
+    import numpy as np
+
+    cmd_info = "mri_info --%s %s" % (argument, fname)
+    proc = sp.Popen(cmd_info, stdout=sp.PIPE, shell=True)
+    data = bytearray(proc.stdout.read())
+    mstring = np.fromstring(data.decode("utf-8"), sep='\n')
+    result = np.reshape(mstring, (4, -1))
+    return result
