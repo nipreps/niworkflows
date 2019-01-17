@@ -96,6 +96,11 @@ ENV PATH=$ANTSPATH:$PATH
 # Installing SVGO
 RUN npm install -g svgo
 
+# Installing WEBP tools
+RUN curl -sSLO "http://downloads.webmproject.org/releases/webp/libwebp-0.5.2-linux-x86-64.tar.gz" && \
+  tar -xf libwebp-0.5.2-linux-x86-64.tar.gz && cd libwebp-0.5.2-linux-x86-64/bin && \
+  mv cwebp /usr/local/bin/ && rm -rf libwebp-0.5.2-linux-x86-64
+
 # Installing and setting up miniconda
 RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh && \
     bash Miniconda3-4.5.11-Linux-x86_64.sh -b -p /usr/local/miniconda && \
