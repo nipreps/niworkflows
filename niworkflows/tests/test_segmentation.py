@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 from shutil import copy
 import pytest
-from templateflo.api import get as get_template
+from templateflow.api import get as get_template
 
 from nipype.interfaces.base import Bunch
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
