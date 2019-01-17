@@ -170,8 +170,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     wf = pe.Workflow(name)
 
     tpl_target_path = get_template(
-            in_template, 'res-01_%s.nii.gz' % bids_suffix)
-
+        in_template, 'res-01_%s.nii.gz' % bids_suffix)
 
     try:
         # Get probabilistic brain mask if available
@@ -209,11 +208,11 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
             bspline_fitting_distance=bspline_fitting_distance),
         n_procs=omp_nthreads, name='inu_n4', iterfield=['input_image'])
 
-    res_tmpl = pe.Node(ResampleImageBySpacing(out_spacing=(4, 4, 4),
-                       apply_smoothing=True), name='res_tmpl')
+    res_tmpl = pe.Node(ResampleImageBySpacing(
+        out_spacing=(4, 4, 4), apply_smoothing=True), name='res_tmpl')
     res_tmpl.inputs.input_image = tpl_target_path
-    res_target = pe.Node(ResampleImageBySpacing(out_spacing=(4, 4, 4),
-                         apply_smoothing=True), name='res_target')
+    res_target = pe.Node(ResampleImageBySpacing(
+        out_spacing=(4, 4, 4), apply_smoothing=True), name='res_target')
 
     lap_tmpl = pe.Node(ImageMath(operation='Laplacian', op2='1.5 1'),
                        name='lap_tmpl')
@@ -434,9 +433,9 @@ def init_atropos_wf(name='atropos_wf',
                        name='03_pad_mask')
 
     # Split segmentation in binary masks
-    sel_labels = pe.Node(niu.Function(function=_select_labels,
-                         output_names=['out_wm', 'out_gm', 'out_csf']),
-                         name='04_sel_labels')
+    sel_labels = pe.Node(niu.Function(
+        function=_select_labels, output_names=['out_wm', 'out_gm', 'out_csf']),
+        name='04_sel_labels')
     sel_labels.inputs.labels = list(reversed(in_segmentation_model[1:]))
 
     # Select largest components (GM, WM)
@@ -471,9 +470,9 @@ def init_atropos_wf(name='atropos_wf',
 
     # Superstep 7
     # Split segmentation in binary masks
-    sel_labels2 = pe.Node(niu.Function(function=_select_labels,
-                          output_names=['out_wm', 'out_gm', 'out_csf']),
-                          name='14_sel_labels2')
+    sel_labels2 = pe.Node(niu.Function(
+        function=_select_labels, output_names=['out_wm', 'out_gm', 'out_csf']),
+        name='14_sel_labels2')
     sel_labels2.inputs.labels = list(reversed(in_segmentation_model[1:]))
 
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} addtozero ${EXTRACTION_MASK} ${EXTRACTION_TMP}
