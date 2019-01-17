@@ -91,6 +91,11 @@ jobs:
               docker images
             fi
       - run:
+          name: Store FreeSurfer license file
+          command: |
+            mkdir -p /tmp/fslicense
+            printf "$FS_LICENSE_CONTENT" | base64 -d  >> /tmp/fslicense/license.txt
+      - run:
           name: Run unit tests
           no_output_timeout: 2h
           command: |
@@ -109,6 +114,7 @@ jobs:
           command: |
             docker run -it --rm=false \
               -e SAVE_CIRCLE_ARTIFACTS="/tmp" \
+              -v /tmp/fslicense/license.txt:/opt/freesurfer/license.txt:ro \
               -v ${PWD}:/tmp niworkflows:py3 \
               pytest -n auto --junit-xml=/tmp/reportlets.xml \
               /src/niworkflows/niworkflows/tests/
