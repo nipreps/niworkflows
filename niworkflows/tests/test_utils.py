@@ -8,7 +8,7 @@ from templateflow.api import get as get_template
 from niworkflows.interfaces.masks import SimpleShowMaskRPT
 
 
-def test_compression(oasis_dir):
+def test_compression():
     """ the BET report capable test """
 
     uncompressed = SimpleShowMaskRPT(
