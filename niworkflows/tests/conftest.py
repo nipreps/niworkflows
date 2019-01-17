@@ -29,16 +29,6 @@ def pytest_runtest_setup(item):
 
 
 @pytest.fixture
-def mni_dir():
-    return Path(get_template('MNI152Lin', 'res-01_T1w.nii.gz')).parent
-
-
-@pytest.fixture
-def oasis_dir():
-    return Path(get_template('OASIS30ANTs', 'res-01_T1w.nii.gz')).parent
-
-
-@pytest.fixture
 def reference():
     return get_template('MNI152Lin', 'res-02_T1w.nii.gz')
 
