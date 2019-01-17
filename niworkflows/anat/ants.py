@@ -165,8 +165,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
 
     """
-    from datalad.support.exceptions import IncompleteResultsError
-    from templateflow.api import get as get_template
+    from templateflow.api import get as get_template, IncompleteResultsError
     wf = pe.Workflow(name)
 
     tpl_target_path = get_template(
