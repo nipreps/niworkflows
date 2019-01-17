@@ -113,7 +113,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
             Estimated peak memory consumption of the most hungry nodes
             in the workflow
         bids_suffix : str
-            Sequence type of the first input image ('T1', 'T2', or 'FLAIR')
+            Sequence type of the first input image ('T1w', 'T2w', or 'FLAIR')
         atropos_refine : bool
             Enables or disables the whole ATROPOS sub-workflow
         atropos_use_random_seed : bool
@@ -352,7 +352,7 @@ def init_atropos_wf(name='atropos_wf',
                     omp_nthreads=None,
                     mem_gb=3.0,
                     padding=10,
-                    in_segmentation_model=list(ATROPOS_MODELS['T1'].values())):
+                    in_segmentation_model=list(ATROPOS_MODELS['T1w'].values())):
     """
     Implements supersteps 6 and 7 of ``antsBrainExtraction.sh``,
     which refine the mask previously computed with the spatial
