@@ -9,10 +9,8 @@ Nipype translation of ANTs workflows
 """
 
 # general purpose
-import os
 from collections import OrderedDict
 from multiprocessing import cpu_count
-from pathlib import Path
 from pkg_resources import resource_filename as pkgr_fn
 from packaging.version import parse as parseversion, Version
 
@@ -38,13 +36,13 @@ from ..interfaces.fixes import (
 )
 
 ATROPOS_MODELS = {
-    'T1': OrderedDict([
+    'T1w': OrderedDict([
         ('nclasses', 3),
         ('csf', 1),
         ('gm', 2),
         ('wm', 3),
     ]),
-    'T2': OrderedDict([
+    'T2w': OrderedDict([
         ('nclasses', 3),
         ('csf', 3),
         ('gm', 2),
@@ -65,7 +63,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                              normalization_quality='precise',
                              omp_nthreads=None,
                              mem_gb=3.0,
-                             modality='T1',
+                             bids_suffix='T1w',
                              atropos_refine=True,
                              atropos_use_random_seed=True,
                              atropos_model=None,
@@ -117,7 +115,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         mem_gb : float
             Estimated peak memory consumption of the most hungry nodes
             in the workflow
-        modality : str
+        bids_suffix : str
             Sequence type of the first input image ('T1', 'T2', or 'FLAIR')
         atropos_refine : bool
             Enables or disables the whole ATROPOS sub-workflow
@@ -126,7 +124,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
             system's clock
         atropos_model : tuple or None
             Allows to specify a particular segmentation model, overwriting
-            the defaults based on ``modality``
+            the defaults based on ``bids_suffix``
         use_laplacian : bool
             Enables or disables alignment of the Laplacian as an additional
             criterion for image registration quality (default: True)
@@ -171,11 +169,8 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     from datalad.support.exceptions import IncompleteResultsError
     wf = pe.Workflow(name)
 
-    mod = ('%sw' % modality[:2].upper()
-           if modality.upper().startswith('T') else modality.upper())
-
     tpl_target_path = get_template(
-            in_template, 'res-01_%s.nii.gz' % mod)
+            in_template, 'res-01_%s.nii.gz' % bids_suffix)
 
 
     try:
@@ -331,7 +326,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
             use_random_seed=atropos_use_random_seed,
             omp_nthreads=omp_nthreads,
             mem_gb=mem_gb,
-            in_segmentation_model=atropos_model or list(ATROPOS_MODELS[modality].values())
+            in_segmentation_model=atropos_model or list(ATROPOS_MODELS[bids_suffix].values())
         )
 
         wf.disconnect([
@@ -589,6 +584,6 @@ def _select_labels(in_segm, labels):
 
 
 def _gen_name(in_file):
-    import os
+    from os.path import basename
     from nipype.utils.filemanip import fname_presuffix
-    return os.path.basename(fname_presuffix(in_file, suffix='processed'))
+    return basename(fname_presuffix(in_file, suffix='processed'))
