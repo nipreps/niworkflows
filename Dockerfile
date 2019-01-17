@@ -71,7 +71,8 @@ RUN apt-get update && \
                     fsl-core=5.0.9-5~nd16.04+1 \
                     afni=16.2.07~dfsg.1-5~nd16.04+1 \
                     convert3d \
-                    git-annex-standalone
+                    git-annex-standalone && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV FSLDIR="/usr/share/fsl/5.0" \
     FSLOUTPUTTYPE="NIFTI_GZ" \
@@ -155,7 +156,7 @@ RUN datalad get $TEMPLATEFLOW_HOME/tpl-MNI152NLin2009cAsym/*_T1w.nii.gz \
 
 # Installing dev requirements (packages that are not in pypi)
 WORKDIR /src/
-ADD requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt && \
     rm -rf ~/.cache/pip
 
