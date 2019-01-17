@@ -37,7 +37,7 @@ def test_ROIsPlot():
     import nibabel as nb
     import numpy as np
 
-    im = nb.load(get_template('OASIS30ANTs', 'res-01_variant-4_dtissue.nii.gz'))
+    im = nb.load(get_template('OASIS30ANTs', 'res-01_desc-4_dseg.nii.gz'))
     lookup = np.zeros(5, dtype=int)
     lookup[1] = 1
     lookup[2] = 4
@@ -66,7 +66,7 @@ def test_ROIsPlot2():
     import nibabel as nb
     import numpy as np
 
-    im = nb.load(get_template('OASIS30ANTs', 'res-01_variant-4_dtissue.nii.gz'))
+    im = nb.load(get_template('OASIS30ANTs', 'res-01_desc-4_dseg.nii.gz'))
     lookup = np.zeros(5, dtype=int)
     lookup[1] = 1
     lookup[2] = 4
