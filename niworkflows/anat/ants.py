@@ -7,7 +7,6 @@ Nipype translation of ANTs workflows
 ------------------------------------
 
 """
-from __future__ import print_function, division, absolute_import, unicode_literals
 
 # general purpose
 import os
@@ -23,8 +22,10 @@ from nipype.interfaces import utility as niu
 from nipype.interfaces.fsl.maths import ApplyMask
 from nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
 
+# templateflow
+from templateflow.api import get as get_template
+
 # niworkflows
-from ..data.getters import OSF_RESOURCES, TEMPLATE_ALIASES, get_template
 from ..interfaces.ants import (
     ImageMath,
     ResampleImageBySpacing,
@@ -167,36 +168,24 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
 
     """
+    from datalad.support.exceptions import IncompleteResultsError
     wf = pe.Workflow(name)
-
-    template_path = None
-    if in_template in TEMPLATE_ALIASES or in_template in OSF_RESOURCES:
-        template_path = get_template(in_template)
-    else:
-        template_path = Path(in_template)
 
     mod = ('%sw' % modality[:2].upper()
            if modality.upper().startswith('T') else modality.upper())
 
-    # Append template modality
-    potential_targets = list(template_path.glob('*_%s.nii.gz' % mod))
-    if not potential_targets:
-        raise ValueError(
-            'No %s template was found under "%s".' % (mod, template_path))
+    tpl_target_path = get_template(
+            in_template, 'res-01_%s.nii.gz' % mod)
 
-    tpl_target_path = str(potential_targets[0])
-    target_basename = '_'.join(tpl_target_path.split('_')[:-1])
 
-    # Get probabilistic brain mask if available
-    tpl_mask_path = '%s_label-brain_probseg.nii.gz' % target_basename
-    # Fall-back to a binary mask just in case
-    if not os.path.exists(tpl_mask_path):
-        tpl_mask_path = '%s_desc-brain_mask.nii.gz' % target_basename
-
-    if not os.path.exists(tpl_mask_path):
-        raise ValueError(
-            'Probability map for the brain mask associated to this template '
-            '"%s" not found.' % tpl_mask_path)
+    try:
+        # Get probabilistic brain mask if available
+        tpl_mask_path = get_template(
+            in_template, 'res-01_label-brain_probseg.nii.gz')
+    except IncompleteResultsError:
+        # Fall-back to a binary mask just in case
+        tpl_mask_path = get_template(
+            in_template, 'res-01_desc-brain_mask.nii.gz')
 
     if omp_nthreads is None or omp_nthreads < 1:
         omp_nthreads = cpu_count()
@@ -204,10 +193,13 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 'in_mask']),
                         name='inputnode')
 
-    # Try to find a registration mask, set if available
-    tpl_regmask_path = '%s_desc-BrainCerebellumRegistration_mask.nii.gz' % target_basename
-    if os.path.exists(tpl_regmask_path):
+    try:
+        # Try to find a registration mask, set if available
+        tpl_regmask_path = get_template(
+            in_template, 'res-01_desc-BrainCerebellumRegistration_mask.nii.gz')
         inputnode.inputs.in_mask = tpl_regmask_path
+    except IncompleteResultsError:
+        pass  # TODO: log a warning
 
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['bias_corrected', 'out_mask', 'bias_image', 'out_segm']),
