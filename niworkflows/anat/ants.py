@@ -113,7 +113,9 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
             Estimated peak memory consumption of the most hungry nodes
             in the workflow
         bids_suffix : str
-            Sequence type of the first input image ('T1w', 'T2w', or 'FLAIR')
+            Sequence type of the first input image. For a list of acceptable values
+            see https://bids-specification.readthedocs.io/en/latest/\
+04-modality-specific-files/01-magnetic-resonance-imaging-data.html#anatomy-imaging-data
         atropos_refine : bool
             Enables or disables the whole ATROPOS sub-workflow
         atropos_use_random_seed : bool
