@@ -6,7 +6,8 @@ import os
 from tempfile import mkdtemp
 from datetime import datetime as dt
 import pytest
-from niworkflows.data.getters import get_template, get_ds003_downsampled
+from templateflow.api import get as get_template
+from niworkflows.data.getters import get_ds003_downsampled
 
 filepath = os.path.dirname(os.path.realpath(__file__))
 datadir = os.path.realpath(os.path.join(filepath, 'data'))
@@ -29,22 +30,22 @@ def pytest_runtest_setup(item):
 
 @pytest.fixture
 def mni_dir():
-    return get_template('MNI152Lin')
+    return Path(get_template('MNI152Lin', 'res-01_T1w.nii.gz')).parent
 
 
 @pytest.fixture
 def oasis_dir():
-    return get_template('OASIS')
+    return Path(get_template('OASIS30ANTs', 'res-01_T1w.nii.gz')).parent
 
 
 @pytest.fixture
 def reference():
-    return str(get_template('MNI152Lin') / 'tpl-MNI152Lin_space-MNI_res-02_T1w.nii.gz')
+    return get_template('MNI152Lin', 'res-02_T1w.nii.gz')
 
 
 @pytest.fixture
 def reference_mask():
-    return str(get_template('MNI152Lin') / 'tpl-MNI152Lin_space-MNI_res-02_brainmask.nii.gz')
+    return get_template('MNI152Lin', 'res-02_desc-brain_mask.nii.gz')
 
 
 @pytest.fixture

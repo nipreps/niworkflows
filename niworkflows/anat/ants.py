@@ -20,9 +20,6 @@ from nipype.interfaces import utility as niu
 from nipype.interfaces.fsl.maths import ApplyMask
 from nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
 
-# templateflow
-from templateflow.api import get as get_template
-
 # niworkflows
 from ..interfaces.ants import (
     ImageMath,
@@ -167,6 +164,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
     """
     from datalad.support.exceptions import IncompleteResultsError
+    from templateflow.api import get as get_template
     wf = pe.Workflow(name)
 
     tpl_target_path = get_template(

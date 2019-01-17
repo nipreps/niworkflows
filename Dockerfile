@@ -161,7 +161,7 @@ RUN echo "${VERSION}" > /src/niworkflows/niworkflows/VERSION && \
     pip install .[all] && \
     rm -rf ~/.cache/pip
 
-# Pre-install templates and data
+# Pre-install data
 RUN python -c 'from niworkflows.data.getters import get_ds003_downsampled; get_ds003_downsampled()'
 
 WORKDIR /tmp
