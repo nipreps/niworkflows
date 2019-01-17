@@ -22,7 +22,7 @@ from nipype.interfaces.base import (
     BaseInterfaceInputSpec, TraitedSpec, File, traits,
     SimpleInterface, Directory
 )
-from ..data import getters
+from templateflow.api import get as get_template
 
 # CITFI structures with corresponding FS labels
 CIFTI_STRUCT_WITH_LABELS = {
@@ -83,7 +83,7 @@ class GenerateCifti(SimpleInterface):
 
     def _run_interface(self, runtime):
         self._results["variant_key"], self._results["variant"] = self._define_variant()
-        annotation_files, label_file, download_link = self._fetch_data()
+        annotation_files, label_file = self._fetch_data()
         self._results["out_file"] = self._create_cifti_image(
             self.inputs.bold_file,
             label_file,
@@ -91,8 +91,7 @@ class GenerateCifti(SimpleInterface):
             self.inputs.gifti_files,
             self.inputs.volume_target,
             self.inputs.surface_target,
-            self.inputs.TR,
-            download_link)
+            self.inputs.TR)
         return runtime
 
     def _define_variant(self):
@@ -130,16 +129,12 @@ class GenerateCifti(SimpleInterface):
             raise IOError("Freesurfer annotations for %s not found in %s" % (
                           self.inputs.surface_target, self.inputs.subjects_dir))
 
-        label_space = 'OASISTRT20'
-        label_file = str(getters.get_template(label_space) /
-                         'tpl-OASISTRT20_variant-DKT31_space-MNI152NLin2009cAsym.nii.gz')
-
-        download_link = getters.OSF_PROJECT_URL + getters.OSF_RESOURCES[label_space][0]
-        return annotation_files, label_file, download_link
+        label_file = get_template('MNI152NLin2009cAsym', 'res-02_desc-DKT31_dseg.nii.gz')
+        return annotation_files, label_file
 
     @staticmethod
     def _create_cifti_image(bold_file, label_file, annotation_files, gii_files,
-                            volume_target, surface_target, tr, download_link=None):
+                            volume_target, surface_target, tr):
         """
         Generate CIFTI image in target space
 
@@ -151,7 +146,6 @@ class GenerateCifti(SimpleInterface):
             volume_target : label atlas space
             surface_target : gii_files space
             tr : repetition timeseries
-            download_link : URL to download label_file
 
         Returns
             out_file : BOLD data as CIFTI dtseries
@@ -237,7 +231,6 @@ class GenerateCifti(SimpleInterface):
         meta = {
             "target_surface": surface_target,
             "target_volume": volume_target,
-            "download_link": download_link,
         }
         # generate and save CIFTI image
         matrix = ci.Cifti2Matrix()
