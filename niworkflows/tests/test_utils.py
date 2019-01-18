@@ -4,25 +4,26 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
+from templateflow.api import get as get_template
 from niworkflows.interfaces.masks import SimpleShowMaskRPT
 
 
-def test_compression(oasis_dir):
+def test_compression():
     """ the BET report capable test """
 
     uncompressed = SimpleShowMaskRPT(
         generate_report=True,
-        background_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
-        mask_file=str(oasis_dir /
-                      'tpl-OASIS30ANTs_res-01_label-BrainCerebellumRegistration_roi.nii.gz'),
+        background_file=get_template('OASIS30ANTs', 'res-01_T1w.nii.gz'),
+        mask_file=get_template(
+            'OASIS30ANTs', 'res-01_desc-BrainCerebellumRegistration_mask.nii.gz'),
         compress_report=False
     ).run().outputs.out_report
 
     compressed = SimpleShowMaskRPT(
         generate_report=True,
-        background_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
-        mask_file=str(oasis_dir /
-                      'tpl-OASIS30ANTs_res-01_label-BrainCerebellumRegistration_roi.nii.gz'),
+        background_file=get_template('OASIS30ANTs', 'res-01_T1w.nii.gz'),
+        mask_file=get_template(
+            'OASIS30ANTs', 'res-01_desc-BrainCerebellumRegistration_mask.nii.gz'),
         compress_report=True
     ).run().outputs.out_report
 

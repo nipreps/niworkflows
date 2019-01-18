@@ -17,7 +17,7 @@ from nipype.interfaces.ants import AffineInitializer
 from nipype.interfaces.base import (
     traits, isdefined, BaseInterface, BaseInterfaceInputSpec, File)
 
-from ..data import getters
+from templateflow.api import get as get_template
 from .. import NIWORKFLOWS_LOG, __version__
 from .fixes import (
     FixHeaderApplyTransforms as ApplyTransforms,
@@ -341,17 +341,15 @@ class RobustMNINormalization(BaseInterface):
             if self.inputs.orientation == 'LAS':
                 raise NotImplementedError
 
-            # Get the template specified by the user.
-            template = getters.get_template(self.inputs.template)
             # Set the template resolution.
             resolution = self.inputs.template_resolution
-            _tpl_fmt = 'tpl-{}*_res-%02d_%s.nii.gz'.format(self.inputs.template)
-
-            # Find actual files
-            ref_template = str(
-                list(template.glob(_tpl_fmt % (resolution, self.inputs.reference)))[0])
-            ref_mask = str(
-                list(template.glob(_tpl_fmt % (resolution, 'brainmask')))[0])
+            # Get the template specified by the user.
+            ref_template = get_template(
+                self.inputs.template,
+                '_res-%02d_%s.nii.gz' % (resolution, self.inputs.reference))
+            ref_mask = get_template(
+                self.inputs.template,
+                '_res-%02d_desc-brain_mask.nii.gz' % resolution)
 
             # Default is explicit masking disabled
             args['fixed_image'] = ref_template
@@ -381,11 +379,10 @@ class RobustMNINormalization(BaseInterface):
         if isdefined(self.inputs.reference_mask):
             target_mask = self.inputs.reference_mask
         else:
-            template = getters.get_template(self.inputs.template)
             resolution = self.inputs.template_resolution
-            target_mask = str(
-                list(template.glob('tpl-%s*_res-%02d_brainmask.nii.gz' % (
-                     self.inputs.template, resolution)))[0])
+            target_mask = get_template(
+                self.inputs.template,
+                '_res-%02d_desc-brain_mask.nii.gz' % resolution)
 
         res = ApplyTransforms(dimension=3,
                               input_image=input_mask,

@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 from shutil import copy
 import pytest
+from templateflow.api import get as get_template
 
 from nipype.interfaces.base import Bunch
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
@@ -31,12 +32,12 @@ def test_BETRPT(moving):
     _smoke_test_report(bet_rpt, 'testBET.svg')
 
 
-def test_ROIsPlot(oasis_dir):
+def test_ROIsPlot():
     """ the BET report capable test """
     import nibabel as nb
     import numpy as np
 
-    im = nb.load(str(oasis_dir / 'tpl-OASIS30ANTs_res-01_variant-4_dtissue.nii.gz'))
+    im = nb.load(get_template('OASIS30ANTs', 'res-01_desc-4_dseg.nii.gz'))
     lookup = np.zeros(5, dtype=int)
     lookup[1] = 1
     lookup[2] = 4
@@ -51,8 +52,8 @@ def test_ROIsPlot(oasis_dir):
     nb.Nifti1Image(newdata, im.affine, hdr).to_filename(out_file)
     roi_rpt = ROIsPlot(
         generate_report=True,
-        in_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
-        in_mask=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_brainmask.nii.gz'),
+        in_file=get_template('OASIS30ANTs', 'res-01_T1w.nii.gz'),
+        in_mask=get_template('OASIS30ANTs', 'res-01_desc-brain_mask.nii.gz'),
         in_rois=[out_file],
         levels=[1.5, 2.5, 3.5],
         colors=['gold', 'magenta', 'b'],
@@ -60,12 +61,12 @@ def test_ROIsPlot(oasis_dir):
     _smoke_test_report(roi_rpt, 'testROIsPlot.svg')
 
 
-def test_ROIsPlot2(oasis_dir):
+def test_ROIsPlot2():
     """ the BET report capable test """
     import nibabel as nb
     import numpy as np
 
-    im = nb.load(str(oasis_dir / 'tpl-OASIS30ANTs_res-01_variant-4_dtissue.nii.gz'))
+    im = nb.load(get_template('OASIS30ANTs', 'res-01_desc-4_dseg.nii.gz'))
     lookup = np.zeros(5, dtype=int)
     lookup[1] = 1
     lookup[2] = 4
@@ -86,27 +87,27 @@ def test_ROIsPlot2(oasis_dir):
         out_files.append(out_file)
     roi_rpt = ROIsPlot(
         generate_report=True,
-        in_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
-        in_mask=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_brainmask.nii.gz'),
+        in_file=get_template('OASIS30ANTs', 'res-01_T1w.nii.gz'),
+        in_mask=get_template('OASIS30ANTs', 'res-01_desc-brain_mask.nii.gz'),
         in_rois=out_files,
         colors=['gold', 'lightblue', 'b', 'g']
     )
     _smoke_test_report(roi_rpt, 'testROIsPlot2.svg')
 
 
-def test_SimpleShowMaskRPT(oasis_dir):
+def test_SimpleShowMaskRPT():
     """ the BET report capable test """
 
     msk_rpt = SimpleShowMaskRPT(
         generate_report=True,
-        background_file=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
-        mask_file=str(oasis_dir /
-                      'tpl-OASIS30ANTs_res-01_label-BrainCerebellumRegistration_roi.nii.gz')
+        background_file=get_template('OASIS30ANTs', 'res-01_T1w.nii.gz'),
+        mask_file=get_template(
+            'OASIS30ANTs', 'res-01_desc-BrainCerebellumRegistration_mask.nii.gz')
     )
     _smoke_test_report(msk_rpt, 'testSimpleMask.svg')
 
 
-def test_BrainExtractionRPT(monkeypatch, oasis_dir, moving, nthreads):
+def test_BrainExtractionRPT(monkeypatch, moving, nthreads):
     """ test antsBrainExtraction with reports"""
 
     def _agg(objekt, runtime):
@@ -126,13 +127,11 @@ def test_BrainExtractionRPT(monkeypatch, oasis_dir, moving, nthreads):
         dimension=3,
         use_floatingpoint_precision=1,
         anatomical_image=moving,
-        brain_template=str(oasis_dir / 'tpl-OASIS30ANTs_res-01_T1w.nii.gz'),
-        brain_probability_mask=str(
-            oasis_dir /
-            'tpl-OASIS30ANTs_res-01_class-brainmask_probtissue.nii.gz'),
-        extraction_registration_mask=str(
-            oasis_dir /
-            'tpl-OASIS30ANTs_res-01_label-BrainCerebellumRegistration_roi.nii.gz'),
+        brain_template=get_template('OASIS30ANTs', 'res-01_T1w.nii.gz'),
+        brain_probability_mask=get_template(
+            'OASIS30ANTs', 'res-01_label-brain_probseg.nii.gz'),
+        extraction_registration_mask=get_template(
+            'OASIS30ANTs', 'res-01_desc-BrainCerebellumRegistration_mask.nii.gz'),
         out_prefix='testBrainExtractionRPT',
         debug=True,  # run faster for testing purposes
         num_threads=nthreads

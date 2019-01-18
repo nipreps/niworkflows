@@ -7,13 +7,10 @@ Nipype translation of ANTs workflows
 ------------------------------------
 
 """
-from __future__ import print_function, division, absolute_import, unicode_literals
 
 # general purpose
-import os
 from collections import OrderedDict
 from multiprocessing import cpu_count
-from pathlib import Path
 from pkg_resources import resource_filename as pkgr_fn
 from packaging.version import parse as parseversion, Version
 
@@ -24,7 +21,6 @@ from nipype.interfaces.fsl.maths import ApplyMask
 from nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
 
 # niworkflows
-from ..data.getters import OSF_RESOURCES, TEMPLATE_ALIASES, get_template
 from ..interfaces.ants import (
     ImageMath,
     ResampleImageBySpacing,
@@ -37,13 +33,13 @@ from ..interfaces.fixes import (
 )
 
 ATROPOS_MODELS = {
-    'T1': OrderedDict([
+    'T1w': OrderedDict([
         ('nclasses', 3),
         ('csf', 1),
         ('gm', 2),
         ('wm', 3),
     ]),
-    'T2': OrderedDict([
+    'T2w': OrderedDict([
         ('nclasses', 3),
         ('csf', 3),
         ('gm', 2),
@@ -64,7 +60,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                              normalization_quality='precise',
                              omp_nthreads=None,
                              mem_gb=3.0,
-                             modality='T1',
+                             bids_suffix='T1w',
                              atropos_refine=True,
                              atropos_use_random_seed=True,
                              atropos_model=None,
@@ -116,8 +112,10 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         mem_gb : float
             Estimated peak memory consumption of the most hungry nodes
             in the workflow
-        modality : str
-            Sequence type of the first input image ('T1', 'T2', or 'FLAIR')
+        bids_suffix : str
+            Sequence type of the first input image. For a list of acceptable values
+            see https://bids-specification.readthedocs.io/en/latest/\
+04-modality-specific-files/01-magnetic-resonance-imaging-data.html#anatomy-imaging-data
         atropos_refine : bool
             Enables or disables the whole ATROPOS sub-workflow
         atropos_use_random_seed : bool
@@ -125,7 +123,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
             system's clock
         atropos_model : tuple or None
             Allows to specify a particular segmentation model, overwriting
-            the defaults based on ``modality``
+            the defaults based on ``bids_suffix``
         use_laplacian : bool
             Enables or disables alignment of the Laplacian as an additional
             criterion for image registration quality (default: True)
@@ -167,36 +165,20 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
 
     """
+    from templateflow.api import get as get_template, IncompleteResultsError
     wf = pe.Workflow(name)
 
-    template_path = None
-    if in_template in TEMPLATE_ALIASES or in_template in OSF_RESOURCES:
-        template_path = get_template(in_template)
-    else:
-        template_path = Path(in_template)
+    tpl_target_path = get_template(
+        in_template, 'res-01_%s.nii.gz' % bids_suffix)
 
-    mod = ('%sw' % modality[:2].upper()
-           if modality.upper().startswith('T') else modality.upper())
-
-    # Append template modality
-    potential_targets = list(template_path.glob('*_%s.nii.gz' % mod))
-    if not potential_targets:
-        raise ValueError(
-            'No %s template was found under "%s".' % (mod, template_path))
-
-    tpl_target_path = str(potential_targets[0])
-    target_basename = '_'.join(tpl_target_path.split('_')[:-1])
-
-    # Get probabilistic brain mask if available
-    tpl_mask_path = '%s_label-brain_probseg.nii.gz' % target_basename
-    # Fall-back to a binary mask just in case
-    if not os.path.exists(tpl_mask_path):
-        tpl_mask_path = '%s_desc-brain_mask.nii.gz' % target_basename
-
-    if not os.path.exists(tpl_mask_path):
-        raise ValueError(
-            'Probability map for the brain mask associated to this template '
-            '"%s" not found.' % tpl_mask_path)
+    try:
+        # Get probabilistic brain mask if available
+        tpl_mask_path = get_template(
+            in_template, 'res-01_label-brain_probseg.nii.gz')
+    except IncompleteResultsError:
+        # Fall-back to a binary mask just in case
+        tpl_mask_path = get_template(
+            in_template, 'res-01_desc-brain_mask.nii.gz')
 
     if omp_nthreads is None or omp_nthreads < 1:
         omp_nthreads = cpu_count()
@@ -204,10 +186,13 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 'in_mask']),
                         name='inputnode')
 
-    # Try to find a registration mask, set if available
-    tpl_regmask_path = '%s_desc-BrainCerebellumRegistration_mask.nii.gz' % target_basename
-    if os.path.exists(tpl_regmask_path):
+    try:
+        # Try to find a registration mask, set if available
+        tpl_regmask_path = get_template(
+            in_template, 'res-01_desc-BrainCerebellumRegistration_mask.nii.gz')
         inputnode.inputs.in_mask = tpl_regmask_path
+    except IncompleteResultsError:
+        pass  # TODO: log a warning
 
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['bias_corrected', 'out_mask', 'bias_image', 'out_segm']),
@@ -222,11 +207,11 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
             bspline_fitting_distance=bspline_fitting_distance),
         n_procs=omp_nthreads, name='inu_n4', iterfield=['input_image'])
 
-    res_tmpl = pe.Node(ResampleImageBySpacing(out_spacing=(4, 4, 4),
-                       apply_smoothing=True), name='res_tmpl')
+    res_tmpl = pe.Node(ResampleImageBySpacing(
+        out_spacing=(4, 4, 4), apply_smoothing=True), name='res_tmpl')
     res_tmpl.inputs.input_image = tpl_target_path
-    res_target = pe.Node(ResampleImageBySpacing(out_spacing=(4, 4, 4),
-                         apply_smoothing=True), name='res_target')
+    res_target = pe.Node(ResampleImageBySpacing(
+        out_spacing=(4, 4, 4), apply_smoothing=True), name='res_target')
 
     lap_tmpl = pe.Node(ImageMath(operation='Laplacian', op2='1.5 1'),
                        name='lap_tmpl')
@@ -339,7 +324,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
             use_random_seed=atropos_use_random_seed,
             omp_nthreads=omp_nthreads,
             mem_gb=mem_gb,
-            in_segmentation_model=atropos_model or list(ATROPOS_MODELS[modality].values())
+            in_segmentation_model=atropos_model or list(ATROPOS_MODELS[bids_suffix].values())
         )
 
         wf.disconnect([
@@ -367,7 +352,7 @@ def init_atropos_wf(name='atropos_wf',
                     omp_nthreads=None,
                     mem_gb=3.0,
                     padding=10,
-                    in_segmentation_model=list(ATROPOS_MODELS['T1'].values())):
+                    in_segmentation_model=list(ATROPOS_MODELS['T1w'].values())):
     """
     Implements supersteps 6 and 7 of ``antsBrainExtraction.sh``,
     which refine the mask previously computed with the spatial
@@ -447,9 +432,9 @@ def init_atropos_wf(name='atropos_wf',
                        name='03_pad_mask')
 
     # Split segmentation in binary masks
-    sel_labels = pe.Node(niu.Function(function=_select_labels,
-                         output_names=['out_wm', 'out_gm', 'out_csf']),
-                         name='04_sel_labels')
+    sel_labels = pe.Node(niu.Function(
+        function=_select_labels, output_names=['out_wm', 'out_gm', 'out_csf']),
+        name='04_sel_labels')
     sel_labels.inputs.labels = list(reversed(in_segmentation_model[1:]))
 
     # Select largest components (GM, WM)
@@ -484,9 +469,9 @@ def init_atropos_wf(name='atropos_wf',
 
     # Superstep 7
     # Split segmentation in binary masks
-    sel_labels2 = pe.Node(niu.Function(function=_select_labels,
-                          output_names=['out_wm', 'out_gm', 'out_csf']),
-                          name='14_sel_labels2')
+    sel_labels2 = pe.Node(niu.Function(
+        function=_select_labels, output_names=['out_wm', 'out_gm', 'out_csf']),
+        name='14_sel_labels2')
     sel_labels2.inputs.labels = list(reversed(in_segmentation_model[1:]))
 
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} addtozero ${EXTRACTION_MASK} ${EXTRACTION_TMP}
@@ -597,6 +582,6 @@ def _select_labels(in_segm, labels):
 
 
 def _gen_name(in_file):
-    import os
+    from os.path import basename
     from nipype.utils.filemanip import fname_presuffix
-    return os.path.basename(fname_presuffix(in_file, suffix='processed'))
+    return basename(fname_presuffix(in_file, suffix='processed'))
