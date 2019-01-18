@@ -1,3 +1,12 @@
+0.6.0 (January 18, 2019)
+========================
+
+  * [RF] Improve readability of parameters files (#276) @oesteban
+  * [ENH] Improve niwflows.interfaces.freesurfer (#277) @oesteban
+  * [ENH] Make BIDS regex more readable (#278) @oesteban
+  * [ENH] Datalad+templateflow integration (#280) @oesteban 
+
+
 0.5.3 (January 08, 2019)
 ========================
 
