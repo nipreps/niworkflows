@@ -61,12 +61,8 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     moving = traits.Enum('T1w', 'bold', usedefault=True, mandatory=True,
                          desc='registration type')
     # Template to use as the default reference image.
-    template = traits.Enum(
-        'MNI152NLin2009cAsym',
-        'OASIS',
-        'NKI',
-        'mni_icbm152_linear',
-        usedefault=True, desc='define the template to be used')
+    template = traits.Str('MNI152NLin2009cAsym', usedefault=True,
+                          desc='define the template to be used')
     # Load other settings from file.
     settings = traits.List(File(exists=True), desc='pass on the list of settings files')
     # Resolution of the default template.
