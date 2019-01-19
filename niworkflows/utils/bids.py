@@ -177,7 +177,7 @@ def collect_data(dataset, participant_label, task=None, echo=None):
 
         bold_sess = subj_data['bold']
         ses_uids = [list(bold) for _, bold in groupby(bold_sess, key=_grp_echos)]
-        ses_uids = [x[0] if len(x) == 1 else x for x in ses_uids]
+        ses_uids = [x[0] if len(x) <= 2 else x for x in ses_uids]
         subj_data.update({"bold": ses_uids})
 
     return subj_data, layout
