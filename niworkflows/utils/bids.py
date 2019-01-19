@@ -174,7 +174,7 @@ def collect_data(dataset, participant_label, task=None, echo=None):
                 return x
             echo = re.search("_echo-\\d*", x).group(0)
             return x.replace(echo, "_echo-?")
-        
+
         bold_sess = subj_data['bold']
         ses_uids = [list(bold) for _, bold in groupby(bold_sess, key=_grp_echos)]
         ses_uids = [x[0] if len(x) == 1 else x for x in ses_uids]
