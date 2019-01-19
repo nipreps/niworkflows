@@ -182,7 +182,7 @@ def collect_data(dataset, participant_label, task=None, echo=None):
         else:
             ses_uids = bold_sess
 
-    subj_data.update({"bold": ses_uids})
+        subj_data.update({"bold": ses_uids})
 
     return subj_data, layout
 
