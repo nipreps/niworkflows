@@ -167,7 +167,7 @@ def collect_data(dataset, participant_label, task=None, echo=None):
     subj_data = {modality: [x.filename for x in layout.get(**query)]
                  for modality, query in queries.items()}
 
-    if subj_data['bold'] and any(['_echo-' in bold for bold in bold_sess]):
+    if any(['_echo-' in bold for bold in subj_data['bold']]):
         # Special case: multi-echo BOLD, grouping echos
         def _grp_echos(x):
             if '_echo-' not in x:
