@@ -55,7 +55,7 @@ ATROPOS_MODELS = {
 
 
 def init_brain_extraction_wf(name='brain_extraction_wf',
-                             in_template='OASIS',
+                             in_template='OASIS30ANTs',
                              use_float=True,
                              normalization_quality='precise',
                              omp_nthreads=None,
@@ -93,7 +93,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     **Parameters**
 
         in_template : str
-            Name of the skull-stripping template ('OASIS', 'NKI', or
+            Name of the skull-stripping template ('OASIS30ANTs', 'NKI', or
             path).
             The brain template from which regions will be projected
             Anatomical template created using e.g. LPBA40 data set with
