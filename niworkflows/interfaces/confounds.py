@@ -115,7 +115,6 @@ def _check_and_expand_exponential(expr, variables, data):
     if re.search('\^\^[0-9]+$', expr):
         order = re.compile('\^\^([0-9]+)$').findall(expr)
         order = range(1, int(*order) + 1)
-        print('exponential order {}'.format(order))
         variables, data = exponential_terms(order, variables, data)
     elif re.search('\^[0-9]+[\-]?[0-9]*$', expr):
         order = re.compile('\^([0-9]+[\-]?[0-9]*)').findall(expr)
@@ -131,7 +130,6 @@ def _check_and_expand_derivative(expr, variables, data):
     if re.search('^dd[0-9]+x', expr):
         order = re.compile('^dd([0-9]+)x').findall(expr)
         order = range(0, int(*order) + 1)
-        print('derivative order {}'.format(order))
         (variables, data) = temporal_derivatives(order, variables, data)
     elif re.search('^d[0-9]+[\-]?[0-9]*x', expr):
         order = re.compile('^d([0-9]+[\-]?[0-9]*)x').findall(expr)
@@ -141,6 +139,8 @@ def _check_and_expand_derivative(expr, variables, data):
 
 
 def _check_and_expand_subformula(expression, parent_data, variables, data):
+    """Check if the current operation contains a suboperation, and parse it
+    where appropriate."""
     grouping_depth = 0
     for i, char in enumerate(expression):
         if char == '(':
@@ -151,13 +151,35 @@ def _check_and_expand_subformula(expression, parent_data, variables, data):
             grouping_depth -= 1
             if grouping_depth == 0:
                 expr = expression[formula_delimiter:i].strip()
-                print('|{}| is subformula'.format(expr))
                 return parse_formula(expr, parent_data)
     return variables, data
 
 
-def parse_expression(expression, variables, data, parent_data):
-    variables, data = _check_and_expand_subformula(expression, parent_data, variables, data)
+def parse_expression(expression, parent_data):
+    """
+    Parse an expression in a model formula.
+
+    Parameters
+    ----------
+    expression: str
+        Formula expression: either a single variable or a variable group
+        paired with an operation (exponentiation or differentiation).
+    parent_data: pandas DataFrame
+        The source data for the model expansion.
+
+    Outputs
+    -------
+    variables: list
+        A list of variables in the provided formula expression.
+    data: pandas DataFrame
+        A tabulation of all terms in the provided formula expression.
+    """
+    variables = None
+    data = None
+    variables, data = _check_and_expand_subformula(expression,
+                                                   parent_data,
+                                                   variables,
+                                                   data)
     variables, data = _check_and_expand_exponential(expression,
                                                     variables,
                                                     data)
@@ -172,11 +194,50 @@ def parse_expression(expression, variables, data, parent_data):
 
 
 def parse_formula(model_formula, parent_data):
+    """
+    Recursively parse a model formula by breaking it into additive atoms
+    and tracking grouping symbol depth.
+
+    Parameters
+    ----------
+    model_formula: str
+        Expression for the model formula, e.g.
+        '(a + b)^^2 + dd1(c + (d + e)^3) + f'
+    parent_data: pandas DataFrame
+        A tabulation of all values usable in the model formula. Each additive
+        term in `model_formula` should correspond either to a variable in this
+        data frame or to instructions for operating on a variable (for
+        instance, computing temporal derivatives or exponential terms).
+
+        Temporal derivative options:
+        * d6(variable) for the 6th temporal derivative
+        * dd6(variable) for all temporal derivatives up to the 6th
+        * d4-6(variable) for the 4th through 6th temporal derivatives
+        * 0 must be included in the temporal derivative range for the original
+          term to be returned when temporal derivatives are computed.
+
+        Exponential options:
+        * (variable)^6 for the 6th power
+        * (variable)^^6 for all powers up to the 6th
+        * (variable)^4-6 for the 4th through 6th powers
+        * 1 must be included in the powers range for the original term to be
+          returned when exponential terms are computed.
+
+        Temporal derivatives and exponential terms are computed for all terms
+        in the grouping symbols that they adjoin.
+
+    Outputs
+    -------
+    variables: list(str)
+        A list of variables included in the model parsed from the provided
+        formula.
+    data: pandas DataFrame
+        All values in the complete model.
+    """
     variables = {}
     data = {}
     expr_delimiter = 0
     grouping_depth = 0
-    last_child = False
     for i, char in enumerate(model_formula):
         if char == '(':
             grouping_depth += 1
@@ -192,45 +253,15 @@ def parse_formula(model_formula, parent_data):
     data[expression] = None
     for expression in list(variables):
         if expression[0] == '(' and expression[-1] == ')':
-            print('|{}| is form'.format(expression))
             (variables[expression],
              data[expression]) = parse_formula(expression[1:-1],
                                                 parent_data)
         else:
-            print('|{}| is expr'.format(expression))
             (variables[expression],
              data[expression]) = parse_expression(expression,
-                                                  variables.get(expression),
-                                                  data.get(expression),
                                                   parent_data)
     variables = list(set(reduce((lambda x, y: x + y), variables.values())))
     data = pd.concat((data.values()), axis=1)
     data = data.T.drop_duplicates().T
 
     return variables, data
-
-
-def _parse_formula_into_children(model_formula):
-    """
-    Recursively parse a model formula by breaking it into additive atoms
-    and tracking grouping symbol depth.
-
-    Parameters
-    ----------
-    model_formula: str
-        Expression for the model formula, e.g.
-        '(a + b) + (c + (d + e)) + f'
-
-    Outputs
-    -------
-    expressions: list(str)
-        A list of ungrouped expressions in the model formula, e.g.
-        [' ', '  ', ' f'] for the above
-    children: list(str)
-        A list of grouped expressions in the model formula, e.g.
-        ['a + b', 'c + (d + e)', ''] for the above
-    variables: list(str)
-        Placeholder list.
-    data: list(pandas DataFrame objects)
-        Placeholder list.
-    """
