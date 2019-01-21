@@ -44,7 +44,7 @@ class ExpandModel(SimpleInterface):
         else:
             out_file = fname_presuffix(
                 self.inputs.confounds_file,
-                suffix='_spikes.tsv',
+                suffix='_expansion.tsv',
                 newpath=runtime.cwd,
                 use_ext=False)
 
@@ -74,7 +74,7 @@ class SpikeRegressorsInputInterface(BaseInterfaceInputSpec):
         usedefault=True,
         desc='Criteria for generating a spike regressor')
     header_prefix = traits.Str(
-        'spike', usedefault=True,
+        'motion_outlier', usedefault=True,
         desc='Prefix for spikes in the output TSV header')
     lags = traits.List(traits.Int, value=[0], usedefault=True,
                        desc='Relative indices of lagging frames to flag for '
@@ -106,7 +106,7 @@ class SpikeRegressors(SimpleInterface):
         else:
             out_file = fname_presuffix(
                 self.inputs.confounds_file,
-                suffix='_spikes.tsv',
+                suffix='_desc-motion_outliers.tsv',
                 newpath=runtime.cwd,
                 use_ext=False)
 
@@ -125,10 +125,8 @@ class SpikeRegressors(SimpleInterface):
         return runtime
 
 
-def spike_regressors(data,
-    criteria={'framewise_displacement': ('>', 0.2), 'dvars': ('>', 20)},
-    header_prefix='spike', lags=None, minimum_contiguous=None,
-    concatenate=True):
+def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
+                     lags=None, minimum_contiguous=None, concatenate=True):
     """
     Add spike regressors to a confound/nuisance matrix.
 
@@ -173,6 +171,8 @@ def spike_regressors(data,
     mask = {}
     indices = range(data.shape[0])
     lags = lags or [0]
+    criteria = criteria or {'framewise_displacement': ('>', 0.2),
+                            'dvars': ('>', 20)}
     for metric, (criterion, threshold) in criteria.items():
         if criterion == '<':
             mask[metric] = set(np.where(data[metric] < threshold)[0])
@@ -196,7 +196,7 @@ def spike_regressors(data,
     spikes = np.zeros((max(indices)+1, len(mask)))
     for i, m in enumerate(sorted(mask)):
         spikes[m, i] = 1
-    header = ['{:s}_{:02d}'.format(header_prefix, vol)
+    header = ['{:s}{:02d}'.format(header_prefix, vol)
               for vol in range(len(mask))]
     spikes = pd.DataFrame(data=spikes, columns=header)
     if concatenate:
@@ -412,7 +412,7 @@ def _expand_shorthand(model_formula, variables):
     dvall = _get_matches_from_data('.*dvars', variables)
     nss = _get_matches_from_data('non_steady_state_outlier[0-9]+',
                                  variables)
-    spikes = _get_matches_from_data('spike_[0-9]+', variables)
+    spikes = _get_matches_from_data('motion_outlier[0-9]+', variables)
 
     model_formula = re.sub('wm', wm, model_formula)
     model_formula = re.sub('gsr', gsr, model_formula)
