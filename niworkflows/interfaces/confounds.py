@@ -13,9 +13,51 @@ import traits.api as traits
 from functools import reduce
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    traits, TraitedSpec, BaseInterfaceInputSpec, File, Directory, isdefined,
+    traits, TraitedSpec, BaseInterfaceInputSpec, File, isdefined,
     SimpleInterface
 )
+
+
+class ExpandModelInputInterface(BaseInterfaceInputSpec):
+    confounds_file = File(exists=True, mandatory=True,
+        desc='TSV containing confound time series for expansion according to '
+        'the specified formula.')
+    model_formula = traits.Str(
+        '(dd1(rps + wm + csf + gsr))^^2 + others', usedefault=True,
+        desc='Formula for generating model expansions. By default, the '
+        '32-parameter expansion will be generated.')
+    output_file = traits.Str(desc='Output path')
+
+
+class ExpandModelOutputInterface(TraitedSpec):
+    confounds_file = File(exists=True, desc='Output confounds file')
+
+
+class ExpandModel(SimpleInterface):
+    """Expand a confound model according to a specified formula.
+    """
+    input_spec = ExpandModelInputInterface
+    output_spec = ExpandModelOutputInterface
+
+    def _run_interface(self, runtime):
+        if isdefined(self.inputs.output_file):
+            out_file = self.inputs.output_file
+        else:
+            out_file = fname_presuffix(
+                self.inputs.confounds_file,
+                suffix='_spikes.tsv',
+                newpath=runtime.cwd,
+                use_ext=False)
+
+        confounds_data = pd.read_table(self.inputs.confounds_file)
+        _, confounds_data = parse_formula(
+            model_formula=self.inputs.model_formula,
+            parent_data=confounds_data
+        )
+        confounds_data.to_csv(out_file, sep='\t', index=False,
+                              na_rep='n/a')
+        self._results['confounds_file'] = out_file
+        return runtime
 
 
 class SpikeRegressorsInputInterface(BaseInterfaceInputSpec):
@@ -46,8 +88,7 @@ class SpikeRegressorsInputInterface(BaseInterfaceInputSpec):
 
 
 class SpikeRegressorsOutputInterface(TraitedSpec):
-    confounds_file = File(exists=True,
-        desc='Output confounds file')
+    confounds_file = File(exists=True, desc='Output confounds file')
 
 
 class SpikeRegressors(SimpleInterface):
