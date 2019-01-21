@@ -9,7 +9,6 @@ Select terms for a confound model, and compute any requisite expansions.
 import re
 import numpy as np
 import pandas as pd
-import traits.api as traits
 from functools import reduce
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
@@ -20,8 +19,8 @@ from nipype.interfaces.base import (
 
 class ExpandModelInputInterface(BaseInterfaceInputSpec):
     confounds_file = File(exists=True, mandatory=True,
-        desc='TSV containing confound time series for expansion according to '
-        'the specified formula.')
+                          desc='TSV containing confound time series for '
+                          'expansion according to the specified formula.')
     model_formula = traits.Str(
         '(dd1(rps + wm + csf + gsr))^^2 + others', usedefault=True,
         desc='Formula for generating model expansions. By default, the '
@@ -61,7 +60,8 @@ class ExpandModel(SimpleInterface):
 
 
 class SpikeRegressorsInputInterface(BaseInterfaceInputSpec):
-    confounds_file = File(exists=True, mandatory=True,
+    confounds_file = File(
+        exists=True, mandatory=True,
         desc='TSV containing criterion time series (e.g., framewise '
         'displacement, DVARS) to be used for creating spike regressors.')
     criteria = traits.Dict(
@@ -73,15 +73,18 @@ class SpikeRegressorsInputInterface(BaseInterfaceInputSpec):
         value_trait=traits.Tuple(traits.Str, traits.Float),
         usedefault=True,
         desc='Criteria for generating a spike regressor')
-    header_prefix = traits.Str('spike', usedefault=True,
+    header_prefix = traits.Str(
+        'spike', usedefault=True,
         desc='Prefix for spikes in the output TSV header')
     lags = traits.List(traits.Int, value=[0], usedefault=True,
-        desc='Relative indices of lagging frames to flag for each flagged '
-        'frame')
-    minimum_contiguous = traits.Either(None, traits.Int, usedefault=True,
+                       desc='Relative indices of lagging frames to flag for '
+                       'each flagged frame')
+    minimum_contiguous = traits.Either(
+        None, traits.Int, usedefault=True,
         desc='Minimum number of contiguous volumes required to avoid '
         'flagging as a spike')
-    concatenate = traits.Bool(True, usedefault=True,
+    concatenate = traits.Bool(
+        True, usedefault=True,
         desc='Indicates whether to concatenate spikes to existing confounds '
         'or return spikes only')
     output_file = traits.Str(desc='Output path')
@@ -123,12 +126,9 @@ class SpikeRegressors(SimpleInterface):
 
 
 def spike_regressors(data,
-                     criteria={
-                        'framewise_displacement': ('>', 0.2),
-                        'dvars': ('>', 20)
-                     },
-                     header_prefix='spike', lags=[0], minimum_contiguous=None,
-                     concatenate=True):
+    criteria={'framewise_displacement': ('>', 0.2), 'dvars': ('>', 20)},
+    header_prefix='spike', lags=None, minimum_contiguous=None,
+    concatenate=True):
     """
     Add spike regressors to a confound/nuisance matrix.
 
@@ -172,6 +172,7 @@ def spike_regressors(data,
     """
     mask = {}
     indices = range(data.shape[0])
+    lags = lags or [0]
     for metric, (criterion, threshold) in criteria.items():
         if criterion == '<':
             mask[metric] = set(np.where(data[metric] < threshold)[0])
@@ -185,7 +186,7 @@ def spike_regressors(data,
     if minimum_contiguous is not None:
         post_final = data.shape[0] + 1
         epoch_length = np.diff(sorted(mask |
-                        set([-1, post_final]))) - 1
+                                      set([-1, post_final]))) - 1
         epoch_end = sorted(mask | set([post_final]))
         for i, j in zip(epoch_end, epoch_length):
             if j < minimum_contiguous:
@@ -237,18 +238,18 @@ def temporal_derivatives(order, variables, data):
         order = set(order) - set([0])
     for o in order:
         variables_deriv[o] = ['{}_derivative{}'.format(v, o)
-                                 for v in variables]
+                              for v in variables]
         data_deriv[o] = np.tile(np.nan, data[variables].shape)
-        data_deriv[o][o:,:] = np.diff(data[variables], n=o, axis=0)
+        data_deriv[o][o:, :] = np.diff(data[variables], n=o, axis=0)
     variables_deriv = reduce((lambda x, y: x + y), variables_deriv.values())
     data_deriv = pd.DataFrame(columns=variables_deriv,
-                    data=np.concatenate([*data_deriv.values()], axis=1))
+                              data=np.concatenate([*data_deriv.values()],
+                                                  axis=1))
 
     return (variables_deriv, data_deriv)
 
 
 def exponential_terms(order, variables, data):
-    
     """
     Compute exponential expansions.
 
@@ -284,7 +285,6 @@ def exponential_terms(order, variables, data):
     variables_exp = reduce((lambda x, y: x + y), variables_exp.values())
     data_exp = pd.DataFrame(columns=variables_exp,
                             data=np.concatenate([*data_exp.values()], axis=1))
-    
     return (variables_exp, data_exp)
 
 
@@ -494,7 +494,7 @@ def parse_formula(model_formula, parent_data):
         if expression[0] == '(' and expression[-1] == ')':
             (variables[expression],
              data[expression]) = parse_formula(expression[1:-1],
-                                                parent_data)
+                                               parent_data)
         else:
             (variables[expression],
              data[expression]) = parse_expression(expression,
