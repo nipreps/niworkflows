@@ -412,6 +412,7 @@ def _expand_shorthand(model_formula, variables):
     dvall = _get_matches_from_data('.*dvars', variables)
     nss = _get_matches_from_data('non_steady_state_outlier[0-9]+',
                                  variables)
+    spikes = _get_matches_from_data('spike_[0-9]+', variables)
 
     model_formula = re.sub('wm', wm, model_formula)
     model_formula = re.sub('gsr', gsr, model_formula)
@@ -422,6 +423,7 @@ def _expand_shorthand(model_formula, variables):
     model_formula = re.sub('dv', dv, model_formula)
     model_formula = re.sub('dvall', dvall, model_formula)
     model_formula = re.sub('nss', nss, model_formula)
+    model_formula = re.sub('spikes', spikes, model_formula)
 
     formula_variables = _get_variables_from_formula(model_formula)
     others = ' + '.join(set(variables) - set(formula_variables))
