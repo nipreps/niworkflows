@@ -11,6 +11,74 @@ import numpy as np
 import pandas as pd
 import traits.api as traits
 from functools import reduce
+from nipype.utils.filemanip import fname_presuffix
+from nipype.interfaces.base import (
+    traits, TraitedSpec, BaseInterfaceInputSpec, File, Directory, isdefined,
+    SimpleInterface
+)
+
+
+class SpikeRegressorsInputInterface(BaseInterfaceInputSpec):
+    confounds_file = File(exists=True, mandatory=True,
+        desc='TSV containing criterion time series (e.g., framewise '
+        'displacement, DVARS) to be used for creating spike regressors.')
+    criteria = traits.Dict(
+        value={
+            'framewise_displacement': ('>', 0.2),
+            'dvars': ('>', 20)
+        },
+        key_trait=traits.Str,
+        value_trait=traits.Tuple(traits.Str, traits.Float),
+        usedefault=True,
+        desc='Criteria for generating a spike regressor')
+    header_prefix = traits.Str('spike', usedefault=True,
+        desc='Prefix for spikes in the output TSV header')
+    lags = traits.List(traits.Int, value=[0], usedefault=True,
+        desc='Relative indices of lagging frames to flag for each flagged '
+        'frame')
+    minimum_contiguous = traits.Either(None, traits.Int, usedefault=True,
+        desc='Minimum number of contiguous volumes required to avoid '
+        'flagging as a spike')
+    concatenate = traits.Bool(True, usedefault=True,
+        desc='Indicates whether to concatenate spikes to existing confounds '
+        'or return spikes only')
+    output_file = traits.Str(desc='Output path')
+
+
+class SpikeRegressorsOutputInterface(TraitedSpec):
+    confounds_file = File(exists=True,
+        desc='Output confounds file')
+
+
+class SpikeRegressors(SimpleInterface):
+    """Generate spike regressors.
+    """
+    input_spec = SpikeRegressorsInputInterface
+    output_spec = SpikeRegressorsOutputInterface
+
+    def _run_interface(self, runtime):
+        if isdefined(self.inputs.output_file):
+            out_file = self.inputs.output_file
+        else:
+            out_file = fname_presuffix(
+                self.inputs.confounds_file,
+                suffix='_spikes.tsv',
+                newpath=runtime.cwd,
+                use_ext=False)
+
+        confounds_data = pd.read_table(self.inputs.confounds_file)
+        confounds_data = spike_regressors(
+            data=confounds_data,
+            criteria=self.inputs.criteria,
+            header_prefix=self.inputs.header_prefix,
+            lags=self.inputs.lags,
+            minimum_contiguous=self.inputs.minimum_contiguous,
+            concatenate=self.inputs.concatenate
+        )
+        confounds_data.to_csv(out_file, sep='\t', index=False,
+                              na_rep='n/a')
+        self._results['confounds_file'] = out_file
+        return runtime
 
 
 def spike_regressors(data,
@@ -18,7 +86,8 @@ def spike_regressors(data,
                         'framewise_displacement': ('>', 0.2),
                         'dvars': ('>', 20)
                      },
-                     header_prefix='spike', lags=[0], minimum_contiguous=None):
+                     header_prefix='spike', lags=[0], minimum_contiguous=None,
+                     concatenate=True):
     """
     Add spike regressors to a confound/nuisance matrix.
 
@@ -45,11 +114,14 @@ def spike_regressors(data,
         spike regression. If any series of contiguous unflagged frames is
         shorter than the specified minimum, then all of those frames will
         additionally have spike regressors implemented.
+    concatenate: bool
+        Indicates whether the returned object should include only spikes
+        (if false) or all input time series and spikes (if true, default).
 
     Outputs
     -------
     data: pandas DataFrame object
-        The input DataFrame augmented with a column for each spike regressor.
+        The input DataFrame with a column for each spike regressor.
 
     References
     ----------
@@ -85,7 +157,10 @@ def spike_regressors(data,
     header = ['{:s}_{:02d}'.format(header_prefix, vol)
               for vol in range(len(mask))]
     spikes = pd.DataFrame(data=spikes, columns=header)
-    return pd.concat((data, spikes), axis=1)
+    if concatenate:
+        return pd.concat((data, spikes), axis=1)
+    else:
+        return spikes
 
 
 def temporal_derivatives(order, variables, data):
