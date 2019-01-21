@@ -13,6 +13,52 @@ import traits.api as traits
 from functools import reduce
 
 
+def spike_regressors(data,
+                     criteria={
+                        'framewise_displacement': ('>', 0.2),
+                        'dvars': ('>', 20)
+                     },
+                     header_prefix='spike', lag=[0], minimum_contiguous=None):
+    """
+    Add spike regressors to a confound/nuisance matrix.
+
+    Parameters
+    ----------
+    data: pandas DataFrame object
+        A tabulation of observations from which spike regressors should be
+        estimated.
+    criteria: dict{str: ('>' or '<', float)}
+        Criteria for generating a spike regressor. If, for a given frame, the
+        value of the variable corresponding to the key exceeds the threshold
+        indicated by the value, then a spike regressor is created for that
+        frame. By default, the strategy from Power 2014 is implemented: any
+        frames with FD greater than 0.2 or DV greater than 20 are flagged for
+        censoring.
+    header_prefix: str
+        The prefix used to indicate spike regressors in the output data table.
+    lag: list(int)
+        A list indicating the frames to be censored relative to each flag.
+        For instance, [0] censors the flagged frame, while [0, 1] censors
+        both the flagged frame and the following frame.
+    minimum_contiguous: int or None
+        The minimum number of contiguous frames that must be unflagged for
+        spike regression. If any series of contiguous unflagged frames is
+        shorter than the specified minimum, then all of those frames will
+        additionally have spike regressors implemented.
+
+    Outputs
+    -------
+    data: pandas DataFrame object
+        The input DataFrame augmented with a column for each spike regressor.
+
+    References
+    ----------
+    Power JD, Mitra A, Laumann TO, Snyder AZ, Schlaggar BL, Petersen SE (2014)
+        Methods to detect, characterize, and remove motion artifact in resting
+        state fMRI. NeuroImage.
+    """
+
+
 def temporal_derivatives(order, variables, data):
     """
     Compute temporal derivative terms by the method of backwards differences.
