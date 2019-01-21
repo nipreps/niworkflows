@@ -18,7 +18,7 @@ def spike_regressors(data,
                         'framewise_displacement': ('>', 0.2),
                         'dvars': ('>', 20)
                      },
-                     header_prefix='spike', lag=[0], minimum_contiguous=None):
+                     header_prefix='spike', lags=[0], minimum_contiguous=None):
     """
     Add spike regressors to a confound/nuisance matrix.
 
@@ -36,7 +36,7 @@ def spike_regressors(data,
         censoring.
     header_prefix: str
         The prefix used to indicate spike regressors in the output data table.
-    lag: list(int)
+    lags: list(int)
         A list indicating the frames to be censored relative to each flag.
         For instance, [0] censors the flagged frame, while [0, 1] censors
         both the flagged frame and the following frame.
@@ -57,6 +57,35 @@ def spike_regressors(data,
         Methods to detect, characterize, and remove motion artifact in resting
         state fMRI. NeuroImage.
     """
+    mask = {}
+    indices = range(data.shape[0])
+    for metric, (criterion, threshold) in criteria.items():
+        if criterion == '<':
+            mask[metric] = set(np.where(data[metric] < threshold)[0])
+        elif criterion == '>':
+            mask[metric] = set(np.where(data[metric] > threshold)[0])
+    mask = reduce((lambda x, y: x | y), mask.values())
+
+    for lag in lags:
+        mask = set([m + lag for m in mask]) | mask
+
+    if minimum_contiguous is not None:
+        post_final = data.shape[0] + 1
+        epoch_length = np.diff(sorted(mask |
+                        set([-1, post_final]))) - 1
+        epoch_end = sorted(mask | set([post_final]))
+        for i, j in zip(epoch_end, epoch_length):
+            if j < minimum_contiguous:
+                mask = mask | set(range(i - j, i))
+
+    mask = mask.intersection(indices)
+    spikes = np.zeros((max(indices)+1, len(mask)))
+    for i, m in enumerate(sorted(mask)):
+        spikes[m, i] = 1
+    header = ['{:s}_{:02d}'.format(header_prefix, vol)
+              for vol in range(len(mask))]
+    spikes = pd.DataFrame(data=spikes, columns=header)
+    return pd.concat((data, spikes), axis=1)
 
 
 def temporal_derivatives(order, variables, data):
