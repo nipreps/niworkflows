@@ -127,12 +127,12 @@ def _check_and_expand_derivative(expr, variables, data):
     """Check if the current operation specifies a temporal derivative. dd6x
     specifies all derivatives up to the 6th, d5-6x the 5th and 6th, d6x the
     6th only."""
-    if re.search('^dd[0-9]+x', expr):
-        order = re.compile('^dd([0-9]+)x').findall(expr)
+    if re.search('^dd[0-9]+', expr):
+        order = re.compile('^dd([0-9]+)').findall(expr)
         order = range(0, int(*order) + 1)
         (variables, data) = temporal_derivatives(order, variables, data)
-    elif re.search('^d[0-9]+[\-]?[0-9]*x', expr):
-        order = re.compile('^d([0-9]+[\-]?[0-9]*)x').findall(expr)
+    elif re.search('^d[0-9]+[\-]?[0-9]*', expr):
+        order = re.compile('^d([0-9]+[\-]?[0-9]*)').findall(expr)
         order = _order_as_range(*order)
         (variables, data) = temporal_derivatives(order, variables, data)
     return variables, data
@@ -193,6 +193,51 @@ def parse_expression(expression, parent_data):
     return variables, data
 
 
+def _get_matches_from_data(regex, variables):
+    matches = re.compile(regex)
+    matches = ' + '.join([v for v in variables if matches.match(v)])
+    return matches
+
+
+def _get_variables_from_formula(model_formula):
+    symbols_to_clear = [' ', '\(', '\)', 'dd[0-9]+', 'd[0-9]+[\-]?[0-9]*',
+                        '\^\^[0-9]+', '\^[0-9]+[\-]?[0-9]*']
+    for symbol in symbols_to_clear:
+        model_formula = re.sub(symbol, '', model_formula)
+    variables = model_formula.split('+')
+    return variables
+
+
+def _expand_shorthand(model_formula, variables):
+    """Expand shorthand terms in the model formula.
+    """
+    wm = 'white_matter'
+    gsr = 'global_signal'
+    rps = 'trans_x + trans_y + trans_z + rot_x + rot_y + rot_z'
+    fd = 'framewise_displacement'
+    acc = _get_matches_from_data('a_comp_cor_[0-9]+', variables)
+    tcc = _get_matches_from_data('t_comp_cor_[0-9]+', variables)
+    dv = _get_matches_from_data('^std_dvars$', variables)
+    dvall = _get_matches_from_data('.*dvars', variables)
+    nss = _get_matches_from_data('non_steady_state_outlier[0-9]+',
+                                 variables)
+
+    model_formula = re.sub('wm', wm, model_formula)
+    model_formula = re.sub('gsr', gsr, model_formula)
+    model_formula = re.sub('rps', rps, model_formula)
+    model_formula = re.sub('fd', fd, model_formula)
+    model_formula = re.sub('acc', acc, model_formula)
+    model_formula = re.sub('tcc', tcc, model_formula)
+    model_formula = re.sub('dv', dv, model_formula)
+    model_formula = re.sub('dvall', dvall, model_formula)
+    model_formula = re.sub('nss', nss, model_formula)
+
+    formula_variables = _get_variables_from_formula(model_formula)
+    others = ' + '.join(set(variables) - set(formula_variables))
+    model_formula = re.sub('others', others, model_formula)
+    return model_formula
+
+
 def parse_formula(model_formula, parent_data):
     """
     Recursively parse a model formula by breaking it into additive atoms
@@ -238,6 +283,7 @@ def parse_formula(model_formula, parent_data):
     data = {}
     expr_delimiter = 0
     grouping_depth = 0
+    model_formula = _expand_shorthand(model_formula, parent_data.columns)
     for i, char in enumerate(model_formula):
         if char == '(':
             grouping_depth += 1
