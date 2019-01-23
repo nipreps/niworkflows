@@ -1,3 +1,10 @@
+0.6.1 (January 23, 2019)
+========================
+
+  * [FIX] Allow arbitrary template names in ``RobustMNINormalization`` (#284) @oesteban
+  * [FIX] Brain extraction broken connection (#286) @oesteban
+
+
 0.6.0 (January 18, 2019)
 ========================
 
