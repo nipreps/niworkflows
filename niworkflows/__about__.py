@@ -74,6 +74,8 @@ LINKS_REQUIRES = []
 TESTS_REQUIRES = [
     'pytest',
     'pytest-xdist',
+    'pytest-cov',
+    'coverage',
 ]
 
 EXTRA_REQUIRES = {
