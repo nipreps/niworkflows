@@ -79,6 +79,8 @@ jobs:
             - docker-v1-{{ .Branch }}-
             - docker-v1-master-
             - docker-v1-
+      - checkout:
+          path: /tmp/src/niworkflows
       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
