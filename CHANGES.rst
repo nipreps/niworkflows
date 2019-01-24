@@ -14,6 +14,12 @@
   * [ENH] Datalad+templateflow integration (#280) @oesteban 
 
 
+0.5.4 (January 23, 2019)
+========================
+
+  * [HOTFIX] Fix ``UnboundLocalError`` in utils.bids (#285) @oesteban
+
+
 0.5.3 (January 08, 2019)
 ========================
 
