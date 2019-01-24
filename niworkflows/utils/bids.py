@@ -283,6 +283,30 @@ def group_multiecho(bold_sess):
       'sub-01_task-beh_echo-3_run-02_bold.nii.gz'],
       'sub-01_task-beh_run-03_bold.nii.gz']
 
+    Some tests from https://neurostars.org/t/fmriprep-from\
+-singularity-unboundlocalerror/3299/7
+
+    >>> bold_sess = ['sub-01_task-AudLoc_echo-1_bold.nii',
+    ...              'sub-01_task-AudLoc_echo-2_bold.nii',
+    ...              'sub-01_task-FJT_echo-1_bold.nii',
+    ...              'sub-01_task-FJT_echo-2_bold.nii',
+    ...              'sub-01_task-LDT_echo-1_bold.nii',
+    ...              'sub-01_task-LDT_echo-2_bold.nii',
+    ...              'sub-01_task-MotLoc_echo-1_bold.nii',
+    ...              'sub-01_task-MotLoc_echo-2_bold.nii']
+    >>> group_multiecho(bold_sess) == bold_sess
+    True
+
+    >>> bold_sess += ['sub-01_task-MotLoc_echo-3_bold.nii']
+    >>> groups = group_multiecho(bold_sess)
+    >>> len(groups[:-1])
+    6
+    >>> [isinstance(g, list) for g in groups]
+    [False, False, False, False, False, False, True]
+    >>> len(groups[-1])
+    3
+
+
     """
     from itertools import groupby
 
