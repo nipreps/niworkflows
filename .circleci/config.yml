@@ -121,8 +121,8 @@ jobs:
       - run:
           name: Submit unit test coverage
           command: |
-            codecov --file unittests.xml --root /tmp/src/niworkflows --flags unittests \
-                -e CIRCLE_JOB
+            python -m codecov --file unittests.xml --root /tmp/src/niworkflows \
+                --flags unittests -e CIRCLE_JOB
 
       - run:
           name: Run reportlet tests
@@ -138,8 +138,8 @@ jobs:
       - run:
           name: Submit reportlet test coverage
           command: |
-            codecov --file reportlets.xml --root /tmp/src/niworkflows --flags reportlettests \
-                -e CIRCLE_JOB
+            python -m codecov --file reportlets.xml --root /tmp/src/niworkflows \
+                --flags reportlettests -e CIRCLE_JOB
 
       - store_artifacts:
           path: /tmp/tests
