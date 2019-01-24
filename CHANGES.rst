@@ -1,3 +1,9 @@
+0.5.2.post6 (January 24, 2019)
+==============================
+
+  * [HOTFIX] Fix ``UnboundLocalError`` in ``utils.bids`` @oesteban
+
+
 0.5.2.post5 (December 14, 2018)
 ===============================
 
