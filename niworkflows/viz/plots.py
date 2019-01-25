@@ -661,3 +661,64 @@ def compcor_variance_plot(metadata_files, metadata_sources=None,
         figure = None
         return output_file
     return ax
+
+
+def confounds_correlation_plot(confounds_file, output_file=None, figure=None):
+    confounds_data = pd.read_table(confounds_file)
+    corr = confounds_data.corr()
+    n_vars = corr.shape[0]
+
+    if figure is None:
+        fig = plt.figure(figsize=(3*n_vars*0.3, n_vars*0.3))
+    gs = mgs.GridSpec(1, 15)
+    ax0 = plt.subplot(gs[0, :7])
+    ax1 = plt.subplot(gs[0, 7:])
+
+    mask = np.zeros_like(corr, dtype=np.bool)
+    mask[np.triu_indices_from(mask)] = True
+    sns.heatmap(corr,
+                linewidths=0.5,
+                cmap='coolwarm',
+                center=0,
+                square=True,
+                ax=ax0)
+    ax0.tick_params(axis='both', which='both', width=0)
+
+    for tick in ax0.xaxis.get_major_ticks():
+        tick.label.set_fontsize('small')
+    for tick in ax0.yaxis.get_major_ticks():
+        tick.label.set_fontsize('small')
+
+    gscorr = corr.copy()
+    gscorr['index'] = gscorr.index
+    gscorr['global_signal'] = np.abs(gscorr['global_signal'])
+    gs_descending = gscorr.sort_values(by='global_signal', ascending=False)['index']
+    sns.barplot(data=gscorr,
+                x='index',
+                y='global_signal',
+                ax=ax1,
+                order=gs_descending,
+                palette='Reds_d',
+                saturation=.5)
+
+    ax1.set_xlabel('Confound time series')
+    ax1.set_ylabel('Magnitude of correlation with global signal')
+    ax1.tick_params(axis='x', which='both', width=0)
+    ax1.tick_params(axis='y', which='both', width=5, length=5)
+
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize('small')
+        tick.label.set_rotation('vertical')
+    for tick in ax1.yaxis.get_major_ticks():
+        tick.label.set_fontsize('small')
+    for side in ['top', 'right', 'left']:
+        ax1.spines[side].set_color('none')
+        ax1.spines[side].set_visible(False)
+
+    if output_file is not None:
+        figure = plt.gcf()
+        figure.savefig(output_file, bbox_inches='tight')
+        plt.close(figure)
+        figure = None
+        return output_file
+    return [ax0, ax1], gs
