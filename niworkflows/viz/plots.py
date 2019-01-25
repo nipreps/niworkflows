@@ -663,7 +663,33 @@ def compcor_variance_plot(metadata_files, metadata_sources=None,
     return ax
 
 
-def confounds_correlation_plot(confounds_file, output_file=None, figure=None):
+def confounds_correlation_plot(confounds_file, output_file=None, figure=None,
+                               reference='global_signal'):
+    """
+    Parameters
+    ----------
+    confounds_file: str
+        File containing all confound regressors to be included in the
+        correlation plot.
+    output_file: str or None
+        Path where the output figure should be saved. If this is not defined,
+        then the plotting axes will be returned instead of the saved figure
+        path.
+    figure: figure or None
+        Existing figure on which to plot.
+    reference: str
+        `confounds_correlation_plot` prepares a bar plot of the correlations
+        of each confound regressor with a reference column. By default, this
+        is the global signal (so that collinearities with the global signal
+        can readily be assessed).
+
+    Returns
+    -------
+    axes and gridspec
+        Plotting axes and gridspec. Returned only if `output_file` is None.
+    output_file: str
+        The file where the figure is saved.
+    """
     confounds_data = pd.read_table(confounds_file)
     corr = confounds_data.corr()
     n_vars = corr.shape[0]
@@ -691,18 +717,19 @@ def confounds_correlation_plot(confounds_file, output_file=None, figure=None):
 
     gscorr = corr.copy()
     gscorr['index'] = gscorr.index
-    gscorr['global_signal'] = np.abs(gscorr['global_signal'])
-    gs_descending = gscorr.sort_values(by='global_signal', ascending=False)['index']
+    gscorr[reference] = np.abs(gscorr[reference])
+    gs_descending = gscorr.sort_values(by=reference,
+                                       ascending=False)['index']
     sns.barplot(data=gscorr,
                 x='index',
-                y='global_signal',
+                y=reference,
                 ax=ax1,
                 order=gs_descending,
                 palette='Reds_d',
                 saturation=.5)
 
     ax1.set_xlabel('Confound time series')
-    ax1.set_ylabel('Magnitude of correlation with global signal')
+    ax1.set_ylabel('Magnitude of correlation with {}'.format(reference))
     ax1.tick_params(axis='x', which='both', width=0)
     ax1.tick_params(axis='y', which='both', width=5, length=5)
 
