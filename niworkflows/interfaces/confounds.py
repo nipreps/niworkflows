@@ -183,16 +183,16 @@ def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
     for lag in lags:
         mask = set([m + lag for m in mask]) | mask
 
+    mask = mask.intersection(indices)
     if minimum_contiguous is not None:
         post_final = data.shape[0] + 1
         epoch_length = np.diff(sorted(mask |
                                       set([-1, post_final]))) - 1
         epoch_end = sorted(mask | set([post_final]))
-        for i, j in zip(epoch_end, epoch_length):
-            if j < minimum_contiguous:
-                mask = mask | set(range(i - j, i))
+        for end, length in zip(epoch_end, epoch_length):
+            if length < minimum_contiguous:
+                mask = mask | set(range(end - length, end))
 
-    mask = mask.intersection(indices)
     spikes = np.zeros((max(indices)+1, len(mask)))
     for i, m in enumerate(sorted(mask)):
         spikes[m, i] = 1
