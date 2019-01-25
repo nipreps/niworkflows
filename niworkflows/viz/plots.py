@@ -546,9 +546,45 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
     return ax_ts, gs
 
 
-def compcor_variance_plot(metadata_files, metadata_sources, output_file=None,
-                          varexp_thresh=(0.5, 0.7, 0.9), fig=None):
+def compcor_variance_plot(metadata_files, metadata_sources=None,
+                          output_file=None, varexp_thresh=(0.5, 0.7, 0.9),
+                          fig=None):
+    """
+    Parameters
+    ----------
+    metadata_files: list
+        List of paths to files containing component metadata. If more than one
+        decomposition has been performed (e.g., anatomical and temporal
+        CompCor decompositions), then all metadata files can be provided in
+        the list. However, each metadata file should have a corresponding
+        entry in `metadata_sources`.
+    metadata_sources: list or None
+        List of source names (e.g., ['aCompCor']) for decompositions. This
+        list should be of the same length as `metadata_files`.
+    output_file: str or None
+        Path where the output figure should be saved. If this is not defined,
+        then the plotting axes will be returned instead of the saved figure
+        path.
+    varexp_thresh: tuple
+        Set of variance thresholds to include in the plot (default 0.5, 0.7,
+        0.9).
+    fig: figure or None
+        Existing figure on which to plot.
+
+    Returns
+    -------
+    ax: axes
+        Plotting axes. Returned only if the `output_file` parameter is None.
+    output_file: str
+        The file where the figure is saved.
+    """
     metadata = {}
+    if metadata_sources is None:
+        if len(metadata_files) == 1:
+            metadata_sources = ['CompCor']
+        else:
+            metadata_sources = ['Decomposition {:d}'.format(i)
+                                for i in range(len(metadata_files))]
     for file, source in zip(metadata_files, metadata_sources):
         metadata[source] = pd.read_table(str(file))
         metadata[source]['source'] = source
