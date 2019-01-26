@@ -698,7 +698,10 @@ def confounds_correlation_plot(confounds_file, output_file=None, figure=None,
         The file where the figure is saved.
     """
     confounds_data = pd.read_table(confounds_file)
+    confounds_data = confounds_data.loc[:, np.logical_not(
+        np.isclose(confounds_data.var(skipna=True), 0))]
     corr = confounds_data.corr()
+    np.fill_diagonal(corr.values, 0)
 
     gscorr = corr.copy()
     gscorr['index'] = gscorr.index
