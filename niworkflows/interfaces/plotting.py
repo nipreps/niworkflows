@@ -129,6 +129,11 @@ class ConfoundsCorrelationPlotInputSpec(BaseInterfaceInputSpec):
                                   desc='Column in the confound file for '
                                        'which all correlation magnitudes '
                                        'should be ranked and plotted')
+    max_dim = traits.Int(70, usedefault=True,
+                         desc='Maximum number of regressors to include in '
+                              'plot. Regressors with highest magnitude of '
+                              'correlation with `reference_column` will be '
+                              'selected.')
 
 
 class ConfoundsCorrelationPlotOutputSpec(TraitedSpec):
@@ -154,6 +159,7 @@ class ConfoundsCorrelationPlot(SimpleInterface):
         confounds_correlation_plot(
             confounds_file=self.inputs.confounds_file,
             output_file=self._results['out_file'],
-            reference=self.inputs.reference_column
+            reference=self.inputs.reference_column,
+            max_dim=self.inputs.max_dim
         )
         return runtime
