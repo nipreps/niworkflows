@@ -12,7 +12,9 @@ from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     File, BaseInterfaceInputSpec, TraitedSpec, SimpleInterface, traits
 )
-from ..viz.plots import fMRIPlot
+from ..viz.plots import (
+    fMRIPlot, compcor_variance_plot, confounds_correlation_plot
+)
 
 
 class FMRISummaryInputSpec(BaseInterfaceInputSpec):
@@ -34,7 +36,7 @@ class FMRISummaryOutputSpec(TraitedSpec):
 
 class FMRISummary(SimpleInterface):
     """
-    Copy the x-form matrices from `hdr_file` to `out_file`.
+    Prepare a fMRI summary plot for the report.
     """
     input_spec = FMRISummaryInputSpec
     output_spec = FMRISummaryOutputSpec
@@ -69,4 +71,50 @@ class FMRISummary(SimpleInterface):
             vlines={'FD': [self.inputs.fd_thres]},
         ).plot()
         fig.savefig(self._results['out_file'], bbox_inches='tight')
+        return runtime
+
+
+class CompCorVariancePlotInputSpec(BaseInterfaceInputSpec):
+    metadata_files = traits.List(File(exists=True), mandatory=True,
+                                 desc='List of files containing component '
+                                      'metadata')
+    metadata_sources = traits.List(traits.Str,
+                                   desc='List of names of decompositions '
+                                        '(e.g., aCompCor, tCompCor) yielding '
+                                        'the arguments in `metadata_files`')
+    variance_thresholds = traits.Tuple(
+        traits.Float(0.5), traits.Float(0.7), traits.Float(0.9),
+        usedefault=True, desc='Levels of explained variance to include in '
+                              'plot')
+    out_file = traits.Either(None, File, value=None, usedefault=True,
+                             desc='Path to save plot')
+
+
+class CompCorVariancePlotOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Path to saved plot')
+
+
+class CompCorVariancePlot(SimpleInterface):
+    """
+    Plot the number of components necessary to explain the specified levels
+    of variance in the data.
+    """
+    input_spec = CompCorVariancePlotInputSpec
+    output_spec = CompCorVariancePlotOutputSpec
+
+    def _run_interface(self, runtime):
+        if self.inputs.out_file is None:
+            self._results['out_file'] = fname_presuffix(
+                self.inputs.metadata_files[0],
+                suffix='_compcor.svg',
+                use_ext=False,
+                newpath=runtime.cwd)
+        else:
+            self._results['out_file'] = self.inputs.out_file
+        compcor_variance_plot(
+            metadata_files=self.inputs.metadata_files,
+            metadata_sources=self.inputs.metadata_sources,
+            output_file=self._results['out_file'],
+            varexp_thresh=self.inputs.variance_thresholds
+        )
         return runtime
