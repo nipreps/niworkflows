@@ -266,10 +266,10 @@ def exponential_terms(order, variables, data):
 
     Outputs
     -------
-    variables_deriv: list
+    variables_exp: list
         A list of variables to include in the final data frame after adding
         the specified exponential terms.
-    data_deriv: pandas DataFrame object
+    data_exp: pandas DataFrame object
         Table of values of all observations of all variables, including any
         specified exponential terms.
     """
@@ -303,12 +303,12 @@ def _check_and_expand_exponential(expr, variables, data):
     """Check if the current operation specifies exponential expansion. ^^6
     specifies all powers up to the 6th, ^5-6 the 5th and 6th powers, ^6 the
     6th only."""
-    if re.search('\^\^[0-9]+$', expr):
-        order = re.compile('\^\^([0-9]+)$').findall(expr)
+    if re.search(r'\^\^[0-9]+$', expr):
+        order = re.compile(r'\^\^([0-9]+)$').findall(expr)
         order = range(1, int(*order) + 1)
         variables, data = exponential_terms(order, variables, data)
-    elif re.search('\^[0-9]+[\-]?[0-9]*$', expr):
-        order = re.compile('\^([0-9]+[\-]?[0-9]*)').findall(expr)
+    elif re.search(r'\^[0-9]+[\-]?[0-9]*$', expr):
+        order = re.compile(r'\^([0-9]+[\-]?[0-9]*)').findall(expr)
         order = _order_as_range(*order)
         variables, data = exponential_terms(order, variables, data)
     return variables, data
@@ -318,12 +318,12 @@ def _check_and_expand_derivative(expr, variables, data):
     """Check if the current operation specifies a temporal derivative. dd6x
     specifies all derivatives up to the 6th, d5-6x the 5th and 6th, d6x the
     6th only."""
-    if re.search('^dd[0-9]+', expr):
-        order = re.compile('^dd([0-9]+)').findall(expr)
+    if re.search(r'^dd[0-9]+', expr):
+        order = re.compile(r'^dd([0-9]+)').findall(expr)
         order = range(0, int(*order) + 1)
         (variables, data) = temporal_derivatives(order, variables, data)
-    elif re.search('^d[0-9]+[\-]?[0-9]*', expr):
-        order = re.compile('^d([0-9]+[\-]?[0-9]*)').findall(expr)
+    elif re.search(r'^d[0-9]+[\-]?[0-9]*', expr):
+        order = re.compile(r'^d([0-9]+[\-]?[0-9]*)').findall(expr)
         order = _order_as_range(*order)
         (variables, data) = temporal_derivatives(order, variables, data)
     return variables, data
@@ -391,8 +391,8 @@ def _get_matches_from_data(regex, variables):
 
 
 def _get_variables_from_formula(model_formula):
-    symbols_to_clear = [' ', '\(', '\)', 'dd[0-9]+', 'd[0-9]+[\-]?[0-9]*',
-                        '\^\^[0-9]+', '\^[0-9]+[\-]?[0-9]*']
+    symbols_to_clear = [' ', r'\(', r'\)', 'dd[0-9]+', r'd[0-9]+[\-]?[0-9]*',
+                        r'\^\^[0-9]+', r'\^[0-9]+[\-]?[0-9]*']
     for symbol in symbols_to_clear:
         model_formula = re.sub(symbol, '', model_formula)
     variables = model_formula.split('+')
