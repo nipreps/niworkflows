@@ -118,3 +118,42 @@ class CompCorVariancePlot(SimpleInterface):
             varexp_thresh=self.inputs.variance_thresholds
         )
         return runtime
+
+
+class ConfoundsCorrelationPlotInputSpec(BaseInterfaceInputSpec):
+    confounds_file = File(exists=True, mandatory=True,
+                          desc='File containing confound regressors')
+    out_file = traits.Either(None, File, value=None, usedefault=True,
+                             desc='Path to save plot')
+    reference_column = traits.Str('global_signal', usedefault=True,
+                                  desc='Column in the confound file for '
+                                       'which all correlation magnitudes '
+                                       'should be ranked and plotted')
+
+
+class ConfoundsCorrelationPlotOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Path to saved plot')
+
+
+class ConfoundsCorrelationPlot(SimpleInterface):
+    """
+    Plot the correlation among confound regressors.
+    """
+    input_spec = ConfoundsCorrelationPlotInputSpec
+    output_spec = ConfoundsCorrelationPlotOutputSpec
+
+    def _run_interface(self, runtime):
+        if self.inputs.out_file is None:
+            self._results['out_file'] = fname_presuffix(
+                self.inputs.confounds_file,
+                suffix='_confoundCorrelation.svg',
+                use_ext=False,
+                newpath=runtime.cwd)
+        else:
+            self._results['out_file'] = self.inputs.out_file
+        confounds_correlation_plot(
+            confounds_file=self.inputs.confounds_file,
+            output_file=self._results['out_file'],
+            reference=self.inputs.reference_column
+        )
+        return runtime
