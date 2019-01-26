@@ -612,7 +612,7 @@ def compcor_variance_plot(metadata_files, metadata_sources=None,
     for m, (source, mask) in enumerate(decompositions):
         components = metadata[(metadata['mask'] == mask)
                               & (metadata['source'] == source)]
-        if len([m for s, m in decompositions if s == source]):
+        if len([m for s, m in decompositions if s == source]) > 1:
             title_mask = ' ({} mask)'.format(mask)
         else:
             title_mask = ''
@@ -665,7 +665,7 @@ def compcor_variance_plot(metadata_files, metadata_sources=None,
 
 
 def confounds_correlation_plot(confounds_file, output_file=None, figure=None,
-                               reference='global_signal'):
+                               reference='global_signal', max_dim=70):
     """
     Parameters
     ----------
@@ -683,6 +683,12 @@ def confounds_correlation_plot(confounds_file, output_file=None, figure=None,
         of each confound regressor with a reference column. By default, this
         is the global signal (so that collinearities with the global signal
         can readily be assessed).
+    max_dim: int
+        The maximum number of regressors to be included in the output plot.
+        Reductions (e.g., CompCor) of high-dimensional data can yield so many
+        regressors that the correlation structure becomes obfuscated. This
+        criterion selects the `max_dim` regressors that have the largest
+        correlation magnitude with `reference` for inclusion in the plot.
 
     Returns
     -------
@@ -693,6 +699,17 @@ def confounds_correlation_plot(confounds_file, output_file=None, figure=None,
     """
     confounds_data = pd.read_table(confounds_file)
     corr = confounds_data.corr()
+
+    gscorr = corr.copy()
+    gscorr['index'] = gscorr.index
+    gscorr[reference] = np.abs(gscorr[reference])
+    gs_descending = gscorr.sort_values(by=reference,
+                                       ascending=False)['index']
+
+    if corr.shape[0] > max_dim:
+        gs_descending = gs_descending[:max_dim]
+        features = [p for p in corr.columns if p in gs_descending]
+        corr = corr.loc[features, features]
     n_vars = corr.shape[0]
 
     if figure is None:
@@ -715,12 +732,6 @@ def confounds_correlation_plot(confounds_file, output_file=None, figure=None,
         tick.label.set_fontsize('small')
     for tick in ax0.yaxis.get_major_ticks():
         tick.label.set_fontsize('small')
-
-    gscorr = corr.copy()
-    gscorr['index'] = gscorr.index
-    gscorr[reference] = np.abs(gscorr[reference])
-    gs_descending = gscorr.sort_values(by=reference,
-                                       ascending=False)['index']
     sns.barplot(data=gscorr,
                 x='index',
                 y=reference,
