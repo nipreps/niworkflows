@@ -612,16 +612,17 @@ def compcor_variance_plot(metadata_files, metadata_sources=None,
     for m, (source, mask) in enumerate(decompositions):
         components = metadata[(metadata['mask'] == mask)
                               & (metadata['source'] == source)]
-        if len([m for s, m in decompositions if s==source]):
+        if len([m for s, m in decompositions if s == source]):
             title_mask = ' ({} mask)'.format(mask)
         else:
             title_mask = ''
         fig_title = '{}{}'.format(source, title_mask)
 
         ax[m].plot(np.arange(components.shape[0]+1),
-                [0] + list(100*components['cumulative_variance_explained']),
-                color='purple',
-                linewidth=2.5)
+                   [0] + list(
+                       100*components['cumulative_variance_explained']),
+                   color='purple',
+                   linewidth=2.5)
         ax[m].grid(False)
         ax[m].set_xlabel('number of components in model')
         ax[m].set_ylabel('cumulative variance explained (%)')
@@ -695,7 +696,7 @@ def confounds_correlation_plot(confounds_file, output_file=None, figure=None,
     n_vars = corr.shape[0]
 
     if figure is None:
-        fig = plt.figure(figsize=(3*n_vars*0.3, n_vars*0.3))
+        plt.figure(figsize=(3*n_vars*0.3, n_vars*0.3))
     gs = mgs.GridSpec(1, 15)
     ax0 = plt.subplot(gs[0, :7])
     ax1 = plt.subplot(gs[0, 7:])
