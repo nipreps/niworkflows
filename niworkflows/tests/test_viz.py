@@ -21,6 +21,7 @@ def test_carpetplot():
         legend=True
     )
 
+
 def test_plot_melodic_components():
     """Test plotting melodic components"""
     import numpy as np
@@ -55,7 +56,7 @@ def test_plot_melodic_components():
     # noise_components
     noise_comps = np.array([1, 2])
     noise_comps_file = os.path.join(os.getcwd(), 'noise_ics.csv')
-    np.savetxt(noise_comps_file, noise_comps, 
+    np.savetxt(noise_comps_file, noise_comps,
                fmt='%i', delimiter=',')
     # in_file
     voxel_ts = np.random.rand(2, 2, 2, 10)
