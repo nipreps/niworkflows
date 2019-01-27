@@ -15,6 +15,7 @@ import numpy as np
 import nibabel as nb
 import nilearn.image as nli
 from textwrap import indent
+from collections import OrderedDict
 
 import scipy.ndimage as nd
 from nipype import logging
@@ -705,6 +706,55 @@ class JoinTSVColumns(SimpleInterface):
         return runtime
 
 
+class TSV2JSONInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True, desc='Input TSV file')
+    index_column = traits.Str(mandatory=True,
+                              desc='Name of the column in the TSV to be used '
+                                   'as the top-level key in the JSON. All '
+                                   'remaining columns will be assigned as '
+                                   'nested keys.')
+    out_file = File(desc='Path where the output file is to be saved')
+    additional_metadata = traits.Either(None, traits.Dict(), usedefault=True,
+                                        desc='Any additional metadata that '
+                                             'should be applied to all '
+                                             'entries in the JSON.')
+    drop_columns = traits.Either(None, traits.List(), usedefault=True,
+                                 desc='List of columns in the TSV to be '
+                                      'dropped from the JSON.')
+    enforce_case = traits.Bool(True, usedefault=True,
+                               desc='Enforce snake case for top-level keys '
+                                    'and camel case for nested keys')
+
+
+class TSV2JSONOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Output JSON file')
+
+
+class TSV2JSON(SimpleInterface):
+    """Convert metadata from TSV format to JSON format.
+    """
+    input_spec = TSV2JSONInputSpec
+    output_spec = TSV2JSONOutputSpec
+
+    def _run_interface(self, runtime):
+        if not isdefined(self.inputs.out_file):
+            out_file = fname_presuffix(
+                self.inputs.in_file, suffix='.json', newpath=runtime.cwd,
+                use_ext=False)
+        else:
+            out_file = self.inputs.out_file
+
+        self._results['out_file'] = _tsv2json(
+            in_tsv=self.inputs.in_file,
+            out_json=out_file,
+            index_column=self.inputs.index_column,
+            additional_metadata=self.inputs.additional_metadata,
+            drop_columns=self.inputs.drop_columns,
+            enforce_case=self.inputs.enforce_case
+        )
+        return runtime
+
+
 def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
               drop_columns=None, enforce_case=True):
     """
@@ -727,18 +777,19 @@ def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
         List of columns from the input TSV to be dropped from the JSON.
     enforce_case: bool
         Indicates whether BIDS case conventions should be followed. Currently,
-        this means that index fields (column names) use snake case and other
-        fields use camel case.
+        this means that index fields (column names in the associated data TSV)
+        use snake case and other fields use camel case.
 
     Returns
     -------
     str
         Path to the metadata saved in JSON format.
     """
+    import pandas as pd
     # Taken from https://dev.to/rrampage/snake-case-to-camel-case-and- ...
     # back-using-regular-expressions-and-python-m9j
     re_to_camel = r'(.*?)_([a-zA-Z0-9])'
-    re_to_snake = r'(.+?)([A-Z0-9])'
+    re_to_snake = r'(^.+?|.*?)([A-Z]|[0-9]+)'
     def snake(match):
         return '{}_{}'.format(match.group(1).lower(), match.group(2).lower())
     def camel(match):
