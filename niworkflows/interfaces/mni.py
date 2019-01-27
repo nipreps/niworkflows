@@ -32,12 +32,8 @@ class SelectReferenceInputSpec(BaseInterfaceInputSpec):
     reference_image = File(exists=True, desc='override the reference image')
     reference_mask = File(exists=True, requires=['reference_image'],
                           desc='reference image mask')
-    template = traits.Enum(
-        'MNI152NLin2009cAsym',
-        'OASIS',
-        'NKI',
-        'mni_icbm152_linear',
-        usedefault=True, desc='define the template to be used')
+    template = traits.Str('MNI152NLin2009cAsym', usedefault=True,
+                          desc='define the template to be used')
     orientation = traits.Enum('RAS', 'LAS', mandatory=True, usedefault=True,
                               desc='modify template orientation')
     reference = traits.Enum('T1w', 'T2w', 'boldref', 'PDw', mandatory=True, usedefault=True,

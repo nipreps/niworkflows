@@ -8,7 +8,6 @@ Helpers for handling BIDS-like neuroimaging structures
 
 """
 from pathlib import Path
-from itertools import groupby
 import warnings
 import re
 import simplejson as json
@@ -167,22 +166,9 @@ def collect_data(dataset, participant_label, task=None, echo=None):
     subj_data = {modality: [x.filename for x in layout.get(**query)]
                  for modality, query in queries.items()}
 
-    def _grp_echos(x):
-        if '_echo-' not in x:
-            return x
-        echo = re.search("_echo-\\d*", x).group(0)
-        return x.replace(echo, "_echo-?")
-
-    if subj_data["bold"]:
-        bold_sess = subj_data["bold"]
-
-        if any(['_echo-' in bold for bold in bold_sess]):
-            ses_uids = [list(bold) for _, bold in groupby(bold_sess, key=_grp_echos)]
-            ses_uids = [x[0] if len(x) == 1 else x for x in ses_uids]
-        else:
-            ses_uids = bold_sess
-
-    subj_data.update({"bold": ses_uids})
+    # Special case: multi-echo BOLD, grouping echos
+    if any(['_echo-' in bold for bold in subj_data['bold']]):
+        subj_data['bold'] = group_multiecho(subj_data['bold'])
 
     return subj_data, layout
 
@@ -245,3 +231,95 @@ def get_metadata_for_nifti(in_file):
                 json.loads(json_file_path.read_text()))
 
     return merged_param_dict
+
+
+def group_multiecho(bold_sess):
+    """
+    Multiplexes multi-echo EPIs into arrays. Dual-echo is a special
+    case of multi-echo, which is treated as single-echo data.
+
+    >>> bold_sess = ["sub-01_task-rest_echo-1_run-01_bold.nii.gz",
+    ...              "sub-01_task-rest_echo-2_run-01_bold.nii.gz",
+    ...              "sub-01_task-rest_echo-1_run-02_bold.nii.gz",
+    ...              "sub-01_task-rest_echo-2_run-02_bold.nii.gz",
+    ...              "sub-01_task-rest_echo-3_run-02_bold.nii.gz",
+    ...              "sub-01_task-rest_run-03_bold.nii.gz"]
+    >>> group_multiecho(bold_sess)
+    ['sub-01_task-rest_echo-1_run-01_bold.nii.gz',
+     'sub-01_task-rest_echo-2_run-01_bold.nii.gz',
+    ['sub-01_task-rest_echo-1_run-02_bold.nii.gz',
+     'sub-01_task-rest_echo-2_run-02_bold.nii.gz',
+     'sub-01_task-rest_echo-3_run-02_bold.nii.gz'],
+     'sub-01_task-rest_run-03_bold.nii.gz']
+
+    >>> bold_sess.insert(2, "sub-01_task-rest_echo-3_run-01_bold.nii.gz")
+    >>> group_multiecho(bold_sess)
+    [['sub-01_task-rest_echo-1_run-01_bold.nii.gz',
+      'sub-01_task-rest_echo-2_run-01_bold.nii.gz',
+      'sub-01_task-rest_echo-3_run-01_bold.nii.gz'],
+     ['sub-01_task-rest_echo-1_run-02_bold.nii.gz',
+      'sub-01_task-rest_echo-2_run-02_bold.nii.gz',
+      'sub-01_task-rest_echo-3_run-02_bold.nii.gz'],
+      'sub-01_task-rest_run-03_bold.nii.gz']
+
+    >>> bold_sess += ["sub-01_task-beh_echo-1_run-01_bold.nii.gz",
+    ...               "sub-01_task-beh_echo-2_run-01_bold.nii.gz",
+    ...               "sub-01_task-beh_echo-1_run-02_bold.nii.gz",
+    ...               "sub-01_task-beh_echo-2_run-02_bold.nii.gz",
+    ...               "sub-01_task-beh_echo-3_run-02_bold.nii.gz",
+    ...               "sub-01_task-beh_run-03_bold.nii.gz"]
+    >>> group_multiecho(bold_sess)
+    [['sub-01_task-rest_echo-1_run-01_bold.nii.gz',
+      'sub-01_task-rest_echo-2_run-01_bold.nii.gz',
+      'sub-01_task-rest_echo-3_run-01_bold.nii.gz'],
+     ['sub-01_task-rest_echo-1_run-02_bold.nii.gz',
+      'sub-01_task-rest_echo-2_run-02_bold.nii.gz',
+      'sub-01_task-rest_echo-3_run-02_bold.nii.gz'],
+      'sub-01_task-rest_run-03_bold.nii.gz',
+      'sub-01_task-beh_echo-1_run-01_bold.nii.gz',
+      'sub-01_task-beh_echo-2_run-01_bold.nii.gz',
+     ['sub-01_task-beh_echo-1_run-02_bold.nii.gz',
+      'sub-01_task-beh_echo-2_run-02_bold.nii.gz',
+      'sub-01_task-beh_echo-3_run-02_bold.nii.gz'],
+      'sub-01_task-beh_run-03_bold.nii.gz']
+
+    Some tests from https://neurostars.org/t/fmriprep-from\
+-singularity-unboundlocalerror/3299/7
+
+    >>> bold_sess = ['sub-01_task-AudLoc_echo-1_bold.nii',
+    ...              'sub-01_task-AudLoc_echo-2_bold.nii',
+    ...              'sub-01_task-FJT_echo-1_bold.nii',
+    ...              'sub-01_task-FJT_echo-2_bold.nii',
+    ...              'sub-01_task-LDT_echo-1_bold.nii',
+    ...              'sub-01_task-LDT_echo-2_bold.nii',
+    ...              'sub-01_task-MotLoc_echo-1_bold.nii',
+    ...              'sub-01_task-MotLoc_echo-2_bold.nii']
+    >>> group_multiecho(bold_sess) == bold_sess
+    True
+
+    >>> bold_sess += ['sub-01_task-MotLoc_echo-3_bold.nii']
+    >>> groups = group_multiecho(bold_sess)
+    >>> len(groups[:-1])
+    6
+    >>> [isinstance(g, list) for g in groups]
+    [False, False, False, False, False, False, True]
+    >>> len(groups[-1])
+    3
+
+
+    """
+    from itertools import groupby
+
+    def _grp_echos(x):
+        if '_echo-' not in x:
+            return x
+        echo = re.search("_echo-\\d*", x).group(0)
+        return x.replace(echo, "_echo-?")
+
+    ses_uids = []
+    for _, bold in groupby(bold_sess, key=_grp_echos):
+        bold = list(bold)
+        # If single- or dual-echo, flatten list; keep list otherwise.
+        action = getattr(ses_uids, 'append' if len(bold) > 2 else 'extend')
+        action(bold)
+    return ses_uids

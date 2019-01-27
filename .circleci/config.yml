@@ -79,6 +79,8 @@ jobs:
             - docker-v1-{{ .Branch }}-
             - docker-v1-master-
             - docker-v1-
+      - checkout:
+          path: /tmp/src/niworkflows
       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
@@ -96,6 +98,15 @@ jobs:
             mkdir -p /tmp/fslicense
             printf "$FS_LICENSE_CONTENT" | base64 -d  >> /tmp/fslicense/license.txt
       - run:
+          name: Set PR number
+          command: |
+            echo 'export CIRCLE_PR_NUMBER="${CIRCLE_PR_NUMBER:-${CIRCLE_PULL_REQUEST##*/}}"' >> $BASH_ENV
+            source $BASH_ENV
+            echo $CIRCLE_PR_NUMBER
+      - run:
+          name: Get codecov
+          command: python -m pip install codecov
+      - run:
           name: Run unit tests
           no_output_timeout: 2h
           command: |
@@ -104,9 +115,16 @@ jobs:
             docker run -it --rm=false \
               -v ${PWD}:/tmp niworkflows:py3 \
               pytest --junit-xml=/tmp/pytest.xml \
-              --ignore=/src/niworkflows/niworkflows/tests/ \
-              --ignore=/src/niworkflows/niworkflows/interfaces/ants.py \
-              /src/niworkflows/niworkflows
+                     --cov niworkflows --cov-report xml:/tmp/unittests.xml \
+                     --ignore=/src/niworkflows/niworkflows/tests/ \
+                     --ignore=/src/niworkflows/niworkflows/interfaces/ants.py \
+                     /src/niworkflows/niworkflows
+
+      - run:
+          name: Submit unit test coverage
+          command: |
+            python -m codecov --file unittests.xml --root /tmp/src/niworkflows \
+                --flags unittests -e CIRCLE_JOB
 
       - run:
           name: Run reportlet tests
@@ -117,7 +135,13 @@ jobs:
               -v /tmp/fslicense/license.txt:/opt/freesurfer/license.txt:ro \
               -v ${PWD}:/tmp niworkflows:py3 \
               pytest -n auto --junit-xml=/tmp/reportlets.xml \
-              /src/niworkflows/niworkflows/tests/
+                     --cov niworkflows --cov-report xml:/tmp/reportlets.xml \
+                     /src/niworkflows/niworkflows/tests/
+      - run:
+          name: Submit reportlet test coverage
+          command: |
+            python -m codecov --file reportlets.xml --root /tmp/src/niworkflows \
+                --flags reportlettests -e CIRCLE_JOB
 
       - store_artifacts:
           path: /tmp/tests
