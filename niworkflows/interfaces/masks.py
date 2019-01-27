@@ -195,8 +195,8 @@ class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
 
 
 class PrepareRegistrationImagesInputSpec(BaseInterfaceInputSpec):
-    fixed_file = File(exists=True)
-    moving_file = File(exists=True)
+    fixed_file = File(exists=True, mandatory=True)
+    moving_file = File(exists=True, mandatory=True)
     fixed_mask = File
     moving_mask = File
     lesion_mask = File
