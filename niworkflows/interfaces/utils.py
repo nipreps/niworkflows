@@ -707,11 +707,38 @@ class JoinTSVColumns(SimpleInterface):
 
 def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
               drop_columns=None, enforce_case=True):
+    """
+    Convert metadata from TSV format to JSON format.
+
+    Parameters
+    ----------
+    in_tsv: str
+        Path to the metadata in TSV format.
+    out_json: str
+        Path where the metadata should be saved in JSON format after
+        conversion.
+    index_column: str
+        Name of the column in the TSV to be used as an index (top-level key in
+        the JSON).
+    additional_metadata: dict
+        Any additional metadata that should be applied to all entries in the
+        JSON.
+    drop_columns: list
+        List of columns from the input TSV to be dropped from the JSON.
+    enforce_case: bool
+        Indicates whether BIDS case conventions should be followed. Currently,
+        this means that index fields (column names) use snake case and other
+        fields use camel case.
+
+    Returns
+    -------
+    str
+        Path to the metadata saved in JSON format.
+    """
     # Taken from https://dev.to/rrampage/snake-case-to-camel-case-and- ...
     # back-using-regular-expressions-and-python-m9j
     re_to_camel = r'(.*?)_([a-zA-Z0-9])'
     re_to_snake = r'(.+?)([A-Z0-9])'
-
     def snake(match):
         return '{}_{}'.format(match.group(1).lower(), match.group(2).lower())
     def camel(match):
@@ -719,7 +746,8 @@ def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
 
     # from fmriprep
     def less_breakable(a_string):
-        ''' hardens the string to different envs (i.e. case insensitive, no whitespace, '#' '''
+        """ hardens the string to different envs (i.e. case insensitive, no
+        whitespace, '#' """
         return ''.join(a_string.split()).strip('#')
 
     drop_columns = drop_columns or []
