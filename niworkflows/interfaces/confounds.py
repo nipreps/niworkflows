@@ -159,7 +159,7 @@ def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
         Indicates whether the returned object should include only spikes
         (if false) or all input time series and spikes (if true, default).
 
-    Outputs
+    Returns
     -------
     data: pandas DataFrame object
         The input DataFrame with a column for each spike regressor.
@@ -223,7 +223,7 @@ def temporal_derivatives(order, variables, data):
     data: pandas DataFrame object
         Table of values of all observations of all variables.
 
-    Outputs
+    Returns
     -------
     variables_deriv: list
         A list of variables to include in the final data frame after adding
@@ -266,7 +266,7 @@ def exponential_terms(order, variables, data):
     data: pandas DataFrame object
         Table of values of all observations of all variables.
 
-    Outputs
+    Returns
     -------
     variables_exp: list
         A list of variables to include in the final data frame after adding
@@ -360,7 +360,7 @@ def parse_expression(expression, parent_data):
     parent_data: pandas DataFrame
         The source data for the model expansion.
 
-    Outputs
+    Returns
     -------
     variables: list
         A list of variables in the provided formula expression.
@@ -438,7 +438,7 @@ def _unscramble_regressor_columns(parent_data, data):
     the same order as the input data with any expansion columns inserted
     immediately after the originals.
     """
-    matches = ['_power[0-9+]', '_derivative[0-9]+']
+    matches = ['_power[0-9]+', '_derivative[0-9]+']
     var = OrderedDict((c, deque()) for c in parent_data.columns)
     for c in data.columns:
         col = c
@@ -485,7 +485,7 @@ def parse_formula(model_formula, parent_data, unscramble=False):
         Temporal derivatives and exponential terms are computed for all terms
         in the grouping symbols that they adjoin.
 
-    Outputs
+    Returns
     -------
     variables: list(str)
         A list of variables included in the model parsed from the provided

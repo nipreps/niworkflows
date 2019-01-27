@@ -789,7 +789,7 @@ def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
     # Taken from https://dev.to/rrampage/snake-case-to-camel-case-and- ...
     # back-using-regular-expressions-and-python-m9j
     re_to_camel = r'(.*?)_([a-zA-Z0-9])'
-    re_to_snake = r'(^.+?|.*?)([A-Z]|[0-9]+)'
+    re_to_snake = r'(^.+?|.*?)((?<![_A-Z])[A-Z]|(?<![_0-9])[0-9]+)'
     def snake(match):
         return '{}_{}'.format(match.group(1).lower(), match.group(2).lower())
     def camel(match):
@@ -810,7 +810,8 @@ def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
         tsv_data.drop(labels=col, axis='columns', inplace=True)
     tsv_data.set_index(index_column, drop=True, inplace=True)
     if enforce_case:
-        tsv_data.index = [re.sub(re_to_snake, snake, less_breakable(i), 0)
+        tsv_data.index = [re.sub(re_to_snake, snake,
+                                 less_breakable(i).lower(), 0)
                           for i in tsv_data.index]
         tsv_data.columns = [re.sub(re_to_camel, camel,
                                    less_breakable(i).title(), 0)
