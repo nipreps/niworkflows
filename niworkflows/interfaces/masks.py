@@ -197,9 +197,9 @@ class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
 class PrepareRegistrationImagesInputSpec(BaseInterfaceInputSpec):
     fixed_file = File(exists=True, mandatory=True)
     moving_file = File(exists=True, mandatory=True)
-    fixed_mask = File
-    moving_mask = File
-    lesion_mask = File
+    fixed_mask = File(exists=True)
+    moving_mask = File(exists=True)
+    lesion_mask = File(exists=True)
     explicit_masking = traits.Bool(
         True, usedefault=True,
         desc='Set voxels outside the masks to zero thus creating an artificial border that can '
@@ -210,8 +210,8 @@ class PrepareRegistrationImagesInputSpec(BaseInterfaceInputSpec):
 class PrepareRegistrationImagesOutputSpec(TraitedSpec):
     fixed_file = File(exists=True)
     moving_file = File(exists=True)
-    fixed_mask = File
-    moving_mask = File
+    fixed_mask = File(exists=True)
+    moving_mask = File(exists=True)
 
 
 class PrepareRegistrationImages(SimpleInterface):
