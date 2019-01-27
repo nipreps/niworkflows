@@ -10,6 +10,7 @@ import re
 import numpy as np
 import pandas as pd
 from functools import reduce
+from collections import deque, OrderedDict
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     traits, TraitedSpec, BaseInterfaceInputSpec, File, isdefined,
@@ -48,10 +49,11 @@ class ExpandModel(SimpleInterface):
                 newpath=runtime.cwd,
                 use_ext=False)
 
-        confounds_data = pd.read_table(self.inputs.confounds_file)
+        confounds_data = pd.read_csv(self.inputs.confounds_file, sep='\t')
         _, confounds_data = parse_formula(
             model_formula=self.inputs.model_formula,
-            parent_data=confounds_data
+            parent_data=confounds_data,
+            unscramble=True
         )
         confounds_data.to_csv(out_file, sep='\t', index=False,
                               na_rep='n/a')
@@ -110,7 +112,7 @@ class SpikeRegressors(SimpleInterface):
                 newpath=runtime.cwd,
                 use_ext=False)
 
-        confounds_data = pd.read_table(self.inputs.confounds_file)
+        confounds_data = pd.read_csv(self.inputs.confounds_file, sep='\t')
         confounds_data = spike_regressors(
             data=confounds_data,
             criteria=self.inputs.criteria,
@@ -431,7 +433,26 @@ def _expand_shorthand(model_formula, variables):
     return model_formula
 
 
-def parse_formula(model_formula, parent_data):
+def _unscramble_regressor_columns(parent_data, data):
+    """Reorder the columns of a confound matrix such that the columns are in
+    the same order as the input data with any expansion columns inserted
+    immediately after the originals.
+    """
+    matches = ['_power[0-9+]', '_derivative[0-9]+']
+    var = OrderedDict((c, deque()) for c in parent_data.columns)
+    for c in data.columns:
+        col = c
+        for m in matches:
+            col = re.sub(m, '', col)
+        if col == c:
+            var[col].appendleft(c)
+        else:
+            var[col].append(c)
+    unscrambled = reduce((lambda x, y: x + y), var.values())
+    return data[[*unscrambled]]
+
+
+def parse_formula(model_formula, parent_data, unscramble=False):
     """
     Recursively parse a model formula by breaking it into additive atoms
     and tracking grouping symbol depth.
@@ -502,5 +523,8 @@ def parse_formula(model_formula, parent_data):
     variables = list(set(reduce((lambda x, y: x + y), variables.values())))
     data = pd.concat((data.values()), axis=1)
     data = data.T.drop_duplicates().T
+
+    if unscramble:
+        data = _unscramble_regressor_columns(parent_data, data)
 
     return variables, data
