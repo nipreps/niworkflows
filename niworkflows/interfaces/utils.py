@@ -790,8 +790,10 @@ def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
     # back-using-regular-expressions-and-python-m9j
     re_to_camel = r'(.*?)_([a-zA-Z0-9])'
     re_to_snake = r'(^.+?|.*?)((?<![_A-Z])[A-Z]|(?<![_0-9])[0-9]+)'
+
     def snake(match):
         return '{}_{}'.format(match.group(1).lower(), match.group(2).lower())
+
     def camel(match):
         return '{}{}'.format(match.group(1), match.group(2).upper())
 
