@@ -538,16 +538,21 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     Ny = Fs / 2
     f = Ny * (np.array(list(range(1, power.shape[0] + 1)))) / (power.shape[0])
 
+    noise_components = None
+    if noise_components_file:
+        noise_components = np.loadtxt(noise_components_file,
+                                      dtype=int, delimiter=',', ndmin=1)
+
     n_rows = int((n_components + (n_components % 2)) / 2)
     fig = plt.figure(figsize=(6.5 * 1.5, n_rows * 0.85))
     gs = GridSpec(n_rows * 2, 9,
                   width_ratios=[1, 1, 1, 4, 0.001, 1, 1, 1, 4, ],
                   height_ratios=[1.1, 1] * n_rows)
 
-    noise_components = None
-    if noise_components_file:
-        noise_components = np.loadtxt(noise_components_file,
-                                      dtype=int, delimiter=',', ndmin=1)
+    if noise_components.size == n_components:
+        fig.suptitle("WARNING: ALL COMPONENTS CLASSIFIED AS NOISE", color='r')
+    elif noise_components is None or noise_components.size == 0:
+        fig.suptitle("WARNING: NO COMPONENTS CLASSIFIED AS NOISE", color='r')
 
     for i, img in enumerate(
             iter_img(os.path.join(melodic_dir, "melodic_IC.nii.gz"))):
