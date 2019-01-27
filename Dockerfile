@@ -34,10 +34,14 @@ RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/frees
     --exclude='freesurfer/lib/qt' \
     --exclude='freesurfer/matlab' \
     --exclude='freesurfer/mni' \
-    --exclude='freesurfer/subjects' \
+    --exclude='freesurfer/subjects/*_average' \
+    --exclude='freesurfer/subjects/bert' \
+    --exclude='freesurfer/subjects/cvs_*' \
+    --exclude='freesurfer/subjects/fsaverage?' \
+    --exclude='freesurfer/subjects/fsaverage_sym' \
+    --exclude 'freesurfer/subjects/*.mgz' \
     --exclude='freesurfer/tktools' \
-    --exclude='freesurfer/trctrain' && \
-    mkdir -p /opt/freesurfer/subjects
+    --exclude='freesurfer/trctrain'
 
 ENV FSL_DIR="/usr/share/fsl/5.0" \
     OS="Linux" \
