@@ -1,3 +1,10 @@
+0.6.1 (January 23, 2019)
+========================
+
+  * [FIX] Allow arbitrary template names in ``RobustMNINormalization`` (#284) @oesteban
+  * [FIX] Brain extraction broken connection (#286) @oesteban
+
+
 0.6.0 (January 18, 2019)
 ========================
 
@@ -5,6 +12,12 @@
   * [ENH] Improve niwflows.interfaces.freesurfer (#277) @oesteban
   * [ENH] Make BIDS regex more readable (#278) @oesteban
   * [ENH] Datalad+templateflow integration (#280) @oesteban 
+
+
+0.5.4 (January 23, 2019)
+========================
+
+  * [HOTFIX] Fix ``UnboundLocalError`` in utils.bids (#285) @oesteban
 
 
 0.5.3 (January 08, 2019)
