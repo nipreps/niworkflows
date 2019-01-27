@@ -548,11 +548,10 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     gs = GridSpec(n_rows * 2, 9,
                   width_ratios=[1, 1, 1, 4, 0.001, 1, 1, 1, 4, ],
                   height_ratios=[1.1, 1] * n_rows)
-
-    if noise_components.size == n_components:
-        fig.suptitle("WARNING: ALL COMPONENTS CLASSIFIED AS NOISE", color='r')
-    elif noise_components is None or noise_components.size == 0:
+    if noise_components is None or noise_components.size == 0:
         fig.suptitle("WARNING: NO COMPONENTS CLASSIFIED AS NOISE", color='r')
+    elif noise_components.size == n_components:
+        fig.suptitle("WARNING: ALL COMPONENTS CLASSIFIED AS NOISE", color='r')
 
     for i, img in enumerate(
             iter_img(os.path.join(melodic_dir, "melodic_IC.nii.gz"))):
