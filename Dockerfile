@@ -36,7 +36,8 @@ RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/frees
     --exclude='freesurfer/mni' \
     --exclude='freesurfer/subjects' \
     --exclude='freesurfer/tktools' \
-    --exclude='freesurfer/trctrain'
+    --exclude='freesurfer/trctrain' && \
+    mkdir -p /opt/freesurfer/subjects
 
 ENV FSL_DIR="/usr/share/fsl/5.0" \
     OS="Linux" \
