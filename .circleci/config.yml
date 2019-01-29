@@ -97,6 +97,7 @@ jobs:
           command: |
             mkdir -p /tmp/fslicense
             printf "$FS_LICENSE_CONTENT" | base64 -d  >> /tmp/fslicense/license.txt
+            md5sum /tmp/fslicense/license.txt
       - run:
           name: Set PR number
           command: |
