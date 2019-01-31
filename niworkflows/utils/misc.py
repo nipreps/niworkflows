@@ -140,7 +140,7 @@ def _copy_any(src, dst):
 
     src_isgz = src.endswith('.gz')
     dst_isgz = dst.endswith('.gz')
-    if src_isgz == dst_isgz:
+    if not src_isgz and not dst_isgz:
         copyfile(src, dst, copy=True, use_hardlink=True)
         return False  # Make sure we do not reuse the hardlink later
 
@@ -150,13 +150,14 @@ def _copy_any(src, dst):
 
     src_open = gzip.open if src_isgz else open
     with src_open(src, 'rb') as f_in:
-        if dst_isgz:
-            # Remove FNAME header from gzip (poldracklab/fmriprep#1480)
-            f_out = gzip.GzipFile('', 'wb', 9, dst, 0.)
-        else:
-            f_out = open(dst, 'wb')
-        copyfileobj(f_in, f_out)
-        f_out.close()
+        with open(dst, 'wb') as f_out:
+            if dst_isgz:
+                # Remove FNAME header from gzip (poldracklab/fmriprep#1480)
+                gz_out = gzip.GzipFile('', 'wb', 9, f_out, 0.)
+                copyfileobj(f_in, gz_out)
+                gz_out.close()
+            else:
+                copyfileobj(f_in, f_out)
 
     return True
 
