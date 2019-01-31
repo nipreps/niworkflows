@@ -1,3 +1,13 @@
+0.5.2.post8 (January 28, 2019)
+==============================
+
+  * [ENH] Do not save the original name and time stamp of gzip files (#295) @oesteban
+
+0.5.2.post7 (January 24, 2019)
+==============================
+
+  * [FIX] Do not resolve non-existent Paths (#272) @effigies
+
 0.5.2.post6 (January 24, 2019)
 ==============================
 
@@ -7,22 +17,22 @@
 0.5.2.post5 (December 14, 2018)
 ===============================
 
-  * [FIX] ``read_crashfile`` stopped working after migration (#270)
+  * [FIX] ``read_crashfile`` stopped working after migration (#270) @oesteban
 
 0.5.2.post4 (December 13, 2018)
 ===============================
 
-  * [HOTFIX] ``LiterateWorkflow`` returning empty desc (#269)
+  * [HOTFIX] ``LiterateWorkflow`` returning empty desc (#269) @oesteban
 
 0.5.2.post3 (December 13, 2018)
 ===============================
 
-  * [FIX] Summary fMRIPlot chokes when confounds are all-nan (#268)
+  * [FIX] Summary fMRIPlot chokes when confounds are all-nan (#268) @oesteban
 
 0.5.2.post2 (December 12, 2018)
 ===============================
 
-  * [FIX] ``get_metadata_for_nifti`` broken in transfer from fmriprep (#267)
+  * [FIX] ``get_metadata_for_nifti`` broken in transfer from fmriprep (#267) @oesteban
 
 0.5.2.post1 (December 10, 2018)
 ===============================
