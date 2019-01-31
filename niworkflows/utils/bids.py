@@ -41,24 +41,31 @@ class BIDSWarning(RuntimeWarning):
     pass
 
 
+def get_layout():
+    """
+    Gets the global BIDS Layout
+    """
+    global BIDS_LAYOUT
+    return BIDS_LAYOUT
+
+
 def set_bids_dir(bids_dir, exclude=('sourcedata', 'derivatives'),
                  force=False):
     """
     Sets a global BIDS Layout
 
-    >>> layout = set_bids_dir(str(datadir / 'ds114'), force=True)
-    >>> layout.root == str(datadir / 'ds114')
+    >>> set_bids_dir(str(datadir / 'ds114'), force=True)
+    >>> get_layout().root == str(datadir / 'ds114')
     True
 
-    >>> layout = set_bids_dir(
-    ...     str(datadir / 'ds054'))  # doctest: +IGNORE_EXCEPTION_DETAIL
+    >>> set_bids_dir(str(datadir / 'ds054'))  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     RuntimeError:
 
-    >>> layout.root == str(datadir / 'ds114')
+    >>> get_layout().root == str(datadir / 'ds114')
     True
-    >>> layout = set_bids_dir(str(datadir / 'ds054'), force=True)
-    >>> layout.root == str(datadir / 'ds054')
+    >>> set_bids_dir(str(datadir / 'ds054'), force=True)
+    >>> get_layout().root == str(datadir / 'ds054')
     True
 
 
@@ -70,7 +77,6 @@ def set_bids_dir(bids_dir, exclude=('sourcedata', 'derivatives'),
             raise RuntimeError(msg)
         warnings.warn(msg, BIDSWarning)
     BIDS_LAYOUT = BIDSLayout(bids_dir, exclude=list(exclude))
-    return BIDS_LAYOUT
 
 
 def collect_participants(participant_label=None, strict=False):
@@ -80,7 +86,7 @@ def collect_participants(participant_label=None, strict=False):
     Returns the list of participants to be finally processed.
     Requesting all subjects in a BIDS directory root:
 
-    >>> _ = set_bids_dir(str(datadir / 'ds114'), force=True)
+    >>> set_bids_dir(str(datadir / 'ds114'), force=True)
     >>> collect_participants()
     ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
 
@@ -146,7 +152,7 @@ def collect_data(participant_label, task=None, echo=None):
     """
     Uses pybids to retrieve the input data for a given participant
 
-    >>> _ = set_bids_dir(str(datadir / 'ds054'), force=True)
+    >>> set_bids_dir(str(datadir / 'ds054'), force=True)
     >>> bids_root, _ = collect_data('100185')
     >>> bids_root['fmap']  # doctest: +ELLIPSIS
     ['.../ds054/sub-100185/fmap/sub-100185_magnitude1.nii.gz', \
@@ -207,7 +213,7 @@ def collect_data(participant_label, task=None, echo=None):
 def get_metadata_for_nifti(in_file):
     """Fetch metadata for a given nifti file
 
-    >>> _ = set_bids_dir(str(datadir / 'ds054'), force=True)
+    >>> set_bids_dir(str(datadir / 'ds054'), force=True)
     >>> fmap = bids_collect_data('100185')[0]['fmap'][-1]
     >>> metadata = get_metadata_for_nifti(fmap)
     >>> metadata['Manufacturer']
