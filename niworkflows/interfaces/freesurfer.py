@@ -31,8 +31,8 @@ class StructuralReference(fs.RobustTemplate):
     """Variation on RobustTemplate that simply copies the source if a single
     volume is provided.
 
-    >>> from ..utils.bids import collect_data
-    >>> t1w = collect_data(str(datadir / 'ds114'), '01')[0]['t1w']
+    >>> set_bids_dir(str(datadir / 'ds114'))
+    >>> t1w = bids_collect_data('01')[0]['t1w']
     >>> template = StructuralReference()
     >>> template.inputs.in_files = t1w
     >>> template.inputs.auto_detect_sensitivity = True
