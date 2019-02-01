@@ -280,8 +280,8 @@ desc-preproc_bold.nii.gz'
 
                 if curr_codes != xcodes or curr_units != units:
                     self._results['fixed_hdr'][i] = True
-                    hdr.set_qform(hdr.get_qform(), xcodes[0])
-                    hdr.set_sform(hdr.get_sform(), xcodes[1])
+                    hdr.set_qform(nii.affine, xcodes[0])
+                    hdr.set_sform(nii.affine, xcodes[1])
                     hdr.set_xyzt_units(*units)
 
                     # Rewrite file with new header
