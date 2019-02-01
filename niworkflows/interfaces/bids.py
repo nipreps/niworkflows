@@ -12,15 +12,19 @@ import os.path as op
 from pathlib import Path
 from shutil import copytree, rmtree
 
+import nibabel as nb
 from nipype import logging
 from nipype.interfaces.base import (
     traits, isdefined, TraitedSpec, BaseInterfaceInputSpec,
     File, Directory, InputMultiPath, OutputMultiPath, Str,
     SimpleInterface
 )
+from templateflow.api import templates as _get_template_list
 from ..utils.bids import BIDS_NAME, get_metadata_for_nifti
 from ..utils.misc import splitext as _splitext, _copy_any
 
+
+STANDARD_SPACES = _get_template_list()
 LOGGER = logging.getLogger('nipype.interface')
 
 
@@ -147,6 +151,7 @@ class DerivativesDataSinkInputSpec(BaseInterfaceInputSpec):
     extra_values = traits.List(Str)
     compress = traits.Bool(desc="force compression (True) or uncompression (False)"
                                 " of the output file (default: same as input)")
+    check_hdr = traits.Bool(True, usedefault=True, desc='fix headers of NIfTI outputs')
 
 
 class DerivativesDataSinkOutputSpec(TraitedSpec):
@@ -255,6 +260,27 @@ desc-preproc_bold.nii.gz'
             )
             self._results['out_file'].append(out_file)
             self._results['compression'].append(_copy_any(fname, out_file))
+
+            is_nii = out_file.endswith('.nii') or out_file.endswith('.nii.gz')
+            if self.inputs.check_hdr and is_nii:
+                nii = nb.load(out_file)
+                hdr = nii.header.copy()
+                curr_units = tuple([None if u == 'unknown' else u
+                                    for u in hdr.get_xyzt_units()])
+                curr_codes = (int(hdr['qform_code']), int(hdr['sform_code']))
+
+                # Default to mm, use sec if data type is bold
+                units = (curr_units[0] or 'mm', 'sec' if dtype == 'bold' else None)
+                xcodes = (1, 1)  # Derivative in its original scanner space
+                if self.inputs.space:
+                    xcodes = (4, 4) if self.inputs.space in STANDARD_SPACES \
+                        else (2, 2)
+
+                if curr_codes != xcodes or curr_units != units:
+                    hdr.set_qform(hdr.get_qform(), xcodes[0])
+                    hdr.set_sform(hdr.get_sform(), xcodes[1])
+                    hdr.set_xyzt_units(*units)
+
         return runtime
 
 
