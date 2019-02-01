@@ -159,6 +159,7 @@ class DerivativesDataSinkOutputSpec(TraitedSpec):
     compression = OutputMultiPath(
         traits.Bool, desc='whether ``in_file`` was compressed/uncompressed '
                           'or `it was copied directly.')
+    fixed_hdr = traits.List(traits.Bool, desc='whether derivative header was fixed')
 
 
 class DerivativesDataSink(SimpleInterface):
@@ -171,20 +172,20 @@ class DerivativesDataSink(SimpleInterface):
     >>> tmpdir = Path(tempfile.mkdtemp())
     >>> tmpfile = tmpdir / 'a_temp_file.nii.gz'
     >>> tmpfile.open('w').close()  # "touch" the file
-    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir))
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)
     >>> dsink.inputs.in_file = str(tmpfile)
     >>> dsink.inputs.source_file = collect_data(str(datadir / 'ds114'), '01')[0]['t1w'][0]
     >>> dsink.inputs.keep_dtype = True
-    >>> dsink.inputs.suffix = 'target-mni'
+    >>> dsink.inputs.suffix = 'desc-denoised'
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
-    '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_target-mni_T1w.nii.gz'
+    '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_desc-denoised_T1w.nii.gz'
 
     >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
     >>> bids_dir.mkdir(parents=True, exist_ok=True)
     >>> tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-01_bold.nii.gz'
     >>> tricky_source.open('w').close()
-    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir))
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)
     >>> dsink.inputs.in_file = str(tmpfile)
     >>> dsink.inputs.source_file = str(tricky_source)
     >>> dsink.inputs.keep_dtype = True
@@ -244,6 +245,7 @@ desc-preproc_bold.nii.gz'
         dtype = '' if not self.inputs.keep_dtype else ('_%s' % dtype)
 
         self._results['compression'] = []
+        self._results['fixed_hdr'] = [False] * len(self.inputs.in_file)
         for i, fname in enumerate(self.inputs.in_file):
             extra = ''
             if isdefined(self.inputs.extra_values):
@@ -270,16 +272,21 @@ desc-preproc_bold.nii.gz'
                 curr_codes = (int(hdr['qform_code']), int(hdr['sform_code']))
 
                 # Default to mm, use sec if data type is bold
-                units = (curr_units[0] or 'mm', 'sec' if dtype == 'bold' else None)
+                units = (curr_units[0] or 'mm', 'sec' if dtype == '_bold' else None)
                 xcodes = (1, 1)  # Derivative in its original scanner space
                 if self.inputs.space:
                     xcodes = (4, 4) if self.inputs.space in STANDARD_SPACES \
                         else (2, 2)
 
                 if curr_codes != xcodes or curr_units != units:
+                    self._results['fixed_hdr'][i] = True
                     hdr.set_qform(hdr.get_qform(), xcodes[0])
                     hdr.set_sform(hdr.get_sform(), xcodes[1])
                     hdr.set_xyzt_units(*units)
+
+                    # Rewrite file with new header
+                    nii.__class__(nii.get_data(), nii.affine, hdr).to_filename(
+                        out_file)
 
         return runtime
 
