@@ -269,14 +269,7 @@ class ReadSidecarJSONInputSpec(BaseInterfaceInputSpec):
                                desc='allow fields to be undefined')
 
 
-class ReadSidecarJSONOutputSpec(DynamicTraitedSpec):
-    subject_id = traits.Str()
-    session_id = traits.Str()
-    task_id = traits.Str()
-    acq_id = traits.Str()
-    rec_id = traits.Str()
-    run_id = traits.Str()
-    type_id = traits.Str()
+class ReadSidecarJSONOutputSpec(DynamicTraitedSpec, BIDSInfoOutputSpec):
     out_dict = traits.Dict()
 
 
