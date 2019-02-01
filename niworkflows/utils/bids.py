@@ -10,10 +10,7 @@ Helpers for handling BIDS-like neuroimaging structures
 from pathlib import Path
 import warnings
 import re
-import simplejson as json
-
 from bids import BIDSLayout
-from .misc import splitext
 
 __all__ = ['BIDS_NAME']
 
@@ -44,7 +41,8 @@ class BIDSWarning(RuntimeWarning):
     pass
 
 
-def collect_participants(bids_dir, participant_label=None, strict=False):
+def collect_participants(bids_dir, participant_label=None, strict=False,
+                         bids_exclude=('derivatives', 'sourcedata')):
     """
     List the participants under the BIDS root and checks that participants
     designated with the participant_label argument exist in that folder.
@@ -70,9 +68,13 @@ def collect_participants(bids_dir, participant_label=None, strict=False):
     fmriprep.utils.bids.BIDSError:
     ...
     """
-    bids_dir = Path(bids_dir).resolve()
-    all_participants = sorted([str(subdir.name)[4:] for subdir in bids_dir.glob('sub-*')
-                               if subdir.is_dir()])
+
+    if isinstance(bids_dir, BIDSLayout):
+        layout = bids_dir
+    else:
+        layout = BIDSLayout(str(bids_dir), exclude=bids_exclude)
+
+    all_participants = set(layout.get_subjects())
 
     # Error: bids_dir does not contain subjects
     if not all_participants:
@@ -85,7 +87,7 @@ def collect_participants(bids_dir, participant_label=None, strict=False):
 
     # No --participant-label was set, return all
     if not participant_label:
-        return all_participants
+        return sorted(all_participants)
 
     if isinstance(participant_label, str):
         participant_label = [participant_label]
@@ -95,13 +97,13 @@ def collect_participants(bids_dir, participant_label=None, strict=False):
     # Remove duplicates
     participant_label = sorted(set(participant_label))
     # Remove labels not found
-    found_label = sorted(set(participant_label) & set(all_participants))
+    found_label = sorted(set(participant_label) & all_participants)
     if not found_label:
         raise BIDSError('Could not find participants [{}]'.format(
             ', '.join(participant_label)), bids_dir)
 
     # Warn if some IDs were not found
-    notfound_label = sorted(set(participant_label) - set(all_participants))
+    notfound_label = sorted(set(participant_label) - all_participants)
     if notfound_label:
         exc = BIDSError('Some participants were not found: {}'.format(
             ', '.join(notfound_label)), bids_dir)
@@ -112,7 +114,8 @@ def collect_participants(bids_dir, participant_label=None, strict=False):
     return found_label
 
 
-def collect_data(dataset, participant_label, task=None, echo=None):
+def collect_data(bids_dir, participant_label, task=None, echo=None,
+                 bids_exclude=('derivatives', 'sourcedata')):
     """
     Uses pybids to retrieve the input data for a given participant
     >>> bids_root, _ = collect_data(str(datadir / 'ds054'), '100185')
@@ -139,7 +142,11 @@ def collect_data(dataset, participant_label, task=None, echo=None):
     >>> bids_root['t2w']  # doctest: +ELLIPSIS
     []
     """
-    layout = BIDSLayout(dataset, exclude=['derivatives', 'sourcedata'])
+    if isinstance(bids_dir, BIDSLayout):
+        layout = bids_dir
+    else:
+        layout = BIDSLayout(str(bids_dir), exclude=bids_exclude)
+
     queries = {
         'fmap': {'subject': participant_label, 'modality': 'fmap',
                  'extensions': ['nii', 'nii.gz']},
@@ -173,12 +180,12 @@ def collect_data(dataset, participant_label, task=None, echo=None):
     return subj_data, layout
 
 
-def get_metadata_for_nifti(in_file):
+def get_metadata_for_nifti(in_file, bids_dir=None,
+                           bids_exclude=('derivatives', 'sourcedata')):
     """Fetch metadata for a given nifti file
 
-    >>> fmap = bids_collect_data(
-    ...     str(datadir / 'ds054'), '100185')[0]['fmap'][-1]
-    >>> metadata = get_metadata_for_nifti(fmap)
+    >>> metadata = get_metadata_for_nifti(datadir / 'ds054' / 'sub-100185' /
+    ...                                   'fmap' / 'sub-100185_phasediff.nii.gz')
     >>> metadata['Manufacturer']
     'SIEMENS'
 
@@ -186,51 +193,17 @@ def get_metadata_for_nifti(in_file):
 
     """
     in_file = Path(in_file).resolve()
-    fname = splitext(in_file)[0]
-    fname_comps = fname.split("_")
 
-    session_comp_list = []
-    subject_comp_list = []
-    top_comp_list = []
-    ses = None
-    sub = None
+    if bids_dir is None:
+        for parent in in_file.parents:
+            if parent.name.startswith('sub-'):
+                bids_dir = parent
 
-    for comp in fname_comps:
-        if comp[:3] != "run":
-            session_comp_list.append(comp)
-            if comp[:3] == "ses":
-                ses = comp
-            else:
-                subject_comp_list.append(comp)
-                if comp[:3] == "sub":
-                    sub = comp
-                else:
-                    top_comp_list.append(comp)
-
-    jsonext = '{}.json'.format
-    bids_dir = in_file.parent.parent.parent  # go up 3 levels
-    if any([comp.startswith('ses') for comp in fname_comps]):
-        bids_dir = bids_dir.parent  # one more if multisession
-
-    top_json = bids_dir / jsonext("_".join(top_comp_list))
-    potential_json = [top_json]
-
-    subject_json = bids_dir / sub / jsonext("_".join(subject_comp_list))
-    potential_json.append(subject_json)
-
-    if ses:
-        session_json = bids_dir / sub / ses / jsonext("_".join(session_comp_list))
-        potential_json.append(session_json)
-
-    potential_json.append(in_file.parent / jsonext(fname))  # Sidecar json
-
-    merged_param_dict = {}
-    for json_file_path in potential_json:
-        if json_file_path.is_file():
-            merged_param_dict.update(
-                json.loads(json_file_path.read_text()))
-
-    return merged_param_dict
+    if isinstance(bids_dir, BIDSLayout):
+        layout = bids_dir
+    else:
+        layout = BIDSLayout(str(bids_dir), exclude=bids_exclude)
+    return layout.get_metadata(str(in_file))
 
 
 def group_multiecho(bold_sess):
