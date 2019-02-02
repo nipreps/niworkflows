@@ -42,29 +42,32 @@ class BIDSWarning(RuntimeWarning):
 
 
 def collect_participants(bids_dir, participant_label=None, strict=False,
-                         bids_exclude=('derivatives', 'sourcedata'),
                          bids_validate=True):
     """
     List the participants under the BIDS root and checks that participants
     designated with the participant_label argument exist in that folder.
     Returns the list of participants to be finally processed.
     Requesting all subjects in a BIDS directory root:
-    >>> collect_participants(str(datadir / 'ds114'))
+    >>> collect_participants(str(datadir / 'ds114'), bids_validate=False)
     ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
 
     Requesting two subjects, given their IDs:
-    >>> collect_participants(str(datadir / 'ds114'), participant_label=['02', '04'])
+    >>> collect_participants(str(datadir / 'ds114'), participant_label=['02', '04'],
+    ...                      bids_validate=False)
     ['02', '04']
 
     Requesting two subjects, given their IDs (works with 'sub-' prefixes):
-    >>> collect_participants(str(datadir / 'ds114'), participant_label=['sub-02', 'sub-04'])
+    >>> collect_participants(str(datadir / 'ds114'), participant_label=['sub-02', 'sub-04'],
+    ...                      bids_validate=False)
     ['02', '04']
 
     Requesting two subjects, but one does not exist:
-    >>> collect_participants(str(datadir / 'ds114'), participant_label=['02', '14'])
-    ['02']
     >>> collect_participants(str(datadir / 'ds114'), participant_label=['02', '14'],
-    ...                      strict=True)  # doctest: +IGNORE_EXCEPTION_DETAIL
+    ...                      bids_validate=False)
+    ['02']
+    >>> collect_participants(
+    ...     str(datadir / 'ds114'), participant_label=['02', '14'],
+    ...     strict=True, bids_validate=False)  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     fmriprep.utils.bids.BIDSError:
     ...
@@ -73,8 +76,7 @@ def collect_participants(bids_dir, participant_label=None, strict=False,
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
     else:
-        layout = BIDSLayout(str(bids_dir), exclude=bids_exclude,
-                            validate=bids_validate)
+        layout = BIDSLayout(str(bids_dir), validate=bids_validate)
 
     all_participants = set(layout.get_subjects())
 
@@ -117,7 +119,6 @@ def collect_participants(bids_dir, participant_label=None, strict=False,
 
 
 def collect_data(bids_dir, participant_label, task=None, echo=None,
-                 bids_exclude=('derivatives', 'sourcedata'),
                  bids_validate=True):
     """
     Uses pybids to retrieve the input data for a given participant
@@ -149,8 +150,7 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
     else:
-        layout = BIDSLayout(str(bids_dir), exclude=bids_exclude,
-                            validate=bids_validate)
+        layout = BIDSLayout(str(bids_dir), validate=bids_validate)
 
     queries = {
         'fmap': {'datatype': 'fmap'},
@@ -180,9 +180,7 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
     return subj_data, layout
 
 
-def get_metadata_for_nifti(in_file, bids_dir=None,
-                           bids_exclude=('derivatives', 'sourcedata'),
-                           validate=True):
+def get_metadata_for_nifti(in_file, bids_dir=None, validate=True):
     """Fetch metadata for a given nifti file
 
     >>> metadata = get_metadata_for_nifti(
@@ -194,13 +192,11 @@ def get_metadata_for_nifti(in_file, bids_dir=None,
     >>>
 
     """
-    return _init_layout(in_file, bids_dir, bids_exclude,
-                        validate).get_metadata(str(in_file))
+    return _init_layout(in_file, bids_dir, validate).get_metadata(
+        str(in_file))
 
 
-def _init_layout(in_file=None, bids_dir=None,
-                 bids_exclude=('derivatives', 'sourcedata'),
-                 validate=True):
+def _init_layout(in_file=None, bids_dir=None, validate=True):
     if isinstance(bids_dir, BIDSLayout):
         return bids_dir
 
@@ -214,7 +210,7 @@ def _init_layout(in_file=None, bids_dir=None,
         if bids_dir is None:
             raise RuntimeError('Could not infer BIDS root')
 
-    layout = BIDSLayout(str(bids_dir), validate=validate, exclude=bids_exclude)
+    layout = BIDSLayout(str(bids_dir), validate=validate)
     return layout
 
 

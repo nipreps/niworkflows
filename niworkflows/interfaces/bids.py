@@ -33,9 +33,6 @@ class BIDSBaseInputSpec(BaseInterfaceInputSpec):
     bids_dir = traits.Either(
         (None, Directory(exists=True)), usedefault=True,
         desc='optional bids directory to initialize a new layout')
-    bids_exclude = InputMultiObject(
-        ['derivatives', 'sourcedata'], Str, usedefault=True,
-        desc='exclude directories from indexing')
     bids_validate = traits.Bool(True, usedefault=True, desc='enable BIDS validator')
 
 
@@ -115,7 +112,6 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
         self.layout = self.inputs.bids_dir or self.layout
         self.layout = _init_layout(self.inputs.in_file,
                                    self.layout,
-                                   self.inputs.bids_exclude,
                                    self.inputs.bids_validate)
         params = self.layout.parse_file_entities(self.inputs.in_file,
                                                  domains=['bids'])
@@ -144,9 +140,9 @@ class BIDSDataGrabber(SimpleInterface):
     """
     Collect files from a BIDS directory structure
 
-    >>> from niworkflows.utils.bids import collect_data
     >>> bids_src = BIDSDataGrabber(anat_only=False)
-    >>> bids_src.inputs.subject_data = collect_data(str(datadir / 'ds114'), '01')[0]
+    >>> bids_src.inputs.subject_data = bids_collect_data(
+    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]
     >>> bids_src.inputs.subject_id = '01'
     >>> res = bids_src.run()
     >>> res.outputs.t1w  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
@@ -216,13 +212,13 @@ class DerivativesDataSink(SimpleInterface):
     by `base_directory`, given the input reference `source_file`.
 
     >>> import tempfile
-    >>> from niworkflows.utils.bids import collect_data
     >>> tmpdir = Path(tempfile.mkdtemp())
     >>> tmpfile = tmpdir / 'a_temp_file.nii.gz'
     >>> tmpfile.open('w').close()  # "touch" the file
     >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)
     >>> dsink.inputs.in_file = str(tmpfile)
-    >>> dsink.inputs.source_file = collect_data(str(datadir / 'ds114'), '01')[0]['t1w'][0]
+    >>> dsink.inputs.source_file = bids_collect_data(
+    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w'][0]
     >>> dsink.inputs.keep_dtype = True
     >>> dsink.inputs.suffix = 'desc-denoised'
     >>> res = dsink.run()
@@ -399,7 +395,6 @@ class ReadSidecarJSON(SimpleInterface):
         self.layout = self.inputs.bids_dir or self.layout
         self.layout = _init_layout(self.inputs.in_file,
                                    self.layout,
-                                   self.inputs.bids_exclude,
                                    self.inputs.bids_validate)
 
         # Fill in BIDS entities of the output ("*_id")
