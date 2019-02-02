@@ -42,7 +42,8 @@ class BIDSWarning(RuntimeWarning):
 
 
 def collect_participants(bids_dir, participant_label=None, strict=False,
-                         bids_exclude=('derivatives', 'sourcedata')):
+                         bids_exclude=('derivatives', 'sourcedata'),
+                         bids_validate=True):
     """
     List the participants under the BIDS root and checks that participants
     designated with the participant_label argument exist in that folder.
@@ -72,7 +73,8 @@ def collect_participants(bids_dir, participant_label=None, strict=False,
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
     else:
-        layout = BIDSLayout(str(bids_dir), exclude=bids_exclude)
+        layout = BIDSLayout(str(bids_dir), exclude=bids_exclude,
+                            validate=bids_validate)
 
     all_participants = set(layout.get_subjects())
 
@@ -116,10 +118,11 @@ def collect_participants(bids_dir, participant_label=None, strict=False,
 
 def collect_data(bids_dir, participant_label, task=None, echo=None,
                  bids_exclude=('derivatives', 'sourcedata'),
-                 validate=True):
+                 bids_validate=True):
     """
     Uses pybids to retrieve the input data for a given participant
-    >>> bids_root, _ = collect_data(str(datadir / 'ds054'), '100185', validate=False)
+    >>> bids_root, _ = collect_data(str(datadir / 'ds054'), '100185',
+    ...                             bids_validate=False)
     >>> bids_root['fmap']  # doctest: +ELLIPSIS
     ['.../ds054/sub-100185/fmap/sub-100185_magnitude1.nii.gz', \
 '.../ds054/sub-100185/fmap/sub-100185_magnitude2.nii.gz', \
@@ -146,7 +149,8 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
     else:
-        layout = BIDSLayout(str(bids_dir), exclude=bids_exclude, validate=validate)
+        layout = BIDSLayout(str(bids_dir), exclude=bids_exclude,
+                            validate=bids_validate)
 
     queries = {
         'fmap': {'datatype': 'fmap'},
