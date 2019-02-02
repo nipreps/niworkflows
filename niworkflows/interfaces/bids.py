@@ -11,7 +11,6 @@ import os
 from pathlib import Path
 from shutil import copytree, rmtree
 
-from bids import BIDSLayout
 from nipype import logging
 from nipype.interfaces.base import (
     traits, isdefined, Undefined,
@@ -19,27 +18,34 @@ from nipype.interfaces.base import (
     File, Directory, InputMultiObject, OutputMultiObject, Str,
     SimpleInterface,
 )
-from ..utils.bids import BIDS_NAME
+from ..utils.bids import BIDS_NAME, _init_layout
 from ..utils.misc import splitext as _splitext, _copy_any
 
 LOGGER = logging.getLogger('nipype.interface')
 
 
-class BIDSInfoInputSpec(BaseInterfaceInputSpec):
+class BIDSBaseInputSpec(BaseInterfaceInputSpec):
+    bids_dir = traits.Either(
+        (None, Directory(exists=True)), usedefault=True,
+        desc='optional bids directory to initialize a new layout')
+    bids_exclude = InputMultiObject(
+        ['derivatives', 'sourcedata'], Str, usedefault=True,
+        desc='exclude directories from indexing')
+    bids_validate = traits.Bool(True, usedefault=True, desc='enable BIDS validator')
+
+
+class BIDSInfoInputSpec(BIDSBaseInputSpec):
     in_file = File(mandatory=True, desc='input file, part of a BIDS tree')
-    bids_dir = Directory(exists=True,
-                         desc='optional bids directory to initialize a new layout')
-    bids_exclude = InputMultiObject(Directory, desc='exclude directories from indexing')
 
 
-class BIDSInfoOutputSpec(TraitedSpec):
-    subject_id = traits.Str()
-    session_id = traits.Str()
-    task_id = traits.Str()
-    acq_id = traits.Str()
-    rec_id = traits.Str()
-    run_id = traits.Str()
-    type_id = traits.Str()
+class BIDSInfoOutputSpec(DynamicTraitedSpec):
+    subject = traits.Str()
+    session = traits.Str()
+    task = traits.Str()
+    acq = traits.Str()
+    rec = traits.Str()
+    run = traits.Str()
+    suffix = traits.Str()
 
 
 class BIDSInfo(SimpleInterface):
@@ -49,20 +55,50 @@ class BIDSInfo(SimpleInterface):
     This interface uses only the basename, not the path, to determine the
     subject, session, task, run, acquisition or reconstruction.
 
-    >>> bids_info = BIDSInfo(bids_dir=str(datadir / 'ds114'))
+    >>> bids_info = BIDSInfo(bids_dir=str(datadir / 'ds054'), bids_validate=False)
+    >>> bids_info.inputs.in_file = '''\
+sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz'''
+    >>> res = bids_info.run()
+    >>> res.outputs
+    <BLANKLINE>
+    acq = <undefined>
+    rec = <undefined>
+    run = <undefined>
+    session = retest
+    subject = 01
+    suffix = bold
+    task = covertverbgeneration
+    <BLANKLINE>
+
+    >>> bids_info = BIDSInfo(bids_validate=False)
     >>> bids_info.inputs.in_file = str(
     ...     datadir / 'ds114' / 'sub-01' / 'ses-retest' /
     ...     'func' / 'sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz')
     >>> res = bids_info.run()
     >>> res.outputs
     <BLANKLINE>
-    acq_id = <undefined>
-    rec_id = <undefined>
-    run_id = <undefined>
-    session_id = retest
-    subject_id = 01
-    task_id = covertverbgeneration
-    type_id = bold
+    acq = <undefined>
+    rec = <undefined>
+    run = <undefined>
+    session = retest
+    subject = 01
+    suffix = bold
+    task = covertverbgeneration
+    <BLANKLINE>
+
+    >>> bids_info = BIDSInfo(bids_validate=False)
+    >>> bids_info.inputs.in_file = '''\
+sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz'''
+    >>> res = bids_info.run()
+    >>> res.outputs
+    <BLANKLINE>
+    acq = <undefined>
+    rec = <undefined>
+    run = <undefined>
+    session = retest
+    subject = 01
+    suffix = bold
+    task = covertverbgeneration
     <BLANKLINE>
 
     """
@@ -71,16 +107,15 @@ class BIDSInfo(SimpleInterface):
     layout = None
 
     def _run_interface(self, runtime):
-        if isdefined(self.inputs.bids_dir):
-            self.layout = BIDSLayout(
-                self.inputs.bids_dir, exclude=self.inputs.bids_exclude)
-
-        if self.layout is None:
-            raise RuntimeError('Neither a BIDSLayout nor a bids_dir input were set')
-
-        params = self.layout.parse_file_entities(self.inputs.in_file)
-        self._results = {key: params.get(key.split('_')[0], Undefined)
-                         for key in self.output_spec().get().keys()}
+        self.layout = self.inputs.bids_dir or self.layout
+        self.layout = _init_layout(self.inputs.in_file,
+                                   self.layout,
+                                   self.inputs.bids_exclude,
+                                   self.inputs.bids_validate)
+        params = self.layout.parse_file_entities(self.inputs.in_file,
+                                                 domains=['bids'])
+        self._results = {key: params.get(key, Undefined)
+                         for key in BIDSInfoOutputSpec().get().keys()}
         return runtime
 
 
@@ -270,18 +305,15 @@ desc-preproc_bold.nii.gz'
         return runtime
 
 
-class ReadSidecarJSONInputSpec(BaseInterfaceInputSpec):
+class ReadSidecarJSONInputSpec(BIDSBaseInputSpec):
     in_file = File(exists=True, mandatory=True, desc='the input nifti file')
     fields = InputMultiObject(traits.Str,
                               desc='map these fields to the output object')
     undef_fields = traits.Bool(False, usedefault=True,
                                desc='allow fields to be undefined')
-    bids_dir = Directory(exists=True,
-                         desc='optional bids directory to initialize a new layout')
-    bids_exclude = InputMultiObject(Directory, desc='exclude directories from indexing')
 
 
-class ReadSidecarJSONOutputSpec(DynamicTraitedSpec, BIDSInfoOutputSpec):
+class ReadSidecarJSONOutputSpec(BIDSInfoOutputSpec):
     out_dict = traits.Dict()
 
 
@@ -292,15 +324,17 @@ class ReadSidecarJSON(SimpleInterface):
     >>> fmap = str(datadir / 'ds054' / 'sub-100185' / 'fmap' /
     ...            'sub-100185_phasediff.nii.gz')
 
-    >>> meta = ReadSidecarJSON(in_file=fmap, bids_dir=str(datadir / 'ds054')).run()
-    >>> meta.outputs.subject_id
+    >>> meta = ReadSidecarJSON(in_file=fmap, bids_dir=str(datadir / 'ds054'),
+    ...                        bids_validate=False).run()
+    >>> meta.outputs.subject
     '100185'
-    >>> meta.outputs.type_id
+    >>> meta.outputs.suffix
     'phasediff'
     >>> meta.outputs.out_dict['Manufacturer']
     'SIEMENS'
     >>> meta = ReadSidecarJSON(in_file=fmap, fields=['Manufacturer'],
-    ...                        bids_dir=str(datadir / 'ds054')).run()
+    ...                        bids_dir=str(datadir / 'ds054'),
+    ...                        bids_validate=False).run()
     >>> meta.outputs.out_dict['Manufacturer']
     'SIEMENS'
     >>> meta.outputs.Manufacturer
@@ -310,11 +344,14 @@ class ReadSidecarJSON(SimpleInterface):
     AttributeError:
     >>> meta = ReadSidecarJSON(
     ...     in_file=fmap, fields=['MadeUpField'],
-    ...     bids_dir=str(datadir / 'ds054')).run()  # doctest: +IGNORE_EXCEPTION_DETAIL
+    ...     bids_dir=str(datadir / 'ds054'),
+    ...     bids_validate=False).run()  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     KeyError:
     >>> meta = ReadSidecarJSON(in_file=fmap, fields=['MadeUpField'],
-    ...                        bids_dir=str(datadir / 'ds054'), undef_fields=True).run()
+    ...                        undef_fields=True,
+    ...                        bids_dir=str(datadir / 'ds054'),
+    ...                        bids_validate=False).run()
     >>> meta.outputs.MadeUpField
     <undefined>
 
@@ -325,16 +362,14 @@ class ReadSidecarJSON(SimpleInterface):
     _always_run = True
 
     def _run_interface(self, runtime):
-        if isdefined(self.inputs.bids_dir):
-            self.layout = BIDSLayout(
-                self.inputs.bids_dir, exclude=self.inputs.bids_exclude)
-
-        if self.layout is None:
-            raise RuntimeError('Neither a BIDSLayout nor a bids_dir input were set')
+        self.layout = self.inputs.bids_dir or self.layout
+        self.layout = _init_layout(self.inputs.in_file,
+                                   self.layout,
+                                   self.inputs.bids_exclude,
+                                   self.inputs.bids_validate)
 
         # Fill in BIDS entities of the output ("*_id")
-        output_keys = [key for key in list(self.output_spec().get().keys())
-                       if key.endswith('_id')]
+        output_keys = [key for key in list(BIDSInfoOutputSpec().get().keys())]
         params = self.layout.parse_file_entities(self.inputs.in_file)
         self._results = {key: params.get(key.split('_')[0], Undefined)
                          for key in output_keys}

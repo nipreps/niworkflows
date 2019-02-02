@@ -115,10 +115,11 @@ def collect_participants(bids_dir, participant_label=None, strict=False,
 
 
 def collect_data(bids_dir, participant_label, task=None, echo=None,
-                 bids_exclude=('derivatives', 'sourcedata')):
+                 bids_exclude=('derivatives', 'sourcedata'),
+                 validate=True):
     """
     Uses pybids to retrieve the input data for a given participant
-    >>> bids_root, _ = collect_data(str(datadir / 'ds054'), '100185')
+    >>> bids_root, _ = collect_data(str(datadir / 'ds054'), '100185', validate=False)
     >>> bids_root['fmap']  # doctest: +ELLIPSIS
     ['.../ds054/sub-100185/fmap/sub-100185_magnitude1.nii.gz', \
 '.../ds054/sub-100185/fmap/sub-100185_magnitude2.nii.gz', \
@@ -145,23 +146,16 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
     else:
-        layout = BIDSLayout(str(bids_dir), exclude=bids_exclude)
+        layout = BIDSLayout(str(bids_dir), exclude=bids_exclude, validate=validate)
 
     queries = {
-        'fmap': {'subject': participant_label, 'modality': 'fmap',
-                 'extensions': ['nii', 'nii.gz']},
-        'bold': {'subject': participant_label, 'modality': 'func', 'type': 'bold',
-                 'extensions': ['nii', 'nii.gz']},
-        'sbref': {'subject': participant_label, 'modality': 'func', 'type': 'sbref',
-                  'extensions': ['nii', 'nii.gz']},
-        'flair': {'subject': participant_label, 'modality': 'anat', 'type': 'FLAIR',
-                  'extensions': ['nii', 'nii.gz']},
-        't2w': {'subject': participant_label, 'modality': 'anat', 'type': 'T2w',
-                'extensions': ['nii', 'nii.gz']},
-        't1w': {'subject': participant_label, 'modality': 'anat', 'type': 'T1w',
-                'extensions': ['nii', 'nii.gz']},
-        'roi': {'subject': participant_label, 'modality': 'anat', 'type': 'roi',
-                'extensions': ['nii', 'nii.gz']},
+        'fmap': {'datatype': 'fmap'},
+        'bold': {'datatype': 'func', 'suffix': 'bold'},
+        'sbref': {'datatype': 'func', 'suffix': 'sbref'},
+        'flair': {'datatype': 'anat', 'suffix': 'FLAIR'},
+        't2w': {'datatype': 'anat', 'suffix': 'T2w'},
+        't1w': {'datatype': 'anat', 'suffix': 'T1w'},
+        'roi': {'datatype': 'anat', 'suffix': 'roi'},
     }
 
     if task:
@@ -170,8 +164,10 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
     if echo:
         queries['bold']['echo'] = echo
 
-    subj_data = {modality: [x.filename for x in layout.get(**query)]
-                 for modality, query in queries.items()}
+    subj_data = {
+        dtype: sorted([x.path for x in layout.get(subject=participant_label,
+                                                  extensions=['nii', 'nii.gz'], **query)])
+        for dtype, query in queries.items()}
 
     # Special case: multi-echo BOLD, grouping echos
     if any(['_echo-' in bold for bold in subj_data['bold']]):
@@ -181,29 +177,41 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
 
 
 def get_metadata_for_nifti(in_file, bids_dir=None,
-                           bids_exclude=('derivatives', 'sourcedata')):
+                           bids_exclude=('derivatives', 'sourcedata'),
+                           validate=True):
     """Fetch metadata for a given nifti file
 
-    >>> metadata = get_metadata_for_nifti(datadir / 'ds054' / 'sub-100185' /
-    ...                                   'fmap' / 'sub-100185_phasediff.nii.gz')
+    >>> metadata = get_metadata_for_nifti(
+    ...     datadir / 'ds054' / 'sub-100185' / 'fmap' / 'sub-100185_phasediff.nii.gz',
+    ...     validate=False)
     >>> metadata['Manufacturer']
     'SIEMENS'
 
     >>>
 
     """
-    in_file = Path(in_file).resolve()
+    return _init_layout(in_file, bids_dir, bids_exclude,
+                        validate).get_metadata(str(in_file))
+
+
+def _init_layout(in_file=None, bids_dir=None,
+                 bids_exclude=('derivatives', 'sourcedata'),
+                 validate=True):
+    if isinstance(bids_dir, BIDSLayout):
+        return bids_dir
 
     if bids_dir is None:
+        in_file = Path(in_file)
         for parent in in_file.parents:
             if parent.name.startswith('sub-'):
-                bids_dir = parent
+                bids_dir = parent.parent.resolve()
+                break
 
-    if isinstance(bids_dir, BIDSLayout):
-        layout = bids_dir
-    else:
-        layout = BIDSLayout(str(bids_dir), exclude=bids_exclude)
-    return layout.get_metadata(str(in_file))
+        if bids_dir is None:
+            raise RuntimeError('Could not infer BIDS root')
+
+    layout = BIDSLayout(str(bids_dir), validate=validate, exclude=bids_exclude)
+    return layout
 
 
 def group_multiecho(bold_sess):
