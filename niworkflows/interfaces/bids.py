@@ -310,6 +310,9 @@ desc-preproc_bold.nii.gz'
             is_nii = out_file.endswith('.nii') or out_file.endswith('.nii.gz')
             if self.inputs.check_hdr and is_nii:
                 nii = nb.load(out_file)
+                if not isinstance(nii, (nb.Nifti1Image, nb.Nifti2Image)):
+                    # .dtseries.nii are CIfTI2, therefore skip check
+                    return runtime
                 hdr = nii.header.copy()
                 curr_units = tuple([None if u == 'unknown' else u
                                     for u in hdr.get_xyzt_units()])
@@ -331,7 +334,6 @@ desc-preproc_bold.nii.gz'
                     # Rewrite file with new header
                     nii.__class__(nii.get_data(), nii.affine, hdr).to_filename(
                         out_file)
-
         return runtime
 
 
