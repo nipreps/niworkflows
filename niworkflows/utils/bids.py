@@ -169,8 +169,8 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
         queries['bold']['echo'] = echo
 
     subj_data = {
-        dtype: sorted([x.path for x in layout.get(subject=participant_label,
-                                                  extensions=['nii', 'nii.gz'], **query)])
+        dtype: sorted(layout.get(return_type='file', subject=participant_label,
+                                 extensions=['nii', 'nii.gz'], **query))
         for dtype, query in queries.items()}
 
     # Special case: multi-echo BOLD, grouping echos

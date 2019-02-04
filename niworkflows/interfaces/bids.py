@@ -400,7 +400,7 @@ class ReadSidecarJSON(SimpleInterface):
                                    self.inputs.bids_validate)
 
         # Fill in BIDS entities of the output ("*_id")
-        output_keys = [key for key in list(BIDSInfoOutputSpec().get().keys())]
+        output_keys = list(BIDSInfoOutputSpec().get().keys())
         params = self.layout.parse_file_entities(self.inputs.in_file)
         self._results = {key: params.get(key.split('_')[0], Undefined)
                          for key in output_keys}
