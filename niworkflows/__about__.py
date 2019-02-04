@@ -52,7 +52,6 @@ CLASSIFIERS = [
 ]
 
 REQUIRES = [
-    'grabbit',
     'jinja2',
     'matplotlib>=2.2.0',
     'nilearn>=0.2.6',
