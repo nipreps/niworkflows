@@ -232,8 +232,8 @@ def temporal_derivatives(order, variables, data):
         Table of values of all observations of all variables, including any
         specified derivative terms.
     """
-    variables_deriv = {}
-    data_deriv = {}
+    variables_deriv = OrderedDict()
+    data_deriv = OrderedDict()
     if 0 in order:
         data_deriv[0] = data[variables]
         variables_deriv[0] = variables
@@ -275,8 +275,8 @@ def exponential_terms(order, variables, data):
         Table of values of all observations of all variables, including any
         specified exponential terms.
     """
-    variables_exp = {}
-    data_exp = {}
+    variables_exp = OrderedDict()
+    data_exp = OrderedDict()
     if 1 in order:
         data_exp[1] = data[variables]
         variables_exp[1] = variables
