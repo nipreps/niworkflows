@@ -1,3 +1,14 @@
+0.7.0 (February 04, 2019)
+=========================
+
+  * [ENH] Implementation of BIDS utilities using pybids (#299) @oesteban
+  * [HOTFIX] Only check headers of NIfTI files (#300) @oesteban
+  * [ENH] Option to sanitize NIfTI headers when writing derivatives (#298) @oesteban
+  * [ENH] Do not save the original name and time stamp of gzip files (#295) @oesteban
+  * [CI] Checkout source for coverage reporting (#290) @effigies
+  * [CI] Add coverage (#288) @effigies
+
+
 0.6.1 (January 23, 2019)
 ========================
 
