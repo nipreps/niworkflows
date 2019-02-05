@@ -10,10 +10,7 @@ Helpers for handling BIDS-like neuroimaging structures
 from pathlib import Path
 import warnings
 import re
-import simplejson as json
-
 from bids import BIDSLayout
-from .misc import splitext
 
 __all__ = ['BIDS_NAME']
 
@@ -44,35 +41,44 @@ class BIDSWarning(RuntimeWarning):
     pass
 
 
-def collect_participants(bids_dir, participant_label=None, strict=False):
+def collect_participants(bids_dir, participant_label=None, strict=False,
+                         bids_validate=True):
     """
     List the participants under the BIDS root and checks that participants
     designated with the participant_label argument exist in that folder.
     Returns the list of participants to be finally processed.
     Requesting all subjects in a BIDS directory root:
-    >>> collect_participants(str(datadir / 'ds114'))
+    >>> collect_participants(str(datadir / 'ds114'), bids_validate=False)
     ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
 
     Requesting two subjects, given their IDs:
-    >>> collect_participants(str(datadir / 'ds114'), participant_label=['02', '04'])
+    >>> collect_participants(str(datadir / 'ds114'), participant_label=['02', '04'],
+    ...                      bids_validate=False)
     ['02', '04']
 
     Requesting two subjects, given their IDs (works with 'sub-' prefixes):
-    >>> collect_participants(str(datadir / 'ds114'), participant_label=['sub-02', 'sub-04'])
+    >>> collect_participants(str(datadir / 'ds114'), participant_label=['sub-02', 'sub-04'],
+    ...                      bids_validate=False)
     ['02', '04']
 
     Requesting two subjects, but one does not exist:
-    >>> collect_participants(str(datadir / 'ds114'), participant_label=['02', '14'])
-    ['02']
     >>> collect_participants(str(datadir / 'ds114'), participant_label=['02', '14'],
-    ...                      strict=True)  # doctest: +IGNORE_EXCEPTION_DETAIL
+    ...                      bids_validate=False)
+    ['02']
+    >>> collect_participants(
+    ...     str(datadir / 'ds114'), participant_label=['02', '14'],
+    ...     strict=True, bids_validate=False)  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     fmriprep.utils.bids.BIDSError:
     ...
     """
-    bids_dir = Path(bids_dir).resolve()
-    all_participants = sorted([str(subdir.name)[4:] for subdir in bids_dir.glob('sub-*')
-                               if subdir.is_dir()])
+
+    if isinstance(bids_dir, BIDSLayout):
+        layout = bids_dir
+    else:
+        layout = BIDSLayout(str(bids_dir), validate=bids_validate)
+
+    all_participants = set(layout.get_subjects())
 
     # Error: bids_dir does not contain subjects
     if not all_participants:
@@ -85,7 +91,7 @@ def collect_participants(bids_dir, participant_label=None, strict=False):
 
     # No --participant-label was set, return all
     if not participant_label:
-        return all_participants
+        return sorted(all_participants)
 
     if isinstance(participant_label, str):
         participant_label = [participant_label]
@@ -95,13 +101,13 @@ def collect_participants(bids_dir, participant_label=None, strict=False):
     # Remove duplicates
     participant_label = sorted(set(participant_label))
     # Remove labels not found
-    found_label = sorted(set(participant_label) & set(all_participants))
+    found_label = sorted(set(participant_label) & all_participants)
     if not found_label:
         raise BIDSError('Could not find participants [{}]'.format(
             ', '.join(participant_label)), bids_dir)
 
     # Warn if some IDs were not found
-    notfound_label = sorted(set(participant_label) - set(all_participants))
+    notfound_label = sorted(set(participant_label) - all_participants)
     if notfound_label:
         exc = BIDSError('Some participants were not found: {}'.format(
             ', '.join(notfound_label)), bids_dir)
@@ -112,10 +118,12 @@ def collect_participants(bids_dir, participant_label=None, strict=False):
     return found_label
 
 
-def collect_data(dataset, participant_label, task=None, echo=None):
+def collect_data(bids_dir, participant_label, task=None, echo=None,
+                 bids_validate=True):
     """
     Uses pybids to retrieve the input data for a given participant
-    >>> bids_root, _ = collect_data(str(datadir / 'ds054'), '100185')
+    >>> bids_root, _ = collect_data(str(datadir / 'ds054'), '100185',
+    ...                             bids_validate=False)
     >>> bids_root['fmap']  # doctest: +ELLIPSIS
     ['.../ds054/sub-100185/fmap/sub-100185_magnitude1.nii.gz', \
 '.../ds054/sub-100185/fmap/sub-100185_magnitude2.nii.gz', \
@@ -139,22 +147,19 @@ def collect_data(dataset, participant_label, task=None, echo=None):
     >>> bids_root['t2w']  # doctest: +ELLIPSIS
     []
     """
-    layout = BIDSLayout(dataset, exclude=['derivatives', 'sourcedata'])
+    if isinstance(bids_dir, BIDSLayout):
+        layout = bids_dir
+    else:
+        layout = BIDSLayout(str(bids_dir), validate=bids_validate)
+
     queries = {
-        'fmap': {'subject': participant_label, 'modality': 'fmap',
-                 'extensions': ['nii', 'nii.gz']},
-        'bold': {'subject': participant_label, 'modality': 'func', 'type': 'bold',
-                 'extensions': ['nii', 'nii.gz']},
-        'sbref': {'subject': participant_label, 'modality': 'func', 'type': 'sbref',
-                  'extensions': ['nii', 'nii.gz']},
-        'flair': {'subject': participant_label, 'modality': 'anat', 'type': 'FLAIR',
-                  'extensions': ['nii', 'nii.gz']},
-        't2w': {'subject': participant_label, 'modality': 'anat', 'type': 'T2w',
-                'extensions': ['nii', 'nii.gz']},
-        't1w': {'subject': participant_label, 'modality': 'anat', 'type': 'T1w',
-                'extensions': ['nii', 'nii.gz']},
-        'roi': {'subject': participant_label, 'modality': 'anat', 'type': 'roi',
-                'extensions': ['nii', 'nii.gz']},
+        'fmap': {'datatype': 'fmap'},
+        'bold': {'datatype': 'func', 'suffix': 'bold'},
+        'sbref': {'datatype': 'func', 'suffix': 'sbref'},
+        'flair': {'datatype': 'anat', 'suffix': 'FLAIR'},
+        't2w': {'datatype': 'anat', 'suffix': 'T2w'},
+        't1w': {'datatype': 'anat', 'suffix': 'T1w'},
+        'roi': {'datatype': 'anat', 'suffix': 'roi'},
     }
 
     if task:
@@ -163,8 +168,10 @@ def collect_data(dataset, participant_label, task=None, echo=None):
     if echo:
         queries['bold']['echo'] = echo
 
-    subj_data = {modality: [x.filename for x in layout.get(**query)]
-                 for modality, query in queries.items()}
+    subj_data = {
+        dtype: sorted(layout.get(return_type='file', subject=participant_label,
+                                 extensions=['nii', 'nii.gz'], **query))
+        for dtype, query in queries.items()}
 
     # Special case: multi-echo BOLD, grouping echos
     if any(['_echo-' in bold for bold in subj_data['bold']]):
@@ -173,64 +180,38 @@ def collect_data(dataset, participant_label, task=None, echo=None):
     return subj_data, layout
 
 
-def get_metadata_for_nifti(in_file):
+def get_metadata_for_nifti(in_file, bids_dir=None, validate=True):
     """Fetch metadata for a given nifti file
 
-    >>> fmap = bids_collect_data(
-    ...     str(datadir / 'ds054'), '100185')[0]['fmap'][-1]
-    >>> metadata = get_metadata_for_nifti(fmap)
+    >>> metadata = get_metadata_for_nifti(
+    ...     datadir / 'ds054' / 'sub-100185' / 'fmap' / 'sub-100185_phasediff.nii.gz',
+    ...     validate=False)
     >>> metadata['Manufacturer']
     'SIEMENS'
 
     >>>
 
     """
-    in_file = Path(in_file).resolve()
-    fname = splitext(in_file)[0]
-    fname_comps = fname.split("_")
+    return _init_layout(in_file, bids_dir, validate).get_metadata(
+        str(in_file))
 
-    session_comp_list = []
-    subject_comp_list = []
-    top_comp_list = []
-    ses = None
-    sub = None
 
-    for comp in fname_comps:
-        if comp[:3] != "run":
-            session_comp_list.append(comp)
-            if comp[:3] == "ses":
-                ses = comp
-            else:
-                subject_comp_list.append(comp)
-                if comp[:3] == "sub":
-                    sub = comp
-                else:
-                    top_comp_list.append(comp)
+def _init_layout(in_file=None, bids_dir=None, validate=True):
+    if isinstance(bids_dir, BIDSLayout):
+        return bids_dir
 
-    jsonext = '{}.json'.format
-    bids_dir = in_file.parent.parent.parent  # go up 3 levels
-    if any([comp.startswith('ses') for comp in fname_comps]):
-        bids_dir = bids_dir.parent  # one more if multisession
+    if bids_dir is None:
+        in_file = Path(in_file)
+        for parent in in_file.parents:
+            if parent.name.startswith('sub-'):
+                bids_dir = parent.parent.resolve()
+                break
 
-    top_json = bids_dir / jsonext("_".join(top_comp_list))
-    potential_json = [top_json]
+        if bids_dir is None:
+            raise RuntimeError('Could not infer BIDS root')
 
-    subject_json = bids_dir / sub / jsonext("_".join(subject_comp_list))
-    potential_json.append(subject_json)
-
-    if ses:
-        session_json = bids_dir / sub / ses / jsonext("_".join(session_comp_list))
-        potential_json.append(session_json)
-
-    potential_json.append(in_file.parent / jsonext(fname))  # Sidecar json
-
-    merged_param_dict = {}
-    for json_file_path in potential_json:
-        if json_file_path.is_file():
-            merged_param_dict.update(
-                json.loads(json_file_path.read_text()))
-
-    return merged_param_dict
+    layout = BIDSLayout(str(bids_dir), validate=validate)
+    return layout
 
 
 def group_multiecho(bold_sess):

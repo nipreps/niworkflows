@@ -8,19 +8,20 @@ Interfaces for handling BIDS-like neuroimaging structures
 """
 
 import os
-import os.path as op
 from pathlib import Path
 from shutil import copytree, rmtree
 
 import nibabel as nb
+
 from nipype import logging
 from nipype.interfaces.base import (
-    traits, isdefined, TraitedSpec, BaseInterfaceInputSpec,
-    File, Directory, InputMultiPath, OutputMultiPath, Str,
-    SimpleInterface
+    traits, isdefined, Undefined,
+    TraitedSpec, BaseInterfaceInputSpec, DynamicTraitedSpec,
+    File, Directory, InputMultiObject, OutputMultiObject, Str,
+    SimpleInterface,
 )
 from templateflow.api import templates as _get_template_list
-from ..utils.bids import BIDS_NAME, get_metadata_for_nifti
+from ..utils.bids import BIDS_NAME, _init_layout
 from ..utils.misc import splitext as _splitext, _copy_any
 
 
@@ -28,51 +29,94 @@ STANDARD_SPACES = _get_template_list()
 LOGGER = logging.getLogger('nipype.interface')
 
 
-class BIDSInfoInputSpec(BaseInterfaceInputSpec):
+class BIDSBaseInputSpec(BaseInterfaceInputSpec):
+    bids_dir = traits.Either(
+        (None, Directory(exists=True)), usedefault=True,
+        desc='optional bids directory to initialize a new layout')
+    bids_validate = traits.Bool(True, usedefault=True, desc='enable BIDS validator')
+
+
+class BIDSInfoInputSpec(BIDSBaseInputSpec):
     in_file = File(mandatory=True, desc='input file, part of a BIDS tree')
 
 
-class BIDSInfoOutputSpec(TraitedSpec):
-    subject_id = traits.Str()
-    session_id = traits.Str()
-    task_id = traits.Str()
-    acq_id = traits.Str()
-    rec_id = traits.Str()
-    run_id = traits.Str()
+class BIDSInfoOutputSpec(DynamicTraitedSpec):
+    subject = traits.Str()
+    session = traits.Str()
+    task = traits.Str()
+    acq = traits.Str()
+    rec = traits.Str()
+    run = traits.Str()
+    suffix = traits.Str()
 
 
 class BIDSInfo(SimpleInterface):
     """
-    Extract metadata from a BIDS-conforming filename
+    Extract BIDS entities from a BIDS-conforming path
 
     This interface uses only the basename, not the path, to determine the
     subject, session, task, run, acquisition or reconstruction.
 
-    >>> from niworkflows.utils.bids import collect_data
-    >>> bids_info = BIDSInfo()
-    >>> bids_info.inputs.in_file = collect_data(str(datadir / 'ds114'), '01')[0]['bold'][0]
-    >>> bids_info.inputs.in_file  # doctest: +ELLIPSIS
-    '.../ds114/sub-01/ses-retest/func/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz'
+    >>> bids_info = BIDSInfo(bids_dir=str(datadir / 'ds054'), bids_validate=False)
+    >>> bids_info.inputs.in_file = '''\
+sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz'''
     >>> res = bids_info.run()
     >>> res.outputs
     <BLANKLINE>
-    acq_id = <undefined>
-    rec_id = <undefined>
-    run_id = <undefined>
-    session_id = ses-retest
-    subject_id = sub-01
-    task_id = task-covertverbgeneration
+    acq = <undefined>
+    rec = <undefined>
+    run = <undefined>
+    session = retest
+    subject = 01
+    suffix = bold
+    task = covertverbgeneration
+    <BLANKLINE>
+
+    >>> bids_info = BIDSInfo(bids_validate=False)
+    >>> bids_info.inputs.in_file = str(
+    ...     datadir / 'ds114' / 'sub-01' / 'ses-retest' /
+    ...     'func' / 'sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz')
+    >>> res = bids_info.run()
+    >>> res.outputs
+    <BLANKLINE>
+    acq = <undefined>
+    rec = <undefined>
+    run = <undefined>
+    session = retest
+    subject = 01
+    suffix = bold
+    task = covertverbgeneration
+    <BLANKLINE>
+
+    >>> bids_info = BIDSInfo(bids_validate=False)
+    >>> bids_info.inputs.in_file = '''\
+sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz'''
+    >>> res = bids_info.run()
+    >>> res.outputs
+    <BLANKLINE>
+    acq = <undefined>
+    rec = <undefined>
+    run = <undefined>
+    session = retest
+    subject = 01
+    suffix = bold
+    task = covertverbgeneration
     <BLANKLINE>
 
     """
     input_spec = BIDSInfoInputSpec
     output_spec = BIDSInfoOutputSpec
+    layout = None
 
     def _run_interface(self, runtime):
-        match = BIDS_NAME.search(self.inputs.in_file)
-        params = match.groupdict() if match is not None else {}
-        self._results = {key: val for key, val in list(params.items())
-                         if val is not None}
+        self.layout = self.inputs.bids_dir or self.layout
+        self.layout = _init_layout(self.inputs.in_file,
+                                   self.layout,
+                                   self.inputs.bids_validate)
+        params = self.layout.parse_file_entities(self.inputs.in_file,
+                                                 domains=['bids'])
+        self._results = {key: params.get(key, Undefined)
+                         for key in BIDSInfoOutputSpec().get().keys()}
         return runtime
 
 
@@ -83,23 +127,23 @@ class BIDSDataGrabberInputSpec(BaseInterfaceInputSpec):
 
 class BIDSDataGrabberOutputSpec(TraitedSpec):
     out_dict = traits.Dict(desc='output data structure')
-    fmap = OutputMultiPath(desc='output fieldmaps')
-    bold = OutputMultiPath(desc='output functional images')
-    sbref = OutputMultiPath(desc='output sbrefs')
-    t1w = OutputMultiPath(desc='output T1w images')
-    roi = OutputMultiPath(desc='output ROI images')
-    t2w = OutputMultiPath(desc='output T2w images')
-    flair = OutputMultiPath(desc='output FLAIR images')
+    fmap = OutputMultiObject(desc='output fieldmaps')
+    bold = OutputMultiObject(desc='output functional images')
+    sbref = OutputMultiObject(desc='output sbrefs')
+    t1w = OutputMultiObject(desc='output T1w images')
+    roi = OutputMultiObject(desc='output ROI images')
+    t2w = OutputMultiObject(desc='output T2w images')
+    flair = OutputMultiObject(desc='output FLAIR images')
 
 
 class BIDSDataGrabber(SimpleInterface):
     """
     Collect files from a BIDS directory structure
 
-    >>> from niworkflows.utils.bids import collect_data
     >>> bids_src = BIDSDataGrabber(anat_only=False)
-    >>> bids_src.inputs.subject_data = collect_data(str(datadir / 'ds114'), '01')[0]
-    >>> bids_src.inputs.subject_id = 'ds114'
+    >>> bids_src.inputs.subject_data = bids_collect_data(
+    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]
+    >>> bids_src.inputs.subject_id = '01'
     >>> res = bids_src.run()
     >>> res.outputs.t1w  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
     ['.../ds114/sub-01/ses-retest/anat/sub-01_ses-retest_T1w.nii.gz',
@@ -141,8 +185,8 @@ class BIDSDataGrabber(SimpleInterface):
 class DerivativesDataSinkInputSpec(BaseInterfaceInputSpec):
     base_directory = traits.Directory(
         desc='Path to the base directory for storing data.')
-    in_file = InputMultiPath(File(exists=True), mandatory=True,
-                             desc='the object to be saved')
+    in_file = InputMultiObject(File(exists=True), mandatory=True,
+                               desc='the object to be saved')
     source_file = File(exists=False, mandatory=True, desc='the input func file')
     space = Str('', usedefault=True, desc='Label for space field')
     desc = Str('', usedefault=True, desc='Label for description field')
@@ -155,8 +199,8 @@ class DerivativesDataSinkInputSpec(BaseInterfaceInputSpec):
 
 
 class DerivativesDataSinkOutputSpec(TraitedSpec):
-    out_file = OutputMultiPath(File(exists=True, desc='written file path'))
-    compression = OutputMultiPath(
+    out_file = OutputMultiObject(File(exists=True, desc='written file path'))
+    compression = OutputMultiObject(
         traits.Bool, desc='whether ``in_file`` was compressed/uncompressed '
                           'or `it was copied directly.')
     fixed_hdr = traits.List(traits.Bool, desc='whether derivative header was fixed')
@@ -168,13 +212,13 @@ class DerivativesDataSink(SimpleInterface):
     by `base_directory`, given the input reference `source_file`.
 
     >>> import tempfile
-    >>> from niworkflows.utils.bids import collect_data
     >>> tmpdir = Path(tempfile.mkdtemp())
     >>> tmpfile = tmpdir / 'a_temp_file.nii.gz'
     >>> tmpfile.open('w').close()  # "touch" the file
     >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)
     >>> dsink.inputs.in_file = str(tmpfile)
-    >>> dsink.inputs.source_file = collect_data(str(datadir / 'ds114'), '01')[0]['t1w'][0]
+    >>> dsink.inputs.source_file = bids_collect_data(
+    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w'][0]
     >>> dsink.inputs.keep_dtype = True
     >>> dsink.inputs.suffix = 'desc-denoised'
     >>> res = dsink.run()
@@ -293,46 +337,86 @@ desc-preproc_bold.nii.gz'
         return runtime
 
 
-class ReadSidecarJSONInputSpec(BaseInterfaceInputSpec):
+class ReadSidecarJSONInputSpec(BIDSBaseInputSpec):
     in_file = File(exists=True, mandatory=True, desc='the input nifti file')
-    fields = traits.List(traits.Str, desc='get only certain fields')
+    fields = InputMultiObject(traits.Str,
+                              desc='map these fields to the output object')
+    undef_fields = traits.Bool(False, usedefault=True,
+                               desc='allow fields to be undefined')
 
 
-class ReadSidecarJSONOutputSpec(TraitedSpec):
-    subject_id = traits.Str()
-    session_id = traits.Str()
-    task_id = traits.Str()
-    acq_id = traits.Str()
-    rec_id = traits.Str()
-    run_id = traits.Str()
+class ReadSidecarJSONOutputSpec(BIDSInfoOutputSpec):
     out_dict = traits.Dict()
 
 
 class ReadSidecarJSON(SimpleInterface):
     """
     A utility to find and read JSON sidecar files of a BIDS tree
+
+    >>> fmap = str(datadir / 'ds054' / 'sub-100185' / 'fmap' /
+    ...            'sub-100185_phasediff.nii.gz')
+
+    >>> meta = ReadSidecarJSON(in_file=fmap, bids_dir=str(datadir / 'ds054'),
+    ...                        bids_validate=False).run()
+    >>> meta.outputs.subject
+    '100185'
+    >>> meta.outputs.suffix
+    'phasediff'
+    >>> meta.outputs.out_dict['Manufacturer']
+    'SIEMENS'
+    >>> meta = ReadSidecarJSON(in_file=fmap, fields=['Manufacturer'],
+    ...                        bids_dir=str(datadir / 'ds054'),
+    ...                        bids_validate=False).run()
+    >>> meta.outputs.out_dict['Manufacturer']
+    'SIEMENS'
+    >>> meta.outputs.Manufacturer
+    'SIEMENS'
+    >>> meta.outputs.OtherField  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    AttributeError:
+    >>> meta = ReadSidecarJSON(
+    ...     in_file=fmap, fields=['MadeUpField'],
+    ...     bids_dir=str(datadir / 'ds054'),
+    ...     bids_validate=False).run()  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    KeyError:
+    >>> meta = ReadSidecarJSON(in_file=fmap, fields=['MadeUpField'],
+    ...                        undef_fields=True,
+    ...                        bids_dir=str(datadir / 'ds054'),
+    ...                        bids_validate=False).run()
+    >>> meta.outputs.MadeUpField
+    <undefined>
+
     """
-    expr = BIDS_NAME
     input_spec = ReadSidecarJSONInputSpec
     output_spec = ReadSidecarJSONOutputSpec
+    layout = None
     _always_run = True
 
     def _run_interface(self, runtime):
-        metadata = get_metadata_for_nifti(self.inputs.in_file)
-        output_keys = [key for key in list(self.output_spec().get().keys()) if key.endswith('_id')]
-        outputs = self.expr.search(op.basename(self.inputs.in_file)).groupdict()
+        self.layout = self.inputs.bids_dir or self.layout
+        self.layout = _init_layout(self.inputs.in_file,
+                                   self.layout,
+                                   self.inputs.bids_validate)
 
-        for key in output_keys:
-            id_value = outputs.get(key)
-            if id_value is not None:
-                self._results[key] = outputs.get(key)
+        # Fill in BIDS entities of the output ("*_id")
+        output_keys = list(BIDSInfoOutputSpec().get().keys())
+        params = self.layout.parse_file_entities(self.inputs.in_file)
+        self._results = {key: params.get(key.split('_')[0], Undefined)
+                         for key in output_keys}
 
+        # Fill in metadata
+        metadata = self.layout.get_metadata(self.inputs.in_file)
+        self._results['out_dict'] = metadata
+
+        # Set dynamic outputs if fields input is present
         if isdefined(self.inputs.fields) and self.inputs.fields:
             for fname in self.inputs.fields:
-                self._results[fname] = metadata[fname]
-        else:
-            self._results['out_dict'] = metadata
-
+                if not self.inputs.undef_fields and fname not in metadata:
+                    raise KeyError(
+                        'Metadata field "%s" not found for file %s' % (
+                            fname, self.inputs.in_file))
+                self._results[fname] = metadata.get(fname, Undefined)
         return runtime
 
 

@@ -52,14 +52,13 @@ CLASSIFIERS = [
 ]
 
 REQUIRES = [
-    'grabbit==0.2.3',
     'jinja2',
     'matplotlib>=2.2.0',
     'nilearn>=0.2.6',
     'nipype>=1.1.6',
     'packaging',
     'pandas',
-    'pybids==0.6.5',
+    'pybids>=0.7,<0.8',
     'scikit-image',
     'scipy',
     'seaborn',
