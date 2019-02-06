@@ -632,7 +632,7 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
         desc='a 3-D label image, with 0 denoting '
         'background, or a list of 3-D probability '
         'maps (one per label) or the equivalent 4D '
-        'file.')
+        'file or a 3-D label image containing parcels for each non-zero value.')
     class_labels = traits.List(
         mandatory=True,
         desc='Human-readable labels for each segment '
@@ -670,25 +670,37 @@ class SignalExtraction(SimpleInterface):
     output_spec = SignalExtractionOutputSpec
 
     def _run_interface(self, runtime):
+        img = nb.load(self.inputs.in_file)
         mask_imgs = [nb.load(fname) for fname in self.inputs.label_files]
-        if len(mask_imgs) == 1:
+        masksconcat = False
+        if len(mask_imgs) == 1 and len(mask_imgs[0].shape) == 4:
             mask_imgs = nb.four_to_three(mask_imgs[0])
-
-        masks = [mask_img.get_data().astype(np.bool) for mask_img in mask_imgs]
-
-        n_masks = len(masks)
+        
+        for i, mask in enumerate(mask_imgs):
+            if img.shape != mask.shape:
+                mask_imgs[i] = nli.resample_to_img(mask, img, interpolation='nearest')
+            
+        if len(mask_imgs) > 1: 
+            masks = [mask_img.get_data().astype(np.bool) for mask_img in mask_imgs]
+            n_masks = len(masks)
+        else:
+            masks = mask_imgs[0].get_data()
+            uniquevals = np.unique(masks)
+            n_masks = len(uniquevals[uniquevals > 0]) 
+            masksconcat = True
 
         if n_masks != len(self.inputs.class_labels):
             raise ValueError("Number of masks must match number of labels")
-
-        img = nb.load(self.inputs.in_file)
-
+        
         series = np.zeros((img.shape[3], n_masks))
 
         data = img.get_data()
         for j in range(n_masks):
-            series[:, j] = data[masks[j], :].mean(axis=0)
-
+            if masksconcat: 
+                series[:, j] = data[masks==(j+1), :].mean(axis=0)
+            else: 
+                series[:, j] = data[masks[j], :].mean(axis=0)
+                
         output = np.vstack((self.inputs.class_labels, series.astype(str)))
         self._results['out_file'] = os.path.join(runtime.cwd,
                                                  self.inputs.out_file)
