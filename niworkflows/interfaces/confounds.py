@@ -89,6 +89,8 @@ class SpikeRegressorsInputInterface(BaseInterfaceInputSpec):
         True, usedefault=True,
         desc='Indicates whether to concatenate spikes to existing confounds '
         'or return spikes only')
+    output_format = traits.Enum('spikes', 'mask', usedefault=True,
+                                desc='Format of output (spikes or mask)')
     output_file = traits.Str(desc='Output path')
 
 
@@ -119,7 +121,8 @@ class SpikeRegressors(SimpleInterface):
             header_prefix=self.inputs.header_prefix,
             lags=self.inputs.lags,
             minimum_contiguous=self.inputs.minimum_contiguous,
-            concatenate=self.inputs.concatenate
+            concatenate=self.inputs.concatenate,
+            output=self.inputs.output_format
         )
         confounds_data.to_csv(out_file, sep='\t', index=False,
                               na_rep='n/a')
@@ -128,7 +131,8 @@ class SpikeRegressors(SimpleInterface):
 
 
 def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
-                     lags=None, minimum_contiguous=None, concatenate=True):
+                     lags=None, minimum_contiguous=None, concatenate=True,
+                     output='spikes'):
     """
     Add spike regressors to a confound/nuisance matrix.
 
@@ -158,6 +162,10 @@ def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
     concatenate: bool
         Indicates whether the returned object should include only spikes
         (if false) or all input time series and spikes (if true, default).
+    output: str
+        Indicates whether the output should be formatted as spike regressors
+        ('spikes', a separate column for each outlier) or as a temporal mask
+        ('mask', a single output column indicating the locations of outliers).
 
     Returns
     -------
@@ -194,13 +202,19 @@ def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
         for end, length in zip(epoch_end, epoch_length):
             if length < minimum_contiguous:
                 mask = mask | set(range(end - length, end))
+        mask = mask.intersection(indices)
 
-    spikes = np.zeros((max(indices)+1, len(mask)))
-    for i, m in enumerate(sorted(mask)):
-        spikes[m, i] = 1
-    header = ['{:s}{:02d}'.format(header_prefix, vol)
-              for vol in range(len(mask))]
-    spikes = pd.DataFrame(data=spikes, columns=header)
+    if output == 'mask':
+        spikes = np.zeros(data.shape[0])
+        spikes[list(mask)] = 1
+        spikes = pd.DataFrame(data=spikes, columns=[header_prefix])
+    else:
+        spikes = np.zeros((max(indices)+1, len(mask)))
+        for i, m in enumerate(sorted(mask)):
+            spikes[m, i] = 1
+        header = ['{:s}{:02d}'.format(header_prefix, vol)
+                  for vol in range(len(mask))]
+        spikes = pd.DataFrame(data=spikes, columns=header)
     if concatenate:
         return pd.concat((data, spikes), axis=1)
     else:
