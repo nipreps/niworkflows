@@ -680,13 +680,13 @@ class SignalExtraction(SimpleInterface):
             if img.shape != mask.shape:
                 mask_imgs[i] = nli.resample_to_img(mask, img, interpolation='nearest')
             
-        if len(mask_imgs) > 1: 
+        if len(mask_imgs) > 1:
             masks = [mask_img.get_data().astype(np.bool) for mask_img in mask_imgs]
             n_masks = len(masks)
         else:
             masks = mask_imgs[0].get_data()
             uniquevals = np.unique(masks)
-            n_masks = len(uniquevals[uniquevals > 0]) 
+            n_masks = len(uniquevals[uniquevals > 0])
             masksconcat = True
 
         if n_masks != len(self.inputs.class_labels):
@@ -696,11 +696,10 @@ class SignalExtraction(SimpleInterface):
 
         data = img.get_data()
         for j in range(n_masks):
-            if masksconcat: 
+            if masksconcat:
                 series[:, j] = data[masks==(j+1), :].mean(axis=0)
-            else: 
+            else:
                 series[:, j] = data[masks[j], :].mean(axis=0)
-                
         output = np.vstack((self.inputs.class_labels, series.astype(str)))
         self._results['out_file'] = os.path.join(runtime.cwd,
                                                  self.inputs.out_file)
