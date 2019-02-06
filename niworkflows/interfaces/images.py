@@ -675,11 +675,11 @@ class SignalExtraction(SimpleInterface):
         masksconcat = False
         if len(mask_imgs) == 1 and len(mask_imgs[0].shape) == 4:
             mask_imgs = nb.four_to_three(mask_imgs[0])
-        
+
         for i, mask in enumerate(mask_imgs):
             if img.shape != mask.shape:
                 mask_imgs[i] = nli.resample_to_img(mask, img, interpolation='nearest')
-            
+
         if len(mask_imgs) > 1:
             masks = [mask_img.get_data().astype(np.bool) for mask_img in mask_imgs]
             n_masks = len(masks)
@@ -691,7 +691,7 @@ class SignalExtraction(SimpleInterface):
 
         if n_masks != len(self.inputs.class_labels):
             raise ValueError("Number of masks must match number of labels")
-        
+
         series = np.zeros((img.shape[3], n_masks))
 
         data = img.get_data()
