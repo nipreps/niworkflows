@@ -103,6 +103,23 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
     task = covertverbgeneration
     <BLANKLINE>
 
+    >>> from bids import BIDSLayout
+    >>> bids_info = BIDSInfo()
+    >>> bids_info.layout = BIDSLayout(str(datadir / 'ds114'), validate=False)
+    >>> bids_info.inputs.in_file = '''\
+sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz'''
+    >>> res = bids_info.run()
+    >>> res.outputs
+    <BLANKLINE>
+    acq = <undefined>
+    rec = <undefined>
+    run = <undefined>
+    session = retest
+    subject = 01
+    suffix = bold
+    task = covertverbgeneration
+    <BLANKLINE>
+
     """
     input_spec = BIDSInfoInputSpec
     output_spec = BIDSInfoOutputSpec
