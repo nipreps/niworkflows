@@ -697,7 +697,7 @@ class SignalExtraction(SimpleInterface):
         data = img.get_data()
         for j in range(n_masks):
             if masksconcat:
-                series[:, j] = data[masks==(j+1), :].mean(axis=0)
+                series[:, j] = data[masks == (j+1), :].mean(axis=0)
             else:
                 series[:, j] = data[masks[j], :].mean(axis=0)
         output = np.vstack((self.inputs.class_labels, series.astype(str)))
