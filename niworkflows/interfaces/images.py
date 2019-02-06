@@ -37,7 +37,8 @@ class IntraModalMergeOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='merged image')
     out_avg = File(exists=True, desc='average image')
     out_mats = OutputMultiPath(File(exists=True), desc='output matrices')
-    out_movpar = OutputMultiPath(File(exists=True), desc='output movement parameters')
+    out_movpar = OutputMultiPath(
+        File(exists=True), desc='output movement parameters')
 
 
 class IntraModalMerge(SimpleInterface):
@@ -115,7 +116,8 @@ DISCARD_TEMPLATE = """\t\t\t\t<li><abbr title="{path}">{basename}</abbr></li>"""
 
 
 class TemplateDimensionsInputSpec(BaseInterfaceInputSpec):
-    t1w_list = InputMultiPath(File(exists=True), mandatory=True, desc='input T1w images')
+    t1w_list = InputMultiPath(
+        File(exists=True), mandatory=True, desc='input T1w images')
     max_scale = traits.Float(3.0, usedefault=True,
                              desc='Maximum scaling factor in images to accept')
 
@@ -150,7 +152,8 @@ class TemplateDimensions(SimpleInterface):
     def _generate_segment(self, discards, dims, zooms):
         items = [DISCARD_TEMPLATE.format(path=path, basename=os.path.basename(path))
                  for path in discards]
-        discard_list = '\n'.join(["\t\t\t<ul>"] + items + ['\t\t\t</ul>']) if items else ''
+        discard_list = '\n'.join(
+            ["\t\t\t<ul>"] + items + ['\t\t\t</ul>']) if items else ''
         zoom_fmt = '{:.02g}mm x {:.02g}mm x {:.02g}mm'.format(*zooms)
         return CONFORMATION_TEMPLATE.format(n_t1w=len(self.inputs.t1w_list),
                                             dims='x'.join(map(str, dims)),
@@ -163,7 +166,8 @@ class TemplateDimensions(SimpleInterface):
         in_names = np.array(self.inputs.t1w_list)
         orig_imgs = np.vectorize(nb.load)(in_names)
         reoriented = np.vectorize(nb.as_closest_canonical)(orig_imgs)
-        all_zooms = np.array([img.header.get_zooms()[:3] for img in reoriented])
+        all_zooms = np.array([img.header.get_zooms()[:3]
+                              for img in reoriented])
         all_shapes = np.array([img.shape[:3] for img in reoriented])
 
         # Identify images that would require excessive up-sampling
@@ -188,7 +192,8 @@ class TemplateDimensions(SimpleInterface):
 
         # Create report
         dropped_images = in_names[~valid]
-        segment = self._generate_segment(dropped_images, target_shape, target_zooms)
+        segment = self._generate_segment(
+            dropped_images, target_shape, target_zooms)
         out_report = os.path.join(runtime.cwd, 'report.html')
         with open(out_report, 'w') as fobj:
             fobj.write(segment)
@@ -208,7 +213,8 @@ class ConformInputSpec(BaseInterfaceInputSpec):
 
 class ConformOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Conformed image')
-    transform = File(exists=True, desc='Conformation transform (voxel-to-voxel)')
+    transform = File(
+        exists=True, desc='Conformation transform (voxel-to-voxel)')
 
 
 class Conform(SimpleInterface):
@@ -261,23 +267,29 @@ class Conform(SimpleInterface):
         if rescale or resize:
             if rescale:
                 scale_factor = target_zooms / zooms
-                target_affine[:3, :3] = reoriented.affine[:3, :3].dot(np.diag(scale_factor))
+                target_affine[:3, :3] = reoriented.affine[:3, :3].dot(
+                    np.diag(scale_factor))
 
             if resize:
                 # The shift is applied after scaling.
                 # Use a proportional shift to maintain relative position in dataset
                 size_factor = target_span / (zooms * shape)
                 # Use integer shifts to avoid unnecessary interpolation
-                offset = (reoriented.affine[:3, 3] * size_factor - reoriented.affine[:3, 3])
-                target_affine[:3, 3] = reoriented.affine[:3, 3] + offset.astype(int)
+                offset = (reoriented.affine[:3, 3] *
+                          size_factor - reoriented.affine[:3, 3])
+                target_affine[:3, 3] = reoriented.affine[:3,
+                                                         3] + offset.astype(int)
 
-            data = nli.resample_img(reoriented, target_affine, target_shape).get_data()
+            data = nli.resample_img(
+                reoriented, target_affine, target_shape).get_data()
             conform_xfm = np.linalg.inv(reoriented.affine).dot(target_affine)
-            reoriented = reoriented.__class__(data, target_affine, reoriented.header)
+            reoriented = reoriented.__class__(
+                data, target_affine, reoriented.header)
 
         # Image may be reoriented, rescaled, and/or resized
         if reoriented is not orig_img:
-            out_name = fname_presuffix(fname, suffix='_ras', newpath=runtime.cwd)
+            out_name = fname_presuffix(
+                fname, suffix='_ras', newpath=runtime.cwd)
             reoriented.to_filename(out_name)
         else:
             out_name = fname
@@ -285,7 +297,8 @@ class Conform(SimpleInterface):
         transform = ornt_xfm.dot(conform_xfm)
         assert np.allclose(orig_img.affine.dot(transform), target_affine)
 
-        mat_name = fname_presuffix(fname, suffix='.mat', newpath=runtime.cwd, use_ext=False)
+        mat_name = fname_presuffix(
+            fname, suffix='.mat', newpath=runtime.cwd, use_ext=False)
         np.savetxt(mat_name, transform, fmt='%.08f')
 
         self._results['out_file'] = out_name
@@ -379,7 +392,8 @@ class ValidateImage(SimpleInterface):
             return runtime
 
         # A new file will be written
-        out_fname = fname_presuffix(self.inputs.in_file, suffix='_valid', newpath=runtime.cwd)
+        out_fname = fname_presuffix(
+            self.inputs.in_file, suffix='_valid', newpath=runtime.cwd)
         self._results['out_file'] = out_fname
 
         # Row 2:
@@ -420,7 +434,8 @@ class ValidateImage(SimpleInterface):
     Analyses of this dataset MAY BE INVALID.
 </p>
 """
-        snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (warning_txt, description)
+        snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (
+            warning_txt, description)
         # Store new file and report
         img.to_filename(out_fname)
         with open(out_report, 'w') as fobj:
@@ -678,10 +693,12 @@ class SignalExtraction(SimpleInterface):
 
         for i, mask in enumerate(mask_imgs):
             if img.shape != mask.shape:
-                mask_imgs[i] = nli.resample_to_img(mask, img, interpolation='nearest')
+                mask_imgs[i] = nli.resample_to_img(
+                    mask, img, interpolation='nearest')
 
         if len(mask_imgs) > 1:
-            masks = [mask_img.get_data().astype(np.bool) for mask_img in mask_imgs]
+            masks = [mask_img.get_data().astype(np.bool)
+                     for mask_img in mask_imgs]
             n_masks = len(masks)
         else:
             masks = mask_imgs[0].get_data()
