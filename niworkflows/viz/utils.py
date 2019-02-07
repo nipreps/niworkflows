@@ -201,12 +201,23 @@ def cuts_from_bbox(mask_nii, cuts=3):
     from nibabel.affines import apply_affine
 
     mask_data = mask_nii.get_data() > 0.0
+
+    # First, project the number of masked voxels on each axes
     ijk_counts = [
-        mask_data.sum(2).sum(0),  # project to i
-        mask_data.sum(2).sum(1),  # project to j
-        mask_data.sum(1).sum(0),  # project to k
+        mask_data.sum(2).sum(0),  # project to i (sagittal)
+        mask_data.sum(2).sum(1),  # project to j (coronal)
+        mask_data.sum(1).sum(0),  # project to k (axial)
     ]
 
+    # If all voxels are masked in a slice (say that happens at k=10),
+    # then the value for ijk_counts for the projection to k (ie. ijk_counts[2])
+    # at that element of the orthogonal axes (ijk_counts[2][10]) is
+    # the total number of voxels in that slice (ie. Ni x Nj).
+    # Here we define some thresholds to consider the plane as "masked"
+    # The thresholds vary because of the shape of the brain
+    # I have manually found that for the axial view requiring 30%
+    # of the slice elements to be masked drops almost empty boxes
+    # in the mosaic of axial planes (and also addresses #281)
     ijk_th = [
         int((mask_data.shape[1] * mask_data.shape[2]) * 0.2),   # sagittal
         int((mask_data.shape[0] * mask_data.shape[2]) * 0.0),   # coronal
