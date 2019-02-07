@@ -204,9 +204,9 @@ def cuts_from_bbox(mask_nii, cuts=3):
 
     # First, project the number of masked voxels on each axes
     ijk_counts = [
-        mask_data.sum(2).sum(0),  # project to i (sagittal)
-        mask_data.sum(2).sum(1),  # project to j (coronal)
-        mask_data.sum(1).sum(0),  # project to k (axial)
+        mask_data.sum(2).sum(1),  # project sagittal planes to transverse (i) axis
+        mask_data.sum(2).sum(0),  # project coronal planes to to longitudinal (j) axis
+        mask_data.sum(1).sum(0),  # project axial planes to vertical (k) axis
     ]
 
     # If all voxels are masked in a slice (say that happens at k=10),
