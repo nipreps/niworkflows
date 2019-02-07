@@ -146,8 +146,8 @@ def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
         value of the variable corresponding to the key exceeds the threshold
         indicated by the value, then a spike regressor is created for that
         frame. By default, the strategy from Power 2014 is implemented: any
-        frames with FD greater than 0.2 or DV greater than 20 are flagged for
-        censoring.
+        frames with FD greater than 0.5 or standardised DV greater than 1.5
+        are flagged for censoring.
     header_prefix: str
         The prefix used to indicate spike regressors in the output data table.
     lags: list(int)
@@ -181,8 +181,8 @@ def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
     mask = {}
     indices = range(data.shape[0])
     lags = lags or [0]
-    criteria = criteria or {'framewise_displacement': ('>', 0.2),
-                            'dvars': ('>', 20)}
+    criteria = criteria or {'framewise_displacement': ('>', 0.5),
+                            'std_dvars': ('>', 1.5)}
     for metric, (criterion, threshold) in criteria.items():
         if criterion == '<':
             mask[metric] = set(np.where(data[metric] < threshold)[0])
