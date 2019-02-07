@@ -9,6 +9,8 @@ from datetime import datetime as dt
 import pytest
 from templateflow.api import get as get_template
 
+filepath = os.path.dirname(os.path.realpath(__file__))
+datadir = os.path.realpath(os.path.join(filepath, 'data'))
 
 test_data_env = os.getenv('TEST_DATA_HOME',
                           str(Path.home() / '.cache' / 'stanford-crn'))
