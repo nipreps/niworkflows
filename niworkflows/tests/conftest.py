@@ -3,14 +3,16 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ py.test configuration file """
 import os
+from pathlib import Path
 from tempfile import mkdtemp
 from datetime import datetime as dt
 import pytest
 from templateflow.api import get as get_template
-from niworkflows.data.getters import get_ds003_downsampled
 
-filepath = os.path.dirname(os.path.realpath(__file__))
-datadir = os.path.realpath(os.path.join(filepath, 'data'))
+
+test_data_env = os.getenv('TEST_DATA_HOME',
+                          str(Path.home() / '.cache' / 'stanford-crn'))
+data_dir = Path(test_data_env) / 'ds003_downsampled'
 
 
 def _run_interface_mock(objekt, runtime):
@@ -40,7 +42,7 @@ def reference_mask():
 
 @pytest.fixture
 def moving():
-    return os.path.join(get_ds003_downsampled(), 'sub-01/anat/sub-01_T1w.nii.gz')
+    return str(data_dir / 'sub-01/anat/sub-01_T1w.nii.gz')
 
 
 @pytest.fixture
