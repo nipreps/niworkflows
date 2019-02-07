@@ -225,14 +225,19 @@ def cuts_from_bbox(mask_nii, cuts=3):
     ]
 
     vox_coords = []
-    for c, th in zip(ijk_counts, ijk_th):
+    for ax, (c, th) in enumerate(zip(ijk_counts, ijk_th)):
         B = np.argwhere(c > th)
-        # Avoid too narrow selections of cuts
-        if th > 0 and (B.min() + cuts + 1) >= B.max():
+        if B.size:
+            smin, smax = B.min(), B.max()
+
+        # Avoid too narrow selections of cuts (very small masks)
+        if not B.size or (th > 0 and (smin + cuts + 1) >= smax):
             B = np.argwhere(c > 0)
-        ijk = (B.min(), B.max())
-        inc = (ijk[1] - ijk[0]) / (cuts + 1)
-        vox_coords.append([ijk[0] + (i + 1) * inc for i in range(cuts)])
+
+        # Resort to full plane if mask is seemingly empty
+        smin, smax = B.min(), B.max() if B.size else (0, mask_data.shape[ax])
+        inc = (smax - smin) / (cuts + 1)
+        vox_coords.append([smin + (i + 1) * inc for i in range(cuts)])
 
     ras_coords = []
     for cross in np.array(vox_coords).T:
