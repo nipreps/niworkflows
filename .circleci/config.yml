@@ -119,8 +119,8 @@ jobs:
       image: circleci/classic:201711-01
     working_directory: /tmp/tests
     steps:
-      # - attach_workspace:
-      #     at: /tmp
+      - attach_workspace:
+          at: /tmp
       - restore_cache:
           keys:
             - docker-v1-{{ .Branch }}-{{ epoch }}
@@ -156,7 +156,7 @@ jobs:
             sudo setfacl -d -m group:ubuntu:rwx $PWD
             sudo setfacl -m group:ubuntu:rwx $PWD
             docker run -it --rm=false \
-              -e TEST_DATA_HOME=/tmp/data \
+              -e TEST_DATA_HOME=/data -v /tmp/data:/data \
               -v ${PWD}:/tmp niworkflows:py3 \
               pytest --junit-xml=/tmp/pytest.xml \
                      --cov niworkflows --cov-report xml:/tmp/unittests.xml \
@@ -175,7 +175,8 @@ jobs:
           no_output_timeout: 2h
           command: |
             docker run -it --rm=false \
-              -e SAVE_CIRCLE_ARTIFACTS="/tmp" -e TEST_DATA_HOME=/tmp/data \
+              -e SAVE_CIRCLE_ARTIFACTS="/tmp" \
+              -e TEST_DATA_HOME=/data -v /tmp/data:/data \
               -v /tmp/fslicense/license.txt:/opt/freesurfer/license.txt:ro \
               -v ${PWD}:/tmp niworkflows:py3 \
               pytest -n auto --junit-xml=/tmp/reportlets.xml \
