@@ -227,8 +227,11 @@ def cuts_from_bbox(mask_nii, cuts=3):
     vox_coords = []
     for c, th in zip(ijk_counts, ijk_th):
         B = np.argwhere(c > th)
+        # Avoid too narrow selections of cuts
+        if ijk_th > 0 and (B.min() + cuts + 1) >= B.max():
+            B = np.argwhere(c > 0)
         ijk = (B.min(), B.max())
-        inc = abs(ijk[1] - ijk[0]) / (cuts + 1)
+        inc = (ijk[1] - ijk[0]) / (cuts + 1)
         vox_coords.append([ijk[0] + (i + 1) * inc for i in range(cuts)])
 
     ras_coords = []
