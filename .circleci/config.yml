@@ -93,8 +93,8 @@ jobs:
             mkdir -p /tmp/data
             if [[ ! -d /tmp/data/BIDS-examples-1-enh-ds054 ]]; then
               wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O BIDS-examples-1-enh-ds054.tar.gz "http://github.com/chrisfilo/BIDS-examples-1/archive/enh/ds054.zip"
-              tar xvzf BIDS-examples-1-enh-ds054.tar.gz -C /tmp/data/BIDS-examples-1-enh-ds054/
+                -O BIDS-examples-1-enh-ds054.zip "http://github.com/chrisfilo/BIDS-examples-1/archive/enh/ds054.zip"
+              unzip BIDS-examples-1-enh-ds054.zip -d /tmp/data/
             else
               echo "BIDS stub was cached"
             fi
@@ -129,10 +129,6 @@ jobs:
             - docker-v1-
       - checkout:
           path: /tmp/src/niworkflows
-      - run:
-          name: Get test data
-          command: |
-            if []
       - run:
           name: Load Docker image layer cache
           no_output_timeout: 30m
