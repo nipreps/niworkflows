@@ -1,3 +1,11 @@
+0.7.1 (February 07, 2019)
+=========================
+
+  * [TST] Add test on ``BIDSInfo`` interface (#302) @oesteban
+  * [MNT] Deprecate ``getters`` module (#305) @oesteban
+  * [FIX] Improve bounding box computation from masks (#304) @oesteban
+
+
 0.7.0 (February 04, 2019)
 =========================
 
