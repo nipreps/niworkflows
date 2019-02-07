@@ -169,9 +169,7 @@ RUN echo "${VERSION}" > /src/niworkflows/niworkflows/VERSION && \
     pip install .[all] && \
     rm -rf ~/.cache/pip
 
-# Pre-install data
-RUN python -c 'from niworkflows.data.getters import get_ds003_downsampled; get_ds003_downsampled()'
-
+# Final settings
 WORKDIR /tmp
 ARG BUILD_DATE
 ARG VCS_REF

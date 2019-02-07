@@ -7,8 +7,12 @@ Data grabbers
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
 
+from warnings import warn
 from ..data.utils import fetch_file
 
+DEPRECATION_MSG = """\
+Module ``niworkflows.data.getters`` has been deprecated in 0.7.1, \
+and will be removed in 0.8."""
 
 OSF_PROJECT_URL = ('https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/')
 OSF_RESOURCES = {
@@ -54,6 +58,7 @@ def get_dataset(dataset_name, dataset_prefix=None, data_dir=None,
     :param str url: download URL of the dataset. Overwrite the default URL.
 
     """
+    warn(DEPRECATION_MSG)
     file_id, md5 = OSF_RESOURCES[dataset_name]
     if url is None:
         url = '{}/{}'.format(OSF_PROJECT_URL, file_id)
@@ -63,6 +68,7 @@ def get_dataset(dataset_name, dataset_prefix=None, data_dir=None,
 
 def get_template(template_name, data_dir=None, url=None, resume=True, verbose=1):
     """Download and load a template"""
+    warn(DEPRECATION_MSG)
     if template_name.startswith('tpl-'):
         template_name = template_name[4:]
 
@@ -80,6 +86,7 @@ def get_brainweb_1mm_normal(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
 
     """
+    warn(DEPRECATION_MSG)
     return get_dataset('brainweb', data_dir=data_dir, url=url,
                        resume=resume, verbose=verbose)
 
@@ -92,6 +99,7 @@ def get_ds003_downsampled(data_dir=None, url=None, resume=True, verbose=1):
     :param str url: download URL of the dataset. Overwrite the default URL.
 
     """
+    warn(DEPRECATION_MSG)
     return get_dataset('ds003_downsampled', data_dir=data_dir, url=url,
                        resume=resume, verbose=verbose)
 
@@ -99,6 +107,7 @@ def get_ds003_downsampled(data_dir=None, url=None, resume=True, verbose=1):
 def get_bids_examples(data_dir=None, url=None, resume=True, verbose=1,
                       variant='BIDS-examples-1-1.0.0-rc3u5'):
     """Download BIDS-examples-1"""
+    warn(DEPRECATION_MSG)
     variant = 'BIDS-examples-1-1.0.0-rc3u5' if variant not in BIDS_EXAMPLES else variant
     if url is None:
         url = BIDS_EXAMPLES[variant][0]
