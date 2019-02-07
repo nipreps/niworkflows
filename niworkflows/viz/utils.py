@@ -199,20 +199,50 @@ def extract_svg(display_object, dpi=300, compress='auto'):
 def cuts_from_bbox(mask_nii, cuts=3):
     """Finds equi-spaced cuts for presenting images"""
     from nibabel.affines import apply_affine
-    mask_data = mask_nii.get_data()
-    B = np.argwhere(mask_data > 0)
-    start_coords = B.min(0)
-    stop_coords = B.max(0) + 1
+
+    mask_data = mask_nii.get_data() > 0.0
+
+    # First, project the number of masked voxels on each axes
+    ijk_counts = [
+        mask_data.sum(2).sum(1),  # project sagittal planes to transverse (i) axis
+        mask_data.sum(2).sum(0),  # project coronal planes to to longitudinal (j) axis
+        mask_data.sum(1).sum(0),  # project axial planes to vertical (k) axis
+    ]
+
+    # If all voxels are masked in a slice (say that happens at k=10),
+    # then the value for ijk_counts for the projection to k (ie. ijk_counts[2])
+    # at that element of the orthogonal axes (ijk_counts[2][10]) is
+    # the total number of voxels in that slice (ie. Ni x Nj).
+    # Here we define some thresholds to consider the plane as "masked"
+    # The thresholds vary because of the shape of the brain
+    # I have manually found that for the axial view requiring 30%
+    # of the slice elements to be masked drops almost empty boxes
+    # in the mosaic of axial planes (and also addresses #281)
+    ijk_th = [
+        int((mask_data.shape[1] * mask_data.shape[2]) * 0.2),   # sagittal
+        int((mask_data.shape[0] * mask_data.shape[2]) * 0.0),   # coronal
+        int((mask_data.shape[0] * mask_data.shape[1]) * 0.3),   # axial
+    ]
 
     vox_coords = []
-    for start, stop in zip(start_coords, stop_coords):
-        inc = abs(stop - start) / (cuts + 1)
-        vox_coords.append([start + (i + 1) * inc for i in range(cuts)])
+    for ax, (c, th) in enumerate(zip(ijk_counts, ijk_th)):
+        B = np.argwhere(c > th)
+        if B.size:
+            smin, smax = B.min(), B.max()
+
+        # Avoid too narrow selections of cuts (very small masks)
+        if not B.size or (th > 0 and (smin + cuts + 1) >= smax):
+            B = np.argwhere(c > 0)
+
+        # Resort to full plane if mask is seemingly empty
+        smin, smax = B.min(), B.max() if B.size else (0, mask_data.shape[ax])
+        inc = (smax - smin) / (cuts + 1)
+        vox_coords.append([smin + (i + 1) * inc for i in range(cuts)])
 
     ras_coords = []
     for cross in np.array(vox_coords).T:
-        ras_coords.append(apply_affine(mask_nii.affine, cross).tolist())
-
+        ras_coords.append(apply_affine(
+            mask_nii.affine, cross).tolist())
     ras_cuts = [list(coords) for coords in np.transpose(ras_coords)]
     return {k: v for k, v in zip(['x', 'y', 'z'], ras_cuts)}
 
