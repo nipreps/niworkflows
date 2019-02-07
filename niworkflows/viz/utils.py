@@ -199,20 +199,31 @@ def extract_svg(display_object, dpi=300, compress='auto'):
 def cuts_from_bbox(mask_nii, cuts=3):
     """Finds equi-spaced cuts for presenting images"""
     from nibabel.affines import apply_affine
-    mask_data = mask_nii.get_data()
-    B = np.argwhere(mask_data > 0)
-    start_coords = B.min(0)
-    stop_coords = B.max(0) + 1
+
+    mask_data = mask_nii.get_data() > 0.0
+    ijk_counts = [
+        mask_data.sum(2).sum(0),  # project to i
+        mask_data.sum(2).sum(1),  # project to j
+        mask_data.sum(1).sum(0),  # project to k
+    ]
+
+    ijk_th = [
+        int((mask_data.shape[1] * mask_data.shape[2]) * 0.2),   # sagittal
+        int((mask_data.shape[0] * mask_data.shape[2]) * 0.0),   # coronal
+        int((mask_data.shape[0] * mask_data.shape[1]) * 0.3),   # axial
+    ]
 
     vox_coords = []
-    for start, stop in zip(start_coords, stop_coords):
-        inc = abs(stop - start) / (cuts + 1)
-        vox_coords.append([start + (i + 1) * inc for i in range(cuts)])
+    for c, th in zip(ijk_counts, ijk_th):
+        B = np.argwhere(c > th)
+        ijk = (B.min(), B.max())
+        inc = abs(ijk[1] - ijk[0]) / (cuts + 1)
+        vox_coords.append([ijk[0] + (i + 1) * inc for i in range(cuts)])
 
     ras_coords = []
     for cross in np.array(vox_coords).T:
-        ras_coords.append(apply_affine(mask_nii.affine, cross).tolist())
-
+        ras_coords.append(apply_affine(
+            mask_nii.affine, cross).tolist())
     ras_cuts = [list(coords) for coords in np.transpose(ras_coords)]
     return {k: v for k, v in zip(['x', 'y', 'z'], ras_cuts)}
 
