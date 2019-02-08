@@ -12,12 +12,36 @@ from niworkflows.interfaces.confounds import ExpandModel, SpikeRegressors
 from niworkflows.tests.conftest import datadir
 
 
+def _smoke_test_report(report_interface, artifact_name):
+    report_interface.run()
+    out_report = report_interface.inputs.out_report
+
+    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+    if save_artifacts:
+        copy(out_report, os.path.join(save_artifacts, artifact_name))
+    assert os.path.isfile(out_report), 'Report "%s" does not exist' % out_report
+
+
 def _expand_test(orig_data_file, model_formula):
     exp_data_file = ExpandModel(
         confounds_file=orig_data_file,
         model_formula=model_formula
     ).run().outputs.confounds_file
     return pd.read_csv(exp_data_file, sep='\t')
+
+
+def _spikes_test(orig_data_file, criteria, lags=None,
+                mincontig=None, fmt='mask'):
+    lags = lags or [0]
+    spk_data_file = SpikeRegressors(
+        confounds_file=orig_data_file,
+        criteria=criteria,
+        lags=lags,
+        minimum_contiguous=mincontig,
+        output_format=fmt,
+        concatenate=False
+    ).run().outputs.confounds_file
+    return pd.read_csv(spk_data_file, sep='\t')
 
 
 orig_data_file = os.path.join(datadir, 'confounds_test.tsv')
@@ -74,3 +98,35 @@ def test_expansion_na_robustness():
     for col in expected_data.columns:
         pd.testing.assert_series_equal(expected_data[col], exp_data[col],
                                check_dtype=False)
+
+
+def test_spikes():
+    """Test outlier flagging"""
+    criteria = {
+        'd': ('>', 6),
+        'a': ('<', -4)
+    }
+    outliers = [1, 1, 0, 0, 1]
+    spk_data = _spikes_test(orig_data_file, criteria)
+    assert np.all(np.isclose(outliers, spk_data['motion_outlier']))
+
+    outliers_spikes = pd.DataFrame({
+        'motion_outlier00': [1, 0, 0, 0, 0],
+        'motion_outlier01': [0, 1, 0, 0, 0],
+        'motion_outlier02': [0, 0, 0, 0, 1],
+    })
+    spk_data = _spikes_test(orig_data_file, criteria, fmt='spikes')
+    assert set(spk_data.columns) == set(outliers_spikes.columns)
+    for col in outliers_spikes.columns:
+        assert np.all(np.isclose(outliers_spikes[col], spk_data[col]))
+
+    lags = [0, 1]
+    outliers_lags = [1, 1, 1, 0, 1]
+    spk_data = _spikes_test(orig_data_file, criteria, lags=lags)
+    assert np.all(np.isclose(outliers_lags, spk_data['motion_outlier']))
+
+    mincontig = 2
+    outliers_mc = [1, 1, 1, 1, 1]
+    spk_data = _spikes_test(orig_data_file, criteria, lags=lags,
+                            mincontig=mincontig)
+    assert np.all(np.isclose(outliers_mc, spk_data['motion_outlier']))
