@@ -568,23 +568,42 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     Ny = Fs / 2
     f = Ny * (np.array(list(range(1, power.shape[0] + 1)))) / (power.shape[0])
 
-    n_rows = int((n_components + (n_components % 2)) / 2)
-    fig = plt.figure(figsize=(6.5 * 1.5, n_rows * 0.85))
-    gs = GridSpec(n_rows * 2, 9,
-                  width_ratios=[1, 1, 1, 4, 0.001, 1, 1, 1, 4, ],
-                  height_ratios=[1.1, 1] * n_rows)
-
     noise_components = None
     if noise_components_file:
         noise_components = np.loadtxt(noise_components_file,
                                       dtype=int, delimiter=',', ndmin=1)
+
+    n_rows = int((n_components + (n_components % 2)) / 2)
+    warning_row = int(noise_components is None or
+                      noise_components.size == 0 or
+                      noise_components.size == n_components)
+    fig = plt.figure(figsize=(6.5 * 1.5, (n_rows + warning_row) * 0.85))
+    gs = GridSpec(n_rows * 2 + warning_row, 9,
+                  width_ratios=[1, 1, 1, 4, 0.001, 1, 1, 1, 4, ],
+                  height_ratios=[5] * warning_row + [1.1, 1] * n_rows)
+
+    if warning_row:
+        ax = fig.add_subplot(gs[0, :])
+        ncomps = 'NONE of the'
+        if noise_components is not None and noise_components.size == n_components:
+            ncomps = 'ALL'
+        ax.annotate(
+            'WARNING: {} components were classified as noise'.format(ncomps),
+            xy=(0.0, 0.5), xycoords='axes fraction',
+            xytext=(0.01, 0.5), textcoords='axes fraction',
+            size=12, color='#ea8800',
+            bbox=dict(boxstyle="round",
+                      fc='#f7dcb7',
+                      ec='#FC990E'))
+        ax.axes.get_xaxis().set_visible(False)
+        ax.axes.get_yaxis().set_visible(False)
 
     for i, img in enumerate(
             iter_img(os.path.join(melodic_dir, "melodic_IC.nii.gz"))):
 
         col = i % 2
         row = int(i / 2)
-        l_row = row * 2
+        l_row = row * 2 + warning_row
 
         # Set default colors
         color_title = 'k'
