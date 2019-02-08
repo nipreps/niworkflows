@@ -6,10 +6,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import numpy as np
 import pandas as pd
-#from ..interfaces.confounds import ExpandModel, SpikeRegressors
-#from .conftest import datadir
-from niworkflows.interfaces.confounds import ExpandModel, SpikeRegressors
-from niworkflows.tests.conftest import datadir
+from ..interfaces.confounds import ExpandModel, SpikeRegressors
+from ..interfaces.plotting import (
+    CompCorVariancePlot, ConfoundsCorrelationPlot)
+from .conftest import datadir
 
 
 def _smoke_test_report(report_interface, artifact_name):
@@ -127,3 +127,19 @@ def test_spikes():
     spk_data = _spikes_test(criteria, lags=lags,
                             mincontig=mincontig)
     assert np.all(np.isclose(outliers_mc, spk_data['motion_outlier']))
+
+
+def test_CompCorVariancePlot():
+    """CompCor variance report test"""
+    metadata_file = os.path.join(datadir, 'confounds_metadata_test.tsv')
+    cc_rpt = CompCorVariancePlot(metadata_files=[metadata_file],
+                                 metadata_sources=['aCompCor'])
+    _smoke_test_report(cc_rpt, 'compcor_variance.svg')
+
+
+def test_ConfoundsCorrelationPlot():
+    """confounds correlation report test"""
+    confounds_file = os.path.join(datadir, 'confounds_test.tsv')
+    cc_rpt = ConfoundsCorrelationPlot(confounds_file=confounds_file,
+                                      reference_column='a')
+    _smoke_test_report(cc_rpt, 'confounds_correlation.svg')
