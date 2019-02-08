@@ -25,7 +25,9 @@ class ExpandModelInputInterface(BaseInterfaceInputSpec):
     model_formula = traits.Str(
         '(dd1(rps + wm + csf + gsr))^^2 + others', usedefault=True,
         desc='Formula for generating model expansions. By default, the '
-        '32-parameter expansion will be generated.')
+        '32-parameter expansion will be generated. Note that any expressions '
+        'to be expanded *must* be in parentheses, even if they include only '
+        'a single variable (e.g., (x)^2, not x^2).')
     output_file = traits.Str(desc='Output path')
 
 
@@ -476,6 +478,8 @@ def parse_formula(model_formula, parent_data, unscramble=False):
     model_formula: str
         Expression for the model formula, e.g.
         '(a + b)^^2 + dd1(c + (d + e)^3) + f'
+        Note that any expressions to be expanded *must* be in parentheses,
+        even if they include only a single variable (e.g., (x)^2, not x^2).
     parent_data: pandas DataFrame
         A tabulation of all values usable in the model formula. Each additive
         term in `model_formula` should correspond either to a variable in this
