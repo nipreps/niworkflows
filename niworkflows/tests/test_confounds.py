@@ -15,7 +15,7 @@ from .conftest import datadir
 
 def _smoke_test_report(report_interface, artifact_name):
     report_interface.run()
-    out_report = report_interface.inputs.out_file
+    out_report = report_interface.outputs.out_file
 
     save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
     if save_artifacts:
