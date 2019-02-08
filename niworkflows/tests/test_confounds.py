@@ -14,7 +14,7 @@ from niworkflows.tests.conftest import datadir
 
 def _smoke_test_report(report_interface, artifact_name):
     report_interface.run()
-    out_report = report_interface.inputs.out_report
+    out_report = report_interface.inputs.out_file
 
     save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
     if save_artifacts:
@@ -22,7 +22,8 @@ def _smoke_test_report(report_interface, artifact_name):
     assert os.path.isfile(out_report), 'Report "%s" does not exist' % out_report
 
 
-def _expand_test(orig_data_file, model_formula):
+def _expand_test(model_formula):
+    orig_data_file = os.path.join(datadir, 'confounds_test.tsv')
     exp_data_file = ExpandModel(
         confounds_file=orig_data_file,
         model_formula=model_formula
@@ -30,8 +31,8 @@ def _expand_test(orig_data_file, model_formula):
     return pd.read_csv(exp_data_file, sep='\t')
 
 
-def _spikes_test(orig_data_file, criteria, lags=None,
-                mincontig=None, fmt='mask'):
+def _spikes_test(criteria, lags=None, mincontig=None, fmt='mask'):
+    orig_data_file = os.path.join(datadir, 'confounds_test.tsv')
     lags = lags or [0]
     spk_data_file = SpikeRegressors(
         confounds_file=orig_data_file,
@@ -44,10 +45,6 @@ def _spikes_test(orig_data_file, criteria, lags=None,
     return pd.read_csv(spk_data_file, sep='\t')
 
 
-orig_data_file = os.path.join(datadir, 'confounds_test.tsv')
-orig_data = pd.read_csv(orig_data_file, sep='\t')
-
-
 def test_expansion_variable_selection():
     """Test model expansion: simple variable selection"""
     model_formula = 'a + b + c + d'
@@ -57,7 +54,7 @@ def test_expansion_variable_selection():
         'c': [0, 1, 0, 1, 0],
         'd': [9, 7, 5, 3, 1],
     })
-    exp_data = _expand_test(orig_data_file, model_formula)
+    exp_data = _expand_test(model_formula)
     pd.testing.assert_frame_equal(exp_data, expected_data)
 
 
@@ -77,7 +74,7 @@ def test_expansion_derivatives_and_powers():
         'e': [0, 0, 0, 0, 0],
         'f': [np.NaN, 6, 4, 2, 0],
     })
-    exp_data = _expand_test(orig_data_file, model_formula)
+    exp_data = _expand_test(model_formula)
     assert set(exp_data.columns) == set(expected_data.columns)
     for col in expected_data.columns:
         pd.testing.assert_series_equal(expected_data[col], exp_data[col],
@@ -93,7 +90,7 @@ def test_expansion_na_robustness():
         'f_derivative1': [np.NaN, np.NaN, -2, -2, -2],
         'f_derivative1_power2': [np.NaN, np.NaN, 4, 4, 4],
     })
-    exp_data = _expand_test(orig_data_file, model_formula)
+    exp_data = _expand_test(model_formula)
     assert set(exp_data.columns) == set(expected_data.columns)
     for col in expected_data.columns:
         pd.testing.assert_series_equal(expected_data[col], exp_data[col],
@@ -107,7 +104,7 @@ def test_spikes():
         'a': ('<', -4)
     }
     outliers = [1, 1, 0, 0, 1]
-    spk_data = _spikes_test(orig_data_file, criteria)
+    spk_data = _spikes_test(criteria)
     assert np.all(np.isclose(outliers, spk_data['motion_outlier']))
 
     outliers_spikes = pd.DataFrame({
@@ -115,18 +112,18 @@ def test_spikes():
         'motion_outlier01': [0, 1, 0, 0, 0],
         'motion_outlier02': [0, 0, 0, 0, 1],
     })
-    spk_data = _spikes_test(orig_data_file, criteria, fmt='spikes')
+    spk_data = _spikes_test(criteria, fmt='spikes')
     assert set(spk_data.columns) == set(outliers_spikes.columns)
     for col in outliers_spikes.columns:
         assert np.all(np.isclose(outliers_spikes[col], spk_data[col]))
 
     lags = [0, 1]
     outliers_lags = [1, 1, 1, 0, 1]
-    spk_data = _spikes_test(orig_data_file, criteria, lags=lags)
+    spk_data = _spikes_test(criteria, lags=lags)
     assert np.all(np.isclose(outliers_lags, spk_data['motion_outlier']))
 
     mincontig = 2
     outliers_mc = [1, 1, 1, 1, 1]
-    spk_data = _spikes_test(orig_data_file, criteria, lags=lags,
+    spk_data = _spikes_test(criteria, lags=lags,
                             mincontig=mincontig)
     assert np.all(np.isclose(outliers_mc, spk_data['motion_outlier']))
