@@ -4,6 +4,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
+from shutil import copy
 import numpy as np
 import pandas as pd
 from ..interfaces.confounds import ExpandModel, SpikeRegressors
@@ -78,7 +79,7 @@ def test_expansion_derivatives_and_powers():
     assert set(exp_data.columns) == set(expected_data.columns)
     for col in expected_data.columns:
         pd.testing.assert_series_equal(expected_data[col], exp_data[col],
-                               check_dtype=False)
+                                       check_dtype=False)
 
 
 def test_expansion_na_robustness():
@@ -94,7 +95,7 @@ def test_expansion_na_robustness():
     assert set(exp_data.columns) == set(expected_data.columns)
     for col in expected_data.columns:
         pd.testing.assert_series_equal(expected_data[col], exp_data[col],
-                               check_dtype=False)
+                                       check_dtype=False)
 
 
 def test_spikes():
@@ -124,8 +125,7 @@ def test_spikes():
 
     mincontig = 2
     outliers_mc = [1, 1, 1, 1, 1]
-    spk_data = _spikes_test(criteria, lags=lags,
-                            mincontig=mincontig)
+    spk_data = _spikes_test(criteria, lags=lags, mincontig=mincontig)
     assert np.all(np.isclose(outliers_mc, spk_data['motion_outlier']))
 
 
