@@ -1,3 +1,9 @@
+0.7.1.post1 (February 12, 2019)
+===============================
+
+  * [FIX] Do not cast ``run`` BIDS-entity to string (#307) @oesteban
+
+
 0.7.1 (February 07, 2019)
 =========================
 
