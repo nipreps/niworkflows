@@ -44,9 +44,9 @@ class BIDSInfoOutputSpec(DynamicTraitedSpec):
     subject = traits.Str()
     session = traits.Str()
     task = traits.Str()
-    acq = traits.Str()
-    rec = traits.Str()
-    run = traits.Str()
+    acquisition = traits.Str()
+    reconstruction = traits.Str()
+    run = traits.Int()
     suffix = traits.Str()
 
 
@@ -63,9 +63,39 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
     >>> res = bids_info.run()
     >>> res.outputs
     <BLANKLINE>
-    acq = <undefined>
-    rec = <undefined>
+    acquisition = <undefined>
+    reconstruction = <undefined>
     run = <undefined>
+    session = retest
+    subject = 01
+    suffix = bold
+    task = covertverbgeneration
+    <BLANKLINE>
+
+    >>> bids_info = BIDSInfo(bids_dir=str(datadir / 'ds054'), bids_validate=False)
+    >>> bids_info.inputs.in_file = '''\
+sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_rec-MB_acq-AP_run-1_bold.nii.gz'''
+    >>> res = bids_info.run()
+    >>> res.outputs
+    <BLANKLINE>
+    acquisition = AP
+    reconstruction = MB
+    run = 1
+    session = retest
+    subject = 01
+    suffix = bold
+    task = covertverbgeneration
+    <BLANKLINE>
+
+    >>> bids_info = BIDSInfo(bids_dir=str(datadir / 'ds054'), bids_validate=False)
+    >>> bids_info.inputs.in_file = '''\
+sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_acq-AP_run-01_bold.nii.gz'''
+    >>> res = bids_info.run()
+    >>> res.outputs
+    <BLANKLINE>
+    acquisition = AP
+    reconstruction = <undefined>
+    run = 1
     session = retest
     subject = 01
     suffix = bold
@@ -79,8 +109,8 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
     >>> res = bids_info.run()
     >>> res.outputs
     <BLANKLINE>
-    acq = <undefined>
-    rec = <undefined>
+    acquisition = <undefined>
+    reconstruction = <undefined>
     run = <undefined>
     session = retest
     subject = 01
@@ -94,8 +124,8 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
     >>> res = bids_info.run()
     >>> res.outputs
     <BLANKLINE>
-    acq = <undefined>
-    rec = <undefined>
+    acquisition = <undefined>
+    reconstruction = <undefined>
     run = <undefined>
     session = retest
     subject = 01
@@ -111,8 +141,8 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
     >>> res = bids_info.run()
     >>> res.outputs
     <BLANKLINE>
-    acq = <undefined>
-    rec = <undefined>
+    acquisition = <undefined>
+    reconstruction = <undefined>
     run = <undefined>
     session = retest
     subject = 01
