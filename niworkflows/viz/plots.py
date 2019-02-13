@@ -479,7 +479,8 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
     nonnan = tseries[~np.isnan(tseries)]
     if nonnan.size > 0:
         # Calculate Y limits
-        def_ylims = [nonnan.min() - 0.1 * abs(nonnan.min()), 1.1 * nonnan.max()]
+        valrange = (nonnan.max() - nonnan.min())
+        def_ylims = [nonnan.min() - 0.1 * nonnan_range, nonnan.max() + 0.1 * nonnan_range]
         if ylims is not None:
             if ylims[0] is not None:
                 def_ylims[0] = min([def_ylims[0], ylims[0]])
@@ -539,7 +540,7 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
         ax_dist = plt.subplot(gs_dist)
         sns.displot(tseries, vertical=True, ax=ax_dist)
         ax_dist.set_xlabel('Timesteps')
-        ax_dist.set_ylim(ax_ts.get_ylim())
+        ax_dist.set_ylim([])
         ax_dist.set_yticklabels([])
 
         return [ax_ts, ax_dist], gs
