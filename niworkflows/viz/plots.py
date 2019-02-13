@@ -540,7 +540,7 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
         ax_dist = plt.subplot(gs_dist)
         sns.displot(tseries, vertical=True, ax=ax_dist)
         ax_dist.set_xlabel('Timesteps')
-        ax_dist.set_ylim([])
+        ax_dist.set_ylim(ax_ts.get_ylim())
         ax_dist.set_yticklabels([])
 
         return [ax_ts, ax_dist], gs
