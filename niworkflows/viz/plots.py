@@ -479,7 +479,8 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
     nonnan = tseries[~np.isnan(tseries)]
     if nonnan.size > 0:
         # Calculate Y limits
-        def_ylims = [nonnan.min() - 0.1 * abs(nonnan.min()), 1.1 * nonnan.max()]
+        valrange = (nonnan.max() - nonnan.min())
+        def_ylims = [nonnan.min() - 0.1 * valrange, nonnan.max() + 0.1 * valrange]
         if ylims is not None:
             if ylims[0] is not None:
                 def_ylims[0] = min([def_ylims[0], ylims[0]])
