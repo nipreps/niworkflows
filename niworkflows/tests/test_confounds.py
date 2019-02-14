@@ -31,12 +31,13 @@ def _expand_test(model_formula):
     return pd.read_csv(exp_data_file, sep='\t')
 
 
-def _spikes_test(criteria, lags=None, mincontig=None, fmt='mask'):
-    orig_data_file = os.path.join(datadir, 'confounds_test.tsv')
+def _spikes_test(lags=None, mincontig=None, fmt='mask'):
+    orig_data_file = os.path.join(datadir, 'spikes_test.tsv')
     lags = lags or [0]
     spk_data_file = SpikeRegressors(
         confounds_file=orig_data_file,
-        criteria=criteria,
+        fd_thresh=4,
+        dvars_thresh=6,
         lags=lags,
         minimum_contiguous=mincontig,
         output_format=fmt,
@@ -99,12 +100,8 @@ def test_expansion_na_robustness():
 
 def test_spikes():
     """Test outlier flagging"""
-    criteria = {
-        'd': ('>', 6),
-        'a': ('<', -4)
-    }
     outliers = [1, 1, 0, 0, 1]
-    spk_data = _spikes_test(criteria)
+    spk_data = _spikes_test()
     assert np.all(np.isclose(outliers, spk_data['motion_outlier']))
 
     outliers_spikes = pd.DataFrame({
@@ -112,19 +109,19 @@ def test_spikes():
         'motion_outlier01': [0, 1, 0, 0, 0],
         'motion_outlier02': [0, 0, 0, 0, 1],
     })
-    spk_data = _spikes_test(criteria, fmt='spikes')
+    spk_data = _spikes_test(fmt='spikes')
     assert set(spk_data.columns) == set(outliers_spikes.columns)
     for col in outliers_spikes.columns:
         assert np.all(np.isclose(outliers_spikes[col], spk_data[col]))
 
     lags = [0, 1]
     outliers_lags = [1, 1, 1, 0, 1]
-    spk_data = _spikes_test(criteria, lags=lags)
+    spk_data = _spikes_test(lags=lags)
     assert np.all(np.isclose(outliers_lags, spk_data['motion_outlier']))
 
     mincontig = 2
     outliers_mc = [1, 1, 1, 1, 1]
-    spk_data = _spikes_test(criteria, lags=lags, mincontig=mincontig)
+    spk_data = _spikes_test(lags=lags, mincontig=mincontig)
     assert np.all(np.isclose(outliers_mc, spk_data['motion_outlier']))
 
 
