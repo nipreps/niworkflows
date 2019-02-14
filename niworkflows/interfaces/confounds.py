@@ -27,8 +27,25 @@ class ExpandModelInputInterface(BaseInterfaceInputSpec):
         desc='Formula for generating model expansions. By default, the '
         '32-parameter expansion will be generated. Note that any expressions '
         'to be expanded *must* be in parentheses, even if they include only '
-        'a single variable (e.g., (x)^2, not x^2).')
-    output_file = traits.Str(desc='Output path')
+        'a single variable (e.g., (x)^2, not x^2).'
+        'Examples:\n'
+        '* rps + wm + csf + gsr : 9-parameter model. rps denotes realignment '
+        'parameters, wm denotes mean white matter signal, csf denotes mean '
+        'cerebrospinal fluid signal, and gsr denotes mean global signal.\n')
+        '* (dd1(rps + wm + csf + gsr))^^2 : 36-parameter expansion.'
+        'rps + wm + csf + gsr denotes that realignment parameters and mean '
+        'WM, CSF, and global signals should be included. dd1 denotes that '
+        'these signals should be augmented with their first temporal '
+        'derivatives. ^^2 denotes that the original signals and temporal '
+        'derivatives should be augmented with quadratic expansions.\n'
+        '* (dd1(rps))^^2 : 24-parameter expansion. rps denotes that '
+        'realignment parameters should be included. dd1 and ^^2 denote '
+        'temporal derivative and quadratic expansions as above.\n'
+        '* (dd1(rps + wm + csf + gsr))^^2 + others : generate all expansion '
+        'terms necessary for a 36-parameter model as above, and concatenate '
+        'those expansion terms to all other regressor columns in the '
+        'confounds file.\n'
+    output_file = File(desc='Output path')
 
 
 class ExpandModelOutputInterface(TraitedSpec):
@@ -68,15 +85,14 @@ class SpikeRegressorsInputInterface(BaseInterfaceInputSpec):
         exists=True, mandatory=True,
         desc='TSV containing criterion time series (e.g., framewise '
         'displacement, DVARS) to be used for creating spike regressors.')
-    criteria = traits.Dict(
-        value={
-            'framewise_displacement': ('>', 0.2),
-            'dvars': ('>', 20)
-        },
-        key_trait=traits.Str,
-        value_trait=traits.Tuple(traits.Str, traits.Float),
-        usedefault=True,
-        desc='Criteria for generating a spike regressor')
+    fd_thresh = traits.Float(
+        0.5, usedefault=True,
+        desc='Minimum framewise displacement threshold for flagging a frame '
+        'as a spike.')
+    dvars_thresh = traits.Float(
+        1.5, usedefault=True,
+        desc='Minimum standardised DVARS threshold for flagging a frame as '
+        'a spike.')
     header_prefix = traits.Str(
         'motion_outlier', usedefault=True,
         desc='Prefix for spikes in the output TSV header')
@@ -93,7 +109,7 @@ class SpikeRegressorsInputInterface(BaseInterfaceInputSpec):
         'or return spikes only')
     output_format = traits.Enum('spikes', 'mask', usedefault=True,
                                 desc='Format of output (spikes or mask)')
-    output_file = traits.Str(desc='Output path')
+    output_file = File(desc='Output path')
 
 
 class SpikeRegressorsOutputInterface(TraitedSpec):
@@ -116,10 +132,15 @@ class SpikeRegressors(SimpleInterface):
                 newpath=runtime.cwd,
                 use_ext=False)
 
+        spike_criteria = {
+            'framewise_displacement': ('>', self.inputs.fd_thresh),
+            'std_dvars': ('>', self.inputs.dvars_thresh)
+        }
+
         confounds_data = pd.read_csv(self.inputs.confounds_file, sep='\t')
         confounds_data = spike_regressors(
             data=confounds_data,
-            criteria=self.inputs.criteria,
+            criteria=spike_criteria,
             header_prefix=self.inputs.header_prefix,
             lags=self.inputs.lags,
             minimum_contiguous=self.inputs.minimum_contiguous,
