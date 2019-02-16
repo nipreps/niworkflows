@@ -453,7 +453,7 @@ def general_filter_2d(timeseries_2d,
     timeseries_2d_out: str
         Path where the filtered time series dataset will be saved.
     t_rep: float
-        Repetition time of the dataset.For 2-dimensional data, this argument
+        Repetition time of the dataset. For 2-dimensional data, this argument
         is required.
     filter_type: str
         Filter class: one of `butterworth`, `chebyshev1`, `chebyshev2`, and
@@ -753,3 +753,70 @@ def interpolate_lombscargle_4d(timeseries_4d,
     img_interpolated = _fold_image(img_data, img, brain_mask)
     nib.save(img_interpolated, timeseries_4d_out)
     return timeseries_4d_out
+
+
+def interpolate_lombscargle_2d(timeseries_2d,
+                               timeseries_2d_out,
+                               t_rep,
+                               temporal_mask=None,
+                               oversampling_frequency=8,
+                               maximum_frequency=1):
+    
+    """Interpolation for 2D TSV time series data.
+
+    Temporally interpolate over unseen (masked) values in a dataset using an
+    approach based on the Lomb-Scargle periodogram. Follows code originally
+    written in MATLAB by Anish Mitra and Jonathan Power:
+    https://www.ncbi.nlm.nih.gov/pubmed/23994314
+
+    The original code can be found in the function `getTransform` here:
+        https://github.com/MidnightScanClub/MSC_Gratton2018_Codebase/blob/ ...
+        master/FCProcessing/FCPROCESS_MSC_task.m
+
+    Parameters
+    ----------
+    timeseries_2d: str
+        Path to the 2-dimensional TSV time series dataset that is to be
+        interpolated. The interpolation is applied to each column, over rows.
+    timeseries_2d_out: str
+        Path where the interpolated time series dataset will be saved.
+    t_rep: float
+        Repetition time of the dataset. For 2-dimensional data, this argument
+        is required.
+    temporal_mask: str
+        Temporal mask file indicating whether the value in each frame should
+        be interpolated.
+    oversampling_frequency: int
+        Oversampling frequency for the periodogram.
+    maximum_frequency: float
+        The maximum frequency in the dataset, as a fraction of Nyquist.
+        Default 1 (Nyquist).
+
+    Returns
+    -------
+    str
+        Path to the saved and interpolated TSV time series.
+    """
+    tsv_data = read_tsv(timeseries_2d, sep='\t')
+    nobs_total = tsv_data.shape[0]
+
+    (sine_term, cosine_term, angular_frequencies, all_samples, nobs, tmask
+        ) = periodogram_cfg(
+        temporal_mask_file=temporal_mask,
+        sampling_period=t_rep,
+        oversampling_frequency=oversampling_frequency,
+        maximum_frequency=maximum_frequency)
+    tsv_data_recon = interpolate_lombscargle(
+        data=tsv_data.values[tmask.data,:].T,
+        sine_term=sine_term,
+        cosine_term=cosine_term,
+        angular_frequencies=angular_frequencies,
+        all_samples=all_samples,
+        n_samples_seen=nobs,
+        n_samples=nobs_total
+    ).T
+    tsv_data.values[np.logical_not(tmask),:] = (
+        tsv_data_recon[np.logical_not(tmask),:])
+
+    tsv_data.to_csv(timeseries_2d_out, sep='\t', index=False, na_rep='n/a')
+    return timeseries_2d_out
