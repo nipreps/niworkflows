@@ -262,12 +262,47 @@ class DemeanDetrend4D(SimpleInterface):
          self._results['output_mean']) = demean_detrend_4d(
             timeseries_4d=self.inputs.in_file,
             detrend_order=self.inputs.detrend_order,
-            detrend_type=self.inputs.detrend_type,
             brain_mask=self.inputs.mask,
             temporal_mask=self.inputs.tmask,
             save_mean=True,
             timeseries_4d_out=out_file,
             mean_out=out_mean
+        )
+        return runtime
+
+
+class DemeanDetrend2DInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='1D or 2D TSV time series to be demeaned/detrended')
+    tmask = File(exists=True, mandatory=True,
+                 desc='Temporal mask')
+    detrend_order = traits.Int(0, usedefault=True,
+                    desc='Order of polynomial detrend (0 for demean only)')
+    output_file = File(desc='Output path')
+
+
+class DemeanDetrend2DOutputSpec(TraitedSpec):
+    output_file = File(exists=True, desc='Demeaned and detrended TSV file')
+
+
+class DemeanDetrend2D(SimpleInterface):
+    """Demean/detrend a 2D TSV time series."""
+    input_spec = DemeanDetrend2DInputSpec
+    output_spec = DemeanDetrend2DOutputSpec
+
+    def _run_interface(self, runtime):
+        if isdefined(self.inputs.output_file):
+            out_file = self.inputs.output_file
+        else:
+            out_file = fname_presuffix(self.inputs.in_file,
+                                       suffix='_dmdt2D',
+                                       newpath=runtime.cwd)
+
+        self._results['output_file'] = demean_detrend_2d(
+            timeseries_2d=self.inputs.in_file,
+            detrend_order=self.inputs.detrend_order,
+            temporal_mask=self.inputs.tmask,
+            timeseries_2d_out=out_file
         )
         return runtime
 
@@ -966,8 +1001,7 @@ def interpolate_lombscargle_2d(timeseries_2d,
     return timeseries_2d_out
 
 
-def demean_detrend(data, detrend_order, detrend_type='polynomial',
-                   temporal_mask=None, save_mean=True):
+def demean_detrend(data, detrend_order, temporal_mask=None, save_mean=True):
     """Demean and detrend the input data using a polynomial or Legendre
     polynomial fit.
 
@@ -978,10 +1012,6 @@ def demean_detrend(data, detrend_order, detrend_type='polynomial',
     detrend_order: int
         The degree of polynomial to be fit as part of the detrend protocol.
         (order 0: demean; order 1: linear; order 2: quadratic; . . .)
-    detrend_type: str
-        Simple polynomial (polynomial) or Legendre polynomial (legendre).
-        This is really just bells and whistles. There's no difference
-        between outputs from the two methods.
     temporal_mask: str
         Temporal mask file indicating whether the value in each frame should
         be considered in the demean step.
@@ -1004,18 +1034,11 @@ def demean_detrend(data, detrend_order, detrend_type='polynomial',
             indices=np.where(tmask)[0],
             axis=-1)
 
-    if detrend_type == 'polynomial':
-        fit_coef = np.polynomial.polynomial.polyfit(x=indices,
-                                                    y=data_to_fit.T,
-                                                    deg=detrend_order)
-        fit = np.polynomial.polynomial.polyval(c=fit_coef,
-                                               x=indices_all)
-    elif detrend_type == 'legendre':
-        fit_coef = np.polynomial.legendre.legfit(x=indices,
-                                                 y=data_to_fit.T,
-                                                 deg=detrend_order)
-        fit = np.polynomial.legendre.legval(x=indices_all,
-                                            c=fit_coef)
+    fit_coef = np.polynomial.legendre.legfit(x=indices,
+                                             y=data_to_fit.T,
+                                             deg=detrend_order)
+    fit = np.polynomial.legendre.legval(x=indices_all,
+                                        c=fit_coef)
     fit_res = data - fit
     fit_mean = fit_coef[0]
 
@@ -1028,7 +1051,6 @@ def demean_detrend(data, detrend_order, detrend_type='polynomial',
 def demean_detrend_4d(timeseries_4d,
                       timeseries_4d_out,
                       detrend_order,
-                      detrend_type='polynomial',
                       brain_mask=None,
                       temporal_mask=None,
                       save_mean=False,
@@ -1046,10 +1068,6 @@ def demean_detrend_4d(timeseries_4d,
     detrend_order: int
         The degree of polynomial to be fit as part of the detrend protocol.
         (order 0: demean; order 1: linear; order 2: quadratic; . . .)
-    detrend_type: str
-        Type of polynomial fit. Either `legendre` or `polynomial`. Both yield
-        identical results, so there isn't really much reason to use this
-        option.
     brain_mask: str
         Binary-valued NIfTI image wherein the value of each voxel indicates
         whether that voxel is part of the brain (and should consequently be
@@ -1077,7 +1095,6 @@ def demean_detrend_4d(timeseries_4d,
 
     (residuals, mean_vals) = demean_detrend(data=img_data,
                                             detrend_order=detrend_order,
-                                            detrend_type=detrend_type,
                                             temporal_mask=temporal_mask,
                                             save_mean=save_mean)
     img_dmdt = _fold_image(residuals, img, brain_mask)
@@ -1100,7 +1117,6 @@ def demean_detrend_4d(timeseries_4d,
 def demean_detrend_2d(timeseries_2d,
                       timeseries_2d_out,
                       detrend_order,
-                      detrend_type='polynomial',
                       temporal_mask=None):
 
     """Demean and detrend a 2D TSV dataset.
@@ -1116,10 +1132,6 @@ def demean_detrend_2d(timeseries_2d,
     detrend_order: int
         The degree of polynomial to be fit as part of the detrend protocol.
         (order 0: demean; order 1: linear; order 2: quadratic; . . .)
-    detrend_type: str
-        Type of polynomial fit. Either `legendre` or `polynomial`. Both yield
-        identical results, so there isn't really much reason to use this
-        option.
     temporal_mask: str
         Temporal mask file indicating whether the value in each frame should
         be considered in the polynomial fit.
@@ -1132,7 +1144,6 @@ def demean_detrend_2d(timeseries_2d,
     tsv_data = read_csv(timeseries_2d, sep='\t')
     tsv_data[:] = demean_detrend(data=tsv_data.values.T,
                                  detrend_order=detrend_order,
-                                 detrend_type=detrend_type,
                                  temporal_mask=temporal_mask,
                                  save_mean=False)
     tsv_data.to_csv(timeseries_2d_out, sep='\t', index=False, na_rep='n/a')
