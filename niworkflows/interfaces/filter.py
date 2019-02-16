@@ -660,3 +660,96 @@ def interpolate_lombscargle(data,
     recon = (recon.T/norm_fac).T
 
     return recon
+
+
+def interpolate_lombscargle_4d(timeseries_4d,
+                               timeseries_4d_out,
+                               brain_mask=None,
+                               temporal_mask=None,
+                               t_rep=None,
+                               oversampling_frequency=8,
+                               maximum_frequency=1,
+                               voxel_bin_size=5000):
+    """Interpolation for 4D NIfTI time series data.
+
+    Temporally interpolate over unseen (masked) values in a dataset using an
+    approach based on the Lomb-Scargle periodogram. Follows code originally
+    written in MATLAB by Anish Mitra and Jonathan Power:
+    https://www.ncbi.nlm.nih.gov/pubmed/23994314
+
+    The original code can be found in the function `getTransform` here:
+        https://github.com/MidnightScanClub/MSC_Gratton2018_Codebase/blob/ ...
+        master/FCProcessing/FCPROCESS_MSC_task.m
+
+    Parameters
+    ----------
+    timeseries_4d: str
+        Path to the 4-dimensional NIfTI time series dataset that is to be
+        interpolated. The interpolation is applied over the fourth (temporal)
+        axis.
+    timeseries_4d_out: str
+        Path where the interpolated time series dataset will be saved.
+    brain_mask: str
+        Binary-valued NIfTI image wherein the value of each voxel indicates
+        whether that voxel is part of the brain (and should consequently be
+        interpolated). Providing a mask substantially speeds the interpolation
+        procedure.
+    temporal_mask: str
+        Temporal mask file indicating whether the value in each frame should
+        be interpolated.
+    t_rep: float
+        Repetition time of the dataset. If this isn't explicitly provided,
+        then it will be automatically inferred from the image header.
+    oversampling_frequency: int
+        Oversampling frequency for the periodogram.
+    maximum_frequency: float
+        The maximum frequency in the dataset, as a fraction of Nyquist.
+        Default 1 (Nyquist).
+    voxel_bin_size: int
+        Because interpolation is a highly memory-intensive process, it might
+        be necessary to split the dataset into several voxel bins. This will
+        limit memory usage at a significant cost to processing speed.
+
+    Returns
+    -------
+    str
+        Path to the saved and interpolated NIfTI time series.
+    """
+    img = nb.load(timeseries_4d)
+    t_rep = t_rep or img.header.get_zooms()[3]
+    img_data = _unfold_image(img, brain_mask)
+    nvox = img_data.shape[0]
+    nvol_total = img_data.shape[-1]
+
+    (sine_term, cosine_term, angular_frequencies, all_samples, nvol, tmask
+        ) = periodogram_cfg(
+        temporal_mask_file=temporal_mask,
+        sampling_period=t_rep,
+        oversampling_frequency=oversampling_frequency,
+        maximum_frequency=maximum_frequency)
+
+    n_voxel_bins = int(np.ceil(nvox / voxel_bin_size))
+
+    for current_bin in range(0, n_voxel_bins):
+        print('Voxel bin {} out of {}'.format(current_bin + 1, n_voxel_bins))
+
+        bin_index = np.arange(start=(current_bin)*voxel_bin_size-1,
+                              stop=(current_bin+1)*voxel_bin_size)
+        bin_index = np.intersect1d(bin_index, range(0,nvox))
+        voxel_bin = img_data[bin_index, :][:, tmask]
+        recon = interpolate_lombscargle(
+            data=voxel_bin,
+            sine_term=sine_term,
+            cosine_term=cosine_term,
+            angular_frequencies=angular_frequencies,
+            all_samples=all_samples,
+            n_samples_seen=nvol,
+            n_samples=nvol_total)
+
+        img_data[np.ix_(bin_index, np.logical_not(tmask))] = (
+            recon[:, tmask.negation()])
+        del recon
+
+    img_interpolated = _fold_image(img_data, img, brain_mask)
+    nib.save(img_interpolated, timeseries_4d_out)
+    return timeseries_4d_out
