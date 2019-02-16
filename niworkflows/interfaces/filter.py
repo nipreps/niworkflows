@@ -253,3 +253,67 @@ def general_filter(data,
                            method='gust')
     data[mask] = np.nan
     return (data.T + colmeans).T
+
+
+def general_filter_4d(timeseries_4d,
+                      timeseries_4d_out,
+                      brain_mask=None,
+                      t_rep=None,
+                      filter_type='butterworth',
+                      filter_order=1,
+                      passband=(0.01, 0.08),
+                      ripple_pass=5,
+                      ripple_stop=20):
+
+    """Temporally filter a 4D NIfTI dataset.
+
+    Parameters
+    ----------
+    timeseries_4d: str
+        Path to the 4-dimensional NIfTI time series dataset that is to be
+        filtered. The filter is applied over the fourth (temporal) axis.
+    timeseries_4d_out: str
+        Path where the filtered time series dataset will be saved.
+    brain_mask: str
+        Binary-valued NIfTI image wherein the value of each voxel indicates
+        whether that voxel is part of the brain (and should consequently be
+        filtered). Providing a mask substantially speeds the filtering
+        procedure.
+    t_rep: float
+        Repetition time of the dataset. If this isn't explicitly provided,
+        then it will be automatically inferred from the image header.
+    filter_type: str
+        Filter class: one of `butterworth`, `chebyshev1`, `chebyshev2`, and
+        `elliptic`. Note that Chebyshev and elliptic filters require
+        specification of appropriate ripples.
+    filter_order: int
+        Order of the filter. Note that the output filter has double the
+        specified order; this prevents phase-shifting of the data.
+    passband: tuple
+        2-tuple indicating high-pass and low-pass cutoffs for the filter.
+    ripple_pass: float
+        Passband ripple parameter. Required for elliptic and type I Chebyshev
+        filters.
+    ripple_stop: float
+        Stopband ripple parameter. Required for elliptic and type II Chebyshev
+        filters.
+
+    Returns
+    -------
+    str
+        Path to the saved and filtered NIfTI time series.
+    """
+    img = nb.load(timeseries_4d)
+    t_rep = t_rep or img.header.get_zooms()[3]
+    img_data = _unfold_image(img, brain_mask)
+
+    img_data = general_filter(data=img_data,
+                              sampling_rate=1/t_rep,
+                              filter_type=filter_type,
+                              passband=passband,
+                              ripple_pass=ripple_pass,
+                              ripple_stop=ripple_stop)
+
+    img_filtered = _fold_image(img_data, img, brain_mask)
+    nib.save(img_filtered, timeseries_4d_out)
+    return timeseries_4d_out
