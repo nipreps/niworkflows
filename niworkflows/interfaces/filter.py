@@ -571,3 +571,92 @@ def periodogram_cfg(temporal_mask_file,
 
     return (sine_term, cosine_term, angular_frequencies, all_samples,
             n_samples_seen, tmask)
+
+
+def interpolate_lombscargle(data,
+                            sine_term,
+                            cosine_term,
+                            angular_frequencies,
+                            all_samples,
+                            n_samples_seen,
+                            n_samples):
+    """Temporally interpolate over unseen (masked) values in a dataset using
+    an approach based on the Lomb-Scargle periodogram. Follows code originally
+    written in MATLAB by Anish Mitra and Jonathan Power:
+    https://www.ncbi.nlm.nih.gov/pubmed/23994314
+
+    The original code can be found in the function `getTransform` here:
+        https://github.com/MidnightScanClub/MSC_Gratton2018_Codebase/blob/ ...
+        master/FCProcessing/FCPROCESS_MSC_task.m
+
+    Parameters
+    ----------
+    data: numpy array
+        Seen data to use as a reference for reconstruction of unseen data.
+    sine_term: numpy array
+        Sine basis term for the periodogram.
+    cosine_term: numpy array
+        Cosine basis term for the periodogram.
+    angular_frequencies: numpy array
+        Angular frequencies for computing the periodogram.
+    all_samples: numpy array
+        Temporal indices of all samples, seen and unseen.
+    n_samples_seen: int
+        The number of seen samples (i.e., samples not flagged for
+        interpolation).
+    n_samples: int
+        The total number of samples.
+
+    Returns
+    -------
+    recon: numpy array
+        Input data with unseen frames reconstructed via interpolation based on
+        the Lomb-Scargle periodogram.
+    """
+    n_features = data.shape[0]
+
+    def _compute_term(term):
+        """Compute the transform from seen data as follows for sin and cos
+        terms:
+        termfinal = sum(termmult,2)./sum(term.^2,2)
+        Compute numerators and denominators, then divide
+        """
+        mult = np.zeros(shape=(angular_frequencies.shape[0],
+                               n_samples_seen,
+                               n_features))
+        for obs in range(0,n_samples_seen):
+            mult[:,obs,:] = np.outer(term[:,obs],data[:,obs])
+        numerator = np.sum(mult,1)
+        denominator = np.sum(term**2,1)
+        term = (numerator.T/denominator).T
+        return term
+
+    def _reconstruct_term(term, fn):
+        """Interpolate over unseen epochs, reconstruct the time series
+        """
+        term_prod = fn(np.outer(angular_frequencies, all_samples))
+        term_recon = np.zeros(shape=(angular_frequencies.shape[0],
+                                     n_samples,
+                                     n_features))
+        for i in range(angular_frequencies.shape[0]):
+            term_recon[i,:,:] = np.outer(term_prod[i,:],term[i,:])
+        term_recon = np.sum(term_recon,0)
+        return term_recon
+
+    c = _compute_term(cosine_term)
+    s = _compute_term(sine_term)
+
+    s_recon = _reconstruct_term(s, np.sin)
+    c_recon = _reconstruct_term(c, np.cos)
+
+    recon = (c_recon + s_recon).T
+    del c_recon, s_recon
+
+    # Normalise the reconstructed spectrum. This is necessary when the
+    # oversampling frequency exceeds 1.
+    std_recon = np.std(recon, 1, ddof=1)
+    std_orig = np.std(data, 1, ddof=1)
+    norm_fac = std_recon/std_orig
+    recon = (recon.T/norm_fac).T
+
+    return recon
