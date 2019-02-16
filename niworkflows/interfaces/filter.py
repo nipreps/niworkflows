@@ -1044,3 +1044,45 @@ def demean_detrend_4d(timeseries_4d,
         nib.save(img_mean, mean_out)
 
     return timeseries_4d_out, mean_out
+
+
+def demean_detrend_2d(timeseries_2d,
+                      timeseries_2d_out,
+                      detrend_order,
+                      detrend_type='polynomial',
+                      temporal_mask=None):
+
+    """Demean and detrend a 2D TSV dataset.
+
+    Parameters
+    ----------
+    timeseries_2d: str
+        Path to the 2-dimensional TSV time series dataset that is to be
+        demeaned and detrended via polynomial fit. The fit is applied over
+        the fourth (temporal) axis.
+    timeseries_2d_out: str
+        Path where the detrended time series dataset will be saved.
+    detrend_order: int
+        The degree of polynomial to be fit as part of the detrend protocol.
+        (order 0: demean; order 1: linear; order 2: quadratic; . . .)
+    detrend_type: str
+        Type of polynomial fit. Either `legendre` or `polynomial`. Both yield
+        identical results, so there isn't really much reason to use this
+        option.
+    temporal_mask: str
+        Temporal mask file indicating whether the value in each frame should
+        be considered in the polynomial fit.
+
+    Returns
+    -------
+    str
+        Saved and detrended TSV time series.
+    """
+    tsv_data = read_csv(timeseries_2d, sep='\t')
+    tsv_data[:] = demean_detrend(data=tsv_data.values.T,
+                                 detrend_order=detrend_order,
+                                 detrend_type=detrend_type,
+                                 temporal_mask=temporal_mask,
+                                 save_mean=False)
+    tsv_data.to_csv(timeseries_2d_out, sep='\t', index=False, na_rep='n/a')
+    return timeseries_2d_out
