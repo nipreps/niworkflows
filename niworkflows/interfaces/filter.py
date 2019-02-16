@@ -12,6 +12,67 @@ import pandas as pd
 import nibabel as nb
 from scipy import signal
 
+from nipype.utils.filemanip import fname_presuffix
+from nipype.interfaces.base import (
+    traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface, File)
+
+
+class TemporalFilter4DInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='4D NIfTI time series to be temporally filtered')
+    mask = File(exists=True,
+                desc='Spatial mask over which the filter is to be applied')
+    t_rep = traits.Either(None, traits.Float, default=None, usedefault=True,
+                          desc='Repetition time (T_R)')
+    filter_type = traits.Enum(
+        'butterworth',
+        'chebyshev1',
+        'chebyshev2',
+        'elliptic',
+        usedefault=True,
+        desc='Filter class (Butterworth, Chebyshev, or elliptic)')
+    filter_order = traits.Int(1, usedefault=True,
+                              desc='Temporal filter order')
+    passband = traits.Tuple(traits.Float(0.01), traits.Float(0.08),
+                            usedefault=True, desc='Frequency pass band')
+    ripple_pass = traits.Float(5, usedefault=True,
+                               desc='Pass band ripple')
+    ripple_stop = traits.Float(20, usedefault=True,
+                               desc='Stop band ripple')
+    output_file = File(desc='Output path')
+
+
+class TemporalFilter4DOutputSpec(TraitedSpec):
+    output_file = File(exists=True, desc='Temporally filtered 4D NIfTI time series')
+
+
+class TemporalFilter4D(SimpleInterface):
+    """Temporally filter a 4D NIfTI dataset.
+    """
+    input_spec = TemporalFilter4DInputSpec
+    output_spec = TemporalFilter4DOutputSpec
+
+    def _run_interface(self, runtime):
+        if isdefined(self.inputs.output_file):
+            out_file = self.inputs.output_file
+        else:
+            out_file = fname_presuffix(self.inputs.in_file,
+                                       suffix='_filter4D',
+                                       newpath=runtime.cwd)
+
+        self._results['output_file'] = general_filter_4d(
+            timeseries_4d=self.inputs.in_file,
+            timeseries_4d_out=out_file,
+            brain_mask=self.inputs.mask,
+            t_rep=self.inputs.t_rep,
+            filter_type=self.inputs.filter_type,
+            filter_order=self.inputs.filter_order,
+            passband=self.inputs.passband,
+            ripple_pass=self.inputs.ripple_pass,
+            ripple_stop=self.inputs.ripple_stop
+        )
+        return runtime
+
 
 def _validate_passband(filter_type, passband):
     """Verify that the filter passband is reasonably formulated.
