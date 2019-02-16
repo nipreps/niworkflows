@@ -141,9 +141,9 @@ class Interpolate4DInputSpec(BaseInterfaceInputSpec):
                          desc='Repetition time (T_R)')
     os_freq = traits.Int(8, usedefault=True,
                          desc='Oversampling frequency')
-    maxfreq = traits.Float(
+    max_freq = traits.Float(
         1, usedefault=True, desc='Max frequency, as a fraction of Nyquist')
-    voxbin = traits.Int(
+    vox_bin = traits.Int(
         5000, usedefault=True, desc='Number of voxels to transform at a time')
     output_file = File(desc='Output path')
 
@@ -172,9 +172,51 @@ class Interpolate4D(SimpleInterface):
             brain_mask=self.inputs.mask,
             temporal_mask=self.inputs.tmask,
             t_rep=self.inputs.t_rep,
-            oversampling_frequency=self.inputs.ofreq,
-            maximum_frequency=self.inputs.maxfreq,
-            voxel_bin_size=self.inputs.voxbin
+            oversampling_frequency=self.inputs.os_freq,
+            maximum_frequency=self.inputs.max_freq,
+            voxel_bin_size=self.inputs.vox_bin
+        )
+        return runtime
+
+
+class Interpolate2DInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='1D or 2D TSV time series to be transformed')
+    tmask = File(exists=True, mandatory=True,
+                 desc='Temporal mask')
+    t_rep = traits.Float(usedefault=False, mandatory=True,
+                         desc='Repetition time (T_R)')
+    os_freq = traits.Int(8, usedefault=True,
+                         desc='Oversampling frequency')
+    max_freq = traits.Float(
+        1, usedefault=True, desc='Max frequency, as a fraction of Nyquist')
+    output_file = File(desc='Output path')
+
+
+class Interpolate2DOutputSpec(TraitedSpec):
+    output_file = File(exists=True, desc='Interpolated TSV file')
+
+
+class Interpolate2D(SimpleInterface):
+
+    input_spec = Interpolate2DInputSpec
+    output_spec = Interpolate2DOutputSpec
+
+    def _run_interface(self, runtime):
+        if isdefined(self.inputs.output_file):
+            out_file = self.inputs.output_file
+        else:
+            out_file = fname_presuffix(self.inputs.in_file,
+                                       suffix='_interpolate2D',
+                                       newpath=runtime.cwd)
+
+        self._results['output_file'] = interpolate_lombscargle_2d(
+            timeseries_2d=self.inputs.in_file,
+            timeseries_2d_out=out_file,
+            temporal_mask=self.inputs.tmask,
+            t_rep=self.inputs.t_rep,
+            oversampling_frequency=self.inputs.os_freq,
+            maximum_frequency=self.inputs.max_freq
         )
         return runtime
 
