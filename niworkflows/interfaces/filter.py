@@ -972,3 +972,75 @@ def demean_detrend(data, detrend_order, detrend_type='polynomial',
         return fit_res, fit_mean
     else:
         return fit_res, None
+
+
+def demean_detrend_4d(timeseries_4d,
+                      timeseries_4d_out,
+                      detrend_order,
+                      detrend_type='polynomial',
+                      brain_mask=None,
+                      temporal_mask=None,
+                      save_mean=False,
+                      mean_out=None):
+    """Demean and detrend a 4D NIfTI data set.
+
+    Parameters
+    ----------
+    timeseries_4d: str
+        Path to the 4-dimensional NIfTI time series dataset that is to be
+        demeaned and detrended via polynomial fit. The fit is applied over
+        the fourth (temporal) axis.
+    timeseries_4d_out: str
+        Path where the detrended time series dataset will be saved.
+    detrend_order: int
+        The degree of polynomial to be fit as part of the detrend protocol.
+        (order 0: demean; order 1: linear; order 2: quadratic; . . .)
+    detrend_type: str
+        Type of polynomial fit. Either `legendre` or `polynomial`. Both yield
+        identical results, so there isn't really much reason to use this
+        option.
+    brain_mask: str
+        Binary-valued NIfTI image wherein the value of each voxel indicates
+        whether that voxel is part of the brain (and should consequently be
+        detrended). Providing a mask substantially speeds the detrend
+        procedure.
+    temporal_mask: str
+        Temporal mask file indicating whether the value in each frame should
+        be considered in the polynomial fit.
+    save_mean: bool
+        Return the fit's mean value separately. If this is true, then mean_out
+        must be defined appropriately. This can be useful if you later wish
+        to add back the mean.
+    mean_out: str
+        Path where the mean image will be saved.
+
+    Returns
+    -------
+    str
+        Path to the saved and detrended NIfTI time series.
+    str
+        Path to the saved mean image.
+    """
+    img = nb.load(timeseries_4d)
+    img_data = _unfold_image(img, brain_mask)
+
+    (residuals, mean_vals) = demean_detrend(data=img_data,
+                                            detrend_order=detrend_order,
+                                            detrend_type=detrend_type,
+                                            temporal_mask=temporal_mask,
+                                            save_mean=save_mean)
+    img_dmdt = _fold_image(residuals, img, brain_mask)
+    nib.save(img_dmdt, timeseries_4d_out)
+
+    if save_mean:
+        if brain_mask is not None:
+            data_mean = np.zeros(shape=img.shape[:-1])
+            data_mean[brain_mask.get_data().astype('bool')] = mean_vals
+        else:
+            data_folded = mean_vals.reshape(img.shape[:-1])
+        img_mean = nib.Nifti1Image(dataobj=data_mean,
+                                   affine=img.affine,
+                                   header=img.header)
+        nib.save(img_mean, mean_out)
+
+    return timeseries_4d_out, mean_out
