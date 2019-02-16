@@ -198,7 +198,7 @@ class Interpolate2DOutputSpec(TraitedSpec):
 
 
 class Interpolate2D(SimpleInterface):
-
+    """Interpolate a 2D TSV time series."""
     input_spec = Interpolate2DInputSpec
     output_spec = Interpolate2DOutputSpec
 
@@ -217,6 +217,57 @@ class Interpolate2D(SimpleInterface):
             t_rep=self.inputs.t_rep,
             oversampling_frequency=self.inputs.os_freq,
             maximum_frequency=self.inputs.max_freq
+        )
+        return runtime
+
+
+class DemeanDetrend4DInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='4D NIfTI time series to be demeaned and detrended')
+    tmask = File(exists=True, mandatory=True,
+                 desc='Temporal mask')
+    mask = File(exists=True,
+                desc='Spatial mask')
+    detrend_order = traits.Int(0, usedefault=True,
+                    desc='Order of polynomial detrend (0 for demean only)')
+    output_file = File(desc='Output path')
+    output_mean = File(desc='Output path for mean image')
+
+
+class DemeanDetrend4DOutputSpec(TraitedSpec):
+    output_file = File(exists=True, desc='Demeaned and detrended NIfTI file')
+    output_mean = File(exists=True, desc='Mean value computed voxelwise')
+
+
+class DemeanDetrend4D(SimpleInterface):
+    """Demean/detrend a 4D NIfTI time series."""
+    input_spec = DemeanDetrend4DInputSpec
+    output_spec = DemeanDetrend4DOutputSpec
+
+    def _run_interface(self, runtime):
+        if isdefined(self.inputs.output_file):
+            out_file = self.inputs.output_file
+        else:
+            out_file = fname_presuffix(self.inputs.in_file,
+                                       suffix='_dmdt4D',
+                                       newpath=runtime.cwd)
+        if isdefined(self.inputs.output_mean):
+            out_mean = self.inputs.output_mean
+        else:
+            out_mean = fname_presuffix(self.inputs.in_file,
+                                       suffix='_dmdt4Dmean',
+                                       newpath=runtime.cwd)
+
+        (self._results['output_file'],
+         self._results['output_mean']) = demean_detrend_4d(
+            timeseries_4d=self.inputs.in_file,
+            detrend_order=self.inputs.detrend_order,
+            detrend_type=self.inputs.detrend_type,
+            brain_mask=self.inputs.mask,
+            temporal_mask=self.inputs.tmask,
+            save_mean=True,
+            timeseries_4d_out=out_file,
+            mean_out=out_mean
         )
         return runtime
 
