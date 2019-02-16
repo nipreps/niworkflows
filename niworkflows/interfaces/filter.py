@@ -98,7 +98,8 @@ class TemporalFilter2DInputSpec(BaseInterfaceInputSpec):
 
 
 class TemporalFilter2DOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='Temporally filtered TSV time series')
+    output_file = File(
+        exists=True, desc='Temporally filtered TSV time series')
 
 
 class TemporalFilter2D(SimpleInterface):
@@ -115,7 +116,7 @@ class TemporalFilter2D(SimpleInterface):
                                        suffix='_filter2D',
                                        newpath=runtime.cwd)
 
-        self._results['out_file'] = general_filter_2d(
+        self._results['output_file'] = general_filter_2d(
             timeseries_2d=self.inputs.in_file,
             t_rep=self.inputs.t_rep,
             timeseries_2d_out=out_file,
@@ -124,6 +125,56 @@ class TemporalFilter2D(SimpleInterface):
             passband=self.inputs.passband,
             ripple_pass=self.inputs.ripple_pass,
             ripple_stop=self.inputs.ripple_stop
+        )
+        return runtime
+
+
+
+class Interpolate4DInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='4D NIfTI time series to be transformed')
+    tmask = File(exists=True, mandatory=True,
+                 desc='Temporal mask')
+    mask = File(exists=True,
+                desc='Spatial mask')
+    t_rep = traits.Float(usedefault=False,
+                         desc='Repetition time (T_R)')
+    os_freq = traits.Int(8, usedefault=True,
+                         desc='Oversampling frequency')
+    maxfreq = traits.Float(
+        1, usedefault=True, desc='Max frequency, as a fraction of Nyquist')
+    voxbin = traits.Int(
+        5000, usedefault=True, desc='Number of voxels to transform at a time')
+    output_file = File(desc='Output path')
+
+
+class Interpolate4DOutputSpec(TraitedSpec):
+    output_file = File(exists=True, desc='Interpolated 4D NIfTI file')
+
+
+class Interpolate4D(SimpleInterface):
+    """Interpolate a 4D NIfTI time series.
+    """
+    input_spec = Interpolate4DInputSpec
+    output_spec = Interpolate4DOutputSpec
+
+    def _run_interface(self, runtime):
+        if isdefined(self.inputs.output_file):
+            out_file = self.inputs.output_file
+        else:
+            out_file = fname_presuffix(self.inputs.in_file,
+                                       suffix='_interpolate4D',
+                                       newpath=runtime.cwd)
+
+        self._results['output_file'] = interpolate_lombscargle_4d(
+            timeseries_4d=self.inputs.in_file,
+            timeseries_4d_out=out_file,
+            brain_mask=self.inputs.mask,
+            temporal_mask=self.inputs.tmask,
+            t_rep=self.inputs.t_rep,
+            oversampling_frequency=self.inputs.ofreq,
+            maximum_frequency=self.inputs.maxfreq,
+            voxel_bin_size=self.inputs.voxbin
         )
         return runtime
 
