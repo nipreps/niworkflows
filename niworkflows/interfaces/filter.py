@@ -74,6 +74,60 @@ class TemporalFilter4D(SimpleInterface):
         return runtime
 
 
+class TemporalFilter2DInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='1D or 2D TSV time series to be temporally filtered')
+    t_rep = traits.Float(mandatory=True, desc='Sampling time (T_R)')
+    filter_type = traits.Enum(
+        'butterworth',
+        'chebyshev1',
+        'chebyshev2',
+        'elliptic',
+        usedefault=True,
+        desc='Filter class (Butterworth, Chebyshev, or elliptic)'
+    )
+    filter_order = traits.Int(1, usedefault=True,
+                              desc='Temporal filter order')
+    passband = traits.Tuple(traits.Float(0.01), traits.Float(0.08),
+                            usedefault=True, desc='Frequency pass band')
+    ripple_pass = traits.Float(5, usedefault=True,
+                               desc='Pass band ripple')
+    ripple_stop = traits.Float(20, usedefault=True,
+                               desc='Stop band ripple')
+    output_file = File(desc='Output path')
+
+
+class TemporalFilter2DOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Temporally filtered TSV time series')
+
+
+class TemporalFilter2D(SimpleInterface):
+    """Temporally filter a 2D TSV dataset.
+    """
+    input_spec = TemporalFilter2DInputSpec
+    output_spec = TemporalFilter2DOutputSpec
+
+    def _run_interface(self, runtime):
+        if isdefined(self.inputs.output_file):
+            out_file = self.inputs.output_file
+        else:
+            out_file = fname_presuffix(self.inputs.in_file,
+                                       suffix='_filter2D',
+                                       newpath=runtime.cwd)
+
+        self._results['out_file'] = general_filter_2d(
+            timeseries_2d=self.inputs.in_file,
+            t_rep=self.inputs.t_rep,
+            timeseries_2d_out=out_file,
+            filter_type=self.inputs.filter_type,
+            filter_order=self.inputs.filter_order,
+            passband=self.inputs.passband,
+            ripple_pass=self.inputs.ripple_pass,
+            ripple_stop=self.inputs.ripple_stop
+        )
+        return runtime
+
+
 def _validate_passband(filter_type, passband):
     """Verify that the filter passband is reasonably formulated.
 
