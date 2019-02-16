@@ -8,6 +8,7 @@ Temporal filtering operations for the image processing system
 """
 
 import numpy as np
+import nibabel as nb
 from scipy import signal
 
 
@@ -120,6 +121,56 @@ def _get_norm_passband(passband, sampling_rate):
     else:
         filter_pass = 'bandpass'
     return passband_norm, filter_pass
+
+
+def _unfold_image(img, mask=None):
+    """Unfold a four-dimensional time series into two dimensions.
+
+    Parameters
+    ----------
+    img: nibabel NIfTI object
+        NIfTI object corresponding to the 4D time series to be unfolded.
+    mask: nibabel NIfTI object
+        Mask indicating the spatial extent of the unfolding. To unfold
+        only brain voxels, for instance, this should be a brain mask.
+
+    Returns
+    numpy array
+        2-dimensional numpy array with rows equal to frames in the time
+        series and columns equal to voxels in the mask..
+    """
+    if mask is not None:
+        return img.get_fdata()[mask.get_data().astype('bool')]
+    else:
+        return img.get_fdata().reshape([-1, img.shape[3]])
+
+
+def _fold_image(data, template, mask=None):
+    """Fold a 2D numpy array into a 4D NIfTI time series.
+
+    Parameters
+    ----------
+    data: numpy array
+        2-dimensional numpy array to be folded.
+    template: nibabel NIfTI object
+        NIfTI object that provides header and affine information for the
+        folded dataset. This might, for instance, be the original 4D time
+        series that was previously unfolded into the 2D data array.
+    mask: nibabel NIfTI object
+        Mask indicating the spatial extent of the unfolded 2D data.
+
+    Returns
+    -------
+    nibabel NIfTI object
+    """
+    if mask is not None:
+        data_folded = np.zeros(shape=template.shape)
+        data_folded[mask.get_data().astype('bool')] = data
+    else:
+        data_folded = data.reshape(template.shape)
+    return nib.Nifti1Image(dataobj=data_folded,
+                           affine=template.affine,
+                           header=template.header)
 
 
 def general_filter(data,
