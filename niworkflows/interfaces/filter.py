@@ -8,6 +8,7 @@ Temporal filtering operations for the image processing system
 """
 
 import numpy as np
+from scipy import signal
 
 
 def _validate_passband(filter_type, passband):
@@ -119,3 +120,85 @@ def _get_norm_passband(passband, sampling_rate):
     else:
         filter_pass = 'bandpass'
     return passband_norm, filter_pass
+
+
+def general_filter(data,
+                   sampling_rate,
+                   filter_type='butterworth',
+                   filter_order=1,
+                   passband=(0.01, 0.08),
+                   ripple_pass=5,
+                   ripple_stop=20):
+    """Temporal filtering for any data array.
+
+    Parameters
+    ----------
+    data: numpy array
+        2D data array to be filtered. The input should be transformed so that
+        the axis to be filtered (typically time) is the second axis and all
+        remaining dimensions are unfolded into the first axis.
+    sampling_rate: float
+        Repetition time or sampling rate of the data along the filter axis.
+    filter_type: str
+        Filter class: one of `butterworth`, `chebyshev1`, `chebyshev2`, and
+        `elliptic`. Note that Chebyshev and elliptic filters require
+        specification of appropriate ripples.
+    filter_order: int
+        Order of the filter. Note that the output filter has double the
+        specified order; this prevents phase-shifting of the data.
+    passband: tuple
+        2-tuple indicating high-pass and low-pass cutoffs for the filter.
+    ripple_pass: float
+        Passband ripple parameter. Required for elliptic and type I Chebyshev
+        filters.
+    ripple_stop: float
+        Stopband ripple parameter. Required for elliptic and type II Chebyshev
+        filters.
+
+    Returns
+    -------
+    numpy array
+        The filtered input data array.
+    """
+    passband_norm, filter_pass = _get_norm_passband(passband, sampling_rate)
+
+    if filter_type == 'butterworth':
+        filt = signal.butter(N=filter_order,
+                             Wn=passband_norm,
+                             btype=filter_pass)
+    elif filter_type == 'chebyshev1':
+        filt = signal.cheby1(N=filter_order,
+                             rp=ripple_pass,
+                             Wn=passband_norm,
+                             btype=filter_pass)
+    elif filter_type == 'chebyshev2':
+        filt = signal.cheby2(N=filter_order,
+                             rs=ripple_stop,
+                             Wn=passband_norm,
+                             btype=filter_pass)
+    elif filter_type == 'elliptic':
+        filt = signal.ellip(N=filter_order,
+                            rp=ripple_pass,
+                            rs=ripple_stop,
+                            Wn=passband_norm,
+                            btype=filter_pass)
+    ##########################################################################
+    #TODO this block needs some work.
+    # Mask nans and filter the data. Should probably interpolate over those
+    # nans though.
+    #TODO need to do something more reasonable to the nans  as this will
+    #     distort the filter like hell.
+    #     serial transposition is demeaning the data so that the filter is
+    #     well-behaved. mean is added back at the end.
+    #     also necessary to broadcast arrays.
+    #TODO also need to decide what to do about means. filter will be incorrect
+    #     unless data are demeaned, but the mean should potentially omit
+    #     censored values
+    ##########################################################################
+    mask = np.isnan(data)
+    data[mask] =   0
+    colmeans = data.mean(1)
+    data = signal.filtfilt(filt[0],filt[1],(data.T - colmeans).T,
+                           method='gust')
+    data[mask] = np.nan
+    return (data.T + colmeans).T
