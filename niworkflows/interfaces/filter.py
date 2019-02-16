@@ -8,6 +8,7 @@ Temporal filtering operations for the image processing system
 """
 
 import numpy as np
+import pandas as pd
 import nibabel as nb
 from scipy import signal
 
@@ -317,3 +318,57 @@ def general_filter_4d(timeseries_4d,
     img_filtered = _fold_image(img_data, img, brain_mask)
     nib.save(img_filtered, timeseries_4d_out)
     return timeseries_4d_out
+
+
+def general_filter_2d(timeseries_2d,
+                      timeseries_2d_out,
+                      t_rep,
+                      filter_type='butterworth',
+                      filter_order=1,
+                      passband=[0.01, 0.08],
+                      ripple_pass=5,
+                      ripple_stop=20):
+    """Temporally filter a 2D TSV dataset.
+
+    Parameters
+    ----------
+    timeseries_2d: str
+        Path to the 2-dimensional TSV time series dataset that is to be
+        filtered. The filter is applied to each column, over rows.
+    timeseries_2d_out: str
+        Path where the filtered time series dataset will be saved.
+    t_rep: float
+        Repetition time of the dataset.For 2-dimensional data, this argument
+        is required.
+    filter_type: str
+        Filter class: one of `butterworth`, `chebyshev1`, `chebyshev2`, and
+        `elliptic`. Note that Chebyshev and elliptic filters require
+        specification of appropriate ripples.
+    filter_order: int
+        Order of the filter. Note that the output filter has double the
+        specified order; this prevents phase-shifting of the data.
+    passband: tuple
+        2-tuple indicating high-pass and low-pass cutoffs for the filter.
+    ripple_pass: float
+        Passband ripple parameter. Required for elliptic and type I Chebyshev
+        filters.
+    ripple_stop: float
+        Stopband ripple parameter. Required for elliptic and type II Chebyshev
+        filters.
+
+    Returns
+    -------
+    str
+        Path to the saved and filtered TSV time series.
+    """
+    tsv_data = pd.read_csv(timeseries_2d, sep='\t')
+
+    tsv_data[:] = general_filter(data=tsv_data.values.T,
+                                 sampling_rate=1/t_rep,
+                                 filter_type=filter_type,
+                                 passband=passband,
+                                 ripple_pass=ripple_pass,
+                                 ripple_stop=ripple_stop).T
+
+    tsv_data.to_csv(timeseries_2d_out, sep='\t', index=False, na_rep='n/a')
+    return timeseries_2d_out
