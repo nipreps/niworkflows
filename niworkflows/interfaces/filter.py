@@ -908,8 +908,67 @@ def interpolate_lombscargle_2d(timeseries_2d,
         n_samples_seen=nobs,
         n_samples=nobs_total
     ).T
-    tsv_data.values[np.logical_not(tmask),:] = (
-        tsv_data_recon[np.logical_not(tmask),:])
+    tsv_data.values[np.logical_not(tmask), :] = (
+        tsv_data_recon[np.logical_not(tmask), :])
 
     tsv_data.to_csv(timeseries_2d_out, sep='\t', index=False, na_rep='n/a')
     return timeseries_2d_out
+
+
+def demean_detrend(data, detrend_order, detrend_type='polynomial',
+                   temporal_mask=None, save_mean=True):
+    """Demean and detrend the input data using a polynomial or Legendre
+    polynomial fit.
+
+    Parameters
+    ----------
+    data: numpy array
+        Data to be detrended. The detrend is applied across rows.
+    detrend_order: int
+        The degree of polynomial to be fit as part of the detrend protocol.
+        (order 0: demean; order 1: linear; order 2: quadratic; . . .)
+    detrend_type: str
+        Simple polynomial (polynomial) or Legendre polynomial (legendre).
+        This is really just bells and whistles. There's no difference
+        between outputs from the two methods.
+    temporal_mask: str
+        Temporal mask file indicating whether the value in each frame should
+        be considered in the demean step.
+    save_mean
+        Return the fit's mean value separately.
+
+    Returns
+    -------
+    numpy array
+        The demeaned and detrended dataset.
+    numpy array or None
+        The voxelwise mean. None if save_mean is False.
+    """
+    data_to_fit = data
+    indices = np.arange(data.shape[-1])
+    if temporal_mask is not None:
+        indices = np.where(tmask)[0]
+        tmask = pd.read_csv(temporal_mask, sep='\t').values.astype('bool')
+        data_to_fit = data.take(
+            indices=np.where(tmask)[0],
+            axis=-1)
+
+    if detrend_type == 'polynomial':
+        fit_coef = np.polynomial.polynomial.polyfit(x=indices,
+                                                    y=data_to_fit.T,
+                                                    deg=detrend_order)
+        fit = np.polynomial.polynomial.polyval(c=fit_coef,
+                                               x=indices_all)
+    elif detrend_type == 'legendre':
+        fit_coef = np.polynomial.legendre.legfit(x=indices,
+                                                 y=data_to_fit.T,
+                                                 deg=detrend_order)
+        fit = np.polynomial.legendre.legval(x=indices_all,
+                                            c=fit_coef)
+    fit_res = data - fit
+    fit_mean = fit_coef[0]
+
+    if save_mean:
+        return fit_res, fit_mean
+    else:
+        return fit_res, None
