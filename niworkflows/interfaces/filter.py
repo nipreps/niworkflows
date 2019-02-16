@@ -305,7 +305,7 @@ def general_filter(data,
         the axis to be filtered (typically time) is the second axis and all
         remaining dimensions are unfolded into the first axis.
     sampling_rate: float
-        Repetition time or sampling rate of the data along the filter axis.
+        Sampling rate (1/T_R) of the data along the filter axis.
     filter_type: str
         Filter class: one of `butterworth`, `chebyshev1`, `chebyshev2`, and
         `elliptic`. Note that Chebyshev and elliptic filters require
@@ -487,3 +487,87 @@ def general_filter_2d(timeseries_2d,
 
     tsv_data.to_csv(timeseries_2d_out, sep='\t', index=False, na_rep='n/a')
     return timeseries_2d_out
+
+
+def periodogram_cfg(temporal_mask_file,
+                    sampling_period,
+                    flag=1,
+                    oversampling_frequency=8,
+                    maximum_frequency=1):
+    """Configure inputs for interpolate_lombscargle.
+
+    Parameters
+    ----------
+    temporal_mask_file: str
+        File indicating whether the value in each frame should be
+        interpolated.
+    sampling_period: float
+        The sampling period or repetition time.
+    flag: 1 or 0
+        Value in the temporal_mask_file that indicates a frame should be
+        interpolated.
+    oversampling_frequency: int
+        Oversampling frequency for the periodogram.
+    maximum_frequency: float
+        The maximum frequency in the dataset, as a fraction of Nyquist.
+        Default 1 (Nyquist).
+
+    Returns
+    -------
+    sine_term: numpy array
+        Sine basis term for the periodogram.
+    cosine_term: numpy array
+        Cosine basis term for the periodogram.
+    angular_frequencies: numpy array
+        Angular frequencies for computing the periodogram.
+    all_samples: numpy array
+        Temporal indices of all observations, seen and unseen.
+    n_samples_seen: int
+        The number of seen samples (i.e., samples not flagged for
+        interpolation).
+    tmask: numpy array
+        Boolean-valued numpy array indicating whether the value in each frame
+        should be interpolated.
+    """
+    tmask = pd.read_csv(temporal_mask_file, sep='\t').values.astype('bool')
+    n_samples = len(tmask)
+
+    seen_samples =(np.where(tmask)[0] + 1) * sampling_period
+    timespan = max(seen_samples) - min(seen_samples)
+    n_samples_seen = seen_samples.shape[0]
+    if n_samples_seen == n_samples:
+        raise ValueError('No interpolation is necessary for this dataset.')
+
+    all_samples = np.arange(start=sampling_period,
+                            stop=sampling_period * (n_samples + 1),
+                            step=sampling_period)
+    sampling_frequencies = np.arange(
+        start=1/(timespan * oversampling_frequency),
+        step=1/(timespan * oversampling_frequency),
+        stop=(maximum_frequency * n_samples_seen
+              / (2 * timespan)
+              + 1 / (timespan * oversampling_frequency)))
+    angular_frequencies = 2 * np.pi * sampling_frequencies
+
+    offsets = np.arctan2(
+        np.sum(
+            np.sin(2 * np.outer(angular_frequencies, seen_samples)),
+            1),
+        np.sum(
+            np.cos(2 * np.outer(angular_frequencies, seen_samples)),
+            1)
+        ) / (2 * angular_frequencies)
+
+    cosine_term = np.cos(
+        np.outer(angular_frequencies,
+                 seen_samples) -
+        np.matlib.repmat(angular_frequencies * offsets,
+                         n_samples_seen, 1).T)
+    sine_term = np.sin(
+        np.outer(angular_frequencies,
+                 seen_samples) -
+        np.matlib.repmat(angular_frequencies * offsets,
+                         n_samples_seen, 1).T)
+
+    return (sine_term, cosine_term, angular_frequencies, all_samples,
+            n_samples_seen, tmask)
