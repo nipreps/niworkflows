@@ -197,9 +197,13 @@ def _gen_reference(fixed_image, moving_image, fov_mask=None, out_file=None,
                                    suffix='_reference',
                                    newpath=os.getcwd())
 
-    new_zooms = nli.load_img(moving_image).header.get_zooms()[:3]
+    # Moving images may not be RAS/LPS (more generally, transverse-longitudinal-axial)
+    reoriented_moving_img = nb.as_closest_canonical(nb.load(moving_image))
+    new_zooms = reoriented_moving_img.header.get_zooms()[:3]
+
     # Avoid small differences in reported resolution to cause changes to
     # FOV. See https://github.com/poldracklab/fmriprep/issues/512
+    # A positive diagonal affine is RAS, hence the need to reorient above.
     new_affine = np.diag(np.round(new_zooms, 3))
 
     resampled = nli.resample_img(fixed_image,
