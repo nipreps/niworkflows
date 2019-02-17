@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
-Temporal filtering operations for the image processing system
+Temporal filtering operations
 """
 
 import numpy as np
 import pandas as pd
 import nibabel as nb
 from scipy import signal
+from collections import OrderedDict
 
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
@@ -196,6 +196,7 @@ class Interpolate2DInputSpec(BaseInterfaceInputSpec):
 
 class Interpolate2DOutputSpec(TraitedSpec):
     output_file = File(exists=True, desc='Interpolated TSV file')
+    idx_nan = traits.List(desc='List of each column\'s NaN indices')
 
 
 class Interpolate2D(SimpleInterface):
@@ -211,7 +212,8 @@ class Interpolate2D(SimpleInterface):
                                        suffix='_interpolate2D',
                                        newpath=runtime.cwd)
 
-        self._results['output_file'] = interpolate_lombscargle_2d(
+        (self._results['output_file'],
+         self._results['idx_nan']) = interpolate_lombscargle_2d(
             timeseries_2d=self.inputs.in_file,
             timeseries_2d_out=out_file,
             temporal_mask=self.inputs.tmask,
@@ -479,16 +481,8 @@ def general_filter(data,
                             rs=ripple_stop,
                             Wn=passband_norm,
                             btype=filter_pass)
-    ##########################################################################
-    #TODO this block needs some work.
-    # Mask nans and filter the data. Should probably interpolate over those
-    # nans though.
-    #TODO need to do something more reasonable to the nans  as this will
-    #     distort the filter like hell.
-    #     serial transposition is demeaning the data so that the filter is
-    #     well-behaved. mean is added back at the end.
-    #     also necessary to broadcast arrays.
-    ##########################################################################
+    # NaNs are masked here, but they should already be interpolated. If not,
+    # the imputation of zero values will probably distort the filter.
     mask = np.isnan(data)
     data[mask] = 0
     colmeans = data.mean(1)
@@ -615,7 +609,7 @@ def general_filter_2d(timeseries_2d,
     return timeseries_2d_out
 
 
-def periodogram_cfg(temporal_mask_file,
+def periodogram_cfg(tmask,
                     sampling_period,
                     flag=1,
                     oversampling_frequency=8,
@@ -624,9 +618,9 @@ def periodogram_cfg(temporal_mask_file,
 
     Parameters
     ----------
-    temporal_mask_file: str
-        File indicating whether the value in each frame should be
-        interpolated.
+    tmask: numpy array
+        Boolean numpy array indicating whether the value in each frame should
+        be interpolated.
     sampling_period: float
         The sampling period or repetition time.
     flag: 1 or 0
@@ -651,11 +645,7 @@ def periodogram_cfg(temporal_mask_file,
     n_samples_seen: int
         The number of seen samples (i.e., samples not flagged for
         interpolation).
-    tmask: numpy array
-        Boolean-valued numpy array indicating whether the value in each frame
-        should be interpolated.
     """
-    tmask = pd.read_csv(temporal_mask_file, sep='\t').values.astype('bool')
     n_samples = len(tmask)
 
     seen_samples =(np.where(tmask)[0] + 1) * sampling_period
@@ -696,7 +686,7 @@ def periodogram_cfg(temporal_mask_file,
                          n_samples_seen, 1).T)
 
     return (sine_term, cosine_term, angular_frequencies, all_samples,
-            n_samples_seen, tmask)
+            n_samples_seen)
 
 
 def interpolate_lombscargle(data,
@@ -847,9 +837,11 @@ def interpolate_lombscargle_4d(timeseries_4d,
     nvox = img_data.shape[0]
     nvol_total = img_data.shape[-1]
 
-    (sine_term, cosine_term, angular_frequencies, all_samples, nvol, tmask
+    tmask = pd.read_csv(
+        temporal_mask, sep='\t').values.astype('bool').squeeze()
+    (sine_term, cosine_term, angular_frequencies, all_samples, nvol
         ) = periodogram_cfg(
-        temporal_mask_file=temporal_mask,
+        tmask=tmask,
         sampling_period=t_rep,
         oversampling_frequency=oversampling_frequency,
         maximum_frequency=maximum_frequency)
@@ -873,7 +865,7 @@ def interpolate_lombscargle_4d(timeseries_4d,
             n_samples=nvol_total)
 
         img_data[np.ix_(bin_index, np.logical_not(tmask))] = (
-            recon[:, tmask.negation()])
+            recon[:, np.logical_not(tmask)])
         del recon
 
     img_interpolated = _fold_image(img_data, img, brain_mask)
@@ -923,29 +915,40 @@ def interpolate_lombscargle_2d(timeseries_2d,
     str
         Path to the saved and interpolated TSV time series.
     """
-    tsv_data = read_tsv(timeseries_2d, sep='\t')
+    tsv_data = pd.read_csv(timeseries_2d, sep='\t')
     nobs_total = tsv_data.shape[0]
+    tmask = pd.read_csv(
+        temporal_mask, sep='\t').values.astype('bool').squeeze()
 
-    (sine_term, cosine_term, angular_frequencies, all_samples, nobs, tmask
-        ) = periodogram_cfg(
-        temporal_mask_file=temporal_mask,
-        sampling_period=t_rep,
-        oversampling_frequency=oversampling_frequency,
-        maximum_frequency=maximum_frequency)
-    tsv_data_recon = interpolate_lombscargle(
-        data=tsv_data.values[tmask.data,:].T,
-        sine_term=sine_term,
-        cosine_term=cosine_term,
-        angular_frequencies=angular_frequencies,
-        all_samples=all_samples,
-        n_samples_seen=nobs,
-        n_samples=nobs_total
-    ).T
-    tsv_data.values[np.logical_not(tmask), :] = (
-        tsv_data_recon[np.logical_not(tmask), :])
+    idx_nan = [(col, list(np.where(tsv_data[col].isnull())[0]))
+               for col in tsv_data.columns
+               if np.any(tsv_data[col].isnull())]
+
+    datasets = ([tsv_data[tsv_data.columns[~tsv_data.isnull().any()]]]
+                + [tsv_data[[col]] for col
+                in tsv_data.columns[tsv_data.isnull().any()]])
+    for data in datasets:
+        tmask_cur = np.logical_and(data.notnull().any(axis=1), tmask)
+        (sine_term, cosine_term, angular_frequencies, all_samples, nobs
+            ) = periodogram_cfg(
+            tmask=tmask_cur,
+            sampling_period=t_rep,
+            oversampling_frequency=oversampling_frequency,
+            maximum_frequency=maximum_frequency)
+        tsv_data_recon = interpolate_lombscargle(
+            data=data.values[tmask_cur, :].T,
+            sine_term=sine_term,
+            cosine_term=cosine_term,
+            angular_frequencies=angular_frequencies,
+            all_samples=all_samples,
+            n_samples_seen=nobs,
+            n_samples=nobs_total
+        ).T
+        tsv_data.loc[np.logical_not(tmask_cur), data.columns] = (
+            tsv_data_recon[np.logical_not(tmask_cur), :])
 
     tsv_data.to_csv(timeseries_2d_out, sep='\t', index=False, na_rep='n/a')
-    return timeseries_2d_out
+    return timeseries_2d_out, idx_nan
 
 
 def demean_detrend(data, detrend_order, temporal_mask=None, save_mean=True):
