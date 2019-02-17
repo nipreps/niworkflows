@@ -2,9 +2,12 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
-Temporal filtering operations for the image processing system
+Temporal filtering workflow based on a Nipype translation of:
+    https://github.com/MidnightScanClub/MSC_Gratton2018_Codebase/blob/ ...
+    master/FCProcessing/FCPROCESS_MSC_task.m
+
+Original paper: https://www.ncbi.nlm.nih.gov/pubmed/23994314
 """
 
 from multiprocessing import cpu_count
@@ -13,7 +16,8 @@ from nipype.interfaces import utility as niu, fsl, afni
 from ..interfaces.filter import (
     TemporalFilter4D, TemporalFilter2D,
     Interpolate4D, Interpolate2D,
-    DemeanDetrend4D, DemeanDetrend2D
+    DemeanDetrend4D, DemeanDetrend2D,
+    RestoreNaN
 )
 
 def init_temporal_filter_wf(t_rep,
@@ -186,6 +190,8 @@ def init_temporal_filter_wf(t_rep,
         interp_2d = pe.MapNode(
             Interpolate2D(t_rep=t_rep),
             name='interp_2d', iterfield=['in_file'])
+        restore_nan = pe.MapNode(RestoreNaN(), name='restore_nan',
+                                 iterfield=['in_file', 'idx_nan'])
 
         workflow.connect([
             (inputnode, interp_4d, [('brain_mask', 'mask'),
@@ -193,9 +199,12 @@ def init_temporal_filter_wf(t_rep,
             (inputnode, interp_2d, [('temporal_mask', 'tmask')]),
             (src_4d[0], interp_4d, [(src_4d[1], 'in_file')]),
             (src_2d[0], interp_2d, [(src_2d[1], 'in_file')]),
+            (interp_2d, restore_nan, [('idx_nan', 'idx_nan')]),
+            (restore_nan, dst_2d[0], [('output_file', dst_2d[1])]),
         ])
         src_4d = (interp_4d, 'output_file')
         src_2d = (interp_2d, 'output_file')
+        dst_2d = (restore_nan, 'in_file')
 
     if filter_type == 'gaussian':
         _validate_passband(filter_type, passband)

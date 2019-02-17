@@ -310,6 +310,37 @@ class DemeanDetrend2D(SimpleInterface):
         return runtime
 
 
+class RestoreNaNInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='Interpolated TSV time series')
+    idx_nan = traits.List(desc='List of each column\'s NaN indices')
+    output_file = File(desc='Output path')
+
+
+class RestoreNaNOutputSpec(TraitedSpec):
+    output_file = File(exists=True, desc='TSV file with NaNs restored')
+
+
+class RestoreNaN(SimpleInterface):
+    """Restore NaN values that were interpolated over."""
+    input_spec = RestoreNaNInputSpec
+    output_spec = RestoreNaNOutputSpec
+
+    def _run_interface(self, runtime):
+        if isdefined(self.inputs.output_file):
+            out_file = self.inputs.output_file
+        else:
+            out_file = fname_presuffix(self.inputs.in_file,
+                                       suffix='_nan',
+                                       newpath=runtime.cwd)
+        self._results['output_file'] = restore_nan(
+            timeseries_2d=self.inputs.in_file,
+            timeseries_2d_out=out_file,
+            idx_nan=self.inputs.idx_nan
+        )
+        return runtime
+
+
 def _normalise_passband(passband, nyquist):
     """Normalise the passband according to the Nyquist frequency."""
     passband_norm = [0, 1]
@@ -914,6 +945,10 @@ def interpolate_lombscargle_2d(timeseries_2d,
     -------
     str
         Path to the saved and interpolated TSV time series.
+    list
+        List of tuples indicating the columns and row indices of any NaN
+        values that were overwritten by interpolation. Can be passed to
+        restore_nan to restore those values.
     """
     tsv_data = pd.read_csv(timeseries_2d, sep='\t')
     nobs_total = tsv_data.shape[0]
@@ -949,6 +984,34 @@ def interpolate_lombscargle_2d(timeseries_2d,
 
     tsv_data.to_csv(timeseries_2d_out, sep='\t', index=False, na_rep='n/a')
     return timeseries_2d_out, idx_nan
+
+
+def restore_nan(timeseries_2d, timeseries_2d_out, idx_nan):
+    """Restore any NaN values that interpolation previously removed to ensure
+    a well-behaved filter.
+
+    Parameters
+    ----------
+    timeseries_2d: str
+        Path to the 2-dimensional TSV time series dataset to which the NaN
+        values should be restored.
+    timeseries_2d_out: str
+        Path where the time series dataset with restored NaN values will be
+        saved.
+    idx_nan: list
+        List of tuples indicating the columns and row indices of any NaN
+        values that were overwritten by interpolation.
+
+    Returns
+    -------
+    str
+        Path to the TSV time series with NaNs restored.
+    """
+    tsv_data = pd.read_csv(timeseries_2d, sep='\t')
+    for col_name, row_idx in idx_nan:
+        tsv_data.loc[row_idx, col_name] = np.NaN
+    tsv_data.to_csv(timeseries_2d_out, sep='\t', index=False, na_rep='n/a')
+    return timeseries_2d_out
 
 
 def demean_detrend(data, detrend_order, temporal_mask=None, save_mean=True):
