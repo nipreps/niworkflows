@@ -14,7 +14,8 @@ from scipy import signal
 
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface, File)
+    traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface,
+    File, isdefined)
 
 
 class TemporalFilter4DInputSpec(BaseInterfaceInputSpec):
@@ -224,10 +225,10 @@ class Interpolate2D(SimpleInterface):
 class DemeanDetrend4DInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='4D NIfTI time series to be demeaned and detrended')
-    tmask = File(exists=True, mandatory=True,
-                 desc='Temporal mask')
-    mask = File(exists=True,
-                desc='Spatial mask')
+    tmask = traits.Either(None, File(exists=True), default=None,
+                          usedefault=True, desc='Temporal mask')
+    mask = traits.Either(None, File(exists=True), default=None,
+                         usedefault=True, desc='Spatial mask')
     detrend_order = traits.Int(0, usedefault=True,
                     desc='Order of polynomial detrend (0 for demean only)')
     output_file = File(desc='Output path')
@@ -274,8 +275,8 @@ class DemeanDetrend4D(SimpleInterface):
 class DemeanDetrend2DInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='1D or 2D TSV time series to be demeaned/detrended')
-    tmask = File(exists=True, mandatory=True,
-                 desc='Temporal mask')
+    tmask = traits.Either(None, File(exists=True), default=None,
+                          usedefault=True, desc='Temporal mask')
     detrend_order = traits.Int(0, usedefault=True,
                     desc='Order of polynomial detrend (0 for demean only)')
     output_file = File(desc='Output path')
@@ -307,67 +308,16 @@ class DemeanDetrend2D(SimpleInterface):
         return runtime
 
 
-def _validate_passband(filter_type, passband):
-    """Verify that the filter passband is reasonably formulated.
-
-    Parameters
-    ----------
-    filter_type: str
-        String indicating the type of filter.
-    passband: tuple
-        2-tuple indicating high-pass and low-pass cutoffs for the filter.
-    """
-    if passband[0] > passband[1]:
-        raise ValueError(
-            '\n'
-            'High-pass cutoff must be less than low-pass cutoff\n'
-            'for the selected filter type.\n'
-            '==================================================\n'
-            'Filter class:     {0}\n'
-            'High-pass cutoff: {1[0]}\n'
-            'Low-pass cutoff:  {1[1]}\n'.format(filter_type, passband))
-
-
-def _get_fsl_passband(passband, sampling_rate):
-    """
-    Convert the passband to a form that FSL can understand.
-    For use when filtering with a Gaussian kernel.
-    1) Convert the cutoff frequencies from Hz (cycles per second) to cycles
-       per repetition.
-    2) Convert from frequency cutoff (in Hz) to cycle cutoff (in s). 
-    3) Then, determine how many cycles of the cutoff per repetition.
-
-    Parameters
-    ----------
-    passband: tuple
-        2-tuple indicating high-pass and low-pass cutoffs for the filter.
-    sampling_rate: float
-        Repetition time.
-
-    Returns
-    -------
-    tuple
-        FSL-compatible passband.
-    """
-    passband_frequency = (0, -1)
-    passband_frequency[0] = (1/passband[0])/(2 * sampling_rate)
-    if passband[1] == 'nyquist':
-        passband_frequency[1] = -1
-    else:
-        passband_frequency[1] = 1/passband[1]/(2 * sampling_rate)
-    return passband_frequency
-
-
 def _normalise_passband(passband, nyquist):
     """Normalise the passband according to the Nyquist frequency."""
-    passband_norm = (0, 1)
+    passband_norm = [0, 1]
 
     passband_norm[0] = float(passband[0])/nyquist
     if passband[1] == 'nyquist':
         passband_norm[1] = 1
     else:
         passband_norm[1] = float(passband[1])/nyquist
-    return passband_norm
+    return tuple(passband_norm)
 
 
 def _get_norm_passband(passband, sampling_rate):
@@ -388,6 +338,7 @@ def _get_norm_passband(passband, sampling_rate):
         Indicator of whether the filter is permissive at high or low
         frequencies. If None, this determination is 
     """
+    filter_pass = 'bandpass'
     nyquist = 0.5 * sampling_rate
     passband_norm = _normalise_passband(passband, nyquist)
 
@@ -413,8 +364,6 @@ def _get_norm_passband(passband, sampling_rate):
         passband_norm = passband_norm[1]
     elif passband_norm[0] > passband_norm[1]:
         filter_pass = 'bandstop'
-    else:
-        filter_pass = 'bandpass'
     return passband_norm, filter_pass
 
 
@@ -435,6 +384,7 @@ def _unfold_image(img, mask=None):
         series and columns equal to voxels in the mask..
     """
     if mask is not None:
+        mask = nb.load(mask)
         return img.get_fdata()[mask.get_data().astype('bool')]
     else:
         return img.get_fdata().reshape([-1, img.shape[3]])
@@ -459,13 +409,14 @@ def _fold_image(data, template, mask=None):
     nibabel NIfTI object
     """
     if mask is not None:
+        mask = nb.load(mask)
         data_folded = np.zeros(shape=template.shape)
         data_folded[mask.get_data().astype('bool')] = data
     else:
         data_folded = data.reshape(template.shape)
-    return nib.Nifti1Image(dataobj=data_folded,
-                           affine=template.affine,
-                           header=template.header)
+    return nb.Nifti1Image(dataobj=data_folded,
+                          affine=template.affine,
+                          header=template.header)
 
 
 def general_filter(data,
@@ -537,17 +488,13 @@ def general_filter(data,
     #     serial transposition is demeaning the data so that the filter is
     #     well-behaved. mean is added back at the end.
     #     also necessary to broadcast arrays.
-    #TODO also need to decide what to do about means. filter will be incorrect
-    #     unless data are demeaned, but the mean should potentially omit
-    #     censored values
     ##########################################################################
     mask = np.isnan(data)
-    data[mask] =   0
+    data[mask] = 0
     colmeans = data.mean(1)
-    data = signal.filtfilt(filt[0],filt[1],(data.T - colmeans).T,
-                           method='gust')
+    data = signal.filtfilt(filt[0], filt[1], data, method='gust')
     data[mask] = np.nan
-    return (data.T + colmeans).T
+    return data
 
 
 def general_filter_4d(timeseries_4d,
@@ -610,7 +557,7 @@ def general_filter_4d(timeseries_4d,
                               ripple_stop=ripple_stop)
 
     img_filtered = _fold_image(img_data, img, brain_mask)
-    nib.save(img_filtered, timeseries_4d_out)
+    nb.save(img_filtered, timeseries_4d_out)
     return timeseries_4d_out
 
 
@@ -930,7 +877,7 @@ def interpolate_lombscargle_4d(timeseries_4d,
         del recon
 
     img_interpolated = _fold_image(img_data, img, brain_mask)
-    nib.save(img_interpolated, timeseries_4d_out)
+    nb.save(img_interpolated, timeseries_4d_out)
     return timeseries_4d_out
 
 
@@ -1027,19 +974,20 @@ def demean_detrend(data, detrend_order, temporal_mask=None, save_mean=True):
     """
     data_to_fit = data
     indices = np.arange(data.shape[-1])
+    indices_all = indices
     if temporal_mask is not None:
-        indices = np.where(tmask)[0]
         tmask = pd.read_csv(temporal_mask, sep='\t').values.astype('bool')
+        indices = np.where(tmask)[0]
         data_to_fit = data.take(
             indices=np.where(tmask)[0],
             axis=-1)
 
-    fit_coef = np.polynomial.legendre.legfit(x=indices,
-                                             y=data_to_fit.T,
-                                             deg=detrend_order)
-    fit = np.polynomial.legendre.legval(x=indices_all,
-                                        c=fit_coef)
-    fit_res = data - fit
+    fit_coef = np.ma.polyfit(x=indices,
+                             y=data_to_fit.T,
+                             deg=detrend_order)
+    fit = np.polynomial.polynomial.polyval(x=indices_all,
+                                           c=fit_coef)
+    fit_res = (data - fit)
     fit_mean = fit_coef[0]
 
     if save_mean:
@@ -1098,18 +1046,19 @@ def demean_detrend_4d(timeseries_4d,
                                             temporal_mask=temporal_mask,
                                             save_mean=save_mean)
     img_dmdt = _fold_image(residuals, img, brain_mask)
-    nib.save(img_dmdt, timeseries_4d_out)
+    nb.save(img_dmdt, timeseries_4d_out)
 
     if save_mean:
         if brain_mask is not None:
+            brain_mask = nb.load(brain_mask)
             data_mean = np.zeros(shape=img.shape[:-1])
             data_mean[brain_mask.get_data().astype('bool')] = mean_vals
         else:
             data_folded = mean_vals.reshape(img.shape[:-1])
-        img_mean = nib.Nifti1Image(dataobj=data_mean,
-                                   affine=img.affine,
-                                   header=img.header)
-        nib.save(img_mean, mean_out)
+        img_mean = nb.Nifti1Image(dataobj=data_mean,
+                                  affine=img.affine,
+                                  header=img.header)
+        nb.save(img_mean, mean_out)
 
     return timeseries_4d_out, mean_out
 
@@ -1141,10 +1090,12 @@ def demean_detrend_2d(timeseries_2d,
     str
         Saved and detrended TSV time series.
     """
-    tsv_data = read_csv(timeseries_2d, sep='\t')
-    tsv_data[:] = demean_detrend(data=tsv_data.values.T,
+    tsv_data = pd.read_csv(timeseries_2d, sep='\t')
+    data_to_fit = np.ma.masked_array(tsv_data.values.T,
+                                     np.isnan(tsv_data.values.T))
+    tsv_data[:] = demean_detrend(data=data_to_fit,
                                  detrend_order=detrend_order,
                                  temporal_mask=temporal_mask,
-                                 save_mean=False)
+                                 save_mean=False)[0].data.T
     tsv_data.to_csv(timeseries_2d_out, sep='\t', index=False, na_rep='n/a')
     return timeseries_2d_out
