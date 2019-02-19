@@ -59,7 +59,7 @@ def init_temporal_filter_wf(t_rep,
 
 
     **Parameters**
-        
+
         t_rep: float
             Repetition time of all data to be filtered.
         detrend: bool
@@ -113,7 +113,7 @@ def init_temporal_filter_wf(t_rep,
 
 
     **Inputs**
-        
+
         timeseries_4d
             List of 4D time series formatted as a NIfTI file.
         timeseries_2d
@@ -130,7 +130,7 @@ def init_temporal_filter_wf(t_rep,
 
 
     **Outputs**
-        
+
         timeseries_4d_filtered
             The filtered and fully processed ``timeseries_4d``.
         timeseries_2d_filtered
