@@ -13,6 +13,7 @@ Original paper: https://www.ncbi.nlm.nih.gov/pubmed/23994314
 from multiprocessing import cpu_count
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu, fsl, afni
+from .timeseries1D import init_apply_to_2d_wf as init_2d_wf
 from ..interfaces.filter import (
     TemporalFilter4D, TemporalFilter2D,
     Interpolate4D, Interpolate2D,
@@ -208,7 +209,7 @@ def init_temporal_filter_wf(t_rep,
 
     if filter_type == 'gaussian':
         _validate_passband(filter_type, passband)
-        passband = get_fsl_passband(passband, t_rep)
+        passband = _get_fsl_passband(passband, t_rep)
         gaussian_4d = pe.MapNode(fsl.maths.TemporalFilter(
             highpass_sigma=passband[0],
             lowpass_sigma=passband[1],
@@ -221,6 +222,15 @@ def init_temporal_filter_wf(t_rep,
             output_type='NIFTI_GZ'),
             name='gaussian_2d', iterfield=['in_file'],
             n_procs=omp_nthreads, mem_gb=mem_gb)
+        gaussian_2d_wf = init_2d_wf(gaussian_2d, t_rep, 'gaussian_2d_wf')
+
+        workflow.connect([
+            (src_4d[0], gaussian_4d, [(src_4d[1], 'in_file')]),
+            (src_2d[0], gaussian_2d_wf, [(src_2d[1], 'inputnode.in_files')]),
+        ])
+        src_4d = (gaussian_4d, 'out_file')
+        src_2d = (gaussian_2d_wf, 'outputnode.out_files')
+
     elif filter_type == 'fourier':
         _validate_passband(filter_type, passband)
         fourier_4d = pe.MapNode(afni.Bandpass(
@@ -236,6 +246,15 @@ def init_temporal_filter_wf(t_rep,
             tr=t_rep),
             name='fourier_2d', iterfield=['in_file'],
             n_procs=omp_nthreads, mem_gb=mem_gb)
+        fourier_2d_wf = init_2d_wf(fourier_2d, t_rep, 'fourier_2d_wf',
+                                   mode='afni3d')
+        workflow.connect([
+            (src_4d[0], fourier_4d, [(src_4d[1], 'in_file')]),
+            (src_2d[0], fourier_2d_wf, [(src_2d[1], 'inputnode.in_files')]),
+        ])
+        src_4d = (fourier_4d, 'out_file')
+        src_2d = (fourier_2d_wf, 'outputnode.out_files')
+
     else:
         signal_4d = pe.MapNode(TemporalFilter4D(
             t_rep=t_rep,
@@ -313,7 +332,7 @@ def _get_fsl_passband(passband, sampling_rate):
     tuple
         FSL-compatible passband.
     """
-    passband_frequency = (0, -1)
+    passband_frequency = [0, -1]
     passband_frequency[0] = (1/passband[0])/(2 * sampling_rate)
     if passband[1] == 'nyquist':
         passband_frequency[1] = -1

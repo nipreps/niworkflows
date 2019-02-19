@@ -38,7 +38,8 @@ def init_apply_to_2d_wf(function_node,
 
         function_node
             The nipype image processing node that should be applied to the
-            input one- or two-dimensional TSV file.
+            input one- or two-dimensional TSV file. This should be a MapNode
+            with an appropriate ``iterfield`` set.
         t_rep
             Repetition time or sampling interval for the data in the TSV file.
         name
@@ -55,15 +56,15 @@ def init_apply_to_2d_wf(function_node,
 
     **Inputs**
 
-        in_file
-            A one- or two-dimensional TSV file to which the processing step in
-            `function_node` should be applied.
+        in_files
+            A list of one- or two-dimensional TSV files to which the
+            processing step in `function_node` should be applied.
 
 
     **Outputs**
 
-        out_file
-            TSV file with the requested transformation applied.
+        out_files
+            TSV files with the requested transformation applied.
     """
     workflow  = pe.Workflow(name=name)
     
@@ -71,60 +72,63 @@ def init_apply_to_2d_wf(function_node,
     inputnode = pe.Node(
         name='inputnode',
         interface=niu.IdentityInterface(
-            fields=['in_file']
+            fields=['in_files']
     ))
     outputnode = pe.Node(
         name='outputnode',
         interface=niu.IdentityInterface(
-            fields=['out_file']
+            fields=['out_files']
     ))
     
     # Assemble the workflow.
     if mode == 'afni3d':
-        to_1d = pe.Node(name='to_1d', interface=TSVTo1D(transpose=True))
-        from_1d = pe.Node(name='from_1d',
-                          interface=xcp.TSVFrom1D(in_format='columns'))
+        to_1d = pe.MapNode(name='to_1d', iterfield=['in_file'],
+                           interface=TSVTo1D(transpose=True))
+        from_1d = pe.MapNode(name='from_1d', iterfield=['in_file', 'header'],
+                             interface=TSVFrom1D(in_format='columns'))
         # This is extremely hackish, but it seems to be the only way to get
         # AFNI 3D operations to work on 1D files in Nipype as of now
-        suffix_1d_1 = pe.Node(name=('suffix_1D_first'),
+        suffix_1d_1 = pe.MapNode(name=('suffix_1D_first'), iterfield=['src'],
             interface=niu.Function(
                 input_names=['src'],
                 output_names=['real_dst'],
-                function=_move_ifc))
-        suffix_1d_2 = pe.Node(name=('suffix_1D_second'),
+                function=_copy_to_1D))
+        suffix_1d_2 = pe.MapNode(name=('suffix_1D_second'), iterfield=['src'],
             interface=niu.Function(
                 input_names=['src'],
                 output_names=['real_dst'],
-                function=_move_ifc))
+                function=_copy_to_1D))
 
         workflow.connect([
-            (inputnode, to_1d, [('in_file', 'in_file')]),
+            (inputnode, to_1d, [('in_files', 'in_file')]),
             (to_1d, suffix_1d_1, [('out_file', 'src')]),
             (suffix_1d_1, function_node, [('real_dst', input_field)]),
             (function_node, suffix_1d_2, [(output_field, 'src')]),
             (suffix_1d_2, from_1d, [('real_dst', 'in_file')]),
             (to_1d, from_1d, [('header', 'header')]),
-            (from_1d, outputnode, [('out_file', 'out_file')])
+            (from_1d, outputnode, [('out_file', 'out_files')])
         ])
     else:
         # Map tsv to image and image to tsv
-        tsv_to_img = pe.Node(
-            name='tsv2img',
+        tsv_to_img = pe.MapNode(
+            name='tsv2img', iterfield=['in_file'],
             interface=TSVToImage(t_rep=t_rep))
-        img_to_tsv = pe.Node(name='img2tsv', interface=ImageToTSV())
+        img_to_tsv = pe.MapNode(
+            interface=ImageToTSV(),
+            name='img2tsv', iterfield=['in_file', 'header'])
         # Copy header information
-        copy_geometry = pe.Node(
-            name='copy_geometry',
+        copy_geometry = pe.MapNode(
+            name='copy_geometry', iterfield=['in_file', 'dest_file'],
             interface=fsl.utils.CopyGeom(output_type='NIFTI_GZ'))
 
         workflow.connect([
-            (inputnode, tsv_to_img, [('in_file', 'in_file')]),
+            (inputnode, tsv_to_img, [('in_files', 'in_file')]),
             (tsv_to_img, function_node, [('out_file', input_field)]),
             (tsv_to_img, copy_geometry, [('out_file', 'in_file')]),
             (function_node, copy_geometry, [(output_field,'dest_file')]),
             (copy_geometry, img_to_tsv, [('out_file', 'in_file')]),
             (tsv_to_img, img_to_tsv, [('header', 'header')]),
-            (img_to_tsv, outputnode, [('out_file', 'out_file')])
+            (img_to_tsv, outputnode, [('out_file', 'out_files')])
         ])
     
     return workflow

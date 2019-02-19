@@ -6,6 +6,9 @@
 Operations to apply analytic tools designed for 4D NIfTI time series to
 2D TSV files.
 """
+import pandas as pd
+import numpy as np
+import nibabel as nb
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface, File)
@@ -120,7 +123,7 @@ class TSVFrom1D(SimpleInterface):
 
         self._results['out_file'] = tsv_from_1D(afni1d=self.inputs.in_file,
                                                 tsv=out_file,
-                                                format=self.inputs.in_format,
+                                                obs=self.inputs.in_format,
                                                 header=self.inputs.header)
 
         return runtime
@@ -153,9 +156,9 @@ def tsv2img(tsv, img, t_rep):
     tsv_data = pd.read_csv(tsv, header=None, skiprows=[0], sep='\t').values.T
     tsv_data.shape = [tsv_data.shape[0],1,1,tsv_data.shape[1]]
     header = list(pd.read_csv(tsv, sep='\t', nrows=0, header=0).columns)
-    img = nib.Nifti1Image(dataobj=tsv_data, affine=np.eye(4))
-    tsv_img.header['pixdim'][4] = t_rep
-    nib.save(tsv_img, img)
+    img_data = nb.Nifti1Image(dataobj=tsv_data, affine=np.eye(4))
+    img_data.header['pixdim'][4] = t_rep
+    nb.save(img_data, img)
     return img, header
 
 
@@ -178,15 +181,15 @@ def img2tsv(img, tsv, mask=None, header=None):
     str
         Path to the TSV generated from image data.
     """
-    img = nib.load(img)
+    img = nb.load(img)
     img_data = _unfold_image(img, mask=mask)
 
     if header is not None:
-        tsv_data = DataFrame(data=img_data.T, columns=header)
+        tsv_data = pd.DataFrame(data=img_data.T, columns=header)
         tsv_data.to_csv(tsv, sep='\t', index=False,
                         na_rep='n/a', header=True)
     else:
-        tsv_data = DataFrame(data=img_data.T)
+        tsv_data = pd.DataFrame(data=img_data.T)
         tsv_data.to_csv(tsv, sep='\t', index=False,
                         na_rep='n/a', header=False)
     return tsv
@@ -254,6 +257,6 @@ def tsv_from_1D(afni1d, tsv, obs='columns', header=None):
         tsv_data = tsv_data.T
     if header is not None:
         tsv_data.columns = header
-    tsv_data.to_tsv(tsv, header=False)
+    tsv_data.to_csv(tsv, sep='\t', index=False, na_rep='n/a', header=False)
 
     return tsv
