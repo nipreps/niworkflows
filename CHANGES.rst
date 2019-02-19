@@ -1,3 +1,13 @@
+0.7.2 (February 19, 2019)
+=========================
+
+  * [FIX] Do not cast ``run`` BIDS-entity to string (#307) @oesteban
+  * [FIX] Scaling of confound fix (#310) @wiheto
+  * [FIX] GenerateSamplingReference with correct zooms (#312) @effigies
+  * [ENH] AROMA plots - add warning for edge cases (none/all are noise) (#292) @jdkent
+  * [ENH] Confound enhancement (#287) @rciric
+
+
 0.7.1 (February 07, 2019)
 =========================
 
