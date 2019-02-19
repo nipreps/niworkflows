@@ -869,8 +869,8 @@ def interpolate_lombscargle_4d(timeseries_4d,
 
     tmask = pd.read_csv(
         temporal_mask, sep='\t').values.astype('bool').squeeze()
-    (sine_term, cosine_term, angular_frequencies, all_samples, nvol
-    ) = periodogram_cfg(
+    (sine_term, cosine_term, angular_frequencies, all_samples,
+     nvol) = periodogram_cfg(
         tmask=tmask,
         sampling_period=t_rep,
         oversampling_frequency=oversampling_frequency,
@@ -962,8 +962,8 @@ def interpolate_lombscargle_2d(timeseries_2d,
                 in tsv_data.columns[tsv_data.isnull().any()]])
     for data in datasets:
         tmask_cur = np.logical_and(data.notnull().any(axis=1), tmask)
-        (sine_term, cosine_term, angular_frequencies, all_samples, nobs
-        ) = periodogram_cfg(
+        (sine_term, cosine_term, angular_frequencies, all_samples,
+         nobs) = periodogram_cfg(
             tmask=tmask_cur,
             sampling_period=t_rep,
             oversampling_frequency=oversampling_frequency,
