@@ -21,6 +21,7 @@ from ..interfaces.filter import (
     RestoreNaN
 )
 
+
 def init_temporal_filter_wf(t_rep,
                             detrend=True,
                             interpolate=True,
@@ -317,7 +318,7 @@ def _get_fsl_passband(passband, sampling_rate):
     For use when filtering with a Gaussian kernel.
     1) Convert the cutoff frequencies from Hz (cycles per second) to cycles
        per repetition.
-    2) Convert from frequency cutoff (in Hz) to cycle cutoff (in s). 
+    2) Convert from frequency cutoff (in Hz) to cycle cutoff (in s).
     3) Then, determine how many cycles of the cutoff per repetition.
 
     Parameters

@@ -5,9 +5,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from .confounds import ExpandModel, SpikeRegressors
 from .filter import (
-	TemporalFilter4D, TemporalFilter2D,
-	Interpolate4D, Interpolate2D,
-	DemeanDetrend4D, DemeanDetrend2D
+    TemporalFilter4D, TemporalFilter2D,
+    Interpolate4D, Interpolate2D,
+    DemeanDetrend4D, DemeanDetrend2D
 )
 from .masks import BETRPT as BET
 from .segmentation import (FASTRPT as FAST)

@@ -135,7 +135,7 @@ def tsv2img(tsv, img, t_rep):
 
     Note that dummy NIfTIs must explicitly have repetition time set via input
     to this function, and the affine of a dummy NIfTI is identity.
-    
+
     Parameters
     ----------
     tsv: str
@@ -154,7 +154,7 @@ def tsv2img(tsv, img, t_rep):
         can potentially be added later if the image is converted back.
     """
     tsv_data = pd.read_csv(tsv, header=None, skiprows=[0], sep='\t').values.T
-    tsv_data.shape = [tsv_data.shape[0],1,1,tsv_data.shape[1]]
+    tsv_data.shape = [tsv_data.shape[0], 1, 1, tsv_data.shape[1]]
     header = list(pd.read_csv(tsv, sep='\t', nrows=0, header=0).columns)
     img_data = nb.Nifti1Image(dataobj=tsv_data, affine=np.eye(4))
     img_data.header['pixdim'][4] = t_rep

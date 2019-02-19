@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 import nibabel as nb
 from scipy import signal
-from collections import OrderedDict
 
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
@@ -130,7 +129,6 @@ class TemporalFilter2D(SimpleInterface):
         return runtime
 
 
-
 class Interpolate4DInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='4D NIfTI time series to be transformed')
@@ -231,8 +229,9 @@ class DemeanDetrend4DInputSpec(BaseInterfaceInputSpec):
                           usedefault=True, desc='Temporal mask')
     mask = traits.Either(None, File(exists=True), default=None,
                          usedefault=True, desc='Spatial mask')
-    detrend_order = traits.Int(0, usedefault=True,
-                    desc='Order of polynomial detrend (0 for demean only)')
+    detrend_order = traits.Int(
+        0, usedefault=True,
+        desc='Order of polynomial detrend (0 for demean only)')
     output_file = File(desc='Output path')
     output_mean = File(desc='Output path for mean image')
 
@@ -279,8 +278,9 @@ class DemeanDetrend2DInputSpec(BaseInterfaceInputSpec):
                    desc='1D or 2D TSV time series to be demeaned/detrended')
     tmask = traits.Either(None, File(exists=True), default=None,
                           usedefault=True, desc='Temporal mask')
-    detrend_order = traits.Int(0, usedefault=True,
-                    desc='Order of polynomial detrend (0 for demean only)')
+    detrend_order = traits.Int(
+        0, usedefault=True,
+        desc='Order of polynomial detrend (0 for demean only)')
     output_file = File(desc='Output path')
 
 
@@ -369,7 +369,7 @@ def _get_norm_passband(passband, sampling_rate):
         Cutoff frequencies normalised between 0 and Nyquist.
     None or str
         Indicator of whether the filter is permissive at high or low
-        frequencies. If None, this determination is 
+        frequencies.
     """
     filter_pass = 'bandpass'
     nyquist = 0.5 * sampling_rate
@@ -516,7 +516,6 @@ def general_filter(data,
     # the imputation of zero values will probably distort the filter.
     mask = np.isnan(data)
     data[mask] = 0
-    colmeans = data.mean(1)
     data = signal.filtfilt(filt[0], filt[1], data, method='gust')
     data[mask] = np.nan
     return data
@@ -679,7 +678,7 @@ def periodogram_cfg(tmask,
     """
     n_samples = len(tmask)
 
-    seen_samples =(np.where(tmask)[0] + 1) * sampling_period
+    seen_samples = (np.where(tmask)[0] + 1) * sampling_period
     timespan = max(seen_samples) - min(seen_samples)
     n_samples_seen = seen_samples.shape[0]
     if n_samples_seen == n_samples:
@@ -771,10 +770,10 @@ def interpolate_lombscargle(data,
         mult = np.zeros(shape=(angular_frequencies.shape[0],
                                n_samples_seen,
                                n_features))
-        for obs in range(0,n_samples_seen):
-            mult[:,obs,:] = np.outer(term[:,obs],data[:,obs])
-        numerator = np.sum(mult,1)
-        denominator = np.sum(term**2,1)
+        for obs in range(0, n_samples_seen):
+            mult[:, obs, :] = np.outer(term[:, obs], data[:, obs])
+        numerator = np.sum(mult, 1)
+        denominator = np.sum(term**2, 1)
         term = (numerator.T/denominator).T
         return term
 
@@ -786,8 +785,8 @@ def interpolate_lombscargle(data,
                                      n_samples,
                                      n_features))
         for i in range(angular_frequencies.shape[0]):
-            term_recon[i,:,:] = np.outer(term_prod[i,:],term[i,:])
-        term_recon = np.sum(term_recon,0)
+            term_recon[i, :, :] = np.outer(term_prod[i, :], term[i, :])
+        term_recon = np.sum(term_recon, 0)
         return term_recon
 
     c = _compute_term(cosine_term)
@@ -871,7 +870,7 @@ def interpolate_lombscargle_4d(timeseries_4d,
     tmask = pd.read_csv(
         temporal_mask, sep='\t').values.astype('bool').squeeze()
     (sine_term, cosine_term, angular_frequencies, all_samples, nvol
-        ) = periodogram_cfg(
+    ) = periodogram_cfg(
         tmask=tmask,
         sampling_period=t_rep,
         oversampling_frequency=oversampling_frequency,
@@ -884,7 +883,7 @@ def interpolate_lombscargle_4d(timeseries_4d,
 
         bin_index = np.arange(start=(current_bin)*voxel_bin_size-1,
                               stop=(current_bin+1)*voxel_bin_size)
-        bin_index = np.intersect1d(bin_index, range(0,nvox))
+        bin_index = np.intersect1d(bin_index, range(0, nvox))
         voxel_bin = img_data[bin_index, :][:, tmask]
         recon = interpolate_lombscargle(
             data=voxel_bin,
@@ -910,7 +909,6 @@ def interpolate_lombscargle_2d(timeseries_2d,
                                temporal_mask=None,
                                oversampling_frequency=8,
                                maximum_frequency=1):
-    
     """Interpolation for 2D TSV time series data.
 
     Temporally interpolate over unseen (masked) values in a dataset using an
@@ -965,7 +963,7 @@ def interpolate_lombscargle_2d(timeseries_2d,
     for data in datasets:
         tmask_cur = np.logical_and(data.notnull().any(axis=1), tmask)
         (sine_term, cosine_term, angular_frequencies, all_samples, nobs
-            ) = periodogram_cfg(
+        ) = periodogram_cfg(
             tmask=tmask_cur,
             sampling_period=t_rep,
             oversampling_frequency=oversampling_frequency,
@@ -1120,7 +1118,7 @@ def demean_detrend_4d(timeseries_4d,
             data_mean = np.zeros(shape=img.shape[:-1])
             data_mean[brain_mask.get_data().astype('bool')] = mean_vals
         else:
-            data_folded = mean_vals.reshape(img.shape[:-1])
+            data_mean = mean_vals.reshape(img.shape[:-1])
         img_mean = nb.Nifti1Image(dataobj=data_mean,
                                   affine=img.affine,
                                   header=img.header)

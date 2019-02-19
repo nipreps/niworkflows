@@ -66,20 +66,16 @@ def init_apply_to_2d_wf(function_node,
         out_files
             TSV files with the requested transformation applied.
     """
-    workflow  = pe.Workflow(name=name)
-    
+    workflow = pe.Workflow(name=name)
+
     # I/O nodes
     inputnode = pe.Node(
         name='inputnode',
-        interface=niu.IdentityInterface(
-            fields=['in_files']
-    ))
+        interface=niu.IdentityInterface(fields=['in_files']))
     outputnode = pe.Node(
         name='outputnode',
-        interface=niu.IdentityInterface(
-            fields=['out_files']
-    ))
-    
+        interface=niu.IdentityInterface(fields=['out_files']))
+
     # Assemble the workflow.
     if mode == 'afni3d':
         to_1d = pe.MapNode(name='to_1d', iterfield=['in_file'],
@@ -88,12 +84,14 @@ def init_apply_to_2d_wf(function_node,
                              interface=TSVFrom1D(in_format='columns'))
         # This is extremely hackish, but it seems to be the only way to get
         # AFNI 3D operations to work on 1D files in Nipype as of now
-        suffix_1d_1 = pe.MapNode(name=('suffix_1D_first'), iterfield=['src'],
+        suffix_1d_1 = pe.MapNode(
+            name=('suffix_1D_first'), iterfield=['src'],
             interface=niu.Function(
                 input_names=['src'],
                 output_names=['real_dst'],
                 function=_copy_to_1D))
-        suffix_1d_2 = pe.MapNode(name=('suffix_1D_second'), iterfield=['src'],
+        suffix_1d_2 = pe.MapNode(
+            name=('suffix_1D_second'), iterfield=['src'],
             interface=niu.Function(
                 input_names=['src'],
                 output_names=['real_dst'],
@@ -125,12 +123,12 @@ def init_apply_to_2d_wf(function_node,
             (inputnode, tsv_to_img, [('in_files', 'in_file')]),
             (tsv_to_img, function_node, [('out_file', input_field)]),
             (tsv_to_img, copy_geometry, [('out_file', 'in_file')]),
-            (function_node, copy_geometry, [(output_field,'dest_file')]),
+            (function_node, copy_geometry, [(output_field, 'dest_file')]),
             (copy_geometry, img_to_tsv, [('out_file', 'in_file')]),
             (tsv_to_img, img_to_tsv, [('header', 'header')]),
             (img_to_tsv, outputnode, [('out_file', 'out_files')])
         ])
-    
+
     return workflow
 
 
