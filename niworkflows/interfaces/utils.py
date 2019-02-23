@@ -443,6 +443,7 @@ class TPM2ROIInputSpec(BaseInterfaceInputSpec):
 class TPM2ROIOutputSpec(TraitedSpec):
     roi_file = File(exists=True, desc='output ROI file')
     eroded_mask = File(exists=True, desc='resulting eroded mask')
+    out_report = File(exists=True, desc='HTML segment containing warning')
 
 
 class TPM2ROI(SimpleInterface):
@@ -460,6 +461,7 @@ class TPM2ROI(SimpleInterface):
     output_spec = TPM2ROIOutputSpec
 
     def _run_interface(self, runtime):
+        out_report = os.path.join(runtime.cwd, 'report.html')
         mask_erode_mm = self.inputs.mask_erode_mm
         if not isdefined(mask_erode_mm):
             mask_erode_mm = None
@@ -472,7 +474,7 @@ class TPM2ROI(SimpleInterface):
         erode_prop = self.inputs.erode_prop
         if not isdefined(erode_prop):
             erode_prop = None
-        roi_file, eroded_mask = _tpm2roi(
+        roi_file, eroded_mask, warning_txt = _tpm2roi(
             self.inputs.in_tpm,
             self.inputs.in_mask,
             mask_erode_mm,
@@ -481,9 +483,29 @@ class TPM2ROI(SimpleInterface):
             erode_prop,
             self.inputs.prob_thresh,
             newpath=runtime.cwd,
+            return_warning=True,
         )
         self._results['roi_file'] = roi_file
         self._results['eroded_mask'] = eroded_mask
+
+        if warning_txt:
+            description = """\
+<p class="elem-desc">
+    The specified erosion applied to {} resulted in an empty mask.
+    The uneroded mask has been used instead.
+    Substantial partial volume effects are possible; checking the correlation
+    among confound time series is advised.
+</p>
+""".format(self.inputs.in_tpm)
+
+            snippet = '<h3 class="elem-title">{}</h3>\n{}\n'.format(
+                warning_txt, description)
+            with open(out_report, 'w') as fobj:
+                fobj.write(indent(snippet, '\t' * 3))
+        else:
+            open(out_report, 'w').close()
+
+        self._results['out_report'] = out_report
         return runtime
 
 
@@ -833,10 +855,11 @@ def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
 
 def _tpm2roi(in_tpm, in_mask, mask_erosion_mm=None, erosion_mm=None,
              mask_erosion_prop=None, erosion_prop=None, pthres=0.95,
-             newpath=None):
+             newpath=None, return_warning=False):
     """
     Generate a mask from a tissue probability map
     """
+    warning_txt = ''
     tpm_img = nb.load(in_tpm)
     roi_mask = (tpm_img.get_data() >= pthres).astype(np.uint8)
 
@@ -850,7 +873,11 @@ def _tpm2roi(in_tpm, in_mask, mask_erosion_mm=None, erosion_mm=None,
         mask_data = mask_img.get_data().astype(np.uint8)
         if mask_erosion_mm:
             iter_n = max(int(mask_erosion_mm / max(mask_img.header.get_zooms())), 1)
-            mask_data = nd.binary_erosion(mask_data, iterations=iter_n)
+            mask_data_eroded = nd.binary_erosion(mask_data, iterations=iter_n)
+            if np.sum(mask_data_eroded > 0) > 0:
+                mask_data = mask_data_eroded
+            else:
+                warning_txt = 'WARNING - Erosion resulted in empty mask'
         else:
             orig_vol = np.sum(mask_data > 0)
             while np.sum(mask_data > 0) / orig_vol > mask_erosion_prop:
@@ -882,4 +909,7 @@ def _tpm2roi(in_tpm, in_mask, mask_erosion_mm=None, erosion_mm=None,
     roi_img = nb.Nifti1Image(roi_mask, tpm_img.affine, tpm_img.header)
     roi_img.set_data_dtype(np.uint8)
     roi_img.to_filename(roi_fname)
-    return roi_fname, eroded_mask_file or in_mask
+    if return_warning:
+        return roi_fname, eroded_mask_file or in_mask, warning_txt
+    else:
+        return roi_fname, eroded_mask_file or in_mask
