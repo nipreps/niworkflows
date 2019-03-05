@@ -37,7 +37,8 @@ def test_ROIsPlot():
     import nibabel as nb
     import numpy as np
 
-    im = nb.load(get_template('OASIS30ANTs', resolution=1, desc='4', suffix='dseg'))
+    im = nb.load(str(
+        get_template('OASIS30ANTs', resolution=1, desc='4', suffix='dseg')))
     lookup = np.zeros(5, dtype=int)
     lookup[1] = 1
     lookup[2] = 4
@@ -52,8 +53,10 @@ def test_ROIsPlot():
     nb.Nifti1Image(newdata, im.affine, hdr).to_filename(out_file)
     roi_rpt = ROIsPlot(
         generate_report=True,
-        in_file=get_template('OASIS30ANTs', resolution=1, suffix='T1w'),
-        in_mask=get_template('OASIS30ANTs', resolution=1, desc='brain', suffix='mask'),
+        in_file=str(
+            get_template('OASIS30ANTs', resolution=1, suffix='T1w')),
+        in_mask=str(
+            get_template('OASIS30ANTs', resolution=1, desc='brain', suffix='mask')),
         in_rois=[out_file],
         levels=[1.5, 2.5, 3.5],
         colors=['gold', 'magenta', 'b'],
@@ -66,7 +69,8 @@ def test_ROIsPlot2():
     import nibabel as nb
     import numpy as np
 
-    im = nb.load(get_template('OASIS30ANTs', resolution=1, desc='4', suffix='dseg'))
+    im = nb.load(str(
+        get_template('OASIS30ANTs', resolution=1, desc='4', suffix='dseg')))
     lookup = np.zeros(5, dtype=int)
     lookup[1] = 1
     lookup[2] = 4
@@ -87,8 +91,10 @@ def test_ROIsPlot2():
         out_files.append(out_file)
     roi_rpt = ROIsPlot(
         generate_report=True,
-        in_file=get_template('OASIS30ANTs', resolution=1, suffix='T1w'),
-        in_mask=get_template('OASIS30ANTs', resolution=1, desc='brain', suffix='mask'),
+        in_file=str(
+            get_template('OASIS30ANTs', resolution=1, suffix='T1w')),
+        in_mask=str(
+            get_template('OASIS30ANTs', resolution=1, desc='brain', suffix='mask')),
         in_rois=out_files,
         colors=['gold', 'lightblue', 'b', 'g']
     )
@@ -100,9 +106,11 @@ def test_SimpleShowMaskRPT():
 
     msk_rpt = SimpleShowMaskRPT(
         generate_report=True,
-        background_file=get_template('OASIS30ANTs', resolution=1, suffix='T1w'),
-        mask_file=get_template('OASIS30ANTs', resolution=1,
-                               desc='BrainCerebellumRegistration', suffix='mask')
+        background_file=str(
+            get_template('OASIS30ANTs', resolution=1, suffix='T1w')),
+        mask_file=str(
+            get_template('OASIS30ANTs', resolution=1,
+                         desc='BrainCerebellumRegistration', suffix='mask'))
     )
     _smoke_test_report(msk_rpt, 'testSimpleMask.svg')
 
@@ -127,12 +135,14 @@ def test_BrainExtractionRPT(monkeypatch, moving, nthreads):
         dimension=3,
         use_floatingpoint_precision=1,
         anatomical_image=moving,
-        brain_template=get_template('OASIS30ANTs', resolution=1, suffix='T1w'),
-        brain_probability_mask=get_template('OASIS30ANTs', resolution=1,
-                                            label='brain', suffix='probseg'),
-        extraction_registration_mask=get_template(
-            'OASIS30ANTs', resolution=1,
-            desc='BrainCerebellumRegistration', suffix='mask'),
+        brain_template=str(
+            get_template('OASIS30ANTs', resolution=1, suffix='T1w')),
+        brain_probability_mask=str(
+            get_template('OASIS30ANTs', resolution=1,
+                         label='brain', suffix='probseg')),
+        extraction_registration_mask=str(
+            get_template('OASIS30ANTs', resolution=1,
+                         desc='BrainCerebellumRegistration', suffix='mask')),
         out_prefix='testBrainExtractionRPT',
         debug=True,  # run faster for testing purposes
         num_threads=nthreads

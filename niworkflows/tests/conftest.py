@@ -34,12 +34,12 @@ def pytest_runtest_setup(item):
 
 @pytest.fixture
 def reference():
-    return get_template('MNI152Lin', resolution=2, suffix='T1w')
+    return str(get_template('MNI152Lin', resolution=2, suffix='T1w'))
 
 
 @pytest.fixture
 def reference_mask():
-    return get_template('MNI152Lin', resolution=2, desc='brain', suffix='mask')
+    return str(get_template('MNI152Lin', resolution=2, desc='brain', suffix='mask'))
 
 
 @pytest.fixture

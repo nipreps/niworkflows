@@ -168,15 +168,17 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     from templateflow.api import get as get_template
     wf = pe.Workflow(name)
 
-    tpl_target_path = get_template(in_template, resolution=1, suffix=bids_suffix)
-    tpl_target_path = get_template(in_template, resolution=1, suffix=bids_suffix)
+    tpl_target_path = str(
+        get_template(in_template, resolution=1, suffix=bids_suffix))
+    tpl_target_path = str(
+        get_template(in_template, resolution=1, suffix=bids_suffix))
 
     # Get probabilistic brain mask if available
-    tpl_mask_path = get_template(
-        in_template, resolution=1,
-        label='brain', suffix='probseg') or get_template(
-        in_template, resolution=1,
-        desc='brain', suffix='mask')
+    tpl_mask_path = str(
+        get_template(in_template, resolution=1,
+                     label='brain', suffix='probseg') or
+        get_template(in_template, resolution=1,
+                     desc='brain', suffix='mask'))
 
     if omp_nthreads is None or omp_nthreads < 1:
         omp_nthreads = cpu_count()
@@ -185,9 +187,9 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                         name='inputnode')
 
     # Try to find a registration mask, set if available
-    tpl_regmask_path = get_template(
+    tpl_regmask_path = str(get_template(
         in_template, resolution=1,
-        desc='BrainCerebellumRegistration', suffix='mask')
+        desc='BrainCerebellumRegistration', suffix='mask'))
     if tpl_regmask_path:
         inputnode.inputs.in_mask = tpl_regmask_path
 
