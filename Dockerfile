@@ -2,7 +2,7 @@
 FROM ubuntu:xenial-20161213
 
 # Pre-cache neurodebian key
-COPY docker/files/neurodebian.gpg /root/.neurodebian.gpg
+COPY docker/files/neurodebian.gpg /usr/local/etc/.neurodebian.gpg
 
 # Prepare environment
 RUN apt-get update && \
@@ -63,7 +63,7 @@ ENV PERL5LIB="$MINC_LIB_DIR/perl5/5.8.5" \
 
 # Installing Neurodebian packages (FSL, AFNI, git)
 RUN curl -sSL "http://neuro.debian.net/lists/$( lsb_release -c | cut -f2 ).us-ca.full" >> /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key add /root/.neurodebian.gpg && \
+    apt-key add /usr/local/etc/.neurodebian.gpg && \
     (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true)
 
 RUN apt-get update && \
@@ -93,6 +93,11 @@ RUN mkdir -p $ANTSPATH && \
     curl -sSL "https://dl.dropbox.com/s/2f4sui1z6lcgyek/ANTs-Linux-centos5_x86_64-v2.2.0-0740f91.tar.gz" \
     | tar -xzC $ANTSPATH --strip-components 1
 ENV PATH=$ANTSPATH:$PATH
+
+# Create a shared $HOME directory
+RUN useradd -m -s /bin/bash -G users niworkflows
+WORKDIR /home/niworkflows
+ENV HOME="/home/niworkflows"
 
 # Installing SVGO
 RUN npm install -g svgo
@@ -131,27 +136,23 @@ RUN conda install -y python=3.7.1 \
     conda clean --all -y; sync && \
     conda clean -tipsy && sync
 
+# Unless otherwise specified each process should only use one thread - nipype
+# will handle parallelization
+ENV MKL_NUM_THREADS=1 \
+    OMP_NUM_THREADS=1
+
 # Precaching fonts, set 'Agg' as default backend for matplotlib
 RUN python -c "from matplotlib import font_manager" && \
     sed -i 's/\(backend *: \).*$/\1Agg/g' $( python -c "import matplotlib; print(matplotlib.matplotlib_fname())" )
 
 # Precaching atlases
-WORKDIR /opt
-ENV TEMPLATEFLOW_HOME="/opt/templateflow" \
-    CRN_SHARED_DATA="/opt/templateflow"
-RUN pip install "datalad==0.10.0" && \
-    rm -rf ~/.cache/pip
-
-RUN git config --global user.name "First Last" && \
-    git config --global user.email "email@domain.com" && \
-    datalad install -r https://github.com/templateflow/templateflow.git
-RUN datalad get $TEMPLATEFLOW_HOME/tpl-MNI152NLin2009cAsym/*_T1w.nii.gz \
-                $TEMPLATEFLOW_HOME/tpl-MNI152NLin2009cAsym/*_desc-brain_mask.nii.gz \
-                $TEMPLATEFLOW_HOME/tpl-MNI152Lin/*_T1w.nii.gz \
-                $TEMPLATEFLOW_HOME/tpl-MNI152Lin/*_desc-brain_mask.nii.gz \
-                $TEMPLATEFLOW_HOME/tpl-OASIS30ANTs/*_T1w.nii.gz \
-                $TEMPLATEFLOW_HOME/tpl-OASIS30ANTs/*_desc-brain_mask.nii.gz \
-                $TEMPLATEFLOW_HOME/tpl-OASIS30ANTs/*_res-01_desc-4_dseg.nii.gz
+RUN pip install --no-cache-dir "templateflow>=0.1.0,<0.2.0a0" && \
+    python -c "from templateflow import api as tfapi; \
+               tfapi.get('MNI152Lin|MNI152NLin2009cAsym|OASIS30ANTs', suffix='T1w'); \
+               tfapi.get('MNI152Lin|MNI152NLin2009cAsym|OASIS30ANTs', desc='brain', suffix='mask'); \
+               tfapi.get('OASIS30ANTs', resolution=1, desc='4', suffix='dseg'); \
+               tfapi.get('OASIS30ANTs|NKI', resolution=1, label='brain', suffix='probseg'); \
+               tfapi.get('OASIS30ANTs|NKI', resolution=1, desc='BrainCerebellumRegistration', suffix='mask'); "
 
 # Installing dev requirements (packages that are not in pypi)
 WORKDIR /src/

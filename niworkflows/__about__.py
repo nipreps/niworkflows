@@ -63,7 +63,7 @@ REQUIRES = [
     'scipy',
     'seaborn',
     'svgutils',
-    'templateflow>=0.0.3',
+    'templateflow>=0.1.0,<0.2.0a0',
 ]
 
 SETUP_REQUIRES = []

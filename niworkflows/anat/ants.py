@@ -165,20 +165,18 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
 
     """
-    from templateflow.api import get as get_template, IncompleteResultsError
+    from templateflow.api import get as get_template
     wf = pe.Workflow(name)
 
-    tpl_target_path = get_template(
-        in_template, 'res-01_%s.nii.gz' % bids_suffix)
+    tpl_target_path = str(
+        get_template(in_template, desc=None, resolution=1, suffix=bids_suffix))
 
-    try:
-        # Get probabilistic brain mask if available
-        tpl_mask_path = get_template(
-            in_template, 'res-01_label-brain_probseg.nii.gz')
-    except IncompleteResultsError:
-        # Fall-back to a binary mask just in case
-        tpl_mask_path = get_template(
-            in_template, 'res-01_desc-brain_mask.nii.gz')
+    # Get probabilistic brain mask if available
+    tpl_mask_path = str(
+        get_template(in_template, resolution=1,
+                     label='brain', suffix='probseg') or
+        get_template(in_template, resolution=1,
+                     desc='brain', suffix='mask'))
 
     if omp_nthreads is None or omp_nthreads < 1:
         omp_nthreads = cpu_count()
@@ -186,13 +184,12 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 'in_mask']),
                         name='inputnode')
 
-    try:
-        # Try to find a registration mask, set if available
-        tpl_regmask_path = get_template(
-            in_template, 'res-01_desc-BrainCerebellumRegistration_mask.nii.gz')
+    # Try to find a registration mask, set if available
+    tpl_regmask_path = str(get_template(
+        in_template, resolution=1,
+        desc='BrainCerebellumRegistration', suffix='mask'))
+    if tpl_regmask_path:
         inputnode.inputs.in_mask = tpl_regmask_path
-    except IncompleteResultsError:
-        pass  # TODO: log a warning
 
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['bias_corrected', 'out_mask', 'bias_image', 'out_segm']),
