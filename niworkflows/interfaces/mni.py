@@ -340,12 +340,10 @@ class RobustMNINormalization(BaseInterface):
             # Set the template resolution.
             resolution = self.inputs.template_resolution
             # Get the template specified by the user.
-            ref_template = get_template(
-                self.inputs.template,
-                '_res-%02d_%s.nii.gz' % (resolution, self.inputs.reference))
-            ref_mask = get_template(
-                self.inputs.template,
-                '_res-%02d_desc-brain_mask.nii.gz' % resolution)
+            ref_template = get_template(self.inputs.template, resolution=resolution,
+                                        suffix=self.inputs.reference)
+            ref_mask = get_template(self.inputs.template, resolution=resolution,
+                                    desc='brain', suffix='mask')
 
             # Default is explicit masking disabled
             args['fixed_image'] = ref_template
@@ -376,9 +374,8 @@ class RobustMNINormalization(BaseInterface):
             target_mask = self.inputs.reference_mask
         else:
             resolution = self.inputs.template_resolution
-            target_mask = get_template(
-                self.inputs.template,
-                '_res-%02d_desc-brain_mask.nii.gz' % resolution)
+            target_mask = get_template(self.inputs.template, resolution=resolution,
+                                       desc='brain', suffix='mask')
 
         res = ApplyTransforms(dimension=3,
                               input_image=input_mask,

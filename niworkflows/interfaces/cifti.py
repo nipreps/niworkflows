@@ -129,7 +129,8 @@ class GenerateCifti(SimpleInterface):
             raise IOError("Freesurfer annotations for %s not found in %s" % (
                           self.inputs.surface_target, self.inputs.subjects_dir))
 
-        label_file = get_template('MNI152NLin2009cAsym', 'res-02_desc-DKT31_dseg.nii.gz')
+        label_file = get_template(
+            'MNI152NLin2009cAsym', resolution=2, desc='DKT31', suffix='dseg')
         return annotation_files, label_file
 
     @staticmethod
