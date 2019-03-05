@@ -169,9 +169,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     wf = pe.Workflow(name)
 
     tpl_target_path = str(
-        get_template(in_template, resolution=1, suffix=bids_suffix))
-    tpl_target_path = str(
-        get_template(in_template, resolution=1, suffix=bids_suffix))
+        get_template(in_template, desc=None, resolution=1, suffix=bids_suffix))
 
     # Get probabilistic brain mask if available
     tpl_mask_path = str(

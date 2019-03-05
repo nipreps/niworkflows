@@ -54,7 +54,7 @@ def test_ROIsPlot():
     roi_rpt = ROIsPlot(
         generate_report=True,
         in_file=str(
-            get_template('OASIS30ANTs', resolution=1, suffix='T1w')),
+            get_template('OASIS30ANTs', resolution=1, desc=None, suffix='T1w')),
         in_mask=str(
             get_template('OASIS30ANTs', resolution=1, desc='brain', suffix='mask')),
         in_rois=[out_file],
@@ -92,7 +92,7 @@ def test_ROIsPlot2():
     roi_rpt = ROIsPlot(
         generate_report=True,
         in_file=str(
-            get_template('OASIS30ANTs', resolution=1, suffix='T1w')),
+            get_template('OASIS30ANTs', resolution=1, desc=None, suffix='T1w')),
         in_mask=str(
             get_template('OASIS30ANTs', resolution=1, desc='brain', suffix='mask')),
         in_rois=out_files,
@@ -107,7 +107,7 @@ def test_SimpleShowMaskRPT():
     msk_rpt = SimpleShowMaskRPT(
         generate_report=True,
         background_file=str(
-            get_template('OASIS30ANTs', resolution=1, suffix='T1w')),
+            get_template('OASIS30ANTs', resolution=1, desc=None, suffix='T1w')),
         mask_file=str(
             get_template('OASIS30ANTs', resolution=1,
                          desc='BrainCerebellumRegistration', suffix='mask'))
@@ -136,7 +136,7 @@ def test_BrainExtractionRPT(monkeypatch, moving, nthreads):
         use_floatingpoint_precision=1,
         anatomical_image=moving,
         brain_template=str(
-            get_template('OASIS30ANTs', resolution=1, suffix='T1w')),
+            get_template('OASIS30ANTs', resolution=1, desc=None, suffix='T1w')),
         brain_probability_mask=str(
             get_template('OASIS30ANTs', resolution=1,
                          label='brain', suffix='probseg')),

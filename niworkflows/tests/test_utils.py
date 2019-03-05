@@ -14,7 +14,7 @@ def test_compression():
     uncompressed = SimpleShowMaskRPT(
         generate_report=True,
         background_file=str(
-            get_template('OASIS30ANTs', resolution=1, suffix='T1w')),
+            get_template('OASIS30ANTs', resolution=1, desc=None, suffix='T1w')),
         mask_file=str(
             get_template('OASIS30ANTs', resolution=1,
                          desc='BrainCerebellumRegistration', suffix='mask')),
@@ -24,7 +24,7 @@ def test_compression():
     compressed = SimpleShowMaskRPT(
         generate_report=True,
         background_file=str(
-            get_template('OASIS30ANTs', resolution=1, suffix='T1w')),
+            get_template('OASIS30ANTs', resolution=1, desc=None, suffix='T1w')),
         mask_file=str(
             get_template('OASIS30ANTs', resolution=1,
                          desc='BrainCerebellumRegistration', suffix='mask')),

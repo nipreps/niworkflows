@@ -34,7 +34,7 @@ def pytest_runtest_setup(item):
 
 @pytest.fixture
 def reference():
-    return str(get_template('MNI152Lin', resolution=2, suffix='T1w'))
+    return str(get_template('MNI152Lin', resolution=2, desc=None, suffix='T1w'))
 
 
 @pytest.fixture

@@ -341,7 +341,7 @@ class RobustMNINormalization(BaseInterface):
             resolution = self.inputs.template_resolution
             # Get the template specified by the user.
             ref_template = get_template(self.inputs.template, resolution=resolution,
-                                        suffix=self.inputs.reference)
+                                        desc=None, suffix=self.inputs.reference)
             ref_mask = get_template(self.inputs.template, resolution=resolution,
                                     desc='brain', suffix='mask')
 
