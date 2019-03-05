@@ -38,7 +38,8 @@ def test_ROIsPlot():
     import numpy as np
 
     im = nb.load(str(
-        get_template('OASIS30ANTs', resolution=1, desc='4', suffix='dseg')))
+        get_template('OASIS30ANTs', resolution=1, desc='4',
+                     suffix='dseg', extensions=['.nii', '.nii.gz'])))
     lookup = np.zeros(5, dtype=int)
     lookup[1] = 1
     lookup[2] = 4
@@ -70,7 +71,8 @@ def test_ROIsPlot2():
     import numpy as np
 
     im = nb.load(str(
-        get_template('OASIS30ANTs', resolution=1, desc='4', suffix='dseg')))
+        get_template('OASIS30ANTs', resolution=1, desc='4',
+                     suffix='dseg', extensions=['.nii', '.nii.gz'])))
     lookup = np.zeros(5, dtype=int)
     lookup[1] = 1
     lookup[2] = 4
