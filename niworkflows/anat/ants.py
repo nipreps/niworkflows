@@ -172,11 +172,9 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         get_template(in_template, desc=None, resolution=1, suffix=bids_suffix))
 
     # Get probabilistic brain mask if available
-    tpl_mask_path = str(
-        get_template(in_template, resolution=1,
-                     label='brain', suffix='probseg') or
-        get_template(in_template, resolution=1,
-                     desc='brain', suffix='mask'))
+    tpl_mask_path = get_template(
+        in_template, resolution=1, label='brain', suffix='probseg') or \
+        get_template(in_template, resolution=1, desc='brain', suffix='mask')
 
     if omp_nthreads is None or omp_nthreads < 1:
         omp_nthreads = cpu_count()
@@ -221,9 +219,9 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
     # Initialize transforms with antsAI
     init_aff = pe.Node(AI(
-        metric=('Mattes', 32, 'Regular', 0.2),
+        metric=('Mattes', 32, 'Regular', 0.25),
         transform=('Affine', 0.1),
-        search_factor=(20, 0.12),
+        search_factor=(15, 0.1),
         principal_axes=False,
         convergence=(10, 1e-6, 10),
         verbose=True),
@@ -251,7 +249,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         name='map_brainmask',
         mem_gb=1
     )
-    map_brainmask.inputs.input_image = tpl_mask_path
+    map_brainmask.inputs.input_image = str(tpl_mask_path)
 
     thr_brainmask = pe.Node(ThresholdImage(
         dimension=3, th_low=0.5, th_high=1.0, inside_value=1,
@@ -279,7 +277,8 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         (res_target, init_aff, [('output_image', 'moving_image')]),
         (init_aff, norm, [('output_transform', 'initial_moving_transform')]),
         (norm, map_brainmask, [
-            ('inverse_composite_transform', 'transforms')]),
+            ('reverse_transforms', 'transforms'),
+            ('reverse_invert_flags', 'invert_transform_flags')]),
         (map_brainmask, thr_brainmask, [('output_image', 'input_image')]),
         (thr_brainmask, dil_brainmask, [('output_image', 'op1')]),
         (dil_brainmask, get_brainmask, [('output_image', 'op1')]),
@@ -466,9 +465,9 @@ def init_atropos_wf(name='atropos_wf',
     # Superstep 7
     # Split segmentation in binary masks
     sel_labels2 = pe.Node(niu.Function(
-        function=_select_labels, output_names=['out_wm', 'out_gm', 'out_csf']),
+        function=_select_labels, output_names=['out_gm', 'out_wm']),
         name='14_sel_labels2')
-    sel_labels2.inputs.labels = list(reversed(in_segmentation_model[1:]))
+    sel_labels2.inputs.labels = in_segmentation_model[2:]
 
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} addtozero ${EXTRACTION_MASK} ${EXTRACTION_TMP}
     add_7 = pe.Node(ImageMath(operation='addtozero'), name='15_add_7')
