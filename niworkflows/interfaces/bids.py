@@ -229,24 +229,25 @@ class BIDSDataGrabber(SimpleInterface):
         return runtime
 
 
-class DerivativesDataSinkInputSpec(BaseInterfaceInputSpec):
+class DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     base_directory = traits.Directory(
         desc='Path to the base directory for storing data.')
-    in_file = InputMultiObject(File(exists=True), mandatory=True,
-                               desc='the object to be saved')
-    source_file = File(exists=False, mandatory=True, desc='the input func file')
-    space = Str('', usedefault=True, desc='Label for space field')
-    desc = Str('', usedefault=True, desc='Label for description field')
-    suffix = Str('', usedefault=True, desc='suffix appended to source_file')
-    keep_dtype = traits.Bool(False, usedefault=True, desc='keep datatype suffix')
-    extra_values = traits.List(Str)
+    check_hdr = traits.Bool(True, usedefault=True, desc='fix headers of NIfTI outputs')
     compress = traits.Bool(desc="force compression (True) or uncompression (False)"
                                 " of the output file (default: same as input)")
-    check_hdr = traits.Bool(True, usedefault=True, desc='fix headers of NIfTI outputs')
+    desc = Str('', usedefault=True, desc='Label for description field')
+    extra_values = traits.List(Str)
+    in_file = InputMultiObject(File(exists=True), mandatory=True,
+                               desc='the object to be saved')
+    keep_dtype = traits.Bool(False, usedefault=True, desc='keep datatype suffix')
+    source_file = File(exists=False, mandatory=True, desc='the input func file')
+    space = Str('', usedefault=True, desc='Label for space field')
+    suffix = Str('', usedefault=True, desc='suffix appended to source_file')
 
 
 class DerivativesDataSinkOutputSpec(TraitedSpec):
     out_file = OutputMultiObject(File(exists=True, desc='written file path'))
+    out_meta = OutputMultiObject(File(exists=True, desc='written JSON sidecar path'))
     compression = OutputMultiObject(
         traits.Bool, desc='whether ``in_file`` was compressed/uncompressed '
                           'or `it was copied directly.')
