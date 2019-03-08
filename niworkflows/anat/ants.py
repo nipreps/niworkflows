@@ -150,11 +150,14 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
     **Outputs**
 
-        bias_corrected
-            The ``in_files`` input images, after :abbr:`INU (intensity non-uniformity)`
-            correction.
+
+        out_file
+            Skull-stripped and :abbr:`INU (intensity non-uniformity)`-corrected ``in_files``
         out_mask
             Calculated brain mask
+        bias_corrected
+            The ``in_files`` input images, after :abbr:`INU (intensity non-uniformity)`
+            correction, before skull-stripping.
         bias_image
             The :abbr:`INU (intensity non-uniformity)` field estimated for each
             input in ``in_files``
@@ -190,7 +193,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         inputnode.inputs.in_mask = str(tpl_regmask_path)
 
     outputnode = pe.Node(niu.IdentityInterface(
-        fields=['bias_corrected', 'out_mask', 'bias_image', 'out_segm']),
+        fields=['out_file', 'out_mask', 'bias_corrected', 'bias_image', 'out_segm']),
         name='outputnode')
 
     trunc = pe.MapNode(ImageMath(operation='TruncateImageIntensity', op2='0.01 0.999 256'),
@@ -285,8 +288,9 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         (inu_n4, apply_mask, [('output_image', 'in_file')]),
         (get_brainmask, apply_mask, [('output_image', 'mask_file')]),
         (get_brainmask, outputnode, [('output_image', 'out_mask')]),
-        (apply_mask, outputnode, [('out_file', 'bias_corrected')]),
-        (inu_n4, outputnode, [('bias_image', 'bias_image')]),
+        (apply_mask, outputnode, [('out_file', 'out_file')]),
+        (inu_n4, outputnode, [('output_image', 'bias_corrected'),
+                              ('bias_image', 'bias_image')]),
     ])
 
     if use_laplacian:
