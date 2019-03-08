@@ -185,11 +185,11 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                         name='inputnode')
 
     # Try to find a registration mask, set if available
-    tpl_regmask_path = str(get_template(
+    tpl_regmask_path = get_template(
         in_template, resolution=1,
-        desc='BrainCerebellumRegistration', suffix='mask'))
+        desc='BrainCerebellumExtraction', suffix='mask')
     if tpl_regmask_path:
-        inputnode.inputs.in_mask = tpl_regmask_path
+        inputnode.inputs.in_mask = str(tpl_regmask_path)
 
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['bias_corrected', 'out_mask', 'bias_image', 'out_segm']),
