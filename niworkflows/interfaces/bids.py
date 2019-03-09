@@ -306,6 +306,29 @@ desc-preproc_bold.json'
     >>> Path(res.outputs.out_meta).read_text().splitlines()[1]
     '  "RepetitionTime": 0.75'
 
+    >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
+    >>> bids_dir.mkdir(parents=True, exist_ok=True)
+    >>> tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-01_bold.nii.gz'
+    >>> tricky_source.open('w').close()
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
+    ...                             SkullStripped=True)
+    >>> dsink.inputs.in_file = str(tmpfile)
+    >>> dsink.inputs.source_file = str(tricky_source)
+    >>> dsink.inputs.keep_dtype = True
+    >>> dsink.inputs.desc = 'preproc'
+    >>> dsink.inputs.RepetitionTime = 0.75
+    >>> res = dsink.run()
+    >>> res.outputs.out_meta  # doctest: +ELLIPSIS
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
+desc-preproc_bold.json'
+
+    >>> lines = Path(res.outputs.out_meta).read_text().splitlines()
+    >>> lines[1]
+    '  "RepetitionTime": 0.75,'
+
+    >>> lines[2]
+    '  "SkullStripped": true'
+
     """
     input_spec = DerivativesDataSinkInputSpec
     output_spec = DerivativesDataSinkOutputSpec
@@ -409,12 +432,13 @@ desc-preproc_bold.json'
 
         if len(self._results['out_file']) == 1:
             meta_fields = self.inputs.copyable_trait_names()
-            meta_dict = {k: getattr(self.inputs, k)
-                         for k in meta_fields if k not in self._static_traits}
-            if meta_dict:
+            self._metadata.update({
+                k: getattr(self.inputs, k)
+                for k in meta_fields if k not in self._static_traits})
+            if self._metadata:
                 sidecar = (Path(self._results['out_file'][0]).parent /
                            ('%s.json' % _splitext(self._results['out_file'][0])[0]))
-                sidecar.write_text(dumps(meta_dict, sort_keys=True, indent=2))
+                sidecar.write_text(dumps(self._metadata, sort_keys=True, indent=2))
                 self._results['out_meta'] = str(sidecar)
         return runtime
 
