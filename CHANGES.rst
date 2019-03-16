@@ -1,3 +1,10 @@
+0.8.1 (March 15, 2019)
+======================
+
+  * FIX: Revising antsBrainExtraction dual workflow (#316) @oesteban
+  * ENH: Expose bias-corrected T1w before skull-stripping (#317) @oesteban
+  * ENH: ``DerivativesDataSink`` - enable JSON sidecar writing (#318) @oesteban
+
 0.8.0 (March 05, 2019)
 ======================
 
