@@ -69,6 +69,7 @@ def test_expansion_derivatives_and_powers():
         'a_derivative1': [np.NaN, -1, -1, -1, -1],
         'a_derivative1_power2': [np.NaN, 1, 1, 1, 1],
         'b_derivative1': [np.NaN, 0, 0, 0, 0],
+        'b_derivative1_power2': [np.NaN, 0, 0, 0, 0],
         'c_power2_derivative1': [np.NaN, 1, -1, 1, -1],
         'c_power2_derivative2': [np.NaN, np.NaN, -2, 2, -2],
         'd': [9, 7, 5, 3, 1],
