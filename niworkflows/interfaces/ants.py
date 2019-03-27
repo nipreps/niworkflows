@@ -474,9 +474,11 @@ class AntsJointFusion(ANTSCommand):
             ])
             retval = target_image_cmd
         elif opt == 'atlas_segmentation_image':
-            assert len(val) == len(self.inputs.atlas_image), "Number of specified " \
-                "segmentations should be identical to the number of atlas image " \
-                "sets {0}!={1}".format(len(val), len(self.inputs.atlas_image))
+            if len(val) != len(self.inputs.atlas_image):
+                raise ValueError(
+                    "Number of specified segmentations should be identical to the number "
+                    "of atlas image sets {0}!={1}".format(
+                        len(val), len(self.inputs.atlas_image)))
 
             atlas_segmentation_image_cmd = " ".join([
                 '-l {0}'.format(fn)

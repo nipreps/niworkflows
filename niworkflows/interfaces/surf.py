@@ -527,7 +527,6 @@ def ply2gii(in_file, metadata, out_file=None):
     from nibabel.gifti import (
         GiftiMetaData, GiftiCoordSystem, GiftiImage, GiftiDataArray,
     )
-    from nipype.utils.filemanip import fname_presuffix
     from pyntcloud import PyntCloud
 
     in_file = Path(in_file)
