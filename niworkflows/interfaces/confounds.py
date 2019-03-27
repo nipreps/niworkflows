@@ -561,7 +561,6 @@ def parse_formula(model_formula, parent_data, unscramble=False):
                                                   parent_data)
     variables = list(set(reduce((lambda x, y: x + y), variables.values())))
     data = pd.concat((data.values()), axis=1)
-    data = data.T.drop_duplicates().T
 
     if unscramble:
         data = _unscramble_regressor_columns(parent_data, data)
