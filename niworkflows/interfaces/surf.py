@@ -14,6 +14,7 @@ from collections import defaultdict
 import numpy as np
 import nibabel as nb
 
+from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec, TraitedSpec, File, traits, isdefined,
     SimpleInterface, CommandLine, CommandLineInputSpec,
@@ -247,8 +248,8 @@ class CSVToGiftiOutputSpec(TraitedSpec):
 
 
 class CSVToGifti(SimpleInterface):
-    """Converts GIfTI files to CSV to make them ammenable to use with
-    ``antsApplyTransformsToPoints``."""
+    """Converts CSV files back to GIfTI, after moving vertices with
+    ``antsApplyTransformToPoints``."""
     input_spec = CSVToGiftiInputSpec
     output_spec = CSVToGiftiOutputSpec
 
@@ -314,8 +315,10 @@ class PoissonReconOutputSpec(TraitedSpec):
 
 
 class PoissonRecon(CommandLine):
-    """Converts multiple surfaces into a pointcloud with corresponding normals
-    to then apply Poisson reconstruction"""
+    """Runs Poisson Reconstruction on a cloud of points + normals
+    given in PLY format.
+    See https://github.com/mkazhdan/PoissonRecon
+    """
     input_spec = PoissonReconInputSpec
     output_spec = PoissonReconOutputSpec
     _cmd = 'PoissonRecon'
@@ -331,8 +334,7 @@ class PLYtoGiftiOutputSpec(TraitedSpec):
 
 
 class PLYtoGifti(SimpleInterface):
-    """Converts multiple surfaces into a pointcloud with corresponding normals
-    to then apply Poisson reconstruction"""
+    """Convert surfaces from PLY to GIfTI"""
     input_spec = PLYtoGiftiInputSpec
     output_spec = PLYtoGiftiOutputSpec
 
@@ -385,8 +387,7 @@ class UnzipJoinedSurfacesOutputSpec(TraitedSpec):
 
 
 class UnzipJoinedSurfaces(SimpleInterface):
-    """Converts multiple surfaces into a pointcloud with corresponding normals
-    to then apply Poisson reconstruction"""
+    """Unpack surfaces by identifier keys"""
     input_spec = UnzipJoinedSurfacesInputSpec
     output_spec = UnzipJoinedSurfacesOutputSpec
 
@@ -481,7 +482,6 @@ def load_transform(fname):
         return np.genfromtxt(lines)
 
     raise ValueError("Unknown transform type; pass FSL (.mat) or LTA (.lta)")
-
 
 
 def vertex_normals(vertices, faces):
