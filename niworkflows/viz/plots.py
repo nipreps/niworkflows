@@ -603,9 +603,10 @@ def compcor_variance_plot(metadata_files, metadata_sources=None,
     data_sources = list(metadata.groupby(['source', 'mask']).groups.keys())
     for source, mask in data_sources:
         if not np.isnan(
-                metadata.loc[(metadata['source'] == source)
-                    & (metadata['mask'] == mask)]['singular_value'].values[0]
-                ):
+                metadata.loc[
+                    (metadata['source'] == source)
+                    & (metadata['mask'] == mask)
+                ]['singular_value'].values[0]):
             decompositions.append((source, mask))
 
     if fig is not None:
