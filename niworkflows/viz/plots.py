@@ -599,7 +599,15 @@ def compcor_variance_plot(metadata_files, metadata_sources=None,
         'alpha': 0.8
     }
 
-    decompositions = list(metadata.groupby(['source', 'mask']).groups.keys())
+    decompositions = []
+    data_sources = list(metadata.groupby(['source', 'mask']).groups.keys())
+    for source, mask in data_sources:
+        if not np.isnan(
+                metadata.loc[
+                    (metadata['source'] == source)
+                    & (metadata['mask'] == mask)
+                ]['singular_value'].values[0]):
+            decompositions.append((source, mask))
 
     if fig is not None:
         ax = [fig.add_subplot(1, len(decompositions), i+1)
@@ -702,7 +710,6 @@ def confounds_correlation_plot(confounds_file, output_file=None, figure=None,
     confounds_data = confounds_data.loc[:, np.logical_not(
         np.isclose(confounds_data.var(skipna=True), 0))]
     corr = confounds_data.corr()
-    np.fill_diagonal(corr.values, 0)
 
     gscorr = corr.copy()
     gscorr['index'] = gscorr.index
@@ -715,6 +722,7 @@ def confounds_correlation_plot(confounds_file, output_file=None, figure=None,
         features = [p for p in corr.columns if p in gs_descending]
         corr = corr.loc[features, features]
     n_vars = corr.shape[0]
+    np.fill_diagonal(corr.values, 0)
 
     if figure is None:
         plt.figure(figsize=(3*n_vars*0.3, n_vars*0.3))
