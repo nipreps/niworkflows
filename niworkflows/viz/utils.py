@@ -685,4 +685,4 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
                        ' preseveAspectRation="xMidYMid meet" viewBox',
                        image_svg, count=1)
 
-    Path(out_file).write_bytes(image_svg)
+    Path(out_file).write_text(image_svg)
