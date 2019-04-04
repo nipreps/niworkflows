@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import os.path as op
+from pathlib import Path
 import subprocess
 import base64
 import re
@@ -569,14 +570,16 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     f = Ny * (np.array(list(range(1, power.shape[0] + 1)))) / (power.shape[0])
 
     noise_components = None
+    warning_row = 0  # Do not allocate warning row
     if noise_components_file:
         noise_components = np.loadtxt(noise_components_file,
                                       dtype=int, delimiter=',', ndmin=1)
+        # Activate warning row if pertinent
+        warning_row = int(noise_components is None or
+                          noise_components.size == 0 or
+                          noise_components.size == n_components)
 
     n_rows = int((n_components + (n_components % 2)) / 2)
-    warning_row = int(noise_components is None or
-                      noise_components.size == 0 or
-                      noise_components.size == n_components)
     fig = plt.figure(figsize=(6.5 * 1.5, (n_rows + warning_row) * 0.85))
     gs = GridSpec(n_rows * 2 + warning_row, 9,
                   width_ratios=[1, 1, 1, 4, 0.001, 1, 1, 1, 4, ],
@@ -598,22 +601,27 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
         ax.axes.get_xaxis().set_visible(False)
         ax.axes.get_yaxis().set_visible(False)
 
+    # Set default colors
+    color_title = 'k'
+    color_time = current_palette[0]
+    color_power = current_palette[1]
+    classified_colors = None
+    titlefmt = "C{id:d}{noise}: Tot. var. expl. {var:.2g}%".format
+    if noise_components is not None and noise_components.size > 0:
+        classified_colors = {True: 'r', False: 'g'}
+
     for i, img in enumerate(
             iter_img(os.path.join(melodic_dir, "melodic_IC.nii.gz"))):
 
         col = i % 2
-        row = int(i / 2)
+        row = i // 2
         l_row = row * 2 + warning_row
+        is_noise = False
 
-        # Set default colors
-        color_title = 'k'
-        color_time = current_palette[0]
-        color_power = current_palette[1]
-
-        if noise_components is not None and noise_components.size > 0:
+        if classified_colors:
             # If a noise components list is provided, assign red/green
-            color_title = color_time = color_power = (
-                'r' if (i + 1) in noise_components else 'g')
+            is_noise = (i + 1) in noise_components
+            color_title = color_time = color_power = classified_colors[is_noise]
 
         data = img.get_data()
         for j in range(3):
@@ -627,8 +635,10 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
             ax1.autoscale_view('tight')
             if j == 0:
                 ax1.set_title(
-                    "C%d: Tot. var. expl. %.2g%%" % (i + 1, stats[i, 1]), x=0,
-                    y=1.18, fontsize=7,
+                    titlefmt(id=i + 1,
+                             noise=' [noise]' * is_noise,
+                             var=stats[i, 1]),
+                    x=0, y=1.18, fontsize=7,
                     horizontalalignment='left',
                     verticalalignment='top',
                     color=color_title)
@@ -675,5 +685,4 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
                        ' preseveAspectRation="xMidYMid meet" viewBox',
                        image_svg, count=1)
 
-    with open(out_file, 'w' if PY3 else 'wb') as f:
-        f.write(image_svg)
+    Path(out_file).write_bytes(image_svg)

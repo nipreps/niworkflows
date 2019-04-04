@@ -27,12 +27,15 @@ def test_plot_melodic_components():
     import numpy as np
     # save the artifacts
     save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+    all_noise = 'melodic_all_noise.svg'
+    no_noise = 'melodic_no_noise.svg'
+    no_classified = 'melodic_no_classified.svg'
+
     if save_artifacts:
         all_noise = os.path.join(save_artifacts, 'melodic_all_noise.svg')
         no_noise = os.path.join(save_artifacts, 'melodic_no_noise.svg')
-    else:
-        all_noise = 'melodic_all_noise.svg'
-        no_noise = 'melodic_no_noise.svg'
+        no_classified = os.path.join(save_artifacts, 'melodic_no_classified.svg')
+
     # melodic directory
     os.makedirs('melodic', exist_ok=True)
     melodic_dir = os.path.join(os.getcwd(), "melodic")
@@ -65,7 +68,7 @@ def test_plot_melodic_components():
     # report_mask
     report_mask = nb.Nifti2Image(np.ones([2, 2, 2]), np.eye(4))
     report_mask.to_filename('report_mask.nii.gz')
-    print(os.getcwd())
+
     # run command with all noise components
     viz.utils.plot_melodic_components(melodic_dir, 'in_file.nii.gz', tr=2.0,
                                       report_mask='report_mask.nii.gz',
@@ -75,3 +78,9 @@ def test_plot_melodic_components():
     viz.utils.plot_melodic_components(melodic_dir, 'in_file.nii.gz', tr=2.0,
                                       report_mask='report_mask.nii.gz',
                                       out_file=no_noise)
+
+    # run command without noise components file
+    viz.utils.plot_melodic_components(melodic_dir, 'in_file.nii.gz', tr=2.0,
+                                      report_mask='report_mask.nii.gz',
+                                      noise_components_file=None,
+                                      out_file=no_classified)
