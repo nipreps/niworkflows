@@ -12,7 +12,7 @@ import base64
 import re
 from sys import version_info
 from uuid import uuid4
-from io import open, StringIO
+from io import StringIO
 
 import numpy as np
 import nibabel as nb
@@ -520,6 +520,39 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
                             out_file='melodic_reportlet.svg',
                             compress='auto', report_mask=None,
                             noise_components_file=None):
+    """
+    Plots the spatiotemporal components extracted by FSL MELODIC
+    from functional MRI data.
+
+    Parameters
+
+        melodic_dir : str
+            Path pointing to the outputs of MELODIC
+        in_file :  str
+            Path pointing to the reference fMRI dataset. This file
+            will be used to extract the TR value, if the ``tr`` argument
+            is not set. This file will be used to calculate a mask
+            if ``report_mask`` is not provided.
+        tr : float
+            Repetition time in seconds
+        out_file : str
+            Path where the resulting SVG file will be stored
+        compress : ``'auto'`` or bool
+            Whether SVG should be compressed. If ``'auto'``, compression
+            will be executed if dependencies are installed (SVGO)
+        report_mask : str
+            Path to a brain mask corresponding to ``in_file``
+        noise_components_file : str
+            A CSV file listing the indexes of components classified as noise
+            by some manual or automated (e.g. ICA-AROMA) procedure. If a
+            ``noise_components_file`` is provided, then components will be
+            plotted with red/green colors (correspondingly to whether they
+            are in the file -noise components, red-, or not -signal, green-).
+            When all or none of the components are in the file, a warning
+            is printed at the top.
+
+
+    """
     from nilearn.image import index_img, iter_img
     import nibabel as nb
     import numpy as np
@@ -569,15 +602,22 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     Ny = Fs / 2
     f = Ny * (np.array(list(range(1, power.shape[0] + 1)))) / (power.shape[0])
 
-    noise_components = None
+    # Set default colors
+    color_title = 'k'
+    color_time = current_palette[0]
+    color_power = current_palette[1]
+    classified_colors = None
+
     warning_row = 0  # Do not allocate warning row
+    # Only if the components file has been provided, a warning banner will
+    # be issued if all or none of the components were classified as noise
     if noise_components_file:
         noise_components = np.loadtxt(noise_components_file,
                                       dtype=int, delimiter=',', ndmin=1)
         # Activate warning row if pertinent
-        warning_row = int(noise_components is None or
-                          noise_components.size == 0 or
+        warning_row = int(noise_components.size == 0 or
                           noise_components.size == n_components)
+        classified_colors = {True: 'r', False: 'g'}
 
     n_rows = int((n_components + (n_components % 2)) / 2)
     fig = plt.figure(figsize=(6.5 * 1.5, (n_rows + warning_row) * 0.85))
@@ -588,7 +628,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     if warning_row:
         ax = fig.add_subplot(gs[0, :])
         ncomps = 'NONE of the'
-        if noise_components is not None and noise_components.size == n_components:
+        if noise_components.size == n_components:
             ncomps = 'ALL'
         ax.annotate(
             'WARNING: {} components were classified as noise'.format(ncomps),
@@ -601,15 +641,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
         ax.axes.get_xaxis().set_visible(False)
         ax.axes.get_yaxis().set_visible(False)
 
-    # Set default colors
-    color_title = 'k'
-    color_time = current_palette[0]
-    color_power = current_palette[1]
-    classified_colors = None
     titlefmt = "C{id:d}{noise}: Tot. var. expl. {var:.2g}%".format
-    if noise_components is not None and noise_components.size > 0:
-        classified_colors = {True: 'r', False: 'g'}
-
     for i, img in enumerate(
             iter_img(os.path.join(melodic_dir, "melodic_IC.nii.gz"))):
 

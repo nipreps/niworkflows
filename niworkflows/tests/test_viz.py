@@ -61,6 +61,11 @@ def test_plot_melodic_components():
     noise_comps_file = os.path.join(os.getcwd(), 'noise_ics.csv')
     np.savetxt(noise_comps_file, noise_comps,
                fmt='%i', delimiter=',')
+
+    # create empty components file
+    nocomps_file = os.path.join(os.getcwd(), 'noise_none.csv')
+    open(nocomps_file, 'w').close()
+
     # in_file
     voxel_ts = np.random.rand(2, 2, 2, 10)
     in_file = nb.Nifti2Image(voxel_ts, np.eye(4))
@@ -77,10 +82,10 @@ def test_plot_melodic_components():
     # run command with no noise components
     viz.utils.plot_melodic_components(melodic_dir, 'in_file.nii.gz', tr=2.0,
                                       report_mask='report_mask.nii.gz',
+                                      noise_components_file=nocomps_file,
                                       out_file=no_noise)
 
     # run command without noise components file
     viz.utils.plot_melodic_components(melodic_dir, 'in_file.nii.gz', tr=2.0,
                                       report_mask='report_mask.nii.gz',
-                                      noise_components_file=None,
                                       out_file=no_classified)
