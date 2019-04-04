@@ -510,11 +510,13 @@ def init_atropos_wf(name='atropos_wf',
     depad_csf = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
                         name='27_depad_csf')
 
+    msk_conform = pe.Node(niu.Function(function=_conform_mask), name='msk_conform')
     merge_tpms = pe.Node(niu.Merge(in_segmentation_model[0]), name='merge_tpms')
     wf.connect([
         (inputnode, pad_mask, [('in_mask', 'op1')]),
         (inputnode, atropos, [('in_files', 'intensity_images'),
                               ('in_mask_dilated', 'mask_image')]),
+        (inputnode, msk_conform, [(('in_files', _pop), 'in_reference')]),
         (atropos, pad_segm, [('classified_image', 'op1')]),
         (pad_segm, sel_labels, [('output_image', 'in_segm')]),
         (sel_labels, get_wm, [('out_wm', 'op1')]),
@@ -548,7 +550,8 @@ def init_atropos_wf(name='atropos_wf',
         (depad_csf, merge_tpms, [('output_image', 'in1')]),
         (depad_gm, merge_tpms, [('output_image', 'in2')]),
         (depad_wm, merge_tpms, [('output_image', 'in3')]),
-        (depad_mask, outputnode, [('output_image', 'out_mask')]),
+        (depad_mask, msk_conform, [('output_image', 'in_mask')]),
+        (msk_conform, outputnode, [('out', 'out_mask')]),
         (depad_segm, outputnode, [('output_image', 'out_segm')]),
         (merge_tpms, outputnode, [('out', 'out_tpms')]),
     ])
@@ -580,3 +583,35 @@ def _select_labels(in_segm, labels):
         newnii.to_filename(out_file)
         out_files.append(out_file)
     return out_files
+
+
+def _conform_mask(in_mask, in_reference):
+    """Ensures the mask headers make sense and match those of the T1w"""
+    from pathlib import Path
+    import nibabel as nb
+    from nipype.utils.filemanip import fname_presuffix
+
+    ref = nb.load(in_reference)
+    nii = nb.load(in_mask)
+    hdr = nii.header.copy()
+    hdr.set_data_dtype('int16')
+    hdr.set_slope_inter(1, 0)
+
+    qform, qcode = ref.header.get_qform(coded=True)
+    if qcode is not None:
+        hdr.set_qform(qform, int(qcode))
+
+    sform, scode = ref.header.get_sform(coded=True)
+    if scode is not None:
+        hdr.set_sform(sform, int(scode))
+
+    if '_maths' in in_mask:  # Cut the name at first _maths occurrence
+        ext = ''.join(Path(in_mask).suffixes)
+        basename = Path(in_mask).name
+        in_mask = basename.split('_maths')[0] + ext
+
+    out_file = fname_presuffix(in_mask, suffix='_mask',
+                               newpath=str(Path()))
+    nii.__class__(nii.get_data().astype('int16'), ref.affine,
+                  hdr).to_filename(out_file)
+    return out_file

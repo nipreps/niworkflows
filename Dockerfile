@@ -157,7 +157,7 @@ RUN pip install --no-cache-dir "templateflow>=0.1.0,<0.2.0a0" && \
 # Installing dev requirements (packages that are not in pypi)
 WORKDIR /src/
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt && \
+RUN pip install --no-cache-dir -r requirements.txt && \
     rm -rf ~/.cache/pip
 
 COPY . niworkflows/
@@ -167,7 +167,7 @@ RUN echo "${VERSION}" > /src/niworkflows/niworkflows/VERSION && \
     echo "include niworkflows/VERSION" >> MANIFEST.in && \
     find /src/niworkflows/ -name "test*.py" -exec chmod a-x {} + && \
     cd /src/niworkflows && \
-    pip install .[all] && \
+    pip install --no-cache-dir .[all] && \
     rm -rf ~/.cache/pip
 
 # Final settings
