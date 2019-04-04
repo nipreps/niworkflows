@@ -1,11 +1,14 @@
 0.8.2 (April 4, 2019)
 =====================
 
-New release to go along with the new MRIQC 0.15.0.
+New release to go along with the upcoming MRIQC 0.15.0.
 
-  * FIX: "NONE of the components..." banner was printed even when no AROMA file was present (#330) @oesteban
   * ENH: Update CompCor plotting to allow getting NaNs (#326) @rciric
+  * ENH: Ensure brain mask's conformity (#324) @oesteban
+  * ENH: Add several helper interfaces (#325) @oesteban
+  * FIX: "NONE of the components..." banner was printed even when no AROMA file was present (#330) @oesteban
 
+  
 0.8.1 (March 15, 2019)
 ======================
 
