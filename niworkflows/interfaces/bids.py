@@ -241,6 +241,7 @@ class DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     in_file = InputMultiObject(File(exists=True), mandatory=True,
                                desc='the object to be saved')
     keep_dtype = traits.Bool(False, usedefault=True, desc='keep datatype suffix')
+    meta_dict = traits.DictStrAny(desc='an input dictionary containing metadata')
     source_file = File(exists=False, mandatory=True, desc='the input func file')
     space = Str('', usedefault=True, desc='Label for space field')
     suffix = Str('', usedefault=True, desc='suffix appended to source_file')
@@ -329,6 +330,33 @@ desc-preproc_bold.json'
     >>> lines[2]
     '  "SkullStripped": true'
 
+    >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
+    >>> bids_dir.mkdir(parents=True, exist_ok=True)
+    >>> tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-01_bold.nii.gz'
+    >>> tricky_source.open('w').close()
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
+    ...                             SkullStripped=True)
+    >>> dsink.inputs.in_file = str(tmpfile)
+    >>> dsink.inputs.source_file = str(tricky_source)
+    >>> dsink.inputs.keep_dtype = True
+    >>> dsink.inputs.desc = 'preproc'
+    >>> dsink.inputs.RepetitionTime = 0.75
+    >>> dsink.inputs.meta_dict = {'RepetitionTime': 1.75, 'SkullStripped': False, 'Z': 'val'}
+    >>> res = dsink.run()
+    >>> res.outputs.out_meta  # doctest: +ELLIPSIS
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
+desc-preproc_bold.json'
+
+    >>> lines = Path(res.outputs.out_meta).read_text().splitlines()
+    >>> lines[1]
+    '  "RepetitionTime": 0.75,'
+
+    >>> lines[2]
+    '  "SkullStripped": true,'
+
+    >>> lines[3]
+    '  "Z": "val"'
+
     """
     input_spec = DerivativesDataSinkInputSpec
     output_spec = DerivativesDataSinkOutputSpec
@@ -347,6 +375,12 @@ desc-preproc_bold.json'
             self.out_path_base = out_path_base
 
     def _run_interface(self, runtime):
+        if isdefined(self.inputs.meta_dict):
+            meta = self.inputs.meta_dict
+            # inputs passed in construction take priority
+            meta.update(self._metadata)
+            self._metadata = meta
+
         src_fname, _ = _splitext(self.inputs.source_file)
         src_fname, dtype = src_fname.rsplit('_', 1)
         _, ext = _splitext(self.inputs.in_file[0])
