@@ -39,6 +39,7 @@ class IntraModalMergeOutputSpec(TraitedSpec):
     out_mats = OutputMultiPath(File(exists=True), desc='output matrices')
     out_movpar = OutputMultiPath(File(exists=True), desc='output movement parameters')
 
+
 class IntraModalMerge(SimpleInterface):
     input_spec = IntraModalMergeInputSpec
     output_spec = IntraModalMergeOutputSpec
@@ -680,7 +681,7 @@ class SignalExtraction(SimpleInterface):
         if len(mask_imgs) == 1 and len(mask_imgs[0].shape) == 4:
             mask_imgs = nb.four_to_three(mask_imgs[0])
 
-        for i, mask in enumerate(mask_imgs):
+        for mask in mask_imgs:
             if img.shape != mask.shape:
                 raise NotImplementedError('Input image and mask should be of same dimensions before running SignalExtraction')
 
