@@ -697,7 +697,7 @@ class SignalExtraction(SimpleInterface):
             n_masks = len(uniquevals[uniquevals > 0])
             multi_index_mask = True
 
-        if n_masks != len(self.inputs.class_labels):
+         if len(masks) != len(self.inputs.class_labels):
             raise ValueError("Number of masks must match number of labels")
 
         series = np.zeros((img.shape[3], n_masks))
