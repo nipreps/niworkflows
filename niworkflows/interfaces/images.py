@@ -682,7 +682,7 @@ class SignalExtraction(SimpleInterface):
                     mask, img, interpolation='nearest')
 
         if len(mask_imgs) > 1:
-            masks = [mask_img.get_data().astype(np.bool)
+            masks = [mask_img.get_data() > self.inputs.prob_thres
                      for mask_img in mask_imgs]
             n_masks = len(masks)
         else:
