@@ -694,16 +694,16 @@ class SignalExtraction(SimpleInterface):
         else:
             masks = mask_imgs[0].get_data()
             uniquevals = np.unique(masks)
-            n_masks = len(uniquevals[uniquevals > 0])
+            n_masks = len(uniquevals[uniquevals != 0])
             multi_index_mask = True
 
-         if len(masks) != len(self.inputs.class_labels):
+        if len(masks) != len(self.inputs.class_labels):
             raise ValueError("Number of masks must match number of labels")
 
         series = np.zeros((img.shape[3], n_masks))
 
         data = img.get_data()
-         for j, mask in enumerate(masks):
+        for j, mask in enumerate(masks):
              series[:, j] = data[mask, :].mean(axis=0)
             if multi_index_mask:
                 series[:, j] = data[masks == (j+1), :].mean(axis=0)
