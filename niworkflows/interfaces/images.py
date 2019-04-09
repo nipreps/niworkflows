@@ -39,7 +39,6 @@ class IntraModalMergeOutputSpec(TraitedSpec):
     out_mats = OutputMultiPath(File(exists=True), desc='output matrices')
     out_movpar = OutputMultiPath(File(exists=True), desc='output movement parameters')
 
-
 class IntraModalMerge(SimpleInterface):
     input_spec = IntraModalMergeInputSpec
     output_spec = IntraModalMergeOutputSpec
@@ -629,10 +628,15 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
     label_files = InputMultiPath(
         File(exists=True),
         mandatory=True,
-        desc='a 3-D label image, with 0 denoting '
-        'background, or a list of 3-D probability '
+        desc='a 3D label image, with 0 denoting '
+        'background, or a list of 3D probability '
         'maps (one per label) or the equivalent 4D '
-        'file or a 3-D label image containing parcels for each non-zero value.')
+        'file.')
+    prob_thres = traits.Float(
+        0.5,
+        usedefault=True,
+        desc='If label_files are probability masks, threshold '
+        'at specified probability.')
     class_labels = traits.List(
         mandatory=True,
         desc='Human-readable labels for each segment '
@@ -678,8 +682,7 @@ class SignalExtraction(SimpleInterface):
 
         for i, mask in enumerate(mask_imgs):
             if img.shape != mask.shape:
-                mask_imgs[i] = nli.resample_to_img(
-                    mask, img, interpolation='nearest')
+                raise NotImplementedError('Input image and mask should be of same dimensions before running SignalExtraction')
 
         if len(mask_imgs) > 1:
             masks = [mask_img.get_data() > self.inputs.prob_thres
