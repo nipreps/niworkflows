@@ -681,7 +681,7 @@ class SignalExtraction(SimpleInterface):
         if len(mask_imgs) == 1 and len(mask_imgs[0].shape) == 4:
             mask_imgs = nb.four_to_three(mask_imgs[0])
 
-        if img.shape[:3] != mask.shape:
+        if img.shape[:3] != mask_imgs[:3].shape:
             raise NotImplementedError(
                 "Input image and mask should be of "
                 "same dimensions before running SignalExtraction"
