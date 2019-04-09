@@ -703,7 +703,8 @@ class SignalExtraction(SimpleInterface):
         series = np.zeros((img.shape[3], n_masks))
 
         data = img.get_data()
-        for j in range(n_masks):
+         for j, mask in enumerate(masks):
+             series[:, j] = data[mask, :].mean(axis=0)
             if multi_index_mask:
                 series[:, j] = data[masks == (j+1), :].mean(axis=0)
             else:
