@@ -22,12 +22,12 @@ from ..interfaces.surf import NormalizeSurf
 def init_gifti_surface_wf(name='gifti_surface_wf',
                           subjects_dir=getenv('SUBJECTS_DIR', None)):
     """
-    This workflow prepares GIfTI surfaces from a FreeSurfer subjects directory
+    This workflow prepares GIFTI surfaces from a FreeSurfer subjects directory
     If midthickness (or graymid) surfaces do not exist, they are generated and
     saved to the subject directory as ``lh/rh.midthickness``.
     These, along with the gray/white matter boundary (``lh/rh.smoothwm``), pial
     sufaces (``lh/rh.pial``) and inflated surfaces (``lh/rh.inflated``) are
-    converted to GIfTI files.
+    converted to GIFTI files.
     Additionally, the vertex coordinates are :py:class:`recentered
     <smriprep.interfaces.NormalizeSurf>` to align with native T1w space.
 
@@ -54,10 +54,10 @@ def init_gifti_surface_wf(name='gifti_surface_wf',
     **Outputs**
 
         surfaces
-            GIfTI surfaces for gray/white matter boundary, pial surface,
+            GIFTI surfaces for gray/white matter boundary, pial surface,
             midthickness (or graymid) surface, and inflated surfaces.
         surf_norm
-            Normalized (re-centered) GIfTI surfaces aligned in native T1w
+            Normalized (re-centered) GIFTI surfaces aligned in native T1w
             space, corresponding to the ``surfaces`` output.
         fsnative_to_t1w_xfm
             LTA formatted affine transform file.
