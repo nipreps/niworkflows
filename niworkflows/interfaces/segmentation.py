@@ -112,6 +112,10 @@ class MELODICRPT(reporting.ReportCapableInterface, fsl.MELODIC):
 
     def _generate_report(self):
         from niworkflows.viz.utils import plot_melodic_components
+        mix = os.path.join(self._melodic_dir, "melodic_mix")
+        if not os.path.exists(mix):
+            open(self.inputs.out_report, 'w').close()
+            return
         plot_melodic_components(melodic_dir=self._melodic_dir,
                                 in_file=self.inputs.in_files[0],
                                 tr=self.inputs.tr_sec,
