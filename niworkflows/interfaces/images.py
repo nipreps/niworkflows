@@ -677,7 +677,6 @@ class SignalExtraction(SimpleInterface):
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file)
         mask_imgs = [nb.load(fname) for fname in self.inputs.label_files]
-        multi_index_mask = False
         if len(mask_imgs) == 1 and len(mask_imgs[0].shape) == 4:
             mask_imgs = nb.four_to_three(mask_imgs[0])
         # This check assumes all input masks have same dimensions
