@@ -680,35 +680,33 @@ class SignalExtraction(SimpleInterface):
         multi_index_mask = False
         if len(mask_imgs) == 1 and len(mask_imgs[0].shape) == 4:
             mask_imgs = nb.four_to_three(mask_imgs[0])
-
-        if img.shape[:3] != mask_imgs[:3].shape:
+        # This check assumes all input masks have same dimensions
+        if img.shape[:3] != mask_imgs[0].shape[:3]:
             raise NotImplementedError(
                 "Input image and mask should be of "
                 "same dimensions before running SignalExtraction"
                 )
-
+        # Load the mask.
+        # If mask is a list, each mask is treated as its own ROI/parcel
+        # If mask is a 3D, each integer is treated as its own ROI/parcel
         if len(mask_imgs) > 1:
-            masks = [mask_img.get_data() > self.inputs.prob_thres
+            masks = [mask_img.get_data() >= self.inputs.prob_thres
                      for mask_img in mask_imgs]
-            n_masks = len(masks)
         else:
-            masks = mask_imgs[0].get_data()
-            uniquevals = np.unique(masks)
-            n_masks = len(uniquevals[uniquevals != 0])
-            multi_index_mask = True
+            labelsmap = mask_imgs[0].get_data()
+            labels = np.unique(labelsmap)
+            labels = labels[labels != 0]
+            masks = [labelsmap == l for l in labels]
 
         if len(masks) != len(self.inputs.class_labels):
             raise ValueError("Number of masks must match number of labels")
 
-        series = np.zeros((img.shape[3], n_masks))
+        series = np.zeros((img.shape[3], len(masks)))
 
         data = img.get_data()
         for j, mask in enumerate(masks):
             series[:, j] = data[mask, :].mean(axis=0)
-            if multi_index_mask:
-                series[:, j] = data[masks == (j+1), :].mean(axis=0)
-            else:
-                series[:, j] = data[masks[j], :].mean(axis=0)
+
         output = np.vstack((self.inputs.class_labels, series.astype(str)))
         self._results['out_file'] = os.path.join(runtime.cwd,
                                                  self.inputs.out_file)
