@@ -383,7 +383,7 @@ class EstimateReferenceImage(SimpleInterface):
             ref_nii = nb.squeeze_image(nb.load(ref_name))
 
             # If reference is only 1 volume, return it directly
-            if ref_nii.get_data().ndim == 3:
+            if len(ref_nii.shape) == 3:
                 ref_nii.header.extensions.clear()
                 ref_nii.to_filename(out_ref_fname)
                 self._results['ref_image'] = out_ref_fname
