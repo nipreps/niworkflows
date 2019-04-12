@@ -7,6 +7,7 @@ Nipype interfaces for ANTs commands
 """
 
 import os
+from glob import glob
 from nipype.interfaces import base
 from nipype.interfaces.ants.base import ANTSCommandInputSpec, ANTSCommand
 from nipype.interfaces.base import traits, isdefined
@@ -281,3 +282,232 @@ class AI(ANTSCommand):
 
     def _list_outputs(self):
         return getattr(self, '_output')
+
+
+class AntsJointFusionInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(
+        3,
+        2,
+        4,
+        argstr='-d %d',
+        desc='This option forces the image to be treated '
+        'as a specified-dimensional image. If not '
+        'specified, the program tries to infer the '
+        'dimensionality from the input image.')
+    target_image = traits.List(
+        base.InputMultiPath(base.File(exists=True)),
+        argstr='-t %s',
+        mandatory=True,
+        desc='The target image (or '
+        'multimodal target images) assumed to be '
+        'aligned to a common image domain.')
+    atlas_image = traits.List(
+        base.InputMultiPath(base.File(exists=True)),
+        argstr="-g %s...",
+        mandatory=True,
+        desc='The atlas image (or '
+        'multimodal atlas images) assumed to be '
+        'aligned to a common image domain.')
+    atlas_segmentation_image = base.InputMultiPath(
+        base.File(exists=True),
+        argstr="-l %s...",
+        mandatory=True,
+        desc='The atlas segmentation '
+        'images. For performing label fusion the number '
+        'of specified segmentations should be identical '
+        'to the number of atlas image sets.')
+    alpha = traits.Float(
+        default_value=0.1,
+        usedefault=True,
+        argstr='-a %s',
+        desc=(
+            'Regularization '
+            'term added to matrix Mx for calculating the inverse. Default = 0.1'
+        ))
+    beta = traits.Float(
+        default_value=2.0,
+        usedefault=True,
+        argstr='-b %s',
+        desc=('Exponent for mapping '
+              'intensity difference to the joint error. Default = 2.0'))
+    retain_label_posterior_images = traits.Bool(
+        False,
+        argstr='-r',
+        usedefault=True,
+        requires=['atlas_segmentation_image'],
+        desc=('Retain label posterior probability images. Requires '
+              'atlas segmentations to be specified. Default = false'))
+    retain_atlas_voting_images = traits.Bool(
+        False,
+        argstr='-f',
+        usedefault=True,
+        desc=('Retain atlas voting images. Default = false'))
+    constrain_nonnegative = traits.Bool(
+        False,
+        argstr='-c',
+        usedefault=True,
+        desc=('Constrain solution to non-negative weights.'))
+    patch_radius = traits.ListInt(
+        minlen=3,
+        maxlen=3,
+        argstr='-p %s',
+        desc=('Patch radius for similarity measures.'
+              'Default: 2x2x2'))
+    patch_metric = traits.Enum(
+        'PC',
+        'MSQ',
+        argstr='-m %s',
+        desc=('Metric to be used in determining the most similar '
+              'neighborhood patch. Options include Pearson\'s '
+              'correlation (PC) and mean squares (MSQ). Default = '
+              'PC (Pearson correlation).'))
+    search_radius = traits.List(
+        [3, 3, 3],
+        minlen=1,
+        maxlen=3,
+        argstr='-s %s',
+        usedefault=True,
+        desc=('Search radius for similarity measures. Default = 3x3x3. '
+              'One can also specify an image where the value at the '
+              'voxel specifies the isotropic search radius at that voxel.'))
+    exclusion_image_label = traits.List(
+        traits.Str(),
+        argstr='-e %s',
+        requires=['exclusion_image'],
+        desc=('Specify a label for the exclusion region.'))
+    exclusion_image = traits.List(
+        base.File(exists=True),
+        desc=('Specify an exclusion region for the given label.'))
+    mask_image = base.File(
+        argstr='-x %s',
+        exists=True,
+        desc='If a mask image '
+        'is specified, fusion is only performed in the mask region.')
+    out_label_fusion = base.File(
+        argstr="%s", hash_files=False, desc='The output label fusion image.')
+    out_intensity_fusion_name_format = traits.Str(
+        argstr="",
+        desc='Optional intensity fusion '
+        'image file name format. '
+        '(e.g. "antsJointFusionIntensity_%d.nii.gz")')
+    out_label_post_prob_name_format = traits.Str(
+        'antsJointFusionPosterior_%d.nii.gz',
+        requires=['out_label_fusion', 'out_intensity_fusion_name_format'],
+        desc='Optional label posterior probability '
+        'image file name format.')
+    out_atlas_voting_weight_name_format = traits.Str(
+        'antsJointFusionVotingWeight_%d.nii.gz',
+        requires=[
+            'out_label_fusion', 'out_intensity_fusion_name_format',
+            'out_label_post_prob_name_format'
+        ],
+        desc='Optional atlas voting weight image '
+        'file name format.')
+    verbose = traits.Bool(False, argstr="-v", desc=('Verbose output.'))
+
+
+class AntsJointFusionOutputSpec(base.TraitedSpec):
+    out_label_fusion = base.File(exists=True)
+    out_intensity_fusion = base.OutputMultiPath(
+        base.File(exists=True))
+    out_label_post_prob = base.OutputMultiPath(
+        base.File(exists=True))
+    out_atlas_voting_weight = base.OutputMultiPath(
+        base.File(exists=True))
+
+
+class AntsJointFusion(ANTSCommand):
+    """
+    """
+    input_spec = AntsJointFusionInputSpec
+    output_spec = AntsJointFusionOutputSpec
+    _cmd = 'antsJointFusion'
+
+    def _format_arg(self, opt, spec, val):
+        if opt == 'exclusion_image_label':
+            retval = []
+            for ii in range(len(self.inputs.exclusion_image_label)):
+                retval.append(
+                    '-e {0}[{1}]'.format(self.inputs.exclusion_image_label[ii],
+                                         self.inputs.exclusion_image[ii]))
+            retval = ' '.join(retval)
+        elif opt == 'patch_radius':
+            retval = '-p {0}'.format(self._format_xarray(val))
+        elif opt == 'search_radius':
+            retval = '-s {0}'.format(self._format_xarray(val))
+        elif opt == 'out_label_fusion':
+            if isdefined(self.inputs.out_intensity_fusion_name_format):
+                if isdefined(self.inputs.out_label_post_prob_name_format):
+                    if isdefined(
+                            self.inputs.out_atlas_voting_weight_name_format):
+                        retval = '-o [{0}, {1}, {2}, {3}]'.format(
+                            self.inputs.out_label_fusion,
+                            self.inputs.out_intensity_fusion_name_format,
+                            self.inputs.out_label_post_prob_name_format,
+                            self.inputs.out_atlas_voting_weight_name_format)
+                    else:
+                        retval = '-o [{0}, {1}, {2}]'.format(
+                            self.inputs.out_label_fusion,
+                            self.inputs.out_intensity_fusion_name_format,
+                            self.inputs.out_label_post_prob_name_format)
+                else:
+                    retval = '-o [{0}, {1}]'.format(
+                        self.inputs.out_label_fusion,
+                        self.inputs.out_intensity_fusion_name_format)
+            else:
+                retval = '-o {0}'.format(self.inputs.out_label_fusion)
+        elif opt == 'out_intensity_fusion_name_format':
+            retval = ''
+            if not isdefined(self.inputs.out_label_fusion):
+                retval = '-o {0}'.format(
+                    self.inputs.out_intensity_fusion_name_format)
+        elif opt == 'atlas_image':
+            atlas_image_cmd = " ".join([
+                '-g [{0}]'.format(", ".join("'%s'" % fn for fn in ai))
+                for ai in self.inputs.atlas_image
+            ])
+            retval = atlas_image_cmd
+        elif opt == 'target_image':
+            target_image_cmd = " ".join([
+                '-t [{0}]'.format(", ".join("'%s'" % fn for fn in ai))
+                for ai in self.inputs.target_image
+            ])
+            retval = target_image_cmd
+        elif opt == 'atlas_segmentation_image':
+            if len(val) != len(self.inputs.atlas_image):
+                raise ValueError(
+                    "Number of specified segmentations should be identical to the number "
+                    "of atlas image sets {0}!={1}".format(
+                        len(val), len(self.inputs.atlas_image)))
+
+            atlas_segmentation_image_cmd = " ".join([
+                '-l {0}'.format(fn)
+                for fn in self.inputs.atlas_segmentation_image
+            ])
+            retval = atlas_segmentation_image_cmd
+        else:
+
+            return super(AntsJointFusion, self)._format_arg(opt, spec, val)
+        return retval
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if isdefined(self.inputs.out_label_fusion):
+            outputs['out_label_fusion'] = os.path.abspath(
+                self.inputs.out_label_fusion)
+        if isdefined(self.inputs.out_intensity_fusion_name_format):
+            outputs['out_intensity_fusion'] = glob(os.path.abspath(
+                self.inputs.out_intensity_fusion_name_format.replace(
+                    '%d', '*'))
+            )
+        if isdefined(self.inputs.out_label_post_prob_name_format):
+            outputs['out_label_post_prob'] = glob(os.path.abspath(
+                self.inputs.out_label_post_prob_name_format.replace(
+                    '%d', '*'))
+            )
+        if isdefined(self.inputs.out_atlas_voting_weight_name_format):
+            outputs['out_atlas_voting_weight'] = glob(os.path.abspath(
+                self.inputs.out_atlas_voting_weight_name_format.replace(
+                    '%d', '*'))
+            )
+        return outputs

@@ -21,7 +21,6 @@ jobs:
             - docker-v1-
           paths:
             - /tmp/cache/docker.tar.gz
-            - /tmp/cache/ubuntu.tar.gz
       - checkout
       - setup_remote_docker
       - run:
@@ -66,13 +65,61 @@ jobs:
       #     paths:
       #       - cache/docker.tar.gz
 
+  get_data:
+    machine:
+      # Ubuntu 14.04 with Docker 17.10.0-ce
+      image: circleci/classic:201711-01
+    working_directory: /home/circleci/data
+    steps:
+      - restore_cache:
+          keys:
+            - data-v1-{{ epoch }}
+            - data-v1-
+      - run:
+          name: Get test data from ds000003
+          command: |
+            mkdir -p /tmp/data
+            if [[ ! -d /tmp/data/ds003_downsampled ]]; then
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O ds003_downsampled.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f328f6b83f6901ef94cf70"
+              tar xvzf ds003_downsampled.tar.gz -C /tmp/data/
+            else
+              echo "Dataset ds000003 was cached"
+            fi
+      - run:
+          name: Get BIDS test data stub
+          command: |
+            mkdir -p /tmp/data
+            if [[ ! -d /tmp/data/BIDS-examples-1-enh-ds054 ]]; then
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O BIDS-examples-1-enh-ds054.zip "http://github.com/chrisfilo/BIDS-examples-1/archive/enh/ds054.zip"
+              unzip BIDS-examples-1-enh-ds054.zip -d /tmp/data/
+            else
+              echo "BIDS stub was cached"
+            fi
+      - run:
+          name: Store FreeSurfer license file
+          command: |
+            mkdir -p /tmp/fslicense
+            printf "$FS_LICENSE_CONTENT" | base64 -d  >> /tmp/fslicense/license.txt
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - data
+            - fslicense
+      - save_cache:
+         key: data-v1-{{ epoch }}
+         paths:
+            - /tmp/data
+
+
   test_pytest:
     machine:
       image: circleci/classic:201711-01
     working_directory: /tmp/tests
     steps:
-      # - attach_workspace:
-      #     at: /tmp
+      - attach_workspace:
+          at: /tmp
       - restore_cache:
           keys:
             - docker-v1-{{ .Branch }}-{{ epoch }}
@@ -93,11 +140,6 @@ jobs:
               docker images
             fi
       - run:
-          name: Store FreeSurfer license file
-          command: |
-            mkdir -p /tmp/fslicense
-            printf "$FS_LICENSE_CONTENT" | base64 -d  >> /tmp/fslicense/license.txt
-      - run:
           name: Set PR number
           command: |
             echo 'export CIRCLE_PR_NUMBER="${CIRCLE_PR_NUMBER:-${CIRCLE_PULL_REQUEST##*/}}"' >> $BASH_ENV
@@ -113,6 +155,7 @@ jobs:
             sudo setfacl -d -m group:ubuntu:rwx $PWD
             sudo setfacl -m group:ubuntu:rwx $PWD
             docker run -it --rm=false \
+              -e TEST_DATA_HOME=/data -v /tmp/data:/data \
               -v ${PWD}:/tmp niworkflows:py3 \
               pytest --junit-xml=/tmp/pytest.xml \
                      --cov niworkflows --cov-report xml:/tmp/unittests.xml \
@@ -132,6 +175,7 @@ jobs:
           command: |
             docker run -it --rm=false \
               -e SAVE_CIRCLE_ARTIFACTS="/tmp" \
+              -e TEST_DATA_HOME=/data -v /tmp/data:/data \
               -v /tmp/fslicense/license.txt:/opt/freesurfer/license.txt:ro \
               -v ${PWD}:/tmp niworkflows:py3 \
               pytest -n auto --junit-xml=/tmp/reportlets.xml \
@@ -174,10 +218,15 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - get_data:
+          filters:
+            tags:
+              only: /.*/
 
       - test_pytest:
           requires:
             - build
+            - get_data
           filters:
             branches:
               ignore: /docs?\/.*/
@@ -185,7 +234,6 @@ workflows:
               only: /.*/
       - deploy:
           requires:
-            - build
             - test_pytest
           filters:
             branches:

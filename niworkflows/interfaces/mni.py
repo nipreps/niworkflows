@@ -340,22 +340,20 @@ class RobustMNINormalization(BaseInterface):
             # Set the template resolution.
             resolution = self.inputs.template_resolution
             # Get the template specified by the user.
-            ref_template = get_template(
-                self.inputs.template,
-                '_res-%02d_%s.nii.gz' % (resolution, self.inputs.reference))
-            ref_mask = get_template(
-                self.inputs.template,
-                '_res-%02d_desc-brain_mask.nii.gz' % resolution)
+            ref_template = get_template(self.inputs.template, resolution=resolution,
+                                        desc=None, suffix=self.inputs.reference)
+            ref_mask = get_template(self.inputs.template, resolution=resolution,
+                                    desc='brain', suffix='mask')
 
             # Default is explicit masking disabled
-            args['fixed_image'] = ref_template
+            args['fixed_image'] = str(ref_template)
             # Use the template mask as the fixed mask.
-            args['fixed_image_masks'] = ref_mask
+            args['fixed_image_masks'] = str(ref_mask)
 
             # Overwrite defaults if explicit masking
             if self.inputs.explicit_masking:
                 # Mask the template image with the template mask.
-                args['fixed_image'] = mask(ref_template, ref_mask,
+                args['fixed_image'] = mask(str(ref_template), str(ref_mask),
                                            "fixed_masked.nii.gz")
                 # Do not use a fixed mask during registration.
                 args.pop('fixed_image_masks', None)
@@ -365,7 +363,7 @@ class RobustMNINormalization(BaseInterface):
                     # Create a cost function mask with the form: [global mask]
                     # Use this as the fixed mask.
                     args['fixed_image_masks'] = create_cfm(
-                        ref_mask, lesion_mask=None, global_mask=True)
+                        str(ref_mask), lesion_mask=None, global_mask=True)
 
         return args
 
@@ -376,18 +374,17 @@ class RobustMNINormalization(BaseInterface):
             target_mask = self.inputs.reference_mask
         else:
             resolution = self.inputs.template_resolution
-            target_mask = get_template(
-                self.inputs.template,
-                '_res-%02d_desc-brain_mask.nii.gz' % resolution)
+            target_mask = get_template(self.inputs.template, resolution=resolution,
+                                       desc='brain', suffix='mask')
 
         res = ApplyTransforms(dimension=3,
                               input_image=input_mask,
-                              reference_image=target_mask,
+                              reference_image=str(target_mask),
                               transforms=forward_transform,
                               interpolation='NearestNeighbor',
                               resource_monitor=False).run()
         input_mask_data = (nb.load(res.outputs.output_image).get_data() != 0)
-        target_mask_data = (nb.load(target_mask).get_data() != 0)
+        target_mask_data = (nb.load(str(target_mask)).get_data() != 0)
 
         overlap_voxel_count = np.logical_and(input_mask_data, target_mask_data)
 

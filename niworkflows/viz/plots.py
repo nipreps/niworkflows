@@ -479,7 +479,8 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
     nonnan = tseries[~np.isnan(tseries)]
     if nonnan.size > 0:
         # Calculate Y limits
-        def_ylims = [nonnan.min() - 0.1 * abs(nonnan.min()), 1.1 * nonnan.max()]
+        valrange = (nonnan.max() - nonnan.min())
+        def_ylims = [nonnan.min() - 0.1 * valrange, nonnan.max() + 0.1 * valrange]
         if ylims is not None:
             if ylims[0] is not None:
                 def_ylims[0] = min([def_ylims[0], ylims[0]])
@@ -544,3 +545,231 @@ def confoundplot(tseries, gs_ts, gs_dist=None, name=None,
 
         return [ax_ts, ax_dist], gs
     return ax_ts, gs
+
+
+def compcor_variance_plot(metadata_files, metadata_sources=None,
+                          output_file=None, varexp_thresh=(0.5, 0.7, 0.9),
+                          fig=None):
+    """
+    Parameters
+    ----------
+    metadata_files: list
+        List of paths to files containing component metadata. If more than one
+        decomposition has been performed (e.g., anatomical and temporal
+        CompCor decompositions), then all metadata files can be provided in
+        the list. However, each metadata file should have a corresponding
+        entry in `metadata_sources`.
+    metadata_sources: list or None
+        List of source names (e.g., ['aCompCor']) for decompositions. This
+        list should be of the same length as `metadata_files`.
+    output_file: str or None
+        Path where the output figure should be saved. If this is not defined,
+        then the plotting axes will be returned instead of the saved figure
+        path.
+    varexp_thresh: tuple
+        Set of variance thresholds to include in the plot (default 0.5, 0.7,
+        0.9).
+    fig: figure or None
+        Existing figure on which to plot.
+
+    Returns
+    -------
+    ax: axes
+        Plotting axes. Returned only if the `output_file` parameter is None.
+    output_file: str
+        The file where the figure is saved.
+    """
+    metadata = {}
+    if metadata_sources is None:
+        if len(metadata_files) == 1:
+            metadata_sources = ['CompCor']
+        else:
+            metadata_sources = ['Decomposition {:d}'.format(i)
+                                for i in range(len(metadata_files))]
+    for file, source in zip(metadata_files, metadata_sources):
+        metadata[source] = pd.read_table(str(file))
+        metadata[source]['source'] = source
+    metadata = pd.concat(list(metadata.values()))
+    bbox_txt = {
+        'boxstyle': 'round',
+        'fc': 'white',
+        'ec': 'none',
+        'color': 'none',
+        'linewidth': 0,
+        'alpha': 0.8
+    }
+
+    decompositions = []
+    data_sources = list(metadata.groupby(['source', 'mask']).groups.keys())
+    for source, mask in data_sources:
+        if not np.isnan(
+                metadata.loc[
+                    (metadata['source'] == source)
+                    & (metadata['mask'] == mask)
+                ]['singular_value'].values[0]):
+            decompositions.append((source, mask))
+
+    if fig is not None:
+        ax = [fig.add_subplot(1, len(decompositions), i+1)
+              for i in range(len(decompositions))]
+    elif len(decompositions) > 1:
+        fig, ax = plt.subplots(1, len(decompositions),
+                               figsize=(5*len(decompositions), 5))
+    else:
+        ax = [plt.axes()]
+
+    for m, (source, mask) in enumerate(decompositions):
+        components = metadata[(metadata['mask'] == mask)
+                              & (metadata['source'] == source)]
+        if len([m for s, m in decompositions if s == source]) > 1:
+            title_mask = ' ({} mask)'.format(mask)
+        else:
+            title_mask = ''
+        fig_title = '{}{}'.format(source, title_mask)
+
+        ax[m].plot(np.arange(components.shape[0]+1),
+                   [0] + list(
+                       100*components['cumulative_variance_explained']),
+                   color='purple',
+                   linewidth=2.5)
+        ax[m].grid(False)
+        ax[m].set_xlabel('number of components in model')
+        ax[m].set_ylabel('cumulative variance explained (%)')
+        ax[m].set_title(fig_title)
+
+        varexp = {}
+
+        for i, thr in enumerate(varexp_thresh):
+            varexp[thr] = np.searchsorted(
+                components['cumulative_variance_explained'], thr) + 1
+            ax[m].axhline(y=100*thr, color='lightgrey', linewidth=0.25)
+            ax[m].axvline(x=varexp[thr], color='C{}'.format(i),
+                          linewidth=2, linestyle=':')
+            ax[m].text(0, 100*thr, '{:.0f}'.format(100*thr),
+                       fontsize='x-small', bbox=bbox_txt)
+            ax[m].text(varexp[thr][0], 25,
+                       '{} components explain\n{:.0f}% of variance'.format(
+                            varexp[thr][0], 100*thr),
+                       rotation=90,
+                       horizontalalignment='center',
+                       fontsize='xx-small',
+                       bbox=bbox_txt)
+
+        ax[m].set_yticks([])
+        ax[m].set_yticklabels([])
+        for tick in ax[m].xaxis.get_major_ticks():
+            tick.label.set_fontsize('x-small')
+            tick.label.set_rotation('vertical')
+        for side in ['top', 'right', 'left']:
+            ax[m].spines[side].set_color('none')
+            ax[m].spines[side].set_visible(False)
+
+    if output_file is not None:
+        figure = plt.gcf()
+        figure.savefig(output_file, bbox_inches='tight')
+        plt.close(figure)
+        figure = None
+        return output_file
+    return ax
+
+
+def confounds_correlation_plot(confounds_file, output_file=None, figure=None,
+                               reference='global_signal', max_dim=70):
+    """
+    Parameters
+    ----------
+    confounds_file: str
+        File containing all confound regressors to be included in the
+        correlation plot.
+    output_file: str or None
+        Path where the output figure should be saved. If this is not defined,
+        then the plotting axes will be returned instead of the saved figure
+        path.
+    figure: figure or None
+        Existing figure on which to plot.
+    reference: str
+        `confounds_correlation_plot` prepares a bar plot of the correlations
+        of each confound regressor with a reference column. By default, this
+        is the global signal (so that collinearities with the global signal
+        can readily be assessed).
+    max_dim: int
+        The maximum number of regressors to be included in the output plot.
+        Reductions (e.g., CompCor) of high-dimensional data can yield so many
+        regressors that the correlation structure becomes obfuscated. This
+        criterion selects the `max_dim` regressors that have the largest
+        correlation magnitude with `reference` for inclusion in the plot.
+
+    Returns
+    -------
+    axes and gridspec
+        Plotting axes and gridspec. Returned only if `output_file` is None.
+    output_file: str
+        The file where the figure is saved.
+    """
+    confounds_data = pd.read_table(confounds_file)
+    confounds_data = confounds_data.loc[:, np.logical_not(
+        np.isclose(confounds_data.var(skipna=True), 0))]
+    corr = confounds_data.corr()
+
+    gscorr = corr.copy()
+    gscorr['index'] = gscorr.index
+    gscorr[reference] = np.abs(gscorr[reference])
+    gs_descending = gscorr.sort_values(by=reference,
+                                       ascending=False)['index']
+
+    if corr.shape[0] > max_dim:
+        gs_descending = gs_descending[:max_dim]
+        features = [p for p in corr.columns if p in gs_descending]
+        corr = corr.loc[features, features]
+    n_vars = corr.shape[0]
+    np.fill_diagonal(corr.values, 0)
+
+    if figure is None:
+        plt.figure(figsize=(3*n_vars*0.3, n_vars*0.3))
+    gs = mgs.GridSpec(1, 15)
+    ax0 = plt.subplot(gs[0, :7])
+    ax1 = plt.subplot(gs[0, 7:])
+
+    mask = np.zeros_like(corr, dtype=np.bool)
+    mask[np.triu_indices_from(mask)] = True
+    sns.heatmap(corr,
+                linewidths=0.5,
+                cmap='coolwarm',
+                center=0,
+                square=True,
+                ax=ax0)
+    ax0.tick_params(axis='both', which='both', width=0)
+
+    for tick in ax0.xaxis.get_major_ticks():
+        tick.label.set_fontsize('small')
+    for tick in ax0.yaxis.get_major_ticks():
+        tick.label.set_fontsize('small')
+    sns.barplot(data=gscorr,
+                x='index',
+                y=reference,
+                ax=ax1,
+                order=gs_descending,
+                palette='Reds_d',
+                saturation=.5)
+
+    ax1.set_xlabel('Confound time series')
+    ax1.set_ylabel('Magnitude of correlation with {}'.format(reference))
+    ax1.tick_params(axis='x', which='both', width=0)
+    ax1.tick_params(axis='y', which='both', width=5, length=5)
+
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize('small')
+        tick.label.set_rotation('vertical')
+    for tick in ax1.yaxis.get_major_ticks():
+        tick.label.set_fontsize('small')
+    for side in ['top', 'right', 'left']:
+        ax1.spines[side].set_color('none')
+        ax1.spines[side].set_visible(False)
+
+    if output_file is not None:
+        figure = plt.gcf()
+        figure.savefig(output_file, bbox_inches='tight')
+        plt.close(figure)
+        figure = None
+        return output_file
+    return [ax0, ax1], gs

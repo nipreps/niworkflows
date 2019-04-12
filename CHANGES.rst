@@ -1,3 +1,49 @@
+0.8.2 (April 4, 2019)
+=====================
+
+New release to go along with the upcoming MRIQC 0.15.0.
+
+  * ENH: Update CompCor plotting to allow getting NaNs (#326) @rciric
+  * ENH: Ensure brain mask's conformity (#324) @oesteban
+  * ENH: Add several helper interfaces (#325) @oesteban
+  * FIX: "NONE of the components..." banner was printed even when no AROMA file was present (#330) @oesteban
+
+  
+0.8.1 (March 15, 2019)
+======================
+
+  * FIX: Revising antsBrainExtraction dual workflow (#316) @oesteban
+  * ENH: Expose bias-corrected T1w before skull-stripping (#317) @oesteban
+  * ENH: ``DerivativesDataSink`` - enable JSON sidecar writing (#318) @oesteban
+
+0.8.0 (March 05, 2019)
+======================
+
+  * [PIN] Update to TemplateFlow 0.1.0 (#315) @oesteban
+
+0.7.2 (February 19, 2019)
+=========================
+
+  * [FIX] Scaling of confound fix (#310) @wiheto
+  * [FIX] GenerateSamplingReference with correct zooms (#312) @effigies
+  * [ENH] AROMA plots - add warning for edge cases (none/all are noise) (#292) @jdkent
+  * [ENH] Confound enhancement (#287) @rciric
+
+
+0.7.1.post1 (February 12, 2019)
+===============================
+
+  * [FIX] Do not cast ``run`` BIDS-entity to string (#307) @oesteban
+
+
+0.7.1 (February 07, 2019)
+=========================
+
+  * [TST] Add test on ``BIDSInfo`` interface (#302) @oesteban
+  * [MNT] Deprecate ``getters`` module (#305) @oesteban
+  * [FIX] Improve bounding box computation from masks (#304) @oesteban
+
+
 0.7.0 (February 04, 2019)
 =========================
 

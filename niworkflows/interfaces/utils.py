@@ -8,11 +8,14 @@ Utilities
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
+import re
+import json
 import shutil
 import numpy as np
 import nibabel as nb
 import nilearn.image as nli
 from textwrap import indent
+from collections import OrderedDict
 
 import scipy.ndimage as nd
 from nipype import logging
@@ -194,9 +197,13 @@ def _gen_reference(fixed_image, moving_image, fov_mask=None, out_file=None,
                                    suffix='_reference',
                                    newpath=os.getcwd())
 
-    new_zooms = nli.load_img(moving_image).header.get_zooms()[:3]
+    # Moving images may not be RAS/LPS (more generally, transverse-longitudinal-axial)
+    reoriented_moving_img = nb.as_closest_canonical(nb.load(moving_image))
+    new_zooms = reoriented_moving_img.header.get_zooms()[:3]
+
     # Avoid small differences in reported resolution to cause changes to
     # FOV. See https://github.com/poldracklab/fmriprep/issues/512
+    # A positive diagonal affine is RAS, hence the need to reorient above.
     new_affine = np.diag(np.round(new_zooms, 3))
 
     resampled = nli.resample_img(fixed_image,
@@ -701,6 +708,127 @@ class JoinTSVColumns(SimpleInterface):
 
         self._results['out_file'] = out_file
         return runtime
+
+
+class TSV2JSONInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True, desc='Input TSV file')
+    index_column = traits.Str(mandatory=True,
+                              desc='Name of the column in the TSV to be used '
+                                   'as the top-level key in the JSON. All '
+                                   'remaining columns will be assigned as '
+                                   'nested keys.')
+    out_file = File(desc='Path where the output file is to be saved')
+    additional_metadata = traits.Either(None, traits.Dict(), usedefault=True,
+                                        desc='Any additional metadata that '
+                                             'should be applied to all '
+                                             'entries in the JSON.')
+    drop_columns = traits.Either(None, traits.List(), usedefault=True,
+                                 desc='List of columns in the TSV to be '
+                                      'dropped from the JSON.')
+    enforce_case = traits.Bool(True, usedefault=True,
+                               desc='Enforce snake case for top-level keys '
+                                    'and camel case for nested keys')
+
+
+class TSV2JSONOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Output JSON file')
+
+
+class TSV2JSON(SimpleInterface):
+    """Convert metadata from TSV format to JSON format.
+    """
+    input_spec = TSV2JSONInputSpec
+    output_spec = TSV2JSONOutputSpec
+
+    def _run_interface(self, runtime):
+        if not isdefined(self.inputs.out_file):
+            out_file = fname_presuffix(
+                self.inputs.in_file, suffix='.json', newpath=runtime.cwd,
+                use_ext=False)
+        else:
+            out_file = self.inputs.out_file
+
+        self._results['out_file'] = _tsv2json(
+            in_tsv=self.inputs.in_file,
+            out_json=out_file,
+            index_column=self.inputs.index_column,
+            additional_metadata=self.inputs.additional_metadata,
+            drop_columns=self.inputs.drop_columns,
+            enforce_case=self.inputs.enforce_case
+        )
+        return runtime
+
+
+def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
+              drop_columns=None, enforce_case=True):
+    """
+    Convert metadata from TSV format to JSON format.
+
+    Parameters
+    ----------
+    in_tsv: str
+        Path to the metadata in TSV format.
+    out_json: str
+        Path where the metadata should be saved in JSON format after
+        conversion.
+    index_column: str
+        Name of the column in the TSV to be used as an index (top-level key in
+        the JSON).
+    additional_metadata: dict
+        Any additional metadata that should be applied to all entries in the
+        JSON.
+    drop_columns: list
+        List of columns from the input TSV to be dropped from the JSON.
+    enforce_case: bool
+        Indicates whether BIDS case conventions should be followed. Currently,
+        this means that index fields (column names in the associated data TSV)
+        use snake case and other fields use camel case.
+
+    Returns
+    -------
+    str
+        Path to the metadata saved in JSON format.
+    """
+    import pandas as pd
+    # Taken from https://dev.to/rrampage/snake-case-to-camel-case-and- ...
+    # back-using-regular-expressions-and-python-m9j
+    re_to_camel = r'(.*?)_([a-zA-Z0-9])'
+    re_to_snake = r'(^.+?|.*?)((?<![_A-Z])[A-Z]|(?<![_0-9])[0-9]+)'
+
+    def snake(match):
+        return '{}_{}'.format(match.group(1).lower(), match.group(2).lower())
+
+    def camel(match):
+        return '{}{}'.format(match.group(1), match.group(2).upper())
+
+    # from fmriprep
+    def less_breakable(a_string):
+        """ hardens the string to different envs (i.e. case insensitive, no
+        whitespace, '#' """
+        return ''.join(a_string.split()).strip('#')
+
+    drop_columns = drop_columns or []
+    additional_metadata = additional_metadata or {}
+    tsv_data = pd.read_csv(in_tsv, '\t')
+    for k, v in additional_metadata.items():
+        tsv_data[k] = v
+    for col in drop_columns:
+        tsv_data.drop(labels=col, axis='columns', inplace=True)
+    tsv_data.set_index(index_column, drop=True, inplace=True)
+    if enforce_case:
+        tsv_data.index = [re.sub(re_to_snake, snake,
+                                 less_breakable(i), 0).lower()
+                          for i in tsv_data.index]
+        tsv_data.columns = [re.sub(re_to_camel, camel,
+                                   less_breakable(i).title(), 0)
+                            for i in tsv_data.columns]
+    json_data = tsv_data.to_json(orient='index')
+    json_data = json.JSONDecoder(
+        object_pairs_hook=OrderedDict).decode(json_data)
+
+    with open(out_json, 'w') as f:
+        json.dump(json_data, f, indent=4)
+    return out_json
 
 
 def _tpm2roi(in_tpm, in_mask, mask_erosion_mm=None, erosion_mm=None,

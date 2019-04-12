@@ -57,5 +57,5 @@
   "verbose": true,
   "winsorize_lower_quantile": 0.025,
   "winsorize_upper_quantile": 0.975,
-  "write_composite_transform": true
+  "write_composite_transform": false
 }

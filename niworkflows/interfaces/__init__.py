@@ -3,6 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from .confounds import ExpandModel, SpikeRegressors
 from .masks import BETRPT as BET
 from .segmentation import (FASTRPT as FAST)
 from .registration import (FLIRTRPT as FLIRT,
@@ -12,4 +13,6 @@ from .registration import (FLIRTRPT as FLIRT,
                            ANTSApplyTransformsRPT as ApplyTransforms,
                            SimpleBeforeAfterRPT as SimpleBeforeAfter)
 from .utils import CopyXForm, CopyHeader, NormalizeMotionParams, SanitizeImage
-from .plotting import FMRISummary
+from .plotting import (
+    FMRISummary, CompCorVariancePlot, ConfoundsCorrelationPlot
+)

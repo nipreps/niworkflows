@@ -8,6 +8,7 @@ Interfaces for handling BIDS-like neuroimaging structures
 """
 
 import os
+from json import dumps
 from pathlib import Path
 from shutil import copytree, rmtree
 
@@ -44,9 +45,9 @@ class BIDSInfoOutputSpec(DynamicTraitedSpec):
     subject = traits.Str()
     session = traits.Str()
     task = traits.Str()
-    acq = traits.Str()
-    rec = traits.Str()
-    run = traits.Str()
+    acquisition = traits.Str()
+    reconstruction = traits.Str()
+    run = traits.Int()
     suffix = traits.Str()
 
 
@@ -63,9 +64,39 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
     >>> res = bids_info.run()
     >>> res.outputs
     <BLANKLINE>
-    acq = <undefined>
-    rec = <undefined>
+    acquisition = <undefined>
+    reconstruction = <undefined>
     run = <undefined>
+    session = retest
+    subject = 01
+    suffix = bold
+    task = covertverbgeneration
+    <BLANKLINE>
+
+    >>> bids_info = BIDSInfo(bids_dir=str(datadir / 'ds054'), bids_validate=False)
+    >>> bids_info.inputs.in_file = '''\
+sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_rec-MB_acq-AP_run-1_bold.nii.gz'''
+    >>> res = bids_info.run()
+    >>> res.outputs
+    <BLANKLINE>
+    acquisition = AP
+    reconstruction = MB
+    run = 1
+    session = retest
+    subject = 01
+    suffix = bold
+    task = covertverbgeneration
+    <BLANKLINE>
+
+    >>> bids_info = BIDSInfo(bids_dir=str(datadir / 'ds054'), bids_validate=False)
+    >>> bids_info.inputs.in_file = '''\
+sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_acq-AP_run-01_bold.nii.gz'''
+    >>> res = bids_info.run()
+    >>> res.outputs
+    <BLANKLINE>
+    acquisition = AP
+    reconstruction = <undefined>
+    run = 1
     session = retest
     subject = 01
     suffix = bold
@@ -79,8 +110,8 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
     >>> res = bids_info.run()
     >>> res.outputs
     <BLANKLINE>
-    acq = <undefined>
-    rec = <undefined>
+    acquisition = <undefined>
+    reconstruction = <undefined>
     run = <undefined>
     session = retest
     subject = 01
@@ -94,8 +125,25 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
     >>> res = bids_info.run()
     >>> res.outputs
     <BLANKLINE>
-    acq = <undefined>
-    rec = <undefined>
+    acquisition = <undefined>
+    reconstruction = <undefined>
+    run = <undefined>
+    session = retest
+    subject = 01
+    suffix = bold
+    task = covertverbgeneration
+    <BLANKLINE>
+
+    >>> from bids import BIDSLayout
+    >>> bids_info = BIDSInfo()
+    >>> bids_info.layout = BIDSLayout(str(datadir / 'ds114'), validate=False)
+    >>> bids_info.inputs.in_file = '''\
+sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz'''
+    >>> res = bids_info.run()
+    >>> res.outputs
+    <BLANKLINE>
+    acquisition = <undefined>
+    reconstruction = <undefined>
     run = <undefined>
     session = retest
     subject = 01
@@ -182,24 +230,26 @@ class BIDSDataGrabber(SimpleInterface):
         return runtime
 
 
-class DerivativesDataSinkInputSpec(BaseInterfaceInputSpec):
+class DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     base_directory = traits.Directory(
         desc='Path to the base directory for storing data.')
-    in_file = InputMultiObject(File(exists=True), mandatory=True,
-                               desc='the object to be saved')
-    source_file = File(exists=False, mandatory=True, desc='the input func file')
-    space = Str('', usedefault=True, desc='Label for space field')
-    desc = Str('', usedefault=True, desc='Label for description field')
-    suffix = Str('', usedefault=True, desc='suffix appended to source_file')
-    keep_dtype = traits.Bool(False, usedefault=True, desc='keep datatype suffix')
-    extra_values = traits.List(Str)
+    check_hdr = traits.Bool(True, usedefault=True, desc='fix headers of NIfTI outputs')
     compress = traits.Bool(desc="force compression (True) or uncompression (False)"
                                 " of the output file (default: same as input)")
-    check_hdr = traits.Bool(True, usedefault=True, desc='fix headers of NIfTI outputs')
+    desc = Str('', usedefault=True, desc='Label for description field')
+    extra_values = traits.List(Str)
+    in_file = InputMultiObject(File(exists=True), mandatory=True,
+                               desc='the object to be saved')
+    keep_dtype = traits.Bool(False, usedefault=True, desc='keep datatype suffix')
+    meta_dict = traits.DictStrAny(desc='an input dictionary containing metadata')
+    source_file = File(exists=False, mandatory=True, desc='the input func file')
+    space = Str('', usedefault=True, desc='Label for space field')
+    suffix = Str('', usedefault=True, desc='suffix appended to source_file')
 
 
 class DerivativesDataSinkOutputSpec(TraitedSpec):
     out_file = OutputMultiObject(File(exists=True, desc='written file path'))
+    out_meta = OutputMultiObject(File(exists=True, desc='written JSON sidecar path'))
     compression = OutputMultiObject(
         traits.Bool, desc='whether ``in_file`` was compressed/uncompressed '
                           'or `it was copied directly.')
@@ -239,6 +289,74 @@ class DerivativesDataSink(SimpleInterface):
     '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
 desc-preproc_bold.nii.gz'
 
+    >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
+    >>> bids_dir.mkdir(parents=True, exist_ok=True)
+    >>> tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-01_bold.nii.gz'
+    >>> tricky_source.open('w').close()
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)
+    >>> dsink.inputs.in_file = str(tmpfile)
+    >>> dsink.inputs.source_file = str(tricky_source)
+    >>> dsink.inputs.keep_dtype = True
+    >>> dsink.inputs.desc = 'preproc'
+    >>> dsink.inputs.RepetitionTime = 0.75
+    >>> res = dsink.run()
+    >>> res.outputs.out_meta  # doctest: +ELLIPSIS
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
+desc-preproc_bold.json'
+
+    >>> Path(res.outputs.out_meta).read_text().splitlines()[1]
+    '  "RepetitionTime": 0.75'
+
+    >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
+    >>> bids_dir.mkdir(parents=True, exist_ok=True)
+    >>> tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-01_bold.nii.gz'
+    >>> tricky_source.open('w').close()
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
+    ...                             SkullStripped=True)
+    >>> dsink.inputs.in_file = str(tmpfile)
+    >>> dsink.inputs.source_file = str(tricky_source)
+    >>> dsink.inputs.keep_dtype = True
+    >>> dsink.inputs.desc = 'preproc'
+    >>> dsink.inputs.RepetitionTime = 0.75
+    >>> res = dsink.run()
+    >>> res.outputs.out_meta  # doctest: +ELLIPSIS
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
+desc-preproc_bold.json'
+
+    >>> lines = Path(res.outputs.out_meta).read_text().splitlines()
+    >>> lines[1]
+    '  "RepetitionTime": 0.75,'
+
+    >>> lines[2]
+    '  "SkullStripped": true'
+
+    >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
+    >>> bids_dir.mkdir(parents=True, exist_ok=True)
+    >>> tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-01_bold.nii.gz'
+    >>> tricky_source.open('w').close()
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
+    ...                             SkullStripped=True)
+    >>> dsink.inputs.in_file = str(tmpfile)
+    >>> dsink.inputs.source_file = str(tricky_source)
+    >>> dsink.inputs.keep_dtype = True
+    >>> dsink.inputs.desc = 'preproc'
+    >>> dsink.inputs.RepetitionTime = 0.75
+    >>> dsink.inputs.meta_dict = {'RepetitionTime': 1.75, 'SkullStripped': False, 'Z': 'val'}
+    >>> res = dsink.run()
+    >>> res.outputs.out_meta  # doctest: +ELLIPSIS
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
+desc-preproc_bold.json'
+
+    >>> lines = Path(res.outputs.out_meta).read_text().splitlines()
+    >>> lines[1]
+    '  "RepetitionTime": 0.75,'
+
+    >>> lines[2]
+    '  "SkullStripped": true,'
+
+    >>> lines[3]
+    '  "Z": "val"'
+
     """
     input_spec = DerivativesDataSinkInputSpec
     output_spec = DerivativesDataSinkOutputSpec
@@ -246,12 +364,23 @@ desc-preproc_bold.nii.gz'
     _always_run = True
 
     def __init__(self, out_path_base=None, **inputs):
+        self._metadata = {}
+        self._static_traits = self.input_spec.class_editable_traits()
+        for dynamic_input in set(inputs) - set(self._static_traits):
+            self._metadata[dynamic_input] = inputs.pop(dynamic_input)
+
         super(DerivativesDataSink, self).__init__(**inputs)
         self._results['out_file'] = []
         if out_path_base:
             self.out_path_base = out_path_base
 
     def _run_interface(self, runtime):
+        if isdefined(self.inputs.meta_dict):
+            meta = self.inputs.meta_dict
+            # inputs passed in construction take priority
+            meta.update(self._metadata)
+            self._metadata = meta
+
         src_fname, _ = _splitext(self.inputs.source_file)
         src_fname, dtype = src_fname.rsplit('_', 1)
         _, ext = _splitext(self.inputs.in_file[0])
@@ -334,6 +463,17 @@ desc-preproc_bold.nii.gz'
                     # Rewrite file with new header
                     nii.__class__(nii.get_data(), nii.affine, hdr).to_filename(
                         out_file)
+
+        if len(self._results['out_file']) == 1:
+            meta_fields = self.inputs.copyable_trait_names()
+            self._metadata.update({
+                k: getattr(self.inputs, k)
+                for k in meta_fields if k not in self._static_traits})
+            if self._metadata:
+                sidecar = (Path(self._results['out_file'][0]).parent /
+                           ('%s.json' % _splitext(self._results['out_file'][0])[0]))
+                sidecar.write_text(dumps(self._metadata, sort_keys=True, indent=2))
+                self._results['out_meta'] = str(sidecar)
         return runtime
 
 

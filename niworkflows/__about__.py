@@ -63,13 +63,15 @@ REQUIRES = [
     'scipy',
     'seaborn',
     'svgutils',
-    'templateflow>=0.0.3',
+    'templateflow>=0.1.0,<0.2.0a0',
 ]
 
 SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 
-LINKS_REQUIRES = []
+LINKS_REQUIRES = [
+    'git+https://github.com/daavoo/pyntcloud#egg=pyntcloud-0.0.1',
+]
 TESTS_REQUIRES = [
     'pytest',
     'pytest-xdist',
@@ -84,6 +86,7 @@ EXTRA_REQUIRES = {
         'pydot>=1.2.3',
     ],
     'duecredit': ['duecredit'],
+    'pointclouds': ['pyntcloud'],
     'tests': TESTS_REQUIRES,
 }
 

@@ -150,11 +150,14 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
     **Outputs**
 
-        bias_corrected
-            The ``in_files`` input images, after :abbr:`INU (intensity non-uniformity)`
-            correction.
+
+        out_file
+            Skull-stripped and :abbr:`INU (intensity non-uniformity)`-corrected ``in_files``
         out_mask
             Calculated brain mask
+        bias_corrected
+            The ``in_files`` input images, after :abbr:`INU (intensity non-uniformity)`
+            correction, before skull-stripping.
         bias_image
             The :abbr:`INU (intensity non-uniformity)` field estimated for each
             input in ``in_files``
@@ -165,20 +168,16 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
 
     """
-    from templateflow.api import get as get_template, IncompleteResultsError
+    from templateflow.api import get as get_template
     wf = pe.Workflow(name)
 
-    tpl_target_path = get_template(
-        in_template, 'res-01_%s.nii.gz' % bids_suffix)
+    tpl_target_path = str(
+        get_template(in_template, desc=None, resolution=1, suffix=bids_suffix))
 
-    try:
-        # Get probabilistic brain mask if available
-        tpl_mask_path = get_template(
-            in_template, 'res-01_label-brain_probseg.nii.gz')
-    except IncompleteResultsError:
-        # Fall-back to a binary mask just in case
-        tpl_mask_path = get_template(
-            in_template, 'res-01_desc-brain_mask.nii.gz')
+    # Get probabilistic brain mask if available
+    tpl_mask_path = get_template(
+        in_template, resolution=1, label='brain', suffix='probseg') or \
+        get_template(in_template, resolution=1, desc='brain', suffix='mask')
 
     if omp_nthreads is None or omp_nthreads < 1:
         omp_nthreads = cpu_count()
@@ -186,16 +185,15 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 'in_mask']),
                         name='inputnode')
 
-    try:
-        # Try to find a registration mask, set if available
-        tpl_regmask_path = get_template(
-            in_template, 'res-01_desc-BrainCerebellumRegistration_mask.nii.gz')
-        inputnode.inputs.in_mask = tpl_regmask_path
-    except IncompleteResultsError:
-        pass  # TODO: log a warning
+    # Try to find a registration mask, set if available
+    tpl_regmask_path = get_template(
+        in_template, resolution=1,
+        desc='BrainCerebellumExtraction', suffix='mask')
+    if tpl_regmask_path:
+        inputnode.inputs.in_mask = str(tpl_regmask_path)
 
     outputnode = pe.Node(niu.IdentityInterface(
-        fields=['bias_corrected', 'out_mask', 'bias_image', 'out_segm']),
+        fields=['out_file', 'out_mask', 'bias_corrected', 'bias_image', 'out_segm']),
         name='outputnode')
 
     trunc = pe.MapNode(ImageMath(operation='TruncateImageIntensity', op2='0.01 0.999 256'),
@@ -224,9 +222,9 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
     # Initialize transforms with antsAI
     init_aff = pe.Node(AI(
-        metric=('Mattes', 32, 'Regular', 0.2),
+        metric=('Mattes', 32, 'Regular', 0.25),
         transform=('Affine', 0.1),
-        search_factor=(20, 0.12),
+        search_factor=(15, 0.1),
         principal_axes=False,
         convergence=(10, 1e-6, 10),
         verbose=True),
@@ -254,7 +252,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         name='map_brainmask',
         mem_gb=1
     )
-    map_brainmask.inputs.input_image = tpl_mask_path
+    map_brainmask.inputs.input_image = str(tpl_mask_path)
 
     thr_brainmask = pe.Node(ThresholdImage(
         dimension=3, th_low=0.5, th_high=1.0, inside_value=1,
@@ -282,15 +280,17 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         (res_target, init_aff, [('output_image', 'moving_image')]),
         (init_aff, norm, [('output_transform', 'initial_moving_transform')]),
         (norm, map_brainmask, [
-            ('inverse_composite_transform', 'transforms')]),
+            ('reverse_transforms', 'transforms'),
+            ('reverse_invert_flags', 'invert_transform_flags')]),
         (map_brainmask, thr_brainmask, [('output_image', 'input_image')]),
         (thr_brainmask, dil_brainmask, [('output_image', 'op1')]),
         (dil_brainmask, get_brainmask, [('output_image', 'op1')]),
         (inu_n4, apply_mask, [('output_image', 'in_file')]),
         (get_brainmask, apply_mask, [('output_image', 'mask_file')]),
         (get_brainmask, outputnode, [('output_image', 'out_mask')]),
-        (apply_mask, outputnode, [('out_file', 'bias_corrected')]),
-        (inu_n4, outputnode, [('bias_image', 'bias_image')]),
+        (apply_mask, outputnode, [('out_file', 'out_file')]),
+        (inu_n4, outputnode, [('output_image', 'bias_corrected'),
+                              ('bias_image', 'bias_image')]),
     ])
 
     if use_laplacian:
@@ -333,8 +333,10 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         wf.connect([
             (inu_n4, atropos_wf, [
                 ('output_image', 'inputnode.in_files')]),
-            (get_brainmask, atropos_wf, [
+            (thr_brainmask, atropos_wf, [
                 ('output_image', 'inputnode.in_mask')]),
+            (get_brainmask, atropos_wf, [
+                ('output_image', 'inputnode.in_mask_dilated')]),
             (atropos_wf, outputnode, [
                 ('outputnode.out_mask', 'out_mask')]),
             (atropos_wf, apply_mask, [
@@ -406,8 +408,8 @@ def init_atropos_wf(name='atropos_wf',
     """
     wf = pe.Workflow(name)
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 'in_mask']),
-                        name='inputnode')
+    inputnode = pe.Node(niu.IdentityInterface(
+        fields=['in_files', 'in_mask', 'in_mask_dilated']), name='inputnode')
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['out_mask', 'out_segm', 'out_tpms']), name='outputnode')
 
@@ -448,12 +450,14 @@ def init_atropos_wf(name='atropos_wf',
     # MultiplyImages ${DIMENSION} ${EXTRACTION_GM} ${EXTRACTION_TMP} ${EXTRACTION_GM}
     fill_gm = pe.Node(ImageMath(operation='FillHoles', op2='2'),
                       name='07_fill_gm')
-    mult_gm = pe.Node(MultiplyImages(dimension=3), name='08_mult_gm')
+    mult_gm = pe.Node(MultiplyImages(
+        dimension=3, output_product_image='08_mult_gm.nii.gz'), name='08_mult_gm')
 
     # MultiplyImages ${DIMENSION} ${EXTRACTION_WM} ${ATROPOS_WM_CLASS_LABEL} ${EXTRACTION_WM}
     # ImageMath ${DIMENSION} ${EXTRACTION_TMP} ME ${EXTRACTION_CSF} 10
-    relabel_wm = pe.Node(MultiplyImages(dimension=3, second_input=in_segmentation_model[-1]),
-                         name='09_relabel_wm')
+    relabel_wm = pe.Node(MultiplyImages(
+        dimension=3, second_input=in_segmentation_model[-1],
+        output_product_image='09_relabel_wm.nii.gz'), name='09_relabel_wm')
     me_csf = pe.Node(ImageMath(operation='ME', op2='10'), name='10_me_csf')
 
     # ImageMath ${DIMENSION} ${EXTRACTION_GM} addtozero ${EXTRACTION_GM} ${EXTRACTION_TMP}
@@ -461,17 +465,18 @@ def init_atropos_wf(name='atropos_wf',
     # ImageMath ${DIMENSION} ${EXTRACTION_SEGMENTATION} addtozero ${EXTRACTION_WM} ${EXTRACTION_GM}
     add_gm = pe.Node(ImageMath(operation='addtozero'),
                      name='11_add_gm')
-    relabel_gm = pe.Node(MultiplyImages(dimension=3, second_input=in_segmentation_model[-2]),
-                         name='12_relabel_gm')
+    relabel_gm = pe.Node(MultiplyImages(
+        dimension=3, second_input=in_segmentation_model[-2],
+        output_product_image='12_relabel_gm.nii.gz'), name='12_relabel_gm')
     add_gm_wm = pe.Node(ImageMath(operation='addtozero'),
                         name='13_add_gm_wm')
 
     # Superstep 7
     # Split segmentation in binary masks
     sel_labels2 = pe.Node(niu.Function(
-        function=_select_labels, output_names=['out_wm', 'out_gm', 'out_csf']),
+        function=_select_labels, output_names=['out_gm', 'out_wm']),
         name='14_sel_labels2')
-    sel_labels2.inputs.labels = list(reversed(in_segmentation_model[1:]))
+    sel_labels2.inputs.labels = in_segmentation_model[2:]
 
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} addtozero ${EXTRACTION_MASK} ${EXTRACTION_TMP}
     add_7 = pe.Node(ImageMath(operation='addtozero'), name='15_add_7')
@@ -505,26 +510,25 @@ def init_atropos_wf(name='atropos_wf',
     depad_csf = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding),
                         name='27_depad_csf')
 
+    msk_conform = pe.Node(niu.Function(function=_conform_mask), name='msk_conform')
     merge_tpms = pe.Node(niu.Merge(in_segmentation_model[0]), name='merge_tpms')
     wf.connect([
         (inputnode, pad_mask, [('in_mask', 'op1')]),
         (inputnode, atropos, [('in_files', 'intensity_images'),
-                              ('in_mask', 'mask_image')]),
+                              ('in_mask_dilated', 'mask_image')]),
+        (inputnode, msk_conform, [(('in_files', _pop), 'in_reference')]),
         (atropos, pad_segm, [('classified_image', 'op1')]),
         (pad_segm, sel_labels, [('output_image', 'in_segm')]),
         (sel_labels, get_wm, [('out_wm', 'op1')]),
         (sel_labels, get_gm, [('out_gm', 'op1')]),
         (get_gm, fill_gm, [('output_image', 'op1')]),
-        (get_gm, mult_gm, [('output_image', 'first_input'),
-                           (('output_image', _gen_name), 'output_product_image')]),
+        (get_gm, mult_gm, [('output_image', 'first_input')]),
         (fill_gm, mult_gm, [('output_image', 'second_input')]),
-        (get_wm, relabel_wm, [('output_image', 'first_input'),
-                              (('output_image', _gen_name), 'output_product_image')]),
+        (get_wm, relabel_wm, [('output_image', 'first_input')]),
         (sel_labels, me_csf, [('out_csf', 'op1')]),
         (mult_gm, add_gm, [('output_product_image', 'op1')]),
         (me_csf, add_gm, [('output_image', 'op2')]),
-        (add_gm, relabel_gm, [('output_image', 'first_input'),
-                              (('output_image', _gen_name), 'output_product_image')]),
+        (add_gm, relabel_gm, [('output_image', 'first_input')]),
         (relabel_wm, add_gm_wm, [('output_product_image', 'op1')]),
         (relabel_gm, add_gm_wm, [('output_product_image', 'op2')]),
         (add_gm_wm, sel_labels2, [('output_image', 'in_segm')]),
@@ -546,7 +550,8 @@ def init_atropos_wf(name='atropos_wf',
         (depad_csf, merge_tpms, [('output_image', 'in1')]),
         (depad_gm, merge_tpms, [('output_image', 'in2')]),
         (depad_wm, merge_tpms, [('output_image', 'in3')]),
-        (depad_mask, outputnode, [('output_image', 'out_mask')]),
+        (depad_mask, msk_conform, [('output_image', 'in_mask')]),
+        (msk_conform, outputnode, [('out', 'out_mask')]),
         (depad_segm, outputnode, [('output_image', 'out_segm')]),
         (merge_tpms, outputnode, [('out', 'out_tpms')]),
     ])
@@ -573,14 +578,40 @@ def _select_labels(in_segm, labels):
         data = (nii.get_data() == l).astype(np.uint8)
         newnii = nii.__class__(data, nii.affine, nii.header)
         newnii.set_data_dtype('uint8')
-        out_file = fname_presuffix(in_segm, suffix='class-%02d' % l,
+        out_file = fname_presuffix(in_segm, suffix='_class-%02d' % l,
                                    newpath=cwd)
         newnii.to_filename(out_file)
         out_files.append(out_file)
     return out_files
 
 
-def _gen_name(in_file):
-    from os.path import basename
+def _conform_mask(in_mask, in_reference):
+    """Ensures the mask headers make sense and match those of the T1w"""
+    from pathlib import Path
+    import nibabel as nb
     from nipype.utils.filemanip import fname_presuffix
-    return basename(fname_presuffix(in_file, suffix='processed'))
+
+    ref = nb.load(in_reference)
+    nii = nb.load(in_mask)
+    hdr = nii.header.copy()
+    hdr.set_data_dtype('int16')
+    hdr.set_slope_inter(1, 0)
+
+    qform, qcode = ref.header.get_qform(coded=True)
+    if qcode is not None:
+        hdr.set_qform(qform, int(qcode))
+
+    sform, scode = ref.header.get_sform(coded=True)
+    if scode is not None:
+        hdr.set_sform(sform, int(scode))
+
+    if '_maths' in in_mask:  # Cut the name at first _maths occurrence
+        ext = ''.join(Path(in_mask).suffixes)
+        basename = Path(in_mask).name
+        in_mask = basename.split('_maths')[0] + ext
+
+    out_file = fname_presuffix(in_mask, suffix='_mask',
+                               newpath=str(Path()))
+    nii.__class__(nii.get_data().astype('int16'), ref.affine,
+                  hdr).to_filename(out_file)
+    return out_file
