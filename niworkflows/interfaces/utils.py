@@ -710,6 +710,31 @@ class JoinTSVColumns(SimpleInterface):
         return runtime
 
 
+class DictMergeInputSpec(BaseInterfaceInputSpec):
+    in_dicts = traits.List(
+        traits.Either(traits.Dict, traits.Instance(OrderedDict)),
+        desc='Dictionaries to be merged. In the event of a collision, values '
+             'from dictionaries later in the list receive precedence.')
+
+
+class DictMergeOutputSpec(TraitedSpec):
+    out_dict = traits.Either(traits.Dict, traits.Instance(OrderedDict),
+                             desc='Merged dictionary')
+
+
+class DictMerge(SimpleInterface):
+    """Merge (ordered) dictionaries."""
+    input_spec = DictMergeInputSpec
+    output_spec = DictMergeOutputSpec
+
+    def _run_interface(self, runtime):
+        out_dict = {}
+        for in_dict in self.inputs.in_dicts:
+            out_dict.update(in_dict)
+        self._results['out_dict'] = out_dict
+        return runtime
+
+
 class TSV2JSONInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='Input TSV file')
     index_column = traits.Str(mandatory=True,
@@ -717,8 +742,13 @@ class TSV2JSONInputSpec(BaseInterfaceInputSpec):
                                    'as the top-level key in the JSON. All '
                                    'remaining columns will be assigned as '
                                    'nested keys.')
-    out_file = File(desc='Path where the output file is to be saved')
-    additional_metadata = traits.Either(None, traits.Dict(), usedefault=True,
+    output = traits.Either(None, File,
+                           desc='Path where the output file is to be saved. '
+                                'If this is `None`, then a JSON-compatible '
+                                'dictionary is returned instead.')
+    additional_metadata = traits.Either(None, traits.Dict,
+                                        traits.Instance(OrderedDict),
+                                        usedefault=True,
                                         desc='Any additional metadata that '
                                              'should be applied to all '
                                              'entries in the JSON.')
@@ -731,7 +761,9 @@ class TSV2JSONInputSpec(BaseInterfaceInputSpec):
 
 
 class TSV2JSONOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='Output JSON file')
+    output = traits.Either(traits.Dict, File(exists=True),
+                           traits.Instance(OrderedDict),
+                           desc='Output dictionary or JSON file')
 
 
 class TSV2JSON(SimpleInterface):
@@ -741,16 +773,16 @@ class TSV2JSON(SimpleInterface):
     output_spec = TSV2JSONOutputSpec
 
     def _run_interface(self, runtime):
-        if not isdefined(self.inputs.out_file):
-            out_file = fname_presuffix(
+        if not isdefined(self.inputs.output):
+            output = fname_presuffix(
                 self.inputs.in_file, suffix='.json', newpath=runtime.cwd,
                 use_ext=False)
         else:
-            out_file = self.inputs.out_file
+            output = self.inputs.output
 
-        self._results['out_file'] = _tsv2json(
+        self._results['output'] = _tsv2json(
             in_tsv=self.inputs.in_file,
-            out_json=out_file,
+            out_json=output,
             index_column=self.inputs.index_column,
             additional_metadata=self.inputs.additional_metadata,
             drop_columns=self.inputs.drop_columns,
@@ -770,7 +802,7 @@ def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
         Path to the metadata in TSV format.
     out_json: str
         Path where the metadata should be saved in JSON format after
-        conversion.
+        conversion. If this is None, then a dictionary is returned instead.
     index_column: str
         Name of the column in the TSV to be used as an index (top-level key in
         the JSON).
@@ -790,7 +822,7 @@ def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
         Path to the metadata saved in JSON format.
     """
     import pandas as pd
-    # Taken from https://dev.to/rrampage/snake-case-to-camel-case-and- ...
+    # Adapted from https://dev.to/rrampage/snake-case-to-camel-case-and- ...
     # back-using-regular-expressions-and-python-m9j
     re_to_camel = r'(.*?)_([a-zA-Z0-9])'
     re_to_snake = r'(^.+?|.*?)((?<![_A-Z])[A-Z]|(?<![_0-9])[0-9]+)'
@@ -825,6 +857,8 @@ def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
     json_data = tsv_data.to_json(orient='index')
     json_data = json.JSONDecoder(
         object_pairs_hook=OrderedDict).decode(json_data)
+    if out_json is None:
+        return json_data
 
     with open(out_json, 'w') as f:
         json.dump(json_data, f, indent=4)
