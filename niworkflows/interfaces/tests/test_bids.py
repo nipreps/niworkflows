@@ -112,3 +112,21 @@ def test_DerivativesDataSink_t1w(tmpdir, space, size, units, xcodes, fixed):
     assert int(nii.header['qform_code']) == XFORM_CODES[space]
     assert int(nii.header['sform_code']) == XFORM_CODES[space]
     assert nii.header.get_xyzt_units() == ('mm', 'unknown')
+
+
+def test_ReadSidecarJSON_connection(testdata_dir):
+    """
+    This test prevents regressions of #333
+    """
+    from nipype.pipeline import engine as pe
+    from nipype.interfaces import utility as niu
+    from niworkflows.interfaces.bids import ReadSidecarJSON
+
+    n = pe.Node(ReadSidecarJSON(fields=['RepetitionTime']), name='node')
+    n.inputs.in_file = str(testdata_dir / 'ds054' / 'sub-100185' / 'fmap' /
+                           'sub-100185_phasediff.nii.gz')
+    o = pe.Node(niu.IdentityInterface(fields=['RepetitionTime']), name='o')
+    wf = pe.Workflow(name='json')
+    wf.connect([
+        (n, o, [('RepetitionTime', 'RepetitionTime')]),
+    ])
