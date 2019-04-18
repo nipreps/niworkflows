@@ -114,7 +114,11 @@ def test_DerivativesDataSink_t1w(tmpdir, space, size, units, xcodes, fixed):
     assert nii.header.get_xyzt_units() == ('mm', 'unknown')
 
 
-def test_ReadSidecarJSON_connection(testdata_dir):
+@pytest.mark.parametrize('field', [
+    'RepetitionTime',
+    'UndefinedField',
+])
+def test_ReadSidecarJSON_connection(testdata_dir, field):
     """
     This test prevents regressions of #333
     """
@@ -122,11 +126,21 @@ def test_ReadSidecarJSON_connection(testdata_dir):
     from nipype.interfaces import utility as niu
     from niworkflows.interfaces.bids import ReadSidecarJSON
 
-    n = pe.Node(ReadSidecarJSON(fields=['RepetitionTime']), name='node')
+    reg_fields = ['RepetitionTime']
+    n = pe.Node(ReadSidecarJSON(fields=reg_fields), name='node')
     n.inputs.in_file = str(testdata_dir / 'ds054' / 'sub-100185' / 'fmap' /
                            'sub-100185_phasediff.nii.gz')
-    o = pe.Node(niu.IdentityInterface(fields=['RepetitionTime']), name='o')
+    o = pe.Node(niu.IdentityInterface(fields=['out_port']), name='o')
     wf = pe.Workflow(name='json')
-    wf.connect([
-        (n, o, [('RepetitionTime', 'RepetitionTime')]),
-    ])
+
+    if field in reg_fields:  # This should work
+        wf.connect([
+            (n, o, [(field, 'out_port')]),
+        ])
+    else:
+        with pytest.raises(Exception) as excinfo:
+            wf.connect([
+                (n, o, [(field, 'out_port')]),
+            ])
+
+        assert 'Some connections were not found' in str(excinfo)

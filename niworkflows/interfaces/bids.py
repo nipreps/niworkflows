@@ -21,6 +21,7 @@ from nipype.interfaces.base import (
     File, Directory, InputMultiObject, OutputMultiObject, Str,
     SimpleInterface,
 )
+from nipype.interfaces.io import add_traits
 from templateflow.api import templates as _get_template_list
 from ..utils.bids import BIDS_NAME, _init_layout
 from ..utils.misc import splitext as _splitext, _copy_any
@@ -479,10 +480,6 @@ desc-preproc_bold.json'
 
 class ReadSidecarJSONInputSpec(BIDSBaseInputSpec):
     in_file = File(exists=True, mandatory=True, desc='the input nifti file')
-    fields = InputMultiObject(traits.Str,
-                              desc='map these fields to the output object')
-    undef_fields = traits.Bool(False, usedefault=True,
-                               desc='allow fields to be undefined')
 
 
 class ReadSidecarJSONOutputSpec(BIDSInfoOutputSpec):
@@ -533,6 +530,22 @@ class ReadSidecarJSON(SimpleInterface):
     layout = None
     _always_run = True
 
+    def __init__(self, fields=None, undef_fields=False, **inputs):
+        super(ReadSidecarJSON, self).__init__(**inputs)
+        self._fields = fields or []
+        self._undef_fields = undef_fields
+
+        if fields:
+            add_traits(self.inputs, fields)
+
+        self.inputs.trait_set(**inputs)
+
+    def _outputs(self):
+        base = super(ReadSidecarJSON, self)._outputs()
+        if self._fields:
+            base = add_traits(base, self._fields)
+        return base
+
     def _run_interface(self, runtime):
         self.layout = self.inputs.bids_dir or self.layout
         self.layout = _init_layout(self.inputs.in_file,
@@ -550,13 +563,12 @@ class ReadSidecarJSON(SimpleInterface):
         self._results['out_dict'] = metadata
 
         # Set dynamic outputs if fields input is present
-        if isdefined(self.inputs.fields) and self.inputs.fields:
-            for fname in self.inputs.fields:
-                if not self.inputs.undef_fields and fname not in metadata:
-                    raise KeyError(
-                        'Metadata field "%s" not found for file %s' % (
-                            fname, self.inputs.in_file))
-                self._results[fname] = metadata.get(fname, Undefined)
+        for fname in self._fields:
+            if not self._undef_fields and fname not in metadata:
+                raise KeyError(
+                    'Metadata field "%s" not found for file %s' % (
+                        fname, self.inputs.in_file))
+            self._results[fname] = metadata.get(fname, Undefined)
         return runtime
 
 
