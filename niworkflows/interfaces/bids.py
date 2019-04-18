@@ -533,12 +533,10 @@ class ReadSidecarJSON(SimpleInterface):
     def __init__(self, fields=None, undef_fields=False, **inputs):
         super(ReadSidecarJSON, self).__init__(**inputs)
         self._fields = fields or []
+        if isinstance(self._fields, str):
+            self._fields = [self._fields]
+
         self._undef_fields = undef_fields
-
-        if fields:
-            add_traits(self.inputs, fields)
-
-        self.inputs.trait_set(**inputs)
 
     def _outputs(self):
         base = super(ReadSidecarJSON, self)._outputs()
