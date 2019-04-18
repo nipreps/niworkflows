@@ -138,7 +138,7 @@ def test_ReadSidecarJSON_connection(testdata_dir, field):
             (n, o, [(field, 'out_port')]),
         ])
     else:
-        with pytest.raises(Exception) as excinfo:
+        with pytest.raises(Exception, match=r'.*Some connections were not found.*'):
             wf.connect([
                 (n, o, [(field, 'out_port')]),
             ])
