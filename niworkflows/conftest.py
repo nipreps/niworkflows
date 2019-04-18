@@ -18,3 +18,8 @@ def add_np(doctest_namespace):
     doctest_namespace['Path'] = Path
     doctest_namespace['datadir'] = data_dir
     doctest_namespace['bids_collect_data'] = collect_data
+
+
+@pytest.fixture
+def testdata_dir():
+    return data_dir
