@@ -142,5 +142,3 @@ def test_ReadSidecarJSON_connection(testdata_dir, field):
             wf.connect([
                 (n, o, [(field, 'out_port')]),
             ])
-
-        assert 'Some connections were not found' in str(excinfo)
