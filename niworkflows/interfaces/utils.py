@@ -718,8 +718,7 @@ class DictMergeInputSpec(BaseInterfaceInputSpec):
 
 
 class DictMergeOutputSpec(TraitedSpec):
-    out_dict = traits.Either(traits.Dict, traits.Instance(OrderedDict),
-                             desc='Merged dictionary')
+    out_dict = traits.Dict(desc='Merged dictionary')
 
 
 class DictMerge(SimpleInterface):
