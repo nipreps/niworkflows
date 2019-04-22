@@ -200,7 +200,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                        name='truncate_images', iterfield=['op1'])
     inu_n4 = pe.MapNode(
         N4BiasFieldCorrection(
-            dimension=3, save_bias=True, copy_header=True,
+            dimension=3, save_bias=False, copy_header=True,
             n_iterations=[50] * 4, convergence_threshold=1e-7, shrink_factor=4,
             bspline_fitting_distance=bspline_fitting_distance),
         n_procs=omp_nthreads, name='inu_n4', iterfield=['input_image'])
@@ -265,11 +265,20 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     get_brainmask = pe.Node(ImageMath(operation='GetLargestComponent'),
                             name='get_brainmask')
 
+    # Refine INU correction
+    inu_n4_final = pe.MapNode(
+        N4BiasFieldCorrection(
+            dimension=3, save_bias=True, copy_header=True,
+            n_iterations=[50] * 5, convergence_threshold=1e-7, shrink_factor=4,
+            bspline_fitting_distance=bspline_fitting_distance),
+        n_procs=omp_nthreads, name='inu_n4_final', iterfield=['input_image'])
+
     # Apply mask
     apply_mask = pe.MapNode(ApplyMask(), iterfield=['in_file'], name='apply_mask')
 
     wf.connect([
         (inputnode, trunc, [('in_files', 'op1')]),
+        (inputnode, inu_n4_final, [('in_files', 'input_image')]),
         (inputnode, init_aff, [('in_mask', 'fixed_image_mask')]),
         (inputnode, norm, [('in_mask', fixed_mask_trait)]),
         (inputnode, map_brainmask, [(('in_files', _pop), 'reference_image')]),
@@ -285,12 +294,12 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         (map_brainmask, thr_brainmask, [('output_image', 'input_image')]),
         (thr_brainmask, dil_brainmask, [('output_image', 'op1')]),
         (dil_brainmask, get_brainmask, [('output_image', 'op1')]),
-        (inu_n4, apply_mask, [('output_image', 'in_file')]),
+        (inu_n4_final, apply_mask, [('output_image', 'in_file')]),
         (get_brainmask, apply_mask, [('output_image', 'mask_file')]),
         (get_brainmask, outputnode, [('output_image', 'out_mask')]),
         (apply_mask, outputnode, [('out_file', 'out_file')]),
-        (inu_n4, outputnode, [('output_image', 'bias_corrected'),
-                              ('bias_image', 'bias_image')]),
+        (inu_n4_final, outputnode, [('output_image', 'bias_corrected'),
+                                    ('bias_image', 'bias_image')]),
     ])
 
     if use_laplacian:
@@ -319,12 +328,15 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         ])
 
     if atropos_refine:
+        atropos_model = atropos_model or list(ATROPOS_MODELS[bids_suffix].values())
         atropos_wf = init_atropos_wf(
             use_random_seed=atropos_use_random_seed,
             omp_nthreads=omp_nthreads,
             mem_gb=mem_gb,
-            in_segmentation_model=atropos_model or list(ATROPOS_MODELS[bids_suffix].values())
+            in_segmentation_model=atropos_model,
         )
+        sel_wm = pe.Node(niu.Select(index=atropos_model[-1] - 1), name='sel_wm',
+                         run_without_submitting=True)
 
         wf.disconnect([
             (get_brainmask, outputnode, [('output_image', 'out_mask')]),
@@ -337,6 +349,8 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                 ('output_image', 'inputnode.in_mask')]),
             (get_brainmask, atropos_wf, [
                 ('output_image', 'inputnode.in_mask_dilated')]),
+            (atropos_wf, sel_wm, [('outputnode.out_tpms', 'inlist')]),
+            (sel_wm, inu_n4_final, [('out', 'weight_image')]),
             (atropos_wf, outputnode, [
                 ('outputnode.out_mask', 'out_mask')]),
             (atropos_wf, apply_mask, [
