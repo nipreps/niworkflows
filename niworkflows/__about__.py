@@ -70,7 +70,7 @@ SETUP_REQUIRES = []
 REQUIRES += SETUP_REQUIRES
 
 LINKS_REQUIRES = [
-    'git+https://github.com/daavoo/pyntcloud#egg=pyntcloud-0.0.1',
+    'git+https://github.com/daavoo/pyntcloud.git#egg=pyntcloud-0.0.1',
 ]
 TESTS_REQUIRES = [
     'pytest',
