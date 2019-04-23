@@ -77,50 +77,23 @@ div#boilerplate pre {
 </noscript>
 
 {% for sub_report in sections %}
+    {% if sub_report.reportlets %}
     <div id="{{ sub_report.name }}">
     <h1 class="sub-report-title">{{ sub_report.name }}</h1>
-    {% if sub_report.isnested %}
-        {% for run_report in sub_report.reportlets %}
-            <div id="{{run_report.name}}">
-                <h2 class="run-title">Reports for {{ run_report.title }}</h2>
-                {% for elem in run_report.reportlets %}
-                    {% if elem.contents %}
-                        {% if elem.title %}<h3 class="elem-title">{{ elem.title }}</h3>{% endif %}
-                        {% if elem.description %}<p class="elem-desc">{{ elem.description }}<p>{% endif %}
-                        {% for content in elem.contents %}
-                            {% if elem.raw %}{{ content }}{% else %}
-                            <div class="elem-image">
-                            <object class="svg-reportlet" type="image/svg+xml" data="./{{ content }}">
-                            Problem loading figure {{ content }}. If the link below works, please try reloading the report in your browser.</object>
-                            </div>
-                            <div class="elem-filename">
-                                Get figure file: <a href="./{{ content }}" target="_blank">{{ content }}</a>
-                            </div>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                {% endfor %}
-            </div>
-        {% endfor %}
-    {% else %}
-        {% for elem in sub_report.reportlets %}
-            {% if elem.contents %}
-                {% if elem.title %}<h3 class="elem-title">{{ elem.title }}</h3>{% endif %}
-                {% if elem.description %}<p class="elem-desc">{{ elem.description }}<p><br />{% endif %}
-                {% for content in elem.contents %}
-                    {% if elem.raw %}{{ content }}{% else %}
-                        <div class="elem-image">
-                        <object class="svg-reportlet" type="image/svg+xml" data="./{{ content }}">filename:{{ content }}</object>
-                        </div>
-                        <div class="elem-filename">
-                            Get figure file: <a href="./{{ content }}" target="_blank">{{ content }}</a>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-        {% endfor %}
-    {% endif %}
+    {% for run_report in sub_report.reportlets %}
+        <div id="{{run_report.name}}">
+            {% if run_report.title %}<h2 class="run-title">Reports for {{ run_report.title }}</h2>{% endif %}
+            {% if run_report.description %}<p class="elem-desc">{{ run_report.description }}</p>{% endif %}
+            {% for elem in run_report.components %}
+                {% if elem[0] %}
+                    {% if elem[1] %}<p class="elem-desc">{{ elem[1] }}</p>{% endif %}
+                    {{ elem[0] }}
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
     </div>
+    {% endif %}
 {% endfor %}
 
 <div id="boilerplate">

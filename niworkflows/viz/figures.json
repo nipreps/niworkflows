@@ -1,0 +1,119 @@
+{
+    "name": "bids",
+    "entities": [
+        {
+            "name": "subject",
+            "pattern": "[/\\\\]sub-([a-zA-Z0-9]+)",
+            "directory": "{{root}}{subject}"
+        },
+        {
+            "name": "session",
+            "pattern": "[_/\\\\]ses-([a-zA-Z0-9]+)",
+            "mandatory": false,
+            "directory": "{{root}}{subject}{session}",
+            "missing_value": "ses-1"
+        },
+        {
+            "name": "task",
+            "pattern": "[_/\\\\]task-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "acquisition",
+            "pattern": "[_/\\\\]acq-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "ce",
+            "pattern": "[_/\\\\]ce-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "reconstruction",
+            "pattern": "[_/\\\\]rec-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "dir",
+            "pattern": "[_/\\\\]dir-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "run",
+            "pattern": "[_/\\\\]run-0*(\\d+)",
+            "dtype": "int"
+        },
+        {
+            "name": "proc",
+            "pattern": "[_/\\\\]proc-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "modality",
+            "pattern": "[_/\\\\]mod-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "echo",
+            "pattern": "[_/\\\\]echo-([0-9]+)\\_bold."
+        },
+        {
+            "name": "recording",
+            "pattern": "[_/\\\\]recording-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "suffix",
+            "pattern": "[._]*([a-zA-Z0-9]*?)\\.[^/\\\\]+$"
+        },
+        {
+            "name": "fmap",
+            "pattern": "(phasediff|magnitude[1-2]|phase[1-2]|fieldmap|epi)\\.nii"
+        },
+        {
+            "name": "datatype",
+            "pattern": "[/\\\\](func|anat|fmap|dwi|meg)[/\\\\]"
+        },
+        {
+            "name": "space",
+            "pattern": "space-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "atlas",
+            "pattern": "atlas-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "roi",
+            "pattern": "roi-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "label",
+            "pattern": "label-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "desc",
+            "pattern": "desc-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "from",
+            "pattern": "(?:^|_)from-([a-zA-Z0-9]+).*xfm"
+        },
+        {
+            "name": "to",
+            "pattern": "(?:^|_)to-([a-zA-Z0-9]+).*xfm"
+        },
+        {
+            "name": "mode",
+            "pattern": "(?:^|_)mode-([a-zA-Z0-9]+).*xfm"
+        },
+        {
+            "name": "hemi",
+            "pattern": "hemi-(L|R)"
+        },
+        {
+            "name": "model",
+            "pattern": "model-([a-zA-Z0-9]+)"
+        },
+        {
+            "name": "subset",
+            "pattern": "subset-([a-zA-Z0-9]+)"
+        }
+    ],
+
+    "default_path_patterns": [
+        "sub-{subject}[/ses-{session}]/{datatype<anat|figures>}/sub-{subject}[_ses-{session}][_acq-{acquisition}][_ce-{contrast}][_rec-{reconstruction}][_space-{space}][_desc-{desc}]_{suffix<T1w|T2w|T1rho|T1map|T2map|T2star|FLAIR|FLASH|PDmap|PD|PDT2|inplaneT[12]|angio|dseg|mask>}.{extension<html|svg>}",
+        "sub-{subject}[/ses-{session}]/{datatype<func|figures>}/sub-{subject}[_ses-{session}]_task-{task}[_acq-{acquisition}][_rec-{reconstruction}][_run-{run}][_echo-{echo}][_space-{space}][_desc-{desc}]_{suffix<bold>}.{extension<html|svg>}"
+    ]
+}

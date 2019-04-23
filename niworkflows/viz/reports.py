@@ -3,21 +3,33 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-fMRIprep reports builder
-^^^^^^^^^^^^^^^^^^^^^^^^
+Reports builder for BIDS-Apps
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 """
 from pathlib import Path
 import json
 import re
+from itertools import product
+from collections import defaultdict
 from pkg_resources import resource_filename as pkgrf
+from bids.layout import BIDSLayout, add_config_paths
 
 import jinja2
 from nipype.utils.filemanip import copyfile
 
-from ..utils.misc import read_crashfile
-from ..utils.bids import BIDS_NAME
+add_config_paths(figures=pkgrf('niworkflows', 'viz/figures.json'))
+LAYOUT_GET = defaultdict(str('s').format, [('echo', 'es')])
+SVG_SNIPPET = """\
+<object class="svg-reportlet" type="image/svg+xml" data="./{0}">
+Problem loading figure {0}. If the link below works, please try \
+reloading the report in your browser.</object>
+</div>
+<div class="elem-filename">
+    Get figure file: <a href="./{0}" target="_blank">{0}</a>
+</div>
+"""
 
 
 class Element(object):
@@ -32,17 +44,116 @@ class Element(object):
 
 class Reportlet(Element):
     """
-    A reportlet has title, description and a list of graphical components
+    A reportlet has title, description and a list of components with either an
+    HTML fragment or a path to an SVG file, and possibly a caption. This is a
+    factory class to generate Reportlets reusing the layout from a ``Report``
+    object.
+
+    .. testsetup::
+
+    >>> from shutil import copytree
+    >>> from tempfile import TemporaryDirectory
+    >>> from bids.layout import BIDSLayout
+    >>> new_path = Path(__file__).resolve().parent.parent
+    >>> test_data_path = new_path / 'data' / 'tests' / 'work'
+    >>> tmpdir = TemporaryDirectory()
+    >>> os.chdir(tmpdir.name)  #noqa
+    >>> testdir = Path().resolve()
+    >>> data_dir = copytree(test_data_path, testdir / 'work')
+    >>> out_figs = (testdir / 'out' / 'fmriprep' )
+    >>> bl = BIDSLayout(str(testdir / 'work' / 'reportlets'),
+    ...                 config='figures', validate=False)
+
+    .. doctest::
+
+    >>> bl.get(subject='01', desc='reconall')
+    [<BIDSFile filename='fmriprep/sub-01/anat/sub-01_desc-reconall_T1w.svg'>]
+
+    >>> len(bl.get(subject='01', space='.*'))
+    2
+
+    >>> r = Reportlet(bl, out_figs, config={
+    ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'desc': 'reconall'},
+    ...     'description': 'Some description'})
+    >>> r.name
+    'datatype-anat_desc-reconall'
+
+    >>> r.components[0][0].startswith('<object')
+    True
+
+    >>> r = Reportlet(bl, out_figs, config={
+    ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'desc': 'summary'},
+    ...     'description': 'Some description'})
+
+    >>> r.components[0][0].startswith('<h3')
+    True
+
+    >>> r.components[0][1] is None
+    True
+
+    >>> r = Reportlet(bl, out_figs, config={
+    ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'space': '.*'},
+    ...     'caption': 'Some description {space}'})
+    >>> r.components[0][1]
+    'Some description MNI152NLin2009cAsym'
+
+    >>> r.components[1][1]
+    'Some description MNI152NLin6Asym'
+
+
+    >>> r = Reportlet(bl, out_figs, config={
+    ...     'title': 'Some Title', 'bids': {'datatype': 'fmap', 'space': '.*'},
+    ...     'caption': 'Some description {space}'})
+    >>> r.is_empty()
+    True
+
+    .. testcleanup::
+
+    >>> tmpdir.cleanup()
+
     """
 
-    def __init__(self, name, file_pattern=None, title=None, description=None, raw=False):
-        self.name = name
-        self.file_pattern = re.compile(file_pattern)
-        self.title = title
-        self.description = description
-        self.source_files = []
-        self.contents = []
-        self.raw = raw
+    def __init__(self, layout, out_dir, config=None):
+        if not config:
+            raise RuntimeError('Reportlet must have a config object')
+
+        self.name = config.get('name')
+        if not self.name:
+            self.name = '_'.join('%s-%s' % i for i in config['bids'].items())
+
+        self.title = config.get('title')
+        self.description = config.get('description')
+
+        # Query the BIDS layout of reportlets
+        files = layout.get(**config['bids'])
+
+        self.components = []
+        for bidsfile in files:
+            src = Path(bidsfile.path)
+            ext = ''.join(src.suffixes)
+            desc_text = config.get('caption')
+
+            contents = None
+            if ext == '.html':
+                contents = src.read_text().strip()
+            elif ext == '.svg':
+                entities = bidsfile.entities
+                if desc_text:
+                    desc_text = desc_text.format(**entities)
+
+                entities['extension'] = 'svg'
+                entities['datatype'] = 'figures'
+                linked_svg = layout.build_path(entities)
+                out_file = out_dir / linked_svg
+                out_file.parent.mkdir(parents=True, exist_ok=True)
+                copyfile(src, out_file, copy=True, use_hardlink=True)
+                contents = SVG_SNIPPET.format(linked_svg)
+
+            if contents:
+                self.components.append((contents, desc_text))
+
+    def is_empty(self):
+        return len(self.components) == 0
 
 
 class SubReport(Element):
@@ -56,25 +167,55 @@ class SubReport(Element):
         self.reportlets = []
         if reportlets:
             self.reportlets += reportlets
-        self.isnested = False
 
 
 class Report(object):
     """
-    The full report object
+    The full report object. This object maintains a BIDSLayout to index
+    all reportlets.
+
+
+    .. testsetup::
+
+    >>> from shutil import copytree
+    >>> from tempfile import TemporaryDirectory
+    >>> from bids.layout import BIDSLayout
+    >>> new_path = Path(__file__).resolve().parent.parent
+    >>> test_data_path = new_path / 'data' / 'tests' / 'work'
+    >>> tmpdir = TemporaryDirectory()
+    >>> os.chdir(tmpdir.name)  #noqa
+    >>> testdir = Path().resolve()
+    >>> data_dir = copytree(test_data_path, testdir / 'work')
+    >>> out_figs = (testdir / 'out' / 'fmriprep' )
+
+    .. doctest::
+
+    >>> robj = Report(testdir / 'work' / 'reportlets',
+    ...               'work/config.json', testdir / 'out',
+    ...               'madeoutuuid', subject_id='01')
+    >>> robj.layout.get(subject='01', desc='reconall')
+    [<BIDSFile filename='fmriprep/sub-01/anat/sub-01_desc-reconall_T1w.svg'>]
+
+    >>> robj.generate_report()
+    0
+    >>> len((testdir / 'out' / 'niworkflows' / 'sub-01.html').read_text())
+    9014
+
     """
 
     def __init__(self, reportlets_dir, config, out_dir, run_uuid,
-                 subject_id=None,
-                 out_filename='report.html',
-                 sentry_sdk=None):
+                 subject_id=None, out_filename='report.html'):
         self.root = reportlets_dir
+
+        # Initialize a BIDS layout
+        self.layout = BIDSLayout(self.root, config='figures', validate=False)
+
+        # Initialize structuring elements
         self.sections = []
         self.errors = []
         self.out_dir = Path(out_dir)
         self.out_filename = out_filename
         self.run_uuid = run_uuid
-        self.sentry_sdk = sentry_sdk
         self.template_path = None
         self.packagename = None
         self.subject_id = subject_id
@@ -84,12 +225,10 @@ class Report(object):
         if self.subject_id is not None:
             self.out_filename = 'sub-{}.html'.format(self.subject_id)
 
-        self._load_config(config)
+        self._load_config(Path(config))
 
     def _load_config(self, config):
-        config = Path(config)
-        with config.open('r') as configfh:
-            settings = json.load(configfh)
+        settings = json.loads(config.read_text())
         self.packagename = settings.get('package', None)
 
         if self.packagename is not None:
@@ -100,132 +239,49 @@ class Report(object):
             self.root = self.root / 'sub-{}'.format(self.subject_id)
 
         template_path = Path(settings.get('template_path', 'report.tpl'))
-        if not str(template_path).startswith('/'):
+        if not template_path.is_absolute():
             template_path = config.parent / template_path
         self.template_path = template_path.resolve()
         self.index(settings['sections'])
 
     def index(self, config):
-        fig_dir = 'figures'
-        subject = 'sub-{}'.format(self.subject_id)
-        svg_dir = self.out_dir / subject / fig_dir
-        svg_dir.mkdir(parents=True, exist_ok=True)
-        reportlet_list = list(sorted([str(f) for f in Path(self.root).glob('**/*.*')]))
-
         for subrep_cfg in config:
-            reportlets = []
-            for reportlet_cfg in subrep_cfg['reportlets']:
-                rlet = Reportlet(**reportlet_cfg)
-                for src in reportlet_list:
-                    ext = src.split('.')[-1]
-                    if rlet.file_pattern.search(src):
-                        contents = None
-                        if ext == 'html':
-                            with open(src) as fp:
-                                contents = fp.read().strip()
-                        elif ext == 'svg':
-                            fbase = Path(src).name
-                            copyfile(src, str(svg_dir / fbase),
-                                     copy=True, use_hardlink=True)
-                            contents = str(Path(subject) / fig_dir / fbase)
+            orderings = [s for s in subrep_cfg.get('ordering', '').strip().split(',') if s]
 
-                        if contents:
-                            rlet.source_files.append(src)
-                            rlet.contents.append(contents)
+            queries = []
+            for key in orderings:
+                values = getattr(self.layout, 'get_%s%s' % (key, LAYOUT_GET[key]))()
+                if values:
+                    queries.append((key, values))
 
-                if rlet.source_files:
-                    reportlets.append(rlet)
+            if not queries:
+                reportlets = [Reportlet(self.layout, self.out_dir, config=cfg)
+                              for cfg in subrep_cfg['reportlets']]
+            else:
+                reportlets = []
+                entities, values = zip(*queries)
+                combinations = list(product(*values))
 
+                for c in combinations:
+                    for cfg in subrep_cfg['reportlets']:
+                        cfg['bids'].update({entities[i]: c[i] for i in range(len(c))})
+                        reportlets.append(
+                            Reportlet(self.layout, self.out_dir, config=cfg)
+                        )
+
+            # Filter out empty reportlets
+            reportlets = [r for r in reportlets if not r.is_empty()]
             if reportlets:
                 sub_report = SubReport(
                     subrep_cfg['name'], reportlets=reportlets,
                     title=subrep_cfg.get('title'))
-                self.sections.append(order_by_run(sub_report))
+                self.sections.append(sub_report)
 
-        error_dir = self.out_dir / self.packagename / subject / 'log' / self.run_uuid
+        error_dir = self.out_dir / self.packagename / 'sub-{}'.format(self.subject_id) / \
+            'log' / self.run_uuid
         if error_dir.is_dir():
-            self.index_error_dir(error_dir)
-
-    def index_error_dir(self, error_dir):
-        """
-        Crawl subjects crash directory for the corresponding run, report to sentry, and
-        populate self.errors.
-        """
-        for crashfile in error_dir.glob('crash*.*'):
-            crash_info = read_crashfile(str(crashfile))
-            if self.sentry_sdk:
-                with self.sentry_sdk.push_scope() as scope:
-                    node_name = crash_info['node'].split('.')[-1]
-                    # last line is probably most informative summary
-                    gist = crash_info['traceback'].split('\n')[-1]
-                    exception_text_start = 1
-                    for line in crash_info['traceback'].split('\n')[1:]:
-                        if not line[0].isspace():
-                            break
-                        exception_text_start += 1
-
-                    exception_text = '\n'.join(crash_info['traceback'].split('\n')[
-                                     exception_text_start:])
-
-                    scope.set_tag("node_name", node_name)
-
-                    chunk_size = 16384
-
-                    for k, v in crash_info.items():
-                        if k == 'inputs':
-                            scope.set_extra(k, dict(v))
-                        elif isinstance(v, str) and len(v) > chunk_size:
-                            chunks = [v[i:i + chunk_size] for i in range(0, len(v), chunk_size)]
-                            for i, chunk in enumerate(chunks):
-                                scope.set_extra('%s_%02d' % (k, i), chunk)
-                        else:
-                            scope.set_extra(k, v)
-                    scope.level = 'fatal'
-
-                    # Group common events with pre specified fingerprints
-                    fingerprint_dict = {
-                        'permission-denied': [
-                            "PermissionError: [Errno 13] Permission denied"],
-                        'memory-error': ["MemoryError", "Cannot allocate memory"],
-                        'reconall-already-running': [
-                            "ERROR: it appears that recon-all is already running"],
-                        'no-disk-space': [
-                            "OSError: [Errno 28] No space left on device",
-                            "[Errno 122] Disk quota exceeded"],
-                        'sigkill': ["Return code: 137"],
-                        'keyboard-interrupt': ["KeyboardInterrupt"],
-                    }
-
-                    fingerprint = ''
-                    issue_title = node_name + ': ' + gist
-                    for new_fingerprint, error_snippets in fingerprint_dict.items():
-                        for error_snippet in error_snippets:
-                            if error_snippet in crash_info['traceback']:
-                                fingerprint = new_fingerprint
-                                issue_title = new_fingerprint
-                                break
-                        if fingerprint:
-                            break
-
-                    message = issue_title + '\n\n'
-                    message += exception_text[-(8192 - len(message)):]
-                    if fingerprint:
-                        self.sentry_sdk.add_breadcrumb([fingerprint], 'fatal')
-                    else:
-                        # remove file paths
-                        fingerprint = re.sub(r"(/[^/ ]*)+/?", '', message)
-                        # remove words containing numbers
-                        fingerprint = re.sub(r"([a-zA-Z]*[0-9]+[a-zA-Z]*)+", '', fingerprint)
-                        # adding the return code if it exists
-                        for line in message.split('\n'):
-                            if line.startswith("Return code"):
-                                fingerprint += line
-                                break
-
-                    scope.fingerprint = [fingerprint]
-                    self.sentry_sdk.capture_message(message, 'fatal')
-
-            self.errors.append(crash_info)
+            from ..utils.misc import read_crashfile
+            self.errors = [read_crashfile(str(f)) for f in error_dir.glob('crash*.*')]
 
     def generate_report(self):
         logs_path = self.out_dir / 'logs'
@@ -271,69 +327,7 @@ class Report(object):
         return len(self.errors)
 
 
-def order_by_run(subreport):
-    ordered = []
-    run_reps = {}
-
-    for element in subreport.reportlets:
-        if len(element.source_files) == 1 and element.source_files[0]:
-            ordered.append(element)
-            continue
-
-        for filename, file_contents in zip(element.source_files, element.contents):
-            name, title = generate_name_title(filename)
-            if not filename or not name:
-                continue
-
-            new_element = Reportlet(
-                name=element.name, title=element.title, file_pattern=element.file_pattern,
-                description=element.description, raw=element.raw)
-            new_element.contents.append(file_contents)
-            new_element.source_files.append(filename)
-
-            if name not in run_reps:
-                run_reps[name] = SubReport(name, title=title)
-
-            run_reps[name].reportlets.append(new_element)
-
-    if run_reps:
-        keys = list(sorted(run_reps.keys()))
-        for key in keys:
-            ordered.append(run_reps[key])
-        subreport.isnested = True
-
-    subreport.reportlets = ordered
-    return subreport
-
-
-def generate_name_title(filename):
-    fname = Path(filename).name
-    expr = re.compile(BIDS_NAME)
-    outputs = expr.search(fname)
-    if outputs:
-        outputs = outputs.groupdict()
-    else:
-        return None, None
-
-    name = '{session}{task}{acq}{rec}{run}'.format(
-        session="_ses-" + outputs['session_id'] if outputs['session_id'] else '',
-        task="_task-" + outputs['task_id'] if outputs['task_id'] else '',
-        acq="_acq-" + outputs['acq_id'] if outputs['acq_id'] else '',
-        rec="_rec-" + outputs['rec_id'] if outputs['rec_id'] else '',
-        run="_run-" + outputs['run_id'] if outputs['run_id'] else ''
-    )
-    title = '{session}{task}{acq}{rec}{run}'.format(
-        session=" Session: " + outputs['session_id'] if outputs['session_id'] else '',
-        task=" Task: " + outputs['task_id'] if outputs['task_id'] else '',
-        acq=" Acquisition: " + outputs['acq_id'] if outputs['acq_id'] else '',
-        rec=" Reconstruction: " + outputs['rec_id'] if outputs['rec_id'] else '',
-        run=" Run: " + outputs['run_id'] if outputs['run_id'] else ''
-    )
-    return name.strip('_'), title
-
-
-def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config,
-                sentry_sdk=None):
+def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config):
     """
     Runs the reports
 
@@ -362,20 +356,17 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config,
 
     """
     report = Report(Path(reportlets_dir), config, out_dir, run_uuid,
-                    subject_id=subject_label,
-                    sentry_sdk=sentry_sdk)
+                    subject_id=subject_label)
     return report.generate_report()
 
 
-def generate_reports(subject_list, output_dir, work_dir, run_uuid, config,
-                     sentry_sdk=None):
+def generate_reports(subject_list, output_dir, work_dir, run_uuid, config):
     """
     A wrapper to run_reports on a given ``subject_list``
     """
     reports_dir = str(Path(work_dir) / 'reportlets')
     report_errors = [
-        run_reports(reports_dir, output_dir, subject_label, run_uuid, config,
-                    sentry_sdk=sentry_sdk)
+        run_reports(reports_dir, output_dir, subject_label, run_uuid, config)
         for subject_label in subject_list
     ]
 
