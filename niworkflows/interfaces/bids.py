@@ -276,6 +276,17 @@ class DerivativesDataSink(SimpleInterface):
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_desc-denoised_T1w.nii.gz'
 
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
+    ...                             allowed_entities=['from', 'to'], **{'from': 'orig'})
+    >>> dsink.inputs.in_file = str(tmpfile)
+    >>> dsink.inputs.to = 'native'
+    >>> dsink.inputs.source_file = bids_collect_data(
+    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w'][0]
+    >>> dsink.inputs.keep_dtype = True
+    >>> res = dsink.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../sub-01_ses-retest_from-orig_to-native_T1w.nii.gz'
+
     >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
     >>> bids_dir.mkdir(parents=True, exist_ok=True)
     >>> tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-01_bold.nii.gz'
@@ -364,13 +375,20 @@ desc-preproc_bold.json'
     out_path_base = "niworkflows"
     _always_run = True
 
-    def __init__(self, out_path_base=None, **inputs):
+    def __init__(self, allowed_entities=None, out_path_base=None, **inputs):
+        self._allowed_entities = allowed_entities or []
+
         self._metadata = {}
-        self._static_traits = self.input_spec.class_editable_traits()
+        self._static_traits = self.input_spec.class_editable_traits() + self._allowed_entities
         for dynamic_input in set(inputs) - set(self._static_traits):
             self._metadata[dynamic_input] = inputs.pop(dynamic_input)
 
         super(DerivativesDataSink, self).__init__(**inputs)
+        if self._allowed_entities:
+            add_traits(self.inputs, self._allowed_entities)
+            for k in set(self._allowed_entities).intersection(list(inputs.keys())):
+                setattr(self.inputs, k, inputs[k])
+
         self._results['out_file'] = []
         if out_path_base:
             self.out_path_base = out_path_base
@@ -409,9 +427,18 @@ desc-preproc_bold.json'
         out_path.mkdir(exist_ok=True, parents=True)
         base_fname = str(out_path / src_fname)
 
-        formatstr = '{bname}{space}{desc}{extra}{suffix}{dtype}{ext}'
+        allowed_entities = {}
+        for key in self._allowed_entities:
+            value = getattr(self.inputs, key)
+            if value is not None and isdefined(value):
+                allowed_entities[key] = '_%s-%s' % (key, value)
+
+        formatbase = '{bname}{space}{desc}' + ''.join(
+            [allowed_entities.get(s, '') for s in self._allowed_entities])
+
+        formatstr = formatbase + '{extra}{suffix}{dtype}{ext}'
         if len(self.inputs.in_file) > 1 and not isdefined(self.inputs.extra_values):
-            formatstr = '{bname}{space}{desc}{suffix}{i:04d}{dtype}{ext}'
+            formatstr = formatbase + '{suffix}{i:04d}{dtype}{ext}'
 
         space = '_space-{}'.format(self.inputs.space) if self.inputs.space else ''
         desc = '_desc-{}'.format(self.inputs.desc) if self.inputs.desc else ''
@@ -420,6 +447,7 @@ desc-preproc_bold.json'
 
         self._results['compression'] = []
         self._results['fixed_hdr'] = [False] * len(self.inputs.in_file)
+
         for i, fname in enumerate(self.inputs.in_file):
             extra = ''
             if isdefined(self.inputs.extra_values):
