@@ -30,7 +30,8 @@
             "space": ".*",
             "suffix": "T1w"
           },
-          "caption": "Nonlinear mapping of the T1w image into {space} space. Hover on the panel with the mouse to transition between both spaces.",
+          "description": "Results of nonlinear alignment of the T1w image to template space. Hover on the panel with the mouse to transition between both spaces.",
+          "caption": "Spatial normalization of the T1w image to the <code>{space}</code> template.",
           "title": "Spatial normalization"
         },
         {

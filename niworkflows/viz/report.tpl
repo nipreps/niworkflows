@@ -17,6 +17,10 @@ h2 { padding-top: 20px; }
 h3 { padding-top: 15px; }
 
 .elem-desc {}
+.elem-caption {
+    margin-top: 15px
+    margin-bottom: 0;
+}
 .elem-filename {}
 
 div.elem-image {
@@ -82,11 +86,11 @@ div#boilerplate pre {
     <h1 class="sub-report-title">{{ sub_report.name }}</h1>
     {% for run_report in sub_report.reportlets %}
         <div id="{{run_report.name}}">
-            {% if run_report.title %}<h2 class="run-title">Reports for {{ run_report.title }}</h2>{% endif %}
+            {% if run_report.title %}<h2 class="run-title">{{ run_report.title }}</h2>{% endif %}
             {% if run_report.description %}<p class="elem-desc">{{ run_report.description }}</p>{% endif %}
             {% for elem in run_report.components %}
                 {% if elem[0] %}
-                    {% if elem[1] %}<p class="elem-desc">{{ elem[1] }}</p>{% endif %}
+                    {% if elem[1] %}<p class="elem-caption">{{ elem[1] }}</p>{% endif %}
                     {{ elem[0] }}
                 {% endif %}
             {% endfor %}
@@ -99,8 +103,8 @@ div#boilerplate pre {
 <div id="boilerplate">
     <h1 class="sub-report-title">Methods</h1>
     {% if boilerplate %}
-    <p>We kindly ask to report results preprocessed with fMRIPrep using the following
-       boilerplate</p>
+    <p>We kindly ask to report results preprocessed with this tool using the following
+       boilerplate.</p>
     <ul class="nav nav-tabs" id="myTab" role="tablist">
         {% for b in boilerplate %}
         <li class="nav-item">
@@ -116,7 +120,6 @@ div#boilerplate pre {
     {% else %}
     <p class="text-danger">Failed to generate the boilerplate</p>
     {% endif %}
-    <p>Alternatively, an interactive <a href="http://fmriprep.readthedocs.io/en/latest/citing.html">boilerplate generator</a> is available in the <a href="https://fmriprep.org">documentation website</a>.</p>
 </div>
 
 <div id="errors">

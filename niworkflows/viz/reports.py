@@ -19,6 +19,7 @@ from bids.layout import BIDSLayout, add_config_paths
 import jinja2
 from nipype.utils.filemanip import copyfile
 
+
 add_config_paths(figures=pkgrf('niworkflows', 'viz/figures.json'))
 LAYOUT_GET = defaultdict(str('s').format, [('echo', 'es')])
 SVG_SNIPPET = """\
@@ -190,8 +191,7 @@ class Report(object):
 
     .. doctest::
 
-    >>> robj = Report(testdir / 'work' / 'reportlets',
-    ...               'work/config.json', testdir / 'out',
+    >>> robj = Report(testdir / 'work' / 'reportlets', testdir / 'out',
     ...               'madeoutuuid', subject_id='01')
     >>> robj.layout.get(subject='01', desc='reconall')
     [<BIDSFile filename='fmriprep/sub-01/anat/sub-01_desc-reconall_T1w.svg'>]
@@ -203,7 +203,7 @@ class Report(object):
 
     """
 
-    def __init__(self, reportlets_dir, config, out_dir, run_uuid,
+    def __init__(self, reportlets_dir, out_dir, run_uuid, config=None,
                  subject_id=None, out_filename='report.html',
                  packagename=None):
         self.root = reportlets_dir
@@ -226,6 +226,8 @@ class Report(object):
         if self.subject_id is not None:
             self.out_filename = 'sub-{}.html'.format(self.subject_id)
 
+        if config is None:
+            config = pkgrf('niworkflows', 'viz/defaultconfig.json')
         self._load_config(Path(config))
 
     def _load_config(self, config):
@@ -328,7 +330,8 @@ class Report(object):
         return len(self.errors)
 
 
-def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config):
+def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config=None,
+                packagename=None):
     """
     Runs the reports
 
@@ -347,8 +350,7 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config):
     .. doctest::
 
     >>> run_reports(str(testdir / 'work' / 'reportlets'),
-    ...             str(testdir / 'out'), '01', 'madeoutuuid',
-    ...             'work/config.json')
+    ...             str(testdir / 'out'), '01', 'madeoutuuid')
     0
 
     .. testcleanup::
@@ -356,18 +358,20 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config):
     >>> tmpdir.cleanup()
 
     """
-    report = Report(Path(reportlets_dir), config, out_dir, run_uuid,
-                    subject_id=subject_label)
+    report = Report(Path(reportlets_dir), out_dir, run_uuid, config=config,
+                    subject_id=subject_label, packagename=packagename)
     return report.generate_report()
 
 
-def generate_reports(subject_list, output_dir, work_dir, run_uuid, config):
+def generate_reports(subject_list, output_dir, work_dir, run_uuid, config=None,
+                     packagename=None):
     """
     A wrapper to run_reports on a given ``subject_list``
     """
     reports_dir = str(Path(work_dir) / 'reportlets')
     report_errors = [
-        run_reports(reports_dir, output_dir, subject_label, run_uuid, config)
+        run_reports(reports_dir, output_dir, subject_label, run_uuid,
+                    config, packagename=packagename)
         for subject_label in subject_list
     ]
 
