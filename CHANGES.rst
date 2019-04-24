@@ -1,3 +1,20 @@
+0.9.0 (March 24, 2019)
+======================
+
+A number of new features, mostly making BIDS-related interfaces more enjoyable
+and including a large refactor of the reports factory that now internally uses
+pybids to find reportlets.
+
+* ENH: ``DerivativesDataSink`` now accepts metadata dictionaries too (#332) @oesteban
+* ENH: Upstream ``init_gifti_surface_wf`` from sMRIPrep (#328) @oesteban
+* FIX: Do not generate 4D references out of 4D single-band references (SBRefs) (#338) @oesteban
+* FIX: Allow pipelining dynamic outputs of ``ReadSidecarJSON`` (#340) @oesteban
+* ENH: Dictionary manipulation / TSV to dict, merge multiple dicts (#341) @rciric
+* ENH: run a second ``N4BiasFieldCorrection`` node to refine INU correction (#342) @oesteban
+* ENH: Add an ``allowed_entities`` setting in ``DerivativesDataSink`` (#343) @oesteban
+* ENH: Refactor of the Report generation tools (#344) @oesteban
+* PIN: Update dependencies - nilearn!=0.5.0,!=0.5.1 and latest templateflow (0.1.7)
+
 0.8.2 (April 4, 2019)
 =====================
 
