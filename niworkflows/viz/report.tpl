@@ -63,7 +63,9 @@ div#boilerplate pre {
             <a class="nav-link dropdown-toggle" id="navbar{{ sub_report.name }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#">{{ sub_report.name }}</a>
             <div class="dropdown-menu" aria-labelledby="navbar{{ sub_report.name }}">
                 {% for run_report in sub_report.reportlets %}
-                <a class="dropdown-item" href="#{{run_report.name}}">{{run_report.title}}</a>
+                    {% if run_report.title %}
+                    <a class="dropdown-item" href="#{{run_report.name}}">{{run_report.title}}</a>
+                    {% endif %}
                 {% endfor %}
             </div>
         </li>
@@ -86,7 +88,8 @@ div#boilerplate pre {
     <h1 class="sub-report-title">{{ sub_report.name }}</h1>
     {% for run_report in sub_report.reportlets %}
         <div id="{{run_report.name}}">
-            {% if run_report.title %}<h2 class="run-title">{{ run_report.title }}</h2>{% endif %}
+            {% if run_report.title %}<h2 class="sub-report-group">{{ run_report.title }}</h2>{% endif %}
+            {% if run_report.subtitle %}<h3 class="run-title">{{ run_report.subtitle }}</h3>{% endif %}
             {% if run_report.description %}<p class="elem-desc">{{ run_report.description }}</p>{% endif %}
             {% for elem in run_report.components %}
                 {% if elem[0] %}

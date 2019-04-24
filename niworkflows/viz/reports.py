@@ -21,7 +21,7 @@ from nipype.utils.filemanip import copyfile
 
 
 add_config_paths(figures=pkgrf('niworkflows', 'viz/figures.json'))
-LAYOUT_GET = defaultdict(str('s').format, [('echo', 'es')])
+PLURAL_SUFFIX = defaultdict(str('s').format, [('echo', 'es')])
 SVG_SNIPPET = """\
 <object class="svg-reportlet" type="image/svg+xml" data="./{0}">
 Problem loading figure {0}. If the link below works, please try \
@@ -118,11 +118,10 @@ class Reportlet(Element):
         if not config:
             raise RuntimeError('Reportlet must have a config object')
 
-        self.name = config.get('name')
-        if not self.name:
-            self.name = '_'.join('%s-%s' % i for i in config['bids'].items())
-
+        self.name = config.get(
+            'name', '_'.join('%s-%s' % i for i in config['bids'].items()))
         self.title = config.get('title')
+        self.subtitle = config.get('subtitle')
         self.description = config.get('description')
 
         # Query the BIDS layout of reportlets
@@ -162,12 +161,11 @@ class SubReport(Element):
     SubReports are sections within a Report
     """
 
-    def __init__(self, name, reportlets=None, title=''):
+    def __init__(self, name, isnested=False, reportlets=None, title=''):
         self.name = name
         self.title = title
-        self.reportlets = []
-        if reportlets:
-            self.reportlets += reportlets
+        self.reportlets = reportlets or []
+        self.isnested = isnested
 
 
 class Report(object):
@@ -199,7 +197,7 @@ class Report(object):
     >>> robj.generate_report()
     0
     >>> len((testdir / 'out' / 'niworkflows' / 'sub-01.html').read_text())
-    9014
+    16988
 
     """
 
@@ -248,38 +246,54 @@ class Report(object):
         self.index(settings['sections'])
 
     def index(self, config):
+        """
+        Traverse the reports config definition and instantiate reportlets.
+        This method also places figures in their final location.
+        """
         for subrep_cfg in config:
+            # First determine whether we need to split by some ordering
+            # (ie. sessions / tasks / runs), which are separated by commas.
             orderings = [s for s in subrep_cfg.get('ordering', '').strip().split(',') if s]
-
             queries = []
             for key in orderings:
-                values = getattr(self.layout, 'get_%s%s' % (key, LAYOUT_GET[key]))()
+                values = getattr(self.layout, 'get_%s%s' % (key, PLURAL_SUFFIX[key]))()
                 if values:
                     queries.append((key, values))
 
-            if not queries:
+            if not queries:  # E.g. this is an anatomical reportlet
                 reportlets = [Reportlet(self.layout, self.out_dir, config=cfg)
                               for cfg in subrep_cfg['reportlets']]
             else:
+                # Do not use dictionary for queries, as we need to preserve ordering
+                # of ordering columns.
                 reportlets = []
                 entities, values = zip(*queries)
-                combinations = list(product(*values))
+                combinations = list(product(*values))  # e.g.: [('rest', 1), ('rest', 2)]
 
                 for c in combinations:
-                    for cfg in subrep_cfg['reportlets']:
+                    # Set a common title for this particular combination c
+                    title = 'Reports for: %s.' % ', '.join(
+                        ['%s <span class="bids-entity">%s</span>' % (entities[i], c[i])
+                         for i in range(len(c))])
+                    for cfg_i, cfg in enumerate(subrep_cfg['reportlets']):
                         cfg['bids'].update({entities[i]: c[i] for i in range(len(c))})
-                        reportlets.append(
-                            Reportlet(self.layout, self.out_dir, config=cfg)
-                        )
+                        rlet = Reportlet(self.layout, self.out_dir, config=cfg)
+                        if not rlet.is_empty():
+                            rlet.title = title
+                            title = None
+                            reportlets.append(rlet)
 
             # Filter out empty reportlets
             reportlets = [r for r in reportlets if not r.is_empty()]
             if reportlets:
                 sub_report = SubReport(
-                    subrep_cfg['name'], reportlets=reportlets,
+                    subrep_cfg['name'],
+                    isnested=len(queries) > 0,
+                    reportlets=reportlets,
                     title=subrep_cfg.get('title'))
                 self.sections.append(sub_report)
 
+        # Populate errors sections
         error_dir = self.out_dir / self.packagename / 'sub-{}'.format(self.subject_id) / \
             'log' / self.run_uuid
         if error_dir.is_dir():
@@ -287,6 +301,7 @@ class Report(object):
             self.errors = [read_crashfile(str(f)) for f in error_dir.glob('crash*.*')]
 
     def generate_report(self):
+        """Once the Report has been indexed, the final HTML can be generated"""
         logs_path = self.out_dir / 'logs'
 
         boilerplate = []
