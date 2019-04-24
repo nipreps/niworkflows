@@ -54,7 +54,7 @@ CLASSIFIERS = [
 REQUIRES = [
     'jinja2',
     'matplotlib>=2.2.0',
-    'nilearn>=0.2.6',
+    'nilearn>=0.2.6,!=0.5.0,!=0.5.1',
     'nipype>=1.1.6',
     'packaging',
     'pandas',
@@ -63,7 +63,7 @@ REQUIRES = [
     'scipy',
     'seaborn',
     'svgutils',
-    'templateflow>=0.1.0,<0.2.0a0',
+    'templateflow<0.2.0a0,>=0.1.7',
 ]
 
 SETUP_REQUIRES = []

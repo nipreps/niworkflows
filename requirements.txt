@@ -1,2 +1,2 @@
 git+https://github.com/daavoo/pyntcloud.git#egg=pyntcloud-0.0.1
-templateflow>=0.1.0,<0.2.0a0
+templateflow<0.2.0a0,>=0.1.7
