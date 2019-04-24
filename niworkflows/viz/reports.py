@@ -275,7 +275,7 @@ class Report(object):
                     title = 'Reports for: %s.' % ', '.join(
                         ['%s <span class="bids-entity">%s</span>' % (entities[i], c[i])
                          for i in range(len(c))])
-                    for cfg_i, cfg in enumerate(subrep_cfg['reportlets']):
+                    for cfg in subrep_cfg['reportlets']:
                         cfg['bids'].update({entities[i]: c[i] for i in range(len(c))})
                         rlet = Reportlet(self.layout, self.out_dir, config=cfg)
                         if not rlet.is_empty():
