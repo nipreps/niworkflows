@@ -33,6 +33,8 @@ def main():
         'niworkflows': [
             'data/t1-mni_registration*.json',
             'data/bold-mni_registration*.json',
+            'viz/*.json',
+            'viz/report.tpl',
         ]}
 
     root_dir = op.dirname(op.abspath(getfile(currentframe())))
