@@ -204,7 +204,8 @@ class Report(object):
     """
 
     def __init__(self, reportlets_dir, config, out_dir, run_uuid,
-                 subject_id=None, out_filename='report.html'):
+                 subject_id=None, out_filename='report.html',
+                 packagename=None):
         self.root = reportlets_dir
 
         # Initialize a BIDS layout
@@ -217,7 +218,7 @@ class Report(object):
         self.out_filename = out_filename
         self.run_uuid = run_uuid
         self.template_path = None
-        self.packagename = None
+        self.packagename = packagename
         self.subject_id = subject_id
         if subject_id is not None and subject_id.startswith('sub-'):
             self.subject_id = self.subject_id[4:]
@@ -229,7 +230,7 @@ class Report(object):
 
     def _load_config(self, config):
         settings = json.loads(config.read_text())
-        self.packagename = settings.get('package', None)
+        self.packagename = self.packagename or settings.get('package', None)
 
         if self.packagename is not None:
             self.root = self.root / self.packagename
