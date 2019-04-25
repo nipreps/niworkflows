@@ -1,6 +1,10 @@
 # data
 include niworkflows/data/*.json
 include niworkflows/data/tests/work/*
+include niworkflows/reports/figures.json
+include niworkflows/reports/fmriprep.yml
+include niworkflows/reports/report.tpl
+
 
 # misc
 include requirements.txt
