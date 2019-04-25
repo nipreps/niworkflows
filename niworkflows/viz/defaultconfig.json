@@ -129,7 +129,7 @@
             "desc": "flirtnobbr",
             "suffix": "bold"
           },
-          "caption": "FSL <code>flirt</code> was used to generate transformations from EPI space to T1 Space - BBR refinement rejected",
+          "caption": "FSL <code>flirt</code> was used to generate transformations from EPI space to T1 Space - BBR refinement rejected. Note that Nearest Neighbor interpolation is used in the reportlets in order to highlight potential spin-history and other artifacts, whereas final images are resampled using Lanczos interpolation.",
           "subtitle": "EPI to T1 registration"
         },
         {
@@ -138,7 +138,7 @@
             "desc": "coreg",
             "suffix": "bold"
           },
-          "caption": "<code>mri_coreg</code> (FreeSurfer) was used to generate transformations from EPI space to T1 Space - <code>bbregister</code> refinement rejected",
+          "caption": "<code>mri_coreg</code> (FreeSurfer) was used to generate transformations from EPI space to T1 Space - <code>bbregister</code> refinement rejected. Note that Nearest Neighbor interpolation is used in the reportlets in order to highlight potential spin-history and other artifacts, whereas final images are resampled using Lanczos interpolation.",
           "subtitle": "EPI to T1 registration"
         },
         {
@@ -147,7 +147,7 @@
             "desc": "flirtbbr",
             "suffix": "bold"
           },
-          "caption": "FSL <code>flirt</code> was used to generate transformations from EPI-space to T1w-space - The white matter mask calculated with FSL <code>fast</code> (brain tissue segmentation) was used for BBR",
+          "caption": "FSL <code>flirt</code> was used to generate transformations from EPI-space to T1w-space - The white matter mask calculated with FSL <code>fast</code> (brain tissue segmentation) was used for BBR. Note that Nearest Neighbor interpolation is used in the reportlets in order to highlight potential spin-history and other artifacts, whereas final images are resampled using Lanczos interpolation.",
           "subtitle": "EPI to T1 registration"
         },
         {
@@ -156,7 +156,7 @@
             "desc": "bbregister",
             "suffix": "bold"
           },
-          "caption": "<code>bbregister</code> was used to generate transformations from EPI-space to T1w-space",
+          "caption": "<code>bbregister</code> was used to generate transformations from EPI-space to T1w-space. Note that Nearest Neighbor interpolation is used in the reportlets in order to highlight potential spin-history and other artifacts, whereas final images are resampled using Lanczos interpolation.",
           "subtitle": "EPI to T1 registration"
         },
         {
