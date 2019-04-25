@@ -126,6 +126,14 @@
         {
           "bids": {
             "datatype": "func",
+            "desc": "[at]compcor",
+            "suffix": "bold",
+            "extensions": [".html"]
+          }
+        },
+        {
+          "bids": {
+            "datatype": "func",
             "desc": "flirtnobbr",
             "suffix": "bold"
           },
