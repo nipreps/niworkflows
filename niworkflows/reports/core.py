@@ -9,7 +9,6 @@ Reports builder for BIDS-Apps
 
 """
 from pathlib import Path
-import json
 import re
 from itertools import product
 from collections import defaultdict
@@ -196,7 +195,7 @@ class Report(object):
     >>> robj.generate_report()
     0
     >>> len((testdir / 'out' / 'niworkflows' / 'sub-01.html').read_text())
-    17582
+    20862
 
     """
 
@@ -229,11 +228,12 @@ class Report(object):
             self.out_filename = 'sub-{}.html'.format(self.subject_id)
 
         if config is None:
-            config = pkgrf('niworkflows', 'reports/defaultconfig.json')
+            config = pkgrf('niworkflows', 'reports/fmriprep.yml')
         self._load_config(Path(config))
 
     def _load_config(self, config):
-        settings = json.loads(config.read_text())
+        from yaml import load
+        settings = load(config.read_text())
         self.packagename = self.packagename or settings.get('package', None)
 
         if self.packagename is not None:

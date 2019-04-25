@@ -59,6 +59,7 @@ REQUIRES = [
     'packaging',
     'pandas',
     'pybids>=0.7,<0.8',
+    'PyYAML',
     'scikit-image',
     'scipy',
     'seaborn',

@@ -33,8 +33,8 @@ def main():
         'niworkflows': [
             'data/t1-mni_registration*.json',
             'data/bold-mni_registration*.json',
-            'reports/defaultconfig.json',
             'reports/figures.json',
+            'reports/fmriprep.yml',
             'reports/report.tpl',
         ]}
 
