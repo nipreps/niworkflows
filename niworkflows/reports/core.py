@@ -20,7 +20,6 @@ import jinja2
 from nipype.utils.filemanip import copyfile
 
 
-add_config_paths(figures=pkgrf('niworkflows', 'viz/figures.json'))
 PLURAL_SUFFIX = defaultdict(str('s').format, [('echo', 'es')])
 SVG_SNIPPET = """\
 <object class="svg-reportlet" type="image/svg+xml" data="./{0}">
@@ -197,7 +196,7 @@ class Report(object):
     >>> robj.generate_report()
     0
     >>> len((testdir / 'out' / 'niworkflows' / 'sub-01.html').read_text())
-    16988
+    17582
 
     """
 
@@ -207,6 +206,11 @@ class Report(object):
         self.root = reportlets_dir
 
         # Initialize a BIDS layout
+        try:
+            add_config_paths(figures=pkgrf('niworkflows', 'reports/figures.json'))
+        except ValueError as e:
+            if "Configuration 'figures' already exists" != str(e):
+                raise
         self.layout = BIDSLayout(self.root, config='figures', validate=False)
 
         # Initialize structuring elements
@@ -225,7 +229,7 @@ class Report(object):
             self.out_filename = 'sub-{}.html'.format(self.subject_id)
 
         if config is None:
-            config = pkgrf('niworkflows', 'viz/defaultconfig.json')
+            config = pkgrf('niworkflows', 'reports/defaultconfig.json')
         self._load_config(Path(config))
 
     def _load_config(self, config):
