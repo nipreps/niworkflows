@@ -120,3 +120,9 @@ class KeySelect(BaseInterface):
 
         outputs['key'] = self.inputs.key
         return outputs
+
+    def _outputs(self):
+        base = super(KeySelect, self)._outputs()
+        if self._fields:
+            base = add_traits(base, self._fields)
+        return base
