@@ -102,7 +102,7 @@ class KeySelect(BaseInterface):
             setattr(self.inputs, in_field, inputs[in_field])
 
     def _check_len(self, name, new):
-        if name != "key" and (isinstance(new, str) or len(new) != self._nitems):
+        if name in self._fields and (isinstance(new, str) or len(new) != self._nitems):
             raise ValueError('Trying to set an invalid value (%s) for input "%s"' % (
                 new, name))
 
