@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from nipype.interfaces.io import add_traits
 from nipype.interfaces.base import (
-    traits, Str, DynamicTraitedSpec, BaseInterface
+    traits, Str, DynamicTraitedSpec, BaseInterface, isdefined
 )
 
 
@@ -83,16 +83,6 @@ class KeySelect(BaseInterface):
         # Call constructor
         super(KeySelect, self).__init__(**inputs)
 
-        # Handle keys
-        self._nitems = None
-        self._keys = keys
-        if keys:
-            self._set_keys(keys)
-            self.inputs.keys = keys
-
-        # Attach events
-        self.inputs.on_trait_change(self._check_len)
-
         # Handle and initiate fields
         if not fields:
             raise ValueError('A list or multiplexed fields must be provided at '
@@ -105,40 +95,44 @@ class KeySelect(BaseInterface):
             raise ValueError('Some fields are invalid (%s).' % ', '.join(_invalid))
 
         self._fields = fields
+
+        # Attach events
+        self.inputs.on_trait_change(self._check_len)
+        if keys:
+            self.inputs.keys = keys
+
+        # Add fields in self._fields
         add_traits(self.inputs, self._fields)
 
         for in_field in set(self._fields).intersection(inputs.keys()):
             setattr(self.inputs, in_field, inputs[in_field])
 
-    def _set_keys(self, keys):
-        nitems = len(keys)
-        if isinstance(keys, str) or nitems == 1:
-            raise ValueError('The index of ordered keys is required to be an iterable '
-                             'over two or more string objects.')
-
-        if len(set(keys)) != nitems:
-            raise ValueError('Found duplicated entries in the index of ordered keys')
-
-        self._nitems = nitems
-        self._keys = keys
-
     def _check_len(self, name, new):
         if name == "keys":
-            self._set_keys(new)
+            nitems = len(new)
+            if len(set(new)) != nitems:
+                raise ValueError('Found duplicated entries in the index of ordered keys')
 
-        if name == "key" and self._keys and new not in self._keys:
+        if not isdefined(self.inputs.keys):
+            return
+
+        if name == "key" and new not in self.inputs.keys:
             raise ValueError('Selected key "%s" not found in the index' % new)
 
-        if self._nitems and name in self._fields and \
-           (isinstance(new, str) or len(new) != self._nitems):
-            raise ValueError('Trying to set an invalid value (%s) for input "%s"' % (
-                new, name))
+        if name in self._fields:
+            if isinstance(new, str) or len(new) <= 1:
+                raise ValueError('Trying to set an invalid value (%s) for input "%s"' % (
+                                 new, name))
+
+            if len(new) != len(self.inputs.keys):
+                raise ValueError('Length of value (%s) for input field "%s" does not match '
+                                 'the length of the indexing list.' % (new, name))
 
     def _run_interface(self, runtime):
         return runtime
 
     def _list_outputs(self):
-        index = self._keys.index(self.inputs.key)
+        index = self.inputs.keys.index(self.inputs.key)
 
         outputs = {k: getattr(self.inputs, k)[index]
                    for k in self._fields}
