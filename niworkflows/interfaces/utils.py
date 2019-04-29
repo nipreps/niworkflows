@@ -22,7 +22,7 @@ from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
 from nipype.utils.misc import normalize_mc_params
 from nipype.interfaces.base import (
-    traits, isdefined, File, InputMultiPath,
+    traits, Str, isdefined, File, InputMultiPath,
     TraitedSpec, BaseInterfaceInputSpec, SimpleInterface
 )
 from .. import __version__
@@ -126,6 +126,8 @@ class GenerateSamplingReferenceInputSpec(BaseInterfaceInputSpec):
                              desc='force xform code')
     fov_mask = traits.Either(None, File(exists=True), usedefault=True,
                              desc='mask to clip field of view (in fixed_image space)')
+    resolution = traits.Either('native', Str, traits.Int, None, usedefault=True,
+                               desc='setting "native" will replicate oritinal image')
 
 
 class GenerateSamplingReferenceOutputSpec(TraitedSpec):
@@ -151,6 +153,9 @@ class GenerateSamplingReference(SimpleInterface):
     output_spec = GenerateSamplingReferenceOutputSpec
 
     def _run_interface(self, runtime):
+        if self.inputs.resolution == 'native':
+            self._results['out_file'] = self.inputs.moving_image
+            return runtime
         self._results['out_file'] = _gen_reference(
             self.inputs.fixed_image,
             self.inputs.moving_image,
