@@ -8,12 +8,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from nipype.interfaces.io import add_traits
 from nipype.interfaces.base import (
-    Str, DynamicTraitedSpec, BaseInterface
+    traits, Str, DynamicTraitedSpec, BaseInterface
 )
 
 
 class KeySelectInputSpec(DynamicTraitedSpec):
     key = Str(mandatory=True, desc='selective key')
+    keys = traits.List(Str, mandatory=True, min=2, desc='index of keys')
 
 
 class KeySelectOutputSpec(DynamicTraitedSpec):
@@ -26,6 +27,20 @@ class KeySelect(BaseInterface):
 
     >>> ks = KeySelect(keys=['MNI152NLin6Asym', 'MNI152Lin', 'fsaverage'],
     ...                fields=['field1', 'field2', 'field3'])
+    >>> ks.inputs.field1 = ['fsl', 'mni', 'freesurfer']
+    >>> ks.inputs.field2 = ['volume', 'volume', 'surface']
+    >>> ks.inputs.field3 = [True, False, False]
+    >>> ks.inputs.key = 'MNI152Lin'
+    >>> ks.run().outputs
+    <BLANKLINE>
+    field1 = mni
+    field2 = volume
+    field3 = False
+    key = MNI152Lin
+    <BLANKLINE>
+
+    >>> ks = KeySelect(fields=['field1', 'field2', 'field3'])
+    >>> ks.inputs.keys=['MNI152NLin6Asym', 'MNI152Lin', 'fsaverage']
     >>> ks.inputs.field1 = ['fsl', 'mni', 'freesurfer']
     >>> ks.inputs.field2 = ['volume', 'volume', 'surface']
     >>> ks.inputs.field3 = [True, False, False]
@@ -65,21 +80,20 @@ class KeySelect(BaseInterface):
     output_spec = KeySelectOutputSpec
 
     def __init__(self, keys=None, fields=None, **inputs):
-        if not keys:
-            raise ValueError('The index of ordered keys is required to instantiate '
-                             'this interface.')
+        # Call constructor
+        super(KeySelect, self).__init__(**inputs)
 
-        nitems = len(keys)
-        if isinstance(keys, str) or nitems == 1:
-            raise ValueError('The index of ordered keys is required to be an iterable '
-                             'over two or more string objects.')
-
-        if len(set(keys)) != nitems:
-            raise ValueError('Found duplicated entries in the index of ordered keys')
-
+        # Handle keys
+        self._nitems = None
         self._keys = keys
-        self._nitems = nitems
+        if keys:
+            self._set_keys(keys)
+            self.inputs.keys = keys
 
+        # Attach events
+        self.inputs.on_trait_change(self._check_len)
+
+        # Handle and initiate fields
         if not fields:
             raise ValueError('A list or multiplexed fields must be provided at '
                              'instantiation time.')
@@ -91,23 +105,33 @@ class KeySelect(BaseInterface):
             raise ValueError('Some fields are invalid (%s).' % ', '.join(_invalid))
 
         self._fields = fields
-
-        # Call constructor
-        super(KeySelect, self).__init__(**inputs)
         add_traits(self.inputs, self._fields)
-
-        self.inputs.on_trait_change(self._check_len)
 
         for in_field in set(self._fields).intersection(inputs.keys()):
             setattr(self.inputs, in_field, inputs[in_field])
 
+    def _set_keys(self, keys):
+        nitems = len(keys)
+        if isinstance(keys, str) or nitems == 1:
+            raise ValueError('The index of ordered keys is required to be an iterable '
+                             'over two or more string objects.')
+
+        if len(set(keys)) != nitems:
+            raise ValueError('Found duplicated entries in the index of ordered keys')
+
+        self._nitems = nitems
+        self._keys = keys
+
     def _check_len(self, name, new):
+        if name == "keys":
+            self._set_keys(new)
+
+        if name == "key" and self._keys and new not in self._keys:
+            raise ValueError('Selected key "%s" not found in the index' % new)
+
         if name in self._fields and (isinstance(new, str) or len(new) != self._nitems):
             raise ValueError('Trying to set an invalid value (%s) for input "%s"' % (
                 new, name))
-
-        if name == "key" and new not in self._keys:
-            raise ValueError('Selected key "%s" not found in the index' % new)
 
     def _run_interface(self, runtime):
         return runtime
