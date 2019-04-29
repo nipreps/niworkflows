@@ -8,13 +8,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from nipype.interfaces.io import add_traits
 from nipype.interfaces.base import (
-    traits, Str, DynamicTraitedSpec, BaseInterface, isdefined
+    InputMultiObject, Str, DynamicTraitedSpec, BaseInterface, isdefined
 )
 
 
 class KeySelectInputSpec(DynamicTraitedSpec):
     key = Str(mandatory=True, desc='selective key')
-    keys = traits.List(Str, mandatory=True, min=2, desc='index of keys')
+    keys = InputMultiObject(Str, mandatory=True, min=1, desc='index of keys')
 
 
 class KeySelectOutputSpec(DynamicTraitedSpec):
@@ -75,6 +75,20 @@ class KeySelect(BaseInterface):
     Traceback (most recent call last):
     ValueError: Selected key "MNINLin2009cAsym" not found in the index
 
+    >>> ks = KeySelect(fields=['field1', 'field2', 'field3'])
+    >>> ks.inputs.keys=['MNI152NLin6Asym']
+    >>> ks.inputs.field1 = ['fsl']
+    >>> ks.inputs.field2 = ['volume']
+    >>> ks.inputs.field3 = [True]
+    >>> ks.inputs.key = 'MNI152NLin6Asym'
+    >>> ks.run().outputs
+    <BLANKLINE>
+    field1 = fsl
+    field2 = volume
+    field3 = True
+    key = MNI152NLin6Asym
+    <BLANKLINE>
+
     """
     input_spec = KeySelectInputSpec
     output_spec = KeySelectOutputSpec
@@ -120,7 +134,7 @@ class KeySelect(BaseInterface):
             raise ValueError('Selected key "%s" not found in the index' % new)
 
         if name in self._fields:
-            if isinstance(new, str) or len(new) <= 1:
+            if isinstance(new, str) or len(new) < 1:
                 raise ValueError('Trying to set an invalid value (%s) for input "%s"' % (
                                  new, name))
 
