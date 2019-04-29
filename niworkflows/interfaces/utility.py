@@ -129,7 +129,8 @@ class KeySelect(BaseInterface):
         if name == "key" and self._keys and new not in self._keys:
             raise ValueError('Selected key "%s" not found in the index' % new)
 
-        if name in self._fields and (isinstance(new, str) or len(new) != self._nitems):
+        if self._nitems and name in self._fields and \
+           (isinstance(new, str) or len(new) != self._nitems):
             raise ValueError('Trying to set an invalid value (%s) for input "%s"' % (
                 new, name))
 
