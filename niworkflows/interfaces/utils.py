@@ -126,8 +126,9 @@ class GenerateSamplingReferenceInputSpec(BaseInterfaceInputSpec):
                              desc='force xform code')
     fov_mask = traits.Either(None, File(exists=True), usedefault=True,
                              desc='mask to clip field of view (in fixed_image space)')
-    resolution = traits.Either('native', Str, traits.Int, None, usedefault=True,
-                               desc='setting "native" will replicate oritinal image')
+    keep_native = traits.Bool(False, usedefault=True,
+                              desc='whether the original, native resolution should be '
+                                   'used.')
 
 
 class GenerateSamplingReferenceOutputSpec(TraitedSpec):
@@ -153,7 +154,7 @@ class GenerateSamplingReference(SimpleInterface):
     output_spec = GenerateSamplingReferenceOutputSpec
 
     def _run_interface(self, runtime):
-        if self.inputs.resolution == 'native':
+        if self.inputs.keep_native:
             self._results['out_file'] = self.inputs.moving_image
             return runtime
         self._results['out_file'] = _gen_reference(
