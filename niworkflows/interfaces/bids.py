@@ -467,7 +467,8 @@ desc-preproc_bold.json'
 
             is_nii = out_file.endswith('.nii') or out_file.endswith('.nii.gz')
             if self.inputs.check_hdr and is_nii:
-                nii = nb.load(out_file)
+                # Use mmap = False because we may overwrite the file
+                nii = nb.load(out_file, mmap=False)
                 if not isinstance(nii, (nb.Nifti1Image, nb.Nifti2Image)):
                     # .dtseries.nii are CIfTI2, therefore skip check
                     return runtime
