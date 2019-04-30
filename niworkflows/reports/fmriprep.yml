@@ -64,6 +64,21 @@ sections:
       desc: '[at]compcor'
       extensions: [.html]
       suffix: bold
+  - bids: {datatype: func, desc: '[at]compcorvar', suffix: bold}
+    caption: The cumulative variance explained by the first k components of the
+      <em>t/aCompCor</em> decomposition, plotted for all values of <em>k</em>.
+      The number of components that must be included in the model in order to
+      explain some fraction of variance in the decomposition mask can be used
+      as a feature selection criterion for confound regression.
+  - bids: {datatype: func, desc: 'confoundcorr', suffix: bold}
+    caption: |
+      Left: Heatmap summarizing the correlation structure among confound variables.
+      (Cosine bases and PCA-derived CompCor components are inherently orthogonal.)
+      Right: magnitude of the correlation between each confound time series and the
+      mean global signal. Strong correlations might be indicative of partial volume
+      effects and can inform decisions about feature orthogonalization prior to 
+      confound regression.
+    subtitle: Correlations among nuisance regressors
   - bids: {datatype: func, desc: flirtnobbr, suffix: bold}
     caption: FSL <code>flirt</code> was used to generate transformations from EPI
       space to T1 Space - BBR refinement rejected. Note that Nearest Neighbor interpolation
