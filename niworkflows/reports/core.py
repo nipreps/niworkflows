@@ -188,13 +188,13 @@ class Report(object):
     .. doctest::
 
     >>> robj = Report(testdir / 'work' / 'reportlets', testdir / 'out',
-    ...               'madeoutuuid', subject_id='01')
+    ...               'madeoutuuid', subject_id='01', packagename='fmriprep')
     >>> robj.layout.get(subject='01', desc='reconall')
-    [<BIDSFile filename='fmriprep/sub-01/anat/sub-01_desc-reconall_T1w.svg'>]
+    [<BIDSFile filename='anat/sub-01_desc-reconall_T1w.svg'>]
 
     >>> robj.generate_report()
     0
-    >>> len((testdir / 'out' / 'niworkflows' / 'sub-01.html').read_text())
+    >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
     20862
 
     """
@@ -369,8 +369,8 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config=None,
 
     .. doctest::
 
-    >>> run_reports(str(testdir / 'work' / 'reportlets'),
-    ...             str(testdir / 'out'), '01', 'madeoutuuid')
+    >>> run_reports(testdir / 'work' / 'reportlets', testdir / 'out',
+    ...             '01', 'madeoutuuid', packagename='fmriprep')
     0
 
     .. testcleanup::
