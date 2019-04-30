@@ -232,7 +232,7 @@ class Report(object):
         self._load_config(Path(config))
 
     def _load_config(self, config):
-        from yaml import load
+        from yaml import safe_load as load
         settings = load(config.read_text())
         self.packagename = self.packagename or settings.get('package', None)
 
