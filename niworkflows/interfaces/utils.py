@@ -22,7 +22,7 @@ from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
 from nipype.utils.misc import normalize_mc_params
 from nipype.interfaces.base import (
-    traits, Str, isdefined, File, InputMultiPath,
+    traits, isdefined, File, InputMultiPath,
     TraitedSpec, BaseInterfaceInputSpec, SimpleInterface
 )
 from .. import __version__
