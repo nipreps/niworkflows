@@ -17,37 +17,35 @@ XFORM_CODES = {
 BOLD_PATH = 'ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.gz'
 
 
-@pytest.mark.parametrize('space, size, units, xcodes, zipped, fixed', [
-    ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (2, 2), True, [False]),
-    ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (0, 2), True, [True]),
-    ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (0, 0), True, [True]),
-    ('T1w', (30, 30, 30, 10), ('mm', None), (2, 2), True, [True]),
-    ('T1w', (30, 30, 30, 10), (None, None), (0, 2), True, [True]),
-    ('T1w', (30, 30, 30, 10), (None, 'sec'), (0, 0), True, [True]),
-    ('MNI152Lin', (30, 30, 30, 10), ('mm', 'sec'), (4, 4), True, [False]),
-    ('MNI152Lin', (30, 30, 30, 10), ('mm', 'sec'), (0, 2), True, [True]),
-    ('MNI152Lin', (30, 30, 30, 10), ('mm', 'sec'), (0, 0), True, [True]),
-    ('MNI152Lin', (30, 30, 30, 10), ('mm', None), (4, 4), True, [True]),
-    ('MNI152Lin', (30, 30, 30, 10), (None, None), (0, 2), True, [True]),
-    ('MNI152Lin', (30, 30, 30, 10), (None, 'sec'), (0, 0), True, [True]),
-    (None, (30, 30, 30, 10), ('mm', 'sec'), (1, 1), True, [False]),
-    (None, (30, 30, 30, 10), ('mm', 'sec'), (0, 0), True, [True]),
-    (None, (30, 30, 30, 10), ('mm', 'sec'), (0, 2), True, [True]),
-    (None, (30, 30, 30, 10), ('mm', None), (1, 1), True, [True]),
-    (None, (30, 30, 30, 10), (None, None), (0, 2), True, [True]),
-    (None, (30, 30, 30, 10), (None, 'sec'), (0, 0), True, [True]),
-    (None, (30, 30, 30, 10), (None, 'sec'), (0, 0), False, [True]),
+@pytest.mark.parametrize('space, size, units, xcodes, fixed', [
+    ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (2, 2), [False]),
+    ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (0, 2), [True]),
+    ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (0, 0), [True]),
+    ('T1w', (30, 30, 30, 10), ('mm', None), (2, 2), [True]),
+    ('T1w', (30, 30, 30, 10), (None, None), (0, 2), [True]),
+    ('T1w', (30, 30, 30, 10), (None, 'sec'), (0, 0), [True]),
+    ('MNI152Lin', (30, 30, 30, 10), ('mm', 'sec'), (4, 4), [False]),
+    ('MNI152Lin', (30, 30, 30, 10), ('mm', 'sec'), (0, 2), [True]),
+    ('MNI152Lin', (30, 30, 30, 10), ('mm', 'sec'), (0, 0), [True]),
+    ('MNI152Lin', (30, 30, 30, 10), ('mm', None), (4, 4), [True]),
+    ('MNI152Lin', (30, 30, 30, 10), (None, None), (0, 2), [True]),
+    ('MNI152Lin', (30, 30, 30, 10), (None, 'sec'), (0, 0), [True]),
+    (None, (30, 30, 30, 10), ('mm', 'sec'), (1, 1), [False]),
+    (None, (30, 30, 30, 10), ('mm', 'sec'), (0, 0), [True]),
+    (None, (30, 30, 30, 10), ('mm', 'sec'), (0, 2), [True]),
+    (None, (30, 30, 30, 10), ('mm', None), (1, 1), [True]),
+    (None, (30, 30, 30, 10), (None, None), (0, 2), [True]),
+    (None, (30, 30, 30, 10), (None, 'sec'), (0, 0), [True]),
 ])
-def test_DerivativesDataSink_bold(tmpdir, space, size, units, xcodes, zipped, fixed):
+def test_DerivativesDataSink_bold(tmpdir, space, size, units, xcodes, fixed):
     tmpdir.chdir()
-
-    fname = 'source.nii.gz' if zipped else 'source.nii'
 
     hdr = nb.Nifti1Header()
     hdr.set_qform(np.eye(4), code=xcodes[0])
     hdr.set_sform(np.eye(4), code=xcodes[1])
     hdr.set_xyzt_units(*units)
-    nb.Nifti1Image(np.zeros(size), np.eye(4), hdr).to_filename(fname)
+    nb.Nifti1Image(np.zeros(size), np.eye(4), hdr).to_filename(
+        'source.nii.gz')
 
     # BOLD derivative in T1w space
     dds = bintfs.DerivativesDataSink(
@@ -56,7 +54,7 @@ def test_DerivativesDataSink_bold(tmpdir, space, size, units, xcodes, zipped, fi
         desc='preproc',
         source_file=BOLD_PATH,
         space=space or Undefined,
-        in_file=fname,
+        in_file='source.nii.gz'
     ).run()
 
     nii = nb.load(dds.outputs.out_file)
