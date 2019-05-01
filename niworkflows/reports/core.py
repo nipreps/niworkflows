@@ -188,13 +188,13 @@ class Report(object):
     .. doctest::
 
     >>> robj = Report(testdir / 'work' / 'reportlets', testdir / 'out',
-    ...               'madeoutuuid', subject_id='01')
+    ...               'madeoutuuid', subject_id='01', packagename='fmriprep')
     >>> robj.layout.get(subject='01', desc='reconall')
-    [<BIDSFile filename='fmriprep/sub-01/anat/sub-01_desc-reconall_T1w.svg'>]
+    [<BIDSFile filename='anat/sub-01_desc-reconall_T1w.svg'>]
 
     >>> robj.generate_report()
     0
-    >>> len((testdir / 'out' / 'niworkflows' / 'sub-01.html').read_text())
+    >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
     20862
 
     """
@@ -204,13 +204,12 @@ class Report(object):
                  packagename=None):
         self.root = reportlets_dir
 
-        # Initialize a BIDS layout
+        # Add a new figures spec
         try:
             add_config_paths(figures=pkgrf('niworkflows', 'reports/figures.json'))
         except ValueError as e:
             if "Configuration 'figures' already exists" != str(e):
                 raise
-        self.layout = BIDSLayout(self.root, config='figures', validate=False)
 
         # Initialize structuring elements
         self.sections = []
@@ -232,7 +231,7 @@ class Report(object):
         self._load_config(Path(config))
 
     def _load_config(self, config):
-        from yaml import load
+        from yaml import safe_load as load
         settings = load(config.read_text())
         self.packagename = self.packagename or settings.get('package', None)
 
@@ -252,8 +251,11 @@ class Report(object):
     def index(self, config):
         """
         Traverse the reports config definition and instantiate reportlets.
+
         This method also places figures in their final location.
         """
+        # Initialize a BIDS layout
+        self.layout = BIDSLayout(self.root, config='figures', validate=False)
         for subrep_cfg in config:
             # First determine whether we need to split by some ordering
             # (ie. sessions / tasks / runs), which are separated by commas.
@@ -297,9 +299,8 @@ class Report(object):
                     title=subrep_cfg.get('title'))
                 self.sections.append(sub_report)
 
-        # Populate errors sections
-        error_dir = self.out_dir / self.packagename / 'sub-{}'.format(self.subject_id) / \
-            'log' / self.run_uuid
+        # Populate errors section
+        error_dir = self.out_dir / 'sub-{}'.format(self.subject_id) / 'log' / self.run_uuid
         if error_dir.is_dir():
             from ..utils.misc import read_crashfile
             self.errors = [read_crashfile(str(f)) for f in error_dir.glob('crash*.*')]
@@ -368,8 +369,8 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config=None,
 
     .. doctest::
 
-    >>> run_reports(str(testdir / 'work' / 'reportlets'),
-    ...             str(testdir / 'out'), '01', 'madeoutuuid')
+    >>> run_reports(testdir / 'work' / 'reportlets', testdir / 'out',
+    ...             '01', 'madeoutuuid', packagename='fmriprep')
     0
 
     .. testcleanup::
@@ -377,7 +378,7 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config=None,
     >>> tmpdir.cleanup()
 
     """
-    report = Report(Path(reportlets_dir), out_dir, run_uuid, config=config,
+    report = Report(reportlets_dir, out_dir, run_uuid, config=config,
                     subject_id=subject_label, packagename=packagename)
     return report.generate_report()
 
@@ -387,9 +388,9 @@ def generate_reports(subject_list, output_dir, work_dir, run_uuid, config=None,
     """
     A wrapper to run_reports on a given ``subject_list``
     """
-    reports_dir = str(Path(work_dir) / 'reportlets')
+    reportlets_dir = Path(work_dir) / 'reportlets'
     report_errors = [
-        run_reports(reports_dir, output_dir, subject_label, run_uuid,
+        run_reports(reportlets_dir, output_dir, subject_label, run_uuid,
                     config, packagename=packagename)
         for subject_label in subject_list
     ]
