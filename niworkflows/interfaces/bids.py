@@ -12,6 +12,7 @@ from json import dumps
 from pathlib import Path
 from shutil import copytree, rmtree
 
+import numpy as np
 import nibabel as nb
 
 from nipype import logging
@@ -490,7 +491,7 @@ desc-preproc_bold.json'
                     hdr.set_xyzt_units(*units)
 
                     # Rewrite file with new header
-                    nii.__class__(nii.get_data(), nii.affine, hdr).to_filename(
+                    nii.__class__(np.array(nii.dataobj), nii.affine, hdr).to_filename(
                         out_file)
 
         if len(self._results['out_file']) == 1:
