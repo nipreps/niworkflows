@@ -1,11 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-Reports builder for BIDS-Apps
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Reports builder for BIDS-Apps.
 
+Generalizes report generation across BIDS-Apps
 
 """
 from pathlib import Path
@@ -20,7 +18,7 @@ from nipype.utils.filemanip import copyfile
 
 
 PLURAL_SUFFIX = defaultdict(str('s').format, [('echo', 'es')])
-SVG_SNIPPET = """\
+SVG_SNIPPET = ["""\
 <object class="svg-reportlet" type="image/svg+xml" data="./{0}">
 Problem loading figure {0}. If the link below works, please try \
 reloading the report in your browser.</object>
@@ -28,13 +26,17 @@ reloading the report in your browser.</object>
 <div class="elem-filename">
     Get figure file: <a href="./{0}" target="_blank">{0}</a>
 </div>
-"""
+""", """\
+<img class="svg-reportlet" src="./{0}" style="width: 100%" />
+</div>
+<div class="elem-filename">
+    Get figure file: <a href="./{0}" target="_blank">{0}</a>
+</div>
+"""]
 
 
 class Element(object):
-    """
-    Just a basic component of a report
-    """
+    """Just a basic component of a report"""
 
     def __init__(self, name, title=None):
         self.name = name
@@ -145,7 +147,23 @@ class Reportlet(Element):
                 out_file = out_dir / linked_svg
                 out_file.parent.mkdir(parents=True, exist_ok=True)
                 copyfile(src, out_file, copy=True, use_hardlink=True)
-                contents = SVG_SNIPPET.format(linked_svg)
+                is_static = config.get('static', True)
+                contents = SVG_SNIPPET[is_static].format(linked_svg)
+
+                # Our current implementations of dynamic reportlets do this themselves,
+                # however I'll leave the code here since this is potentially something we
+                # will want to transfer from every figure generator to this location.
+                # The following code misses setting preserveAspecRatio="xMidYMid meet"
+                # if not is_static:
+                #     # Remove height and width attributes from initial <svg> tag
+                #     svglines = out_file.read_text().splitlines()
+                #     expr = re.compile(r' (height|width)=["\'][0-9]+(\.[0-9]*)?[a-z]*["\']')
+                #     for l, line in enumerate(svglines[:6]):
+                #         if line.strip().startswith('<svg'):
+                #             newline = expr.sub('', line)
+                #             svglines[l] = newline
+                #             out_file.write_text('\n'.join(svglines))
+                #             break
 
             if contents:
                 self.components.append((contents, desc_text))
@@ -155,9 +173,7 @@ class Reportlet(Element):
 
 
 class SubReport(Element):
-    """
-    SubReports are sections within a Report
-    """
+    """SubReports are sections within a Report."""
 
     def __init__(self, name, isnested=False, reportlets=None, title=''):
         self.name = name

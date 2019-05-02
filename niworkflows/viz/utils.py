@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import os.path as op
-from pathlib import Path
 import subprocess
 import base64
 import re
@@ -560,8 +559,6 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     import seaborn as sns
     from matplotlib.gridspec import GridSpec
     import os
-    import re
-    from io import StringIO
     sns.set_style("white")
     current_palette = sns.color_palette()
     in_nii = nb.load(in_file)
@@ -702,19 +699,6 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
         sns.despine(left=True, bottom=True)
 
     plt.subplots_adjust(hspace=0.5)
-
-    image_buf = StringIO()
-    fig.savefig(image_buf, dpi=300, format='svg', transparent=True,
+    fig.savefig(out_file, dpi=300, format='svg', transparent=True,
                 bbox_inches='tight', pad_inches=0.01)
     fig.clf()
-    image_svg = image_buf.getvalue()
-
-    if compress is True or compress == 'auto':
-        image_svg = svg_compress(image_svg, compress)
-    image_svg = re.sub(' height="[0-9]+[a-z]*"', '', image_svg, count=1)
-    image_svg = re.sub(' width="[0-9]+[a-z]*"', '', image_svg, count=1)
-    image_svg = re.sub(' viewBox',
-                       ' preseveAspectRation="xMidYMid meet" viewBox',
-                       image_svg, count=1)
-
-    Path(out_file).write_text(image_svg)
