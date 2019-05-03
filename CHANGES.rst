@@ -1,3 +1,10 @@
+0.9.1 (May 3, 2019)
+===================
+
+A hotfix release to allow new documentation building of fMRIPrep.
+
+  * FIX: Tolerate missing ANTs at workflow construction (#358) @effigies
+
 0.9.0 (May 3, 2019)
 ===================
 
