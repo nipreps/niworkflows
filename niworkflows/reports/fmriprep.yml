@@ -20,6 +20,7 @@ sections:
     description: Results of nonlinear alignment of the T1w reference one or more template
       space(s). Hover on the panels with the mouse pointer to transition between both
       spaces.
+    static: false
     subtitle: Spatial normalization of the anatomical T1w reference
   - bids: {datatype: anat, desc: reconall, suffix: T1w}
     caption: Surfaces (white and pial) reconstructed with FreeSurfer (<code>recon-all</code>)
@@ -29,7 +30,7 @@ sections:
   ordering: session
   reportlets:
   - bids: {datatype: fmap, desc: brain, suffix: mask}
-    caption: Brain extraction of the magnitude image from the fieldmap
+    caption: Brain extraction of the magnitude image from the fieldmap.
     subtitle: Skull stripped magnitude image
 - name: Functional
   ordering: session,task,run
@@ -39,72 +40,72 @@ sections:
   - bids: {datatype: func, desc: magnitude, suffix: bold}
     caption: Results of affine coregistration between the magnitude image of the fieldmap
       and the reference EPI image
+    static: false
     subtitle: Fieldmap to EPI registration
   - bids: {datatype: func, desc: fieldmap, suffix: bold}
-    caption: Overlaid on the reference EPI image
+    caption: Overlaid on the reference EPI image.
+    static: false
     subtitle: Fieldmap
   - bids: {datatype: func, desc: sdc, suffix: bold}
     caption: Results of performing susceptibility distortion correction (SDC) on the
       EPI
+    static: false
     subtitle: Susceptibility distortion correction
   - bids: {datatype: func, desc: forcedsyn, suffix: bold}
     caption: The dataset contained some fieldmap information, but the argument <code>--force-syn</code>
       was used. The higher-priority SDC method was used. Here, we show the results
       of performing SyN-based SDC on the EPI for comparison.
+    static: false
     subtitle: Experimental fieldmap-less susceptibility distortion correction
-  - bids: {datatype: func, desc: rois, suffix: bold}
-    caption: Brain mask calculated on the BOLD signal (red contour), along with the
-      masks used for a/tCompCor.<br />The aCompCor mask (magenta contour) is a conservative
-      CSF and white-matter mask for extracting physiological and movement confounds.
-      <br />The fCompCor mask (blue contour) contains the top 5% most variable voxels
-      within a heavily-eroded brain-mask.
-    subtitle: ROIs in BOLD space
-  - bids:
-      datatype: func
-      desc: '[at]compcor'
-      extensions: [.html]
-      suffix: bold
-  - bids: {datatype: func, desc: '[at]compcorvar', suffix: bold}
-    caption: The cumulative variance explained by the first k components of the
-      <em>t/aCompCor</em> decomposition, plotted for all values of <em>k</em>.
-      The number of components that must be included in the model in order to
-      explain some fraction of variance in the decomposition mask can be used
-      as a feature selection criterion for confound regression.
-  - bids: {datatype: func, desc: 'confoundcorr', suffix: bold}
-    caption: |
-      Left: Heatmap summarizing the correlation structure among confound variables.
-      (Cosine bases and PCA-derived CompCor components are inherently orthogonal.)
-      Right: magnitude of the correlation between each confound time series and the
-      mean global signal. Strong correlations might be indicative of partial volume
-      effects and can inform decisions about feature orthogonalization prior to 
-      confound regression.
-    subtitle: Correlations among nuisance regressors
   - bids: {datatype: func, desc: flirtnobbr, suffix: bold}
     caption: FSL <code>flirt</code> was used to generate transformations from EPI
       space to T1 Space - BBR refinement rejected. Note that Nearest Neighbor interpolation
       is used in the reportlets in order to highlight potential spin-history and other
       artifacts, whereas final images are resampled using Lanczos interpolation.
-    subtitle: EPI to T1 registration
+    static: false
+    subtitle: Alignment of functional and anatomical MRI data (volume based)
   - bids: {datatype: func, desc: coreg, suffix: bold}
     caption: <code>mri_coreg</code> (FreeSurfer) was used to generate transformations
       from EPI space to T1 Space - <code>bbregister</code> refinement rejected. Note
       that Nearest Neighbor interpolation is used in the reportlets in order to highlight
       potential spin-history and other artifacts, whereas final images are resampled
       using Lanczos interpolation.
-    subtitle: EPI to T1 registration
+    static: false
+    subtitle: Alignment of functional and anatomical MRI data (volume based)
   - bids: {datatype: func, desc: flirtbbr, suffix: bold}
     caption: FSL <code>flirt</code> was used to generate transformations from EPI-space
       to T1w-space - The white matter mask calculated with FSL <code>fast</code> (brain
       tissue segmentation) was used for BBR. Note that Nearest Neighbor interpolation
       is used in the reportlets in order to highlight potential spin-history and other
       artifacts, whereas final images are resampled using Lanczos interpolation.
-    subtitle: EPI to T1 registration
+    static: false
+    subtitle: Alignment of functional and anatomical MRI data (surface driven)
   - bids: {datatype: func, desc: bbregister, suffix: bold}
     caption: <code>bbregister</code> was used to generate transformations from EPI-space
       to T1w-space. Note that Nearest Neighbor interpolation is used in the reportlets
       in order to highlight potential spin-history and other artifacts, whereas final
       images are resampled using Lanczos interpolation.
-    subtitle: EPI to T1 registration
+    static: false
+    subtitle: Alignment of functional and anatomical MRI data (surface driven)
+  - bids: {datatype: func, desc: rois, suffix: bold}
+    caption: Brain mask calculated on the BOLD signal (red contour), along with the
+      masks used for a/tCompCor.<br />The aCompCor mask (magenta contour) is a conservative
+      CSF and white-matter mask for extracting physiological and movement confounds.
+      <br />The fCompCor mask (blue contour) contains the top 5% most variable voxels
+      within a heavily-eroded brain-mask.
+    subtitle: Brain mask and (temporal/anatomical) CompCor ROIs
+  - bids:
+      datatype: func
+      desc: '[at]compcor'
+      extensions: [.html]
+      suffix: bold
+  - bids: {datatype: func, desc: 'compcorvar', suffix: bold}
+    caption: The cumulative variance explained by the first k components of the
+      <em>t/aCompCor</em> decomposition, plotted for all values of <em>k</em>.
+      The number of components that must be included in the model in order to
+      explain some fraction of variance in the decomposition mask can be used
+      as a feature selection criterion for confound regression.
+    subtitle: Variance explained by t/aCompCor components
   - bids: {datatype: func, desc: carpetplot, suffix: bold}
     caption: Summary statistics are plotted, which may reveal trends or artifacts
       in the BOLD data. Global signals calculated within the whole-brain (GS), within
@@ -116,6 +117,15 @@ sections:
       and white matter and CSF (red), indicated by the color map on the left-hand
       side.
     subtitle: BOLD Summary
+  - bids: {datatype: func, desc: 'confoundcorr', suffix: bold}
+    caption: |
+      Left: Heatmap summarizing the correlation structure among confound variables.
+      (Cosine bases and PCA-derived CompCor components are inherently orthogonal.)
+      Right: magnitude of the correlation between each confound time series and the
+      mean global signal. Strong correlations might be indicative of partial volume
+      effects and can inform decisions about feature orthogonalization prior to
+      confound regression.
+    subtitle: Correlations among nuisance regressors
   - bids: {datatype: func, desc: aroma, suffix: bold}
     caption: |
       Maps created with maximum intensity projection (glass brain) with a
