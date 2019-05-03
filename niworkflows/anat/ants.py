@@ -233,7 +233,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
     # Tolerate missing ANTs at construction time
     _ants_version = Registration().version
-    if _ants_version and parseversion(_ants_version) > Version('2.2.0'):
+    if _ants_version and parseversion(_ants_version) >= Version('2.3.0'):
         init_aff.inputs.search_grid = (40, (0, 40, 40))
 
     # Set up spatial normalization
@@ -246,7 +246,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         mem_gb=mem_gb)
     norm.inputs.float = use_float
     fixed_mask_trait = 'fixed_image_mask'
-    if _ants_version and parseversion(_ants_version) > Version('2.2.0'):
+    if _ants_version and parseversion(_ants_version) >= Version('2.2.0'):
         fixed_mask_trait += 's'
 
     map_brainmask = pe.Node(
