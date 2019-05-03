@@ -1,19 +1,35 @@
-0.9.0 (March 24, 2019)
-======================
+0.9.0 (May 3, 2019)
+===================
 
-A number of new features, mostly making BIDS-related interfaces more enjoyable
-and including a large refactor of the reports factory that now internally uses
-pybids to find reportlets.
+A number of new features and bugfixes. This release includes a refactor of the
+reports generation system that attempts to better generalize to other BIDS-Apps.
+The new reports internally use pybids to find reportlets, and the configuration
+file has been migrated to YAML to allow line breaks when captioning reportlets.
+The release also provides more infrastructure for fMRIPrep and sMRIPrep, including
+some BIDS-related interfaces.
 
-* ENH: ``DerivativesDataSink`` now accepts metadata dictionaries too (#332) @oesteban
-* ENH: Upstream ``init_gifti_surface_wf`` from sMRIPrep (#328) @oesteban
-* FIX: Do not generate 4D references out of 4D single-band references (SBRefs) (#338) @oesteban
-* FIX: Allow pipelining dynamic outputs of ``ReadSidecarJSON`` (#340) @oesteban
-* ENH: Dictionary manipulation / TSV to dict, merge multiple dicts (#341) @rciric
-* ENH: run a second ``N4BiasFieldCorrection`` node to refine INU correction (#342) @oesteban
-* ENH: Add an ``allowed_entities`` setting in ``DerivativesDataSink`` (#343) @oesteban
-* ENH: Refactor of the Report generation tools (#344) @oesteban
-* PIN: Update dependencies - nilearn!=0.5.0,!=0.5.1 and latest templateflow (0.1.7)
+  * ENH: Miscellaneous improvements to the Reports (#357) @oesteban
+  * ENH: Add a ``KeySelect`` interface (#347) @oesteban
+  * FIX: BusError in ``DerivativesDataSink`` (#356) @effigies
+  * Revert "FIX: BusError in ``DerivativesDataSink``" (#355) @effigies
+  * FIX: ``GenerateSamplingReference`` failed extension with #348 (#354) @oesteban
+  * FIX: Revise tests after sloppy merge of #352 (#353) @oesteban
+  * FIX: Reportlets path and output path were wrong (#352) @oesteban
+  * FIX: Use safe loader for YAML data input in reports (#351) @oesteban
+  * FIX: Allow ``native`` grids (i.e. pass-through) for ``GenerateSamplingReference`` (#348) @oesteban
+  * FIX: BusError in ``DerivativesDataSink`` (#350) @effigies
+  * ENH: Add new confounds model to reports template (#349) @oesteban
+  * ENH/FIX: Migrate default config to YAML, fix ROIs query. (#346) @oesteban
+  * REL: Synchronization with latest fMRIPrep changes + minor improvements (#345) @oesteban
+  * ENH: ``DerivativesDataSink`` now accepts metadata dictionaries too (#332) @oesteban
+  * ENH: Upstream ``init_gifti_surface_wf`` from sMRIPrep (#328) @oesteban
+  * FIX: Do not generate 4D references out of 4D single-band references (SBRefs) (#338) @oesteban
+  * FIX: Allow pipelining dynamic outputs of ``ReadSidecarJSON`` (#340) @oesteban
+  * ENH: Dictionary manipulation / TSV to dict, merge multiple dicts (#341) @rciric
+  * ENH: Run a second ``N4BiasFieldCorrection`` node to refine INU correction (#342) @oesteban
+  * ENH: Add an ``allowed_entities`` setting in ``DerivativesDataSink`` (#343) @oesteban
+  * ENH: Refactor of the Report generation tools (#344) @oesteban
+  * PIN: Update dependencies - nilearn!=0.5.0,!=0.5.1 and latest templateflow (0.1.7)
 
 0.8.2 (April 4, 2019)
 =====================
