@@ -1,3 +1,10 @@
+0.9.1-1 (May 3, 2019)
+=====================
+
+A hotfix over latest hotfix.
+
+  * FIX: Minor bug introduced with #358 (`ed7a8e <https://github.com/poldracklab/niworkflows/commit/ed7a8e6ca350d06ff5f4d9fe8bd7ed2f06ada9ad>`__) @oesteban
+
 0.9.1 (May 3, 2019)
 ===================
 
