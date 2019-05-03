@@ -79,6 +79,15 @@ class Reportlet(Element):
     >>> r.name
     'datatype-anat_desc-reconall'
 
+    >>> r.components[0][0].startswith('<img')
+    True
+
+    >>> r = Reportlet(bl, out_figs, config={
+    ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'desc': 'reconall'},
+    ...     'description': 'Some description', 'static': False})
+    >>> r.name
+    'datatype-anat_desc-reconall'
+
     >>> r.components[0][0].startswith('<object')
     True
 
