@@ -21,9 +21,11 @@ import scipy.ndimage as nd
 from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
 from nipype.utils.misc import normalize_mc_params
+from nipype.interfaces.io import add_traits
 from nipype.interfaces.base import (
     traits, isdefined, File, InputMultiPath,
-    TraitedSpec, BaseInterfaceInputSpec, SimpleInterface
+    TraitedSpec, BaseInterfaceInputSpec, SimpleInterface,
+    DynamicTraitedSpec
 )
 from .. import __version__
 
@@ -31,13 +33,8 @@ from .. import __version__
 LOG = logging.getLogger('nipype.interface')
 
 
-class CopyXFormInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc='the file we get the data from')
+class CopyXFormInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     hdr_file = File(exists=True, mandatory=True, desc='the file we get the header from')
-
-
-class CopyXFormOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='written file path')
 
 
 class CopyXForm(SimpleInterface):
@@ -45,17 +42,53 @@ class CopyXForm(SimpleInterface):
     Copy the x-form matrices from `hdr_file` to `out_file`.
     """
     input_spec = CopyXFormInputSpec
-    output_spec = CopyXFormOutputSpec
+    output_spec = DynamicTraitedSpec
+
+    def __init__(self, fields=None, **inputs):
+        self._fields = fields or ['in_file']
+        if isinstance(self._fields, str):
+            self._fields = [self._fields]
+
+        super(CopyXForm, self).__init__(**inputs)
+
+        add_traits(self.inputs, self._fields)
+        for f in set(self._fields).intersection(list(inputs.keys())):
+            setattr(self.inputs, f, inputs[f])
+
+    def _outputs(self):
+        base = super(CopyXForm, self)._outputs()
+        if self._fields:
+            fields = self._fields
+            if 'in_file' in fields:
+                idx = fields.index('in_file')
+                fields.pop(idx)
+                fields.insert(idx, 'out_file')
+
+            base = add_traits(base, fields)
+        return base
 
     def _run_interface(self, runtime):
-        out_name = fname_presuffix(self.inputs.in_file,
-                                   suffix='_xform',
-                                   newpath=runtime.cwd)
-        # Copy and replace header
-        shutil.copy(self.inputs.in_file, out_name)
-        _copyxform(self.inputs.hdr_file, out_name,
-                   message='CopyXForm (niworkflows v%s)' % __version__)
-        self._results['out_file'] = out_name
+        for f in self._fields:
+            in_files = getattr(self.inputs, f)
+            self._results[f] = []
+            if isinstance(in_files, str):
+                in_files = [in_files]
+            for in_file in in_files:
+                out_name = fname_presuffix(
+                    in_file, suffix='_xform', newpath=runtime.cwd)
+                # Copy and replace header
+                shutil.copy(in_file, out_name)
+                _copyxform(self.inputs.hdr_file, out_name,
+                           message='CopyXForm (niworkflows v%s)' % __version__)
+                self._results[f].append(out_name)
+
+            # Flatten out one-element lists
+            if len(self._results[f]) == 1:
+                self._results[f] = self._results[f][0]
+
+        default = self._results.pop('in_file', None)
+        if default:
+            self._results['out_file'] = default
         return runtime
 
 
