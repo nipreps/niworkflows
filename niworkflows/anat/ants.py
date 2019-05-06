@@ -364,12 +364,11 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
             (get_brainmask, atropos_wf, [
                 ('output_image', 'inputnode.in_mask_dilated')]),
             (atropos_wf, copy_xform, [
-                ('outputnode.out_mask', 'out_mask')]),
-            (atropos_wf, apply_mask, [
-                ('outputnode.out_mask', 'mask_file')]),
-            (atropos_wf, copy_xform, [
+                ('outputnode.out_mask', 'out_mask'),
                 ('outputnode.out_segm', 'out_segm'),
                 ('outputnode.out_tpms', 'out_tpms')]),
+            (copy_xform, apply_mask, [
+                ('out_mask', 'mask_file')]),
             (copy_xform, sel_wm, [('out_tpms', 'inlist')]),
             (sel_wm, inu_n4_final, [('out', 'weight_image')]),
             (copy_xform, outputnode, [
