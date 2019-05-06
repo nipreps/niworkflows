@@ -1,3 +1,11 @@
+0.9.2 (May 6, 2019)
+===================
+
+Hotfix addressing x-form issues on our ``antsBrainExtraction``'s interpretation.
+
+* ENH: Ensure consistency of headers along brain extraction workflow (#359) @oesteban
+
+
 0.9.1-1 (May 3, 2019)
 =====================
 
