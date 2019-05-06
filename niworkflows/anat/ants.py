@@ -31,6 +31,8 @@ from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
     FixHeaderApplyTransforms as ApplyTransforms,
 )
+from ..interfaces.utils import CopyXForm
+
 
 ATROPOS_MODELS = {
     'T1w': OrderedDict([
@@ -196,6 +198,10 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         fields=['out_file', 'out_mask', 'bias_corrected', 'bias_image', 'out_segm']),
         name='outputnode')
 
+    copy_xform = pe.Node(CopyXForm(
+        fields=['out_file', 'out_mask', 'bias_corrected', 'bias_image', 'out_segm']),
+        name='copy_xform')
+
     trunc = pe.MapNode(ImageMath(operation='TruncateImageIntensity', op2='0.01 0.999 256'),
                        name='truncate_images', iterfield=['op1'])
     inu_n4 = pe.MapNode(
@@ -280,6 +286,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
     wf.connect([
         (inputnode, trunc, [('in_files', 'op1')]),
+        (inputnode, copy_xform, [(('in_files', _pop), 'hdr_file')]),
         (inputnode, inu_n4_final, [('in_files', 'input_image')]),
         (inputnode, init_aff, [('in_mask', 'fixed_image_mask')]),
         (inputnode, norm, [('in_mask', fixed_mask_trait)]),
@@ -298,10 +305,15 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         (dil_brainmask, get_brainmask, [('output_image', 'op1')]),
         (inu_n4_final, apply_mask, [('output_image', 'in_file')]),
         (get_brainmask, apply_mask, [('output_image', 'mask_file')]),
-        (get_brainmask, outputnode, [('output_image', 'out_mask')]),
-        (apply_mask, outputnode, [('out_file', 'out_file')]),
-        (inu_n4_final, outputnode, [('output_image', 'bias_corrected'),
+        (get_brainmask, copy_xform, [('output_image', 'out_mask')]),
+        (apply_mask, copy_xform, [('out_file', 'out_file')]),
+        (inu_n4_final, copy_xform, [('output_image', 'bias_corrected'),
                                     ('bias_image', 'bias_image')]),
+        (copy_xform, outputnode, [
+            ('out_file', 'out_file'),
+            ('out_mask', 'out_mask'),
+            ('bias_corrected', 'bias_corrected'),
+            ('bias_image', 'bias_image')]),
     ])
 
     if use_laplacian:
@@ -341,7 +353,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                          run_without_submitting=True)
 
         wf.disconnect([
-            (get_brainmask, outputnode, [('output_image', 'out_mask')]),
+            (get_brainmask, copy_xform, [('output_image', 'out_mask')]),
             (get_brainmask, apply_mask, [('output_image', 'mask_file')]),
         ])
         wf.connect([
@@ -351,15 +363,18 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                 ('output_image', 'inputnode.in_mask')]),
             (get_brainmask, atropos_wf, [
                 ('output_image', 'inputnode.in_mask_dilated')]),
-            (atropos_wf, sel_wm, [('outputnode.out_tpms', 'inlist')]),
-            (sel_wm, inu_n4_final, [('out', 'weight_image')]),
-            (atropos_wf, outputnode, [
+            (atropos_wf, copy_xform, [
                 ('outputnode.out_mask', 'out_mask')]),
             (atropos_wf, apply_mask, [
                 ('outputnode.out_mask', 'mask_file')]),
-            (atropos_wf, outputnode, [
+            (atropos_wf, copy_xform, [
                 ('outputnode.out_segm', 'out_segm'),
-                ('outputnode.out_tpms', 'out_tpms')])
+                ('outputnode.out_tpms', 'out_tpms')]),
+            (copy_xform, sel_wm, [('out_tpms', 'inlist')]),
+            (sel_wm, inu_n4_final, [('out', 'weight_image')]),
+            (copy_xform, outputnode, [
+                ('out_segm', 'out_segm'),
+                ('out_tpms', 'out_tpms')]),
         ])
     return wf
 
