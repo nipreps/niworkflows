@@ -49,8 +49,7 @@ class CopyXForm(SimpleInterface):
         if isinstance(self._fields, str):
             self._fields = [self._fields]
 
-        super(CopyXForm, self).__init__(
-            hdr_file=inputs.get('hdr_file', None))
+        super(CopyXForm, self).__init__(**inputs)
 
         add_traits(self.inputs, self._fields)
         for f in set(self._fields).intersection(list(inputs.keys())):

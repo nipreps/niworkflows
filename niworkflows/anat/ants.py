@@ -195,12 +195,13 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         inputnode.inputs.in_mask = str(tpl_regmask_path)
 
     outputnode = pe.Node(niu.IdentityInterface(
-        fields=['out_file', 'out_mask', 'bias_corrected', 'bias_image', 'out_segm']),
+        fields=['out_file', 'out_mask', 'bias_corrected', 'bias_image',
+                'out_segm', 'out_tpms']),
         name='outputnode')
 
     copy_xform = pe.Node(CopyXForm(
-        fields=['out_file', 'out_mask', 'bias_corrected', 'bias_image', 'out_segm']),
-        name='copy_xform')
+        fields=['out_file', 'out_mask', 'bias_corrected', 'bias_image']),
+        name='copy_xform', run_without_submitting=True)
 
     trunc = pe.MapNode(ImageMath(operation='TruncateImageIntensity', op2='0.01 0.999 256'),
                        name='truncate_images', iterfield=['op1'])
@@ -353,8 +354,8 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                          run_without_submitting=True)
 
         wf.disconnect([
-            (get_brainmask, copy_xform, [('output_image', 'out_mask')]),
             (get_brainmask, apply_mask, [('output_image', 'mask_file')]),
+            (copy_xform, outputnode, [('out_mask', 'out_mask')]),
         ])
         wf.connect([
             (inu_n4, atropos_wf, [
@@ -363,17 +364,14 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                 ('output_image', 'inputnode.in_mask')]),
             (get_brainmask, atropos_wf, [
                 ('output_image', 'inputnode.in_mask_dilated')]),
+            (atropos_wf, sel_wm, [('outputnode.out_tpms', 'inlist')]),
+            (sel_wm, inu_n4_final, [('out', 'weight_image')]),
             (atropos_wf, apply_mask, [
                 ('outputnode.out_mask', 'mask_file')]),
-            (atropos_wf, copy_xform, [
+            (atropos_wf, outputnode, [
                 ('outputnode.out_mask', 'out_mask'),
                 ('outputnode.out_segm', 'out_segm'),
                 ('outputnode.out_tpms', 'out_tpms')]),
-            (copy_xform, sel_wm, [('out_tpms', 'inlist')]),
-            (sel_wm, inu_n4_final, [('out', 'weight_image')]),
-            (copy_xform, outputnode, [
-                ('out_segm', 'out_segm'),
-                ('out_tpms', 'out_tpms')]),
         ])
     return wf
 
@@ -442,6 +440,10 @@ def init_atropos_wf(name='atropos_wf',
         fields=['in_files', 'in_mask', 'in_mask_dilated']), name='inputnode')
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['out_mask', 'out_segm', 'out_tpms']), name='outputnode')
+
+    copy_xform = pe.Node(CopyXForm(
+        fields=['out_mask', 'out_segm', 'out_tpms']),
+        name='copy_xform', run_without_submitting=True)
 
     # Run atropos (core node)
     atropos = pe.Node(Atropos(
@@ -543,6 +545,7 @@ def init_atropos_wf(name='atropos_wf',
     msk_conform = pe.Node(niu.Function(function=_conform_mask), name='msk_conform')
     merge_tpms = pe.Node(niu.Merge(in_segmentation_model[0]), name='merge_tpms')
     wf.connect([
+        (inputnode, copy_xform, [(('in_files', _pop), 'hdr_file')]),
         (inputnode, pad_mask, [('in_mask', 'op1')]),
         (inputnode, atropos, [('in_files', 'intensity_images'),
                               ('in_mask_dilated', 'mask_image')]),
@@ -581,9 +584,13 @@ def init_atropos_wf(name='atropos_wf',
         (depad_gm, merge_tpms, [('output_image', 'in2')]),
         (depad_wm, merge_tpms, [('output_image', 'in3')]),
         (depad_mask, msk_conform, [('output_image', 'in_mask')]),
-        (msk_conform, outputnode, [('out', 'out_mask')]),
-        (depad_segm, outputnode, [('output_image', 'out_segm')]),
-        (merge_tpms, outputnode, [('out', 'out_tpms')]),
+        (msk_conform, copy_xform, [('out', 'out_mask')]),
+        (depad_segm, copy_xform, [('output_image', 'out_segm')]),
+        (merge_tpms, copy_xform, [('out', 'out_tpms')]),
+        (copy_xform, outputnode, [
+            ('out_mask', 'out_mask'),
+            ('out_segm', 'out_segm'),
+            ('out_tpms', 'out_tpms')]),
     ])
     return wf
 
