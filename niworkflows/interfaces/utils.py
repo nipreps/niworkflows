@@ -56,7 +56,6 @@ class CopyXForm(SimpleInterface):
         for f in set(self._fields).intersection(list(inputs.keys())):
             setattr(self.inputs, f, inputs[f])
 
-
     def _outputs(self):
         base = super(CopyXForm, self)._outputs()
         if self._fields:
@@ -68,7 +67,6 @@ class CopyXForm(SimpleInterface):
 
             base = add_traits(base, fields)
         return base
-
 
     def _run_interface(self, runtime):
         for f in self._fields:
