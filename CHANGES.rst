@@ -1,3 +1,10 @@
+0.9.2-1 (May 6, 2019)
+=====================
+
+Hotfix to CopyXForm interface to keep backwards compatibility.
+
+* FIX: fields were being replaced in outputs call (b418733) @oesteban
+
 0.9.2 (May 6, 2019)
 ===================
 
@@ -63,7 +70,7 @@ New release to go along with the upcoming MRIQC 0.15.0.
   * ENH: Add several helper interfaces (#325) @oesteban
   * FIX: "NONE of the components..." banner was printed even when no AROMA file was present (#330) @oesteban
 
-  
+
 0.8.1 (March 15, 2019)
 ======================
 
@@ -123,7 +130,7 @@ New release to go along with the upcoming MRIQC 0.15.0.
   * [RF] Improve readability of parameters files (#276) @oesteban
   * [ENH] Improve niwflows.interfaces.freesurfer (#277) @oesteban
   * [ENH] Make BIDS regex more readable (#278) @oesteban
-  * [ENH] Datalad+templateflow integration (#280) @oesteban 
+  * [ENH] Datalad+templateflow integration (#280) @oesteban
 
 
 0.5.4 (January 23, 2019)
@@ -213,7 +220,7 @@ With thanks to @wiheto for contributions.
 0.4.1 (June 7, 2018)
 ====================
 
-* [FIX] Standardize DTK template name 
+* [FIX] Standardize DTK template name
 
 0.4.0 (May 31, 2018)
 ====================
