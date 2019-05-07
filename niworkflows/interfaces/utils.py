@@ -58,7 +58,7 @@ class CopyXForm(SimpleInterface):
     def _outputs(self):
         base = super(CopyXForm, self)._outputs()
         if self._fields:
-            fields = self._fields
+            fields = self._fields.copy()
             if 'in_file' in fields:
                 idx = fields.index('in_file')
                 fields.pop(idx)
