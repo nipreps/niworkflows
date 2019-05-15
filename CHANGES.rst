@@ -1,3 +1,10 @@
+0.9.3 (May 15, 2019)
+====================
+
+Hotfix to the new confounds plot showing correlations.
+
+* FIX: Refine implementation of plotting confounds correlations (#360) @oesteban
+
 0.9.2-1 (May 6, 2019)
 =====================
 
