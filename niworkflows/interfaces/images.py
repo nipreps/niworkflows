@@ -636,7 +636,7 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
     prob_thres = traits.Range(
         low=0.0,
         high=1.0,
-        0.5,
+        value=0.5,
         usedefault=True,
         desc='If label_files are probability masks, threshold '
         'at specified probability.')
