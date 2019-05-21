@@ -633,7 +633,9 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
         'background, or a list of 3D probability '
         'maps (one per label) or the equivalent 4D '
         'file.')
-    prob_thres = traits.Float(
+    prob_thres = traits.Range(
+        low=0.0,
+        high=1.0,
         0.5,
         usedefault=True,
         desc='If label_files are probability masks, threshold '
