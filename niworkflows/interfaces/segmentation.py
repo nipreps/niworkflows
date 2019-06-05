@@ -112,6 +112,13 @@ class MELODICRPT(reporting.ReportCapableInterface, fsl.MELODIC):
 
     def _generate_report(self):
         from niworkflows.viz.utils import plot_melodic_components
+        mix = os.path.join(self._melodic_dir, "melodic_mix")
+        if not os.path.exists(mix):
+            self._out_report = self.inputs.out_report.replace('svg', 'html')
+            snippet = '<h4>MELODIC did not converge, no output</h4>'
+            with open(self._out_report, 'w') as fobj:
+                fobj.write(snippet)
+            return
         plot_melodic_components(melodic_dir=self._melodic_dir,
                                 in_file=self.inputs.in_files[0],
                                 tr=self.inputs.tr_sec,
