@@ -1,11 +1,21 @@
+0.9.5 (June 5, 2019)
+====================
+
+Minor improvements to allow more flexible template selection within
+the brain extraction workflow, in particular to enable using infant and
+pediatric templates.
+
+* ENH: Accept template specifications in ``antsBrainExtraction`` (#364) @oesteban
+
+
 0.9.4 (June 5, 2019)
 ====================
 
 A housekeeping release, including bugfixes and minor enhancements.
 With thanks to William H. Thompson for contributions.
 
-* PIN: TemplateFlow to latest (0.3.0), including infant and pediatric templates #363 @oesteban
-* RF: Move BOLD-reference generation workflows to niworkflows #362 @oesteban
+* PIN: TemplateFlow to latest (0.3.0), including infant and pediatric templates (#363) @oesteban
+* RF: Move BOLD-reference generation workflows to niworkflows (#362) @oesteban
 * ENH: Create informative HTML reportlet on missing MELODIC mix (#337) @effigies
 * ENH: Signal extraction of parcels/ROIs from single NIfTI file (#303) @wiheto
 
