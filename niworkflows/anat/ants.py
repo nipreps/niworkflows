@@ -58,6 +58,7 @@ ATROPOS_MODELS = {
 
 def init_brain_extraction_wf(name='brain_extraction_wf',
                              in_template='OASIS30ANTs',
+                             template_spec=None,
                              use_float=True,
                              normalization_quality='precise',
                              omp_nthreads=None,
@@ -173,13 +174,35 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     from templateflow.api import get as get_template
     wf = pe.Workflow(name)
 
-    tpl_target_path = str(
-        get_template(in_template, desc=None, resolution=1, suffix=bids_suffix))
+    # Massage spec (start creating if None)
+    template_spec = template_spec or {}
+    # suffix passed via spec takes precedence
+    template_spec['suffix'] = template_spec.get('suffix', bids_suffix)
+    template_spec['desc'] = template_spec.get('desc', None)
+    template_spec['resolution'] = template_spec.pop('res', template_spec.get('resolution', 1))
+
+    common_spec = {'resolution': template_spec['resolution']}
+    if 'cohort' in template_spec:
+        common_spec['cohort'] = template_spec['cohort']
+
+    tpl_target_path = get_template(in_template, **template_spec)
+    if not tpl_target_path:
+        raise RuntimeError("""\
+Could not find template "{0}" with specs={1}. Please revise your --skull-strip-template \
+argument.""".format(in_template, template_spec))
+
+    if isinstance(tpl_target_path, list):
+        raise RuntimeError("""\
+The available template modifiers ({0}) did not select a unique template \
+(got "{1}"). Please revise your --skull-strip-template argument.""".format(
+            template_spec, ', '.join([str(p) for p in tpl_target_path])))
+
+    tpl_target_path = str(tpl_target_path)
 
     # Get probabilistic brain mask if available
     tpl_mask_path = get_template(
-        in_template, resolution=1, label='brain', suffix='probseg') or \
-        get_template(in_template, resolution=1, desc='brain', suffix='mask')
+        in_template, label='brain', suffix='probseg', **common_spec) or \
+        get_template(in_template, desc='brain', suffix='mask', **common_spec)
 
     if omp_nthreads is None or omp_nthreads < 1:
         omp_nthreads = cpu_count()
@@ -189,8 +212,8 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
     # Try to find a registration mask, set if available
     tpl_regmask_path = get_template(
-        in_template, resolution=1,
-        desc='BrainCerebellumExtraction', suffix='mask')
+        in_template, desc='BrainCerebellumExtraction', suffix='mask',
+        **common_spec)
     if tpl_regmask_path:
         inputnode.inputs.in_mask = str(tpl_regmask_path)
 
