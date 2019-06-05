@@ -58,6 +58,7 @@ ATROPOS_MODELS = {
 
 def init_brain_extraction_wf(name='brain_extraction_wf',
                              in_template='OASIS30ANTs',
+                             template_spec=None,
                              use_float=True,
                              normalization_quality='precise',
                              omp_nthreads=None,
@@ -173,13 +174,20 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     from templateflow.api import get as get_template
     wf = pe.Workflow(name)
 
+    # Massage spec (start creating if None)
+    template_spec = template_spec or {}
+    # suffix passed via spec takes precedence
+    template_spec['suffix'] = template_spec.get('suffix', bids_suffix)
+    template_spec['desc'] = template_spec.get('desc', None)
+    template_spec['resolution'] = template_spec.get('res', template_spec.get('resolution', 1))
+
     tpl_target_path = str(
-        get_template(in_template, desc=None, resolution=1, suffix=bids_suffix))
+        get_template(in_template, **template_spec))
 
     # Get probabilistic brain mask if available
     tpl_mask_path = get_template(
-        in_template, resolution=1, label='brain', suffix='probseg') or \
-        get_template(in_template, resolution=1, desc='brain', suffix='mask')
+        in_template, resolution=template_spec['resolution'], label='brain', suffix='probseg') or \
+        get_template(in_template, resolution=template_spec['resolution'], desc='brain', suffix='mask')
 
     if omp_nthreads is None or omp_nthreads < 1:
         omp_nthreads = cpu_count()
@@ -189,7 +197,7 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
 
     # Try to find a registration mask, set if available
     tpl_regmask_path = get_template(
-        in_template, resolution=1,
+        in_template, resolution=template_spec['resolution'],
         desc='BrainCerebellumExtraction', suffix='mask')
     if tpl_regmask_path:
         inputnode.inputs.in_mask = str(tpl_regmask_path)
