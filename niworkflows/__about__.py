@@ -64,6 +64,7 @@ REQUIRES = [
     'seaborn',
     'svgutils',
     'templateflow<0.4.0a0,>=0.3.0',
+    'transforms3d',
 ]
 
 SETUP_REQUIRES = []
