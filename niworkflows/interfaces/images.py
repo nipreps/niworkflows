@@ -395,14 +395,13 @@ class ValidateImage(SimpleInterface):
         elif (valid_sform and sform_code > 0) and (not matching_affines or qform_code == 0):
             img.set_qform(sform, sform_code)
             new_qform = img.get_qform()
-            if (np.allclose(img.get_qform(), qform)) and (qform_code > 0):
+            if np.allclose(new_qform, qform) and qform_code > 0:
                 # False alarm
                 self._results['out_file'] = self.inputs.in_file
                 open(out_report, 'w').close()
                 self._results['out_report'] = out_report
                 return runtime
             if not np.allclose(img.get_qform(), qform) and (qform_code > 1):
-                new_qform = img.get_qform()
                 diff = np.linalg.inv(qform) @ new_qform
                 trans, rot, scale, shear = transforms3d.affines.decompose44(diff)
                 axis, angle = transforms3d.axangles.mat2axangle(rot)
