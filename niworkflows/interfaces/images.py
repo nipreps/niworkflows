@@ -14,6 +14,7 @@ import numpy as np
 import nibabel as nb
 import nilearn.image as nli
 from textwrap import indent
+import transforms3d
 
 from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
@@ -376,11 +377,11 @@ class ValidateImage(SimpleInterface):
             self._results['out_file'] = self.inputs.in_file
             open(out_report, 'w').close()
             self._results['out_report'] = out_report
-            return runtime
+            #return runtime
 
         # A new file will be written
-        out_fname = fname_presuffix(self.inputs.in_file, suffix='_valid', newpath=runtime.cwd)
-        self._results['out_file'] = out_fname
+        #out_fname = fname_presuffix(self.inputs.in_file, suffix='_valid', newpath=runtime.cwd)
+        #self._results['out_file'] = out_fname
 
         # Row 2:
         if valid_qform and qform_code > 0 and (sform_code == 0 or not valid_sform):
@@ -392,11 +393,27 @@ class ValidateImage(SimpleInterface):
         # Rows 3-4:
         # Note: if qform is not valid, matching_affines is False
         elif (valid_sform and sform_code > 0) and (not matching_affines or qform_code == 0):
-            img.set_qform(img.get_sform(), sform_code)
-            warning_txt = 'Note on orientation: qform matrix overwritten'
-            description = """\
-<p class="elem-desc">The qform has been copied from sform.</p>
-"""
+            img.set_qform(sform, sform_code)
+            if (np.allclose(img.get_qform(), qform)) and (qform_code == 1):
+                # False alarm
+                self._results['out_file'] = self.inputs.in_file
+                open(out_report, 'w').close()
+                self._results['out_report'] = out_report
+                #return runtime
+            if not np.allclose(img.get_qform(), qform) and (qform_code == 1):
+                new_qform = img.get_qform()
+                diff = np.linalg.inv(qform) @ new_qform
+                trans, rot, scale, shear = transforms3d.affines.decompose44(diff)
+                axis, angle = transforms3d.axangles.mat2axangle(rot)
+                total_trans = np.sqrt(np.sum(trans * trans)) # Add angle and total_trans to report
+                warning_txt = 'Note on orientation: qform matrix overwritten'
+                description = """\
+    <p class="elem-desc">
+    The qform has been copied from sform.
+    The difference in angle is {}.
+    The difference in translation is {}.
+    </p>
+    """.format(round(angle,8), total_trans)  #is there a better way to do this?
             if not valid_qform and qform_code > 0:
                 warning_txt = 'WARNING - Invalid qform information'
                 description = """\
