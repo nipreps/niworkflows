@@ -400,7 +400,7 @@ class ValidateImage(SimpleInterface):
                 open(out_report, 'w').close()
                 self._results['out_report'] = out_report
                 return runtime
-            if not np.allclose(img.get_qform(), qform) and (qform_code == 1):
+            if not np.allclose(img.get_qform(), qform) and (qform_code > 1):
                 new_qform = img.get_qform()
                 diff = np.linalg.inv(qform) @ new_qform
                 trans, rot, scale, shear = transforms3d.affines.decompose44(diff)
