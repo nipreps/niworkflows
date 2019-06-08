@@ -401,13 +401,12 @@ class ValidateImage(SimpleInterface):
                 open(out_report, 'w').close()
                 self._results['out_report'] = out_report
                 return runtime
-            if not np.allclose(img.get_qform(), qform) and (qform_code > 1):
-                diff = np.linalg.inv(qform) @ new_qform
-                trans, rot, scale, shear = transforms3d.affines.decompose44(diff)
-                axis, angle = transforms3d.axangles.mat2axangle(rot)
-                total_trans = np.sqrt(np.sum(trans * trans)) # Add angle and total_trans to report
-                warning_txt = 'Note on orientation: qform matrix overwritten'
-                description = f"""\
+            diff = np.linalg.inv(qform) @ new_qform
+            trans, rot, scale, shear = transforms3d.affines.decompose44(diff)
+            axis, angle = transforms3d.axangles.mat2axangle(rot)
+            total_trans = np.sqrt(np.sum(trans * trans)) # Add angle and total_trans to report
+            warning_txt = 'Note on orientation: qform matrix overwritten'
+            description = f"""\
     <p class="elem-desc">
     The qform has been copied from sform.
     The difference in angle is {angle:.02g}.
