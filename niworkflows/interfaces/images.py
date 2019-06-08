@@ -393,7 +393,8 @@ class ValidateImage(SimpleInterface):
         # Rows 3-4:
         # Note: if qform is not valid, matching_affines is False
         elif (valid_sform and sform_code > 0) and (not matching_affines or qform_code == 0):
-            img.set_qform(img.get_sform, sform_code)
+            img.set_qform(sform, sform_code)
+            new_qform = img.get_qform()
             if (np.allclose(img.get_qform(), qform)) and (qform_code > 0):
                 # False alarm
                 self._results['out_file'] = self.inputs.in_file
