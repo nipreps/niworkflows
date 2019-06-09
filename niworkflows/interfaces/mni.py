@@ -65,9 +65,8 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     # Load other settings from file.
     settings = traits.List(File(exists=True), desc='pass on the list of settings files')
     # Resolution of the default template.
-    template_resolution = traits.Enum(1, 2, mandatory=True, usedefault=True,
-                                      desc='template resolution')
-    template_cohort = traits.Either(traits.Int, traits.Str, desc='template cohort')
+    template_spec = traits.DictStrAny(desc='template specifications')
+    template_resolution = traits.Enum(1, 2, desc='(DEPRECATED) template resolution')
     # Use explicit masking?
     explicit_masking = traits.Bool(True, usedefault=True,
                                    desc="""\
@@ -79,13 +78,17 @@ See https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba\
     float = traits.Bool(False, usedefault=True, desc='use single precision calculations')
 
 
+class RobustMNINormalizationOutputSpec(RegistrationOutputSpec):
+    reference_image = File(exists=True, desc='reference image used for registration target')
+
+
 class RobustMNINormalization(BaseInterface):
     """
     An interface to robustly run T1-to-MNI spatial normalization.
     Several settings are sequentially tried until some work.
     """
     input_spec = RobustMNINormalizationInputSpec
-    output_spec = RegistrationOutputSpec
+    output_spec = RobustMNINormalizationOutputSpec
 
     def _list_outputs(self):
         return self._results
@@ -171,6 +174,7 @@ class RobustMNINormalization(BaseInterface):
             else:
                 runtime.returncode = 0
                 # Grab the outputs.
+                self._results['reference_image'] = self.norm.inputs.fixed_image
                 self._results.update(interface_result.outputs.get())
                 if isdefined(self.inputs.moving_mask):
                     self._validate_results()
@@ -333,30 +337,41 @@ class RobustMNINormalization(BaseInterface):
 
         # If no reference image is provided, fall back to the default template.
         else:
+            from ..utils.misc import get_template_specs
             # Raise an error if the user specifies an unsupported image orientation.
             if self.inputs.orientation == 'LAS':
                 raise NotImplementedError
 
+            template_spec = self.inputs.template_spec if isdefined(
+                self.inputs.template_spec) else {}
+
+            default_resolution = {
+                'precise': 1, 'fast': 2, 'testing': 2}[self.inputs.flavor]
+
             # Set the template resolution.
-            resolution = self.inputs.template_resolution
-            cohort = self.inputs.template_cohort if isdefined(
-                self.inputs.template_cohort) else None
+            if isdefined(self.inputs.template_resolution):
+                NIWORKFLOWS_LOG.warning('The use of ``template_resolution`` is deprecated')
+                template_spec['res'] = self.inputs.template_resolution
+
+            template_spec['suffix'] = self.inputs.reference
+            template_spec['desc'] = None
+            ref_template, template_spec = get_template_specs(
+                self.inputs.template, template_spec=template_spec,
+                default_resolution=default_resolution)
+
             # Get the template specified by the user.
-            ref_template = get_template(self.inputs.template, resolution=resolution,
-                                        desc=None, cohort=cohort,
-                                        suffix=self.inputs.reference)
-            ref_mask = get_template(self.inputs.template, resolution=resolution,
-                                    desc='brain', suffix='mask', cohort=cohort)
+            ref_mask = get_template(self.inputs.template, desc='brain', suffix='mask',
+                                    **template_spec)
 
             # Default is explicit masking disabled
-            args['fixed_image'] = str(ref_template)
+            args['fixed_image'] = ref_template
             # Use the template mask as the fixed mask.
             args['fixed_image_masks'] = str(ref_mask)
 
             # Overwrite defaults if explicit masking
             if self.inputs.explicit_masking:
                 # Mask the template image with the template mask.
-                args['fixed_image'] = mask(str(ref_template), str(ref_mask),
+                args['fixed_image'] = mask(ref_template, str(ref_mask),
                                            "fixed_masked.nii.gz")
                 # Do not use a fixed mask during registration.
                 args.pop('fixed_image_masks', None)

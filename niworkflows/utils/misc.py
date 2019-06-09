@@ -9,7 +9,7 @@ __all__ = ['get_template_specs', 'fix_multi_T1w_source_name', 'add_suffix', 'rea
            'splitext', '_copy_any']
 
 
-def get_template_specs(in_template, template_spec=None):
+def get_template_specs(in_template, template_spec=None, default_resolution=1):
     """
     Parse template specifications
 
@@ -39,7 +39,8 @@ def get_template_specs(in_template, template_spec=None):
     # Massage spec (start creating if None)
     template_spec = template_spec or {}
     template_spec['desc'] = template_spec.get('desc', None)
-    template_spec['resolution'] = template_spec.pop('res', template_spec.get('resolution', 1))
+    template_spec['resolution'] = template_spec.pop(
+        'res', template_spec.get('resolution', default_resolution))
 
     common_spec = {'resolution': template_spec['resolution']}
     if 'cohort' in template_spec:
