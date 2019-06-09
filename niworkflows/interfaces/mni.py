@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ A robust ANTs T1-to-MNI registration workflow with fallback retry """
@@ -68,6 +67,7 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     # Resolution of the default template.
     template_resolution = traits.Enum(1, 2, mandatory=True, usedefault=True,
                                       desc='template resolution')
+    template_cohort = traits.Either(traits.Int, traits.Str, desc='template cohort')
     # Use explicit masking?
     explicit_masking = traits.Bool(True, usedefault=True,
                                    desc="""\
@@ -339,11 +339,14 @@ class RobustMNINormalization(BaseInterface):
 
             # Set the template resolution.
             resolution = self.inputs.template_resolution
+            cohort = self.inputs.template_cohort if isdefined(
+                self.inputs.template_cohort) else None
             # Get the template specified by the user.
             ref_template = get_template(self.inputs.template, resolution=resolution,
-                                        desc=None, suffix=self.inputs.reference)
+                                        desc=None, cohort=cohort,
+                                        suffix=self.inputs.reference)
             ref_mask = get_template(self.inputs.template, resolution=resolution,
-                                    desc='brain', suffix='mask')
+                                    desc='brain', suffix='mask', cohort=cohort)
 
             # Default is explicit masking disabled
             args['fixed_image'] = str(ref_template)
@@ -374,8 +377,10 @@ class RobustMNINormalization(BaseInterface):
             target_mask = self.inputs.reference_mask
         else:
             resolution = self.inputs.template_resolution
+            cohort = self.inputs.template_cohort if isdefined(
+                self.inputs.template_cohort) else None
             target_mask = get_template(self.inputs.template, resolution=resolution,
-                                       desc='brain', suffix='mask')
+                                       desc='brain', suffix='mask', cohort=cohort)
 
         res = ApplyTransforms(dimension=3,
                               input_image=input_mask,
