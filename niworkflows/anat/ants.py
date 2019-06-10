@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -20,6 +18,7 @@ from nipype.interfaces import utility as niu
 from nipype.interfaces.fsl.maths import ApplyMask
 from nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
 
+from ..utils.misc import get_template_specs
 # niworkflows
 from ..interfaces.ants import (
     ImageMath,
@@ -174,30 +173,12 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     from templateflow.api import get as get_template
     wf = pe.Workflow(name)
 
-    # Massage spec (start creating if None)
-    template_spec = template_spec or {}
     # suffix passed via spec takes precedence
     template_spec['suffix'] = template_spec.get('suffix', bids_suffix)
-    template_spec['desc'] = template_spec.get('desc', None)
-    template_spec['resolution'] = template_spec.pop('res', template_spec.get('resolution', 1))
 
-    common_spec = {'resolution': template_spec['resolution']}
-    if 'cohort' in template_spec:
-        common_spec['cohort'] = template_spec['cohort']
-
-    tpl_target_path = get_template(in_template, **template_spec)
-    if not tpl_target_path:
-        raise RuntimeError("""\
-Could not find template "{0}" with specs={1}. Please revise your --skull-strip-template \
-argument.""".format(in_template, template_spec))
-
-    if isinstance(tpl_target_path, list):
-        raise RuntimeError("""\
-The available template modifiers ({0}) did not select a unique template \
-(got "{1}"). Please revise your --skull-strip-template argument.""".format(
-            template_spec, ', '.join([str(p) for p in tpl_target_path])))
-
-    tpl_target_path = str(tpl_target_path)
+    tpl_target_path, common_spec = get_template_specs(
+        in_template,
+        template_spec=template_spec)
 
     # Get probabilistic brain mask if available
     tpl_mask_path = get_template(
