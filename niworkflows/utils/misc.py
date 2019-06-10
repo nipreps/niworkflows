@@ -39,6 +39,7 @@ def get_template_specs(in_template, template_spec=None, default_resolution=1):
     # Massage spec (start creating if None)
     template_spec = template_spec or {}
     template_spec['desc'] = template_spec.get('desc', None)
+    template_spec['atlas'] = template_spec.get('atlas', None)
     template_spec['resolution'] = template_spec.pop(
         'res', template_spec.get('resolution', default_resolution))
 

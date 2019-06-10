@@ -8,8 +8,6 @@ from os import path as op
 import pkg_resources as pkgr
 from multiprocessing import cpu_count
 from packaging.version import Version
-import nibabel as nb
-import numpy as np
 
 from nipype.interfaces.ants.registration import RegistrationOutputSpec
 from nipype.interfaces.ants import AffineInitializer
@@ -19,7 +17,6 @@ from nipype.interfaces.base import (
 from templateflow.api import get as get_template
 from .. import NIWORKFLOWS_LOG, __version__
 from .fixes import (
-    FixHeaderApplyTransforms as ApplyTransforms,
     FixHeaderRegistration as Registration
 )
 
@@ -91,12 +88,14 @@ class RobustMNINormalization(BaseInterface):
     output_spec = RobustMNINormalizationOutputSpec
 
     def _list_outputs(self):
-        return self._results
+        outputs = self.norm._list_outputs()
+        outputs['reference_image'] = self._reference_image
+        return outputs
 
     def __init__(self, **inputs):
         self.norm = None
+        self._reference_image = None
         self.retry = 1
-        self._results = {}
         self.terminal_output = 'file'
         super(RobustMNINormalization, self).__init__(**inputs)
 
@@ -148,11 +147,9 @@ class RobustMNINormalization(BaseInterface):
         # For each settings file...
         for ants_settings in settings_files:
 
-            NIWORKFLOWS_LOG.info('Loading settings from file %s.',
-                                 ants_settings)
+            NIWORKFLOWS_LOG.info('Loading settings from file %s.', ants_settings)
             # Configure an ANTs run based on these settings.
-            self.norm = Registration(from_file=ants_settings,
-                                     **ants_args)
+            self.norm = Registration(from_file=ants_settings, **ants_args)
             self.norm.resource_monitor = False
             self.norm.terminal_output = self.terminal_output
 
@@ -173,12 +170,6 @@ class RobustMNINormalization(BaseInterface):
                         'Log of failed retry saved (%s).', ', '.join(term_out))
             else:
                 runtime.returncode = 0
-                # Grab the outputs.
-                self._results['reference_image'] = self.norm.inputs.fixed_image
-                self._results.update(interface_result.outputs.get())
-                if isdefined(self.inputs.moving_mask):
-                    self._validate_results()
-
                 # Note this in the log.
                 NIWORKFLOWS_LOG.info(
                     'Successful spatial normalization (retry #%d).', self.retry)
@@ -297,6 +288,7 @@ class RobustMNINormalization(BaseInterface):
         if isdefined(self.inputs.reference_image):
             # Use the reference image as the fixed image.
             args['fixed_image'] = self.inputs.reference_image
+            self._reference_image = self.inputs.reference_image
 
             # If a reference mask is provided...
             if isdefined(self.inputs.reference_mask):
@@ -359,6 +351,9 @@ class RobustMNINormalization(BaseInterface):
                 self.inputs.template, template_spec=template_spec,
                 default_resolution=default_resolution)
 
+            # Set reference output
+            self._reference_image = ref_template
+
             # Get the template specified by the user.
             ref_mask = get_template(self.inputs.template, desc='brain', suffix='mask',
                                     **template_spec)
@@ -384,35 +379,6 @@ class RobustMNINormalization(BaseInterface):
                         str(ref_mask), lesion_mask=None, global_mask=True)
 
         return args
-
-    def _validate_results(self):
-        forward_transform = self._results['composite_transform']
-        input_mask = self.inputs.moving_mask
-        if isdefined(self.inputs.reference_mask):
-            target_mask = self.inputs.reference_mask
-        else:
-            resolution = self.inputs.template_resolution
-            cohort = self.inputs.template_cohort if isdefined(
-                self.inputs.template_cohort) else None
-            target_mask = get_template(self.inputs.template, resolution=resolution,
-                                       desc='brain', suffix='mask', cohort=cohort)
-
-        res = ApplyTransforms(dimension=3,
-                              input_image=input_mask,
-                              reference_image=str(target_mask),
-                              transforms=forward_transform,
-                              interpolation='NearestNeighbor',
-                              resource_monitor=False).run()
-        input_mask_data = (nb.load(res.outputs.output_image).get_data() != 0)
-        target_mask_data = (nb.load(str(target_mask)).get_data() != 0)
-
-        overlap_voxel_count = np.logical_and(input_mask_data, target_mask_data)
-
-        overlap_perc = float(overlap_voxel_count.sum()) / float(input_mask_data.sum()) * 100
-
-        assert overlap_perc > 50, \
-            "Normalization failed: only %d%% of the normalized moving image " \
-            "mask overlaps with the reference image mask." % overlap_perc
 
 
 def mask(in_file, mask_file, new_name):
