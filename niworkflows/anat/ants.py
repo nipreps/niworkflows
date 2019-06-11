@@ -173,6 +173,8 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     from templateflow.api import get as get_template
     wf = pe.Workflow(name)
 
+    template_spec = template_spec or {}
+
     # suffix passed via spec takes precedence
     template_spec['suffix'] = template_spec.get('suffix', bids_suffix)
 
