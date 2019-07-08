@@ -1,3 +1,12 @@
+0.9.6 (TBD)
+===========
+
+Minor improvements to support some of the requirements generated during the development of fMRIPrep-1.4.1.
+
+* ENH: Improvements to ``RobustMNINormalization`` (#368) @oesteban
+* RF: Miscellaneous improvements to allow multiplicity of templates and specs (#366) @oesteban
+
+
 0.9.5 (June 5, 2019)
 ====================
 
