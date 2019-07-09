@@ -8,7 +8,7 @@ sections:
   - bids:
       datatype: anat
       desc: conform
-      extensions: [.html]
+      extension: [.html]
       suffix: T1w
   - bids: {datatype: anat, suffix: dseg}
     caption: This panel shows the template T1-weighted image (if several T1w images
@@ -97,7 +97,7 @@ sections:
   - bids:
       datatype: func
       desc: '[at]compcor'
-      extensions: [.html]
+      extension: [.html]
       suffix: bold
   - bids: {datatype: func, desc: 'compcorvar', suffix: bold}
     caption: The cumulative variance explained by the first k components of the
