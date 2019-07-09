@@ -102,7 +102,8 @@ class Reportlet(Element):
     True
 
     >>> r = Reportlet(bl, out_figs, config={
-    ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'space': '.*', 'regex_search': True},
+    ...     'title': 'Some Title',
+    ...     'bids': {'datatype': 'anat', 'space': '.*', 'regex_search': True},
     ...     'caption': 'Some description {space}'})
     >>> sorted(r.components)[0][1]
     'Some description MNI152NLin2009cAsym'
@@ -112,7 +113,8 @@ class Reportlet(Element):
 
 
     >>> r = Reportlet(bl, out_figs, config={
-    ...     'title': 'Some Title', 'bids': {'datatype': 'fmap', 'space': '.*', 'regex_search': True},
+    ...     'title': 'Some Title',
+    ...     'bids': {'datatype': 'fmap', 'space': '.*', 'regex_search': True},
     ...     'caption': 'Some description {space}'})
     >>> r.is_empty()
     True
