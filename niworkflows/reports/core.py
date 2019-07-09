@@ -67,8 +67,8 @@ class Reportlet(Element):
 
     .. doctest::
 
-    >>> bl.get(subject='01', desc='reconall')
-    [<BIDSFile filename='fmriprep/sub-01/anat/sub-01_desc-reconall_T1w.svg'>]
+    >>> bl.get(subject='01', desc='reconall') # doctest: +ELLIPSIS
+    [<BIDSFile filename='.../fmriprep/sub-01/anat/sub-01_desc-reconall_T1w.svg'>]
 
     >>> len(bl.get(subject='01', space='.*'))
     2
@@ -146,7 +146,7 @@ class Reportlet(Element):
             if ext == '.html':
                 contents = src.read_text().strip()
             elif ext == '.svg':
-                entities = bidsfile.entities
+                entities = dict(bidsfile.entities)
                 if desc_text:
                     desc_text = desc_text.format(**entities)
 
@@ -214,8 +214,8 @@ class Report(object):
 
     >>> robj = Report(testdir / 'work' / 'reportlets', testdir / 'out',
     ...               'madeoutuuid', subject_id='01', packagename='fmriprep')
-    >>> robj.layout.get(subject='01', desc='reconall')
-    [<BIDSFile filename='anat/sub-01_desc-reconall_T1w.svg'>]
+    >>> robj.layout.get(subject='01', desc='reconall')  # doctest: +ELLIPSIS
+    [<BIDSFile filename='.../anat/sub-01_desc-reconall_T1w.svg'>]
 
     >>> robj.generate_report()
     0
