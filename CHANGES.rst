@@ -1,5 +1,5 @@
-0.9.6 (TBD)
-===========
+0.9.6 (July 8, 2019)
+====================
 
 Minor improvements to support some of the requirements generated during the development of fMRIPrep-1.4.1.
 
