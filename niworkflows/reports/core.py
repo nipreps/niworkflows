@@ -70,7 +70,7 @@ class Reportlet(Element):
     >>> bl.get(subject='01', desc='reconall') # doctest: +ELLIPSIS
     [<BIDSFile filename='.../fmriprep/sub-01/anat/sub-01_desc-reconall_T1w.svg'>]
 
-    >>> len(bl.get(subject='01', space='.*'))
+    >>> len(bl.get(subject='01', space='.*', regex_search=True))
     2
 
     >>> r = Reportlet(bl, out_figs, config={
@@ -102,17 +102,17 @@ class Reportlet(Element):
     True
 
     >>> r = Reportlet(bl, out_figs, config={
-    ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'space': '.*'},
+    ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'space': '.*', 'regex_search': True},
     ...     'caption': 'Some description {space}'})
-    >>> r.components[0][1]
+    >>> sorted(r.components)[0][1]
     'Some description MNI152NLin2009cAsym'
 
-    >>> r.components[1][1]
+    >>> sorted(r.components)[1][1]
     'Some description MNI152NLin6Asym'
 
 
     >>> r = Reportlet(bl, out_figs, config={
-    ...     'title': 'Some Title', 'bids': {'datatype': 'fmap', 'space': '.*'},
+    ...     'title': 'Some Title', 'bids': {'datatype': 'fmap', 'space': '.*', 'regex_search': True},
     ...     'caption': 'Some description {space}'})
     >>> r.is_empty()
     True
@@ -220,7 +220,7 @@ class Report(object):
     >>> robj.generate_report()
     0
     >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
-    19352
+    19370
 
     """
 
