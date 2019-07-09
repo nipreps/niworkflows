@@ -57,7 +57,7 @@ REQUIRES = [
     'nipype>=1.1.6',
     'packaging',
     'pandas',
-    'pybids>=0.7,<0.8',
+    'pybids>=0.9,<=0.10.0a0',
     'PyYAML',
     'scikit-image',
     'scipy',
