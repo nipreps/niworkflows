@@ -163,8 +163,7 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
         self.layout = _init_layout(self.inputs.in_file,
                                    self.layout,
                                    self.inputs.bids_validate)
-        params = self.layout.parse_file_entities(self.inputs.in_file,
-                                                 scope='raw')
+        params = self.layout.parse_file_entities(self.inputs.in_file)
         self._results = {key: params.get(key, Undefined)
                          for key in BIDSInfoOutputSpec().get().keys()}
         return runtime
