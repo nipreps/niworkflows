@@ -147,7 +147,7 @@ RUN python -c "from matplotlib import font_manager" && \
     sed -i 's/\(backend *: \).*$/\1Agg/g' $( python -c "import matplotlib; print(matplotlib.matplotlib_fname())" )
 
 # Precaching atlases
-RUN pip install --no-cache-dir "templateflow<0.4.0a0,>=0.3.0" && \
+RUN pip install --no-cache-dir "templateflow==0.4.0" && \
     python -c "from templateflow import api as tfapi; \
                tfapi.get('MNI152Lin|MNI152NLin2009cAsym|OASIS30ANTs', suffix='T1w'); \
                tfapi.get('MNI152Lin|MNI152NLin2009cAsym|OASIS30ANTs', desc='brain', suffix='mask'); \

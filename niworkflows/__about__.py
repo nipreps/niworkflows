@@ -57,13 +57,13 @@ REQUIRES = [
     'nipype>=1.1.6',
     'packaging',
     'pandas',
-    'pybids>=0.9,<=0.10.0a0',
+    'pybids @ git+https://github.com/bids-standard/pybids.git@33c7b423bf52828f66512a996c62a432c78ab731',
     'PyYAML',
     'scikit-image',
     'scipy',
     'seaborn',
     'svgutils',
-    'templateflow<0.4.0a0,>=0.3.0',
+    'templateflow @ git+https://github.com/templateflow/python-client.git@a0adcb7b9ef8c313936ec004e9fd7c8cbdd1f32c',
 ]
 
 SETUP_REQUIRES = []
