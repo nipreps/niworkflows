@@ -287,6 +287,7 @@ import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 
 class VersioneerConfig:
@@ -1404,6 +1405,12 @@ def get_versions(verbose=False):
 
     Returns dict with two keys: 'version' and 'full'.
     """
+    ver_file = Path(__file__).parent / 'fmriprep' / 'VERSION'
+
+    if ver_file.is_file():
+        ver = ver_file.read_text().splitlines()[0].strip()
+        return {"version": ver, 'full': ver}
+
     if "versioneer" in sys.modules:
         # see the discussion in cmdclass.py:get_cmdclass()
         del sys.modules["versioneer"]
