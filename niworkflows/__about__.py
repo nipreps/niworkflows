@@ -63,7 +63,7 @@ REQUIRES = [
     'scipy',
     'seaborn',
     'svgutils',
-    'templateflow @ git+https://github.com/templateflow/python-client.git@a0adcb7b9ef8c313936ec004e9fd7c8cbdd1f32c',
+    'templateflow ~= 0.4.1rc1',
 ]
 
 SETUP_REQUIRES = []
