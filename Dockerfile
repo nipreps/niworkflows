@@ -161,20 +161,13 @@ RUN python -c "from templateflow import api as tfapi; \
                tfapi.get('OASIS30ANTs|NKI', resolution=1, desc='BrainCerebellumRegistration', suffix='mask'); "
 
 COPY . niworkflows/
-ARG VERSION=dev
-# Force static versioning within container
-RUN echo "${VERSION}" > /src/niworkflows/niworkflows/VERSION && \
-    echo "include niworkflows/VERSION" >> MANIFEST.in && \
-    find /src/niworkflows/ -name "test*.py" -exec chmod a-x {} + && \
-    cd /src/niworkflows && \
-    pip install --no-cache-dir .[all] && \
+RUN pip install --no-cache-dir /src/niworkflows[all] && \
     rm -rf ~/.cache/pip
 
 # Final settings
 WORKDIR /tmp
 ARG BUILD_DATE
 ARG VCS_REF
-ARG VERSION
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.name="niworkflows" \
       org.label-schema.description="niworkflows - NeuroImaging workflows" \
