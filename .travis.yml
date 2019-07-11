@@ -16,19 +16,18 @@ env:
   global:
     - CHECK_TYPE="install"
     - INSTALL_TYPE="pip"
-    - PIP_CONSTRAINT=""
-    - SETUPTOOLS_CONSTRAINT=""
+    - INSTALL_DEPENDS="pip setuptools"
   matrix:
     - CHECK_TYPE="style"
     - INSTALL_TYPE="install"
     - INSTALL_TYPE="develop"
     - INSTALL_TYPE="sdist"
     - INSTALL_TYPE="wheel"
-    - PIP_CONSTRAINT="==10.0.1" SETUPTOOLS_CONSTRAINT="<30.3.0"
-    - SETUPTOOLS_CONSTRAINT="==30.3.0"
+    - INSTALL_DEPENDS="pip setuptools==30.2.1"
+    - INSTALL_DEPENDS="pip==10.0.1 setuptools==30.3.0"
 
 before_install:
-  - travis_retry python -m pip install --upgrade "pip$PIP_CONSTRAINT" "setuptools$SETUPTOOLS_CONSTRAINT"
+  - python -m pip install --upgrade $INSTALL_DEPENDS
   - pip install "flake8<3.0" flake8-putty
 
 install:
