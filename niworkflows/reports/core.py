@@ -155,6 +155,10 @@ class Reportlet(Element):
                 entities['extension'] = 'svg'
                 entities['datatype'] = 'figures'
                 linked_svg = layout.build_path(entities)
+                if linked_svg is None:
+                    raise ValueError("Could not generate SVG path to copy {src}"
+                                     " to. Entities: {entities}".format(src=src,
+                                                                        entities=entities))
                 out_file = out_dir / linked_svg
                 out_file.parent.mkdir(parents=True, exist_ok=True)
                 copyfile(src, out_file, copy=True, use_hardlink=True)
