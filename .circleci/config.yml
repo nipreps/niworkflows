@@ -37,15 +37,13 @@ jobs:
           name: Build Docker image
           no_output_timeout: 60m
           command: |
-            THISVERSION=$( python3 get_version.py )
             e=1 && for i in {1..5}; do
               docker build \
                 --cache-from=niworkflows:py3 \
                 --rm=false \
                 -t niworkflows:py3 \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-                --build-arg VCS_REF=`git rev-parse --short HEAD` \
-                --build-arg VERSION=${CIRCLE_TAG:-$THISVERSION} . \
+                --build-arg VCS_REF=`git rev-parse --short HEAD` . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
       - run:
