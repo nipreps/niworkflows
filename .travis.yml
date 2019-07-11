@@ -24,7 +24,7 @@ env:
     - INSTALL_TYPE="develop"
     - INSTALL_TYPE="sdist"
     - INSTALL_TYPE="wheel"
-    - PIP_CONSTRAINT="==10.1" SETUPTOOLS_CONSTRAINT="<30.3.0"
+    - PIP_CONSTRAINT="==10.0.1" SETUPTOOLS_CONSTRAINT="<30.3.0"
     - SETUPTOOLS_CONSTRAINT="==30.3.0"
 
 before_install:
