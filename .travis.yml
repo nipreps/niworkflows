@@ -34,7 +34,7 @@ before_install:
         virtualenv --python=python $VENV
         source $VENV/bin/activate
         python --version
-        travis_retry python -m pip install --upgrade "pip$PIP_CONSTRAINT" "setuptools$SETUPTOOLS_CONSTRAINT"
+        python -m pip install --upgrade "pip$PIP_CONSTRAINT" "setuptools$SETUPTOOLS_CONSTRAINT"
         deactivate
     done
 
@@ -49,6 +49,7 @@ install:
     deactivate
   - |
     source /tmp/install/bin/activate
+    python --version
     if [ "$INSTALL_TYPE" == "install" ]; then
         python setup.py install
     elif [ "$INSTALL_TYPE" == "develop" ]; then
