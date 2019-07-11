@@ -205,13 +205,13 @@ jobs:
           name: Build and check
           command: |
             python3 setup.py check -r -s
-            python3 setup.py sdist bdist_wheel
+            python3 setup.py sdist
             python3 -m twine check dist/*
       - run:
           name: Validate version
           command: |
             THISVERSION=$( python3 get_version.py )
-            python3 -m pip install dist/*.whl
+            python3 -m pip install dist/*.tar.gz
             mkdir empty
             cd empty
             INSTALLED=$( python3 -c 'import niworkflows; print(niworkflows.__version__)' )
@@ -231,7 +231,7 @@ jobs:
           name: Build and check
           command: |
             python3 setup.py check -r -s
-            python3 setup.py sdist bdist_wheel
+            python3 setup.py sdist
             python3 -m twine check dist/*
       - run:
           name: Validate version
