@@ -197,6 +197,7 @@ jobs:
     working_directory: /tmp/src/niworkflows
     steps:
       - checkout
+      - run: pyenv local 3.5.2
       - run:
           name: Install build depends
           command: python3 -m pip install "setuptools>=30.3.0" twine docutils
@@ -222,6 +223,7 @@ jobs:
     working_directory: /tmp/src/niworkflows
     steps:
       - checkout
+      - run: pyenv local 3.5.2
       - run:
           name: Install build depends
           command: python3 -m pip install "setuptools>=30.3.0" twine docutils
