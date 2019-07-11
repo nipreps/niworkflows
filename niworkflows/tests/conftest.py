@@ -4,6 +4,7 @@
 """ py.test configuration file """
 import os
 from pathlib import Path
+from tempfile import mkdtemp
 from datetime import datetime as dt
 import pytest
 from templateflow.api import get as get_template
@@ -24,6 +25,12 @@ def _run_interface_mock(objekt, runtime):
     objekt._post_run_hook(runtime)
     objekt._generate_report()
     return runtime
+
+
+# XXX This may not be necessary. Look into more when overhauling tests.
+def pytest_runtest_setup(item):
+    """Change to temporary directory"""
+    os.chdir(mkdtemp())
 
 
 @pytest.fixture
