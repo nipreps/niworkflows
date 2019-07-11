@@ -28,11 +28,27 @@ env:
     - SETUPTOOLS_CONSTRAINT="==30.3.0"
 
 before_install:
-  - travis_retry python -m pip install --upgrade "pip $PIP_CONSTRAINT" "setuptools $SETUPTOOLS_CONSTRAINT"
-  - pip install "flake8<3.0" flake8-putty
+  - travis_retry python -m pip install pip setuptools virtualenv
+  - |
+    for VENV in /tmp/build /tmp/install; do
+        virtualenv --python=python $VENV
+        source $VENV/bin/activate
+        python --version
+        travis_retry python -m pip install --upgrade "pip$PIP_CONSTRAINT" "setuptools$SETUPTOOLS_CONSTRAINT"
+        deactivate
+    done
 
 install:
   - |
+    source /tmp/build/bin/activate
+    if [ "$INSTALL_TYPE" == "sdist" ]; then
+        python setup.py sdist
+    elif [ "$INSTALL_TYPE" == "wheel" ]; then
+        python setup.py bdist_wheel
+    fi
+    deactivate
+  - |
+    source /tmp/install/bin/activate
     if [ "$INSTALL_TYPE" == "install" ]; then
         python setup.py install
     elif [ "$INSTALL_TYPE" == "develop" ]; then
@@ -40,10 +56,8 @@ install:
     elif [ "$INSTALL_TYPE" == "pip" ]; then
         pip install .
     elif [ "$INSTALL_TYPE" == "sdist" ]; then
-        python setup.py sdist
         pip install dist/*.tar.gz
     elif [ "$INSTALL_TYPE" == "wheel" ]; then
-        python setup.py bdist_wheel
         pip install dist/*.whl
     fi
   - |
@@ -57,6 +71,8 @@ script:
       flake8 niworkflows
     elif [ "$CHECK_TYPE" == "install" ]; then
       INTENDED_VERSION="$(python -c 'import versioneer; print(versioneer.get_version())')"
+      mkdir for_testing
+      cd for_testing
       INSTALLED_VERSION="$(python -c 'import niworkflows; print(niworkflows.__version__)')"
       python -c 'import niworkflows; print(niworkflows.__file__)'
       echo "Intended: $INTENDED_VERSION"
