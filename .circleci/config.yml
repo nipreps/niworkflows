@@ -191,6 +191,30 @@ jobs:
       - store_test_results:
           path: /tmp/tests
 
+  test_package:
+    machine:
+      image: circleci/classic:201711-01
+    working_directory: /tmp/src/niworkflows
+    steps:
+      - checkout
+      - run:
+          name: Install build depends
+          command: python3 -m pip install "setuptools>=30.3.0" twine docutils
+      - run:
+          name: Build and check
+          command: |
+            python3 setup.py check -r -s
+            python3 setup.py sdist bdist_wheel
+            twine check dist/*
+      - run:
+          name: Validate version
+          command: |
+            THISVERSION=$( python3 get_version.py )
+            python3 -m pip install dist/*.whl
+            mkdir empty
+            cd empty
+            INSTALLED=$( python3 -c 'import niworkflows; print(niworkflows.__version__)' )
+            test "${CIRCLE_TAG:-$THISVERSION}" == "$INSTALLED"
 
   deploy:
     machine:
@@ -199,13 +223,26 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Deploy to PyPi
+          name: Install build depends
+          command: python3 -m pip install "setuptools>=30.3.0" twine docutils
+      - run:
+          name: Build and check
           command: |
-            pip install "setuptools>=27.0" twine docutils
-            echo "${CIRCLE_TAG}" > niworkflows/VERSION
-            echo "include niworkflows/VERSION" >> MANIFEST.in
-            python setup.py check -r -s
-            python setup.py sdist
+            python3 setup.py check -r -s
+            python3 setup.py sdist bdist_wheel
+            twine check dist/*
+      - run:
+          name: Validate version
+          command: |
+            THISVERSION=$( python3 get_version.py )
+            python3 -m pip install dist/*.tar.gz
+            mkdir empty
+            cd empty
+            INSTALLED=$( python3 -c 'import niworkflows; print(niworkflows.__version__)' )
+            test "${CIRCLE_TAG:-$THISVERSION}" == "$INSTALLED"
+      - run:
+          name: Upload to PyPi
+          command: |
             twine upload dist/*
 
 workflows:
@@ -217,6 +254,10 @@ workflows:
             tags:
               only: /.*/
       - get_data:
+          filters:
+            tags:
+              only: /.*/
+      - test_package:
           filters:
             tags:
               only: /.*/
@@ -233,6 +274,7 @@ workflows:
       - deploy:
           requires:
             - test_pytest
+            - test_package
           filters:
             branches:
               ignore: /.*/
