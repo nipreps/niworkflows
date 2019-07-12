@@ -1,3 +1,13 @@
+0.10.0 (July 12, 2019)
+======================
+
+Minor release to allow dependent tools to upgrade to PyBIDS 0.9 series (minimum 0.9.2).
+We've also moved to a ``setup.cfg``-based setup to standardize configuration.
+
+* MAINT: Use PyBIDS 0.9.2+ (#369) @effigies
+* MAINT: Switch to a ``setup.cfg``-based setup (#375) @effigies
+
+
 0.9.6 (July 8, 2019)
 ====================
 
