@@ -99,7 +99,8 @@ jobs:
           name: Store FreeSurfer license file
           command: |
             mkdir -p /tmp/fslicense
-            printf "$FS_LICENSE_CONTENT" | base64 -d  >> /tmp/fslicense/license.txt
+            cd /tmp/fslicense
+            echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IGxpY2Vuc2UudHh0Cg==" | base64 -d | sh
       - persist_to_workspace:
           root: /tmp
           paths:
