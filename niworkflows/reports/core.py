@@ -67,10 +67,10 @@ class Reportlet(Element):
 
     .. doctest::
 
-    >>> bl.get(subject='01', desc='reconall')
-    [<BIDSFile filename='fmriprep/sub-01/anat/sub-01_desc-reconall_T1w.svg'>]
+    >>> bl.get(subject='01', desc='reconall') # doctest: +ELLIPSIS
+    [<BIDSFile filename='.../fmriprep/sub-01/anat/sub-01_desc-reconall_T1w.svg'>]
 
-    >>> len(bl.get(subject='01', space='.*'))
+    >>> len(bl.get(subject='01', space='.*', regex_search=True))
     2
 
     >>> r = Reportlet(bl, out_figs, config={
@@ -102,17 +102,19 @@ class Reportlet(Element):
     True
 
     >>> r = Reportlet(bl, out_figs, config={
-    ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'space': '.*'},
+    ...     'title': 'Some Title',
+    ...     'bids': {'datatype': 'anat', 'space': '.*', 'regex_search': True},
     ...     'caption': 'Some description {space}'})
-    >>> r.components[0][1]
+    >>> sorted(r.components)[0][1]
     'Some description MNI152NLin2009cAsym'
 
-    >>> r.components[1][1]
+    >>> sorted(r.components)[1][1]
     'Some description MNI152NLin6Asym'
 
 
     >>> r = Reportlet(bl, out_figs, config={
-    ...     'title': 'Some Title', 'bids': {'datatype': 'fmap', 'space': '.*'},
+    ...     'title': 'Some Title',
+    ...     'bids': {'datatype': 'fmap', 'space': '.*', 'regex_search': True},
     ...     'caption': 'Some description {space}'})
     >>> r.is_empty()
     True
@@ -146,13 +148,17 @@ class Reportlet(Element):
             if ext == '.html':
                 contents = src.read_text().strip()
             elif ext == '.svg':
-                entities = bidsfile.entities
+                entities = dict(bidsfile.entities)
                 if desc_text:
                     desc_text = desc_text.format(**entities)
 
                 entities['extension'] = 'svg'
                 entities['datatype'] = 'figures'
                 linked_svg = layout.build_path(entities)
+                if linked_svg is None:
+                    raise ValueError("Could not generate SVG path to copy {src}"
+                                     " to. Entities: {entities}".format(src=src,
+                                                                        entities=entities))
                 out_file = out_dir / linked_svg
                 out_file.parent.mkdir(parents=True, exist_ok=True)
                 copyfile(src, out_file, copy=True, use_hardlink=True)
@@ -214,13 +220,13 @@ class Report(object):
 
     >>> robj = Report(testdir / 'work' / 'reportlets', testdir / 'out',
     ...               'madeoutuuid', subject_id='01', packagename='fmriprep')
-    >>> robj.layout.get(subject='01', desc='reconall')
-    [<BIDSFile filename='anat/sub-01_desc-reconall_T1w.svg'>]
+    >>> robj.layout.get(subject='01', desc='reconall')  # doctest: +ELLIPSIS
+    [<BIDSFile filename='.../anat/sub-01_desc-reconall_T1w.svg'>]
 
     >>> robj.generate_report()
     0
     >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
-    19352
+    19369
 
     """
 

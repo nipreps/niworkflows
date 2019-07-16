@@ -24,6 +24,7 @@ from .. import NIWORKFLOWS_LOG
 from . import report_base as nrc
 from .mni import (
     RobustMNINormalizationInputSpec,
+    RobustMNINormalizationOutputSpec,
     RobustMNINormalization
 )
 from .fixes import (FixHeaderApplyTransforms as ApplyTransforms,
@@ -36,7 +37,7 @@ class RobustMNINormalizationInputSpecRPT(
 
 
 class RobustMNINormalizationOutputSpecRPT(
-        reporting.ReportCapableOutputSpec, ants.registration.RegistrationOutputSpec):
+        reporting.ReportCapableOutputSpec, RobustMNINormalizationOutputSpec):
     pass
 
 
@@ -292,16 +293,17 @@ class SimpleBeforeAfterInputSpecRPT(nrc.SVGReportCapableInputSpec):
     before = File(exists=True, mandatory=True, desc='file before')
     after = File(exists=True, mandatory=True, desc='file after')
     wm_seg = File(desc='reference white matter segmentation mask')
+    before_label = traits.Str("before", usedefault=True)
+    after_label = traits.Str("after", usedefault=True)
 
 
 class SimpleBeforeAfterRPT(nrc.RegistrationRC, nrc.ReportingInterface):
     input_spec = SimpleBeforeAfterInputSpecRPT
 
-    _fixed_image_label = "after"
-    _moving_image_label = "before"
-
     def _post_run_hook(self, runtime):
         """ there is not inner interface to run """
+        self._fixed_image_label = self.inputs.after_label
+        self._moving_image_label = self.inputs.before_label
         self._fixed_image = self.inputs.after
         self._moving_image = self.inputs.before
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None

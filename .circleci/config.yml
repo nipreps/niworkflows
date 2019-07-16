@@ -37,15 +37,13 @@ jobs:
           name: Build Docker image
           no_output_timeout: 60m
           command: |
-            THISVERSION=$( python3 get_version.py )
             e=1 && for i in {1..5}; do
               docker build \
                 --cache-from=niworkflows:py3 \
                 --rm=false \
                 -t niworkflows:py3 \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-                --build-arg VCS_REF=`git rev-parse --short HEAD` \
-                --build-arg VERSION=${CIRCLE_TAG:-$THISVERSION} . \
+                --build-arg VCS_REF=`git rev-parse --short HEAD` . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
       - run:
@@ -101,7 +99,8 @@ jobs:
           name: Store FreeSurfer license file
           command: |
             mkdir -p /tmp/fslicense
-            printf "$FS_LICENSE_CONTENT" | base64 -d  >> /tmp/fslicense/license.txt
+            cd /tmp/fslicense
+            echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IGxpY2Vuc2UudHh0Cg==" | base64 -d | sh
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -193,6 +192,30 @@ jobs:
       - store_test_results:
           path: /tmp/tests
 
+  test_package:
+    machine:
+      image: circleci/classic:201711-01
+    working_directory: /tmp/src/niworkflows
+    steps:
+      - checkout
+      - run: pyenv local 3.5.2
+      - run:
+          name: Install build depends
+          command: python3 -m pip install "setuptools>=30.3.0" "pip>=10.0.1" twine docutils
+      - run:
+          name: Build and check
+          command: |
+            python3 setup.py sdist
+            python3 -m twine check dist/*
+      - run:
+          name: Validate version
+          command: |
+            THISVERSION=$( python3 get_version.py )
+            python3 -m pip install dist/*.tar.gz
+            mkdir empty
+            cd empty
+            INSTALLED=$( python3 -c 'import niworkflows; print(niworkflows.__version__)' )
+            test "${CIRCLE_TAG:-$THISVERSION}" == "$INSTALLED"
 
   deploy:
     machine:
@@ -200,15 +223,29 @@ jobs:
     working_directory: /tmp/src/niworkflows
     steps:
       - checkout
+      - run: pyenv local 3.5.2
       - run:
-          name: Deploy to PyPi
+          name: Install build depends
+          command: python3 -m pip install "setuptools>=30.3.0" "pip>=10.0.1" twine docutils
+      - run:
+          name: Build and check
           command: |
-            pip install "setuptools>=27.0" twine docutils
-            echo "${CIRCLE_TAG}" > niworkflows/VERSION
-            echo "include niworkflows/VERSION" >> MANIFEST.in
-            python setup.py check -r -s
-            python setup.py sdist
-            twine upload dist/*
+            python3 setup.py check -r -s
+            python3 setup.py sdist
+            python3 -m twine check dist/*
+      - run:
+          name: Validate version
+          command: |
+            THISVERSION=$( python3 get_version.py )
+            python3 -m pip install dist/*.tar.gz
+            mkdir empty
+            cd empty
+            INSTALLED=$( python3 -c 'import niworkflows; print(niworkflows.__version__)' )
+            test "${CIRCLE_TAG:-$THISVERSION}" == "$INSTALLED"
+      - run:
+          name: Upload to PyPi
+          command: |
+            python3 -m twine upload dist/*
 
 workflows:
   version: 2
@@ -219,6 +256,10 @@ workflows:
             tags:
               only: /.*/
       - get_data:
+          filters:
+            tags:
+              only: /.*/
+      - test_package:
           filters:
             tags:
               only: /.*/
@@ -235,6 +276,7 @@ workflows:
       - deploy:
           requires:
             - test_pytest
+            - test_package
           filters:
             branches:
               ignore: /.*/

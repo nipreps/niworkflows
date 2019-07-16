@@ -1,3 +1,22 @@
+0.10.0 (July 12, 2019)
+======================
+
+Minor release to allow dependent tools to upgrade to PyBIDS 0.9 series (minimum 0.9.2).
+We've also moved to a ``setup.cfg``-based setup to standardize configuration.
+
+* MAINT: Use PyBIDS 0.9.2+ (#369) @effigies
+* MAINT: Switch to a ``setup.cfg``-based setup (#375) @effigies
+
+
+0.9.6 (July 8, 2019)
+====================
+
+Minor improvements to support some of the requirements generated during the development of fMRIPrep-1.4.1.
+
+* ENH: Improvements to ``RobustMNINormalization`` (#368) @oesteban
+* RF: Miscellaneous improvements to allow multiplicity of templates and specs (#366) @oesteban
+
+
 0.9.5 (June 5, 2019)
 ====================
 

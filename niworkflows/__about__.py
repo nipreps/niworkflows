@@ -12,84 +12,8 @@ __version__ = get_versions()['version']
 del get_versions
 
 __packagename__ = 'niworkflows'
-__author__ = 'The CRN developers'
 __copyright__ = 'Copyright {}, Center for Reproducible Neuroscience, Stanford University'.format(
     datetime.now().year)
 __credits__ = ['Oscar Esteban', 'Ross Blair', 'Shoshana L. Berleant',
                'Christopher J. Markiewicz', 'Chris Gorgolewski',
                'Russell A. Poldrack']
-__license__ = '3-clause BSD'
-__maintainer__ = 'Oscar Esteban'
-__email__ = 'code@oscaresteban.es'
-__status__ = 'Prototype'
-
-__description__ = """\
-NeuroImaging Workflows provides processing tools for magnetic \
-resonance images of the brain.\
-"""
-__longdesc__ = """\
-NeuroImaging Workflows (NIWorkflows) is a selection of image processing workflows \
-for magnetic resonance images of the brain. It is designed to provide an easily \
-accessible, state-of-the-art interface that is robust to differences in scan \
-acquisition protocols and that requires minimal user input. \
-This open-source neuroimaging data processing tool is being developed as a part of \
-the MRI image analysis and reproducibility platform offered by the CRN.\
-"""
-__url__ = 'https://github.com/poldracklab/{}'.format(__packagename__)
-
-DOWNLOAD_URL = (
-    'https://pypi.python.org/packages/source/{name[0]}/{name}/{name}-{ver}.tar.gz'.format(
-        name=__packagename__, ver=__version__))
-CLASSIFIERS = [
-    'Development Status :: 3 - Alpha',
-    'Intended Audience :: Science/Research',
-    'Topic :: Scientific/Engineering :: Image Recognition',
-    'License :: OSI Approved :: BSD License',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7',
-]
-
-REQUIRES = [
-    'jinja2',
-    'matplotlib>=2.2.0',
-    'nilearn>=0.2.6,!=0.5.0,!=0.5.1',
-    'nipype>=1.1.6',
-    'packaging',
-    'pandas',
-    'pybids>=0.7,<0.8',
-    'PyYAML',
-    'scikit-image',
-    'scipy',
-    'seaborn',
-    'svgutils',
-    'templateflow<0.4.0a0,>=0.3.0',
-    'transforms3d',
-]
-
-SETUP_REQUIRES = []
-REQUIRES += SETUP_REQUIRES
-
-LINKS_REQUIRES = [
-    'git+https://github.com/daavoo/pyntcloud.git#egg=pyntcloud-0.0.1',
-]
-TESTS_REQUIRES = [
-    'pytest',
-    'pytest-xdist',
-    'pytest-cov==2.5.1',
-    'coverage',
-]
-
-EXTRA_REQUIRES = {
-    'doc': [
-        'sphinx>=1.5.3',
-        'pydotplus',
-        'pydot>=1.2.3',
-    ],
-    'duecredit': ['duecredit'],
-    'pointclouds': ['pyntcloud'],
-    'tests': TESTS_REQUIRES,
-}
-
-# Enable a handle to install all extra dependencies at once
-EXTRA_REQUIRES['all'] = list(EXTRA_REQUIRES.values())

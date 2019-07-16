@@ -27,8 +27,9 @@ def _run_interface_mock(objekt, runtime):
     return runtime
 
 
+# XXX This may not be necessary. Look into more when overhauling tests.
 def pytest_runtest_setup(item):
-    """Change to temporal directory"""
+    """Change to temporary directory"""
     os.chdir(mkdtemp())
 
 
