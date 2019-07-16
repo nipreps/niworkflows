@@ -406,13 +406,13 @@ class ValidateImage(SimpleInterface):
             angle = transforms3d.axangles.mat2axangle(rot)[1]
             total_trans = np.sqrt(np.sum(trans * trans)) # Add angle and total_trans to report
             warning_txt = 'Note on orientation: qform matrix overwritten'
-            description = f"""\
+            description = """\
     <p class="elem-desc">
     The qform has been copied from sform.
     The difference in angle is {angle:.02g}.
     The difference in translation is {total_trans:.02g}.
     </p>
-    """
+    """.format(angle=angle, total_trans=total_trans)
             if not valid_qform and qform_code > 0:
                 warning_txt = 'WARNING - Invalid qform information'
                 description = """\
