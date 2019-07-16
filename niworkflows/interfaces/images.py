@@ -402,7 +402,7 @@ class ValidateImage(SimpleInterface):
                 self._results['out_report'] = out_report
                 return runtime
             diff = np.linalg.inv(qform) @ new_qform
-            trans, rot, scale, shear = transforms3d.affines.decompose44(diff)
+            trans, rot, scale, _ = transforms3d.affines.decompose44(diff)
             axis, angle = transforms3d.axangles.mat2axangle(rot)
             total_trans = np.sqrt(np.sum(trans * trans)) # Add angle and total_trans to report
             warning_txt = 'Note on orientation: qform matrix overwritten'
