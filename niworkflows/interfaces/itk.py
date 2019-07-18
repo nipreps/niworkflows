@@ -262,7 +262,7 @@ def _applytfms(args):
     runtime = xfm.run().runtime
 
     if copy_dtype:
-        nii = nb.load(out_file)
+        nii = nb.load(out_file, mmap=False)
         in_dtype = nb.load(in_file).get_data_dtype()
 
         # Overwrite only iff dtypes don't match
