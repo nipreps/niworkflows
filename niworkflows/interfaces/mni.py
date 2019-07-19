@@ -5,8 +5,8 @@
 from __future__ import print_function, division, absolute_import, unicode_literals
 from os import path as op
 
-import pkg_resources as pkgr
 from multiprocessing import cpu_count
+import pkg_resources as pkgr
 from packaging.version import Version
 
 from nipype.interfaces.ants.registration import RegistrationOutputSpec
@@ -54,7 +54,7 @@ class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     reference = traits.Enum('T1w', 'T2w', 'boldref', 'PDw', mandatory=True, usedefault=True,
                             desc='set the reference modality for registration')
     # T1 or EPI registration?
-    moving = traits.Enum('T1w', 'bold', usedefault=True, mandatory=True,
+    moving = traits.Enum('T1w', 'boldref', usedefault=True, mandatory=True,
                          desc='registration type')
     # Template to use as the default reference image.
     template = traits.Str('MNI152NLin2009cAsym', usedefault=True,
@@ -153,10 +153,14 @@ class RobustMNINormalization(BaseInterface):
             self.norm.resource_monitor = False
             self.norm.terminal_output = self.terminal_output
 
+            cmd = self.norm.cmdline
             # Print the retry number and command line call to the log.
             NIWORKFLOWS_LOG.info(
-                'Retry #%d, commandline: \n%s', self.retry, self.norm.cmdline)
+                'Retry #%d, commandline: \n%s', self.retry, cmd)
             self.norm.ignore_exception = True
+            with open('command.txt', 'w') as cmdfile:
+                print(cmd + "\n", file=cmdfile)
+
             # Try running registration.
             interface_result = self.norm.run()
 
@@ -351,8 +355,12 @@ class RobustMNINormalization(BaseInterface):
                 self.inputs.template, template_spec=template_spec,
                 default_resolution=default_resolution)
 
-            # Set reference output
+            # Set reference image
             self._reference_image = ref_template
+            if not op.isfile(self._reference_image):
+                raise ValueError("""\
+The registration reference must be an existing file, but path "%s" \
+cannot be found.""" % ref_template)
 
             # Get the template specified by the user.
             ref_mask = get_template(self.inputs.template, desc='brain', suffix='mask',

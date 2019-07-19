@@ -130,6 +130,7 @@ RUN conda install -y python=3.7.1 \
                      libxslt=1.1.32 \
                      graphviz=2.40.1 \
                      traits=4.6.0 \
+                     pip=19.1 \
                      zlib; sync && \
     chmod -R a+rX /usr/local/miniconda; sync && \
     chmod +x /usr/local/miniconda/bin/*; sync && \
@@ -145,36 +146,28 @@ ENV MKL_NUM_THREADS=1 \
 RUN python -c "from matplotlib import font_manager" && \
     sed -i 's/\(backend *: \).*$/\1Agg/g' $( python -c "import matplotlib; print(matplotlib.matplotlib_fname())" )
 
-# Precaching atlases
-RUN pip install --no-cache-dir "templateflow<0.4.0a0,>=0.3.0" && \
-    python -c "from templateflow import api as tfapi; \
-               tfapi.get('MNI152Lin|MNI152NLin2009cAsym|OASIS30ANTs', suffix='T1w'); \
-               tfapi.get('MNI152Lin|MNI152NLin2009cAsym|OASIS30ANTs', desc='brain', suffix='mask'); \
-               tfapi.get('OASIS30ANTs', resolution=1, desc='4', suffix='dseg'); \
-               tfapi.get('OASIS30ANTs|NKI', resolution=1, label='brain', suffix='probseg'); \
-               tfapi.get('OASIS30ANTs|NKI', resolution=1, desc='BrainCerebellumRegistration', suffix='mask'); "
-
 # Installing dev requirements (packages that are not in pypi)
 WORKDIR /src/
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt && \
     rm -rf ~/.cache/pip
 
+# Precaching atlases
+RUN python -c "from templateflow import api as tfapi; \
+               tfapi.get(['MNI152Lin', 'MNI152NLin2009cAsym', 'OASIS30ANTs'], suffix='T1w'); \
+               tfapi.get(['MNI152Lin', 'MNI152NLin2009cAsym', 'OASIS30ANTs'], desc='brain', suffix='mask'); \
+               tfapi.get('OASIS30ANTs', resolution=1, desc='4', suffix='dseg'); \
+               tfapi.get(['OASIS30ANTs', 'NKI'], resolution=1, label='brain', suffix='probseg'); \
+               tfapi.get(['OASIS30ANTs', 'NKI'], resolution=1, desc='BrainCerebellumRegistration', suffix='mask'); "
+
 COPY . niworkflows/
-ARG VERSION=dev
-# Force static versioning within container
-RUN echo "${VERSION}" > /src/niworkflows/niworkflows/VERSION && \
-    echo "include niworkflows/VERSION" >> MANIFEST.in && \
-    find /src/niworkflows/ -name "test*.py" -exec chmod a-x {} + && \
-    cd /src/niworkflows && \
-    pip install --no-cache-dir .[all] && \
+RUN pip install --no-cache-dir /src/niworkflows[all] && \
     rm -rf ~/.cache/pip
 
 # Final settings
 WORKDIR /tmp
 ARG BUILD_DATE
 ARG VCS_REF
-ARG VERSION
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.name="niworkflows" \
       org.label-schema.description="niworkflows - NeuroImaging workflows" \
