@@ -1,3 +1,12 @@
+0.10.1 (July 22, 2019)
+======================
+
+Minor release with bug fixes and pinning the latest stable release of the TemplateFlow client.
+
+* PIN: latest templateflow client (0.4.1) @oesteban
+* FIX: Load file with mmap=False when modifying on-disk dtype (#378) @effigies
+* FIX: Require scikit-learn because nilearn does not (#376) @effigies
+
 0.10.0 (July 12, 2019)
 ======================
 
