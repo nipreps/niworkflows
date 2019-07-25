@@ -1,3 +1,10 @@
+0.10.2 (July 24, 2019)
+======================
+
+Patch release culminating the migration of workflows from fMRIPrep.
+
+* TST: Bring EPI brain extraction tests from fMRIPrep (#380) @oesteban
+
 0.10.1 (July 22, 2019)
 ======================
 
