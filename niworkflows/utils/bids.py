@@ -69,7 +69,7 @@ def collect_participants(bids_dir, participant_label=None, strict=False,
     ...     str(datadir / 'ds114'), participant_label=['02', '14'],
     ...     strict=True, bids_validate=False)  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
-    fmriprep.utils.bids.BIDSError:
+    BIDSError:
     ...
     """
 
