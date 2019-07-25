@@ -311,7 +311,7 @@ def init_enhance_and_skullstrip_bold_wf(
         # Set up spatial normalization
         norm = pe.Node(Registration(
             from_file=pkgr_fn(
-                'fmriprep.data',
+                'niworkflows.data',
                 'epi_atlasbased_brainmask.json')),
             name='norm',
             n_procs=omp_nthreads)

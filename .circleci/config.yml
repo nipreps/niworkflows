@@ -111,6 +111,41 @@ jobs:
          paths:
             - /tmp/data
 
+  get_regression_data:
+    machine:
+      # Ubuntu 14.04 with Docker 17.10.0-ce
+      image: circleci/classic:201711-01
+    working_directory: /home/circleci/data
+    steps:
+      - restore_cache:
+          keys:
+            - regression-v1-{{ .Revision }}
+            - regression-v1-
+      - run:
+          name: Get truncated BOLD series
+          command: |
+            mkdir -p /tmp/data
+            if [[ ! -d /tmp/data/fmriprep_bold_truncated ]]; then
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O fmriprep_bold_truncated.tar.gz "https://osf.io/286yr/download"
+              tar xvzf fmriprep_bold_truncated.tar.gz -C /tmp/data/
+            else
+              echo "Truncated BOLD series were cached"
+            fi
+      - run:
+          name: Get pre-computed masks
+          command: |
+            if [[ ! -d /tmp/data/fmriprep_bold_mask ]]; then
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O fmriprep_bold_mask.tar.gz "https://osf.io/s4f7b/download"
+              tar xvzf fmriprep_bold_mask.tar.gz -C /tmp/data/
+            else
+              echo "Pre-computed masks were cached"
+            fi
+      - save_cache:
+         key: regression-v1-{{ .Revision }}-{{ epoch }}
+         paths:
+            - /tmp/data
 
   test_pytest:
     machine:
@@ -125,6 +160,10 @@ jobs:
             - docker-v1-{{ .Branch }}-
             - docker-v1-master-
             - docker-v1-
+      - restore_cache:
+          keys:
+            - regression-v1-{{ .Revision }}
+
       - checkout:
           path: /tmp/src/niworkflows
       - run:
@@ -160,6 +199,7 @@ jobs:
                      --cov niworkflows --cov-report xml:/tmp/unittests.xml \
                      --ignore=/src/niworkflows/niworkflows/tests/ \
                      --ignore=/src/niworkflows/niworkflows/interfaces/ants.py \
+                     --ignore=/src/niworkflows/niworkflows/func/tests/ \
                      /src/niworkflows/niworkflows
 
       - run:
@@ -191,6 +231,80 @@ jobs:
 
       - store_test_results:
           path: /tmp/tests
+
+  test_masks:
+    machine:
+      image: circleci/classic:201711-01
+    working_directory: /tmp/masks
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - restore_cache:
+          keys:
+            - docker-v1-{{ .Branch }}-{{ epoch }}
+            - docker-v1-{{ .Branch }}-
+            - docker-v1-master-
+            - docker-v1-
+      - restore_cache:
+          keys:
+            - regression-v1-{{ .Revision }}
+
+      - checkout:
+          path: /tmp/src/niworkflows
+      - run:
+          name: Load Docker image layer cache
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            if [ -f /tmp/cache/docker.tar.gz ]; then
+              sudo apt update && sudo apt -y install pigz
+              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
+              docker images
+            fi
+      - run:
+          name: Set PR number
+          command: |
+            echo 'export CIRCLE_PR_NUMBER="${CIRCLE_PR_NUMBER:-${CIRCLE_PULL_REQUEST##*/}}"' >> $BASH_ENV
+            source $BASH_ENV
+            echo $CIRCLE_PR_NUMBER
+      - run:
+          name: Get codecov
+          command: python -m pip install codecov
+
+      - run:
+          name: Run regression tests on EPI masks
+          no_output_timeout: 2h
+          command: |
+            mkdir -p /tmp/masks/reports && \
+            docker run -ti --rm=false \
+              -v /tmp/data:/tmp/data -v /tmp/masks:/tmp/masks \
+              -e FMRIPREP_REGRESSION_SOURCE=/tmp/data/fmriprep_bold_truncated \
+              -e FMRIPREP_REGRESSION_TARGETS=/tmp/data/fmriprep_bold_mask \
+              -e FMRIPREP_REGRESSION_REPORTS=/tmp/masks/reports \
+              niworkflows:py3 \
+              pytest --junit-xml=/tmp/masks/regression.xml \
+                     --cov niworkflows --cov-report xml:/tmp/masks/coverage.xml \
+                     /src/niworkflows/niworkflows/func/tests/
+
+      - run:
+          name: Submit masks test coverage
+          command: |
+            python -m codecov --file /tmp/masks/coverage.xml --root /tmp/src/niworkflows \
+                --flags masks -e CIRCLE_JOB
+
+      - run:
+          name: Package new masks
+          no_output_timeout: 10m
+          working_directory: /tmp/data
+          command: |
+            tar cfz /tmp/masks/fmriprep_bold_mask.tar.gz fmriprep_bold_mask/*/*.nii.gz
+
+      - store_artifacts:
+          path: /tmp/masks
+
+      - store_test_results:
+          path: /tmp/masks
 
   test_package:
     machine:
@@ -257,10 +371,26 @@ workflows:
               only: /.*/
       - get_data:
           filters:
+            branches:
+              ignore:
+                - /masks?\/.*/
             tags:
               only: /.*/
+
+      - get_regression_data:
+          filters:
+            branches:
+              only:
+                - /master/
+                - /masks?\/.*/
+            tags:
+              ignore: /.*/
+
       - test_package:
           filters:
+            branches:
+              ignore:
+                - /masks?\/.*/
             tags:
               only: /.*/
 
@@ -270,9 +400,24 @@ workflows:
             - get_data
           filters:
             branches:
-              ignore: /docs?\/.*/
+              ignore:
+                - /docs?\/.*/
+                - /masks?\/.*/
             tags:
               only: /.*/
+
+      - test_masks:
+          requires:
+            - build
+            - get_regression_data
+          filters:
+            branches:
+              only:
+                - /master/
+                - /masks?\/.*/
+            tags:
+              ignore: /.*/
+
       - deploy:
           requires:
             - test_pytest
