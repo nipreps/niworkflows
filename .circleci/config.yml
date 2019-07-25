@@ -276,7 +276,7 @@ jobs:
           name: Run regression tests on EPI masks
           no_output_timeout: 2h
           command: |
-            mkdir /tmp/masks/reports && \
+            mkdir -p /tmp/masks/reports && \
             docker run -ti --rm=false \
               -v /tmp/data:/tmp/data -v /tmp/masks:/tmp/masks \
               -e FMRIPREP_REGRESSION_SOURCE=/tmp/data/fmriprep_bold_truncated \
