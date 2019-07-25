@@ -1,3 +1,2 @@
-pyntcloud @ git+https://github.com/daavoo/pyntcloud.git#egg=pyntcloud-0.0.1
-pybids @ git+https://github.com/bids-standard/pybids.git@33c7b423bf52828f66512a996c62a432c78ab731
-templateflow ~= 0.4.1rc1
+pyntcloud
+templateflow ~= 0.4.1
