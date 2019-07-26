@@ -9,7 +9,7 @@ ReportCapableInterfaces for segmentation tools
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 
-from nipype.interfaces.base import File
+from nipype.interfaces.base import File, BaseInterface, isdefined
 from nipype.interfaces import fsl, freesurfer
 from nipype.interfaces.mixins import reporting
 from . import report_base as nrc
@@ -106,36 +106,63 @@ class MELODICOutputSpecRPT(reporting.ReportCapableOutputSpec,
     pass
 
 
-class MELODICRPT(reporting.ReportCapableInterface, fsl.MELODIC):
+class MELODICRPT(fsl.MELODIC):
     input_spec = MELODICInputSpecRPT
     output_spec = MELODICOutputSpecRPT
+    _out_report = None
+    generate_report = False
 
-    def _generate_report(self):
-        from niworkflows.viz.utils import plot_melodic_components
+    def __init__(self, generate_report=False, **kwargs):
+        super(MELODICRPT, self).__init__(**kwargs)
+        self.generate_report = generate_report
+
+    def _post_run_hook(self, runtime):
+        # Run _post_run_hook of super class
+        runtime = super(MELODICRPT, self)._post_run_hook(runtime)
+        # leave early if there's nothing to do
+        if not self.generate_report:
+            return runtime
+
+        NIWORKFLOWS_LOG.info('Generating report for MELODIC.')
+        _melodic_dir = runtime.cwd
+        if isdefined(self.inputs.out_dir):
+            _melodic_dir = self.inputs.out_dir
+        self._melodic_dir = os.path.abspath(_melodic_dir)
+
+        self._out_report = self.inputs.out_report
+        if not os.path.isabs(self._out_report):
+            self._out_report = os.path.abspath(os.path.join(runtime.cwd,
+                                                            self._out_report))
+
         mix = os.path.join(self._melodic_dir, "melodic_mix")
         if not os.path.exists(mix):
-            self._out_report = self.inputs.out_report.replace('svg', 'html')
+            NIWORKFLOWS_LOG.warning("MELODIC outputs not found, assuming it didn't converge.")
+            self._out_report = self._out_report.replace('.svg', '.html')
             snippet = '<h4>MELODIC did not converge, no output</h4>'
             with open(self._out_report, 'w') as fobj:
                 fobj.write(snippet)
-            return
+            return runtime
+
+        self._generate_report()
+        return runtime
+
+    def _list_outputs(self):
+        try:
+            outputs = super(MELODICRPT, self)._list_outputs()
+        except NotImplementedError:
+            outputs = {}
+        if self._out_report is not None:
+            outputs['out_report'] = self._out_report
+        return outputs
+
+    def _generate_report(self):
+        from niworkflows.viz.utils import plot_melodic_components
         plot_melodic_components(melodic_dir=self._melodic_dir,
                                 in_file=self.inputs.in_files[0],
                                 tr=self.inputs.tr_sec,
-                                out_file=self.inputs.out_report,
+                                out_file=self._out_report,
                                 compress=self.inputs.compress_report,
                                 report_mask=self.inputs.report_mask)
-
-    def _post_run_hook(self, runtime):
-        ''' generates a report showing nine slices, three per axis, of an
-        arbitrary volume of `in_files`, with the resulting segmentation
-        overlaid '''
-        outputs = self.aggregate_outputs(runtime=runtime)
-        self._melodic_dir = outputs.out_dir
-
-        NIWORKFLOWS_LOG.info('Generating report for MELODIC')
-
-        return super(MELODICRPT, self)._post_run_hook(runtime)
 
 
 class ICA_AROMAInputSpecRPT(nrc.SVGReportCapableInputSpec,
