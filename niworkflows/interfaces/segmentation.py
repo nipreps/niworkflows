@@ -110,7 +110,6 @@ class MELODICRPT(fsl.MELODIC):
     input_spec = MELODICInputSpecRPT
     output_spec = MELODICOutputSpecRPT
     _out_report = None
-    generate_report = False
 
     def __init__(self, generate_report=False, **kwargs):
         super(MELODICRPT, self).__init__(**kwargs)
