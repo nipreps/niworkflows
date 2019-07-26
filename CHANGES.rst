@@ -1,3 +1,10 @@
+0.10.3 (July 26, 2019)
+======================
+
+Patch release with a minor bugfix for MRIQC.
+
+* FIX: Revision of previous PR #337 / MELODIC did not converge (#381) @oesteban
+
 0.10.2 (July 24, 2019)
 ======================
 
