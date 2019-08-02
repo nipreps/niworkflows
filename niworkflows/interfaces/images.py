@@ -663,8 +663,6 @@ class SignalExtractionOutputSpec(TraitedSpec):
         'signals, with as many columns as there are labels and as '
         'many rows as there are timepoints in in_file, plus a '
         'header row with values from class_labels')
-    metadata = traits.Dict(
-        desc='dictionary containing metadata for all extracted signals')
 
 
 class SignalExtraction(SimpleInterface):
@@ -705,16 +703,14 @@ class SignalExtraction(SimpleInterface):
             raise ValueError("Number of masks must match number of labels")
 
         series = np.zeros((img.shape[3], len(masks)))
-        metadata = {}
+
         data = img.get_data()
-        for j, (mask, label) in enumerate(zip(masks, self.inputs.class_labels)):
+        for j, mask in enumerate(masks):
             series[:, j] = data[mask, :].mean(axis=0)
-            metadata[label] = {'Method': 'Mean'}
 
         output = np.vstack((self.inputs.class_labels, series.astype(str)))
         self._results['out_file'] = os.path.join(runtime.cwd,
                                                  self.inputs.out_file)
-        self._results['metadata'] = metadata
         np.savetxt(
             self._results['out_file'], output, fmt=b'%s', delimiter='\t')
 
