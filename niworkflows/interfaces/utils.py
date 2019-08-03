@@ -898,7 +898,7 @@ def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
         object_pairs_hook=OrderedDict).decode(json_data)
     for i in json_data:
         json_data[i].update(additional_metadata)
-    
+
     if out_json is None:
         return json_data
 
