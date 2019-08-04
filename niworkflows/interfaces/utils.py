@@ -881,6 +881,8 @@ def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
     drop_columns = drop_columns or []
     additional_metadata = additional_metadata or {}
     tsv_data = pd.read_csv(in_tsv, '\t')
+    for k, v in additional_metadata.items():
+        tsv_data[k] = v
     for col in drop_columns:
         tsv_data.drop(labels=col, axis='columns', inplace=True)
     tsv_data.set_index(index_column, drop=True, inplace=True)
@@ -896,6 +898,7 @@ def _tsv2json(in_tsv, out_json, index_column, additional_metadata=None,
         object_pairs_hook=OrderedDict).decode(json_data)
     for i in json_data:
         json_data[i].update(additional_metadata)
+
     if out_json is None:
         return json_data
 

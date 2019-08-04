@@ -587,7 +587,7 @@ def compcor_variance_plot(metadata_files, metadata_sources=None,
             metadata_sources = ['Decomposition {:d}'.format(i)
                                 for i in range(len(metadata_files))]
     for file, source in zip(metadata_files, metadata_sources):
-        metadata[source] = pd.read_table(str(file))
+        metadata[source] = pd.read_csv(str(file), sep=r'\s+')
         metadata[source]['source'] = source
     metadata = pd.concat(list(metadata.values()))
     bbox_txt = {
@@ -637,8 +637,8 @@ def compcor_variance_plot(metadata_files, metadata_sources=None,
         varexp = {}
 
         for i, thr in enumerate(varexp_thresh):
-            varexp[thr] = np.searchsorted(
-                components['cumulative_variance_explained'], thr) + 1
+            varexp[thr] = np.atleast_1d(np.searchsorted(
+                components['cumulative_variance_explained'], thr)) + 1
             ax[m].axhline(y=100 * thr, color='lightgrey', linewidth=0.25)
             ax[m].axvline(x=varexp[thr], color='C{}'.format(i),
                           linewidth=2, linestyle=':')

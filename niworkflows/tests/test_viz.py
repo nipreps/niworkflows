@@ -89,3 +89,13 @@ def test_plot_melodic_components():
     viz.utils.plot_melodic_components(melodic_dir, 'in_file.nii.gz', tr=2.0,
                                       report_mask='report_mask.nii.gz',
                                       out_file=no_classified)
+
+
+def test_compcor_variance_plot():
+    """Test plotting CompCor variance"""
+    out_file = 'variance_plot_short.svg'
+    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+    if save_artifacts:
+        out_file = os.path.join(save_artifacts, 'variance_plot_short.svg')
+    metadata_file = os.path.join(datadir, 'confounds_metadata_short_test.tsv')
+    viz.plots.compcor_variance_plot([metadata_file], output_file=out_file)
