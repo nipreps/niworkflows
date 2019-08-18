@@ -3,9 +3,59 @@ import numpy as np
 import nibabel as nb
 from nipype.interfaces import nilearn as nl
 from .. import images as im
+from pathlib import Path
 
 import pytest
+qform_code=1
+sform_code=1
+qform=np.array([[ 1,   0,   0,
+          0],
+       [  0,   1,  0,
+        0],
+       [ 0,  0,  1,
+        0],
+       [  0.00000000e+00,   0.00000000e+00,   0.00000000e+00,
+          1.00000000e+00]])
+sform=np.array([[ 1,   0,   0,
+          0],
+       [  0,   1,  0,
+        0],
+       [ 0,  0,  1,
+        0],
+       [  0.00000000e+00,   0.00000000e+00,   0.00000000e+00,
+          1.00000000e+00]])
 
+@pytest.mark.parametrize('qform_add, sform_add, expectation', [
+    (0, 0, "no_warn"),
+    (0, 1e-14, "no_warn"),
+    (0, 1e-09, "no_warn"),
+    (1e-6, 0, "warn"),
+    (0, 1e-6, "warn"),
+    (1e-5, 0, "warn"),
+    (0, 1e-5, "warn"),
+    (1e-3, 1e-3, "no_warn")
+])
+#just a diagonal of ones in both and see that this doesn't warn, then exercise the other possibilities
+#only look at the 2 areas of images.py that I added and get code overage of those
+def test_qformsform_warning(tmpdir, qform_add, sform_add, expectation):
+    tmpdir.chdir()
+
+    # make a random image
+    random_data = np.random.random(size=(5, 5, 5) + (5,))
+    img = nb.Nifti1Image(random_data, sform+sform_add)
+    # set the qform of the image before calling it
+    img.set_qform(qform+qform_add)
+    img.to_filename('x.nii')
+    fname='x.nii'
+
+    interface = im.ValidateImage()
+    interface.inputs.in_file = fname
+    res = interface.run()
+    if expectation == 'warn':
+        assert "Note on" in Path(res.outputs.out_report).read_text()
+        assert len(Path(res.outputs.out_report).read_text()) > 0
+    elif expectation == 'no_warn':
+        assert len(Path(res.outputs.out_report).read_text()) == 0
 
 @pytest.mark.parametrize('nvols, nmasks, ext, factor', [
     (500, 10, '.nii', 2),
