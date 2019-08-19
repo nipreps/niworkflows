@@ -27,9 +27,9 @@ def test_qformsform_warning(tmpdir, qform_add, sform_add, expectation):
 
     # make a random image
     random_data = np.random.random(size=(5, 5, 5) + (5,))
-    img = nb.Nifti1Image(random_data, sform+sform_add)
+    img = nb.Nifti1Image(random_data, np.eye(4) + sform_add)
     # set the qform of the image before calling it
-    img.set_qform(qform+qform_add)
+    img.set_qform(np.eye(4) + qform_add)
     img.to_filename('x.nii')
     fname = 'x.nii'
 
