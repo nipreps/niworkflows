@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 qform_code = 1
 sform_code = 1
-qform = np.array([[1,   0,   0,  0],
+qform = np.eye(4)
                   [0, 1,  0, 0],
                   [0,  0,  1, 0],
                   [0.00000000e+00,   0.00000000e+00,   0.00000000e+00, 1.00000000e+00]])
