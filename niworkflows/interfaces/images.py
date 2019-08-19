@@ -14,6 +14,7 @@ import numpy as np
 import nibabel as nb
 import nilearn.image as nli
 from textwrap import indent
+import transforms3d
 
 from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
@@ -392,11 +393,26 @@ class ValidateImage(SimpleInterface):
         # Rows 3-4:
         # Note: if qform is not valid, matching_affines is False
         elif (valid_sform and sform_code > 0) and (not matching_affines or qform_code == 0):
-            img.set_qform(img.get_sform(), sform_code)
+            img.set_qform(sform, sform_code)
+            new_qform = img.get_qform()
+            if np.allclose(new_qform, qform) and qform_code > 0:
+                # False alarm
+                self._results['out_file'] = self.inputs.in_file
+                open(out_report, 'w').close()
+                self._results['out_report'] = out_report
+                return runtime
+            diff = np.linalg.inv(qform) @ new_qform
+            trans, rot, _, _ = transforms3d.affines.decompose44(diff)
+            angle = transforms3d.axangles.mat2axangle(rot)[1]
+            total_trans = np.sqrt(np.sum(trans * trans))  # Add angle and total_trans to report
             warning_txt = 'Note on orientation: qform matrix overwritten'
             description = """\
-<p class="elem-desc">The qform has been copied from sform.</p>
-"""
+    <p class="elem-desc">
+    The qform has been copied from sform.
+    The difference in angle is {angle:.02g}.
+    The difference in translation is {total_trans:.02g}.
+    </p>
+    """.format(angle=angle, total_trans=total_trans)
             if not valid_qform and qform_code > 0:
                 warning_txt = 'WARNING - Invalid qform information'
                 description = """\
