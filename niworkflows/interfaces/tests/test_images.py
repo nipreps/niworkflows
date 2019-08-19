@@ -6,8 +6,6 @@ from .. import images as im
 from pathlib import Path
 
 import pytest
-qform_code = 1
-sform_code = 1
 qform = np.eye(4)
 sform = np.eye(4)
 
