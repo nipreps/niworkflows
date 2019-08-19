@@ -9,13 +9,13 @@ import pytest
 qform_code = 1
 sform_code = 1
 qform = np.array([[1,   0,   0,  0],
-                [0, 1,  0, 0],
-                [0,  0,  1, 0],
-                [0.00000000e+00,   0.00000000e+00,   0.00000000e+00, 1.00000000e+00]])
+                  [0, 1,  0, 0],
+                  [0,  0,  1, 0],
+                  [0.00000000e+00,   0.00000000e+00,   0.00000000e+00, 1.00000000e+00]])
 sform = np.array([[1,   0,   0, 0],
-                [0,   1,  0, 0],
-                [0,  0,  1, 0],
-                [0.00000000e+00,   0.00000000e+00,   0.00000000e+00,1.00000000e+00]])
+                  [0,   1,  0, 0],
+                  [0,  0,  1, 0],
+                  [0.00000000e+00,   0.00000000e+00,   0.00000000e+00, 1.00000000e+00]])
 
 
 @pytest.mark.parametrize('qform_add, sform_add, expectation', [
@@ -39,7 +39,7 @@ def test_qformsform_warning(tmpdir, qform_add, sform_add, expectation):
     # set the qform of the image before calling it
     img.set_qform(qform+qform_add)
     img.to_filename('x.nii')
-    fname ='x.nii'
+    fname = 'x.nii'
 
     interface = im.ValidateImage()
     interface.inputs.in_file = fname
