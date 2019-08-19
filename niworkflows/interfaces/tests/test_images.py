@@ -6,7 +6,6 @@ from .. import images as im
 from pathlib import Path
 
 import pytest
-sform = np.eye(4)
 
 
 @pytest.mark.parametrize('qform_add, sform_add, expectation', [
