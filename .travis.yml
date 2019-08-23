@@ -40,7 +40,22 @@ matrix:
     env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.3.0"
 
 before_install:
+  - python -m pip install --upgrade pip virtualenv
+  - virtualenv --python=python /tmp/venv
+  - source /tmp/venv/bin/activate
+  - python --version
+  - pip --version
   - python -m pip install --upgrade $INSTALL_DEPENDS
+  - |
+    if [ "$INSTALL_TYPE" == "pip" ]; then
+        PACKAGE="."
+    elif [ "$INSTALL_TYPE" == "sdist" ]; then
+        python setup.py sdist
+        PACKAGE="$( ls dist/*.tar.gz )"
+    elif [ "$INSTALL_TYPE" == "wheel" ]; then
+        python setup.py bdist_wheel
+        PACKAGE="$( ls dist/*.whl )"
+    fi
 
 install:
   - |
@@ -48,20 +63,12 @@ install:
         python setup.py install
     elif [ "$INSTALL_TYPE" == "develop" ]; then
         python setup.py develop
-    elif [ "$INSTALL_TYPE" == "pip" ]; then
-        pip install .
-    elif [ "$INSTALL_TYPE" == "sdist" ]; then
-        python setup.py sdist
-        pip install dist/*.tar.gz
-    elif [ "$INSTALL_TYPE" == "wheel" ]; then
-        python setup.py bdist_wheel
-        pip install dist/*.whl
+    else
+        pip install $PACKAGE
     fi
   - |
-    if [ "$CHECK_TYPE" == "style" ]; then
-        travis_retry pip install "flake8<3.0" flake8-putty
-    elif [ "$CHECK_TYPE" == "test" ]; then
-        travis_retry pip install "niworkflows[test]"
+    if [ "$CHECK_TYPE" != "install" ]; then
+        travis_retry pip install "niworkflows[$CHECK_TYPE]"
     fi
 
 script:
