@@ -84,7 +84,7 @@ def overwrite_header(img, fname):
         raise ValueError("Cannot write header without compromising data") from e
     else:
         dataobj = img.dataobj
-        data = dataobj.get_unscaled() if nb.is_proxy(dataobj) else dataobj
+        data = np.asarray(dataobj.get_unscaled() if nb.is_proxy(dataobj) else dataobj)
         unsafe_write_nifti_header_and_data(fname, img.header, data)
     finally:
         restore_consumables(img.header, slope, inter, offset)
