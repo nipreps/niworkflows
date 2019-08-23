@@ -12,7 +12,6 @@ from json import dumps
 from pathlib import Path
 from shutil import copytree, rmtree
 
-import numpy as np
 import nibabel as nb
 
 from nipype import logging

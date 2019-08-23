@@ -2,7 +2,7 @@ import nibabel as nb
 import numpy as np
 
 import pytest
-from ..images import update_header_fields, overwrite_header
+from ..images import update_header_fields
 
 
 def random_image():
@@ -23,7 +23,7 @@ def random_image():
 def test_update_header_fields(tmpdir, fields, slope, inter):
     cwd = tmpdir.chdir()
     fname = 'test_file.nii'
-    
+
     # Generate file
     init_img = random_image()
     init_img.header.set_slope_inter(slope, inter)
@@ -56,15 +56,11 @@ def test_update_header_fields(tmpdir, fields, slope, inter):
 def test_update_header_fields_exceptions(tmpdir, fields, slope, inter):
     cwd = tmpdir.chdir()
     fname = 'test_file.nii'
-    
-    # Generate file
-    init_img = random_image()
-    init_img.header.set_slope_inter(slope, inter)
-    init_img.to_filename(fname)
 
-    # Reference load
-    pre_img = nb.load(fname)
-    pre_data = pre_img.get_fdata()
+    # Generate file
+    img = random_image()
+    img.header.set_slope_inter(slope, inter)
+    img.to_filename(fname)
 
     with pytest.raises(ValueError):
         update_header_fields(fname, **fields)
