@@ -19,6 +19,7 @@ env:
     - INSTALL_DEPENDS="pip setuptools"
   matrix:
     - CHECK_TYPE="style"
+    - CHECK_TYPE="test"
     - INSTALL_TYPE="install"
     - INSTALL_TYPE="develop"
     - INSTALL_TYPE="sdist"
@@ -40,7 +41,6 @@ matrix:
 
 before_install:
   - python -m pip install --upgrade $INSTALL_DEPENDS
-  - pip install "flake8<3.0" flake8-putty
 
 install:
   - |
@@ -60,6 +60,8 @@ install:
   - |
     if [ "$CHECK_TYPE" == "style" ]; then
         travis_retry pip install "flake8<3.0" flake8-putty
+    elif [ "$CHECK_TYPE" == "test" ]; then
+        travis_retry pip install "niworkflows[test]"
     fi
 
 script:
@@ -75,6 +77,8 @@ script:
       echo "Intended: $INTENDED_VERSION"
       echo "Installed: $INSTALLED_VERSION"
       test "$INTENDED_VERSION" == "$INSTALLED_VERSION"
+    elif [ "$CHECK_TYPE" == "test" ]; then
+      pytest -n 2 -v --cov niworkflows --cov-config .coveragerc --cov-report xml:cov.xml niworkflows
     else
       false
     fi
