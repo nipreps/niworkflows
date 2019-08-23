@@ -1,7 +1,9 @@
 import pytest
 from ..itk import _applytfms
+from nipype.interfaces.ants.base import Info
 
 
+@pytest.mark.skipif(Info.version() is None, "Missing ANTs")
 @pytest.mark.parametrize('ext', ('.nii', '.nii.gz'))
 @pytest.mark.parametrize('copy_dtype', (True, False))
 @pytest.mark.parametrize('in_dtype', ('i2', 'f4'))
