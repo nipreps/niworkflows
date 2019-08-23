@@ -14,6 +14,9 @@ def random_image():
     {'intent_code': 0},
     {'intent_code': 0, 'sform_code': 4},
     {'sform_code': 3},
+    # Changes to these fields have no effect
+    {'scl_slope': 3., 'scl_inter': 3.},
+    {'vox_offset': 20.},
     ])
 @pytest.mark.parametrize("slope, inter", [
     (None, None),
@@ -45,8 +48,6 @@ def test_update_header_fields(tmpdir, fields, slope, inter):
 
 
 @pytest.mark.parametrize("fields", [
-    {'scl_slope': 3., 'scl_inter': 3.},
-    {'vox_offset': 20.},
     {'datatype': 2},
     ])
 @pytest.mark.parametrize("slope, inter", [

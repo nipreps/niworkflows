@@ -20,16 +20,8 @@ def unsafe_write_nifti_header_and_data(fname, header, data):
 
 
 def set_consumables(header, dataobj):
-    slope, inter = header.get_slope_inter()
-    offset = header.get_data_offset()
     header.set_slope_inter(dataobj.slope, dataobj.inter)
     header.set_data_offset(dataobj.offset)
-    return slope, inter, offset
-
-
-def restore_consumables(header, slope, inter, offset):
-    header.set_slope_inter(slope, inter)
-    header.set_data_offset(offset)
 
 
 def overwrite_header(img, fname):
@@ -61,33 +53,35 @@ def overwrite_header(img, fname):
     >>> img.header['descrip'] = b'Modified with some extremely finicky tooling'
     >>> overwrite_header(img, fname)
 
+    This is a destructive operation, and the image object should be considered unusable
+    after calling this function.
+
     """
     # Synchronize header and set fields that nibabel transfer from header to dataobj
     img.update_header()
-    slope, inter, offset = set_consumables(img.header, img.dataobj)
-    existing_img = nb.load(fname)
+    header = img.header
+    dataobj = img.dataobj
+    set_consumables(header, dataobj)
+
+    ondisk = nb.load(fname)
 
     try:
-        assert isinstance(existing_img.header, img.header_class)
-        assert (slope, inter, offset) == set_consumables(existing_img.header, existing_img.dataobj)
+        assert isinstance(ondisk.header, img.header_class)
         # Check that the data block should be the same size
-        assert existing_img.get_data_dtype() == img.get_data_dtype()
-        assert existing_img.header.get_data_shape() == img.header.get_data_shape()
+        assert ondisk.get_data_dtype() == img.get_data_dtype()
+        assert img.header.get_data_shape() == ondisk.shape
         # At the same offset from the start of the file
-        assert existing_img.header['vox_offset'] == img.header['vox_offset']
+        assert img.header['vox_offset'] == ondisk.dataobj.offset
         # With the same scale factors
-        assert np.allclose(existing_img.header['scl_slope'], img.header['scl_slope'],
-                           equal_nan=True)
-        assert np.allclose(existing_img.header['scl_inter'], img.header['scl_inter'],
-                           equal_nan=True)
+        assert np.allclose(img.header['scl_slope'], ondisk.dataobj.slope, equal_nan=True)
+        assert np.allclose(img.header['scl_inter'], ondisk.dataobj.inter, equal_nan=True)
     except AssertionError as e:
         raise ValueError("Cannot write header without compromising data") from e
     else:
-        dataobj = img.dataobj
-        data = np.asarray(dataobj.get_unscaled() if nb.is_proxy(dataobj) else dataobj)
-        unsafe_write_nifti_header_and_data(fname, img.header, data)
-    finally:
-        restore_consumables(img.header, slope, inter, offset)
+        data = np.asarray(dataobj.get_unscaled())
+        img._dataobj = data  # Allow old dataobj to be garbage collected
+        del ondisk, img, dataobj  # Drop everything we don't need, to be safe
+        unsafe_write_nifti_header_and_data(fname, header, data)
 
 
 def update_header_fields(fname, **kwargs):
