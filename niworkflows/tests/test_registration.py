@@ -9,12 +9,14 @@ import pytest
 
 from nipype.interfaces.base import Bunch
 from nipype.interfaces.fsl import Info as FSLInfo
+from nipype.interfaces.freesurfer import Info as FreeSurferInfo
 from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT,
     MRICoregRPT, ApplyXFMRPT, SimpleBeforeAfterRPT)
 from .conftest import _run_interface_mock, datadir
 
 has_fsl = FSLInfo.version() is not None
+has_freesurfer = FreeSurferInfo.version() is not None
 
 
 def _smoke_test_report(report_interface, artifact_name):
@@ -35,6 +37,7 @@ def test_FLIRTRPT(reference, moving):
     _smoke_test_report(flirt_rpt, 'testFLIRT.svg')
 
 
+@pytest.mark.skipif(not has_freesurfer, reason="No FreeSurfer")
 def test_MRICoregRPT(monkeypatch, reference, moving, nthreads):
     """ the FLIRT report capable test """
     def _agg(objekt, runtime):
@@ -95,6 +98,7 @@ def test_FLIRTRPT_w_BBR(reference, reference_mask, moving):
     _smoke_test_report(flirt_rpt, 'testFLIRTRPTBBR.svg')
 
 
+@pytest.mark.skipif(not has_freesurfer, reason="No FreeSurfer")
 def test_BBRegisterRPT(monkeypatch, moving):
     """ the BBRegister report capable test """
     def _agg(objekt, runtime):
