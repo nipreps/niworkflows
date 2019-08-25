@@ -8,15 +8,11 @@ from shutil import copy
 import pytest
 
 from nipype.interfaces.base import Bunch
-from nipype.interfaces.fsl import Info as FSLInfo
-from nipype.interfaces.freesurfer import Info as FreeSurferInfo
 from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT,
     MRICoregRPT, ApplyXFMRPT, SimpleBeforeAfterRPT)
-from .conftest import _run_interface_mock, datadir
+from .conftest import _run_interface_mock, datadir, has_fsl, has_freesurfer
 
-has_fsl = FSLInfo.version() is not None
-has_freesurfer = FreeSurferInfo.version() is not None
 
 
 def _smoke_test_report(report_interface, artifact_name):

@@ -7,6 +7,8 @@ from pathlib import Path
 from datetime import datetime as dt
 import pytest
 from templateflow.api import get as get_template
+from nipype.interfaces.fsl import Info as FSLInfo
+from nipype.interfaces.freesurfer import Info as FreeSurferInfo
 
 filepath = os.path.dirname(os.path.realpath(__file__))
 datadir = os.path.realpath(os.path.join(filepath, 'data'))
@@ -14,6 +16,9 @@ datadir = os.path.realpath(os.path.join(filepath, 'data'))
 test_data_env = os.getenv('TEST_DATA_HOME',
                           str(Path.home() / '.cache' / 'stanford-crn'))
 data_dir = Path(test_data_env) / 'ds003_downsampled'
+
+has_fsl = FSLInfo.version() is not None
+has_freesurfer = FreeSurferInfo.version() is not None
 
 
 def _run_interface_mock(objekt, runtime):

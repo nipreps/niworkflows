@@ -13,7 +13,7 @@ from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
 from niworkflows.interfaces.masks import (
     BETRPT, BrainExtractionRPT, SimpleShowMaskRPT, ROIsPlot
 )
-from .conftest import _run_interface_mock, datadir
+from .conftest import _run_interface_mock, datadir, has_fsl, has_freesurfer
 
 
 def _smoke_test_report(report_interface, artifact_name):
@@ -26,6 +26,7 @@ def _smoke_test_report(report_interface, artifact_name):
     assert os.path.isfile(out_report), 'Report "%s" does not exist' % out_report
 
 
+@pytest.mark.skipif(not has_fsl, reason="No FSL")
 def test_BETRPT(moving):
     """ the BET report capable test """
     bet_rpt = BETRPT(generate_report=True, in_file=moving)
@@ -152,6 +153,7 @@ def test_BrainExtractionRPT(monkeypatch, moving, nthreads):
     _smoke_test_report(bex_rpt, 'testANTSBrainExtraction.svg')
 
 
+@pytest.mark.skipif(not has_fsl, reason="No FSL")
 @pytest.mark.parametrize("segments", [True, False])
 def test_FASTRPT(monkeypatch, segments, reference, reference_mask):
     """ test FAST with the two options for segments """
@@ -187,6 +189,7 @@ def test_FASTRPT(monkeypatch, segments, reference, reference_mask):
         fast_rpt, 'testFAST_%ssegments.svg' % ('no' * int(not segments)))
 
 
+@pytest.mark.skipif(not has_freesurfer, reason="No FreeSurfer")
 def test_ReconAllRPT(monkeypatch):
     # Patch the _run_interface method
     monkeypatch.setattr(ReconAllRPT, '_run_interface',
