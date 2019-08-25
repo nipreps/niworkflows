@@ -5,12 +5,16 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 from shutil import copy
+import pytest
 
 from nipype.interfaces.base import Bunch
+from nipype.interfaces.fsl import Info as FSLInfo
 from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT,
     MRICoregRPT, ApplyXFMRPT, SimpleBeforeAfterRPT)
 from .conftest import _run_interface_mock, datadir
+
+has_fsl = FSLInfo.version() is not None
 
 
 def _smoke_test_report(report_interface, artifact_name):
@@ -23,6 +27,7 @@ def _smoke_test_report(report_interface, artifact_name):
     assert os.path.isfile(out_report), 'Report does not exist'
 
 
+@pytest.mark.skipif(not has_fsl, reason="No FSL")
 def test_FLIRTRPT(reference, moving):
     """ the FLIRT report capable test """
     flirt_rpt = FLIRTRPT(generate_report=True, in_file=moving,
@@ -51,6 +56,7 @@ def test_MRICoregRPT(monkeypatch, reference, moving, nthreads):
     _smoke_test_report(mri_coreg_rpt, 'testMRICoreg.svg')
 
 
+@pytest.mark.skipif(not has_fsl, reason="No FSL")
 def test_ApplyXFMRPT(reference, moving):
     """ the ApplyXFM report capable test """
     flirt_rpt = FLIRTRPT(generate_report=False, in_file=moving,
@@ -66,6 +72,7 @@ def test_ApplyXFMRPT(reference, moving):
     _smoke_test_report(applyxfm_rpt, 'testApplyXFM.svg')
 
 
+@pytest.mark.skipif(not has_fsl, reason="No FSL")
 def test_SimpleBeforeAfterRPT(reference, moving):
     """ the SimpleBeforeAfterRPT report capable test """
     flirt_rpt = FLIRTRPT(generate_report=False, in_file=moving,
@@ -79,6 +86,7 @@ def test_SimpleBeforeAfterRPT(reference, moving):
     _smoke_test_report(ba_rpt, 'test_SimpleBeforeAfterRPT.svg')
 
 
+@pytest.mark.skipif(not has_fsl, reason="No FSL")
 def test_FLIRTRPT_w_BBR(reference, reference_mask, moving):
     """ test FLIRTRPT with input `wm_seg` set.
     For the sake of testing ONLY, `wm_seg` is set to the filename of a brain mask """
