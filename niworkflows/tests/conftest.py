@@ -27,12 +27,6 @@ def _run_interface_mock(objekt, runtime):
     return runtime
 
 
-# XXX This may not be necessary. Look into more when overhauling tests.
-def pytest_runtest_setup(item):
-    """Change to temporary directory"""
-    os.chdir(mkdtemp())
-
-
 @pytest.fixture
 def reference():
     return str(get_template('MNI152Lin', resolution=2, desc=None, suffix='T1w'))
