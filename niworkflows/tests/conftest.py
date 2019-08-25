@@ -4,7 +4,6 @@
 """ py.test configuration file """
 import os
 from pathlib import Path
-from tempfile import mkdtemp
 from datetime import datetime as dt
 import pytest
 from templateflow.api import get as get_template

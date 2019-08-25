@@ -12,7 +12,7 @@ from shutil import which
 
 
 @pytest.mark.skipif(which('svgo') is None or which('cwebp') is None,
-               reason="svgo or cwebp missing")
+                    reason="svgo or cwebp missing")
 def test_compression():
     """ the BET report capable test """
 
