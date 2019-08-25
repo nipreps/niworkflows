@@ -23,9 +23,8 @@ def random_image():
     (1., 0.),
     (2., 2.)
     ])
-def test_update_header_fields(tmpdir, fields, slope, inter):
-    cwd = tmpdir.chdir()
-    fname = 'test_file.nii'
+def test_update_header_fields(tmp_path, fields, slope, inter):
+    fname = str(tmp_path / 'test_file.nii')
 
     # Generate file
     init_img = random_image()
@@ -44,8 +43,6 @@ def test_update_header_fields(tmpdir, fields, slope, inter):
     # Data should be identical
     assert np.array_equal(pre_data, post_img.get_fdata())
 
-    cwd.chdir()
-
 
 @pytest.mark.parametrize("fields", [
     {'datatype': 2},
@@ -54,9 +51,8 @@ def test_update_header_fields(tmpdir, fields, slope, inter):
     (None, None),
     (2., 2.)
     ])
-def test_update_header_fields_exceptions(tmpdir, fields, slope, inter):
-    cwd = tmpdir.chdir()
-    fname = 'test_file.nii'
+def test_update_header_fields_exceptions(tmp_path, fields, slope, inter):
+    fname = str(tmp_path / 'test_file.nii')
 
     # Generate file
     img = random_image()
@@ -65,5 +61,3 @@ def test_update_header_fields_exceptions(tmpdir, fields, slope, inter):
 
     with pytest.raises(ValueError):
         update_header_fields(fname, **fields)
-
-    cwd.chdir()
