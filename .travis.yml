@@ -71,6 +71,14 @@ install:
         travis_retry pip install "niworkflows[$CHECK_TYPE]"
     fi
 
+before_script:
+  - |
+    if [ "$CHECK_TYPE" == "test" ]; then
+        mkdir -p $HOME/.cache/stanford-crn
+        curl -sSL  "http://github.com/chrisfilo/BIDS-examples-1/archive/enh/ds054.tar.gz" |
+            tar xvzf - -C $HOME/.cache/stanford-crn
+    fi
+
 script:
   - |
     if [ "$CHECK_TYPE" == "style" ]; then
