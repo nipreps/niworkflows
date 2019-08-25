@@ -32,7 +32,7 @@ def test_update_header_fields(tmp_path, fields, slope, inter):
     init_img.to_filename(fname)
 
     # Reference load
-    pre_img = nb.load(fname)
+    pre_img = nb.load(fname, mmap=False)
     pre_data = pre_img.get_fdata()
 
     update_header_fields(fname, **fields)
