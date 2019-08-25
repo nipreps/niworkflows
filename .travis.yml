@@ -67,11 +67,18 @@ install:
         pip install $PACKAGE
     fi
   - |
-    if [ "$CHECK_TYPE" != "install" ]; then
-        travis_retry pip install "niworkflows[$CHECK_TYPE]"
-    fi
+    INTENDED_VERSION="$(python -c 'import versioneer; print(versioneer.get_version())')"
+    pushd /tmp
+    INSTALLED_VERSION="$(python -c 'import niworkflows; print(niworkflows.__version__)')"
+    python -c 'import niworkflows; print(niworkflows.__file__)'
+    echo "Intended: $INTENDED_VERSION"
+    echo "Installed: $INSTALLED_VERSION"
+    test "$INTENDED_VERSION" == "$INSTALLED_VERSION"
+    popd
+  - if [ "$CHECK_TYPE" = "install" ]; then exit 0; fi
 
 before_script:
+  - travis_retry pip install "niworkflows[$CHECK_TYPE]"
   - |
     if [ "$CHECK_TYPE" == "test" ]; then
         mkdir -p $HOME/.cache/stanford-crn
@@ -83,15 +90,6 @@ script:
   - |
     if [ "$CHECK_TYPE" == "style" ]; then
       flake8 niworkflows
-    elif [ "$CHECK_TYPE" == "install" ]; then
-      INTENDED_VERSION="$(python -c 'import versioneer; print(versioneer.get_version())')"
-      mkdir for_testing
-      cd for_testing
-      INSTALLED_VERSION="$(python -c 'import niworkflows; print(niworkflows.__version__)')"
-      python -c 'import niworkflows; print(niworkflows.__file__)'
-      echo "Intended: $INTENDED_VERSION"
-      echo "Installed: $INSTALLED_VERSION"
-      test "$INTENDED_VERSION" == "$INSTALLED_VERSION"
     elif [ "$CHECK_TYPE" == "test" ]; then
       pytest -n 2 -v --cov niworkflows --cov-config .coveragerc --cov-report xml:cov.xml niworkflows
     else
