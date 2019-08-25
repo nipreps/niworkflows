@@ -48,10 +48,10 @@ def overwrite_header(img, fname):
     that do not change the data or affine, e.g.:
 
     >>> import nibabel as nb
-    >>> img = nb.load(fname)
+    >>> img = nb.load(nifti_fname)
     >>> img.header.set_qform(*img.header.get_sform(coded=True))
     >>> img.header['descrip'] = b'Modified with some extremely finicky tooling'
-    >>> overwrite_header(img, fname)
+    >>> overwrite_header(img, nifti_fname)
 
     This is a destructive operation, and the image object should be considered unusable
     after calling this function.
