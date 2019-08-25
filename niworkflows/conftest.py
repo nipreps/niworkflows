@@ -1,8 +1,10 @@
 """py.test configuration"""
 import os
 from pathlib import Path
-import numpy
+import numpy as np
+import nibabel as nb
 import pytest
+import tempfile
 
 from .utils.bids import collect_data
 
@@ -13,11 +15,18 @@ data_dir = Path(test_data_env) / 'BIDS-examples-1-enh-ds054'
 
 @pytest.fixture(autouse=True)
 def add_np(doctest_namespace):
-    doctest_namespace['np'] = numpy
+    doctest_namespace['np'] = np
     doctest_namespace['os'] = os
     doctest_namespace['Path'] = Path
     doctest_namespace['datadir'] = data_dir
     doctest_namespace['bids_collect_data'] = collect_data
+
+    tmpdir = tempfile.TemporaryDirectory()
+    nifti_fname = str(Path(tmpdir.name) / 'test.nii.gz')
+    nb.Nifti1Image(np.random.random((5, 5)).astype('f4'), np.eye(4)).to_filename(nifti_fname)
+    doctest_namespace['nifti_fname'] = nifti_fname
+    yield
+    tmpdir.cleanup()
 
 
 @pytest.fixture
