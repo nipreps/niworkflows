@@ -84,6 +84,8 @@ before_script:
         mkdir -p $HOME/.cache/stanford-crn
         curl -sSL  "http://github.com/chrisfilo/BIDS-examples-1/archive/enh/ds054.tar.gz" |
             tar xvzf - -C $HOME/.cache/stanford-crn
+        curl -sSL "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f328f6b83f6901ef94cf70" |
+            tar xvzf - -C $HOME/.cache/stanford-crn
     fi
 
 script:
