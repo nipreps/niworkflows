@@ -167,7 +167,8 @@ class Reportlet(Element):
                                                                         entities=entities))
                 out_file = out_dir / linked_svg
                 out_file.parent.mkdir(parents=True, exist_ok=True)
-                copyfile(src, out_file, copy=True, use_hardlink=True)
+                # PY35: Coerce to str to pacify os.* functions that don't take Paths until 3.6
+                copyfile(str(src), str(out_file), copy=True, use_hardlink=True)
                 is_static = config.get('static', True)
                 contents = SVG_SNIPPET[is_static].format(linked_svg)
 
