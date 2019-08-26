@@ -25,7 +25,7 @@ env:
     - INSTALL_TYPE="sdist"
     - INSTALL_TYPE="wheel"
     - INSTALL_DEPENDS="pip==18.1 setuptools==30.2.1"
-    - INSTALL_DEPENDS="pip==10.0.1 setuptools==30.3.0"
+    - INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
 
 matrix:
   exclude:
@@ -33,11 +33,11 @@ matrix:
     env: CHECK_TYPE="style"
   allow_failures:
   - python: 3.5
-    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.3.0"
+    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
   - python: 3.6
-    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.3.0"
+    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
   - python: 3.7
-    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.3.0"
+    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
 
 before_install:
   - python -m pip install --upgrade pip virtualenv
