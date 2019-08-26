@@ -7,6 +7,7 @@ import os
 from shutil import copy
 import numpy as np
 import pandas as pd
+from nipype.pipeline import engine as pe
 from ..interfaces.confounds import ExpandModel, SpikeRegressors
 from ..interfaces.plotting import (
     CompCorVariancePlot, ConfoundsCorrelationPlot)
@@ -24,25 +25,25 @@ def _smoke_test_report(report_interface, artifact_name):
 
 def _expand_test(model_formula):
     orig_data_file = os.path.join(datadir, 'confounds_test.tsv')
-    exp_data_file = ExpandModel(
-        confounds_file=orig_data_file,
-        model_formula=model_formula
-    ).run().outputs.confounds_file
+    exp_data_file = pe.Node(ExpandModel(confounds_file=orig_data_file,
+                                        model_formula=model_formula),
+                            name='expand_model').run().outputs.confounds_file
     return pd.read_csv(exp_data_file, sep='\t')
 
 
 def _spikes_test(lags=None, mincontig=None, fmt='mask'):
     orig_data_file = os.path.join(datadir, 'spikes_test.tsv')
     lags = lags or [0]
-    spk_data_file = SpikeRegressors(
-        confounds_file=orig_data_file,
-        fd_thresh=4,
-        dvars_thresh=6,
-        lags=lags,
-        minimum_contiguous=mincontig,
-        output_format=fmt,
-        concatenate=False
-    ).run().outputs.confounds_file
+    spk_data_file = pe.Node(
+        SpikeRegressors(
+            confounds_file=orig_data_file,
+            fd_thresh=4,
+            dvars_thresh=6,
+            lags=lags,
+            minimum_contiguous=mincontig,
+            output_format=fmt,
+            concatenate=False),
+        name='spike_regressors').run().outputs.confounds_file
     return pd.read_csv(spk_data_file, sep='\t')
 
 
