@@ -20,16 +20,15 @@ import pytest
 ])
 # just a diagonal of ones in qform and sform and see that this doesn't warn
 # only look at the 2 areas of images.py that I added and get code coverage of those
-def test_qformsform_warning(tmpdir, qform_add, sform_add, expectation):
-    tmpdir.chdir()
+def test_qformsform_warning(tmp_path, qform_add, sform_add, expectation):
+    fname = str(tmp_path / 'x.nii')
 
     # make a random image
     random_data = np.random.random(size=(5, 5, 5) + (5,))
     img = nb.Nifti1Image(random_data, np.eye(4) + sform_add)
     # set the qform of the image before calling it
     img.set_qform(np.eye(4) + qform_add)
-    img.to_filename('x.nii')
-    fname = 'x.nii'
+    img.to_filename(fname)
 
     interface = im.ValidateImage()
     interface.inputs.in_file = fname
@@ -49,8 +48,9 @@ def test_qformsform_warning(tmpdir, qform_add, sform_add, expectation):
     (200, 10, '.nii', 1.1),
     (200, 10, '.nii.gz', 2),
 ])
-def test_signal_extraction_equivalence(tmpdir, nvols, nmasks, ext, factor):
-    tmpdir.chdir()
+def test_signal_extraction_equivalence(tmp_path, nvols, nmasks, ext, factor):
+    nlsignals = str(tmp_path / 'nlsignals.tsv')
+    imsignals = str(tmp_path / 'imsignals.tsv')
 
     vol_shape = (64, 64, 40)
 
@@ -65,10 +65,10 @@ def test_signal_extraction_equivalence(tmpdir, nvols, nmasks, ext, factor):
 
     se1 = nl.SignalExtraction(in_file=img_fname, label_files=masks_fname,
                               class_labels=['a%d' % i for i in range(nmasks)],
-                              out_file='nlsignals.tsv')
+                              out_file=nlsignals)
     se2 = im.SignalExtraction(in_file=img_fname, label_files=masks_fname,
                               class_labels=['a%d' % i for i in range(nmasks)],
-                              out_file='imsignals.tsv')
+                              out_file=imsignals)
 
     tic = time.time()
     se1.run()
@@ -76,8 +76,8 @@ def test_signal_extraction_equivalence(tmpdir, nvols, nmasks, ext, factor):
     se2.run()
     toc2 = time.time()
 
-    tab1 = np.loadtxt('nlsignals.tsv', skiprows=1)
-    tab2 = np.loadtxt('imsignals.tsv', skiprows=1)
+    tab1 = np.loadtxt(nlsignals, skiprows=1)
+    tab2 = np.loadtxt(imsignals, skiprows=1)
 
     assert np.allclose(tab1, tab2)
 

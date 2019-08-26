@@ -14,7 +14,6 @@ from niworkflows.interfaces.registration import (
 from .conftest import _run_interface_mock, datadir, has_fsl, has_freesurfer
 
 
-
 def _smoke_test_report(report_interface, artifact_name):
     report_interface.run()
     out_report = report_interface.inputs.out_report

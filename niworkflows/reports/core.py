@@ -16,6 +16,12 @@ from bids.layout import BIDSLayout, add_config_paths
 import jinja2
 from nipype.utils.filemanip import copyfile
 
+# Add a new figures spec
+try:
+    add_config_paths(figures=pkgrf('niworkflows', 'reports/figures.json'))
+except ValueError as e:
+    if "Configuration 'figures' already exists" != str(e):
+        raise
 
 PLURAL_SUFFIX = defaultdict(str('s').format, [('echo', 'es')])
 SVG_SNIPPET = ["""\
@@ -52,16 +58,16 @@ class Reportlet(Element):
 
     .. testsetup::
 
+    >>> cwd = os.getcwd()
+    >>> os.chdir(tmpdir)
+
+    >>> from pkg_resources import resource_filename
     >>> from shutil import copytree
-    >>> from tempfile import TemporaryDirectory
     >>> from bids.layout import BIDSLayout
-    >>> new_path = Path(__file__).resolve().parent.parent
-    >>> test_data_path = new_path / 'data' / 'tests' / 'work'
-    >>> tmpdir = TemporaryDirectory()
-    >>> os.chdir(tmpdir.name)  #noqa
-    >>> testdir = Path().resolve()
-    >>> data_dir = copytree(test_data_path, testdir / 'work')
-    >>> out_figs = (testdir / 'out' / 'fmriprep' )
+    >>> test_data_path = resource_filename('niworkflows', 'data/tests/work')
+    >>> testdir = Path(tmpdir)
+    >>> data_dir = copytree(test_data_path, str(testdir / 'work'))
+    >>> out_figs = testdir / 'out' / 'fmriprep'
     >>> bl = BIDSLayout(str(testdir / 'work' / 'reportlets'),
     ...                 config='figures', validate=False)
 
@@ -121,7 +127,7 @@ class Reportlet(Element):
 
     .. testcleanup::
 
-    >>> tmpdir.cleanup()
+    >>> os.chdir(cwd)
 
     """
 
@@ -205,16 +211,16 @@ class Report(object):
 
     .. testsetup::
 
+    >>> cwd = os.getcwd()
+    >>> os.chdir(tmpdir)
+
+    >>> from pkg_resources import resource_filename
     >>> from shutil import copytree
-    >>> from tempfile import TemporaryDirectory
     >>> from bids.layout import BIDSLayout
-    >>> new_path = Path(__file__).resolve().parent.parent
-    >>> test_data_path = new_path / 'data' / 'tests' / 'work'
-    >>> tmpdir = TemporaryDirectory()
-    >>> os.chdir(tmpdir.name)  #noqa
-    >>> testdir = Path().resolve()
-    >>> data_dir = copytree(test_data_path, testdir / 'work')
-    >>> out_figs = (testdir / 'out' / 'fmriprep' )
+    >>> test_data_path = resource_filename('niworkflows', 'data/tests/work')
+    >>> testdir = Path(tmpdir)
+    >>> data_dir = copytree(test_data_path, str(testdir / 'work'))
+    >>> out_figs = testdir / 'out' / 'fmriprep'
 
     .. doctest::
 
@@ -228,19 +234,16 @@ class Report(object):
     >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
     19369
 
+    .. testcleanup::
+
+    >>> os.chdir(cwd)
+
     """
 
     def __init__(self, reportlets_dir, out_dir, run_uuid, config=None,
                  subject_id=None, out_filename='report.html',
                  packagename=None):
         self.root = reportlets_dir
-
-        # Add a new figures spec
-        try:
-            add_config_paths(figures=pkgrf('niworkflows', 'reports/figures.json'))
-        except ValueError as e:
-            if "Configuration 'figures' already exists" != str(e):
-                raise
 
         # Initialize structuring elements
         self.sections = []
@@ -388,14 +391,14 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config=None,
 
     .. testsetup::
 
+    >>> cwd = os.getcwd()
+    >>> os.chdir(tmpdir)
+
+    >>> from pkg_resources import resource_filename
     >>> from shutil import copytree
-    >>> from tempfile import TemporaryDirectory
-    >>> new_path = Path(__file__).resolve().parent.parent
-    >>> test_data_path = new_path / 'data' / 'tests' / 'work'
-    >>> tmpdir = TemporaryDirectory()
-    >>> os.chdir(tmpdir.name)  #noqa
-    >>> testdir = Path().resolve()
-    >>> data_dir = copytree(test_data_path, testdir / 'work')
+    >>> test_data_path = resource_filename('niworkflows', 'data/tests/work')
+    >>> testdir = Path(tmpdir)
+    >>> data_dir = copytree(test_data_path, str(testdir / 'work'))
     >>> (testdir / 'fmriprep').mkdir(parents=True, exist_ok=True)
 
     .. doctest::
@@ -406,7 +409,7 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config=None,
 
     .. testcleanup::
 
-    >>> tmpdir.cleanup()
+    >>> os.chdir(cwd)
 
     """
     report = Report(reportlets_dir, out_dir, run_uuid, config=config,
