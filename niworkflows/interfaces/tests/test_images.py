@@ -1,6 +1,7 @@
 import time
 import numpy as np
 import nibabel as nb
+from nipype.pipeline import engine as pe
 from nipype.interfaces import nilearn as nl
 from .. import images as im
 from pathlib import Path
@@ -21,7 +22,7 @@ import pytest
 # just a diagonal of ones in qform and sform and see that this doesn't warn
 # only look at the 2 areas of images.py that I added and get code coverage of those
 def test_qformsform_warning(tmp_path, qform_add, sform_add, expectation):
-    fname = str(tmp_path / 'x.nii')
+    fname = str(tmp_path / 'test.nii')
 
     # make a random image
     random_data = np.random.random(size=(5, 5, 5) + (5,))
@@ -30,9 +31,9 @@ def test_qformsform_warning(tmp_path, qform_add, sform_add, expectation):
     img.set_qform(np.eye(4) + qform_add)
     img.to_filename(fname)
 
-    interface = im.ValidateImage()
-    interface.inputs.in_file = fname
-    res = interface.run()
+    validate = pe.Node(im.ValidateImage(), name='validate', base_dir=str(tmp_path))
+    validate.inputs.in_file = fname
+    res = validate.run()
     if expectation == 'warn':
         assert "Note on" in Path(res.outputs.out_report).read_text()
         assert len(Path(res.outputs.out_report).read_text()) > 0
@@ -54,8 +55,8 @@ def test_signal_extraction_equivalence(tmp_path, nvols, nmasks, ext, factor):
 
     vol_shape = (64, 64, 40)
 
-    img_fname = 'img' + ext
-    masks_fname = 'masks' + ext
+    img_fname = str(tmp_path / ('img' + ext))
+    masks_fname = str(tmp_path / ('masks' + ext))
 
     random_data = np.random.random(size=vol_shape + (nvols,)) * 2000
     random_mask_data = np.random.random(size=vol_shape + (nmasks,)) < 0.2
