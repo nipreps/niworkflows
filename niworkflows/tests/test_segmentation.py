@@ -10,7 +10,6 @@ import pytest
 from templateflow.api import get as get_template
 
 from nipype.pipeline import engine as pe
-from nipype.interfaces.base import Bunch
 from niworkflows.interfaces.segmentation import FASTRPT, ReconAllRPT
 from niworkflows.interfaces.masks import (
     BETRPT, BrainExtractionRPT, SimpleShowMaskRPT, ROIsPlot
@@ -126,7 +125,8 @@ def test_BrainExtractionRPT(monkeypatch, moving, nthreads):
 
     def _agg(objekt, runtime):
         outputs = objekt.output_spec()
-        outputs.BrainExtractionMask = os.path.join(datadir, 'testBrainExtractionRPTBrainExtractionMask.nii.gz')
+        outputs.BrainExtractionMask = os.path.join(
+            datadir, 'testBrainExtractionRPTBrainExtractionMask.nii.gz')
         outputs.out_report = os.path.join(runtime.cwd, objekt.inputs.out_report)
         return outputs
 

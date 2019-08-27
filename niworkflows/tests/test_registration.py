@@ -9,7 +9,6 @@ import pytest
 from tempfile import TemporaryDirectory
 
 from nipype.pipeline import engine as pe
-from nipype.interfaces.base import Bunch
 from niworkflows.interfaces.registration import (
     FLIRTRPT, RobustMNINormalizationRPT, ANTSRegistrationRPT, BBRegisterRPT,
     MRICoregRPT, ApplyXFMRPT, SimpleBeforeAfterRPT)
@@ -125,7 +124,8 @@ def test_RobustMNINormalizationRPT(monkeypatch, moving):
     """ the RobustMNINormalizationRPT report capable test """
     def _agg(objekt, runtime):
         outputs = objekt.output_spec()
-        outputs.warped_image = os.path.join(datadir, 'testRobustMNINormalizationRPTMovingWarpedImage.nii.gz')
+        outputs.warped_image = os.path.join(
+            datadir, 'testRobustMNINormalizationRPTMovingWarpedImage.nii.gz')
         outputs.out_report = os.path.join(runtime.cwd, objekt.inputs.out_report)
         return outputs
 
@@ -144,7 +144,8 @@ def test_RobustMNINormalizationRPT_masked(monkeypatch, moving, reference_mask):
     """ the RobustMNINormalizationRPT report capable test with masking """
     def _agg(objekt, runtime):
         outputs = objekt.output_spec()
-        outputs.warped_image = os.path.join(datadir, 'testRobustMNINormalizationRPTMovingWarpedImage.nii.gz')
+        outputs.warped_image = os.path.join(
+            datadir, 'testRobustMNINormalizationRPTMovingWarpedImage.nii.gz')
         outputs.out_report = os.path.join(runtime.cwd, objekt.inputs.out_report)
         return outputs
 
@@ -166,7 +167,7 @@ def test_ANTSRegistrationRPT(monkeypatch, reference, moving):
 
     def _agg(objekt, runtime):
         outputs = objekt.output_spec()
-        outputs.warped_image = os.path.join(datadir, 'testANTsRegistrationRPT-warped_image.nii.gz')
+        outputs.warped_image = os.path.join(datadir, 'testANTSRegistrationRPT-warped_image.nii.gz')
         outputs.out_report = os.path.join(runtime.cwd, objekt.inputs.out_report)
         return outputs
 
