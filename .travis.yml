@@ -19,12 +19,13 @@ env:
     - INSTALL_DEPENDS="pip setuptools"
   matrix:
     - CHECK_TYPE="style"
+    - CHECK_TYPE="test"
     - INSTALL_TYPE="install"
     - INSTALL_TYPE="develop"
     - INSTALL_TYPE="sdist"
     - INSTALL_TYPE="wheel"
     - INSTALL_DEPENDS="pip==18.1 setuptools==30.2.1"
-    - INSTALL_DEPENDS="pip==10.0.1 setuptools==30.3.0"
+    - INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
 
 matrix:
   exclude:
@@ -32,15 +33,29 @@ matrix:
     env: CHECK_TYPE="style"
   allow_failures:
   - python: 3.5
-    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.3.0"
+    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
   - python: 3.6
-    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.3.0"
+    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
   - python: 3.7
-    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.3.0"
+    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
 
 before_install:
+  - python -m pip install --upgrade pip virtualenv
+  - virtualenv --python=python /tmp/venv
+  - source /tmp/venv/bin/activate
+  - python --version
+  - pip --version
   - python -m pip install --upgrade $INSTALL_DEPENDS
-  - pip install "flake8<3.0" flake8-putty
+  - |
+    if [ "$INSTALL_TYPE" == "pip" ]; then
+        PACKAGE="."
+    elif [ "$INSTALL_TYPE" == "sdist" ]; then
+        python setup.py sdist
+        PACKAGE="$( ls dist/*.tar.gz )"
+    elif [ "$INSTALL_TYPE" == "wheel" ]; then
+        python setup.py bdist_wheel
+        PACKAGE="$( ls dist/*.whl )"
+    fi
 
 install:
   - |
@@ -48,33 +63,41 @@ install:
         python setup.py install
     elif [ "$INSTALL_TYPE" == "develop" ]; then
         python setup.py develop
-    elif [ "$INSTALL_TYPE" == "pip" ]; then
-        pip install .
-    elif [ "$INSTALL_TYPE" == "sdist" ]; then
-        python setup.py sdist
-        pip install dist/*.tar.gz
-    elif [ "$INSTALL_TYPE" == "wheel" ]; then
-        python setup.py bdist_wheel
-        pip install dist/*.whl
+    else
+        pip install $PACKAGE
     fi
   - |
-    if [ "$CHECK_TYPE" == "style" ]; then
-        travis_retry pip install "flake8<3.0" flake8-putty
+    INTENDED_VERSION="$(python -c 'import versioneer; print(versioneer.get_version())')"
+    pushd /tmp
+    INSTALLED_VERSION="$(python -c 'import niworkflows; print(niworkflows.__version__)')"
+    python -c 'import niworkflows; print(niworkflows.__file__)'
+    echo "Intended: $INTENDED_VERSION"
+    echo "Installed: $INSTALLED_VERSION"
+    test "$INTENDED_VERSION" == "$INSTALLED_VERSION"
+    popd
+  - if [ "$CHECK_TYPE" = "install" ]; then exit 0; fi
+
+before_script:
+  - travis_retry pip install "niworkflows[$CHECK_TYPE]"
+  - |
+    if [ "$CHECK_TYPE" == "test" ]; then
+        mkdir -p $HOME/.cache/stanford-crn
+        curl -sSL  "http://github.com/chrisfilo/BIDS-examples-1/archive/enh/ds054.tar.gz" |
+            tar xvzf - -C $HOME/.cache/stanford-crn
+        curl -sSL "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f328f6b83f6901ef94cf70" |
+            tar xvzf - -C $HOME/.cache/stanford-crn
     fi
 
 script:
   - |
     if [ "$CHECK_TYPE" == "style" ]; then
       flake8 niworkflows
-    elif [ "$CHECK_TYPE" == "install" ]; then
-      INTENDED_VERSION="$(python -c 'import versioneer; print(versioneer.get_version())')"
-      mkdir for_testing
-      cd for_testing
-      INSTALLED_VERSION="$(python -c 'import niworkflows; print(niworkflows.__version__)')"
-      python -c 'import niworkflows; print(niworkflows.__file__)'
-      echo "Intended: $INTENDED_VERSION"
-      echo "Installed: $INSTALLED_VERSION"
-      test "$INTENDED_VERSION" == "$INSTALLED_VERSION"
+    elif [ "$CHECK_TYPE" == "test" ]; then
+      pytest -n 2 -v --cov niworkflows --cov-config .coveragerc --cov-report xml:cov.xml niworkflows
     else
       false
     fi
+
+after_script:
+  - pip install codecov
+  - codecov

@@ -589,10 +589,8 @@ class AddTSVHeader(SimpleInterface):
 
     .. testsetup::
 
-    >>> import pandas as pd
-    >>> from tempfile import TemporaryDirectory
-    >>> tmpdir = TemporaryDirectory()
-    >>> os.chdir(tmpdir.name)
+    >>> cwd = os.getcwd()
+    >>> os.chdir(tmpdir)
 
     .. doctest::
 
@@ -616,7 +614,7 @@ class AddTSVHeader(SimpleInterface):
 
     .. testcleanup::
 
-    >>> tmpdir.cleanup()
+    >>> os.chdir(cwd)
 
     """
     input_spec = AddTSVHeaderInputSpec
@@ -649,12 +647,8 @@ class JoinTSVColumns(SimpleInterface):
 
     .. testsetup::
 
-    >>> import os
-    >>> import pandas as pd
-    >>> import numpy as np
-    >>> from tempfile import TemporaryDirectory
-    >>> tmpdir = TemporaryDirectory()
-    >>> os.chdir(tmpdir.name)
+    >>> cwd = os.getcwd()
+    >>> os.chdir(tmpdir)
 
     .. doctest::
 
@@ -712,7 +706,7 @@ class JoinTSVColumns(SimpleInterface):
 
     .. testcleanup::
 
-    >>> tmpdir.cleanup()
+    >>> os.chdir(cwd)
 
     """
     input_spec = JoinTSVColumnsInputSpec

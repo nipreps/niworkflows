@@ -79,26 +79,29 @@ class ResampleImageBySpacing(ANTSCommand):
     --------
 
     >>> res = ResampleImageBySpacing(dimension=3)
-    >>> res.inputs.input_image = 'input.nii.gz'
+    >>> res.inputs.input_image = nifti_fname
     >>> res.inputs.output_image = 'output.nii.gz'
     >>> res.inputs.out_spacing = (4, 4, 4)
-    'ResampleImageBySpacing input.nii.gz output.nii.gz 4 4 4'
+    >>> res.cmdline  #doctest: +ELLIPSIS
+    'ResampleImageBySpacing 3 .../test.nii.gz output.nii.gz 4 4 4'
 
     >>> res = ResampleImageBySpacing(dimension=3)
-    >>> res.inputs.input_image = 'input.nii.gz'
+    >>> res.inputs.input_image = nifti_fname
     >>> res.inputs.output_image = 'output.nii.gz'
     >>> res.inputs.out_spacing = (4, 4, 4)
     >>> res.inputs.apply_smoothing = True
-    'ResampleImageBySpacing input.nii.gz output.nii.gz 4 4 4 1'
+    >>> res.cmdline  #doctest: +ELLIPSIS
+    'ResampleImageBySpacing 3 .../test.nii.gz output.nii.gz 4 4 4 1'
 
     >>> res = ResampleImageBySpacing(dimension=3)
-    >>> res.inputs.input_image = 'input.nii.gz'
+    >>> res.inputs.input_image = nifti_fname
     >>> res.inputs.output_image = 'output.nii.gz'
     >>> res.inputs.out_spacing = (4, 4, 4)
     >>> res.inputs.apply_smoothing = True
     >>> res.inputs.addvox = 2
     >>> res.inputs.nn_interp = False
-    'ResampleImageBySpacing input.nii.gz output.nii.gz 4 4 4 1 2 0'
+    >>> res.cmdline  #doctest: +ELLIPSIS
+    'ResampleImageBySpacing 3 .../test.nii.gz output.nii.gz 4 4 4 1 2 0'
 
     """
     _cmd = 'ResampleImageBySpacing'
@@ -155,20 +158,22 @@ class ThresholdImage(ANTSCommand):
     --------
 
     >>> res = ThresholdImage(dimension=3)
-    >>> res.inputs.input_image = 'input.nii.gz'
+    >>> res.inputs.input_image = nifti_fname
     >>> res.inputs.output_image = 'output.nii.gz'
     >>> res.inputs.th_low = 0.5
     >>> res.inputs.th_high = 1.0
-    >>> res.inputs.inside_val = 1.0
-    >>> res.inputs.outside_val = 0.0
-    'ThresholdImage input.nii.gz output.nii.gz 0.50000 1.00000 1.00000 0.00000'
+    >>> res.inputs.inside_value = 1.0
+    >>> res.inputs.outside_value = 0.0
+    >>> res.cmdline  #doctest: +ELLIPSIS
+    'ThresholdImage 3 .../test.nii.gz output.nii.gz 0.500000 1.000000 1.000000 0.000000'
 
     >>> res = ThresholdImage(dimension=3)
-    >>> res.inputs.input_image = 'input.nii.gz'
+    >>> res.inputs.input_image = nifti_fname
     >>> res.inputs.output_image = 'output.nii.gz'
     >>> res.inputs.mode = 'Kmeans'
     >>> res.inputs.num_thresholds = 4
-    'ThresholdImage input.nii.gz output.nii.gz Kmeans 4'
+    >>> res.cmdline  #doctest: +ELLIPSIS
+    'ThresholdImage 3 .../test.nii.gz output.nii.gz Kmeans 4'
 
     """
     _cmd = 'ThresholdImage'

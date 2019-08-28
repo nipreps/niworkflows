@@ -38,10 +38,8 @@ BOLD_PATH = 'ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
     (None, (30, 30, 30, 10), (None, 'sec'), (0, 0), True, [True]),
     (None, (30, 30, 30, 10), (None, 'sec'), (0, 0), False, [True]),
 ])
-def test_DerivativesDataSink_bold(tmpdir, space, size, units, xcodes, zipped, fixed):
-    tmpdir.chdir()
-
-    fname = 'source.nii.gz' if zipped else 'source.nii'
+def test_DerivativesDataSink_bold(tmp_path, space, size, units, xcodes, zipped, fixed):
+    fname = str(tmp_path / 'source.nii') + ('.gz' if zipped else '')
 
     hdr = nb.Nifti1Header()
     hdr.set_qform(np.eye(4), code=xcodes[0])
@@ -51,7 +49,7 @@ def test_DerivativesDataSink_bold(tmpdir, space, size, units, xcodes, zipped, fi
 
     # BOLD derivative in T1w space
     dds = bintfs.DerivativesDataSink(
-        base_directory=str(tmpdir),
+        base_directory=str(tmp_path),
         keep_dtype=True,
         desc='preproc',
         source_file=BOLD_PATH,
@@ -89,24 +87,23 @@ T1W_PATH = 'ds054/sub-100185/anat/sub-100185_T1w.nii.gz'
     (None, (30, 30, 30), (None, None), (0, 2), [True]),
     (None, (30, 30, 30), (None, 'sec'), (0, 0), [True]),
 ])
-def test_DerivativesDataSink_t1w(tmpdir, space, size, units, xcodes, fixed):
-    tmpdir.chdir()
+def test_DerivativesDataSink_t1w(tmp_path, space, size, units, xcodes, fixed):
+    fname = str(tmp_path / 'source.nii.gz')
 
     hdr = nb.Nifti1Header()
     hdr.set_qform(np.eye(4), code=xcodes[0])
     hdr.set_sform(np.eye(4), code=xcodes[1])
     hdr.set_xyzt_units(*units)
-    nb.Nifti1Image(np.zeros(size), np.eye(4), hdr).to_filename(
-        'source.nii.gz')
+    nb.Nifti1Image(np.zeros(size), np.eye(4), hdr).to_filename(fname)
 
     # BOLD derivative in T1w space
     dds = bintfs.DerivativesDataSink(
-        base_directory=str(tmpdir),
+        base_directory=str(tmp_path),
         keep_dtype=True,
         desc='preproc',
         source_file=T1W_PATH,
         space=space or Undefined,
-        in_file='source.nii.gz'
+        in_file=fname
     ).run()
 
     nii = nb.load(dds.outputs.out_file)

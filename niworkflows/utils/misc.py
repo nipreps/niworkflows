@@ -19,8 +19,9 @@ def get_template_specs(in_template, template_spec=None, default_resolution=1):
     >>> get_template_specs('MNI152NLin2009cAsym', {'res': '2', 'suffix': 'T1w'})[1]
     {'resolution': '2'}
 
-    >>> get_template_specs('MNIInfant', {'res': '2', 'cohort': '10', 'suffix': 'T1w'})[1]
-    {'resolution': '2', 'cohort': '10'}
+    >>> specs = get_template_specs('MNIInfant', {'res': '2', 'cohort': '10', 'suffix': 'T1w'})[1]
+    >>> sorted(specs.items())
+    [('cohort', '10'), ('resolution', '2')]
 
     >>> get_template_specs('MNI152NLin2009cAsym',
     ...                    {'suffix': 'T1w', 'cohort': 1})[1] # doctest: +IGNORE_EXCEPTION_DETAIL
