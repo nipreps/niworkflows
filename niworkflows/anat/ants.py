@@ -287,6 +287,8 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
             n_iterations=[50] * 5, convergence_threshold=1e-7, shrink_factor=4,
             bspline_fitting_distance=bspline_fitting_distance),
         n_procs=omp_nthreads, name='inu_n4_final', iterfield=['input_image'])
+    if _ants_version and parseversion(_ants_version) >= Version('2.1.0'):
+        inu_n4_final.inputs.rescale_intensities = True
 
     # Apply mask
     apply_mask = pe.MapNode(ApplyMask(), iterfield=['in_file'], name='apply_mask')

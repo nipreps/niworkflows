@@ -13,7 +13,7 @@ from packaging.version import parse as parseversion, Version
 from pkg_resources import resource_filename as pkgr_fn
 
 from nipype.pipeline import engine as pe
-from nipype.interfaces import utility as niu, fsl, afni, ants
+from nipype.interfaces import utility as niu, fsl, afni
 
 from templateflow.api import get as get_template
 
@@ -22,6 +22,7 @@ from ..interfaces.ants import AI
 from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
     FixHeaderApplyTransforms as ApplyTransforms,
+    FixN4BiasFieldCorrection as N4BiasFieldCorrection,
 )
 from ..interfaces.images import ValidateImage, MatchHeader
 from ..interfaces.masks import SimpleShowMaskRPT
@@ -35,7 +36,7 @@ DEFAULT_MEMORY_MIN_GB = 0.01
 def init_bold_reference_wf(omp_nthreads, bold_file=None, pre_mask=False,
                            name='bold_reference_wf', gen_report=False):
     """
-    This workflow generates reference BOLD images for a series
+    This workflow generates reference BOLD images for a series.
 
     The raw reference image is the target of :abbr:`HMC (head motion correction)`, and a
     contrast-enhanced reference is the subject of distortion correction, as well as
@@ -251,9 +252,12 @@ def init_enhance_and_skullstrip_bold_wf(
                         run_without_submitting=True)
 
     # Run N4 normally, force num_threads=1 for stability (images are small, no need for >1)
-    n4_correct = pe.Node(ants.N4BiasFieldCorrection(
+    n4_correct = pe.Node(N4BiasFieldCorrection(
         dimension=3, copy_header=True, bspline_fitting_distance=200), shrink_factor=2,
         name='n4_correct', n_procs=1)
+    _n4_version = N4BiasFieldCorrection().version
+    if _n4_version and parseversion(_n4_version) >= Version('2.1.0'):
+        n4_correct.inputs.rescale_intensities = True
 
     # Create a generous BET mask out of the bias-corrected EPI
     skullstrip_first_pass = pe.Node(fsl.BET(frac=0.2, mask=True),
