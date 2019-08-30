@@ -252,7 +252,7 @@ def init_enhance_and_skullstrip_bold_wf(
 
     # Run N4 normally, force num_threads=1 for stability (images are small, no need for >1)
     n4_correct = pe.Node(ants.N4BiasFieldCorrection(
-        dimension=3, copy_header=True, bspline_fitting_distance=200),
+        dimension=3, copy_header=True, bspline_fitting_distance=200), shrink_factor=2,
         name='n4_correct', n_procs=1)
 
     # Create a generous BET mask out of the bias-corrected EPI
