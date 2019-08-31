@@ -24,7 +24,7 @@ env:
     - INSTALL_TYPE="develop"
     - INSTALL_TYPE="sdist"
     - INSTALL_TYPE="wheel"
-    - INSTALL_DEPENDS="pip==18.1 setuptools==30.4.0"
+    - INSTALL_DEPENDS="pip==19.2.3 setuptools==41.2.0"
     - INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
 
 matrix:
@@ -40,12 +40,11 @@ matrix:
     env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
 
 before_install:
-  - python -m pip install --upgrade pip virtualenv
-  - virtualenv --python=python /tmp/venv
-  - source /tmp/venv/bin/activate
   - python --version
-  - pip --version
+  - echo $PYTHONPATH
+  - python -c "import sys; print('\n'.join(sys.path))"
   - python -m pip install --upgrade $INSTALL_DEPENDS
+  - python -m pip --version
   - |
     if [ "$INSTALL_TYPE" == "pip" ]; then
         PACKAGE="."
@@ -64,7 +63,7 @@ install:
     elif [ "$INSTALL_TYPE" == "develop" ]; then
         python setup.py develop
     else
-        pip install $PACKAGE
+        python -m pip install $PACKAGE
     fi
   - |
     INTENDED_VERSION="$(python -c 'import versioneer; print(versioneer.get_version())')"
@@ -78,7 +77,7 @@ install:
   - if [ "$CHECK_TYPE" = "install" ]; then exit 0; fi
 
 before_script:
-  - travis_retry pip install "niworkflows[$CHECK_TYPE]"
+  - travis_retry python -m pip install "niworkflows[$CHECK_TYPE]"
   - |
     if [ "$CHECK_TYPE" == "test" ]; then
         mkdir -p $HOME/.cache/stanford-crn
@@ -99,5 +98,5 @@ script:
     fi
 
 after_script:
-  - pip install codecov
+  - python -m pip install codecov
   - codecov
