@@ -205,7 +205,7 @@ class TruncateLTA(object):
             if not isdefined(lta_file):
                 continue
 
-            lines = Path(lta_file).read_text().splitlines()
+            lines = Path(lta_file).read_text().splitlines(keepends=True)
 
             fixed = False
             newfile = []
@@ -214,7 +214,7 @@ class TruncateLTA(object):
                     fixed = True
                     newfile.append('filename = path_too_long\n')
                 else:
-                    newfile.append(line+'\n')
+                    newfile.append(line)
 
             if fixed:
                 Path(lta_file).write_text(''.join(newfile))
