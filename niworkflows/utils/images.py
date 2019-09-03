@@ -64,9 +64,13 @@ def overwrite_header(img, fname):
     img.update_header()
     header = img.header
     dataobj = img.dataobj
+
+    if getattr(img.dataobj, '_mmap', False):
+        raise ValueError("Image loaded with `mmap=True`. Aborting unsafe operation.")
+
     set_consumables(header, dataobj)
 
-    ondisk = nb.load(fname)
+    ondisk = nb.load(fname, mmap=False)
 
     try:
         assert isinstance(ondisk.header, img.header_class)

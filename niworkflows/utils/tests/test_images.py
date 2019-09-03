@@ -2,7 +2,7 @@ import nibabel as nb
 import numpy as np
 
 import pytest
-from ..images import update_header_fields
+from ..images import update_header_fields, overwrite_header
 
 
 def random_image():
@@ -61,3 +61,13 @@ def test_update_header_fields_exceptions(tmp_path, fields, slope, inter):
 
     with pytest.raises(ValueError):
         update_header_fields(fname, **fields)
+
+
+def test_overwrite_header_reject_mmap(tmp_path):
+    fname = str(tmp_path / 'test_file.nii')
+
+    random_image().to_filename(fname)
+
+    img = nb.load(fname, mmap=True)
+    with pytest.raises(ValueError):
+        overwrite_header(img, fname)
