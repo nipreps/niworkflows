@@ -205,7 +205,7 @@ class TruncateLTA(object):
             if not isdefined(lta_file):
                 continue
 
-            lines = Path(lta_file).read_text().splitlines()
+            lines = Path(lta_file).read_text().splitlines(keepends=True)
 
             fixed = False
             newfile = []
