@@ -4,6 +4,7 @@ import os
 
 import nibabel as nb
 
+from nipype.interfaces.base import traits
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.ants.resampling import ApplyTransforms
 from nipype.interfaces.ants.registration import Registration
@@ -70,6 +71,7 @@ class FixN4BiasFieldCorrectionOutputSpec(VanillaN4OutputSpec):
     negative_values = traits.Bool(False, usedefault=True,
                                   desc='Indicates whether the input was corrected for '
                                        'nonpositive values by adding a constant offset.')
+
 
 class FixN4BiasFieldCorrection(VanillaN4):
     """Checks and fixes for nonpositive values in the input to ``N4BiasFieldCorrection``."""
