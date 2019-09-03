@@ -41,8 +41,10 @@ matrix:
 
 before_install:
   - python --version
-  - echo $PYTHONPATH
-  - python -c "import sys; print('\n'.join(sys.path))"
+  - python -m venv /tmp/venv
+  - deactivate
+  - source /tmp/venv/bin/activate
+  - echo $PATH
   - python -m pip install --upgrade $INSTALL_DEPENDS
   - python -m pip --version
   - |
