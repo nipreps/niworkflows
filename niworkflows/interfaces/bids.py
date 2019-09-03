@@ -12,7 +12,6 @@ from json import dumps
 from pathlib import Path
 from shutil import copytree, rmtree
 
-import numpy as np
 import nibabel as nb
 
 from nipype import logging
@@ -25,6 +24,7 @@ from nipype.interfaces.base import (
 from nipype.interfaces.io import add_traits
 from templateflow.api import templates as _get_template_list
 from ..utils.bids import BIDS_NAME, _init_layout
+from ..utils.images import overwrite_header
 from ..utils.misc import splitext as _splitext, _copy_any
 
 
@@ -467,11 +467,13 @@ desc-preproc_bold.json'
 
             is_nii = out_file.endswith('.nii') or out_file.endswith('.nii.gz')
             if self.inputs.check_hdr and is_nii:
-                nii = nb.load(out_file)
+                # Do not use mmap; if we need to access the data at all, it will be to
+                # rewrite, risking a BusError
+                nii = nb.load(out_file, mmap=False)
                 if not isinstance(nii, (nb.Nifti1Image, nb.Nifti2Image)):
                     # .dtseries.nii are CIfTI2, therefore skip check
                     return runtime
-                hdr = nii.header.copy()
+                hdr = nii.header
                 curr_units = tuple([None if u == 'unknown' else u
                                     for u in hdr.get_xyzt_units()])
                 curr_codes = (int(hdr['qform_code']), int(hdr['sform_code']))
@@ -490,8 +492,7 @@ desc-preproc_bold.json'
                     hdr.set_xyzt_units(*units)
 
                     # Rewrite file with new header
-                    nii.__class__(np.array(nii.dataobj), nii.affine, hdr).to_filename(
-                        out_file)
+                    overwrite_header(nii, out_file)
 
         if len(self._results['out_file']) == 1:
             meta_fields = self.inputs.copyable_trait_names()
