@@ -11,6 +11,7 @@ from collections import OrderedDict
 from multiprocessing import cpu_count
 from pkg_resources import resource_filename as pkgr_fn
 from packaging.version import parse as parseversion, Version
+from warnings import warn
 
 # nipype
 from nipype.pipeline import engine as pe
@@ -289,6 +290,11 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
         n_procs=omp_nthreads, name='inu_n4_final', iterfield=['input_image'])
     if _ants_version and parseversion(_ants_version) >= Version('2.1.0'):
         inu_n4_final.inputs.rescale_intensities = True
+    else:
+        warn("""\
+Found ANTs version %s, which is too old. Please consider upgrading to 2.1.0 or \
+greater so that the --rescale-intensities option is available with \
+N4BiasFieldCorrection.""" % _ants_version, DeprecationWarning)
 
     # Apply mask
     apply_mask = pe.MapNode(ApplyMask(), iterfield=['in_file'], name='apply_mask')
