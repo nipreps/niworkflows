@@ -255,9 +255,7 @@ def init_enhance_and_skullstrip_bold_wf(
     n4_correct = pe.Node(N4BiasFieldCorrection(
         dimension=3, copy_header=True, bspline_fitting_distance=200), shrink_factor=2,
         name='n4_correct', n_procs=1)
-    _n4_version = N4BiasFieldCorrection().version
-    if _n4_version and parseversion(_n4_version) >= Version('2.1.0'):
-        n4_correct.inputs.rescale_intensities = True
+    n4_correct.inputs.rescale_intensities = True
 
     # Create a generous BET mask out of the bias-corrected EPI
     skullstrip_first_pass = pe.Node(fsl.BET(frac=0.2, mask=True),
