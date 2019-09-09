@@ -1,9 +1,17 @@
-0.10.3 (July 26, 2019)
-======================
+0.10.3 (September 9, 2019)
+==========================
 
-Patch release with a minor bugfix for MRIQC.
+Patch release with several bugfixes and two improvements on how NIfTI files were
+handled. With thanks to David Hunt and Ursula Tooley for contributions.
 
+* ENH: Memory optimized header rewriting (#386) @effigies
+* ENH: Warn about copying sform to qform only if qform changes (#365) @utooley
+* FIX: Nonpositive values entered to N4 when calculating BOLDrefs (#389) @oesteban
+* FIX: Retain newlines in corrected LTA files (#391) @davhunt
+* FIX: Handle singleton decompositions (#383) @rciric
 * FIX: Revision of previous PR #337 / MELODIC did not converge (#381) @oesteban
+* MAINT:Confound metadata maintenance (#382) @rciric
+* TEST: Skip tests with non-Python dependencies when missing (#387) @effigies
 
 0.10.2 (July 24, 2019)
 ======================
