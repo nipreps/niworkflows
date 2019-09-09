@@ -119,8 +119,8 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - regression-v1-{{ .Revision }}
-            - regression-v1-
+            - regression-v2-{{ .Revision }}
+            - regression-v2-
       - run:
           name: Get truncated BOLD series
           command: |
@@ -143,7 +143,7 @@ jobs:
               echo "Pre-computed masks were cached"
             fi
       - save_cache:
-         key: regression-v1-{{ .Revision }}-{{ epoch }}
+         key: regression-v2-{{ .Revision }}-{{ epoch }}
          paths:
             - /tmp/data
 
@@ -160,9 +160,6 @@ jobs:
             - docker-v1-{{ .Branch }}-
             - docker-v1-master-
             - docker-v1-
-      - restore_cache:
-          keys:
-            - regression-v1-{{ .Revision }}
 
       - checkout:
           path: /tmp/src/niworkflows
@@ -247,7 +244,7 @@ jobs:
             - docker-v1-
       - restore_cache:
           keys:
-            - regression-v1-{{ .Revision }}
+            - regression-v2-{{ .Revision }}
 
       - checkout:
           path: /tmp/src/niworkflows
@@ -295,6 +292,7 @@ jobs:
 
       - run:
           name: Package new masks
+          when: always
           no_output_timeout: 10m
           working_directory: /tmp/data
           command: |
@@ -315,7 +313,7 @@ jobs:
       - run: pyenv local 3.5.2
       - run:
           name: Install build depends
-          command: python3 -m pip install "setuptools>=30.3.0" "pip>=10.0.1" twine docutils
+          command: python3 -m pip install "setuptools>=30.4.0" "pip>=10.0.1" twine docutils
       - run:
           name: Build and check
           command: |
@@ -340,7 +338,7 @@ jobs:
       - run: pyenv local 3.5.2
       - run:
           name: Install build depends
-          command: python3 -m pip install "setuptools>=30.3.0" "pip>=10.0.1" twine docutils
+          command: python3 -m pip install "setuptools>=30.4.0" "pip>=10.0.1" twine docutils
       - run:
           name: Build and check
           command: |

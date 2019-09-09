@@ -44,8 +44,9 @@ before_install:
   - virtualenv --python=python /tmp/venv
   - source /tmp/venv/bin/activate
   - python --version
-  - pip --version
+  - python -m pip --version
   - python -m pip install --upgrade $INSTALL_DEPENDS
+  - python -m pip --version
   - |
     if [ "$INSTALL_TYPE" == "pip" ]; then
         PACKAGE="."
@@ -64,7 +65,7 @@ install:
     elif [ "$INSTALL_TYPE" == "develop" ]; then
         python setup.py develop
     else
-        pip install $PACKAGE
+        python -m pip install $PACKAGE
     fi
   - |
     INTENDED_VERSION="$(python -c 'import versioneer; print(versioneer.get_version())')"
@@ -78,7 +79,7 @@ install:
   - if [ "$CHECK_TYPE" = "install" ]; then exit 0; fi
 
 before_script:
-  - travis_retry pip install "niworkflows[$CHECK_TYPE]"
+  - travis_retry python -m pip install "niworkflows[$CHECK_TYPE]"
   - |
     if [ "$CHECK_TYPE" == "test" ]; then
         mkdir -p $HOME/.cache/stanford-crn
@@ -99,5 +100,5 @@ script:
     fi
 
 after_script:
-  - pip install codecov
+  - python -m pip install codecov
   - codecov
