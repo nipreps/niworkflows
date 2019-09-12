@@ -204,7 +204,7 @@ class TruncateLTA(object):
             lta_file = outputs[lta_name]
             if not isdefined(lta_file):
                 continue
-            check_lta_length(lta_file)
+            fix_lta_length(lta_file)
 
         runtime = super(TruncateLTA, self)._post_run_hook(runtime)
         return runtime
@@ -313,7 +313,17 @@ class MedialNaNs(SimpleInterface):
         return runtime
 
 
-def check_lta_length(lta_file):
+def fix_lta_length(lta_file):
+    """
+    Revises the length of the filename field in the LTA file and replaces if too long.
+
+    >>> fix_lta_length(lta_file_1)
+    False
+
+    >>> fix_lta_length(lta_file_2)
+    True
+
+    """
     lines = Path(lta_file).read_text().splitlines(keepends=True)
 
     fixed = False
@@ -327,6 +337,7 @@ def check_lta_length(lta_file):
 
     if fixed:
         Path(lta_file).write_text(''.join(newfile))
+    return fixed
 
 
 def inject_skullstripped(subjects_dir, subject_id, skullstripped):
