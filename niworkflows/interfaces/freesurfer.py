@@ -332,11 +332,11 @@ def fix_lta_length(lta_file):
     >>> nb.save(nifti_file, long_name)
     >>> nb.save(nifti_file, short_name)
     >>> devnull = open(os.devnull, 'w')
-    >>> subprocess.call(["mri_coreg, "--mov", long_name, "--ref", long_name, "--reg", "lta_file_1\
-    ... .lta"], stdout=devnull)
+    >>> subprocess.call(["mri_coreg", "--mov", long_name, "--ref", long_name, "--reg", "lta_file_\
+    ... 1.lta"], stdout=devnull)
     0
-    >>> subprocess.call(["mri_coreg, "--mov", short_name, "--ref", short_name "--reg", "lta_file_\
-    ... 2.lta"], stdout=devnull)
+    >>> subprocess.call(["mri_coreg", "--mov", short_name, "--ref", short_name "--reg", "lta_file\
+    ... _2.lta"], stdout=devnull)
     0
     >>> fix_lta_length('lta_file_1.lta')
     True
