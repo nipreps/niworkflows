@@ -322,16 +322,21 @@ def fix_lta_length(lta_file):
     >>> import subprocess
     >>> import os
     >>> data = np.arange(4*4*3).reshape(4,4,3)
-    >>> long_name = '/N/dc2/scratch/davhunt/workflows/5d6705bee0ae0618d1ededa8/5d6db5f2e0ae06ba6cee3710/fmripworkdir/fmriprep_wf/single_subject_TTTEMPSUB_wf/func_preproc_ses_SSSES_task_balloonanalogrisktask_run_1_wf/bold_reg_wf/bbreg_wf/mri_coreg/ref_bold_excessively_long_filename.nii.gz'
+    >>> long_name = '/N/dc2/scratch/davhunt/workflows/5d6705bee0ae0618d1ededa8/5d6db5f2e0ae06ba6c\
+    ... ee3710/fmripworkdir/fmriprep_wf/single_subject_TTTEMPSUB_wf/func_preproc_ses_SSSES_task_b\
+    ... alloonanalogrisktask_run_1_wf/bold_reg_wf/bbreg_wf/mri_coreg/ref_bold_excessively_long_fi\
+    ... lename.nii.gz'
     >>> short_name = 'short_filename.nii.gz'
     >>> os.makedirs(os.path.dirname(long_name))
     >>> nifti_file = nb.Nifti1Image(data, affine=np.eye(4))
     >>> nb.save(nifti_file, long_name)
     >>> nb.save(nifti_file, short_name)
     >>> devnull = open(os.devnull, 'w')
-    >>> subprocess.call(["mri_coreg, "--mov", long_name, "--ref", long_name, "--reg", "lta_file_1.lta"], stdout=devnull)
+    >>> subprocess.call(["mri_coreg, "--mov", long_name, "--ref", long_name, "--reg", "lta_file_1\
+    ... .lta"], stdout=devnull)
     0
-    >>> subprocess.call(["mri_coreg, "--mov", short_name, "--ref", short_name "--reg", "lta_file_2.lta"], stdout=devnull)
+    >>> subprocess.call(["mri_coreg, "--mov", short_name, "--ref", short_name "--reg", "lta_file_\
+    ... 2.lta"], stdout=devnull)
     0
     >>> fix_lta_length('lta_file_1.lta')
     True
