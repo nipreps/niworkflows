@@ -332,7 +332,7 @@ def fix_lta_length(lta_file):
     >>> nb.save(nifti_file, long_name)
     >>> nb.save(nifti_file, short_name)
     >>> devnull = open(os.devnull, 'w')
-    >>> mri_coreg = os.getenv('FREESURFER_HOME') + '/bin/mri_coreg'
+    >>> mri_coreg = '/opt/freesurfer/bin/mri_coreg'
     >>> subprocess.call([mri_coreg, "--mov", long_name, "--ref", long_name, "--reg", "lta_file_\
     ... 1.lta"], stdout=devnull)
     0
