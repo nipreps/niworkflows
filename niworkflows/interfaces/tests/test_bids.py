@@ -162,11 +162,38 @@ def test_fsdir_noaction(derivatives, subjects_dir):
 @pytest.mark.parametrize('spaces', [[], ['fsaverage'], ['fsnative'], ['fsaverage5', 'fsnative']])
 def test_fsdir(tmp_path, spaces):
     fshome = os.environ['FREESURFER_HOME']
-    res = bintfs.BIDSFreeSurferDir(derivatives=str(tmp_path), spaces=spaces,
-                                   freesurfer_home=fshome).run()
     subjects_dir = tmp_path / 'freesurfer'
-    assert res.outputs.subjects_dir == str(subjects_dir)
 
+    # Verify we're starting clean
     for space in spaces:
         if space.startswith('fsaverage'):
-            assert Path.exists(subjects_dir / space)
+            assert not Path.exists(subjects_dir / space)
+
+    # Run three times to check idempotence
+    # Third time force an overwrite
+    for overwrite_fsaverage in (False, False, True):
+        res = bintfs.BIDSFreeSurferDir(derivatives=str(tmp_path), spaces=spaces,
+                                       freesurfer_home=fshome,
+                                       overwrite_fsaverage=overwrite_fsaverage).run()
+        assert res.outputs.subjects_dir == str(subjects_dir)
+
+        for space in spaces:
+            if space.startswith('fsaverage'):
+                assert Path.exists(subjects_dir / space)
+
+
+@pytest.mark.skipif(not os.getenv('FREESURFER_HOME'), reason="No FreeSurfer")
+def test_fsdir_missing_space(tmp_path):
+    fshome = os.environ['FREESURFER_HOME']
+
+    # fsaverage2 doesn't exist in source or destination, so can't copy
+    with pytest.raises(FileNotFoundError):
+        bintfs.BIDSFreeSurferDir(derivatives=str(tmp_path), spaces=['fsaverage2'],
+                                 freesurfer_home=fshome).run()
+
+    subjects_dir = tmp_path / 'freesurfer'
+
+    # If fsaverage2 exists in the destination directory, no error is thrown
+    Path.mkdir(subjects_dir / 'fsaverage2')
+    bintfs.BIDSFreeSurferDir(derivatives=str(tmp_path), spaces=['fsaverage2'],
+                             freesurfer_home=fshome).run()
