@@ -7,7 +7,6 @@ Interfaces for handling BIDS-like neuroimaging structures
 
 """
 
-import os
 from json import dumps
 from pathlib import Path
 from shutil import copytree, rmtree
@@ -604,8 +603,11 @@ class BIDSFreeSurferDirInputSpec(BaseInterfaceInputSpec):
                             desc='BIDS derivatives directory')
     freesurfer_home = Directory(exists=True, mandatory=True,
                                 desc='FreeSurfer installation directory')
-    subjects_dir = traits.Str('freesurfer', usedefault=True,
-                              desc='Name of FreeSurfer subjects directory')
+    subjects_dir = traits.Either(traits.Str(),
+                                 Directory(),
+                                 default='freesurfer',
+                                 usedefault=True,
+                                 desc='Name of FreeSurfer subjects directory')
     spaces = traits.List(traits.Str, desc='Set of output spaces to prepare')
     overwrite_fsaverage = traits.Bool(False, usedefault=True,
                                       desc='Overwrite fsaverage directories, if present')
@@ -617,21 +619,39 @@ class BIDSFreeSurferDirOutputSpec(TraitedSpec):
 
 
 class BIDSFreeSurferDir(SimpleInterface):
-    """Create a FreeSurfer subjects directory in a BIDS derivatives directory
-    and copy fsaverage from the local FreeSurfer distribution.
+    """ Prepare a FreeSurfer subjects directory for use in a BIDS context.
 
-    Output subjects_dir = ``{derivatives}/{subjects_dir}``, and may be passed to
-    ReconAll and other FreeSurfer interfaces.
+    Constructs a subjects directory path, creating if necessary, and copies
+    fsaverage subjects (if necessary or forced via ``overwrite_fsaverage``)
+    into from the local FreeSurfer distribution.
+
+    If ``subjects_dir`` is an absolute path, then it is returned as the output
+    ``subjects_dir``.
+    If it is a relative path, it will be resolved relative to the
+    ```derivatives`` directory.`
+
+    Regardless of the path, if ``fsaverage`` spaces are provided, they will be
+    verified to exist, or copied from ``$FREESURFER_HOME/subjects``, if missing.
+
+    The output ``subjects_dir`` is intended to be passed to ``ReconAll`` and
+    other FreeSurfer interfaces.
     """
     input_spec = BIDSFreeSurferDirInputSpec
     output_spec = BIDSFreeSurferDirOutputSpec
     _always_run = True
 
     def _run_interface(self, runtime):
-        subjects_dir = os.path.join(self.inputs.derivatives,
-                                    self.inputs.subjects_dir)
-        os.makedirs(subjects_dir, exist_ok=True)
-        self._results['subjects_dir'] = subjects_dir
+        subjects_dir = Path(self.inputs.subjects_dir)
+        if not subjects_dir.is_absolute():
+            subjects_dir = Path(self.inputs.derivatives) / subjects_dir
+        subjects_dir.mkdir(parents=True, exist_ok=True)
+        self._results['subjects_dir'] = str(subjects_dir)
+
+        orig_subjects_dir = Path(self.inputs.freesurfer_home) / 'subjects'
+
+        # Source is target, so just quit
+        if subjects_dir == orig_subjects_dir:
+            return runtime
 
         spaces = list(self.inputs.spaces)
         # Always copy fsaverage, for proper recon-all functionality
@@ -642,12 +662,20 @@ class BIDSFreeSurferDir(SimpleInterface):
             # Skip non-freesurfer spaces and fsnative
             if not space.startswith('fsaverage'):
                 continue
-            source = os.path.join(self.inputs.freesurfer_home, 'subjects', space)
-            dest = os.path.join(subjects_dir, space)
+            source = orig_subjects_dir / space
+            dest = subjects_dir / space
+
+            # Edge case, but give a sensible error
+            if not source.exists():
+                if dest.exists():
+                    continue
+                else:
+                    raise FileNotFoundError("Expected to find '%s' to copy" % source)
+
             # Finesse is overrated. Either leave it alone or completely clobber it.
-            if os.path.exists(dest) and self.inputs.overwrite_fsaverage:
+            if dest.exists() and self.inputs.overwrite_fsaverage:
                 rmtree(dest)
-            if not os.path.exists(dest):
+            if not dest.exists():
                 try:
                     copytree(source, dest)
                 except FileExistsError:
