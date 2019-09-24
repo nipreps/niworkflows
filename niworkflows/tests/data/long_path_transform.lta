@@ -1,0 +1,31 @@
+# transform file /N/dc2/scratch/davhunt/workflows/5d6705bee0ae0618d1ededa8/5d6db5f2e0ae06ba6cee3710/fmripworkdir/fmriprep_wf/single_subject_TTTEMPSUB_wf/func_preproc_ses_SSSES_task_balloonanalogrisktask_run_1_wf/bold_reg_wf/bbreg_wf/mri_coreg/registration.lta
+# created by davhunt on Mon Sep  2 22:46:17 2019
+
+type      = 0 # LINEAR_VOX_TO_VOX
+nxforms   = 1
+mean      = 0.0000 0.0000 0.0000
+sigma     = 10000.0000
+1 4 4
+3.124938726425171e+00 -6.231633014976978e-03 2.379096671938896e-02 2.793729782104492e+01 
+1.451765652745962e-02 -1.255382895469666e+00 -3.662998914718628e+00 2.176610260009766e+02 
+1.317331008613110e-02 2.861747980117798e+00 -1.606821179389954e+00 3.680672836303711e+01 
+0.000000000000000e+00 0.000000000000000e+00 0.000000000000000e+00 9.999999403953552e-01 
+src volume info
+valid = 1  # volume info valid
+filename = /N/dc2/scratch/davhunt/workflows/5d6705bee0ae0618d1ededa8/5d6db5f2e0ae06ba6cee3710/fmripworkdir/fmriprep_wf/single_subject_TTTEMPSUB_wf/func_preproc_ses_SSSES_task_balloonanalogrisktask_run_1_wf/bold_reg_wf/bbreg_wf/mri_coreg/ref_bold_corrected_trans_masked.nii.gz
+volume = 64 64 33
+voxelsize = 3.125000000000000e+00 3.125000000000000e+00 4.000000000000000e+00
+xras   = -1.000000000000000e+00 0.000000000000000e+00 0.000000000000000e+00
+yras   = 0.000000000000000e+00 1.000000000000000e+00 0.000000000000000e+00
+zras   = 0.000000000000000e+00 0.000000000000000e+00 1.000000000000000e+00
+cras   = -2.068481445312500e+00 3.198078918457031e+01 -4.065056610107422e+01
+dst volume info
+valid = 1  # volume info valid
+filename = /N/dc2/scratch/davhunt/workflows/5d6705bee0ae0618d1ededa8/5d6db5f2e0ae06ba6cee3710/fmripout/freesurfer/sub-TTTEMPSUB/mri/brainmask.mgz
+volume = 256 256 256
+voxelsize = 1.000000000000000e+00 1.000000000000000e+00 1.000000000000000e+00
+xras   = -9.999999403953552e-01 0.000000000000000e+00 0.000000000000000e+00
+yras   = 0.000000000000000e+00 0.000000000000000e+00 -9.999999403953552e-01
+zras   = 0.000000000000000e+00 9.999999403953552e-01 0.000000000000000e+00
+cras   = -3.000000000000000e+00 2.999969482421875e+00 -8.000038146972656e+00
+subject sub-TTTEMPSUB
