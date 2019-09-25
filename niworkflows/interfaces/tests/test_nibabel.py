@@ -8,7 +8,7 @@ from ..nibabel import Binarize
 
 def test_Binarize(tmp_path):
     """Test binarization interface."""
-    os.chdir(tmp_path)
+    os.chdir(str(tmp_path))
 
     mask = np.zeros((20, 20, 20), dtype=bool)
     mask[5:15, 5:15, 5:15] = bool
