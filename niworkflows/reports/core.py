@@ -161,7 +161,7 @@ class Reportlet(Element):
 
                 entities['extension'] = 'svg'
                 entities['datatype'] = 'figures'
-                linked_svg = layout.build_path(entities)
+                linked_svg = layout.build_path(entities, validate=False)
                 if linked_svg is None:
                     raise ValueError("Could not generate SVG path to copy {src}"
                                      " to. Entities: {entities}".format(src=src,
