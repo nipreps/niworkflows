@@ -8,7 +8,11 @@ as well as for open-source software distribution.
 .. image:: https://circleci.com/gh/poldracklab/niworkflows/tree/master.svg?style=shield
   :target: https://circleci.com/gh/poldracklab/niworkflows/tree/master
   :alt: CI status
-  
+
+.. image:: https://travis-ci.org/poldracklab/niworkflows.svg?branch=master
+  :target: https://travis-ci.org/poldracklab/niworkflows
+  :alt: CI status
+
 .. image:: https://readthedocs.org/projects/nipype-workflows/badge/?version=latest
   :target: http://nipype-workflows.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
