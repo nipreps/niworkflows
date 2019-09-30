@@ -212,6 +212,19 @@ def splitext(fname):
     return stem, basename[len(stem):]
 
 
+def select_first(in_files):
+    """
+    Select the first file from a list of filenames.
+    Used to grab the first echo's file when processing
+    multi-echo data through workflows that only accept
+    a single file.
+    """
+    if isinstance(in_files, list):
+        return in_files[0]
+    else:
+        return in_files
+
+
 def _copy_any(src, dst):
     import os
     import gzip

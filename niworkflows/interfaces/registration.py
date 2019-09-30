@@ -16,6 +16,7 @@ from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
     File,
     SimpleInterface,
+    InputMultiPath,
 )
 from nipype.interfaces.mixins import reporting
 from nipype.interfaces import freesurfer as fs
@@ -398,8 +399,27 @@ class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
 
 
 class _EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="4D EPI file")
-    sbref_file = File(exists=True, desc="Single band reference image")
+    in_file = traits.Either(
+        File(exists=True),
+        InputMultiPath(File(exists=True)),
+        mandatory=True,
+        desc=(
+            "4D EPI file. If multiple files "
+            "are provided, they are assumed "
+            "to represent multiple echoes "
+            "from the same run."
+        ),
+    )
+    sbref_file = traits.Either(
+        File(exists=True),
+        InputMultiPath(File(exists=True)),
+        desc=(
+            "Single band reference image. "
+            "If multiple files are provided, "
+            "they are assumed to represent "
+            "multiple echoes."
+        ),
+    )
     mc_method = traits.Enum(
         "AFNI",
         "FSL",
@@ -415,6 +435,9 @@ class _EstimateReferenceImageOutputSpec(TraitedSpec):
         "state volumes in the beginning of "
         "the input file"
     )
+    description = traits.Str(
+        desc="Description of reference image " "identification steps taken."
+    )
 
 
 class EstimateReferenceImage(SimpleInterface):
@@ -429,7 +452,11 @@ class EstimateReferenceImage(SimpleInterface):
     output_spec = _EstimateReferenceImageOutputSpec
 
     def _run_interface(self, runtime):
-        ref_name = self.inputs.in_file
+        # Select first EPI file
+        if not isinstance(self.inputs.in_file, File):
+            ref_name = self.inputs.in_file[0]
+        else:
+            ref_name = self.inputs.in_file
         ref_nii = nb.load(ref_name)
         n_volumes_to_discard = _get_vols_to_discard(ref_nii)
 
@@ -437,9 +464,13 @@ class EstimateReferenceImage(SimpleInterface):
 
         out_ref_fname = os.path.join(runtime.cwd, "ref_bold.nii.gz")
         if isdefined(self.inputs.sbref_file):
-            out_ref_fname = os.path.join(runtime.cwd, "ref_sbref.nii.gz")
-            ref_name = self.inputs.sbref_file
+            # Select first SBRef file
+            if not isinstance(self.inputs.sbref_file, File):
+                ref_name = self.inputs.sbref_file[0]
+            else:
+                ref_name = self.inputs.sbref_file
             ref_nii = nb.squeeze_image(nb.load(ref_name))
+            out_ref_fname = os.path.join(runtime.cwd, "ref_sbref.nii.gz")
 
             # If reference is only 1 volume, return it directly
             if len(ref_nii.shape) == 3:
@@ -488,7 +519,6 @@ class EstimateReferenceImage(SimpleInterface):
         )
 
         self._results["ref_image"] = out_ref_fname
-
         return runtime
 
 
