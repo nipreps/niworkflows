@@ -435,9 +435,6 @@ class _EstimateReferenceImageOutputSpec(TraitedSpec):
         "state volumes in the beginning of "
         "the input file"
     )
-    description = traits.Str(
-        desc="Description of reference image " "identification steps taken."
-    )
 
 
 class EstimateReferenceImage(SimpleInterface):
