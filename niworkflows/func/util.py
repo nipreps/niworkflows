@@ -165,7 +165,7 @@ using a custom methodology of *fMRIPrep*.
             ("bold_mask", "inputnode.pre_mask"),
         ]),
         (inputnode, validate, [(("bold_file", ensure_list), "in_file")]),
-        (inputnode, gen_ref, [(("sbref_file", ensure_list), "sbref_file")]),
+        (inputnode, gen_ref, [("sbref_file", "sbref_file")]),
         (inputnode, calc_dummy_scans, [("dummy_scans", "dummy_scans")]),
         (validate, gen_ref, [("out_file", "in_file")]),
         (gen_ref, enhance_and_skullstrip_bold_wf, [
