@@ -399,9 +399,8 @@ class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
 
 
 class _EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
-    in_file = traits.Either(
+    in_file = InputMultiPath(
         File(exists=True),
-        InputMultiPath(File(exists=True)),
         mandatory=True,
         desc=(
             "4D EPI file. If multiple files "
@@ -410,9 +409,8 @@ class _EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
             "from the same run."
         ),
     )
-    sbref_file = traits.Either(
+    sbref_file = InputMultiPath(
         File(exists=True),
-        InputMultiPath(File(exists=True)),
         desc=(
             "Single band reference image. "
             "If multiple files are provided, "
@@ -450,10 +448,7 @@ class EstimateReferenceImage(SimpleInterface):
 
     def _run_interface(self, runtime):
         # Select first EPI file
-        if not isinstance(self.inputs.in_file, File):
-            ref_name = self.inputs.in_file[0]
-        else:
-            ref_name = self.inputs.in_file
+        ref_name = self.inputs.in_file[0]
         ref_nii = nb.load(ref_name)
         n_volumes_to_discard = _get_vols_to_discard(ref_nii)
 
@@ -462,10 +457,7 @@ class EstimateReferenceImage(SimpleInterface):
         out_ref_fname = os.path.join(runtime.cwd, "ref_bold.nii.gz")
         if isdefined(self.inputs.sbref_file):
             # Select first SBRef file
-            if not isinstance(self.inputs.sbref_file, File):
-                ref_name = self.inputs.sbref_file[0]
-            else:
-                ref_name = self.inputs.sbref_file
+            ref_name = self.inputs.sbref_file[0]
             ref_nii = nb.squeeze_image(nb.load(ref_name))
             out_ref_fname = os.path.join(runtime.cwd, "ref_sbref.nii.gz")
 
