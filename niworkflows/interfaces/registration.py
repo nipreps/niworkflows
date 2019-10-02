@@ -16,7 +16,7 @@ from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
     File,
     SimpleInterface,
-    InputMultiPath,
+    InputMultiObject,
 )
 from nipype.interfaces.mixins import reporting
 from nipype.interfaces import freesurfer as fs
@@ -399,7 +399,7 @@ class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
 
 
 class _EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
-    in_file = InputMultiPath(
+    in_file = InputMultiObject(
         File(exists=True),
         mandatory=True,
         desc=(
@@ -409,7 +409,7 @@ class _EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
             "from the same run."
         ),
     )
-    sbref_file = InputMultiPath(
+    sbref_file = InputMultiObject(
         File(exists=True),
         desc=(
             "Single band reference image. "
