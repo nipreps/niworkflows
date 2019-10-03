@@ -205,19 +205,7 @@ class TruncateLTA(object):
             if not isdefined(lta_file):
                 continue
 
-            lines = Path(lta_file).read_text().splitlines(keepends=True)
-
-            fixed = False
-            newfile = []
-            for line in lines:
-                if line.startswith('filename = ') and len(line.strip("\n")) >= 255:
-                    fixed = True
-                    newfile.append('filename = path_too_long\n')
-                else:
-                    newfile.append(line)
-
-            if fixed:
-                Path(lta_file).write_text(''.join(newfile))
+            fix_lta_length(lta_file)
 
         runtime = super(TruncateLTA, self)._post_run_hook(runtime)
         return runtime
@@ -324,6 +312,53 @@ class MedialNaNs(SimpleInterface):
             self.inputs.target_subject,
             newpath=runtime.cwd)
         return runtime
+
+
+def fix_lta_length(lta_file):
+    """ Fix the length of the filename field in an LTA file if too long.
+
+    Updates file in place.
+
+    Examples
+    --------
+
+    No changes are made to a valid transform file:
+
+    >>> valid_transform = Path(test_data) / 'valid_transform.lta'
+    >>> orig_contents = valid_transform.read_text()
+    >>> fix_lta_length(valid_transform)
+    False
+    >>> valid_transform.read_text() == orig_contents
+    True
+
+    Invalid transform files are files with > 255 characters in any line:
+
+    >>> invalid_transform = Path(test_data) / 'long_path_transform.lta'
+    >>> orig_contents = invalid_transform.read_text()
+    >>> any(len(line) > 255 for line in orig_contents.splitlines(keepends=True))
+    True
+    >>> local_copy = Path('invalid.lta')
+    >>> local_copy.write_text(orig_contents)
+    2120
+    >>> fix_lta_length(local_copy)
+    True
+    >>> local_copy.read_text() == orig_contents
+    False
+    """
+    lines = Path(lta_file).read_text().splitlines(keepends=True)
+
+    fixed = False
+    newfile = []
+    for line in lines:
+        if line.startswith('filename = ') and len(line.strip("\n")) >= 255:
+            fixed = True
+            newfile.append('filename = path_too_long\n')
+        else:
+            newfile.append(line)
+
+    if fixed:
+        Path(lta_file).write_text(''.join(newfile))
+    return fixed
 
 
 def inject_skullstripped(subjects_dir, subject_id, skullstripped):

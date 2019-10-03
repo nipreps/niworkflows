@@ -6,6 +6,7 @@ import nibabel as nb
 import pandas as pd
 import pytest
 import tempfile
+import pkg_resources
 
 from .utils.bids import collect_data
 
@@ -22,6 +23,7 @@ def add_np(doctest_namespace):
     doctest_namespace['Path'] = Path
     doctest_namespace['datadir'] = data_dir
     doctest_namespace['bids_collect_data'] = collect_data
+    doctest_namespace['test_data'] = pkg_resources.resource_filename('niworkflows', 'tests/data')
 
     tmpdir = tempfile.TemporaryDirectory()
     doctest_namespace['tmpdir'] = tmpdir.name
