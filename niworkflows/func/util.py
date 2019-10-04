@@ -36,7 +36,7 @@ DEFAULT_MEMORY_MIN_GB = 0.01
 def init_bold_reference_wf(omp_nthreads, bold_file=None, pre_mask=False,
                            name='bold_reference_wf', gen_report=False):
     """
-    This workflow generates reference BOLD images for a series.
+    Build a workflow that generates reference BOLD images for a series.
 
     The raw reference image is the target of :abbr:`HMC (head motion correction)`, and a
     contrast-enhanced reference is the subject of distortion correction, as well as
@@ -109,7 +109,7 @@ using a custom methodology of *fMRIPrep*.
     outputnode = pe.Node(
         niu.IdentityInterface(fields=['bold_file', 'raw_ref_image', 'skip_vols',
                                       'algo_dummy_scans', 'ref_image', 'ref_image_brain',
-                                      'bold_mask', 'validation_report', 'mask _report']),
+                                      'bold_mask', 'validation_report']),
         name='outputnode')
 
     # Simplify manually setting input image
