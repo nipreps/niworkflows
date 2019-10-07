@@ -424,6 +424,14 @@ class _EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
         usedefault=True,
         desc="Which software to use to perform motion correction",
     )
+    multiecho = traits.Bool(
+        False,
+        usedefault=True,
+        desc=(
+            "If multiecho data was supplied, data from "
+            "the first echo will be selected."
+        ),
+    )
 
 
 class _EstimateReferenceImageOutputSpec(TraitedSpec):
