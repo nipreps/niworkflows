@@ -462,8 +462,16 @@ class EstimateReferenceImage(SimpleInterface):
 
         self._results["n_volumes_to_discard"] = n_volumes_to_discard
 
+        if multiecho and (len(self.inputs.in_file) < 2):
+            raise ValueError("Argument 'multiecho' is True but "
+                             "'in_file' has only one element")
+
         out_ref_fname = os.path.join(runtime.cwd, "ref_bold.nii.gz")
         if isdefined(self.inputs.sbref_file):
+            if multiecho and (len(self.inputs.sbref_file) < 2):
+                raise ValueError("Argument 'multiecho' is True but "
+                                 "'sbref_file' has only one element")
+
             # Select first SBRef file
             ref_name = self.inputs.sbref_file[0]
             ref_nii = nb.squeeze_image(nb.load(ref_name))
