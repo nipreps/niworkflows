@@ -1,3 +1,15 @@
+0.10.4 (October 8, 2019)
+==========================
+
+Patch release with a few small bug fixes and improvements.
+
+* FIX: Remove unused, undocumented output from the bold_reference workflow (#409) @oesteban
+* FIX: Do not validate built paths (#405) @effigies
+* FIX: Ensure that length of indices matches length of values (#397) @rciric
+* ENH: Add a new ``Binarize`` interface using nibabel (#402) @oesteban
+* ENH: Enable BIDSFreeSurferDir to take an absolute path as a subjects directory (#398) @effigies
+* TEST: Separate LTA length fixing and add doctest (#403) @davhunt
+
 0.10.3 (September 9, 2019)
 ==========================
 
