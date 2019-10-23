@@ -1,8 +1,10 @@
+import os
+from pathlib import Path
+
 import numpy as np
 import nibabel as nb
 import pytest
 from nipype.interfaces.base import Undefined
-
 
 from .. import bids as bintfs
 
@@ -141,3 +143,57 @@ def test_ReadSidecarJSON_connection(testdata_dir, field):
             wf.connect([
                 (n, o, [(field, 'out_port')]),
             ])
+
+
+@pytest.mark.skipif(not os.getenv('FREESURFER_HOME'), reason="No FreeSurfer")
+@pytest.mark.parametrize("derivatives, subjects_dir", [
+    (os.getenv('FREESURFER_HOME'), 'subjects'),
+    ('/tmp', "%s/%s" % (os.getenv('FREESURFER_HOME'), 'subjects'))
+    ])
+def test_fsdir_noaction(derivatives, subjects_dir):
+    """ Using $FREESURFER_HOME/subjects should exit early, however constructed """
+    fshome = os.environ['FREESURFER_HOME']
+    res = bintfs.BIDSFreeSurferDir(derivatives=derivatives, subjects_dir=subjects_dir,
+                                   freesurfer_home=fshome).run()
+    assert res.outputs.subjects_dir == '%s/subjects' % fshome
+
+
+@pytest.mark.skipif(not os.getenv('FREESURFER_HOME'), reason="No FreeSurfer")
+@pytest.mark.parametrize('spaces', [[], ['fsaverage'], ['fsnative'], ['fsaverage5', 'fsnative']])
+def test_fsdir(tmp_path, spaces):
+    fshome = os.environ['FREESURFER_HOME']
+    subjects_dir = tmp_path / 'freesurfer'
+
+    # Verify we're starting clean
+    for space in spaces:
+        if space.startswith('fsaverage'):
+            assert not Path.exists(subjects_dir / space)
+
+    # Run three times to check idempotence
+    # Third time force an overwrite
+    for overwrite_fsaverage in (False, False, True):
+        res = bintfs.BIDSFreeSurferDir(derivatives=str(tmp_path), spaces=spaces,
+                                       freesurfer_home=fshome,
+                                       overwrite_fsaverage=overwrite_fsaverage).run()
+        assert res.outputs.subjects_dir == str(subjects_dir)
+
+        for space in spaces:
+            if space.startswith('fsaverage'):
+                assert Path.exists(subjects_dir / space)
+
+
+@pytest.mark.skipif(not os.getenv('FREESURFER_HOME'), reason="No FreeSurfer")
+def test_fsdir_missing_space(tmp_path):
+    fshome = os.environ['FREESURFER_HOME']
+
+    # fsaverage2 doesn't exist in source or destination, so can't copy
+    with pytest.raises(FileNotFoundError):
+        bintfs.BIDSFreeSurferDir(derivatives=str(tmp_path), spaces=['fsaverage2'],
+                                 freesurfer_home=fshome).run()
+
+    subjects_dir = tmp_path / 'freesurfer'
+
+    # If fsaverage2 exists in the destination directory, no error is thrown
+    Path.mkdir(subjects_dir / 'fsaverage2')
+    bintfs.BIDSFreeSurferDir(derivatives=str(tmp_path), spaces=['fsaverage2'],
+                             freesurfer_home=fshome).run()
