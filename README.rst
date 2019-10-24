@@ -32,9 +32,9 @@ https://github.com/poldracklab/nipype-workflows/issues.
 Authors
 -------
 
-The authors of NIworkflows can be found `here <AUTHORS>`_.
+The authors of NIworkflows can be found `here <AUTHORS>`__.
 
 License
 -------
 
-Preprocessing-workflow is licensed under the Revised BSD Licence. The license can be found `here <LICENSE>`_.
+Preprocessing-workflow is licensed under the Revised BSD Licence. The license can be found `here <LICENSE>`__.
