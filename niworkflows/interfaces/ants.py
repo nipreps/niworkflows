@@ -35,8 +35,8 @@ class ImageMath(ANTSCommand):
     """
     Operations over images
 
-    Example:
-    --------
+    Example
+    -------
 
     """
 
@@ -75,7 +75,7 @@ class ResampleImageBySpacing(ANTSCommand):
     """
     Resamples an image with a given spacing
 
-    Example:
+    Examples
     --------
 
     >>> res = ResampleImageBySpacing(dimension=3)
@@ -154,7 +154,7 @@ class ThresholdImage(ANTSCommand):
     """
     Apply thresholds on images
 
-    Example:
+    Examples
     --------
 
     >>> res = ThresholdImage(dimension=3)
@@ -245,7 +245,7 @@ class AI(ANTSCommand):
     """
     The replacement for ``AffineInitializer``.
 
-    Example:
+    Examples
     --------
 
     """

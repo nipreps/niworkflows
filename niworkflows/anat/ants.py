@@ -89,7 +89,8 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
     .. workflow::
         :graph2use: orig
         :simple_form: yes
-        from niworkflows.anat import init_brain_extraction_wf
+
+        from niworkflows.anat.ants import init_brain_extraction_wf
         wf = init_brain_extraction_wf()
 
 
