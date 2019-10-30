@@ -31,8 +31,14 @@ CIFTI_STRUCT_WITH_LABELS = {
     'CIFTI_STRUCTURE_BRAIN_STEM': [16],
     'CIFTI_STRUCTURE_CAUDATE_LEFT': [11],
     'CIFTI_STRUCTURE_CAUDATE_RIGHT': [50],
-    'CIFTI_STRUCTURE_CEREBELLUM_LEFT': [6],
-    'CIFTI_STRUCTURE_CEREBELLUM_RIGHT': [45],
+    'CIFTI_STRUCTURE_CEREBELLUM_LEFT': [
+        6,  # DKT31
+        8,  # HCP MNI152
+    ],
+    'CIFTI_STRUCTURE_CEREBELLUM_RIGHT': [
+        45,  # DKT31
+        47,  # HCP MNI152
+    ],
     'CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT': [28],
     'CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT': [60],
     'CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT': [17],
@@ -48,14 +54,15 @@ CIFTI_STRUCT_WITH_LABELS = {
 
 class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
     bold_file = File(mandatory=True, exists=True, desc="input BOLD file")
-    volume_target = traits.Enum("MNI152NLin2009cAsym", mandatory=True, usedefault=True,
+    volume_target = traits.Enum("MNI152NLin6Asym", "MNI152NLin2009cAsym", usedefault=True,
                                 desc="CIFTI volumetric output space")
-    surface_target = traits.Enum("fsaverage5", "fsaverage6", mandatory=True,
-                                 usedefault=True, desc="CIFTI surface target space")
-    subjects_dir = Directory(mandatory=True, desc="FreeSurfer SUBJECTS_DIR")
-    TR = traits.Float(mandatory=True, desc="repetition time")
-    gifti_files = traits.List(File(exists=True), mandatory=True,
-                              desc="list of surface geometry files (length 2 with order [L,R])")
+    surface_target = traits.Enum("fsLR", "fsaverage5", "fsaverage6", usedefault=True,
+                                 desc="CIFTI surface target space")
+    TR = traits.Float(mandatory=True, desc="Repetition time")
+    surface_bolds = traits.List(File(exists=True), mandatory=True,
+                                desc="list of surface BOLD GIFTI files (length 2 with order [L,R])")
+    surface_annots = traits.List(File(exists=True),
+                                 help="Surface annotation files. Used to exclude medial wall vertices.")
 
 
 class _GenerateCiftiOutputSpec(TraitedSpec):
@@ -68,25 +75,27 @@ class GenerateCifti(SimpleInterface):
     """
     Generate CIFTI image from BOLD file in target spaces.
 
-    Currently supported
-    * target surfaces: fsaverage5, fsaverage6
-    * target volumes: OASIS-TRT-20_DKT31 labels in MNI152NLin2009cAsym
-
+    target surfaces:
+        - fsaverage5
+        - fsaverage6
+        - fsLR
+    target volumes:
+        - OASIS-TRT-20_DKT31 labels in MNI152NLin2009cAsym (2mm)
+        - MNI152NLin6Asym (1.6)
     """
 
     input_spec = _GenerateCiftiInputSpec
     output_spec = _GenerateCiftiOutputSpec
 
     def _run_interface(self, runtime):
-        self._results["variant_key"], self._results["variant"] = self._define_variant()
+        targets = self._define_variant()
         annotation_files, label_file = self._fetch_data()
         self._results["out_file"] = self._create_cifti_image(
             self.inputs.bold_file,
             label_file,
             annotation_files,
-            self.inputs.gifti_files,
-            self.inputs.volume_target,
-            self.inputs.surface_target,
+            self.inputs.surface_files,
+            targets,
             self.inputs.TR)
         return runtime
 
@@ -94,13 +103,15 @@ class GenerateCifti(SimpleInterface):
         """Assign arbitrary label to combination of CIFTI spaces."""
         space = None
         variants = {
-            # to be expanded once addtional spaces are supported
+            'fsLR': ['fsLR', 'MNI152NLin2009cAsym'],
             'space1': ['fsaverage5', 'MNI152NLin2009cAsym'],
             'space2': ['fsaverage6', 'MNI152NLin2009cAsym'],
         }
         for sp, targets in variants.items():
-            if all(target in targets for target in
-                    [self.inputs.surface_target, self.inputs.volume_target]):
+            if all(
+                target in targets for target in
+                [self.inputs.surface_target, self.inputs.volume_target]
+            ):
                 space = sp
         if space is None:
             raise NotImplementedError
@@ -108,71 +119,92 @@ class GenerateCifti(SimpleInterface):
         variant_key = os.path.abspath('dtseries_variant.json')
         with open(variant_key, 'w') as fp:
             json.dump({space: variants[space]}, fp)
-        return variant_key, space
+        self._results['variant_key'] = variant_key
+        self._results['variant'] = space
+        return variants[space]
 
     def _fetch_data(self):
-        """Convert inputspec to files."""
-        if (self.inputs.surface_target == "fsnative" or
-                self.inputs.volume_target != "MNI152NLin2009cAsym"):
-            # subject space is not support yet
-            raise NotImplementedError
+        """Converts inputspec to files"""
+        if (
+            self.inputs.surface_target not in  ("fsaverage5", "fsaverage6", "fsLR") or
+            self.inputs.volume_target not in ("MNI152NLin2009cAsym", "MNI152NLin6Asym")
+        ):
+            raise NotImplementedError(
+                "Target space (surface: {0}, volume: {1}) is not supported".format(
+                    self.inputs.surface_target, self.inputs.volume_target
+                )
+            )
 
-        annotation_files = sorted(glob(os.path.join(self.inputs.subjects_dir,
-                                                    self.inputs.surface_target,
-                                                    'label',
-                                                    '*h.aparc.annot')))
-        if not annotation_files:
-            raise IOError("Freesurfer annotations for %s not found in %s" % (
-                          self.inputs.surface_target, self.inputs.subjects_dir))
+        tpl_kwargs = {}
+        annotation_files = None
+        if self.inputs.surface_target.startswith("fsav"):
+            tpl_kwargs.update({
+                'resolution': 2,
+                'desc': 'DKT31',
+                'suffix': 'dseg',
+            })
+            annotation_files = sorted(
+                glob(os.path.join(self.inputs.subjects_dir,
+                                  self.inputs.surface_target,
+                                  'label',
+                                  '*h.aparc.annot'))
+            )
+            if not annotation_files:
+                raise IOError("Freesurfer annotations for %s not found in %s" % (
+                            self.inputs.surface_target, self.inputs.subjects_dir))
+        elif self.inputs.surface_target == 'fsLR':
+            tpl_kwargs.update({
+                'resolution': 5,
+                'atlas': 'fsLR',
+                'desc': 'aseg',
+                'suffix': 'dseg'
+            })
 
-        label_file = str(get_template(
-            'MNI152NLin2009cAsym', resolution=2, desc='DKT31', suffix='dseg'))
+        label_file = str(get_template(self.inputs.volume_target, **tpl_kwargs))
         return annotation_files, label_file
 
     @staticmethod
-    def _create_cifti_image(bold_file, label_file, annotation_files, gii_files,
-                            volume_target, surface_target, tr):
+    def _create_cifti_image(bold_img, label_file, bold_surfs,
+                            targets, tr, annotation_files=None):
         """
         Generate CIFTI image in target space.
 
         Parameters
-        ----------
-            bold_file : str
-                4D BOLD timeseries
+            bold_img : `SpatialImage`
+                BOLD volumetric timeseries
             label_file : str
-                label atlas
-            annotation_files : list
-                FreeSurfer annotations
-            gii_files : list
-                4D BOLD surface timeseries in GIFTI format
-            volume_target : str
-                label atlas space
-            surface_target : str
-                gii_files space
+                Subcortical label file
+            bold_surfs : list
+                BOLD surface timeseries [L,R]
+            targets : list
+                Surface and volumetric output spaces
             tr : float
-                repetition time
+                BOLD repetition time
+            annotation_files : list, optional
+                Surface label files used to remove medial wall
 
         Returns
-        -------
-            out_file : str
-                BOLD data as CIFTI dtseries
-
+            out :
+                BOLD data saved as CIFTI dtseries
         """
         label_img = nb.load(label_file)
-        bold_img = resample_to_img(bold_file, label_img)
+        if label_img.shape != bold_img.shape:
+            bold_img = resample_to_img(bold_img, label_img)
 
         bold_data = bold_img.get_fdata(dtype='float32')
         timepoints = bold_img.shape[3]
         label_data = np.asanyarray(label_img.dataobj).astype('int16')
 
         # set up CIFTI information
-        series_map = ci.Cifti2MatrixIndicesMap((0, ),
-                                               'CIFTI_INDEX_TYPE_SERIES',
-                                               number_of_series_points=timepoints,
-                                               series_exponent=0,
-                                               series_start=0.0,
-                                               series_step=tr,
-                                               series_unit='SECOND')
+        series_map = ci.Cifti2MatrixIndicesMap(
+            (0, ),
+            'CIFTI_INDEX_TYPE_SERIES',
+            number_of_series_points=timepoints,
+            series_exponent=0,
+            series_start=0.,
+            series_step=tr,
+            series_unit='SECOND'
+        )
         # Create CIFTI brain models
         idx_offset = 0
         brainmodels = []
@@ -183,13 +215,18 @@ class GenerateCifti(SimpleInterface):
                 model_type = "CIFTI_MODEL_TYPE_SURFACE"
                 # use the corresponding annotation
                 hemi = structure.split('_')[-1]
-                annot = nb.freesurfer.read_annot(annotation_files[hemi == "RIGHT"])
                 # currently only supports L/R cortex
-                gii = nb.load(gii_files[hemi == "RIGHT"])
+                gii = nb.load(bold_surfs[hemi == "RIGHT"])
+                surf_verts = gii.darrays[0].dims[0]
+                if annotation_files:
+                    annot = nb.freesurfer.read_annot(annotation_files[hemi == "RIGHT"])
                 # calculate total number of vertices
                 surf_verts = len(annot[0])
-                # remove medial wall for CIFTI format
-                vert_idx = np.nonzero(annot[0] != annot[2].index(b'unknown'))[0]
+                if annotation_files:
+                    # remove medial wall for CIFTI format
+                    vert_idx = np.nonzero(annot[0] != annot[2].index(b'unknown'))[0]
+                else:
+                    vert_idx = np.arange(surf_verts)
                 # extract values across volumes
                 ts = np.array([tsarr.data[vert_idx] for tsarr in gii.darrays])
 
@@ -236,8 +273,8 @@ class GenerateCifti(SimpleInterface):
                                                  maps=brainmodels)
         # provide some metadata to CIFTI matrix
         meta = {
-            "target_surface": surface_target,
-            "target_volume": volume_target,
+            "target_surface": targets[0],
+            "target_volume": targets[1],
         }
         # generate and save CIFTI image
         matrix = ci.Cifti2Matrix()
@@ -248,7 +285,7 @@ class GenerateCifti(SimpleInterface):
         img = ci.Cifti2Image(bm_ts, hdr)
         img.nifti_header.set_intent('NIFTI_INTENT_CONNECTIVITY_DENSE_SERIES')
 
-        _, out_base, _ = split_filename(bold_file)
+        _, out_base, _ = split_filename(bold_img)
         out_file = "{}.dtseries.nii".format(out_base)
         ci.save(img, out_file)
         return os.path.join(os.getcwd(), out_file)
