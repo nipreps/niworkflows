@@ -58,6 +58,8 @@ class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
                                 desc="CIFTI volumetric output space")
     surface_target = traits.Enum("fsLR", "fsaverage5", "fsaverage6", usedefault=True,
                                  desc="CIFTI surface target space")
+    density = traits.Enum('32k', '59k', '164k', usedefault=True, help='surface hemisphere vertices')
+    resolution = traits.Enum(2, 1.6, usedefault=True, help='volume resolution (mm)')
     TR = traits.Float(mandatory=True, desc="Repetition time")
     surface_bolds = traits.List(File(exists=True), mandatory=True,
                                 desc="list of surface BOLD GIFTI files (length 2 with order [L,R])")
@@ -75,13 +77,9 @@ class GenerateCifti(SimpleInterface):
     """
     Generate CIFTI image from BOLD file in target spaces.
 
-    target surfaces:
-        - fsaverage5
-        - fsaverage6
-        - fsLR
-    target volumes:
-        - OASIS-TRT-20_DKT31 labels in MNI152NLin2009cAsym (2mm)
-        - MNI152NLin6Asym (1.6)
+    Currently supports ``fsLR`` or ``fsaverage`` for template surfaces and
+    ``MNI152NLin6Asym`` or ``MNI152NLin2009cAsym`` as template volumes.
+
     """
 
     input_spec = _GenerateCiftiInputSpec
@@ -135,11 +133,10 @@ class GenerateCifti(SimpleInterface):
                 )
             )
 
-        tpl_kwargs = {}
+        tpl_kwargs = {'resolution': self.inputs.resolution}
         annotation_files = None
-        if self.inputs.surface_target.startswith("fsav"):
+        if self.inputs.volume_target == "MNI152NLin2009cAsym":
             tpl_kwargs.update({
-                'resolution': 2,
                 'desc': 'DKT31',
                 'suffix': 'dseg',
             })
@@ -152,9 +149,9 @@ class GenerateCifti(SimpleInterface):
             if not annotation_files:
                 raise IOError("Freesurfer annotations for %s not found in %s" % (
                             self.inputs.surface_target, self.inputs.subjects_dir))
-        elif self.inputs.surface_target == 'fsLR':
+        elif self.inputs.volume_target == 'MNI152NLin6Asym':
             tpl_kwargs.update({
-                'resolution': 5,
+                'density': self.inputs.density,
                 'atlas': 'fsLR',
                 'desc': 'aseg',
                 'suffix': 'dseg'
