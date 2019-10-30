@@ -13,7 +13,7 @@ from nilearn.image import resample_to_img
 from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec, TraitedSpec, File, traits,
-    SimpleInterface, Directory
+    SimpleInterface
 )
 from templateflow.api import get as get_template
 
@@ -58,13 +58,16 @@ class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
                                 desc="CIFTI volumetric output space")
     surface_target = traits.Enum("fsLR", "fsaverage5", "fsaverage6", usedefault=True,
                                  desc="CIFTI surface target space")
-    density = traits.Enum('32k', '59k', '164k', usedefault=True, help='surface hemisphere vertices')
+    density = traits.Enum('32k', '59k', '164k', usedefault=True,
+                          help='surface hemisphere vertices')
     resolution = traits.Enum(2, 1.6, usedefault=True, help='volume resolution (mm)')
     TR = traits.Float(mandatory=True, desc="Repetition time")
     surface_bolds = traits.List(File(exists=True), mandatory=True,
-                                desc="list of surface BOLD GIFTI files (length 2 with order [L,R])")
+                                desc="list of surface BOLD GIFTI files"
+                                     " (length 2 with order [L,R])")
     surface_annots = traits.List(File(exists=True),
-                                 help="Surface annotation files. Used to exclude medial wall vertices.")
+                                 help="Surface annotation files."
+                                      " Used to exclude medial wall vertices.")
 
 
 class _GenerateCiftiOutputSpec(TraitedSpec):
@@ -124,7 +127,7 @@ class GenerateCifti(SimpleInterface):
     def _fetch_data(self):
         """Converts inputspec to files"""
         if (
-            self.inputs.surface_target not in  ("fsaverage5", "fsaverage6", "fsLR") or
+            self.inputs.surface_target not in ("fsaverage5", "fsaverage6", "fsLR") or
             self.inputs.volume_target not in ("MNI152NLin2009cAsym", "MNI152NLin6Asym")
         ):
             raise NotImplementedError(
@@ -161,13 +164,13 @@ class GenerateCifti(SimpleInterface):
         return annotation_files, label_file
 
     @staticmethod
-    def _create_cifti_image(bold_img, label_file, bold_surfs,
+    def _create_cifti_image(bold_file, label_file, bold_surfs,
                             targets, tr, annotation_files=None):
         """
         Generate CIFTI image in target space.
 
         Parameters
-            bold_img : `SpatialImage`
+            bold_file : str
                 BOLD volumetric timeseries
             label_file : str
                 Subcortical label file
@@ -184,6 +187,7 @@ class GenerateCifti(SimpleInterface):
             out :
                 BOLD data saved as CIFTI dtseries
         """
+        bold_img = nb.load(bold_file)
         label_img = nb.load(label_file)
         if label_img.shape != bold_img.shape:
             bold_img = resample_to_img(bold_img, label_img)
@@ -282,7 +286,7 @@ class GenerateCifti(SimpleInterface):
         img = ci.Cifti2Image(bm_ts, hdr)
         img.nifti_header.set_intent('NIFTI_INTENT_CONNECTIVITY_DENSE_SERIES')
 
-        _, out_base, _ = split_filename(bold_img)
+        _, out_base, _ = split_filename(bold_file)
         out_file = "{}.dtseries.nii".format(out_base)
         ci.save(img, out_file)
         return os.path.join(os.getcwd(), out_file)
