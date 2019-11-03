@@ -136,4 +136,3 @@ sections:
 - name: About
   reportlets:
   - bids: {datatype: anat, desc: about, suffix: T1w}
-template_path: report.tpl
