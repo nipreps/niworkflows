@@ -11,13 +11,16 @@ niworkflows.egg-info/
 .eggs/
 docs/
 src/
+pip-wheel-metadata/
 
 # git
 .gitignore
 .git/
 **/.git
+.github/
 
 # ci
+.circleci/
 .travis.yml
 appveyor.yml
 circle.yml
@@ -25,3 +28,10 @@ circle.yml
 # testing
 .pytest_cache
 .cache
+.coveragerc
+.pep8speaks.yml
+codecov.yml
+
+# other
+.zenodo.json
+
