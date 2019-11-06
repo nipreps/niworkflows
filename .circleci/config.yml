@@ -511,8 +511,7 @@ workflows:
       - deploy_docs:
           requires:
             - build_docs
-            - deploy_docker
-            - deploy_pypi
+            - deploy
           filters:
             branches:
               only:
