@@ -429,10 +429,10 @@ jobs:
             git config user.name "ci-build"
       - add_ssh_keys:
           fingerprints:
-            - "45:a6:cb:50:27:5a:c7:39:4c:1f:aa:2c:0f:87:8a:a6"
+            - "6b:ba:eb:a8:cb:f7:67:eb:9b:5d:54:91:e8:b3:98:16"
       - run:
           name: Deploy docs to gh-pages branch
-          command: gh-pages --dotfiles --message "[skip ci] Updates" --dist docs/_build/html
+          command: gh-pages --dotfiles --message "doc(update) [skip ci]" --dist docs/_build/html
 
 
 workflows:
@@ -522,5 +522,3 @@ workflows:
                 - /master/
             tags:
               only: /.*/
-
-
