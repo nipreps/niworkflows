@@ -56,8 +56,8 @@ def overwrite_header(img, fname):
     This is a destructive operation, and the image object should be considered unusable
     after calling this function.
 
-    This should only be called with an image loaded with ``mmap=False``, or else you
-    risk `BusError`s.
+    This should only be called with an image loaded with ``mmap=False``,
+    or else you risk getting a ``BusError``.
 
     """
     # Synchronize header and set fields that nibabel transfer from header to dataobj

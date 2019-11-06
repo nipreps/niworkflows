@@ -1,12 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-FreeSurfer-related workflows
-----------------------------
-
-"""
+"""FreeSurfer-related workflows."""
 
 from os import getenv
 from nipype.pipeline import engine as pe
@@ -22,6 +16,8 @@ from ..interfaces.surf import NormalizeSurf
 def init_gifti_surface_wf(name='gifti_surface_wf',
                           subjects_dir=getenv('SUBJECTS_DIR', None)):
     """
+    Build a Nipype workflow to prepare GIFTI surfaces from FreeSurfer.
+
     This workflow prepares GIFTI surfaces from a FreeSurfer subjects directory
     If midthickness (or graymid) surfaces do not exist, they are generated and
     saved to the subject directory as ``lh/rh.midthickness``.
@@ -31,36 +27,38 @@ def init_gifti_surface_wf(name='gifti_surface_wf',
     Additionally, the vertex coordinates are :py:class:`recentered
     <smriprep.interfaces.NormalizeSurf>` to align with native T1w space.
 
-    .. workflow::
-        :graph2use: orig
-        :simple_form: yes
-        from fmriprep.workflows.anatomical import init_gifti_surface_wf
-        wf = init_gifti_surface_wf()
+    Workflow Graph
+        .. workflow::
+            :graph2use: orig
+            :simple_form: yes
 
-    **Parameters**
+            from niworkflows.anat.freesurfer import init_gifti_surface_wf
+            wf = init_gifti_surface_wf()
 
-        subjects_dir
-            FreeSurfer SUBJECTS_DIR
-        name
-            Name for the workflow hierarchy of Nipype
+    Parameters
+    ----------
+    subjects_dir : str
+        FreeSurfer's ``$SUBJECTS_DIR`` environment variable.
+    name : str
+        Name for the workflow hierarchy of Nipype
 
-    **Inputs**
+    Inputs
+    ------
+    in_t1w : str
+        original (pre-``recon-all``), reference T1w image.
+    subject_id : str
+        FreeSurfer subject ID
 
-        in_t1w
-            original (pre-``recon-all``), reference T1w image.
-        subject_id
-            FreeSurfer subject ID
-
-    **Outputs**
-
-        surfaces
-            GIFTI surfaces for gray/white matter boundary, pial surface,
-            midthickness (or graymid) surface, and inflated surfaces.
-        surf_norm
-            Normalized (re-centered) GIFTI surfaces aligned in native T1w
-            space, corresponding to the ``surfaces`` output.
-        fsnative_to_t1w_xfm
-            LTA formatted affine transform file.
+    Outputs
+    -------
+    surfaces : list
+        GIFTI surfaces for gray/white matter boundary, pial surface,
+        midthickness (or graymid) surface, and inflated surfaces.
+    surf_norm : list
+        Normalized (re-centered) GIFTI surfaces aligned in native T1w
+        space, corresponding to the ``surfaces`` output.
+    fsnative_to_t1w_xfm : str
+        LTA formatted affine transform file.
 
     """
     if subjects_dir is None:

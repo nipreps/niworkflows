@@ -491,6 +491,8 @@ def _unscramble_regressor_columns(parent_data, data):
 
 def parse_formula(model_formula, parent_data, unscramble=False):
     """
+    Parse a confound manipulation formula.
+
     Recursively parse a model formula by breaking it into additive atoms
     and tracking grouping symbol depth.
 
@@ -507,23 +509,6 @@ def parse_formula(model_formula, parent_data, unscramble=False):
         data frame or to instructions for operating on a variable (for
         instance, computing temporal derivatives or exponential terms).
 
-        Temporal derivative options:
-        * d6(variable) for the 6th temporal derivative
-        * dd6(variable) for all temporal derivatives up to the 6th
-        * d4-6(variable) for the 4th through 6th temporal derivatives
-        * 0 must be included in the temporal derivative range for the original
-          term to be returned when temporal derivatives are computed.
-
-        Exponential options:
-        * (variable)^6 for the 6th power
-        * (variable)^^6 for all powers up to the 6th
-        * (variable)^4-6 for the 4th through 6th powers
-        * 1 must be included in the powers range for the original term to be
-          returned when exponential terms are computed.
-
-        Temporal derivatives and exponential terms are computed for all terms
-        in the grouping symbols that they adjoin.
-
     Returns
     -------
     variables: list(str)
@@ -531,6 +516,26 @@ def parse_formula(model_formula, parent_data, unscramble=False):
         formula.
     data: pandas DataFrame
         All values in the complete model.
+
+    Options
+    -------
+    Temporal derivative options:
+    * d6(variable) for the 6th temporal derivative
+    * dd6(variable) for all temporal derivatives up to the 6th
+    * d4-6(variable) for the 4th through 6th temporal derivatives
+    * 0 must be included in the temporal derivative range for the original
+      term to be returned when temporal derivatives are computed.
+
+    Exponential options:
+    * (variable)^6 for the 6th power
+    * (variable)^^6 for all powers up to the 6th
+    * (variable)^4-6 for the 4th through 6th powers
+    * 1 must be included in the powers range for the original term to be
+      returned when exponential terms are computed.
+
+    Temporal derivatives and exponential terms are computed for all terms
+    in the grouping symbols that they adjoin.
+
     """
     variables = {}
     data = {}

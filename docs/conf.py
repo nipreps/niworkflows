@@ -42,9 +42,18 @@ extensions = [
     'sphinx.ext.githubpages',
     'nipype.sphinxext.plot_workflow',
     'sphinxcontrib.apidoc',
-    'sphinx.ext.napoleon'
+    'sphinxcontrib.napoleon'
 ]
 
+# Accept custom section names to be parsed for numpy-style docstrings
+# of parameters.
+# Requires pinning sphinxcontrib-napoleon to a specific commit while
+# https://github.com/sphinx-contrib/napoleon/pull/10 is merged.
+napoleon_use_param = False
+napoleon_custom_sections = [
+    ('Inputs', 'Parameters'),
+    ('Outputs', 'Parameters'),
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
