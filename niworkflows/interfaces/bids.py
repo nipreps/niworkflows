@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Interfaces for handling BIDS-like neuroimaging structures
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-"""
+"""Interfaces for handling BIDS-like neuroimaging structures."""
 
 from json import dumps
 from pathlib import Path
@@ -31,18 +26,18 @@ STANDARD_SPACES = _get_template_list()
 LOGGER = logging.getLogger('nipype.interface')
 
 
-class BIDSBaseInputSpec(BaseInterfaceInputSpec):
+class _BIDSBaseInputSpec(BaseInterfaceInputSpec):
     bids_dir = traits.Either(
         (None, Directory(exists=True)), usedefault=True,
         desc='optional bids directory to initialize a new layout')
     bids_validate = traits.Bool(True, usedefault=True, desc='enable BIDS validator')
 
 
-class BIDSInfoInputSpec(BIDSBaseInputSpec):
+class _BIDSInfoInputSpec(_BIDSBaseInputSpec):
     in_file = File(mandatory=True, desc='input file, part of a BIDS tree')
 
 
-class BIDSInfoOutputSpec(DynamicTraitedSpec):
+class _BIDSInfoOutputSpec(DynamicTraitedSpec):
     subject = traits.Str()
     session = traits.Str()
     task = traits.Str()
@@ -54,7 +49,7 @@ class BIDSInfoOutputSpec(DynamicTraitedSpec):
 
 class BIDSInfo(SimpleInterface):
     """
-    Extract BIDS entities from a BIDS-conforming path
+    Extract BIDS entities from a BIDS-conforming path.
 
     This interface uses only the basename, not the path, to determine the
     subject, session, task, run, acquisition or reconstruction.
@@ -153,8 +148,9 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
     <BLANKLINE>
 
     """
-    input_spec = BIDSInfoInputSpec
-    output_spec = BIDSInfoOutputSpec
+
+    input_spec = _BIDSInfoInputSpec
+    output_spec = _BIDSInfoOutputSpec
     layout = None
 
     def _run_interface(self, runtime):
@@ -164,16 +160,16 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
                                    self.inputs.bids_validate)
         params = self.layout.parse_file_entities(self.inputs.in_file)
         self._results = {key: params.get(key, Undefined)
-                         for key in BIDSInfoOutputSpec().get().keys()}
+                         for key in _BIDSInfoOutputSpec().get().keys()}
         return runtime
 
 
-class BIDSDataGrabberInputSpec(BaseInterfaceInputSpec):
+class _BIDSDataGrabberInputSpec(BaseInterfaceInputSpec):
     subject_data = traits.Dict(Str, traits.Any)
     subject_id = Str()
 
 
-class BIDSDataGrabberOutputSpec(TraitedSpec):
+class _BIDSDataGrabberOutputSpec(TraitedSpec):
     out_dict = traits.Dict(desc='output data structure')
     fmap = OutputMultiObject(desc='output fieldmaps')
     bold = OutputMultiObject(desc='output functional images')
@@ -186,7 +182,7 @@ class BIDSDataGrabberOutputSpec(TraitedSpec):
 
 class BIDSDataGrabber(SimpleInterface):
     """
-    Collect files from a BIDS directory structure
+    Collect files from a BIDS directory structure.
 
     >>> bids_src = BIDSDataGrabber(anat_only=False)
     >>> bids_src.inputs.subject_data = bids_collect_data(
@@ -198,8 +194,9 @@ class BIDSDataGrabber(SimpleInterface):
      '.../ds114/sub-01/ses-test/anat/sub-01_ses-test_T1w.nii.gz']
 
     """
-    input_spec = BIDSDataGrabberInputSpec
-    output_spec = BIDSDataGrabberOutputSpec
+
+    input_spec = _BIDSDataGrabberInputSpec
+    output_spec = _BIDSDataGrabberOutputSpec
     _require_funcs = True
 
     def __init__(self, *args, **kwargs):
@@ -230,7 +227,7 @@ class BIDSDataGrabber(SimpleInterface):
         return runtime
 
 
-class DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class _DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     base_directory = traits.Directory(
         desc='Path to the base directory for storing data.')
     check_hdr = traits.Bool(True, usedefault=True, desc='fix headers of NIfTI outputs')
@@ -247,7 +244,7 @@ class DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     suffix = Str('', usedefault=True, desc='suffix appended to source_file')
 
 
-class DerivativesDataSinkOutputSpec(TraitedSpec):
+class _DerivativesDataSinkOutputSpec(TraitedSpec):
     out_file = OutputMultiObject(File(exists=True, desc='written file path'))
     out_meta = OutputMultiObject(File(exists=True, desc='written JSON sidecar path'))
     compression = OutputMultiObject(
@@ -258,6 +255,8 @@ class DerivativesDataSinkOutputSpec(TraitedSpec):
 
 class DerivativesDataSink(SimpleInterface):
     """
+    Store derivative files.
+
     Saves the `in_file` into a BIDS-Derivatives folder provided
     by `base_directory`, given the input reference `source_file`.
 
@@ -369,8 +368,9 @@ desc-preproc_bold.json'
     '  "Z": "val"'
 
     """
-    input_spec = DerivativesDataSinkInputSpec
-    output_spec = DerivativesDataSinkOutputSpec
+
+    input_spec = _DerivativesDataSinkInputSpec
+    output_spec = _DerivativesDataSinkOutputSpec
     out_path_base = "niworkflows"
     _always_run = True
 
@@ -506,17 +506,17 @@ desc-preproc_bold.json'
         return runtime
 
 
-class ReadSidecarJSONInputSpec(BIDSBaseInputSpec):
+class _ReadSidecarJSONInputSpec(_BIDSBaseInputSpec):
     in_file = File(exists=True, mandatory=True, desc='the input nifti file')
 
 
-class ReadSidecarJSONOutputSpec(BIDSInfoOutputSpec):
+class _ReadSidecarJSONOutputSpec(_BIDSInfoOutputSpec):
     out_dict = traits.Dict()
 
 
 class ReadSidecarJSON(SimpleInterface):
     """
-    A utility to find and read JSON sidecar files of a BIDS tree
+    Read JSON sidecar files of a BIDS tree.
 
     >>> fmap = str(datadir / 'ds054' / 'sub-100185' / 'fmap' /
     ...            'sub-100185_phasediff.nii.gz')
@@ -553,8 +553,9 @@ class ReadSidecarJSON(SimpleInterface):
     <undefined>
 
     """
-    input_spec = ReadSidecarJSONInputSpec
-    output_spec = ReadSidecarJSONOutputSpec
+
+    input_spec = _ReadSidecarJSONInputSpec
+    output_spec = _ReadSidecarJSONOutputSpec
     layout = None
     _always_run = True
 
@@ -579,7 +580,7 @@ class ReadSidecarJSON(SimpleInterface):
                                    self.inputs.bids_validate)
 
         # Fill in BIDS entities of the output ("*_id")
-        output_keys = list(BIDSInfoOutputSpec().get().keys())
+        output_keys = list(_BIDSInfoOutputSpec().get().keys())
         params = self.layout.parse_file_entities(self.inputs.in_file)
         self._results = {key: params.get(key.split('_')[0], Undefined)
                          for key in output_keys}
@@ -598,7 +599,7 @@ class ReadSidecarJSON(SimpleInterface):
         return runtime
 
 
-class BIDSFreeSurferDirInputSpec(BaseInterfaceInputSpec):
+class _BIDSFreeSurferDirInputSpec(BaseInterfaceInputSpec):
     derivatives = Directory(exists=True, mandatory=True,
                             desc='BIDS derivatives directory')
     freesurfer_home = Directory(exists=True, mandatory=True,
@@ -613,13 +614,14 @@ class BIDSFreeSurferDirInputSpec(BaseInterfaceInputSpec):
                                       desc='Overwrite fsaverage directories, if present')
 
 
-class BIDSFreeSurferDirOutputSpec(TraitedSpec):
+class _BIDSFreeSurferDirOutputSpec(TraitedSpec):
     subjects_dir = traits.Directory(exists=True,
                                     desc='FreeSurfer subjects directory')
 
 
 class BIDSFreeSurferDir(SimpleInterface):
-    """ Prepare a FreeSurfer subjects directory for use in a BIDS context.
+    """
+    Prepare a FreeSurfer subjects directory for use in a BIDS context.
 
     Constructs a subjects directory path, creating if necessary, and copies
     fsaverage subjects (if necessary or forced via ``overwrite_fsaverage``)
@@ -635,9 +637,11 @@ class BIDSFreeSurferDir(SimpleInterface):
 
     The output ``subjects_dir`` is intended to be passed to ``ReconAll`` and
     other FreeSurfer interfaces.
+
     """
-    input_spec = BIDSFreeSurferDirInputSpec
-    output_spec = BIDSFreeSurferDirOutputSpec
+
+    input_spec = _BIDSFreeSurferDirInputSpec
+    output_spec = _BIDSFreeSurferDirOutputSpec
     _always_run = True
 
     def _run_interface(self, runtime):

@@ -14,18 +14,19 @@
 #
 import os
 import sys
+from packaging.version import Version
 
 from niworkflows import __version__, __copyright__, __packagename__
 
 sys.path.append(os.path.abspath('sphinxext'))
-sys.path.insert(0, os.path.abspath('../wrapper'))
 
 # -- Project information -----------------------------------------------------
 project = __packagename__
 copyright = __copyright__
-author = 'The sMRIPrep Developers'
+author = 'The Niworkflows Developers'
 
 # The short X.Y version
+version = Version(__version__).base_version
 # The full version, including alpha/beta/rc tags
 release = __version__
 
@@ -191,7 +192,7 @@ epub_exclude_files = ['search.html']
 
 apidoc_module_dir = '../niworkflows'
 apidoc_output_dir = 'api'
-apidoc_excluded_paths = ['tests']
+apidoc_excluded_paths = ['conftest.py', '*/tests/*', 'tests/*', 'data/*']
 apidoc_separate_modules = True
 apidoc_extra_args = ['--module-first', '-d 1', '-T']
 

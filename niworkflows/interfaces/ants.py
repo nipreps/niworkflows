@@ -1,10 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Nipype interfaces for ANTs commands
-"""
+"""Nipype interfaces for ANTs' commands."""
 
 import os
 from glob import glob
@@ -13,7 +9,7 @@ from nipype.interfaces.ants.base import ANTSCommandInputSpec, ANTSCommand
 from nipype.interfaces.base import traits, isdefined
 
 
-class ImageMathInputSpec(ANTSCommandInputSpec):
+class _ImageMathInputSpec(ANTSCommandInputSpec):
     dimension = traits.Int(3, usedefault=True, position=1, argstr='%d',
                            desc='dimension of output image')
     output_image = base.File(position=2, argstr='%s', name_source=['op1'],
@@ -27,13 +23,13 @@ class ImageMathInputSpec(ANTSCommandInputSpec):
                         argstr='%s', desc='second operator')
 
 
-class ImageMathOuputSpec(base.TraitedSpec):
+class _ImageMathOuputSpec(base.TraitedSpec):
     output_image = base.File(exists=True, desc='output image file')
 
 
 class ImageMath(ANTSCommand):
     """
-    Operations over images
+    Operations over images.
 
     Example
     -------
@@ -41,11 +37,11 @@ class ImageMath(ANTSCommand):
     """
 
     _cmd = 'ImageMath'
-    input_spec = ImageMathInputSpec
-    output_spec = ImageMathOuputSpec
+    input_spec = _ImageMathInputSpec
+    output_spec = _ImageMathOuputSpec
 
 
-class ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
+class _ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
     dimension = traits.Int(3, usedefault=True, position=1, argstr='%d',
                            desc='dimension of output image')
     input_image = base.File(exists=True, mandatory=True, position=2, argstr='%s',
@@ -67,13 +63,13 @@ class ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
                             position=-1, requires=['addvox'])
 
 
-class ResampleImageBySpacingOutputSpec(base.TraitedSpec):
+class _ResampleImageBySpacingOutputSpec(base.TraitedSpec):
     output_image = traits.File(exists=True, desc='resampled file')
 
 
 class ResampleImageBySpacing(ANTSCommand):
     """
-    Resamples an image with a given spacing
+    Resample an image with a given spacing.
 
     Examples
     --------
@@ -104,9 +100,10 @@ class ResampleImageBySpacing(ANTSCommand):
     'ResampleImageBySpacing 3 .../test.nii.gz output.nii.gz 4 4 4 1 2 0'
 
     """
+
     _cmd = 'ResampleImageBySpacing'
-    input_spec = ResampleImageBySpacingInputSpec
-    output_spec = ResampleImageBySpacingOutputSpec
+    input_spec = _ResampleImageBySpacingInputSpec
+    output_spec = _ResampleImageBySpacingOutputSpec
 
     def _format_arg(self, name, trait_spec, value):
         if name == 'out_spacing':
@@ -119,7 +116,7 @@ class ResampleImageBySpacing(ANTSCommand):
             name, trait_spec, value)
 
 
-class ThresholdImageInputSpec(ANTSCommandInputSpec):
+class _ThresholdImageInputSpec(ANTSCommandInputSpec):
     dimension = traits.Int(3, usedefault=True, position=1, argstr='%d',
                            desc='dimension of output image')
     input_image = base.File(exists=True, mandatory=True, position=2, argstr='%s',
@@ -146,17 +143,16 @@ class ThresholdImageInputSpec(ANTSCommandInputSpec):
                                  desc='outside value')
 
 
-class ThresholdImageOutputSpec(base.TraitedSpec):
+class _ThresholdImageOutputSpec(base.TraitedSpec):
     output_image = traits.File(exists=True, desc='resampled file')
 
 
 class ThresholdImage(ANTSCommand):
     """
-    Apply thresholds on images
+    Apply thresholds on images.
 
     Examples
     --------
-
     >>> res = ThresholdImage(dimension=3)
     >>> res.inputs.input_image = nifti_fname
     >>> res.inputs.output_image = 'output.nii.gz'
@@ -176,12 +172,13 @@ class ThresholdImage(ANTSCommand):
     'ThresholdImage 3 .../test.nii.gz output.nii.gz Kmeans 4'
 
     """
+
     _cmd = 'ThresholdImage'
-    input_spec = ThresholdImageInputSpec
-    output_spec = ThresholdImageOutputSpec
+    input_spec = _ThresholdImageInputSpec
+    output_spec = _ThresholdImageOutputSpec
 
 
-class AIInputSpec(ANTSCommandInputSpec):
+class _AIInputSpec(ANTSCommandInputSpec):
     dimension = traits.Int(3, usedefault=True, argstr='-d %d',
                            desc='dimension of output image')
     verbose = traits.Bool(False, usedefault=True, argstr='-v %d',
@@ -237,13 +234,13 @@ class AIInputSpec(ANTSCommandInputSpec):
         desc='output file name')
 
 
-class AIOuputSpec(base.TraitedSpec):
+class _AIOuputSpec(base.TraitedSpec):
     output_transform = traits.File(exists=True, desc='output file name')
 
 
 class AI(ANTSCommand):
     """
-    The replacement for ``AffineInitializer``.
+    Replaces ``AffineInitializer``.
 
     Examples
     --------
@@ -251,8 +248,8 @@ class AI(ANTSCommand):
     """
 
     _cmd = 'antsAI'
-    input_spec = AIInputSpec
-    output_spec = AIOuputSpec
+    input_spec = _AIInputSpec
+    output_spec = _AIOuputSpec
 
     def _run_interface(self, runtime, correct_return_codes=(0, )):
         runtime = super(AI, self)._run_interface(
@@ -289,7 +286,7 @@ class AI(ANTSCommand):
         return getattr(self, '_output')
 
 
-class AntsJointFusionInputSpec(ANTSCommandInputSpec):
+class _AntsJointFusionInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(
         3,
         2,
@@ -411,7 +408,7 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
     verbose = traits.Bool(False, argstr="-v", desc=('Verbose output.'))
 
 
-class AntsJointFusionOutputSpec(base.TraitedSpec):
+class _AntsJointFusionOutputSpec(base.TraitedSpec):
     out_label_fusion = base.File(exists=True)
     out_intensity_fusion = base.OutputMultiPath(
         base.File(exists=True))
@@ -422,10 +419,10 @@ class AntsJointFusionOutputSpec(base.TraitedSpec):
 
 
 class AntsJointFusion(ANTSCommand):
-    """
-    """
-    input_spec = AntsJointFusionInputSpec
-    output_spec = AntsJointFusionOutputSpec
+    """Run ``antsJoinFusion``."""
+
+    input_spec = _AntsJointFusionInputSpec
+    output_spec = _AntsJointFusionOutputSpec
     _cmd = 'antsJointFusion'
 
     def _format_arg(self, opt, spec, val):

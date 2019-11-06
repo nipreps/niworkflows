@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-ReportCapableInterfaces for registration tools
-
-"""
-from __future__ import absolute_import, division, print_function, unicode_literals
+"""ReportCapableInterfaces for registration tools."""
 import os
 from distutils.version import LooseVersion
 
@@ -23,28 +18,28 @@ from nipype.interfaces import fsl, ants, afni
 from .. import NIWORKFLOWS_LOG
 from . import report_base as nrc
 from .mni import (
-    RobustMNINormalizationInputSpec,
-    RobustMNINormalizationOutputSpec,
+    _RobustMNINormalizationInputSpec,
+    _RobustMNINormalizationOutputSpec,
     RobustMNINormalization
 )
 from .fixes import (FixHeaderApplyTransforms as ApplyTransforms,
                     FixHeaderRegistration as Registration)
 
 
-class RobustMNINormalizationInputSpecRPT(
-        nrc.SVGReportCapableInputSpec, RobustMNINormalizationInputSpec):
+class _RobustMNINormalizationInputSpecRPT(
+        nrc._SVGReportCapableInputSpec, _RobustMNINormalizationInputSpec):
     pass
 
 
-class RobustMNINormalizationOutputSpecRPT(
-        reporting.ReportCapableOutputSpec, RobustMNINormalizationOutputSpec):
+class _RobustMNINormalizationOutputSpecRPT(
+        reporting.ReportCapableOutputSpec, _RobustMNINormalizationOutputSpec):
     pass
 
 
 class RobustMNINormalizationRPT(
         nrc.RegistrationRC, RobustMNINormalization):
-    input_spec = RobustMNINormalizationInputSpecRPT
-    output_spec = RobustMNINormalizationOutputSpecRPT
+    input_spec = _RobustMNINormalizationInputSpecRPT
+    output_spec = _RobustMNINormalizationOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         # We need to dig into the internal ants.Registration interface
@@ -61,19 +56,19 @@ class RobustMNINormalizationRPT(
         return super(RobustMNINormalizationRPT, self)._post_run_hook(runtime)
 
 
-class ANTSRegistrationInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                                   ants.registration.RegistrationInputSpec):
+class _ANTSRegistrationInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                                    ants.registration.RegistrationInputSpec):
     pass
 
 
-class ANTSRegistrationOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                                    ants.registration.RegistrationOutputSpec):
+class _ANTSRegistrationOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                                     ants.registration.RegistrationOutputSpec):
     pass
 
 
 class ANTSRegistrationRPT(nrc.RegistrationRC, Registration):
-    input_spec = ANTSRegistrationInputSpecRPT
-    output_spec = ANTSRegistrationOutputSpecRPT
+    input_spec = _ANTSRegistrationInputSpecRPT
+    output_spec = _ANTSRegistrationOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.fixed_image[0]
@@ -84,19 +79,19 @@ class ANTSRegistrationRPT(nrc.RegistrationRC, Registration):
         return super(ANTSRegistrationRPT, self)._post_run_hook(runtime)
 
 
-class ANTSApplyTransformsInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                                      ants.resampling.ApplyTransformsInputSpec):
+class _ANTSApplyTransformsInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                                       ants.resampling.ApplyTransformsInputSpec):
     pass
 
 
-class ANTSApplyTransformsOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                                       ants.resampling.ApplyTransformsOutputSpec):
+class _ANTSApplyTransformsOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                                        ants.resampling.ApplyTransformsOutputSpec):
     pass
 
 
 class ANTSApplyTransformsRPT(nrc.RegistrationRC, ApplyTransforms):
-    input_spec = ANTSApplyTransformsInputSpecRPT
-    output_spec = ANTSApplyTransformsOutputSpecRPT
+    input_spec = _ANTSApplyTransformsInputSpecRPT
+    output_spec = _ANTSApplyTransformsOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference_image
@@ -107,20 +102,20 @@ class ANTSApplyTransformsRPT(nrc.RegistrationRC, ApplyTransforms):
         return super(ANTSApplyTransformsRPT, self)._post_run_hook(runtime)
 
 
-class ApplyTOPUPInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                             fsl.epi.ApplyTOPUPInputSpec):
+class _ApplyTOPUPInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                              fsl.epi.ApplyTOPUPInputSpec):
     wm_seg = File(argstr='-wmseg %s',
                   desc='reference white matter segmentation mask')
 
 
-class ApplyTOPUPOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                              fsl.epi.ApplyTOPUPOutputSpec):
+class _ApplyTOPUPOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                               fsl.epi.ApplyTOPUPOutputSpec):
     pass
 
 
 class ApplyTOPUPRPT(nrc.RegistrationRC, fsl.ApplyTOPUP):
-    input_spec = ApplyTOPUPInputSpecRPT
-    output_spec = ApplyTOPUPOutputSpecRPT
+    input_spec = _ApplyTOPUPInputSpecRPT
+    output_spec = _ApplyTOPUPOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         self._fixed_image_label = "after"
@@ -134,20 +129,20 @@ class ApplyTOPUPRPT(nrc.RegistrationRC, fsl.ApplyTOPUP):
         return super(ApplyTOPUPRPT, self)._post_run_hook(runtime)
 
 
-class FUGUEInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                        fsl.preprocess.FUGUEInputSpec):
+class _FUGUEInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                         fsl.preprocess.FUGUEInputSpec):
     wm_seg = File(argstr='-wmseg %s',
                   desc='reference white matter segmentation mask')
 
 
-class FUGUEOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                         fsl.preprocess.FUGUEOutputSpec):
+class _FUGUEOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                          fsl.preprocess.FUGUEOutputSpec):
     pass
 
 
 class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
-    input_spec = FUGUEInputSpecRPT
-    output_spec = FUGUEOutputSpecRPT
+    input_spec = _FUGUEInputSpecRPT
+    output_spec = _FUGUEOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         self._fixed_image_label = "after"
@@ -162,19 +157,19 @@ class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
         return super(FUGUERPT, self)._post_run_hook(runtime)
 
 
-class FLIRTInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                        fsl.preprocess.FLIRTInputSpec):
+class _FLIRTInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                         fsl.preprocess.FLIRTInputSpec):
     pass
 
 
-class FLIRTOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                         fsl.preprocess.FLIRTOutputSpec):
+class _FLIRTOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                          fsl.preprocess.FLIRTOutputSpec):
     pass
 
 
 class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
-    input_spec = FLIRTInputSpecRPT
-    output_spec = FLIRTOutputSpecRPT
+    input_spec = _FLIRTInputSpecRPT
+    output_spec = _FLIRTOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.reference
@@ -187,14 +182,14 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
         return super(FLIRTRPT, self)._post_run_hook(runtime)
 
 
-class ApplyXFMInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                           fsl.preprocess.ApplyXFMInputSpec):
+class _ApplyXFMInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                            fsl.preprocess.ApplyXFMInputSpec):
     pass
 
 
 class ApplyXFMRPT(FLIRTRPT, fsl.ApplyXFM):
-    input_spec = ApplyXFMInputSpecRPT
-    output_spec = FLIRTOutputSpecRPT
+    input_spec = _ApplyXFMInputSpecRPT
+    output_spec = _FLIRTOutputSpecRPT
 
 
 if LooseVersion("0.0.0") < fs.Info.looseversion() < LooseVersion("6.0.0"):
@@ -203,22 +198,22 @@ else:
     _BBRegisterInputSpec = fs.preprocess.BBRegisterInputSpec6
 
 
-class BBRegisterInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                             _BBRegisterInputSpec):
+class _BBRegisterInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                              _BBRegisterInputSpec):
     # Adds default=True, usedefault=True
     out_lta_file = traits.Either(traits.Bool, File, default=True, usedefault=True,
                                  argstr="--lta %s", min_ver='5.2.0',
                                  desc="write the transformation matrix in LTA format")
 
 
-class BBRegisterOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                              fs.preprocess.BBRegisterOutputSpec):
+class _BBRegisterOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                               fs.preprocess.BBRegisterOutputSpec):
     pass
 
 
 class BBRegisterRPT(nrc.RegistrationRC, fs.BBRegister):
-    input_spec = BBRegisterInputSpecRPT
-    output_spec = BBRegisterOutputSpecRPT
+    input_spec = _BBRegisterInputSpecRPT
+    output_spec = _BBRegisterOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         outputs = self.aggregate_outputs(runtime=runtime)
@@ -244,19 +239,19 @@ class BBRegisterRPT(nrc.RegistrationRC, fs.BBRegister):
         return super(BBRegisterRPT, self)._post_run_hook(runtime)
 
 
-class MRICoregInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                           fs.registration.MRICoregInputSpec):
+class _MRICoregInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                            fs.registration.MRICoregInputSpec):
     pass
 
 
-class MRICoregOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                            fs.registration.MRICoregOutputSpec):
+class _MRICoregOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                             fs.registration.MRICoregOutputSpec):
     pass
 
 
 class MRICoregRPT(nrc.RegistrationRC, fs.MRICoreg):
-    input_spec = MRICoregInputSpecRPT
-    output_spec = MRICoregOutputSpecRPT
+    input_spec = _MRICoregInputSpecRPT
+    output_spec = _MRICoregOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         outputs = self.aggregate_outputs(runtime=runtime)
@@ -289,7 +284,7 @@ class MRICoregRPT(nrc.RegistrationRC, fs.MRICoreg):
         return super(MRICoregRPT, self)._post_run_hook(runtime)
 
 
-class SimpleBeforeAfterInputSpecRPT(nrc.SVGReportCapableInputSpec):
+class _SimpleBeforeAfterInputSpecRPT(nrc._SVGReportCapableInputSpec):
     before = File(exists=True, mandatory=True, desc='file before')
     after = File(exists=True, mandatory=True, desc='file after')
     wm_seg = File(desc='reference white matter segmentation mask')
@@ -298,7 +293,7 @@ class SimpleBeforeAfterInputSpecRPT(nrc.SVGReportCapableInputSpec):
 
 
 class SimpleBeforeAfterRPT(nrc.RegistrationRC, nrc.ReportingInterface):
-    input_spec = SimpleBeforeAfterInputSpecRPT
+    input_spec = _SimpleBeforeAfterInputSpecRPT
 
     def _post_run_hook(self, runtime):
         """ there is not inner interface to run """
@@ -314,12 +309,12 @@ class SimpleBeforeAfterRPT(nrc.RegistrationRC, nrc.ReportingInterface):
         return super(SimpleBeforeAfterRPT, self)._post_run_hook(runtime)
 
 
-class ResampleBeforeAfterInputSpecRPT(SimpleBeforeAfterInputSpecRPT):
+class _ResampleBeforeAfterInputSpecRPT(_SimpleBeforeAfterInputSpecRPT):
     base = traits.Enum('before', 'after', usedefault=True, mandatory=True)
 
 
 class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
-    input_spec = ResampleBeforeAfterInputSpecRPT
+    input_spec = _ResampleBeforeAfterInputSpecRPT
 
     def _post_run_hook(self, runtime):
         self._fixed_image = self.inputs.after
@@ -346,7 +341,7 @@ class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
         return runtime
 
 
-class EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
+class _EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="4D EPI file")
     sbref_file = File(exists=True, desc="Single band reference image")
     mc_method = traits.Enum(
@@ -354,7 +349,7 @@ class EstimateReferenceImageInputSpec(BaseInterfaceInputSpec):
         desc="Which software to use to perform motion correction")
 
 
-class EstimateReferenceImageOutputSpec(TraitedSpec):
+class _EstimateReferenceImageOutputSpec(TraitedSpec):
     ref_image = File(exists=True, desc="3D reference image")
     n_volumes_to_discard = traits.Int(desc="Number of detected non-steady "
                                            "state volumes in the beginning of "
@@ -368,8 +363,8 @@ class EstimateReferenceImage(SimpleInterface):
     T1 saturated volumes (non-steady state) otherwise a median of
     of a subset of motion corrected volumes is used.
     """
-    input_spec = EstimateReferenceImageInputSpec
-    output_spec = EstimateReferenceImageOutputSpec
+    input_spec = _EstimateReferenceImageInputSpec
+    output_spec = _EstimateReferenceImageOutputSpec
 
     def _run_interface(self, runtime):
         ref_name = self.inputs.in_file

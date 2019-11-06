@@ -6,7 +6,8 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = _build
-CURBRANCH     = 372_api_doc_generation
+CURBRANCH     = master
+PYTHONPATH    = $(PWD)
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
@@ -53,7 +54,7 @@ clean:
 	rm -rf reference/*
 
 html:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	PYTHONPATH=$(PYTHONPATH) $(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
@@ -180,4 +181,4 @@ pseudoxml:
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
 
 versioned:
-	sphinx-versioning -vv -l ./docs/conf.py build -r $(CURBRANCH) ./docs/ docs/$(BUILDDIR)/html/
+	PYTHONPATH=$(PYTHONPATH) sphinx-versioning -vv -l ./docs/conf.py build -r $(CURBRANCH) ./docs/ docs/$(BUILDDIR)/html/

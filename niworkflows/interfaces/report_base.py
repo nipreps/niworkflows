@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-""" class mixin and utilities for enabling reports for nipype interfaces """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+"""class mixin and utilities for enabling reports for nipype interfaces."""
 from nilearn.masking import apply_mask, unmask
 from nilearn.image import threshold_img, load_img
 
@@ -13,7 +10,7 @@ from .. import NIWORKFLOWS_LOG
 from ..viz.utils import cuts_from_bbox, compose_view
 
 
-class SVGReportCapableInputSpec(reporting.ReportCapableInputSpec):
+class _SVGReportCapableInputSpec(reporting.ReportCapableInputSpec):
     out_report = File(
         'report.svg', usedefault=True, desc='filename for the visual report')
     compress_report = traits.Enum('auto', True, False, usedefault=True,
@@ -24,7 +21,7 @@ class SVGReportCapableInputSpec(reporting.ReportCapableInputSpec):
 
 
 class RegistrationRC(reporting.ReportCapableInterface):
-    """ An abstract mixin to registration nipype interfaces """
+    """An abstract mixin to registration nipype interfaces."""
     _fixed_image = None
     _moving_image = None
     _fixed_image_mask = None
@@ -33,7 +30,7 @@ class RegistrationRC(reporting.ReportCapableInterface):
     _contour = None
 
     def _generate_report(self):
-        """ Generates the visual report """
+        """Generates the visual report."""
         from niworkflows.viz.utils import plot_registration
         NIWORKFLOWS_LOG.info('Generating visual report')
 
@@ -79,8 +76,7 @@ class RegistrationRC(reporting.ReportCapableInterface):
 
 
 class SegmentationRC(reporting.ReportCapableInterface):
-
-    """ An abstract mixin to segmentation nipype interfaces """
+    """An abstract mixin to segmentation nipype interfaces."""
 
     def _generate_report(self):
         from niworkflows.viz.utils import plot_segs
@@ -99,14 +95,13 @@ class SegmentationRC(reporting.ReportCapableInterface):
 
 
 class SurfaceSegmentationRC(reporting.ReportCapableInterface):
-
-    """ An abstract mixin to registration nipype interfaces """
+    """An abstract mixin to registration nipype interfaces."""
     _anat_file = None
     _mask_file = None
     _contour = None
 
     def _generate_report(self):
-        """ Generates the visual report """
+        """Generates the visual report."""
         from niworkflows.viz.utils import plot_registration
         NIWORKFLOWS_LOG.info('Generating visual report')
 
@@ -138,9 +133,11 @@ class SurfaceSegmentationRC(reporting.ReportCapableInterface):
 
 
 class ReportingInterface(reporting.ReportCapableInterface):
-    """Interface that always generates a report
+    """
+    Interface that always generates a report.
 
     A subclass must define an ``input_spec`` and override ``_generate_report``.
+
     """
     output_spec = reporting.ReportCapableOutputSpec
 

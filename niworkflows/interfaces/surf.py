@@ -1,12 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Handling surfaces
------------------
-
-"""
+"""Handling surfaces."""
 import os
 import re
 from collections import defaultdict
@@ -28,17 +22,18 @@ SECONDARY_ANAT_STRUC = {
 }
 
 
-class NormalizeSurfInputSpec(BaseInterfaceInputSpec):
+class _NormalizeSurfInputSpec(BaseInterfaceInputSpec):
     in_file = File(mandatory=True, exists=True, desc='Freesurfer-generated GIFTI file')
     transform_file = File(exists=True, desc='FSL or LTA affine transform file')
 
 
-class NormalizeSurfOutputSpec(TraitedSpec):
+class _NormalizeSurfOutputSpec(TraitedSpec):
     out_file = File(desc='output file with re-centered GIFTI coordinates')
 
 
 class NormalizeSurf(SimpleInterface):
-    """ Normalizes a FreeSurfer-generated GIFTI image
+    """
+    Normalize a FreeSurfer-generated GIFTI image.
 
     FreeSurfer includes an offset to the center of the brain volume that is not
     respected by all software packages.
@@ -72,8 +67,9 @@ Pipelines/blob/ae69b9a/PostFreeSurfer/scripts/FreeSurfer2CaretConvertAndRegister
 #L147-154
 
     """
-    input_spec = NormalizeSurfInputSpec
-    output_spec = NormalizeSurfOutputSpec
+
+    input_spec = _NormalizeSurfInputSpec
+    output_spec = _NormalizeSurfOutputSpec
 
     def _run_interface(self, runtime):
         transform_file = self.inputs.transform_file
@@ -87,19 +83,22 @@ Pipelines/blob/ae69b9a/PostFreeSurfer/scripts/FreeSurfer2CaretConvertAndRegister
         return runtime
 
 
-class GiftiNameSourceInputSpec(BaseInterfaceInputSpec):
+class _GiftiNameSourceInputSpec(BaseInterfaceInputSpec):
     in_file = File(mandatory=True, exists=True, desc='input GIFTI file')
     pattern = traits.Str(mandatory=True,
                          desc='input file name pattern (must capture named group "LR")')
     template = traits.Str(mandatory=True, desc='output file name template')
 
 
-class GiftiNameSourceOutputSpec(TraitedSpec):
+class _GiftiNameSourceOutputSpec(TraitedSpec):
     out_name = traits.Str(desc='(partial) filename formatted according to template')
 
 
 class GiftiNameSource(SimpleInterface):
-    r"""Construct a new filename based on an input filename, a matching pattern,
+    r"""
+    Construct a new filename for a GIFTI file.
+
+    Construct a new filename based on an input filename, a matching pattern,
     and a related template.
 
     This interface is intended for use with GIFTI files, to generate names
@@ -140,8 +139,8 @@ class GiftiNameSource(SimpleInterface):
 
     .. _GIFTI Standard: https://www.nitrc.org/frs/download.php/2871/GIFTI_Surface_Format.pdf
     """
-    input_spec = GiftiNameSourceInputSpec
-    output_spec = GiftiNameSourceOutputSpec
+    input_spec = _GiftiNameSourceInputSpec
+    output_spec = _GiftiNameSourceOutputSpec
 
     def _run_interface(self, runtime):
         in_format = re.compile(self.inputs.pattern)
@@ -153,18 +152,18 @@ class GiftiNameSource(SimpleInterface):
         return runtime
 
 
-class GiftiSetAnatomicalStructureInputSpec(BaseInterfaceInputSpec):
+class _GiftiSetAnatomicalStructureInputSpec(BaseInterfaceInputSpec):
     in_file = File(mandatory=True, exists=True,
                    desc='GIFTI file beginning with "lh." or "rh."')
 
 
-class GiftiSetAnatomicalStructureOutputSpec(TraitedSpec):
+class _GiftiSetAnatomicalStructureOutputSpec(TraitedSpec):
     out_file = File(desc='output file with updated AnatomicalStructurePrimary entry')
 
 
 class GiftiSetAnatomicalStructure(SimpleInterface):
-    """Set AnatomicalStructurePrimary attribute of GIFTI image based on
-    filename.
+    """
+    Set AnatomicalStructurePrimary attribute of GIFTI image based on filename.
 
     For files that begin with ``lh.`` or ``rh.``, update the metadata to
     include::
@@ -177,8 +176,8 @@ class GiftiSetAnatomicalStructure(SimpleInterface):
     effect.
 
     """
-    input_spec = GiftiSetAnatomicalStructureInputSpec
-    output_spec = GiftiSetAnatomicalStructureOutputSpec
+    input_spec = _GiftiSetAnatomicalStructureInputSpec
+    output_spec = _GiftiSetAnatomicalStructureOutputSpec
 
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file)
@@ -198,20 +197,20 @@ class GiftiSetAnatomicalStructure(SimpleInterface):
         return runtime
 
 
-class GiftiToCSVInputSpec(BaseInterfaceInputSpec):
+class _GiftiToCSVInputSpec(BaseInterfaceInputSpec):
     in_file = File(mandatory=True, exists=True, desc='GIFTI file')
     itk_lps = traits.Bool(False, usedefault=True, desc='flip XY axes')
 
 
-class GiftiToCSVOutputSpec(TraitedSpec):
+class _GiftiToCSVOutputSpec(TraitedSpec):
     out_file = File(desc='output csv file')
 
 
 class GiftiToCSV(SimpleInterface):
     """Converts GIfTI files to CSV to make them ammenable to use with
     ``antsApplyTransformsToPoints``."""
-    input_spec = GiftiToCSVInputSpec
-    output_spec = GiftiToCSVOutputSpec
+    input_spec = _GiftiToCSVInputSpec
+    output_spec = _GiftiToCSVOutputSpec
 
     def _run_interface(self, runtime):
         gii = nb.load(self.inputs.in_file)
@@ -237,21 +236,21 @@ class GiftiToCSV(SimpleInterface):
         return runtime
 
 
-class CSVToGiftiInputSpec(BaseInterfaceInputSpec):
+class _CSVToGiftiInputSpec(BaseInterfaceInputSpec):
     in_file = File(mandatory=True, exists=True, desc='CSV file')
     gii_file = File(mandatory=True, exists=True, desc='reference GIfTI file')
     itk_lps = traits.Bool(False, usedefault=True, desc='flip XY axes')
 
 
-class CSVToGiftiOutputSpec(TraitedSpec):
+class _CSVToGiftiOutputSpec(TraitedSpec):
     out_file = File(desc='output GIfTI file')
 
 
 class CSVToGifti(SimpleInterface):
     """Converts CSV files back to GIfTI, after moving vertices with
     ``antsApplyTransformToPoints``."""
-    input_spec = CSVToGiftiInputSpec
-    output_spec = CSVToGiftiOutputSpec
+    input_spec = _CSVToGiftiInputSpec
+    output_spec = _CSVToGiftiOutputSpec
 
     def _run_interface(self, runtime):
         gii = nb.load(self.inputs.gii_file)
@@ -272,22 +271,22 @@ class CSVToGifti(SimpleInterface):
         return runtime
 
 
-class SurfacesToPointCloudInputSpec(BaseInterfaceInputSpec):
+class _SurfacesToPointCloudInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
                               desc='input GIfTI files')
     out_file = File('pointcloud.ply', usedefault=True,
                     desc='output file name')
 
 
-class SurfacesToPointCloudOutputSpec(TraitedSpec):
+class _SurfacesToPointCloudOutputSpec(TraitedSpec):
     out_file = File(desc='output pointcloud in PLY format')
 
 
 class SurfacesToPointCloud(SimpleInterface):
     """Converts multiple surfaces into a pointcloud with corresponding normals
     to then apply Poisson reconstruction"""
-    input_spec = SurfacesToPointCloudInputSpec
-    output_spec = SurfacesToPointCloudOutputSpec
+    input_spec = _SurfacesToPointCloudInputSpec
+    output_spec = _SurfacesToPointCloudOutputSpec
 
     def _run_interface(self, runtime):
         from pathlib import Path
@@ -302,7 +301,7 @@ class SurfacesToPointCloud(SimpleInterface):
         return runtime
 
 
-class PoissonReconInputSpec(CommandLineInputSpec):
+class _PoissonReconInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, mandatory=True, argstr='--in %s',
                    desc='input PLY pointcloud (vertices + normals)')
     out_file = File(argstr='--out %s', keep_extension=True,
@@ -310,7 +309,7 @@ class PoissonReconInputSpec(CommandLineInputSpec):
                     desc='output PLY triangular mesh')
 
 
-class PoissonReconOutputSpec(TraitedSpec):
+class _PoissonReconOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='output PLY triangular mesh')
 
 
@@ -319,24 +318,24 @@ class PoissonRecon(CommandLine):
     given in PLY format.
     See https://github.com/mkazhdan/PoissonRecon
     """
-    input_spec = PoissonReconInputSpec
-    output_spec = PoissonReconOutputSpec
+    input_spec = _PoissonReconInputSpec
+    output_spec = _PoissonReconOutputSpec
     _cmd = 'PoissonRecon'
 
 
-class PLYtoGiftiInputSpec(BaseInterfaceInputSpec):
+class _PLYtoGiftiInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input PLY file')
     surf_key = traits.Str(mandatory=True, desc='reference GIfTI file')
 
 
-class PLYtoGiftiOutputSpec(TraitedSpec):
+class _PLYtoGiftiOutputSpec(TraitedSpec):
     out_file = File(desc='output GIfTI file')
 
 
 class PLYtoGifti(SimpleInterface):
     """Convert surfaces from PLY to GIfTI"""
-    input_spec = PLYtoGiftiInputSpec
-    output_spec = PLYtoGiftiOutputSpec
+    input_spec = _PLYtoGiftiInputSpec
+    output_spec = _PLYtoGiftiOutputSpec
 
     def _run_interface(self, runtime):
         from pathlib import Path
@@ -373,13 +372,13 @@ class PLYtoGifti(SimpleInterface):
         return runtime
 
 
-class UnzipJoinedSurfacesInputSpec(BaseInterfaceInputSpec):
+class _UnzipJoinedSurfacesInputSpec(BaseInterfaceInputSpec):
     in_files = traits.List(
         InputMultiPath(File(exists=True), mandatory=True,
                        desc='input GIfTI files'))
 
 
-class UnzipJoinedSurfacesOutputSpec(TraitedSpec):
+class _UnzipJoinedSurfacesOutputSpec(TraitedSpec):
     out_files = traits.List(
         OutputMultiPath(File(exists=True),
                         desc='output pointcloud in PLY format'))
@@ -388,8 +387,8 @@ class UnzipJoinedSurfacesOutputSpec(TraitedSpec):
 
 class UnzipJoinedSurfaces(SimpleInterface):
     """Unpack surfaces by identifier keys"""
-    input_spec = UnzipJoinedSurfacesInputSpec
-    output_spec = UnzipJoinedSurfacesOutputSpec
+    input_spec = _UnzipJoinedSurfacesInputSpec
+    output_spec = _UnzipJoinedSurfacesOutputSpec
 
     def _run_interface(self, runtime):
         from pathlib import Path
@@ -407,7 +406,8 @@ class UnzipJoinedSurfaces(SimpleInterface):
 
 
 def normalize_surfs(in_file, transform_file, newpath=None):
-    """ Re-center GIFTI coordinates to fit align to native T1 space
+    """
+    Re-center GIFTI coordinates to fit align to native T1w space.
 
     For midthickness surfaces, add MidThickness metadata
 
