@@ -399,7 +399,7 @@ jobs:
               echo "Not a tag or master branch - skipping versioned docs."
               circleci step halt
             else
-              make -f ./docs/Makefile versioned CURBRANCH=$CIRCLE_BRANCH
+              make -f ./docs/Makefile versioned CURBRANCH=${CIRCLE_TAG:-$CIRCLE_BRANCH}
             fi
       - save_cache:
           key: docs-v1-{{ .Branch }}-{{ .Revision }}
