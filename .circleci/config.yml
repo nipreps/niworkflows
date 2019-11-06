@@ -223,6 +223,11 @@ jobs:
             python -m codecov --file reportlets.xml --root /tmp/src/niworkflows \
                 --flags reportlettests -e CIRCLE_JOB
 
+      - run:
+          name: Clean up tests directory
+          command: |
+            rm -rf /tmp/tests/pytest-of-root
+
       - store_artifacts:
           path: /tmp/tests
 
