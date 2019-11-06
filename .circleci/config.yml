@@ -376,6 +376,9 @@ jobs:
             - ./docs/_build/_html
       - checkout
       - run:
+          name: Create subjects folder
+          command: mkdir -p $SUBJECTS_DIR
+      - run:
           name: Install Graphviz
           command: apt update && apt -y install graphviz
       - run:
