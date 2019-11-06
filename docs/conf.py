@@ -46,6 +46,19 @@ extensions = [
     'sphinxcontrib.napoleon'
 ]
 
+autodoc_mock_imports = [
+    'matplotlib',
+    'nilearn',
+    'nitime',
+    'numpy',
+    'pandas',
+    'seaborn',
+    'skimage',
+    'svgutils',
+    'templateflow',
+    'transforms3d',
+]
+
 # Accept custom section names to be parsed for numpy-style docstrings
 # of parameters.
 # Requires pinning sphinxcontrib-napoleon to a specific commit while
