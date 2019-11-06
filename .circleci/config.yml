@@ -364,6 +364,7 @@ jobs:
       - image: python:3.7.4
     environment:
       - FSLOUTPUTTYPE: NIFTI
+      - SUBJECTS_DIR: /tmp/subjects
     steps:
       - restore_cache:
           keys:
