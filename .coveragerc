@@ -1,7 +1,12 @@
 [run]
 branch = True
-source = niworkflows/*
-include = niworkflows/*
-omit = */setup.py
+omit =
+    */tests/*
+    niworkflows/conftest.py
+    niworkflows/_version.py
+
 [report]
-include = niworkflows/*
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    raise NotImplementedError
+    warnings\.warn
