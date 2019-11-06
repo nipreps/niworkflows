@@ -1,12 +1,6 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-ReportCapableInterfaces for segmentation tools
-
-
-"""
-from __future__ import absolute_import, division, print_function, unicode_literals
+"""ReportCapableInterfaces for segmentation tools."""
 import os
 
 from nipype.interfaces.base import File, isdefined
@@ -16,20 +10,20 @@ from . import report_base as nrc
 from .. import NIWORKFLOWS_LOG
 
 
-class FASTInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                       fsl.preprocess.FASTInputSpec):
+class _FASTInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                        fsl.preprocess.FASTInputSpec):
     pass
 
 
-class FASTOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                        fsl.preprocess.FASTOutputSpec):
+class _FASTOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                         fsl.preprocess.FASTOutputSpec):
     pass
 
 
 class FASTRPT(nrc.SegmentationRC,
               fsl.FAST):
-    input_spec = FASTInputSpecRPT
-    output_spec = FASTOutputSpecRPT
+    input_spec = _FASTInputSpecRPT
+    output_spec = _FASTOutputSpecRPT
 
     def _run_interface(self, runtime):
         if self.generate_report:
@@ -58,19 +52,19 @@ class FASTRPT(nrc.SegmentationRC,
         return super(FASTRPT, self)._post_run_hook(runtime)
 
 
-class ReconAllInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                           freesurfer.preprocess.ReconAllInputSpec):
+class _ReconAllInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                            freesurfer.preprocess.ReconAllInputSpec):
     pass
 
 
-class ReconAllOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                            freesurfer.preprocess.ReconAllOutputSpec):
+class _ReconAllOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                             freesurfer.preprocess.ReconAllOutputSpec):
     pass
 
 
 class ReconAllRPT(nrc.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):
-    input_spec = ReconAllInputSpecRPT
-    output_spec = ReconAllOutputSpecRPT
+    input_spec = _ReconAllInputSpecRPT
+    output_spec = _ReconAllOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         ''' generates a report showing nine slices, three per axis, of an
@@ -91,8 +85,8 @@ class ReconAllRPT(nrc.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):
         return super(ReconAllRPT, self)._post_run_hook(runtime)
 
 
-class MELODICInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                          fsl.model.MELODICInputSpec):
+class _MELODICInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                           fsl.model.MELODICInputSpec):
     out_report = File(
         'melodic_reportlet.svg', usedefault=True, desc='Filename for the visual'
                                                        ' report generated '
@@ -101,14 +95,14 @@ class MELODICInputSpecRPT(nrc.SVGReportCapableInputSpec,
                             'If not set the mask will be derived from the data.')
 
 
-class MELODICOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                           fsl.model.MELODICOutputSpec):
+class _MELODICOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                            fsl.model.MELODICOutputSpec):
     pass
 
 
 class MELODICRPT(fsl.MELODIC):
-    input_spec = MELODICInputSpecRPT
-    output_spec = MELODICOutputSpecRPT
+    input_spec = _MELODICInputSpecRPT
+    output_spec = _MELODICOutputSpecRPT
     _out_report = None
 
     def __init__(self, generate_report=False, **kwargs):
@@ -164,8 +158,8 @@ class MELODICRPT(fsl.MELODIC):
                                 report_mask=self.inputs.report_mask)
 
 
-class ICA_AROMAInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                            fsl.aroma.ICA_AROMAInputSpec):
+class _ICA_AROMAInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                             fsl.aroma.ICA_AROMAInputSpec):
     out_report = File(
         'ica_aroma_reportlet.svg', usedefault=True, desc='Filename for the visual'
                                                          ' report generated '
@@ -174,14 +168,14 @@ class ICA_AROMAInputSpecRPT(nrc.SVGReportCapableInputSpec,
                             'If not set the mask will be derived from the data.')
 
 
-class ICA_AROMAOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                             fsl.aroma.ICA_AROMAOutputSpec):
+class _ICA_AROMAOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                              fsl.aroma.ICA_AROMAOutputSpec):
     pass
 
 
 class ICA_AROMARPT(reporting.ReportCapableInterface, fsl.ICA_AROMA):
-    input_spec = ICA_AROMAInputSpecRPT
-    output_spec = ICA_AROMAOutputSpecRPT
+    input_spec = _ICA_AROMAInputSpecRPT
+    output_spec = _ICA_AROMAOutputSpecRPT
 
     def _generate_report(self):
         from niworkflows.viz.utils import plot_melodic_components

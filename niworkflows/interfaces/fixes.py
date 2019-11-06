@@ -67,7 +67,7 @@ class FixHeaderRegistration(Registration):
         return runtime
 
 
-class FixN4BiasFieldCorrectionOutputSpec(VanillaN4OutputSpec):
+class _FixN4BiasFieldCorrectionOutputSpec(VanillaN4OutputSpec):
     negative_values = traits.Bool(False, usedefault=True,
                                   desc='Indicates whether the input was corrected for '
                                        'nonpositive values by adding a constant offset.')
@@ -75,7 +75,7 @@ class FixN4BiasFieldCorrectionOutputSpec(VanillaN4OutputSpec):
 
 class FixN4BiasFieldCorrection(VanillaN4):
     """Checks and fixes for nonpositive values in the input to ``N4BiasFieldCorrection``."""
-    output_spec = FixN4BiasFieldCorrectionOutputSpec
+    output_spec = _FixN4BiasFieldCorrectionOutputSpec
 
     def __init__(self, *args, **kwargs):
         """Add a private property to keep the path to the right input."""

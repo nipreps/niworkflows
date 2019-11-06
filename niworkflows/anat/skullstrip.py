@@ -17,6 +17,39 @@ def afni_wf(name='AFNISkullStripWorkflow', unifize=False, n4_nthreads=1):
     using the N4 algorithm and (optionally) intensity harmonization using
     ANFI's ``3dUnifize``.
 
+    Workflow Graph
+        .. workflow::
+            :graph2use: orig
+            :simple_form: yes
+
+            from niworkflows.anat.skullstrip import afni_wf
+            wf = afni_wf()
+
+    Parameters
+    ----------
+    n4_nthreads : int
+        number of cpus N4 bias field correction can utilize.
+    unifize : bool
+        whether AFNI's ``3dUnifize`` should be applied (default: ``False``).
+    name : str
+        name for the workflow hierarchy of Nipype
+
+    Inputs
+    ------
+    in_file : str
+        input T1w image.
+
+    Outputs
+    -------
+    bias_corrected : str
+        path to the bias corrected input MRI.
+    out_file : str
+        path to the skull-stripped image.
+    out_mask : str
+        path to the generated brain mask.
+    bias_image : str
+        path to the B1 inhomogeneity field.
+
     """
     workflow = pe.Workflow(name=name)
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file']),

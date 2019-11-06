@@ -1,14 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Image tools interfaces
-~~~~~~~~~~~~~~~~~~~~~~
-
-
-"""
-
+"""Image tools interfaces."""
 import os
 import numpy as np
 import nibabel as nb
@@ -26,7 +18,7 @@ from nipype.interfaces import fsl
 LOGGER = logging.getLogger('nipype.interface')
 
 
-class IntraModalMergeInputSpec(BaseInterfaceInputSpec):
+class _IntraModalMergeInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
                               desc='input files')
     hmc = traits.Bool(True, usedefault=True)
@@ -34,7 +26,7 @@ class IntraModalMergeInputSpec(BaseInterfaceInputSpec):
     to_ras = traits.Bool(True, usedefault=True)
 
 
-class IntraModalMergeOutputSpec(TraitedSpec):
+class _IntraModalMergeOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='merged image')
     out_avg = File(exists=True, desc='average image')
     out_mats = OutputMultiPath(File(exists=True), desc='output matrices')
@@ -42,8 +34,8 @@ class IntraModalMergeOutputSpec(TraitedSpec):
 
 
 class IntraModalMerge(SimpleInterface):
-    input_spec = IntraModalMergeInputSpec
-    output_spec = IntraModalMergeOutputSpec
+    input_spec = _IntraModalMergeInputSpec
+    output_spec = _IntraModalMergeOutputSpec
 
     def _run_interface(self, runtime):
         in_files = self.inputs.in_files
@@ -115,13 +107,13 @@ CONFORMATION_TEMPLATE = """\t\t<h3 class="elem-title">Anatomical Conformation</h
 DISCARD_TEMPLATE = """\t\t\t\t<li><abbr title="{path}">{basename}</abbr></li>"""
 
 
-class TemplateDimensionsInputSpec(BaseInterfaceInputSpec):
+class _TemplateDimensionsInputSpec(BaseInterfaceInputSpec):
     t1w_list = InputMultiPath(File(exists=True), mandatory=True, desc='input T1w images')
     max_scale = traits.Float(3.0, usedefault=True,
                              desc='Maximum scaling factor in images to accept')
 
 
-class TemplateDimensionsOutputSpec(TraitedSpec):
+class _TemplateDimensionsOutputSpec(TraitedSpec):
     t1w_valid_list = OutputMultiPath(exists=True, desc='valid T1w images')
     target_zooms = traits.Tuple(traits.Float, traits.Float, traits.Float,
                                 desc='Target zoom information')
@@ -145,8 +137,8 @@ class TemplateDimensions(SimpleInterface):
     To select images that require no scaling (i.e. all have smallest voxel sizes),
     set ``max_scale=1``.
     """
-    input_spec = TemplateDimensionsInputSpec
-    output_spec = TemplateDimensionsOutputSpec
+    input_spec = _TemplateDimensionsInputSpec
+    output_spec = _TemplateDimensionsOutputSpec
 
     def _generate_segment(self, discards, dims, zooms):
         items = [DISCARD_TEMPLATE.format(path=path, basename=os.path.basename(path))
@@ -199,7 +191,7 @@ class TemplateDimensions(SimpleInterface):
         return runtime
 
 
-class ConformInputSpec(BaseInterfaceInputSpec):
+class _ConformInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='Input image')
     target_zooms = traits.Tuple(traits.Float, traits.Float, traits.Float,
                                 desc='Target zoom information')
@@ -207,24 +199,25 @@ class ConformInputSpec(BaseInterfaceInputSpec):
                                 desc='Target shape information')
 
 
-class ConformOutputSpec(TraitedSpec):
+class _ConformOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Conformed image')
     transform = File(exists=True, desc='Conformation transform (voxel-to-voxel)')
 
 
 class Conform(SimpleInterface):
-    """Conform a series of T1w images to enable merging.
+    """
+    Conform a series of T1w images to enable merging.
 
     Performs two basic functions:
-
     #. Orient to RAS (left-right, posterior-anterior, inferior-superior)
     #. Resample to target zooms (voxel sizes) and shape (number of voxels)
 
     Note that the output transforms are voxel-to-voxel; the RAS-to-RAS
     transform is the identity transform.
+
     """
-    input_spec = ConformInputSpec
-    output_spec = ConformOutputSpec
+    input_spec = _ConformInputSpec
+    output_spec = _ConformOutputSpec
 
     def _run_interface(self, runtime):
         # Load image, orient as RAS
@@ -295,18 +288,18 @@ class Conform(SimpleInterface):
         return runtime
 
 
-class ValidateImageInputSpec(BaseInterfaceInputSpec):
+class _ValidateImageInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input image')
 
 
-class ValidateImageOutputSpec(TraitedSpec):
+class _ValidateImageOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='validated image')
     out_report = File(exists=True, desc='HTML segment containing warning')
 
 
 class ValidateImage(SimpleInterface):
     """
-    Check the correctness of x-form headers (matrix and code)
+    Check the correctness of x-form headers (matrix and code).
 
     This interface implements the `following logic
     <https://github.com/poldracklab/fmriprep/issues/873#issuecomment-349394544>`_:
@@ -341,9 +334,11 @@ class ValidateImage(SimpleInterface):
 | sform, qform <- best affine; scode, qcode <- 1 |
     +-------------------+------------------+------------------+------------------\
 +------------------------------------------------+
+
     """
-    input_spec = ValidateImageInputSpec
-    output_spec = ValidateImageOutputSpec
+
+    input_spec = _ValidateImageInputSpec
+    output_spec = _ValidateImageOutputSpec
 
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file)
@@ -446,7 +441,7 @@ class ValidateImage(SimpleInterface):
         return runtime
 
 
-class DemeanImageInputSpec(BaseInterfaceInputSpec):
+class _DemeanImageInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='image to be demeaned')
     in_mask = File(exists=True, mandatory=True,
@@ -455,13 +450,13 @@ class DemeanImageInputSpec(BaseInterfaceInputSpec):
                             desc='demean only within mask')
 
 
-class DemeanImageOutputSpec(TraitedSpec):
+class _DemeanImageOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='demeaned image')
 
 
 class DemeanImage(SimpleInterface):
-    input_spec = DemeanImageInputSpec
-    output_spec = DemeanImageOutputSpec
+    input_spec = _DemeanImageInputSpec
+    output_spec = _DemeanImageOutputSpec
 
     def _run_interface(self, runtime):
         self._results['out_file'] = demean(
@@ -472,7 +467,7 @@ class DemeanImage(SimpleInterface):
         return runtime
 
 
-class FilledImageLikeInputSpec(BaseInterfaceInputSpec):
+class _FilledImageLikeInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='image to be demeaned')
     fill_value = traits.Float(1.0, usedefault=True,
@@ -481,13 +476,13 @@ class FilledImageLikeInputSpec(BaseInterfaceInputSpec):
                         desc='force output data type')
 
 
-class FilledImageLikeOutputSpec(TraitedSpec):
+class _FilledImageLikeOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='demeaned image')
 
 
 class FilledImageLike(SimpleInterface):
-    input_spec = FilledImageLikeInputSpec
-    output_spec = FilledImageLikeOutputSpec
+    input_spec = _FilledImageLikeInputSpec
+    output_spec = _FilledImageLikeOutputSpec
 
     def _run_interface(self, runtime):
         self._results['out_file'] = nii_ones_like(
@@ -498,20 +493,20 @@ class FilledImageLike(SimpleInterface):
         return runtime
 
 
-class MatchHeaderInputSpec(BaseInterfaceInputSpec):
+class _MatchHeaderInputSpec(BaseInterfaceInputSpec):
     reference = File(exists=True, mandatory=True,
                      desc='NIfTI file with reference header')
     in_file = File(exists=True, mandatory=True,
                    desc='NIfTI file which header will be checked')
 
 
-class MatchHeaderOutputSpec(TraitedSpec):
+class _MatchHeaderOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='NIfTI file with fixed header')
 
 
 class MatchHeader(SimpleInterface):
-    input_spec = MatchHeaderInputSpec
-    output_spec = MatchHeaderOutputSpec
+    input_spec = _MatchHeaderInputSpec
+    output_spec = _MatchHeaderOutputSpec
 
     def _run_interface(self, runtime):
         refhdr = nb.load(self.inputs.reference).header.copy()
@@ -546,7 +541,7 @@ class MatchHeader(SimpleInterface):
 
 
 def reorient(in_file, newpath=None):
-    """Reorient Nifti files to RAS"""
+    """Reorient Nifti files to RAS."""
     out_file = fname_presuffix(in_file, suffix='_ras', newpath=newpath)
     nb.as_closest_canonical(nb.load(in_file)).to_filename(out_file)
     return out_file
@@ -569,7 +564,8 @@ def extract_wm(in_seg, wm_label=3, newpath=None):
 
 
 def normalize_xform(img):
-    """ Set identical, valid qform and sform matrices in an image
+    """
+    Set identical, valid qform and sform matrices in an image.
 
     Selects the best available affine (sform > qform > shape-based), and
     coerces it to be qform-compatible (no shears).
@@ -603,7 +599,7 @@ def normalize_xform(img):
 
 
 def demean(in_file, in_mask, only_mask=False, newpath=None):
-    """Demean ``in_file`` within the mask defined by ``in_mask``"""
+    """Demean ``in_file`` within the mask defined by ``in_mask``."""
     import os
     import numpy as np
     import nibabel as nb
@@ -624,7 +620,7 @@ def demean(in_file, in_mask, only_mask=False, newpath=None):
 
 
 def nii_ones_like(in_file, value, dtype, newpath=None):
-    """Create a NIfTI file filled with ``value``, matching properties of ``in_file``"""
+    """Create a NIfTI file filled with ``value``, matching properties of ``in_file``."""
     import os
     import numpy as np
     import nibabel as nb
@@ -640,7 +636,7 @@ def nii_ones_like(in_file, value, dtype, newpath=None):
     return out_file
 
 
-class SignalExtractionInputSpec(BaseInterfaceInputSpec):
+class _SignalExtractionInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='4-D fMRI nii file')
     label_files = InputMultiPath(
         File(exists=True),
@@ -672,7 +668,7 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
         'signals.tsv by default')
 
 
-class SignalExtractionOutputSpec(TraitedSpec):
+class _SignalExtractionOutputSpec(TraitedSpec):
     out_file = File(
         exists=True,
         desc='tsv file containing the computed '
@@ -682,15 +678,18 @@ class SignalExtractionOutputSpec(TraitedSpec):
 
 
 class SignalExtraction(SimpleInterface):
-    """ Extract mean signals from a time series within a set of ROIs
+    """
+    Extract mean signals from a time series within a set of ROIs.
 
     This interface is intended to be a memory-efficient alternative to
     nipype.interfaces.nilearn.SignalExtraction.
     Not all features of nilearn.SignalExtraction are implemented at
     this time.
+
     """
-    input_spec = SignalExtractionInputSpec
-    output_spec = SignalExtractionOutputSpec
+
+    input_spec = _SignalExtractionInputSpec
+    output_spec = _SignalExtractionOutputSpec
 
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file)

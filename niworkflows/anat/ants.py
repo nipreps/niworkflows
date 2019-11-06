@@ -1,10 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Nipype translation of ANTs workflows
-------------------------------------
-
-"""
+"""Nipype translation of ANTs' workflows."""
 
 # general purpose
 from collections import OrderedDict
@@ -70,6 +66,8 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
                              use_laplacian=True,
                              bspline_fitting_distance=200):
     """
+    Build a workflow for atlas-based brain extraction on anatomical MRI data.
+
     A Nipype implementation of the official ANTs' ``antsBrainExtraction.sh``
     workflow (only for 3D images).
 
@@ -85,90 +83,86 @@ def init_brain_extraction_wf(name='brain_extraction_wf',
       4. Superstep 6: apply ATROPOS and massage its outputs
       5. Superstep 7: use results from 4 to refine the brain mask
 
+    Workflow Graph
+        .. workflow::
+            :graph2use: orig
+            :simple_form: yes
 
-    .. workflow::
-        :graph2use: orig
-        :simple_form: yes
-        from niworkflows.anat import init_brain_extraction_wf
-        wf = init_brain_extraction_wf()
+            from niworkflows.anat.ants import init_brain_extraction_wf
+            wf = init_brain_extraction_wf()
 
-
-    **Parameters**
-
-        in_template : str
-            Name of the skull-stripping template ('OASIS30ANTs', 'NKI', or
-            path).
-            The brain template from which regions will be projected
-            Anatomical template created using e.g. LPBA40 data set with
-            ``buildtemplateparallel.sh`` in ANTs.
-            The workflow will automatically search for a brain probability
-            mask created using e.g. LPBA40 data set which have brain masks
-            defined, and warped to anatomical template and
-            averaged resulting in a probability image.
-        use_float : bool
-            Whether single precision should be used
-        normalization_quality : str
-            Use more precise or faster registration parameters
-            (default: ``precise``, other possible values: ``testing``)
-        omp_nthreads : int
-            Maximum number of threads an individual process may use
-        mem_gb : float
-            Estimated peak memory consumption of the most hungry nodes
-            in the workflow
-        bids_suffix : str
-            Sequence type of the first input image. For a list of acceptable values
-            see https://bids-specification.readthedocs.io/en/latest/\
+    Parameters
+    ----------
+    in_template : str
+        Name of the skull-stripping template ('OASIS30ANTs', 'NKI', or
+        path).
+        The brain template from which regions will be projected
+        Anatomical template created using e.g. LPBA40 data set with
+        ``buildtemplateparallel.sh`` in ANTs.
+        The workflow will automatically search for a brain probability
+        mask created using e.g. LPBA40 data set which have brain masks
+        defined, and warped to anatomical template and
+        averaged resulting in a probability image.
+    use_float : bool
+        Whether single precision should be used
+    normalization_quality : str
+        Use more precise or faster registration parameters
+        (default: ``precise``, other possible values: ``testing``)
+    omp_nthreads : int
+        Maximum number of threads an individual process may use
+    mem_gb : float
+        Estimated peak memory consumption of the most hungry nodes
+        in the workflow
+    bids_suffix : str
+        Sequence type of the first input image. For a list of acceptable values
+        see https://bids-specification.readthedocs.io/en/latest/\
 04-modality-specific-files/01-magnetic-resonance-imaging-data.html#anatomy-imaging-data
-        atropos_refine : bool
-            Enables or disables the whole ATROPOS sub-workflow
-        atropos_use_random_seed : bool
-            Whether ATROPOS should generate a random seed based on the
-            system's clock
-        atropos_model : tuple or None
-            Allows to specify a particular segmentation model, overwriting
-            the defaults based on ``bids_suffix``
-        use_laplacian : bool
-            Enables or disables alignment of the Laplacian as an additional
-            criterion for image registration quality (default: True)
-        bspline_fitting_distance : float
-            The size of the b-spline mesh grid elements, in mm (default: 200)
-        name : str, optional
-            Workflow name (default: antsBrainExtraction)
+    atropos_refine : bool
+        Enables or disables the whole ATROPOS sub-workflow
+    atropos_use_random_seed : bool
+        Whether ATROPOS should generate a random seed based on the
+        system's clock
+    atropos_model : tuple or None
+        Allows to specify a particular segmentation model, overwriting
+        the defaults based on ``bids_suffix``
+    use_laplacian : bool
+        Enables or disables alignment of the Laplacian as an additional
+        criterion for image registration quality (default: True)
+    bspline_fitting_distance : float
+        The size of the b-spline mesh grid elements, in mm (default: 200)
+    name : str, optional
+        Workflow name (default: antsBrainExtraction)
 
+    Inputs
+    ------
+    in_files : list
+        List of input anatomical images to be brain-extracted,
+        typically T1-weighted.
+        If a list of anatomical images is provided, subsequently
+        specified images are used during the segmentation process.
+        However, only the first image is used in the registration
+        of priors.
+        Our suggestion would be to specify the T1w as the first image.
+    in_mask : list, optional
+        Mask used for registration to limit the metric
+        computation to a specific region.
 
-    **Inputs**
-
-        in_files
-            List of input anatomical images to be brain-extracted,
-            typically T1-weighted.
-            If a list of anatomical images is provided, subsequently
-            specified images are used during the segmentation process.
-            However, only the first image is used in the registration
-            of priors.
-            Our suggestion would be to specify the T1w as the first image.
-        in_mask
-            (optional) Mask used for registration to limit the metric
-            computation to a specific region.
-
-
-    **Outputs**
-
-
-        out_file
-            Skull-stripped and :abbr:`INU (intensity non-uniformity)`-corrected ``in_files``
-        out_mask
-            Calculated brain mask
-        bias_corrected
-            The ``in_files`` input images, after :abbr:`INU (intensity non-uniformity)`
-            correction, before skull-stripping.
-        bias_image
-            The :abbr:`INU (intensity non-uniformity)` field estimated for each
-            input in ``in_files``
-        out_segm
-            Output segmentation by ATROPOS
-        out_tpms
-            Output :abbr:`TPMs (tissue probability maps)` by ATROPOS
-
+    Outputs
+    -------
+    out_file : str
+        Skull-stripped and :abbr:`INU (intensity non-uniformity)`-corrected ``in_files``
+    out_mask : str
+        Calculated brain mask
+    bias_corrected : str
+        The ``in_files`` input images, after :abbr:`INU (intensity non-uniformity)`
+        correction, before skull-stripping.
+    bias_image : str
+        The :abbr:`INU (intensity non-uniformity)` field estimated for each
+        input in ``in_files``
+    out_segm : str
+        Output segmentation by ATROPOS
+    out_tpms : str
+        Output :abbr:`TPMs (tissue probability maps)` by ATROPOS
 
     """
     from templateflow.api import get as get_template
@@ -397,55 +391,65 @@ def init_atropos_wf(name='atropos_wf',
                     padding=10,
                     in_segmentation_model=list(ATROPOS_MODELS['T1w'].values())):
     """
+    Create an ANTs' ATROPOS workflow for brain tissue segmentation.
+
     Implements supersteps 6 and 7 of ``antsBrainExtraction.sh``,
     which refine the mask previously computed with the spatial
     normalization to the template.
 
-    **Parameters**
+    Workflow Graph
+        .. workflow::
+            :graph2use: orig
+            :simple_form: yes
 
-        use_random_seed : bool
-            Whether ATROPOS should generate a random seed based on the
-            system's clock
-        omp_nthreads : int
-            Maximum number of threads an individual process may use
-        mem_gb : float
-            Estimated peak memory consumption of the most hungry nodes
-            in the workflow
-        padding : int
-            Pad images with zeros before processing
-        in_segmentation_model : tuple
-            A k-means segmentation is run to find gray or white matter
-            around the edge of the initial brain mask warped from the
-            template.
-            This produces a segmentation image with :math:`$K$` classes,
-            ordered by mean intensity in increasing order.
-            With this option, you can control  :math:`$K$` and tell
-            the script which classes represent CSF, gray and white matter.
-            Format (K, csfLabel, gmLabel, wmLabel).
-            Examples:
-              - ``(3,1,2,3)`` for T1 with K=3, CSF=1, GM=2, WM=3 (default)
-              - ``(3,3,2,1)`` for T2 with K=3, CSF=3, GM=2, WM=1
-              - ``(3,1,3,2)`` for FLAIR with K=3, CSF=1 GM=3, WM=2
-              - ``(4,4,2,3)`` uses K=4, CSF=4, GM=2, WM=3
-        name : str, optional
-            Workflow name (default: atropos_wf)
+            from niworkflows.anat.ants import init_atropos_wf
+            wf = init_atropos_wf()
 
+    Parameters
+    ----------
+    use_random_seed : bool
+        Whether ATROPOS should generate a random seed based on the
+        system's clock
+    omp_nthreads : int
+        Maximum number of threads an individual process may use
+    mem_gb : float
+        Estimated peak memory consumption of the most hungry nodes
+        in the workflow
+    padding : int
+        Pad images with zeros before processing
+    in_segmentation_model : tuple
+        A k-means segmentation is run to find gray or white matter
+        around the edge of the initial brain mask warped from the
+        template.
+        This produces a segmentation image with :math:`$K$` classes,
+        ordered by mean intensity in increasing order.
+        With this option, you can control  :math:`$K$` and tell the script which
+        classes represent CSF, gray and white matter.
+        Format (K, csfLabel, gmLabel, wmLabel).
+        Examples:
+        ``(3,1,2,3)`` for T1 with K=3, CSF=1, GM=2, WM=3 (default),
+        ``(3,3,2,1)`` for T2 with K=3, CSF=3, GM=2, WM=1,
+        ``(3,1,3,2)`` for FLAIR with K=3, CSF=1 GM=3, WM=2,
+        ``(4,4,2,3)`` uses K=4, CSF=4, GM=2, WM=3.
+    name : str, optional
+        Workflow name (default: "atropos_wf").
 
-    **Inputs**
+    Inputs
+    ------
+    in_files : list
+        :abbr:`INU (intensity non-uniformity)`-corrected files.
+    in_mask : str
+        Brain mask calculated previously.
 
-        in_files
-            :abbr:`INU (intensity non-uniformity)`-corrected files.
-        in_mask
-            Brain mask calculated previously
+    Outputs
+    -------
+    out_mask : str
+        Refined brain mask
+    out_segm : str
+        Output segmentation
+    out_tpms : str
+        Output :abbr:`TPMs (tissue probability maps)`
 
-
-    **Outputs**
-        out_mask
-            Refined brain mask
-        out_segm
-            Output segmentation
-        out_tpms
-            Output :abbr:`TPMs (tissue probability maps)`
 
     """
     wf = pe.Workflow(name)

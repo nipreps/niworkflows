@@ -1,8 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-""" A robust ANTs T1-to-MNI registration workflow with fallback retry """
-
-from __future__ import print_function, division, absolute_import, unicode_literals
+"""A robust ANTs T1-to-MNI registration workflow with fallback retry."""
 from os import path as op
 
 from multiprocessing import cpu_count
@@ -24,10 +22,7 @@ from .fixes import (
 niworkflows_version = Version(__version__)
 
 
-class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
-    """
-    Set inputs to RobustMNINormalization
-    """
+class _RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     # Enable deprecation
     package_version = niworkflows_version
 
@@ -75,17 +70,19 @@ See https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba\
     float = traits.Bool(False, usedefault=True, desc='use single precision calculations')
 
 
-class RobustMNINormalizationOutputSpec(RegistrationOutputSpec):
+class _RobustMNINormalizationOutputSpec(RegistrationOutputSpec):
     reference_image = File(exists=True, desc='reference image used for registration target')
 
 
 class RobustMNINormalization(BaseInterface):
     """
     An interface to robustly run T1-to-MNI spatial normalization.
+
     Several settings are sequentially tried until some work.
+
     """
-    input_spec = RobustMNINormalizationInputSpec
-    output_spec = RobustMNINormalizationOutputSpec
+    input_spec = _RobustMNINormalizationInputSpec
+    output_spec = _RobustMNINormalizationOutputSpec
 
     def _list_outputs(self):
         outputs = self.norm._list_outputs()
@@ -411,6 +408,7 @@ def mask(in_file, mask_file, new_name):
     -----
     in_file and mask_file must be in the same
     image space and have the same dimensions.
+
     """
     import nibabel as nb
     import os
@@ -453,6 +451,7 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
     -----
     in_file and lesion_mask must be in the same
     image space and have the same dimensions
+
     """
     import os
     import numpy as np

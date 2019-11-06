@@ -1,10 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-FreeSurfer tools interfaces
-===========================
-
-"""
+"""FreeSurfer tools interfaces."""
 
 import os.path as op
 from pathlib import Path
@@ -27,9 +23,11 @@ from .registration import BBRegisterRPT, MRICoregRPT
 
 
 class StructuralReference(fs.RobustTemplate):
-    """Variation on RobustTemplate that simply copies the source if a single
-    volume is provided.
+    """
+    Shortcut RobustTemplate with a copy of the source if a single volume is provided.
 
+    Examples
+    --------
     >>> t1w = bids_collect_data(
     ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w']
     >>> template = StructuralReference()
@@ -70,20 +68,22 @@ class StructuralReference(fs.RobustTemplate):
         return outputs
 
 
-class MakeMidthicknessInputSpec(fs.utils.MRIsExpandInputSpec):
+class _MakeMidthicknessInputSpec(fs.utils.MRIsExpandInputSpec):
     graymid = InputMultiPath(desc='Existing graymid/midthickness file')
 
 
 class MakeMidthickness(fs.MRIsExpand):
-    """ Variation on MRIsExpand that checks for an existing midthickness/graymid
-    surface, and copies if available.
+    """
+    Variation on MRIsExpand that checks for an existing midthickness/graymid surface.
 
-    mris_expand is an expensive operation, so this avoids re-running it when the
+    ``mris_expand`` is an expensive operation, so this avoids re-running it when the
     working directory is lost.
     If users provide their own midthickness/graymid file, we assume they have
     created it correctly.
+
     """
-    input_spec = MakeMidthicknessInputSpec
+
+    input_spec = _MakeMidthicknessInputSpec
 
     @property
     def cmdline(self):
@@ -112,20 +112,20 @@ class MakeMidthickness(fs.MRIsExpand):
         return "cp {} {}".format(source, self._list_outputs()['out_file'])
 
 
-class FSInjectBrainExtractedInputSpec(BaseInterfaceInputSpec):
+class _FSInjectBrainExtractedInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True, desc='FreeSurfer SUBJECTS_DIR')
     subject_id = traits.Str(mandatory=True, desc='Subject ID')
     in_brain = File(mandatory=True, exists=True, desc='input file, part of a BIDS tree')
 
 
-class FSInjectBrainExtractedOutputSpec(TraitedSpec):
+class _FSInjectBrainExtractedOutputSpec(TraitedSpec):
     subjects_dir = Directory(desc='FreeSurfer SUBJECTS_DIR')
     subject_id = traits.Str(desc='Subject ID')
 
 
 class FSInjectBrainExtracted(SimpleInterface):
-    input_spec = FSInjectBrainExtractedInputSpec
-    output_spec = FSInjectBrainExtractedOutputSpec
+    input_spec = _FSInjectBrainExtractedInputSpec
+    output_spec = _FSInjectBrainExtractedOutputSpec
     _always_run = True
 
     def _run_interface(self, runtime):
@@ -138,7 +138,7 @@ class FSInjectBrainExtracted(SimpleInterface):
         return runtime
 
 
-class FSDetectInputsInputSpec(BaseInterfaceInputSpec):
+class _FSDetectInputsInputSpec(BaseInterfaceInputSpec):
     t1w_list = InputMultiPath(File(exists=True), mandatory=True,
                               desc='input file, part of a BIDS tree')
     t2w_list = InputMultiPath(File(exists=True), desc='input file, part of a BIDS tree')
@@ -146,7 +146,7 @@ class FSDetectInputsInputSpec(BaseInterfaceInputSpec):
     hires_enabled = traits.Bool(True, usedefault=True, desc='enable hi-resolution processing')
 
 
-class FSDetectInputsOutputSpec(TraitedSpec):
+class _FSDetectInputsOutputSpec(TraitedSpec):
     t2w = File(desc='reference T2w image')
     use_t2w = traits.Bool(desc='enable use of T2w downstream computation')
     flair = File(desc='reference FLAIR image')
@@ -156,8 +156,8 @@ class FSDetectInputsOutputSpec(TraitedSpec):
 
 
 class FSDetectInputs(SimpleInterface):
-    input_spec = FSDetectInputsInputSpec
-    output_spec = FSDetectInputsOutputSpec
+    input_spec = _FSDetectInputsInputSpec
+    output_spec = _FSDetectInputsOutputSpec
 
     def _run_interface(self, runtime):
         t2w, flair, self._results['hires'], mris_inflate = detect_inputs(
@@ -181,9 +181,11 @@ class FSDetectInputs(SimpleInterface):
 
 
 class TruncateLTA(object):
-    """Mixin to ensure that LTA files do not store overly long paths,
-    which lead to segmentation faults when read by FreeSurfer tools.
+    """
+    Truncate long filenames in LTA files.
 
+    Mixin to ensure that LTA files do not store overly long paths,
+    which lead to segmentation faults when read by FreeSurfer tools.
     See the following issues for discussion:
 
     * https://github.com/freesurfer/freesurfer/pull/180
@@ -191,6 +193,7 @@ class TruncateLTA(object):
     * https://github.com/poldracklab/fmriprep/pull/778
     * https://github.com/poldracklab/fmriprep/issues/1268
     * https://github.com/poldracklab/fmriprep/pull/1274
+
     """
 
     # Use a tuple in case some object produces multiple transforms
@@ -246,7 +249,7 @@ class PatchedRobustRegister(TruncateLTA, RobustRegister):
     lta_outputs = ('out_reg_file', 'half_source_xfm', 'half_targ_xfm')
 
 
-class RefineBrainMaskInputSpec(BaseInterfaceInputSpec):
+class _RefineBrainMaskInputSpec(BaseInterfaceInputSpec):
     in_anat = File(exists=True, mandatory=True,
                    desc='input anatomical reference (INU corrected)')
     in_aseg = File(exists=True, mandatory=True,
@@ -255,7 +258,7 @@ class RefineBrainMaskInputSpec(BaseInterfaceInputSpec):
                    desc='brain tissue segmentation generated with antsBrainExtraction.sh')
 
 
-class RefineBrainMaskOutputSpec(TraitedSpec):
+class _RefineBrainMaskOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='new mask')
 
 
@@ -266,8 +269,8 @@ class RefineBrainMask(SimpleInterface):
     and deep, wide sulci.
     """
 
-    input_spec = RefineBrainMaskInputSpec
-    output_spec = RefineBrainMaskOutputSpec
+    input_spec = _RefineBrainMaskInputSpec
+    output_spec = _RefineBrainMaskOutputSpec
 
     def _run_interface(self, runtime):
 
@@ -288,13 +291,13 @@ class RefineBrainMask(SimpleInterface):
         return runtime
 
 
-class MedialNaNsInputSpec(BaseInterfaceInputSpec):
+class _MedialNaNsInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input surface file')
     target_subject = traits.Str(mandatory=True, desc='target subject ID')
     subjects_dir = Directory(mandatory=True, desc='FreeSurfer SUBJECTS_DIR')
 
 
-class MedialNaNsOutputSpec(TraitedSpec):
+class _MedialNaNsOutputSpec(TraitedSpec):
     out_file = File(desc='the output surface file')
 
 
@@ -302,8 +305,8 @@ class MedialNaNs(SimpleInterface):
     """
     The MedialNaNs converts from arbitrary units to rad/s
     """
-    input_spec = MedialNaNsInputSpec
-    output_spec = MedialNaNsOutputSpec
+    input_spec = _MedialNaNsInputSpec
+    output_spec = _MedialNaNsOutputSpec
 
     def _run_interface(self, runtime):
         self._results['out_file'] = medial_wall_to_nan(
@@ -315,15 +318,14 @@ class MedialNaNs(SimpleInterface):
 
 
 def fix_lta_length(lta_file):
-    """ Fix the length of the filename field in an LTA file if too long.
+    """
+    Fix the length of the filename field in an LTA file if too long.
 
     Updates file in place.
 
     Examples
     --------
-
     No changes are made to a valid transform file:
-
     >>> valid_transform = Path(test_data) / 'valid_transform.lta'
     >>> orig_contents = valid_transform.read_text()
     >>> fix_lta_length(valid_transform)
@@ -332,7 +334,6 @@ def fix_lta_length(lta_file):
     True
 
     Invalid transform files are files with > 255 characters in any line:
-
     >>> invalid_transform = Path(test_data) / 'long_path_transform.lta'
     >>> orig_contents = invalid_transform.read_text()
     >>> any(len(line) > 255 for line in orig_contents.splitlines(keepends=True))
@@ -344,6 +345,7 @@ def fix_lta_length(lta_file):
     True
     >>> local_copy.read_text() == orig_contents
     False
+
     """
     lines = Path(lta_file).read_text().splitlines(keepends=True)
 
@@ -406,8 +408,9 @@ def detect_inputs(t1w_list, t2w_list=None, flair_list=None, hires_enabled=True):
 
 def refine_aseg(aseg, ball_size=4):
     """
-    First step to reconcile ANTs' and FreeSurfer's brain masks.
+    Refine the ``aseg.mgz`` mask of Freesurfer.
 
+    First step to reconcile ANTs' and FreeSurfer's brain masks.
     Here, the ``aseg.mgz`` mask from FreeSurfer is refined in two
     steps, using binary morphological operations:
 
@@ -418,7 +421,6 @@ def refine_aseg(aseg, ball_size=4):
       2. Fill any holes (typically, there could be a hole next to
          the pineal gland and the corpora quadrigemina if the great
          cerebral brain is segmented out).
-
 
     """
     # Read aseg data
@@ -437,8 +439,8 @@ def refine_aseg(aseg, ball_size=4):
 def grow_mask(anat, aseg, ants_segs=None, ww=7, zval=2.0, bw=4):
     """
     Grow mask including pixels that have a high likelihood.
-    GM tissue parameters are sampled in image patches of ``ww`` size.
 
+    GM tissue parameters are sampled in image patches of ``ww`` size.
     This is inspired on mindboggle's solution to the problem:
     https://github.com/nipy/mindboggle/blob/master/mindboggle/guts/segment.py#L1660
 
@@ -477,8 +479,7 @@ def grow_mask(anat, aseg, ants_segs=None, ww=7, zval=2.0, bw=4):
 
 
 def medial_wall_to_nan(in_file, subjects_dir, target_subject, newpath=None):
-    """ Convert values on medial wall to NaNs
-    """
+    """Convert values on medial wall to NaNs."""
     import nibabel as nb
     import numpy as np
     import os
