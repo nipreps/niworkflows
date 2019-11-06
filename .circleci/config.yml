@@ -1,6 +1,28 @@
+docs_deploy: &docs
+  docker:
+    - image: node:8.10.0
+  steps:
+    - checkout
+    - attach_workspace:
+        at: docs/_build
+    - run:
+        name: Disable jekyll builds
+        command: touch docs/_build/html/.nojekyll
+    - run:
+        name: Install and configure dependencies
+        command: |
+          npm install -g --silent gh-pages@2.0.1
+          git config user.email "rosswilsonblair+niworkflows-circleci@gmail.com"
+          git config user.name "ci-build"
+    - add_ssh_keys:
+        fingerprints:
+          - "6b:ba:eb:a8:cb:f7:67:eb:9b:5d:54:91:e8:b3:98:16"
+    - run:
+        name: Deploy docs to gh-pages branch
+        command: gh-pages --dotfiles --message "doc(update) [skip ci]" --dist docs/_build/html
+
 version: 2
 jobs:
-
   build:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
@@ -416,28 +438,11 @@ jobs:
       - store_artifacts:
           path: ./docs/_build/html
 
-  deploy_docs:
-    docker:
-      - image: node:8.10.0
-    steps:
-      - checkout
-      - attach_workspace:
-          at: docs/_build
-      - run:
-          name: Disable jekyll builds
-          command: touch docs/_build/html/.nojekyll
-      - run:
-          name: Install and configure dependencies
-          command: |
-            npm install -g --silent gh-pages@2.0.1
-            git config user.email "rosswilsonblair+niworkflows-circleci@gmail.com"
-            git config user.name "ci-build"
-      - add_ssh_keys:
-          fingerprints:
-            - "6b:ba:eb:a8:cb:f7:67:eb:9b:5d:54:91:e8:b3:98:16"
-      - run:
-          name: Deploy docs to gh-pages branch
-          command: gh-pages --dotfiles --message "doc(update) [skip ci]" --dist docs/_build/html
+  deploy_docs_tag:
+    <<: *docs
+
+  deploy_docs_master:
+    <<: *docs
 
 
 workflows:
@@ -518,12 +523,22 @@ workflows:
             tags:
               only: /.*/
 
-      - deploy_docs:
+      - deploy_docs_master:
+          requires:
+            - test_pytest
+            - test_package
+            - build_docs
+          filters:
+            branches:
+              only: /master/
+            tags:
+              ignore: /.*/
+
+      - deploy_docs_tag:
           requires:
             - deploy
           filters:
             branches:
-              only:
-                - /master/
+              ignore: /.*/
             tags:
               only: /.*/
