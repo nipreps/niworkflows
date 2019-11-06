@@ -1,3 +1,12 @@
+1.0.0 (TBD)
+===========
+
+  * DOC: Generate versioned documentation of the API (#416) @rwblair
+  * ENH: Move nilearn interfaces over from fMRIPrep (#414) @oesteban
+  * ENH: Reports use the default template from niworkflows, allowing overwrite (#419) @oesteban
+  * MAINT: Update ``.gitignore`` and ``.dockerignore`` (#420) @oesteban
+  * MAINT: use scikit-image LTS for earlier python versions (#418) @mgxd
+
 0.10.4 (October 8, 2019)
 ==========================
 
