@@ -13,7 +13,7 @@ from nilearn.image import resample_to_img
 from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec, TraitedSpec, File, traits,
-    SimpleInterface
+    SimpleInterface, Directory
 )
 from templateflow.api import get as get_template
 
@@ -149,7 +149,7 @@ class GenerateCifti(SimpleInterface):
             )
             if not annotation_files:
                 raise IOError("Freesurfer annotations for %s not found in %s" % (
-                            self.inputs.surface_target, self.inputs.subjects_dir))
+                              self.inputs.surface_target, self.inputs.subjects_dir))
         elif self.inputs.volume_target == 'MNI152NLin6Asym':
             tpl_kwargs.update({
                 'density': self.inputs.density,
