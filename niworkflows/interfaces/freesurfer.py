@@ -295,8 +295,8 @@ class RefineBrainMask(SimpleInterface):
 
 class _MedialNaNsInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input surface file')
-    target_subject = traits.Str(mandatory=True, desc='target subject ID')
     subjects_dir = Directory(mandatory=True, desc='FreeSurfer SUBJECTS_DIR')
+    density = traits.Enum('32', '59', '164', desc="Input file density (fsLR only)")
 
 
 class _MedialNaNsOutputSpec(TraitedSpec):
@@ -314,7 +314,7 @@ class MedialNaNs(SimpleInterface):
         self._results['out_file'] = medial_wall_to_nan(
             self.inputs.in_file,
             self.inputs.subjects_dir,
-            self.inputs.target_subject,
+            self.inputs.density,
             newpath=runtime.cwd)
         return runtime
 
@@ -480,20 +480,31 @@ def grow_mask(anat, aseg, ants_segs=None, ww=7, zval=2.0, bw=4):
     return refined
 
 
-def medial_wall_to_nan(in_file, subjects_dir, target_subject, newpath=None):
+def medial_wall_to_nan(in_file, subjects_dir, den=None, newpath=None):
     """Convert values on medial wall to NaNs."""
+    import os
     import nibabel as nb
     import numpy as np
-    import os
+    import templateflow.api as tf
 
     fn = os.path.basename(in_file)
+    target_subject = in_file.split(".")[1]
     if not target_subject.startswith('fs'):
         return in_file
 
-    cortex = nb.freesurfer.read_label(os.path.join(
-        subjects_dir, target_subject, 'label', '{}.cortex.label'.format(fn[:2])))
     func = nb.load(in_file)
-    medial = np.delete(np.arange(len(func.darrays[0].data)), cortex)
+    if target_subject.startswith('fsaverage'):
+        cortex = nb.freesurfer.read_label(os.path.join(
+            subjects_dir, target_subject, 'label', '{}.cortex.label'.format(fn[:2])))
+        medial = np.delete(np.arange(len(func.darrays[0].data)), cortex)
+    elif target_subject == 'fslr' and den is not None:
+        hemi = 'L' if fn[:2] == 'lh' else 'R'
+        label_file = tf.get('fsLR', hemi=hemi, desc='nomedialwall', density=den, suffix='dparc')
+        label = nb.load(str(label_file))
+        medial = np.invert(label.darrays[0].data.astype(bool))
+    else:
+        return in_file
+
     for darray in func.darrays:
         darray.data[medial] = np.nan
 
