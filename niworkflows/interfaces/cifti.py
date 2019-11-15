@@ -65,9 +65,7 @@ class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
     surface_bolds = traits.List(File(exists=True), mandatory=True,
                                 desc="list of surface BOLD GIFTI files"
                                      " (length 2 with order [L,R])")
-    surface_annots = traits.List(File(exists=True),
-                                 help="Surface annotation files."
-                                      " Used to exclude medial wall vertices.")
+    subjects_dir = Directory(mandatory=True, desc="FreeSurfer SUBJECTS_DIR")
 
 
 class _GenerateCiftiOutputSpec(TraitedSpec):
@@ -80,7 +78,7 @@ class GenerateCifti(SimpleInterface):
     """
     Generate CIFTI image from BOLD file in target spaces.
 
-    Currently supports ``fsLR`` or ``fsaverage`` for template surfaces and
+    Currently supports ``fsLR``, ``fsaverage5``, or ``fsaverage6`` for template surfaces and
     ``MNI152NLin6Asym`` or ``MNI152NLin2009cAsym`` as template volumes.
 
     """
@@ -104,7 +102,7 @@ class GenerateCifti(SimpleInterface):
         """Assign arbitrary label to combination of CIFTI spaces."""
         space = None
         variants = {
-            'fsLR': ['fsLR', 'MNI152NLin2009cAsym'],
+            'fsLR': ['fsLR', 'MNI152NLin6Asym'],
             'space1': ['fsaverage5', 'MNI152NLin2009cAsym'],
             'space2': ['fsaverage6', 'MNI152NLin2009cAsym'],
         }
