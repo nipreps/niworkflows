@@ -296,7 +296,7 @@ class RefineBrainMask(SimpleInterface):
 class _MedialNaNsInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input surface file')
     subjects_dir = Directory(mandatory=True, desc='FreeSurfer SUBJECTS_DIR')
-    density = traits.Enum('32', '59', '164', desc="Input file density (fsLR only)")
+    density = traits.Enum(32, 59, 164, desc="Input file density (fsLR only)")
 
 
 class _MedialNaNsOutputSpec(TraitedSpec):
