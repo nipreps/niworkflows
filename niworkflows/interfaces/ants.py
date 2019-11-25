@@ -21,7 +21,7 @@ class _ImageMathInputSpec(ANTSCommandInputSpec):
     op2 = traits.Either(base.File(exists=True), base.Str, position=-1,
                         argstr='%s', desc='second operator')
     copy_header = traits.Bool(
-        True, mandatory=True, usedefault=True,
+        True, usedefault=True,
         desc='copy headers of the original image into the output (corrected) file')
 
 
@@ -35,6 +35,11 @@ class ImageMath(ANTSCommand):
 
     Example
     -------
+    >>> maths = ImageMath(dimension=3, op1=nifti_fname, operation='+', op2='2')
+    >>> result = maths.run()
+    >>> np.all(nb.load(result.outputs.output_image).get_sform() ==
+    ...        nb.load(nifti_fname).get_sform())
+    True
 
     """
 
@@ -164,22 +169,26 @@ class ThresholdImage(ANTSCommand):
 
     Examples
     --------
-    >>> res = ThresholdImage(dimension=3)
-    >>> res.inputs.input_image = nifti_fname
-    >>> res.inputs.output_image = 'output.nii.gz'
-    >>> res.inputs.th_low = 0.5
-    >>> res.inputs.th_high = 1.0
-    >>> res.inputs.inside_value = 1.0
-    >>> res.inputs.outside_value = 0.0
-    >>> res.cmdline  #doctest: +ELLIPSIS
+    >>> thres = ThresholdImage(dimension=3)
+    >>> thres.inputs.input_image = nifti_fname
+    >>> thres.inputs.output_image = 'output.nii.gz'
+    >>> thres.inputs.th_low = 0.5
+    >>> thres.inputs.th_high = 1.0
+    >>> thres.inputs.inside_value = 1.0
+    >>> thres.inputs.outside_value = 0.0
+    >>> thres.cmdline  #doctest: +ELLIPSIS
     'ThresholdImage 3 .../test.nii.gz output.nii.gz 0.500000 1.000000 1.000000 0.000000'
 
-    >>> res = ThresholdImage(dimension=3)
-    >>> res.inputs.input_image = nifti_fname
-    >>> res.inputs.output_image = 'output.nii.gz'
-    >>> res.inputs.mode = 'Kmeans'
-    >>> res.inputs.num_thresholds = 4
-    >>> res.cmdline  #doctest: +ELLIPSIS
+    >>> result = thres.run()
+    >>> os.path.exists(result.outputs.output_image)
+    True
+
+    >>> thres = ThresholdImage(dimension=3)
+    >>> thres.inputs.input_image = nifti_fname
+    >>> thres.inputs.output_image = 'output.nii.gz'
+    >>> thres.inputs.mode = 'Kmeans'
+    >>> thres.inputs.num_thresholds = 4
+    >>> thres.cmdline  #doctest: +ELLIPSIS
     'ThresholdImage 3 .../test.nii.gz output.nii.gz Kmeans 4'
 
     """
@@ -532,7 +541,7 @@ def _copy_header(header_file, in_file, set_dtype=True):
     import nibabel as nb
     in_img = nb.load(header_file)
     out_img = nb.load(in_file, mmap=False)
-    new_img = out_img.__class__(out_img.get_fdata(), in_img.affine,
+    new_img = out_img.__class__(out_img.dataobj, in_img.affine,
                                 in_img.header)
     if set_dtype:
         new_img.set_data_dtype(out_img.get_data_dtype())
