@@ -281,9 +281,9 @@ class RefineBrainMask(SimpleInterface):
         msknii = nb.Nifti1Image(
             grow_mask(anatnii.get_fdata(dtype='float32'),
                       np.asanyarray(
-                          nb.load(self.inputs.in_aseg)._dataobj, dtype='int16'),
+                          nb.load(self.inputs.in_aseg).dataobj).astype('int16'),
                       np.asanyarray(
-                          nb.load(self.inputs.in_ants)._dataobj, dtype='int16')),
+                          nb.load(self.inputs.in_ants).dataobj).astype('int16')),
             anatnii.affine,
             anatnii.header
         )

@@ -163,7 +163,7 @@ class GenerateCifti(SimpleInterface):
 
         bold_data = bold_img.get_fdata(dtype='float32')
         timepoints = bold_img.shape[3]
-        label_data = np.asanyarray(label_img._dataobj, dtype='int16')
+        label_data = np.asanyarray(label_img.dataobj).astype('int16')
 
         # set up CIFTI information
         series_map = ci.Cifti2MatrixIndicesMap((0, ),
