@@ -630,7 +630,7 @@ def _select_labels(in_segm, labels):
     cwd = getcwd()
     nii = nb.load(in_segm)
     for l in labels:
-        data = (nii.get_data() == l).astype(np.uint8)
+        data = (nii.get_fdata() == l).astype(np.uint8)
         newnii = nii.__class__(data, nii.affine, nii.header)
         newnii.set_data_dtype('uint8')
         out_file = fname_presuffix(in_segm, suffix='_class-%02d' % l,
@@ -667,6 +667,6 @@ def _conform_mask(in_mask, in_reference):
 
     out_file = fname_presuffix(in_mask, suffix='_mask',
                                newpath=str(Path()))
-    nii.__class__(nii.get_data().astype('int16'), ref.affine,
+    nii.__class__(nii.get_fdata().astype('int16'), ref.affine,
                   hdr).to_filename(out_file)
     return out_file

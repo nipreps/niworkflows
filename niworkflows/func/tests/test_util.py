@@ -14,8 +14,8 @@ from ..util import init_bold_reference_wf
 
 
 def symmetric_overlap(img1, img2):
-    mask1 = load_img(img1).get_data() > 0
-    mask2 = load_img(img2).get_data() > 0
+    mask1 = load_img(img1).get_fdata() > 0
+    mask2 = load_img(img2).get_fdata() > 0
 
     total1 = np.sum(mask1)
     total2 = np.sum(mask2)
