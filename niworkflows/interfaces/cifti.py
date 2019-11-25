@@ -4,6 +4,7 @@
 import os
 from glob import glob
 import json
+import warnings
 
 import nibabel as nb
 from nibabel import cifti2 as ci
@@ -204,6 +205,7 @@ class GenerateCifti(SimpleInterface):
         bold_img = nb.load(bold_file)
         label_img = nb.load(label_file)
         if label_img.shape != bold_img.shape[:3]:
+            warnings.warn("Resampling bold volume to match label dimensions")
             bold_img = resample_to_img(bold_img, label_img)
 
         bold_data = bold_img.get_fdata(dtype='float32')
