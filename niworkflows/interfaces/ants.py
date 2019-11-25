@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Nipype interfaces for ANTs' commands."""
-
 import os
 from glob import glob
 from nipype.interfaces import base
@@ -21,6 +20,9 @@ class _ImageMathInputSpec(ANTSCommandInputSpec):
                     desc='first operator')
     op2 = traits.Either(base.File(exists=True), base.Str, position=-1,
                         argstr='%s', desc='second operator')
+    copy_header = traits.Bool(
+        True, usedefault=True,
+        desc='copy headers of the original image into the output (corrected) file')
 
 
 class _ImageMathOuputSpec(base.TraitedSpec):
@@ -33,12 +35,24 @@ class ImageMath(ANTSCommand):
 
     Example
     -------
+    >>> maths = ImageMath(dimension=3, op1=nifti_fname, operation='+', op2='2')
+    >>> result = maths.run()
+    >>> np.all(nb.load(result.outputs.output_image).get_sform() ==
+    ...        nb.load(nifti_fname).get_sform())
+    True
 
     """
 
     _cmd = 'ImageMath'
     input_spec = _ImageMathInputSpec
     output_spec = _ImageMathOuputSpec
+
+    def _list_outputs(self):
+        outputs = super(ImageMath, self)._list_outputs()
+        if self.inputs.copy_header:  # Fix headers
+            _copy_header(self.inputs.op1, outputs['output_image'],
+                         set_dtype=False)
+        return outputs
 
 
 class _ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
@@ -73,7 +87,6 @@ class ResampleImageBySpacing(ANTSCommand):
 
     Examples
     --------
-
     >>> res = ResampleImageBySpacing(dimension=3)
     >>> res.inputs.input_image = nifti_fname
     >>> res.inputs.output_image = 'output.nii.gz'
@@ -141,6 +154,9 @@ class _ThresholdImageInputSpec(ANTSCommandInputSpec):
                                 desc='inside value')
     outside_value = traits.Float(0, position=7, argstr='%f', requires=['th_low'],
                                  desc='outside value')
+    copy_header = traits.Bool(
+        True, mandatory=True, usedefault=True,
+        desc='copy headers of the original image into the output (corrected) file')
 
 
 class _ThresholdImageOutputSpec(base.TraitedSpec):
@@ -153,22 +169,26 @@ class ThresholdImage(ANTSCommand):
 
     Examples
     --------
-    >>> res = ThresholdImage(dimension=3)
-    >>> res.inputs.input_image = nifti_fname
-    >>> res.inputs.output_image = 'output.nii.gz'
-    >>> res.inputs.th_low = 0.5
-    >>> res.inputs.th_high = 1.0
-    >>> res.inputs.inside_value = 1.0
-    >>> res.inputs.outside_value = 0.0
-    >>> res.cmdline  #doctest: +ELLIPSIS
+    >>> thres = ThresholdImage(dimension=3)
+    >>> thres.inputs.input_image = nifti_fname
+    >>> thres.inputs.output_image = 'output.nii.gz'
+    >>> thres.inputs.th_low = 0.5
+    >>> thres.inputs.th_high = 1.0
+    >>> thres.inputs.inside_value = 1.0
+    >>> thres.inputs.outside_value = 0.0
+    >>> thres.cmdline  #doctest: +ELLIPSIS
     'ThresholdImage 3 .../test.nii.gz output.nii.gz 0.500000 1.000000 1.000000 0.000000'
 
-    >>> res = ThresholdImage(dimension=3)
-    >>> res.inputs.input_image = nifti_fname
-    >>> res.inputs.output_image = 'output.nii.gz'
-    >>> res.inputs.mode = 'Kmeans'
-    >>> res.inputs.num_thresholds = 4
-    >>> res.cmdline  #doctest: +ELLIPSIS
+    >>> result = thres.run()
+    >>> os.path.exists(result.outputs.output_image)
+    True
+
+    >>> thres = ThresholdImage(dimension=3)
+    >>> thres.inputs.input_image = nifti_fname
+    >>> thres.inputs.output_image = 'output.nii.gz'
+    >>> thres.inputs.mode = 'Kmeans'
+    >>> thres.inputs.num_thresholds = 4
+    >>> thres.cmdline  #doctest: +ELLIPSIS
     'ThresholdImage 3 .../test.nii.gz output.nii.gz Kmeans 4'
 
     """
@@ -176,6 +196,13 @@ class ThresholdImage(ANTSCommand):
     _cmd = 'ThresholdImage'
     input_spec = _ThresholdImageInputSpec
     output_spec = _ThresholdImageOutputSpec
+
+    def _list_outputs(self):
+        outputs = super(ThresholdImage, self)._list_outputs()
+        if self.inputs.copy_header:  # Fix headers
+            _copy_header(self.inputs.input_image, outputs['output_image'],
+                         set_dtype=False)
+        return outputs
 
 
 class _AIInputSpec(ANTSCommandInputSpec):
@@ -239,13 +266,7 @@ class _AIOuputSpec(base.TraitedSpec):
 
 
 class AI(ANTSCommand):
-    """
-    Replaces ``AffineInitializer``.
-
-    Examples
-    --------
-
-    """
+    """Replaces ``AffineInitializer``."""
 
     _cmd = 'antsAI'
     input_spec = _AIInputSpec
@@ -419,7 +440,7 @@ class _AntsJointFusionOutputSpec(base.TraitedSpec):
 
 
 class AntsJointFusion(ANTSCommand):
-    """Run ``antsJoinFusion``."""
+    """Run ``antsJoinFusion`` (finds the consensus segmentation)."""
 
     input_spec = _AntsJointFusionInputSpec
     output_spec = _AntsJointFusionOutputSpec
@@ -513,3 +534,16 @@ class AntsJointFusion(ANTSCommand):
                     '%d', '*'))
             )
         return outputs
+
+
+def _copy_header(header_file, in_file, set_dtype=True):
+    """Copy header from input image to an output image."""
+    import nibabel as nb
+    in_img = nb.load(header_file)
+    out_img = nb.load(in_file, mmap=False)
+    new_img = out_img.__class__(out_img.dataobj, in_img.affine,
+                                in_img.header)
+    if set_dtype:
+        new_img.set_data_dtype(out_img.get_data_dtype())
+    new_img.to_filename(in_file)
+    return in_file

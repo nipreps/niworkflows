@@ -18,6 +18,7 @@ data_dir = Path(test_data_env) / 'BIDS-examples-1-enh-ds054'
 @pytest.fixture(autouse=True)
 def add_np(doctest_namespace):
     doctest_namespace['np'] = np
+    doctest_namespace['nb'] = nb
     doctest_namespace['pd'] = pd
     doctest_namespace['os'] = os
     doctest_namespace['Path'] = Path
@@ -26,12 +27,20 @@ def add_np(doctest_namespace):
     doctest_namespace['test_data'] = pkg_resources.resource_filename('niworkflows', 'tests/data')
 
     tmpdir = tempfile.TemporaryDirectory()
+
     doctest_namespace['tmpdir'] = tmpdir.name
 
     nifti_fname = str(Path(tmpdir.name) / 'test.nii.gz')
-    nb.Nifti1Image(np.random.random((5, 5)).astype('f4'), np.eye(4)).to_filename(nifti_fname)
+    nii = nb.Nifti1Image(np.random.random((5, 5)).astype('f4'), np.eye(4))
+    nii.header.set_qform(np.diag([1, 1, 1, 1]), code=1)
+    nii.header.set_sform(np.diag([-1, 1, 1, 1]), code=1)
+    nii.to_filename(nifti_fname)
     doctest_namespace['nifti_fname'] = nifti_fname
+
+    cwd = os.getcwd()
+    os.chdir(tmpdir.name)
     yield
+    os.chdir(cwd)
     tmpdir.cleanup()
 
 
