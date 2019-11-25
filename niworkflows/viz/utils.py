@@ -200,7 +200,7 @@ def cuts_from_bbox(mask_nii, cuts=3):
     """Finds equi-spaced cuts for presenting images"""
     from nibabel.affines import apply_affine
 
-    mask_data = mask_nii.get_fdata() > 0.0
+    mask_data = np.asanyarray(mask_nii.dataobj) > 0.0
 
     # First, project the number of masked voxels on each axes
     ijk_counts = [
@@ -262,7 +262,7 @@ def _3d_in_file(in_file):
     except AttributeError:
         in_file = in_file
 
-    if in_file.get_fdata().ndim == 3:
+    if len(in_file.shape) == 3:
         return in_file
 
     return nlimage.index_img(in_file, 0)

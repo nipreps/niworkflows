@@ -374,9 +374,9 @@ def inject_skullstripped(subjects_dir, subject_id, skullstripped):
     if not op.exists(bm_auto):
         img = nb.load(t1)
         mask = nb.load(skullstripped)
-        bmask = new_img_like(mask, mask.get_fdata() > 0)
+        bmask = new_img_like(mask, np.asanyarray(mask.dataobj) > 0)
         resampled_mask = resample_to_img(bmask, img, 'nearest')
-        masked_image = new_img_like(img, img.get_fdata() * resampled_mask.get_fdata())
+        masked_image = new_img_like(img, img.get_fdata() * resampled_mask.dataobj)
         masked_image.to_filename(bm_auto)
 
     if not op.exists(bm):

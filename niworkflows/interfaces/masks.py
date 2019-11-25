@@ -113,7 +113,7 @@ class ComputeEPIMask(nrc.SegmentationRC):
 
         mask_nii = compute_epi_mask(padded_nii, exclude_zeros=True)
 
-        mask_data = mask_nii.get_fdata()
+        mask_data = np.asanyarray(mask_nii.dataobj).astype(np.uint8)
         if isdefined(self.inputs.dilation):
             mask_data = nd.morphology.binary_dilation(mask_data).astype(np.uint8)
 
@@ -267,7 +267,7 @@ class ROIsPlot(nrc.ReportingInterface):
             nsegs = len(levels)
             if nsegs == 0:
                 levels = np.unique(np.round(
-                    nb.load(seg_files[0]).get_fdata()).astype(int))
+                    nb.load(seg_files[0]).get_fdata(dtype='float32')))
                 levels = (levels[levels > 0] - 0.5).tolist()
                 nsegs = len(levels)
 

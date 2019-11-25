@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test viz module"""
 import os
+import numpy as np
 import nibabel as nb
 from .. import viz
 from .conftest import datadir
@@ -15,9 +16,9 @@ def test_carpetplot():
         out_file = os.path.join(save_artifacts, 'carpetplot.svg')
     viz.plot_carpet(
         os.path.join(datadir, 'sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz'),
-        nb.load(os.path.join(
+        np.asanyarray(nb.load(os.path.join(
             datadir,
-            'sub-ds205s03_task-functionallocalizer_run-01_bold_parc.nii.gz')).get_fdata(),
+            'sub-ds205s03_task-functionallocalizer_run-01_bold_parc.nii.gz')).dataobj),
         output_file=out_file,
         legend=True
     )

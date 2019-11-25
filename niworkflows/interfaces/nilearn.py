@@ -72,13 +72,13 @@ class MaskEPI(SimpleInterface):
         )
 
         if self.inputs.closing:
-            closed = sim.binary_closing(masknii.get_fdata().astype(
+            closed = sim.binary_closing(np.asanyarray(masknii.dataobj).astype(
                 np.uint8), sim.ball(1)).astype(np.uint8)
             masknii = masknii.__class__(closed, masknii.affine,
                                         masknii.header)
 
         if self.inputs.fill_holes:
-            filled = binary_fill_holes(masknii.get_fdata().astype(
+            filled = binary_fill_holes(np.asanyarray(masknii.dataobj).astype(
                 np.uint8), sim.ball(6)).astype(np.uint8)
             masknii = masknii.__class__(filled, masknii.affine,
                                         masknii.header)
