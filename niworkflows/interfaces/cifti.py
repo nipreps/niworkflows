@@ -58,9 +58,8 @@ class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
                                 desc="CIFTI volumetric output space")
     surface_target = traits.Enum("fsLR", "fsaverage5", "fsaverage6", usedefault=True,
                                  desc="CIFTI surface target space")
-    density = traits.Enum(32, 59, 164, usedefault=True,
+    density = traits.Enum('32k', '59k', usedefault=True,
                           help='surface hemisphere vertices')
-    resolution = traits.Enum(2, 1.6, usedefault=True, help='volume resolution (mm)')
     TR = traits.Float(mandatory=True, desc="Repetition time")
     surface_bolds = traits.List(File(exists=True), mandatory=True,
                                 desc="list of surface BOLD GIFTI files"
@@ -138,6 +137,7 @@ class GenerateCifti(SimpleInterface):
         annotation_files = None
         if self.inputs.volume_target == "MNI152NLin2009cAsym":
             tpl_kwargs.update({
+                'resolution': '2',
                 'desc': 'DKT31',
             })
             annotation_files = sorted(
@@ -148,9 +148,11 @@ class GenerateCifti(SimpleInterface):
             )
 
         elif self.inputs.volume_target == 'MNI152NLin6Asym':
+            res = '2' if self.inputs.density == '32k' else '5'
+
             tpl_kwargs.update({
                 'atlas': 'fsLR',
-                'resolution': self.inputs.resolution,
+                'resolution': res,
             })
             annotation_files = [
                 str(f) for f in get_template(

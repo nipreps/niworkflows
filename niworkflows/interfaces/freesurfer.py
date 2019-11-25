@@ -296,7 +296,7 @@ class RefineBrainMask(SimpleInterface):
 class _MedialNaNsInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input surface file')
     subjects_dir = Directory(mandatory=True, desc='FreeSurfer SUBJECTS_DIR')
-    density = traits.Enum(32, 59, 164, desc="Input file density (fsLR only)")
+    density = traits.Enum('32k', '59k', '164k', desc="Input file density (fsLR only)")
 
 
 class _MedialNaNsOutputSpec(TraitedSpec):
@@ -499,8 +499,8 @@ def medial_wall_to_nan(in_file, subjects_dir, den=None, newpath=None):
         medial = np.delete(np.arange(len(func.darrays[0].data)), cortex)
     elif target_subject == 'fslr' and den is not None:
         hemi = 'L' if fn[:2] == 'lh' else 'R'
-        label_file = tf.get('fsLR', hemi=hemi, desc='nomedialwall', density=den, suffix='dparc')
-        label = nb.load(str(label_file))
+        label_file = str(tf.get('fsLR', hemi=hemi, desc='nomedialwall', density=den, suffix='dparc'))
+        label = nb.load(label_file)
         medial = np.invert(label.darrays[0].data.astype(bool))
     else:
         return in_file
