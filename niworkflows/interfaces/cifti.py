@@ -85,6 +85,9 @@ class GenerateCifti(SimpleInterface):
     input_spec = _GenerateCiftiInputSpec
     output_spec = _GenerateCiftiOutputSpec
 
+    _surfaces = ("fsaverage5", "fsaverage6", "fsLR")
+    _volumes = ("MNI152NLin2009cAsym", "MNI152NLin6Asym")
+
     def _run_interface(self, runtime):
         targets = self._define_variant()
         annotation_files, label_file = self._fetch_data()
@@ -101,7 +104,7 @@ class GenerateCifti(SimpleInterface):
         """Assign arbitrary label to combination of CIFTI spaces."""
         space = None
         variants = {
-            'fsLR': ['fsLR', 'MNI152NLin6Asym'],
+            'HCP grayordinates': ['fsLR', 'MNI152NLin6Asym'],
             'space1': ['fsaverage5', 'MNI152NLin2009cAsym'],
             'space2': ['fsaverage6', 'MNI152NLin2009cAsym'],
         }
@@ -115,8 +118,16 @@ class GenerateCifti(SimpleInterface):
             raise NotImplementedError
 
         variant_key = os.path.abspath('dtseries_variant.json')
+        out_json = {
+            'space': space,
+            'surface': variants[space][0],
+            'volume': variants[space][1]
+        }
+        if self.inputs.surface_target == 'fsLR':
+            # 91k == 2mm resolution, 170k == 1.6mm resolution
+            out_json['grayordinates'] = '91k' if self.inputs.density == '32k' else '170k'
         with open(variant_key, 'w') as fp:
-            json.dump({space: variants[space]}, fp)
+            json.dump(out_json, fp)
         self._results['variant_key'] = variant_key
         self._results['variant'] = space
         return variants[space]
@@ -124,8 +135,8 @@ class GenerateCifti(SimpleInterface):
     def _fetch_data(self):
         """Converts inputspec to files"""
         if (
-            self.inputs.surface_target not in ("fsaverage5", "fsaverage6", "fsLR") or
-            self.inputs.volume_target not in ("MNI152NLin2009cAsym", "MNI152NLin6Asym")
+            self.inputs.surface_target not in self._surfaces or
+            self.inputs.volume_target not in self._volumes
         ):
             raise NotImplementedError(
                 "Target space (surface: {0}, volume: {1}) is not supported".format(
