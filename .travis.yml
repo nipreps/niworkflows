@@ -85,7 +85,8 @@ script:
     if [ "$CHECK_TYPE" == "style" ]; then
       flake8 niworkflows
     elif [ "$CHECK_TYPE" == "test" ]; then
-      pytest -n 2 -v --cov niworkflows --cov-config .coveragerc --cov-report xml:cov.xml niworkflows
+      pytest -n 2 -v --cov niworkflows --cov-config .coveragerc --cov-report xml:cov.xml \
+             --ignore=niworkflows/interfaces/ants.py niworkflows
     else
       false
     fi
