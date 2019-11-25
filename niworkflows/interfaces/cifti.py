@@ -151,7 +151,7 @@ class GenerateCifti(SimpleInterface):
             res = '2' if self.inputs.density == '32k' else '5'
 
             tpl_kwargs.update({
-                'atlas': 'fsLR',
+                'atlas': 'HCP',
                 'resolution': res,
             })
             annotation_files = [
