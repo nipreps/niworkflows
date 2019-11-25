@@ -55,14 +55,12 @@ class IntraModalMerge(SimpleInterface):
 
             # magnitude files can have an extra dimension empty
             if len(filenii.shape) == 5:
-                sqnii = nb.squeeze_image(filenii)
-                if len(sqnii.shape) == 5:
+                filenii = nb.squeeze_image(filenii)
+                if len(filenii.shape) == 5:
                     raise RuntimeError('Input image (%s) is 5D' % in_files[0])
 
                 in_files = [fname_presuffix(in_files[0], suffix='_squeezed',
                                             newpath=runtime.cwd)]
-                filenii = nb.Nifti1Image(sqnii.get_fdata(), filenii.affine,
-                                         filenii.header)
                 filenii.to_filename(in_files[0])
 
             if filenii.dataobj.ndim < 4:
