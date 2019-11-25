@@ -72,13 +72,13 @@ class MaskEPI(SimpleInterface):
         )
 
         if self.inputs.closing:
-            closed = sim.binary_closing(masknii.get_data().astype(
+            closed = sim.binary_closing(np.asanyarray(masknii.dataobj).astype(
                 np.uint8), sim.ball(1)).astype(np.uint8)
             masknii = masknii.__class__(closed, masknii.affine,
                                         masknii.header)
 
         if self.inputs.fill_holes:
-            filled = binary_fill_holes(masknii.get_data().astype(
+            filled = binary_fill_holes(np.asanyarray(masknii.dataobj).astype(
                 np.uint8), sim.ball(6)).astype(np.uint8)
             masknii = masknii.__class__(filled, masknii.affine,
                                         masknii.header)
@@ -145,7 +145,7 @@ def _enhance_t2_contrast(in_file, newpath=None, offset=0.5):
     out_file = fname_presuffix(in_file, suffix='_t1enh',
                                newpath=newpath)
     nii = nb.load(in_file)
-    data = nii.get_data()
+    data = nii.get_fdata()
     maxd = data.max()
     newdata = np.log(offset + data / maxd)
     newdata -= newdata.min()

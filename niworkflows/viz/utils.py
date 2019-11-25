@@ -200,7 +200,7 @@ def cuts_from_bbox(mask_nii, cuts=3):
     """Finds equi-spaced cuts for presenting images"""
     from nibabel.affines import apply_affine
 
-    mask_data = mask_nii.get_data() > 0.0
+    mask_data = np.asanyarray(mask_nii.dataobj) > 0.0
 
     # First, project the number of masked voxels on each axes
     ijk_counts = [
@@ -262,7 +262,7 @@ def _3d_in_file(in_file):
     except AttributeError:
         in_file = in_file
 
-    if in_file.get_data().ndim == 3:
+    if len(in_file.shape) == 3:
         return in_file
 
     return nlimage.index_img(in_file, 0)
@@ -278,7 +278,7 @@ def plot_segs(image_nii, seg_niis, out_file, bbox_nii=None, masked=False,
     plot_params = {} if plot_params is None else plot_params
 
     image_nii = _3d_in_file(image_nii)
-    data = image_nii.get_data()
+    data = image_nii.get_fdata()
 
     plot_params = robust_set_limits(data, plot_params)
 
@@ -363,15 +363,15 @@ def plot_registration(anat_nii, div_id, plot_params=None,
 
     out_files = []
     if estimate_brightness:
-        plot_params = robust_set_limits(anat_nii.get_data().reshape(-1),
+        plot_params = robust_set_limits(anat_nii.get_fdata().reshape(-1),
                                         plot_params)
 
     # FreeSurfer ribbon.mgz
     ribbon = contour is not None and np.array_equal(
-        np.unique(contour.get_data()), [0, 2, 3, 41, 42])
+        np.unique(contour.get_fdata()), [0, 2, 3, 41, 42])
 
     if ribbon:
-        contour_data = contour.get_data() % 39
+        contour_data = contour.get_fdata() % 39
         white = nlimage.new_img_like(contour, contour_data == 2)
         pial = nlimage.new_img_like(contour, contour_data >= 2)
 
@@ -589,7 +589,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
 
     mask_sl = []
     for j in range(3):
-        mask_sl.append(transform_to_2d(mask_img.get_data(), j))
+        mask_sl.append(transform_to_2d(mask_img.get_fdata(), j))
 
     timeseries = np.loadtxt(os.path.join(melodic_dir, "melodic_mix"))
     power = np.loadtxt(os.path.join(melodic_dir, "melodic_FTmix"))
@@ -652,7 +652,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
             is_noise = (i + 1) in noise_components
             color_title = color_time = color_power = classified_colors[is_noise]
 
-        data = img.get_data()
+        data = img.get_fdata()
         for j in range(3):
             ax1 = fig.add_subplot(gs[l_row:l_row + 2, j + col * 5])
             sl = transform_to_2d(data, j)
