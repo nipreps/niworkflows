@@ -59,7 +59,7 @@ class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
                                 desc="CIFTI volumetric output space")
     surface_target = traits.Enum("fsLR", "fsaverage5", "fsaverage6", usedefault=True,
                                  desc="CIFTI surface target space")
-    density = traits.Enum('32k', '59k', usedefault=True,
+    density = traits.Enum(None, '32k', '59k', usedefault=True,
                           help='surface hemisphere vertices')
     TR = traits.Float(mandatory=True, desc="Repetition time")
     surface_bolds = traits.List(File(exists=True), mandatory=True,
@@ -251,6 +251,8 @@ class GenerateCifti(SimpleInterface):
                 ts = None
                 for label in labels:
                     ijk = np.nonzero(label_data == label)
+                    if ijk[0].size == 0:  # skip label if nothing matches
+                        continue
                     ts = (bold_data[ijk] if ts is None
                           else np.concatenate((ts, bold_data[ijk])))
                     vox += [[ijk[0][ix], ijk[1][ix], ijk[2][ix]]
