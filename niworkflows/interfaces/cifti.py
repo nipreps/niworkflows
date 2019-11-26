@@ -160,7 +160,7 @@ class GenerateCifti(SimpleInterface):
             )
 
         elif self.inputs.volume_target == 'MNI152NLin6Asym':
-            res = '2' if self.inputs.density == '32k' else '5'
+            res = '2' if self.inputs.density == '32k' else '6'
 
             tpl_kwargs.update({
                 'atlas': 'HCP',
