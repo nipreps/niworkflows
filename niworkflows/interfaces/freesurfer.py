@@ -498,7 +498,7 @@ def medial_wall_to_nan(in_file, subjects_dir, den=None, newpath=None):
             subjects_dir, target_subject, 'label', '{}.cortex.label'.format(fn[:2])))
         medial = np.delete(np.arange(len(func.darrays[0].data)), cortex)
     elif target_subject == 'fslr' and den is not None:
-        hemi = 'L' if fn[:2] == 'lh' else 'R'
+        hemi = fn[0].upper()
         label_file = str(
             tf.get('fsLR', hemi=hemi, desc='nomedialwall', density=den, suffix='dparc')
         )
