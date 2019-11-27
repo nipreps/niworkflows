@@ -1,15 +1,18 @@
-1.0.0 (TBD)
-===========
-  * CI: Drop setup.py install/develop installs (#428) @effigies
-  * DOC: Maintenance of the documentation building (#429) @oesteban
-  * DOC: Generate versioned documentation of the API (#416) @rwblair
-  * ENH: Add ``copy_header`` inputs to some ANTs interfaces (#401) @oesteban
-  * ENH: Remove the data getters/utils modules (#427) @oesteban
-  * ENH: Move nilearn interfaces over from fMRIPrep (#414) @oesteban
-  * ENH: Reports use the default template from niworkflows, allowing overwrite (#419) @oesteban
-  * FIX: Update all ``SpatialImage.get_data`` -> ``get_fdata`` (#426) @oesteban
-  * MAINT: Update ``.gitignore`` and ``.dockerignore`` (#420) @oesteban
-  * MAINT: use scikit-image LTS for earlier python versions (#418) @mgxd
+1.0.0 (November 26, 2019)
+=========================
+The first stable release of NIWorkflows.
+
+* CI: Drop setup.py install/develop installs (#428) @effigies
+* DOC: Maintenance of the documentation building (#429) @oesteban
+* DOC: Generate versioned documentation of the API (#416) @rwblair
+* ENH: Add ``copy_header`` inputs to some ANTs interfaces (#401) @oesteban
+* ENH: Remove the data getters/utils modules (#427) @oesteban
+* ENH: Move nilearn interfaces over from fMRIPrep (#414) @oesteban
+* ENH: Reports use the default template from niworkflows, allowing overwrite (#419) @oesteban
+* FIX: Update all ``SpatialImage.get_data`` -> ``get_fdata`` (#426) @oesteban
+* MAINT: Update ``.gitignore`` and ``.dockerignore`` (#420) @oesteban
+* MAINT: use scikit-image LTS for earlier python versions (#418) @mgxd
+* MAINT: Pin nipype>=1.3.1, remove link dependencies from ``setup.cfg`` @oesteban
 
 0.10.x series
 =============
