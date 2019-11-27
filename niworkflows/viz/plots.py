@@ -37,13 +37,13 @@ class fMRIPlot(object):
         func_nii = nb.load(func_file)
         self.tr = tr if tr is not None else func_nii.header.get_zooms()[-1]
 
-        self.mask_data = np.ones_like(func_nii.get_data(), dtype='uint8')
+        self.mask_data = nb.fileslice.strided_scalar(func_nii.shape[:3], np.uint8(1))
         if mask_file:
-            self.mask_data = nb.load(mask_file).get_data().astype('uint8')
+            self.mask_data = np.asanyarray(nb.load(mask_file).dataobj).astype('uint8')
 
         self.seg_data = None
         if seg_file:
-            self.seg_data = nb.load(seg_file).get_data()
+            self.seg_data = np.asanyarray(nb.load(seg_file).dataobj)
 
         if units is None:
             units = {}

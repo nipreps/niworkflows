@@ -20,8 +20,6 @@ env:
   matrix:
     - CHECK_TYPE="style"
     - CHECK_TYPE="test"
-    - INSTALL_TYPE="install"
-    - INSTALL_TYPE="develop"
     - INSTALL_TYPE="sdist"
     - INSTALL_TYPE="wheel"
     - INSTALL_DEPENDS="pip==18.1 setuptools==30.2.1"
@@ -59,14 +57,7 @@ before_install:
     fi
 
 install:
-  - |
-    if [ "$INSTALL_TYPE" == "install" ]; then
-        python setup.py install
-    elif [ "$INSTALL_TYPE" == "develop" ]; then
-        python setup.py develop
-    else
-        python -m pip install $PACKAGE
-    fi
+  - python -m pip install $PACKAGE
   - |
     INTENDED_VERSION="$(python -c 'import versioneer; print(versioneer.get_version())')"
     pushd /tmp
@@ -94,7 +85,8 @@ script:
     if [ "$CHECK_TYPE" == "style" ]; then
       flake8 niworkflows
     elif [ "$CHECK_TYPE" == "test" ]; then
-      pytest -n 2 -v --cov niworkflows --cov-config .coveragerc --cov-report xml:cov.xml niworkflows
+      pytest -n 2 -v --cov niworkflows --cov-config .coveragerc --cov-report xml:cov.xml \
+             --ignore=niworkflows/interfaces/ants.py niworkflows
     else
       false
     fi

@@ -1,29 +1,24 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Interfaces being evaluated before upstreaming to nipype.interfaces.utility
-
-"""
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+"""Interfaces under evaluation before upstreaming to nipype.interfaces.utility."""
 from nipype.interfaces.io import add_traits
 from nipype.interfaces.base import (
     InputMultiObject, Str, DynamicTraitedSpec, BaseInterface, isdefined
 )
 
 
-class KeySelectInputSpec(DynamicTraitedSpec):
+class _KeySelectInputSpec(DynamicTraitedSpec):
     key = Str(mandatory=True, desc='selective key')
     keys = InputMultiObject(Str, mandatory=True, min=1, desc='index of keys')
 
 
-class KeySelectOutputSpec(DynamicTraitedSpec):
+class _KeySelectOutputSpec(DynamicTraitedSpec):
     key = Str(desc='propagates selected key')
 
 
 class KeySelect(BaseInterface):
     """
-    An interface that operates similarly to an OrderedDict
+    An interface that operates similarly to an OrderedDict.
 
     >>> ks = KeySelect(keys=['MNI152NLin6Asym', 'MNI152Lin', 'fsaverage'],
     ...                fields=['field1', 'field2', 'field3'])
@@ -90,8 +85,8 @@ class KeySelect(BaseInterface):
     <BLANKLINE>
 
     """
-    input_spec = KeySelectInputSpec
-    output_spec = KeySelectOutputSpec
+    input_spec = _KeySelectInputSpec
+    output_spec = _KeySelectOutputSpec
 
     def __init__(self, keys=None, fields=None, **inputs):
         # Call constructor

@@ -1,10 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Select terms for a confound model, and compute any requisite expansions.
-"""
+"""Select terms for a confound model, and compute any requisite expansions."""
 
 import re
 import numpy as np
@@ -18,45 +14,46 @@ from nipype.interfaces.base import (
 )
 
 
-class ExpandModelInputInterface(BaseInterfaceInputSpec):
+class _ExpandModelInputSpec(BaseInterfaceInputSpec):
     confounds_file = File(exists=True, mandatory=True,
                           desc='TSV containing confound time series for '
                           'expansion according to the specified formula.')
     model_formula = traits.Str(
         '(dd1(rps + wm + csf + gsr))^^2 + others', usedefault=True,
-        desc='Formula for generating model expansions. By default, the '
-        '32-parameter expansion will be generated. Note that any expressions '
-        'to be expanded *must* be in parentheses, even if they include only '
-        'a single variable (e.g., (x)^2, not x^2).\n\n'
-        'Examples:\n'
-        '* rps + wm + csf + gsr : 9-parameter model. rps denotes realignment\n'
-        '  parameters, wm denotes mean white matter signal, csf denotes mean\n'
-        '  cerebrospinal fluid signal, and gsr denotes mean global signal.\n'
-        '* (dd1(rps + wm + csf + gsr))^^2 : 36-parameter expansion.\n'
-        '  rps + wm + csf + gsr denotes that realignment parameters and mean\n'
-        '  WM, CSF, and global signals should be included. dd1 denotes that\n'
-        '  these signals should be augmented with their first temporal\n'
-        '  derivatives. ^^2 denotes that the original signals and temporal\n'
-        '  derivatives should be augmented with quadratic expansions.\n'
-        '* (dd1(rps))^^2 : 24-parameter expansion. rps denotes that\n'
-        '  realignment parameters should be included. dd1 and ^^2 denote\n'
-        '  temporal derivative and quadratic expansions as above.\n'
-        '* (dd1(rps + wm + csf + gsr))^^2 + others : generate all expansion\n'
-        '  terms necessary for a 36-parameter model as above, and\n'
-        '  concatenate those expansion terms to all other regressor columns\n'
-        '  in the confounds file.\n')
+        desc="""\
+Formula for generating model expansions. By default, the
+32-parameter expansion will be generated. Note that any expressions
+to be expanded *must* be in parentheses, even if they include only
+a single variable (e.g., (x)^2, not x^2).
+
+Examples:
+* rps + wm + csf + gsr : 9-parameter model. rps denotes realignment
+  parameters, wm denotes mean white matter signal, csf denotes mean
+  cerebrospinal fluid signal, and gsr denotes mean global signal.
+* (dd1(rps + wm + csf + gsr))^^2 : 36-parameter expansion.
+  rps + wm + csf + gsr denotes that realignment parameters and mean
+  WM, CSF, and global signals should be included. dd1 denotes that
+  these signals should be augmented with their first temporal
+  derivatives. ^^2 denotes that the original signals and temporal
+  derivatives should be augmented with quadratic expansions.
+* (dd1(rps))^^2 : 24-parameter expansion. rps denotes that
+  realignment parameters should be included. dd1 and ^^2 denote
+  temporal derivative and quadratic expansions as above.
+* (dd1(rps + wm + csf + gsr))^^2 + others : generate all expansion
+  terms necessary for a 36-parameter model as above, and
+  concatenate those expansion terms to all other regressor columns
+  in the confounds file.""")
     output_file = File(desc='Output path')
 
 
-class ExpandModelOutputInterface(TraitedSpec):
+class _ExpandModelOutputSpec(TraitedSpec):
     confounds_file = File(exists=True, desc='Output confounds file')
 
 
 class ExpandModel(SimpleInterface):
-    """Expand a confound model according to a specified formula.
-    """
-    input_spec = ExpandModelInputInterface
-    output_spec = ExpandModelOutputInterface
+    """Expand a confound model according to a specified formula."""
+    input_spec = _ExpandModelInputSpec
+    output_spec = _ExpandModelOutputSpec
 
     def _run_interface(self, runtime):
         if isdefined(self.inputs.output_file):
@@ -80,7 +77,7 @@ class ExpandModel(SimpleInterface):
         return runtime
 
 
-class SpikeRegressorsInputInterface(BaseInterfaceInputSpec):
+class _SpikeRegressorsInputSpec(BaseInterfaceInputSpec):
     confounds_file = File(
         exists=True, mandatory=True,
         desc='TSV containing criterion time series (e.g., framewise '
@@ -112,15 +109,14 @@ class SpikeRegressorsInputInterface(BaseInterfaceInputSpec):
     output_file = File(desc='Output path')
 
 
-class SpikeRegressorsOutputInterface(TraitedSpec):
+class _SpikeRegressorsOutputSpec(TraitedSpec):
     confounds_file = File(exists=True, desc='Output confounds file')
 
 
 class SpikeRegressors(SimpleInterface):
-    """Generate spike regressors.
-    """
-    input_spec = SpikeRegressorsInputInterface
-    output_spec = SpikeRegressorsOutputInterface
+    """Generate spike regressors."""
+    input_spec = _SpikeRegressorsInputSpec
+    output_spec = _SpikeRegressorsOutputSpec
 
     def _run_interface(self, runtime):
         if isdefined(self.inputs.output_file):
@@ -200,6 +196,7 @@ def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
     Power JD, Mitra A, Laumann TO, Snyder AZ, Schlaggar BL, Petersen SE (2014)
         Methods to detect, characterize, and remove motion artifact in resting
         state fMRI. NeuroImage.
+
     """
     mask = {}
     indices = range(data.shape[0])
@@ -232,7 +229,7 @@ def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
         spikes[list(mask)] = 1
         spikes = pd.DataFrame(data=spikes, columns=[header_prefix])
     else:
-        spikes = np.zeros((max(indices)+1, len(mask)))
+        spikes = np.zeros((max(indices) + 1, len(mask)))
         for i, m in enumerate(sorted(mask)):
             spikes[m, i] = 1
         header = ['{:s}{:02d}'.format(header_prefix, vol)
@@ -268,6 +265,7 @@ def temporal_derivatives(order, variables, data):
     data_deriv: pandas DataFrame object
         Table of values of all observations of all variables, including any
         specified derivative terms.
+
     """
     variables_deriv = OrderedDict()
     data_deriv = OrderedDict()
@@ -311,6 +309,7 @@ def exponential_terms(order, variables, data):
     data_exp: pandas DataFrame object
         Table of values of all observations of all variables, including any
         specified exponential terms.
+
     """
     variables_exp = OrderedDict()
     data_exp = OrderedDict()
@@ -403,6 +402,7 @@ def parse_expression(expression, parent_data):
         A list of variables in the provided formula expression.
     data: pandas DataFrame
         A tabulation of all terms in the provided formula expression.
+
     """
     variables = None
     data = None
@@ -439,8 +439,7 @@ def _get_variables_from_formula(model_formula):
 
 
 def _expand_shorthand(model_formula, variables):
-    """Expand shorthand terms in the model formula.
-    """
+    """Expand shorthand terms in the model formula."""
     wm = 'white_matter'
     gsr = 'global_signal'
     rps = 'trans_x + trans_y + trans_z + rot_x + rot_y + rot_z'
@@ -491,6 +490,8 @@ def _unscramble_regressor_columns(parent_data, data):
 
 def parse_formula(model_formula, parent_data, unscramble=False):
     """
+    Parse a confound manipulation formula.
+
     Recursively parse a model formula by breaking it into additive atoms
     and tracking grouping symbol depth.
 
@@ -507,23 +508,6 @@ def parse_formula(model_formula, parent_data, unscramble=False):
         data frame or to instructions for operating on a variable (for
         instance, computing temporal derivatives or exponential terms).
 
-        Temporal derivative options:
-        * d6(variable) for the 6th temporal derivative
-        * dd6(variable) for all temporal derivatives up to the 6th
-        * d4-6(variable) for the 4th through 6th temporal derivatives
-        * 0 must be included in the temporal derivative range for the original
-          term to be returned when temporal derivatives are computed.
-
-        Exponential options:
-        * (variable)^6 for the 6th power
-        * (variable)^^6 for all powers up to the 6th
-        * (variable)^4-6 for the 4th through 6th powers
-        * 1 must be included in the powers range for the original term to be
-          returned when exponential terms are computed.
-
-        Temporal derivatives and exponential terms are computed for all terms
-        in the grouping symbols that they adjoin.
-
     Returns
     -------
     variables: list(str)
@@ -531,6 +515,26 @@ def parse_formula(model_formula, parent_data, unscramble=False):
         formula.
     data: pandas DataFrame
         All values in the complete model.
+
+    Options
+    -------
+    Temporal derivative options:
+    * d6(variable) for the 6th temporal derivative
+    * dd6(variable) for all temporal derivatives up to the 6th
+    * d4-6(variable) for the 4th through 6th temporal derivatives
+    * 0 must be included in the temporal derivative range for the original
+      term to be returned when temporal derivatives are computed.
+
+    Exponential options:
+    * (variable)^6 for the 6th power
+    * (variable)^^6 for all powers up to the 6th
+    * (variable)^4-6 for the 4th through 6th powers
+    * 1 must be included in the powers range for the original term to be
+      returned when exponential terms are computed.
+
+    Temporal derivatives and exponential terms are computed for all terms
+    in the grouping symbols that they adjoin.
+
     """
     variables = {}
     data = {}

@@ -278,10 +278,11 @@ class Report(object):
         if self.subject_id is not None:
             self.root = self.root / 'sub-{}'.format(self.subject_id)
 
-        template_path = Path(settings.get('template_path', 'report.tpl'))
-        if not template_path.is_absolute():
-            template_path = config.parent / template_path
-        self.template_path = template_path.resolve()
+        # Default template from niworkflows
+        template_path = Path(pkgrf('niworkflows', 'reports/report.tpl'))
+        if 'template_path' in settings:
+            template_path = config.parent / settings['template_path']
+        self.template_path = template_path.absolute()
         self.index(settings['sections'])
 
     def index(self, config):

@@ -1,14 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Utility workflows
-^^^^^^^^^^^^^^^^^
-
-.. autofunction:: init_bold_reference_wf
-.. autofunction:: init_enhance_and_skullstrip_bold_wf
-.. autofunction:: init_skullstrip_bold_wf
-
-"""
+"""Utility workflows."""
 from packaging.version import parse as parseversion, Version
 from pkg_resources import resource_filename as pkgr_fn
 
@@ -42,59 +34,59 @@ def init_bold_reference_wf(omp_nthreads, bold_file=None, pre_mask=False,
     contrast-enhanced reference is the subject of distortion correction, as well as
     boundary-based registration to T1w and template spaces.
 
-    .. workflow::
-        :graph2use: orig
-        :simple_form: yes
+    Workflow Graph
+        .. workflow::
+            :graph2use: orig
+            :simple_form: yes
 
-        from niworkflows.func.util import init_bold_reference_wf
-        wf = init_bold_reference_wf(omp_nthreads=1)
+            from niworkflows.func.util import init_bold_reference_wf
+            wf = init_bold_reference_wf(omp_nthreads=1)
 
-    **Parameters**
+    Parameters
+    ----------
+    bold_file : str
+        BOLD series NIfTI file
+    omp_nthreads : int
+        Maximum number of threads an individual process may use
+    name : str
+        Name of workflow (default: ``bold_reference_wf``)
+    gen_report : bool
+        Whether a mask report node should be appended in the end
 
-        bold_file : str
-            BOLD series NIfTI file
-        omp_nthreads : int
-            Maximum number of threads an individual process may use
-        name : str
-            Name of workflow (default: ``bold_reference_wf``)
-        gen_report : bool
-            Whether a mask report node should be appended in the end
+    Inputs
+    ------
+    bold_file : str
+        BOLD series NIfTI file
+    bold_mask : bool
+        A tentative brain mask to initialize the workflow (requires ``pre_mask``
+        parameter set ``True``).
+    dummy_scans : int or None
+        Number of non-steady-state volumes specified by user at beginning of ``bold_file``
+    sbref_file : str
+        single band (as opposed to multi band) reference NIfTI file
 
-    **Inputs**
-
-        bold_file
-            BOLD series NIfTI file
-        bold_mask : bool
-            A tentative brain mask to initialize the workflow (requires ``pre_mask``
-            parameter set ``True``).
-        dummy_scans : int or None
-            Number of non-steady-state volumes specified by user at beginning of ``bold_file``
-        sbref_file
-            single band (as opposed to multi band) reference NIfTI file
-
-    **Outputs**
-
-        bold_file
-            Validated BOLD series NIfTI file
-        raw_ref_image
-            Reference image to which BOLD series is motion corrected
-        skip_vols
-            Number of non-steady-state volumes selected at beginning of ``bold_file``
-        algo_dummy_scans
-            Number of non-steady-state volumes agorithmically detected at
-            beginning of ``bold_file``
-        ref_image
-            Contrast-enhanced reference image
-        ref_image_brain
-            Skull-stripped reference image
-        bold_mask
-            Skull-stripping mask of reference image
-        validation_report
-            HTML reportlet indicating whether ``bold_file`` had a valid affine
+    Outputs
+    -------
+    bold_file : str
+        Validated BOLD series NIfTI file
+    raw_ref_image : str
+        Reference image to which BOLD series is motion corrected
+    skip_vols : int
+        Number of non-steady-state volumes selected at beginning of ``bold_file``
+    algo_dummy_scans : int
+        Number of non-steady-state volumes agorithmically detected at
+        beginning of ``bold_file``
+    ref_image : str
+        Contrast-enhanced reference image
+    ref_image_brain : str
+        Skull-stripped reference image
+    bold_mask : str
+        Skull-stripping mask of reference image
+    validation_report : str
+        HTML reportlet indicating whether ``bold_file`` had a valid affine
 
 
-    **Subworkflows**
-
+    Subworkflows
         * :py:func:`~niworkflows.func.util.init_enhance_and_skullstrip_wf`
 
     """
@@ -165,6 +157,8 @@ def init_enhance_and_skullstrip_bold_wf(
         pre_mask=False,
         omp_nthreads=1):
     """
+    Enhance and run brain extraction on a BOLD EPI image.
+
     This workflow takes in a :abbr:`BOLD (blood-oxygen level-dependant)`
     :abbr:`fMRI (functional MRI)` average/summary (e.g., a reference image
     averaging non-steady-state timepoints), and sharpens the histogram
@@ -198,43 +192,46 @@ def init_enhance_and_skullstrip_bold_wf(
     Nipype input.
 
 
-    .. workflow ::
-        :graph2use: orig
-        :simple_form: yes
+    Workflow graph
+        .. workflow ::
+            :graph2use: orig
+            :simple_form: yes
 
-        from niworkflows.func.util import init_enhance_and_skullstrip_bold_wf
-        wf = init_enhance_and_skullstrip_bold_wf(omp_nthreads=1)
-
-    **Parameters**
-        name : str
-            Name of workflow (default: ``enhance_and_skullstrip_bold_wf``)
-        pre_mask : bool
-            Indicates whether the ``pre_mask`` input will be set (and thus, step 1
-            should be skipped).
-        omp_nthreads : int
-            number of threads available to parallel nodes
-
-    **Inputs**
-
-        in_file
-            BOLD image (single volume)
-        pre_mask : bool
-            A tentative brain mask to initialize the workflow (requires ``pre_mask``
-            parameter set ``True``).
-
-
-    **Outputs**
-
-        bias_corrected_file
-            the ``in_file`` after `N4BiasFieldCorrection`_
-        skull_stripped_file
-            the ``bias_corrected_file`` after skull-stripping
-        mask_file
-            mask of the skull-stripped input file
-        out_report
-            reportlet for the skull-stripping
+            from niworkflows.func.util import init_enhance_and_skullstrip_bold_wf
+            wf = init_enhance_and_skullstrip_bold_wf(omp_nthreads=1)
 
     .. _N4BiasFieldCorrection: https://hdl.handle.net/10380/3053
+
+    Parameters
+    ----------
+    name : str
+        Name of workflow (default: ``enhance_and_skullstrip_bold_wf``)
+    pre_mask : bool
+        Indicates whether the ``pre_mask`` input will be set (and thus, step 1
+        should be skipped).
+    omp_nthreads : int
+        number of threads available to parallel nodes
+
+    Inputs
+    ------
+    in_file : str
+        BOLD image (single volume)
+    pre_mask : bool
+        A tentative brain mask to initialize the workflow (requires ``pre_mask``
+        parameter set ``True``).
+
+
+    Outputs
+    -------
+    bias_corrected_file : str
+        the ``in_file`` after `N4BiasFieldCorrection`_
+    skull_stripped_file : str
+        the ``bias_corrected_file`` after skull-stripping
+    mask_file : str
+        mask of the skull-stripped input file
+    out_report : str
+        reportlet for the skull-stripping
+
     """
     workflow = Workflow(name=name)
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'pre_mask']),
@@ -366,34 +363,34 @@ def init_enhance_and_skullstrip_bold_wf(
 
 def init_skullstrip_bold_wf(name='skullstrip_bold_wf'):
     """
-    This workflow applies skull-stripping to a BOLD image.
+    Apply skull-stripping to a BOLD image.
 
     It is intended to be used on an image that has previously been
     bias-corrected with
     :py:func:`~niworkflows.func.util.init_enhance_and_skullstrip_bold_wf`
 
-    .. workflow ::
-        :graph2use: orig
-        :simple_form: yes
+    Workflow Graph
+        .. workflow ::
+            :graph2use: orig
+            :simple_form: yes
 
-        from niworkflows.func.util import init_skullstrip_bold_wf
-        wf = init_skullstrip_bold_wf()
+            from niworkflows.func.util import init_skullstrip_bold_wf
+            wf = init_skullstrip_bold_wf()
 
 
     Inputs
-
-        in_file
-            BOLD image (single volume)
-
+    ------
+    in_file : str
+        BOLD image (single volume)
 
     Outputs
-
-        skull_stripped_file
-            the ``in_file`` after skull-stripping
-        mask_file
-            mask of the skull-stripped input file
-        out_report
-            reportlet for the skull-stripping
+    -------
+    skull_stripped_file : str
+        the ``in_file`` after skull-stripping
+    mask_file : str
+        mask of the skull-stripped input file
+    out_report : str
+        reportlet for the skull-stripping
 
     """
     workflow = Workflow(name=name)
@@ -434,15 +431,17 @@ def _pass_dummy_scans(algo_dummy_scans, dummy_scans=None):
     """
     Graft manually provided number of dummy scans, if necessary.
 
-    **Parameters**
-
+    Parameters
+    ----------
     algo_dummy_scans : int
         number of volumes to skip determined by an algorithm
     dummy_scans : int or None
         number of volumes to skip determined by the user
 
-    **Returns**
+    Returns
+    -------
     skip_vols_num : int
         number of volumes to skip
+
     """
     return dummy_scans or algo_dummy_scans

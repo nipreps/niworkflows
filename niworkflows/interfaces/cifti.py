@@ -1,13 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Handling connectivity
-~~~~~~~~~~~~~~~~~~~~~
-Combines FreeSurfer surfaces with subcortical volumes
-
-"""
+"""Handling connectivity: combines FreeSurfer surfaces with subcortical volumes."""
 import os
 from glob import glob
 import json
@@ -53,7 +46,7 @@ CIFTI_STRUCT_WITH_LABELS = {
 }
 
 
-class GenerateCiftiInputSpec(BaseInterfaceInputSpec):
+class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
     bold_file = File(mandatory=True, exists=True, desc="input BOLD file")
     volume_target = traits.Enum("MNI152NLin2009cAsym", mandatory=True, usedefault=True,
                                 desc="CIFTI volumetric output space")
@@ -65,7 +58,7 @@ class GenerateCiftiInputSpec(BaseInterfaceInputSpec):
                               desc="list of surface geometry files (length 2 with order [L,R])")
 
 
-class GenerateCiftiOutputSpec(TraitedSpec):
+class _GenerateCiftiOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="generated CIFTI file")
     variant = traits.Str(desc="combination of target spaces label")
     variant_key = File(exists=True, desc='file storing variant space information')
@@ -73,13 +66,16 @@ class GenerateCiftiOutputSpec(TraitedSpec):
 
 class GenerateCifti(SimpleInterface):
     """
-    Generate CIFTI image from BOLD file in target spaces. Currently supported
+    Generate CIFTI image from BOLD file in target spaces.
 
+    Currently supported
     * target surfaces: fsaverage5, fsaverage6
     * target volumes: OASIS-TRT-20_DKT31 labels in MNI152NLin2009cAsym
+
     """
-    input_spec = GenerateCiftiInputSpec
-    output_spec = GenerateCiftiOutputSpec
+
+    input_spec = _GenerateCiftiInputSpec
+    output_spec = _GenerateCiftiOutputSpec
 
     def _run_interface(self, runtime):
         self._results["variant_key"], self._results["variant"] = self._define_variant()
@@ -95,7 +91,7 @@ class GenerateCifti(SimpleInterface):
         return runtime
 
     def _define_variant(self):
-        """Assign arbitrary label to combination of CIFTI spaces"""
+        """Assign arbitrary label to combination of CIFTI spaces."""
         space = None
         variants = {
             # to be expanded once addtional spaces are supported
@@ -115,7 +111,7 @@ class GenerateCifti(SimpleInterface):
         return variant_key, space
 
     def _fetch_data(self):
-        """Converts inputspec to files"""
+        """Convert inputspec to files."""
         if (self.inputs.surface_target == "fsnative" or
                 self.inputs.volume_target != "MNI152NLin2009cAsym"):
             # subject space is not support yet
@@ -137,27 +133,37 @@ class GenerateCifti(SimpleInterface):
     def _create_cifti_image(bold_file, label_file, annotation_files, gii_files,
                             volume_target, surface_target, tr):
         """
-        Generate CIFTI image in target space
+        Generate CIFTI image in target space.
 
         Parameters
-            bold_file : 4D BOLD timeseries
-            label_file : label atlas
-            annotation_files : FreeSurfer annotations
-            gii_files : 4D BOLD surface timeseries in GIFTI format
-            volume_target : label atlas space
-            surface_target : gii_files space
-            tr : repetition timeseries
+        ----------
+            bold_file : str
+                4D BOLD timeseries
+            label_file : str
+                label atlas
+            annotation_files : list
+                FreeSurfer annotations
+            gii_files : list
+                4D BOLD surface timeseries in GIFTI format
+            volume_target : str
+                label atlas space
+            surface_target : str
+                gii_files space
+            tr : float
+                repetition time
 
         Returns
-            out_file : BOLD data as CIFTI dtseries
-        """
+        -------
+            out_file : str
+                BOLD data as CIFTI dtseries
 
+        """
         label_img = nb.load(label_file)
         bold_img = resample_to_img(bold_file, label_img)
 
-        bold_data = bold_img.get_data()
+        bold_data = bold_img.get_fdata(dtype='float32')
         timepoints = bold_img.shape[3]
-        label_data = label_img.get_data()
+        label_data = np.asanyarray(label_img.dataobj).astype('int16')
 
         # set up CIFTI information
         series_map = ci.Cifti2MatrixIndicesMap((0, ),
@@ -248,23 +254,21 @@ class GenerateCifti(SimpleInterface):
         return os.path.join(os.getcwd(), out_file)
 
 
-class CiftiNameSourceInputSpec(BaseInterfaceInputSpec):
+class _CiftiNameSourceInputSpec(BaseInterfaceInputSpec):
     variant = traits.Str(mandatory=True,
                          desc=('unique label of spaces used in combination to'
                                ' generate CIFTI file'))
 
 
-class CiftiNameSourceOutputSpec(TraitedSpec):
+class _CiftiNameSourceOutputSpec(TraitedSpec):
     out_name = traits.Str(desc='(partial) filename formatted according to template')
 
 
 class CiftiNameSource(SimpleInterface):
-    """
-    Construct new filename based on unique label of spaces used to generate a
-    CIFTI file
-    """
-    input_spec = CiftiNameSourceInputSpec
-    output_spec = CiftiNameSourceOutputSpec
+    """Construct new filename based on unique label of spaces used to generate a CIFTI file."""
+
+    input_spec = _CiftiNameSourceInputSpec
+    output_spec = _CiftiNameSourceOutputSpec
 
     def _run_interface(self, runtime):
         suffix = 'bold.dtseries'

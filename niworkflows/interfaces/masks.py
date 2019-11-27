@@ -1,12 +1,6 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-ReportCapableInterfaces for masks tools
-
-"""
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+"""ReportCapableInterfaces for masks tools."""
 import os
 import numpy as np
 import nibabel as nb
@@ -23,19 +17,19 @@ from .. import NIWORKFLOWS_LOG
 from . import report_base as nrc
 
 
-class BETInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                      fsl.preprocess.BETInputSpec):
+class _BETInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                       fsl.preprocess.BETInputSpec):
     pass
 
 
-class BETOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                       fsl.preprocess.BETOutputSpec):
+class _BETOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                        fsl.preprocess.BETOutputSpec):
     pass
 
 
 class BETRPT(nrc.SegmentationRC, fsl.BET):
-    input_spec = BETInputSpecRPT
-    output_spec = BETOutputSpecRPT
+    input_spec = _BETInputSpecRPT
+    output_spec = _BETOutputSpecRPT
 
     def _run_interface(self, runtime):
         if self.generate_report:
@@ -58,19 +52,19 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
         return super(BETRPT, self)._post_run_hook(runtime)
 
 
-class BrainExtractionInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                                  ants.segmentation.BrainExtractionInputSpec):
+class _BrainExtractionInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                                   ants.segmentation.BrainExtractionInputSpec):
     pass
 
 
-class BrainExtractionOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                                   ants.segmentation.BrainExtractionOutputSpec):
+class _BrainExtractionOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                                    ants.segmentation.BrainExtractionOutputSpec):
     pass
 
 
 class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
-    input_spec = BrainExtractionInputSpecRPT
-    output_spec = BrainExtractionOutputSpecRPT
+    input_spec = _BrainExtractionInputSpecRPT
+    output_spec = _BrainExtractionOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         ''' generates a report showing slices from each axis '''
@@ -92,23 +86,23 @@ class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
 
 
 # TODO: move this interface to nipype.interfaces.nilearn
-class ComputeEPIMaskInputSpec(nrc.SVGReportCapableInputSpec,
-                              BaseInterfaceInputSpec):
+class _ComputeEPIMaskInputSpec(nrc._SVGReportCapableInputSpec,
+                               BaseInterfaceInputSpec):
     in_file = File(exists=True, desc="3D or 4D EPI file")
     dilation = traits.Int(desc="binary dilation on the nilearn output")
 
 
-class ComputeEPIMaskOutputSpec(reporting.ReportCapableOutputSpec):
+class _ComputeEPIMaskOutputSpec(reporting.ReportCapableOutputSpec):
     mask_file = File(exists=True, desc="Binary brain mask")
 
 
 class ComputeEPIMask(nrc.SegmentationRC):
-    input_spec = ComputeEPIMaskInputSpec
-    output_spec = ComputeEPIMaskOutputSpec
+    input_spec = _ComputeEPIMaskInputSpec
+    output_spec = _ComputeEPIMaskOutputSpec
 
     def _run_interface(self, runtime):
         orig_file_nii = nb.load(self.inputs.in_file)
-        in_file_data = orig_file_nii.get_data()
+        in_file_data = orig_file_nii.get_fdata()
 
         # pad the data to avoid the mask estimation running into edge effects
         in_file_data_padded = np.pad(in_file_data, (1, 1), 'constant',
@@ -119,7 +113,7 @@ class ComputeEPIMask(nrc.SegmentationRC):
 
         mask_nii = compute_epi_mask(padded_nii, exclude_zeros=True)
 
-        mask_data = mask_nii.get_data()
+        mask_data = np.asanyarray(mask_nii.dataobj).astype(np.uint8)
         if isdefined(self.inputs.dilation):
             mask_data = nd.morphology.binary_dilation(mask_data).astype(np.uint8)
 
@@ -161,19 +155,19 @@ class ComputeEPIMask(nrc.SegmentationRC):
         return super(ComputeEPIMask, self)._post_run_hook(runtime)
 
 
-class ACompCorInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                           confounds.CompCorInputSpec):
+class _ACompCorInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                            confounds.CompCorInputSpec):
     pass
 
 
-class ACompCorOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                            confounds.CompCorOutputSpec):
+class _ACompCorOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                             confounds.CompCorOutputSpec):
     pass
 
 
 class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
-    input_spec = ACompCorInputSpecRPT
-    output_spec = ACompCorOutputSpecRPT
+    input_spec = _ACompCorInputSpecRPT
+    output_spec = _ACompCorOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         ''' generates a report showing slices from each axis '''
@@ -192,19 +186,19 @@ class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
         return super(ACompCorRPT, self)._post_run_hook(runtime)
 
 
-class TCompCorInputSpecRPT(nrc.SVGReportCapableInputSpec,
-                           confounds.TCompCorInputSpec):
+class _TCompCorInputSpecRPT(nrc._SVGReportCapableInputSpec,
+                            confounds.TCompCorInputSpec):
     pass
 
 
-class TCompCorOutputSpecRPT(reporting.ReportCapableOutputSpec,
-                            confounds.TCompCorOutputSpec):
+class _TCompCorOutputSpecRPT(reporting.ReportCapableOutputSpec,
+                             confounds.TCompCorOutputSpec):
     pass
 
 
 class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
-    input_spec = TCompCorInputSpecRPT
-    output_spec = TCompCorOutputSpecRPT
+    input_spec = _TCompCorInputSpecRPT
+    output_spec = _TCompCorOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         ''' generates a report showing slices from each axis '''
@@ -226,13 +220,13 @@ class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
         return super(TCompCorRPT, self)._post_run_hook(runtime)
 
 
-class SimpleShowMaskInputSpec(nrc.SVGReportCapableInputSpec):
+class _SimpleShowMaskInputSpec(nrc._SVGReportCapableInputSpec):
     background_file = File(exists=True, mandatory=True, desc='file before')
     mask_file = File(exists=True, mandatory=True, desc='file before')
 
 
 class SimpleShowMaskRPT(nrc.SegmentationRC, nrc.ReportingInterface):
-    input_spec = SimpleShowMaskInputSpec
+    input_spec = _SimpleShowMaskInputSpec
 
     def _post_run_hook(self, runtime):
         self._anat_file = self.inputs.background_file
@@ -243,7 +237,7 @@ class SimpleShowMaskRPT(nrc.SegmentationRC, nrc.ReportingInterface):
         return super(SimpleShowMaskRPT, self)._post_run_hook(runtime)
 
 
-class ROIsPlotInputSpecRPT(nrc.SVGReportCapableInputSpec):
+class _ROIsPlotInputSpecRPT(nrc._SVGReportCapableInputSpec):
     in_file = File(exists=True, mandatory=True, desc='the volume where ROIs are defined')
     in_rois = InputMultiPath(File(exists=True), mandatory=True,
                              desc='a list of regions to be plotted')
@@ -257,7 +251,7 @@ class ROIsPlotInputSpecRPT(nrc.SVGReportCapableInputSpec):
 
 
 class ROIsPlot(nrc.ReportingInterface):
-    input_spec = ROIsPlotInputSpecRPT
+    input_spec = _ROIsPlotInputSpecRPT
 
     def _generate_report(self):
         from niworkflows.viz.utils import plot_segs, compose_view
@@ -273,7 +267,7 @@ class ROIsPlot(nrc.ReportingInterface):
             nsegs = len(levels)
             if nsegs == 0:
                 levels = np.unique(np.round(
-                    nb.load(seg_files[0]).get_data()).astype(int))
+                    nb.load(seg_files[0]).get_fdata(dtype='float32')))
                 levels = (levels[levels > 0] - 0.5).tolist()
                 nsegs = len(levels)
 

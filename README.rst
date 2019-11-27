@@ -1,10 +1,6 @@
 NeuroImaging workflows (NIworkflows): robust processing tools for MRI data
 ==========================================================================
 
-These pipelines are developed by the `Poldrack lab at Stanford University <https://poldracklab.stanford.edu/>`_
-for use at the `Center for Reproducible Neuroscience <http://reproducibility.stanford.edu/>`_,
-as well as for open-source software distribution.
-
 .. image:: https://circleci.com/gh/poldracklab/niworkflows/tree/master.svg?style=shield
   :target: https://circleci.com/gh/poldracklab/niworkflows/tree/master
   :alt: CI status
@@ -13,28 +9,16 @@ as well as for open-source software distribution.
   :target: https://travis-ci.org/poldracklab/niworkflows
   :alt: CI status
 
-.. image:: https://readthedocs.org/projects/nipype-workflows/badge/?version=latest
-  :target: http://nipype-workflows.readthedocs.io/en/latest/?badge=latest
-  :alt: Documentation Status
-
 .. image:: https://codecov.io/gh/poldracklab/niworkflows/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/poldracklab/niworkflows
   :alt: Test coverage
 
-Reporting Issues
-----------------
+NeuroImaging Workflows (NIWorkflows) is a selection of image processing workflows
+for magnetic resonance images of the brain. It is designed to provide an easily
+accessible, state-of-the-art interface that is robust to differences in scan
+acquisition protocols and that requires minimal user input.
 
-All bugs, concerns and enhancement requests for this software can be submitted here:
+This open-source neuroimaging data processing tool is being developed as a part of
+the MRI image analysis and reproducibility platform offered by the CRN.
 
-https://github.com/poldracklab/nipype-workflows/issues.
-
-
-Authors
--------
-
-The authors of NIworkflows can be found `here <AUTHORS>`_.
-
-License
--------
-
-Preprocessing-workflow is licensed under the Revised BSD Licence. The license can be found `here <LICENSE>`_.
+**Documentation**: https://poldracklab.github.io/niworkflows/

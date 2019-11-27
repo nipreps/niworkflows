@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Visualization tools
-
-"""
+"""Visualization tools."""
 import numpy as np
 import pandas as pd
 
@@ -17,7 +13,7 @@ from ..viz.plots import (
 )
 
 
-class FMRISummaryInputSpec(BaseInterfaceInputSpec):
+class _FMRISummaryInputSpec(BaseInterfaceInputSpec):
     in_func = File(exists=True, mandatory=True, desc='')
     in_mask = File(exists=True, mandatory=True, desc='')
     in_segm = File(exists=True, mandatory=True, desc='')
@@ -30,16 +26,14 @@ class FMRISummaryInputSpec(BaseInterfaceInputSpec):
                        desc='the TR')
 
 
-class FMRISummaryOutputSpec(TraitedSpec):
+class _FMRISummaryOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='written file path')
 
 
 class FMRISummary(SimpleInterface):
-    """
-    Prepare a fMRI summary plot for the report.
-    """
-    input_spec = FMRISummaryInputSpec
-    output_spec = FMRISummaryOutputSpec
+    """Prepare an fMRI summary plot for the report."""
+    input_spec = _FMRISummaryInputSpec
+    output_spec = _FMRISummaryOutputSpec
 
     def _run_interface(self, runtime):
         self._results['out_file'] = fname_presuffix(
@@ -74,7 +68,7 @@ class FMRISummary(SimpleInterface):
         return runtime
 
 
-class CompCorVariancePlotInputSpec(BaseInterfaceInputSpec):
+class _CompCorVariancePlotInputSpec(BaseInterfaceInputSpec):
     metadata_files = traits.List(File(exists=True), mandatory=True,
                                  desc='List of files containing component '
                                       'metadata')
@@ -90,17 +84,14 @@ class CompCorVariancePlotInputSpec(BaseInterfaceInputSpec):
                              desc='Path to save plot')
 
 
-class CompCorVariancePlotOutputSpec(TraitedSpec):
+class _CompCorVariancePlotOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Path to saved plot')
 
 
 class CompCorVariancePlot(SimpleInterface):
-    """
-    Plot the number of components necessary to explain the specified levels
-    of variance in the data.
-    """
-    input_spec = CompCorVariancePlotInputSpec
-    output_spec = CompCorVariancePlotOutputSpec
+    """Plot the number of components necessary to explain the specified levels of variance."""
+    input_spec = _CompCorVariancePlotInputSpec
+    output_spec = _CompCorVariancePlotOutputSpec
 
     def _run_interface(self, runtime):
         if self.inputs.out_file is None:
@@ -120,7 +111,7 @@ class CompCorVariancePlot(SimpleInterface):
         return runtime
 
 
-class ConfoundsCorrelationPlotInputSpec(BaseInterfaceInputSpec):
+class _ConfoundsCorrelationPlotInputSpec(BaseInterfaceInputSpec):
     confounds_file = File(exists=True, mandatory=True,
                           desc='File containing confound regressors')
     out_file = traits.Either(None, File, value=None, usedefault=True,
@@ -136,16 +127,14 @@ class ConfoundsCorrelationPlotInputSpec(BaseInterfaceInputSpec):
                               'selected.')
 
 
-class ConfoundsCorrelationPlotOutputSpec(TraitedSpec):
+class _ConfoundsCorrelationPlotOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Path to saved plot')
 
 
 class ConfoundsCorrelationPlot(SimpleInterface):
-    """
-    Plot the correlation among confound regressors.
-    """
-    input_spec = ConfoundsCorrelationPlotInputSpec
-    output_spec = ConfoundsCorrelationPlotOutputSpec
+    """Plot the correlation among confound regressors."""
+    input_spec = _ConfoundsCorrelationPlotInputSpec
+    output_spec = _ConfoundsCorrelationPlotOutputSpec
 
     def _run_interface(self, runtime):
         if self.inputs.out_file is None:

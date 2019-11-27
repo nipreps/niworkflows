@@ -1,13 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-ITK files handling
-~~~~~~~~~~~~~~~~~~
-
-
-"""
+"""ITK files handling."""
 import os
 from mimetypes import guess_type
 from tempfile import TemporaryDirectory
@@ -24,7 +17,7 @@ from nipype.interfaces.ants.resampling import ApplyTransformsInputSpec
 LOGGER = logging.getLogger('nipype.interface')
 
 
-class MCFLIRT2ITKInputSpec(BaseInterfaceInputSpec):
+class _MCFLIRT2ITKInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
                               desc='list of MAT files from MCFLIRT')
     in_reference = File(exists=True, mandatory=True,
@@ -35,17 +28,14 @@ class MCFLIRT2ITKInputSpec(BaseInterfaceInputSpec):
                              desc='number of parallel processes')
 
 
-class MCFLIRT2ITKOutputSpec(TraitedSpec):
+class _MCFLIRT2ITKOutputSpec(TraitedSpec):
     out_file = File(desc='the output ITKTransform file')
 
 
 class MCFLIRT2ITK(SimpleInterface):
-
-    """
-    Convert a list of MAT files from MCFLIRT into an ITK Transform file.
-    """
-    input_spec = MCFLIRT2ITKInputSpec
-    output_spec = MCFLIRT2ITKOutputSpec
+    """Convert a list of MAT files from MCFLIRT into an ITK Transform file."""
+    input_spec = _MCFLIRT2ITKInputSpec
+    output_spec = _MCFLIRT2ITKOutputSpec
 
     def _run_interface(self, runtime):
         num_threads = self.inputs.num_threads
@@ -78,7 +68,7 @@ class MCFLIRT2ITK(SimpleInterface):
         return runtime
 
 
-class MultiApplyTransformsInputSpec(ApplyTransformsInputSpec):
+class _MultiApplyTransformsInputSpec(ApplyTransformsInputSpec):
     input_image = InputMultiPath(File(exists=True), mandatory=True,
                                  desc='input time-series as a list of volumes after splitting'
                                       ' through the fourth dimension')
@@ -90,18 +80,15 @@ class MultiApplyTransformsInputSpec(ApplyTransformsInputSpec):
                              desc='copy dtype from inputs to outputs')
 
 
-class MultiApplyTransformsOutputSpec(TraitedSpec):
+class _MultiApplyTransformsOutputSpec(TraitedSpec):
     out_files = OutputMultiPath(File(), desc='the output ITKTransform file')
     log_cmdline = File(desc='a list of command lines used to apply transforms')
 
 
 class MultiApplyTransforms(SimpleInterface):
-
-    """
-    Apply the corresponding list of input transforms
-    """
-    input_spec = MultiApplyTransformsInputSpec
-    output_spec = MultiApplyTransformsOutputSpec
+    """Apply the corresponding list of input transforms."""
+    input_spec = _MultiApplyTransformsInputSpec
+    output_spec = _MultiApplyTransformsOutputSpec
 
     def _run_interface(self, runtime):
         # Get all inputs from the ApplyTransforms object
@@ -155,25 +142,21 @@ class MultiApplyTransforms(SimpleInterface):
         return runtime
 
 
-class FUGUEvsm2ANTSwarpInputSpec(BaseInterfaceInputSpec):
+class _FUGUEvsm2ANTSwarpInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='input displacements field map')
     pe_dir = traits.Enum('i', 'i-', 'j', 'j-', 'k', 'k-',
                          desc='phase-encoding axis')
 
 
-class FUGUEvsm2ANTSwarpOutputSpec(TraitedSpec):
+class _FUGUEvsm2ANTSwarpOutputSpec(TraitedSpec):
     out_file = File(desc='the output warp field')
 
 
 class FUGUEvsm2ANTSwarp(SimpleInterface):
-
-    """
-    Convert a voxel-shift-map to ants warp
-
-    """
-    input_spec = FUGUEvsm2ANTSwarpInputSpec
-    output_spec = FUGUEvsm2ANTSwarpOutputSpec
+    """Convert a voxel-shift-map to ants warp."""
+    input_spec = _FUGUEvsm2ANTSwarpInputSpec
+    output_spec = _FUGUEvsm2ANTSwarpOutputSpec
 
     def _run_interface(self, runtime):
 
@@ -192,7 +175,7 @@ class FUGUEvsm2ANTSwarp(SimpleInterface):
         hdr.set_intent('vector', (), '')
 
         # Get data, convert to mm
-        data = nii.get_data()
+        data = nii.get_fdata()
 
         aff = np.diag([1.0, 1.0, -1.0])
         if np.linalg.det(aff) < 0 and phaseEncDim != 0:

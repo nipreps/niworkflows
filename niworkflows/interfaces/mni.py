@@ -1,13 +1,12 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-""" A robust ANTs T1-to-MNI registration workflow with fallback retry """
-
-from __future__ import print_function, division, absolute_import, unicode_literals
+"""A robust ANTs T1-to-MNI registration workflow with fallback retry."""
 from os import path as op
 
 from multiprocessing import cpu_count
 import pkg_resources as pkgr
 from packaging.version import Version
+import numpy as np
 
 from nipype.interfaces.ants.registration import RegistrationOutputSpec
 from nipype.interfaces.ants import AffineInitializer
@@ -24,10 +23,7 @@ from .fixes import (
 niworkflows_version = Version(__version__)
 
 
-class RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
-    """
-    Set inputs to RobustMNINormalization
-    """
+class _RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     # Enable deprecation
     package_version = niworkflows_version
 
@@ -75,17 +71,19 @@ See https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba\
     float = traits.Bool(False, usedefault=True, desc='use single precision calculations')
 
 
-class RobustMNINormalizationOutputSpec(RegistrationOutputSpec):
+class _RobustMNINormalizationOutputSpec(RegistrationOutputSpec):
     reference_image = File(exists=True, desc='reference image used for registration target')
 
 
 class RobustMNINormalization(BaseInterface):
     """
     An interface to robustly run T1-to-MNI spatial normalization.
+
     Several settings are sequentially tried until some work.
+
     """
-    input_spec = RobustMNINormalizationInputSpec
-    output_spec = RobustMNINormalizationOutputSpec
+    input_spec = _RobustMNINormalizationInputSpec
+    output_spec = _RobustMNINormalizationOutputSpec
 
     def _list_outputs(self):
         outputs = self.norm._list_outputs()
@@ -411,6 +409,7 @@ def mask(in_file, mask_file, new_name):
     -----
     in_file and mask_file must be in the same
     image space and have the same dimensions.
+
     """
     import nibabel as nb
     import os
@@ -419,8 +418,8 @@ def mask(in_file, mask_file, new_name):
     # Load the mask image
     mask_nii = nb.load(mask_file)
     # Set all non-mask voxels in the input file to zero.
-    data = in_nii.get_data()
-    data[mask_nii.get_data() == 0] = 0
+    data = in_nii.get_fdata()
+    data[np.asanyarray(mask_nii.dataobj) == 0] = 0
     # Save the new masked image.
     new_nii = nb.Nifti1Image(data, in_nii.affine, in_nii.header)
     new_nii.to_filename(new_name)
@@ -453,6 +452,7 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
     -----
     in_file and lesion_mask must be in the same
     image space and have the same dimensions
+
     """
     import os
     import numpy as np
@@ -473,7 +473,7 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
     in_img = nb.load(in_file)
 
     # If we want a global mask, create one based on the input image.
-    data = np.ones(in_img.shape, dtype=np.uint8) if global_mask else in_img.get_data()
+    data = np.ones(in_img.shape, dtype=np.uint8) if global_mask else np.asanyarray(in_img.dataobj)
     if set(np.unique(data)) - {0, 1}:
         raise ValueError("`global_mask` must be true if `in_file` is not a binary mask")
 
@@ -483,7 +483,7 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
         lm_img = nb.as_closest_canonical(nb.load(lesion_mask))
 
         # Subtract lesion mask from secondary mask, set negatives to 0
-        data = np.fmax(data - lm_img.get_data(), 0)
+        data = np.fmax(data - lm_img.dataobj, 0)
         # Cost function mask will be created from subtraction
     # Otherwise, CFM will be created from global mask
 
