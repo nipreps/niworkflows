@@ -1,3 +1,10 @@
+1.0.1 (November 27, 2019)
+=========================
+Bug-fix release in the 1.0.x series.
+
+* FIX: Ensure data type of masked image matches T1.mgz (#430) @effigies
+
+
 1.0.0 (November 26, 2019)
 =========================
 The first stable release of NIWorkflows.
