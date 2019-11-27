@@ -66,7 +66,7 @@ class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
     surface_target = traits.Enum("fsLR", "fsaverage5", "fsaverage6", usedefault=True,
                                  desc="CIFTI surface target space")
     density = traits.Enum(None, '32k', '59k', usedefault=True,
-                          help='surface hemisphere vertices')
+                          desc='Surface vertices density. Only required for fsLR surfaces.')
     TR = traits.Float(mandatory=True, desc="Repetition time")
     surface_bolds = traits.List(File(exists=True), mandatory=True,
                                 desc="list of surface BOLD GIFTI files"
@@ -243,7 +243,11 @@ def _get_cifti_variant(surface_target, volume_target, density=None):
             variant = space
             break
     if variant is None:
-        raise NotImplementedError
+        raise NotImplementedError(
+            "No corresponding variant for (surface: {0}, volume: {1})".format(
+                surface_target, volume_target
+            )
+        )
 
     variant_key = os.path.abspath('dtseries_variant.json')
     out_json = {
