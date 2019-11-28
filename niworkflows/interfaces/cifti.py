@@ -135,7 +135,7 @@ class CiftiNameSource(SimpleInterface):
     def _run_interface(self, runtime):
         suffix = 'bold.dtseries'
         if 'hcp' in self.inputs.variant.lower():
-             suffix = 'space-fsLR_bold.dtseries'
+            suffix = 'space-fsLR_bold.dtseries'
         self._results['out_name'] = suffix
         return runtime
 
