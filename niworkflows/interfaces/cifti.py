@@ -4,6 +4,7 @@
 import os
 from glob import glob
 import json
+import warnings
 
 import nibabel as nb
 from nibabel import cifti2 as ci
@@ -15,62 +16,75 @@ from nipype.interfaces.base import (
     BaseInterfaceInputSpec, TraitedSpec, File, traits,
     SimpleInterface, Directory
 )
-from templateflow.api import get as get_template
+import templateflow.api as tf
 
-# CITFI structures with corresponding FS labels
-CIFTI_STRUCT_WITH_LABELS = {
+CIFTI_SURFACES = ("fsaverage5", "fsaverage6", "fsLR")
+CIFTI_VOLUMES = ("MNI152NLin2009cAsym", "MNI152NLin6Asym")
+CIFTI_STRUCT_WITH_LABELS = {  # CITFI structures with corresponding labels
     # SURFACES
     'CIFTI_STRUCTURE_CORTEX_LEFT': None,
     'CIFTI_STRUCTURE_CORTEX_RIGHT': None,
 
     # SUBCORTICAL
-    'CIFTI_STRUCTURE_ACCUMBENS_LEFT': [26],
-    'CIFTI_STRUCTURE_ACCUMBENS_RIGHT': [58],
-    'CIFTI_STRUCTURE_AMYGDALA_LEFT': [18],
-    'CIFTI_STRUCTURE_AMYGDALA_RIGHT': [54],
-    'CIFTI_STRUCTURE_BRAIN_STEM': [16],
-    'CIFTI_STRUCTURE_CAUDATE_LEFT': [11],
-    'CIFTI_STRUCTURE_CAUDATE_RIGHT': [50],
-    'CIFTI_STRUCTURE_CEREBELLUM_LEFT': [6],
-    'CIFTI_STRUCTURE_CEREBELLUM_RIGHT': [45],
-    'CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT': [28],
-    'CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT': [60],
-    'CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT': [17],
-    'CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT': [53],
-    'CIFTI_STRUCTURE_PALLIDUM_LEFT': [13],
-    'CIFTI_STRUCTURE_PALLIDUM_RIGHT': [52],
-    'CIFTI_STRUCTURE_PUTAMEN_LEFT': [12],
-    'CIFTI_STRUCTURE_PUTAMEN_RIGHT': [51],
-    'CIFTI_STRUCTURE_THALAMUS_LEFT': [10],
-    'CIFTI_STRUCTURE_THALAMUS_RIGHT': [49],
+    'CIFTI_STRUCTURE_ACCUMBENS_LEFT': (26,),
+    'CIFTI_STRUCTURE_ACCUMBENS_RIGHT': (58,),
+    'CIFTI_STRUCTURE_AMYGDALA_LEFT': (18,),
+    'CIFTI_STRUCTURE_AMYGDALA_RIGHT': (54,),
+    'CIFTI_STRUCTURE_BRAIN_STEM': (16,),
+    'CIFTI_STRUCTURE_CAUDATE_LEFT': (11,),
+    'CIFTI_STRUCTURE_CAUDATE_RIGHT': (50,),
+    'CIFTI_STRUCTURE_CEREBELLUM_LEFT': (
+        6,  # DKT31
+        8,  # HCP MNI152
+    ),
+    'CIFTI_STRUCTURE_CEREBELLUM_RIGHT': (
+        45,  # DKT31
+        47,  # HCP MNI152
+    ),
+    'CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT': (28,),
+    'CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT': (60,),
+    'CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT': (17,),
+    'CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT': (53,),
+    'CIFTI_STRUCTURE_PALLIDUM_LEFT': (13,),
+    'CIFTI_STRUCTURE_PALLIDUM_RIGHT': (52,),
+    'CIFTI_STRUCTURE_PUTAMEN_LEFT': (12,),
+    'CIFTI_STRUCTURE_PUTAMEN_RIGHT': (51,),
+    'CIFTI_STRUCTURE_THALAMUS_LEFT': (10,),
+    'CIFTI_STRUCTURE_THALAMUS_RIGHT': (49,),
+}
+CIFTI_VARIANTS = {
+    'HCP grayordinates': ('fsLR', 'MNI152NLin6Asym'),
+    'fMRIPrep grayordinates': ('fsaverage', 'MNI152NLin2009cAsym'),
 }
 
 
 class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
     bold_file = File(mandatory=True, exists=True, desc="input BOLD file")
-    volume_target = traits.Enum("MNI152NLin2009cAsym", mandatory=True, usedefault=True,
+    volume_target = traits.Enum("MNI152NLin6Asym", "MNI152NLin2009cAsym", usedefault=True,
                                 desc="CIFTI volumetric output space")
-    surface_target = traits.Enum("fsaverage5", "fsaverage6", mandatory=True,
-                                 usedefault=True, desc="CIFTI surface target space")
+    surface_target = traits.Enum("fsLR", "fsaverage5", "fsaverage6", usedefault=True,
+                                 desc="CIFTI surface target space")
+    density = traits.Enum('10k', '32k', '41k', '59k',
+                          desc='Surface vertices density.')
+    TR = traits.Float(mandatory=True, desc="Repetition time")
+    surface_bolds = traits.List(File(exists=True), mandatory=True,
+                                desc="list of surface BOLD GIFTI files"
+                                     " (length 2 with order [L,R])")
     subjects_dir = Directory(mandatory=True, desc="FreeSurfer SUBJECTS_DIR")
-    TR = traits.Float(mandatory=True, desc="repetition time")
-    gifti_files = traits.List(File(exists=True), mandatory=True,
-                              desc="list of surface geometry files (length 2 with order [L,R])")
 
 
 class _GenerateCiftiOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="generated CIFTI file")
-    variant = traits.Str(desc="combination of target spaces label")
-    variant_key = File(exists=True, desc='file storing variant space information')
+    out_metadata = File(exists=True, desc='variant metadata JSON')
+    variant = traits.Str(desc="Name of variant space")
 
 
 class GenerateCifti(SimpleInterface):
     """
     Generate CIFTI image from BOLD file in target spaces.
 
-    Currently supported
-    * target surfaces: fsaverage5, fsaverage6
-    * target volumes: OASIS-TRT-20_DKT31 labels in MNI152NLin2009cAsym
+    Currently supports ``fsLR``, ``fsaverage5``, or ``fsaverage6`` for template surfaces and
+    ``MNI152NLin6Asym`` or ``MNI152NLin2009cAsym`` as template volumes.
 
     """
 
@@ -78,186 +92,33 @@ class GenerateCifti(SimpleInterface):
     output_spec = _GenerateCiftiOutputSpec
 
     def _run_interface(self, runtime):
-        self._results["variant_key"], self._results["variant"] = self._define_variant()
-        annotation_files, label_file = self._fetch_data()
-        self._results["out_file"] = self._create_cifti_image(
+        annotation_files, label_file = _get_cifti_data(
+            self.inputs.surface_target,
+            self.inputs.volume_target,
+            self.inputs.subjects_dir,
+            self.inputs.density
+        )
+        self._results['out_metadata'], self._results['variant'] = _get_cifti_variant(
+            self.inputs.surface_target,
+            self.inputs.volume_target,
+            self.inputs.density
+        )
+        self._results["out_file"] = _create_cifti_image(
             self.inputs.bold_file,
             label_file,
+            self.inputs.surface_bolds,
             annotation_files,
-            self.inputs.gifti_files,
-            self.inputs.volume_target,
-            self.inputs.surface_target,
-            self.inputs.TR)
+            self.inputs.TR,
+            (self.inputs.surface_target, self.inputs.volume_target)
+        )
         return runtime
-
-    def _define_variant(self):
-        """Assign arbitrary label to combination of CIFTI spaces."""
-        space = None
-        variants = {
-            # to be expanded once addtional spaces are supported
-            'space1': ['fsaverage5', 'MNI152NLin2009cAsym'],
-            'space2': ['fsaverage6', 'MNI152NLin2009cAsym'],
-        }
-        for sp, targets in variants.items():
-            if all(target in targets for target in
-                    [self.inputs.surface_target, self.inputs.volume_target]):
-                space = sp
-        if space is None:
-            raise NotImplementedError
-
-        variant_key = os.path.abspath('dtseries_variant.json')
-        with open(variant_key, 'w') as fp:
-            json.dump({space: variants[space]}, fp)
-        return variant_key, space
-
-    def _fetch_data(self):
-        """Convert inputspec to files."""
-        if (self.inputs.surface_target == "fsnative" or
-                self.inputs.volume_target != "MNI152NLin2009cAsym"):
-            # subject space is not support yet
-            raise NotImplementedError
-
-        annotation_files = sorted(glob(os.path.join(self.inputs.subjects_dir,
-                                                    self.inputs.surface_target,
-                                                    'label',
-                                                    '*h.aparc.annot')))
-        if not annotation_files:
-            raise IOError("Freesurfer annotations for %s not found in %s" % (
-                          self.inputs.surface_target, self.inputs.subjects_dir))
-
-        label_file = str(get_template(
-            'MNI152NLin2009cAsym', resolution=2, desc='DKT31', suffix='dseg'))
-        return annotation_files, label_file
-
-    @staticmethod
-    def _create_cifti_image(bold_file, label_file, annotation_files, gii_files,
-                            volume_target, surface_target, tr):
-        """
-        Generate CIFTI image in target space.
-
-        Parameters
-        ----------
-            bold_file : str
-                4D BOLD timeseries
-            label_file : str
-                label atlas
-            annotation_files : list
-                FreeSurfer annotations
-            gii_files : list
-                4D BOLD surface timeseries in GIFTI format
-            volume_target : str
-                label atlas space
-            surface_target : str
-                gii_files space
-            tr : float
-                repetition time
-
-        Returns
-        -------
-            out_file : str
-                BOLD data as CIFTI dtseries
-
-        """
-        label_img = nb.load(label_file)
-        bold_img = resample_to_img(bold_file, label_img)
-
-        bold_data = bold_img.get_fdata(dtype='float32')
-        timepoints = bold_img.shape[3]
-        label_data = np.asanyarray(label_img.dataobj).astype('int16')
-
-        # set up CIFTI information
-        series_map = ci.Cifti2MatrixIndicesMap((0, ),
-                                               'CIFTI_INDEX_TYPE_SERIES',
-                                               number_of_series_points=timepoints,
-                                               series_exponent=0,
-                                               series_start=0.0,
-                                               series_step=tr,
-                                               series_unit='SECOND')
-        # Create CIFTI brain models
-        idx_offset = 0
-        brainmodels = []
-        bm_ts = np.empty((timepoints, 0))
-
-        for structure, labels in CIFTI_STRUCT_WITH_LABELS.items():
-            if labels is None:  # surface model
-                model_type = "CIFTI_MODEL_TYPE_SURFACE"
-                # use the corresponding annotation
-                hemi = structure.split('_')[-1]
-                annot = nb.freesurfer.read_annot(annotation_files[hemi == "RIGHT"])
-                # currently only supports L/R cortex
-                gii = nb.load(gii_files[hemi == "RIGHT"])
-                # calculate total number of vertices
-                surf_verts = len(annot[0])
-                # remove medial wall for CIFTI format
-                vert_idx = np.nonzero(annot[0] != annot[2].index(b'unknown'))[0]
-                # extract values across volumes
-                ts = np.array([tsarr.data[vert_idx] for tsarr in gii.darrays])
-
-                vert_idx = ci.Cifti2VertexIndices(vert_idx)
-                bm = ci.Cifti2BrainModel(index_offset=idx_offset,
-                                         index_count=len(vert_idx),
-                                         model_type=model_type,
-                                         brain_structure=structure,
-                                         vertex_indices=vert_idx,
-                                         n_surface_vertices=surf_verts)
-                bm_ts = np.column_stack((bm_ts, ts))
-                idx_offset += len(vert_idx)
-                brainmodels.append(bm)
-            else:
-                model_type = "CIFTI_MODEL_TYPE_VOXELS"
-                vox = []
-                ts = None
-                for label in labels:
-                    ijk = np.nonzero(label_data == label)
-                    ts = (bold_data[ijk] if ts is None
-                          else np.concatenate((ts, bold_data[ijk])))
-                    vox += [[ijk[0][ix], ijk[1][ix], ijk[2][ix]]
-                            for ix, row in enumerate(ts)]
-
-                bm_ts = np.column_stack((bm_ts, ts.T))
-
-                vox = ci.Cifti2VoxelIndicesIJK(vox)
-                bm = ci.Cifti2BrainModel(index_offset=idx_offset,
-                                         index_count=len(vox),
-                                         model_type=model_type,
-                                         brain_structure=structure,
-                                         voxel_indices_ijk=vox)
-                idx_offset += len(vox)
-                brainmodels.append(bm)
-
-        volume = ci.Cifti2Volume(
-            bold_img.shape[:3],
-            ci.Cifti2TransformationMatrixVoxelIndicesIJKtoXYZ(-3, bold_img.affine))
-        brainmodels.append(volume)
-
-        # create CIFTI geometry based on brainmodels
-        geometry_map = ci.Cifti2MatrixIndicesMap((1, ),
-                                                 'CIFTI_INDEX_TYPE_BRAIN_MODELS',
-                                                 maps=brainmodels)
-        # provide some metadata to CIFTI matrix
-        meta = {
-            "target_surface": surface_target,
-            "target_volume": volume_target,
-        }
-        # generate and save CIFTI image
-        matrix = ci.Cifti2Matrix()
-        matrix.append(series_map)
-        matrix.append(geometry_map)
-        matrix.metadata = ci.Cifti2MetaData(meta)
-        hdr = ci.Cifti2Header(matrix)
-        img = ci.Cifti2Image(bm_ts, hdr)
-        img.nifti_header.set_intent('NIFTI_INTENT_CONNECTIVITY_DENSE_SERIES')
-
-        _, out_base, _ = split_filename(bold_file)
-        out_file = "{}.dtseries.nii".format(out_base)
-        ci.save(img, out_file)
-        return os.path.join(os.getcwd(), out_file)
 
 
 class _CiftiNameSourceInputSpec(BaseInterfaceInputSpec):
-    variant = traits.Str(mandatory=True,
-                         desc=('unique label of spaces used in combination to'
-                               ' generate CIFTI file'))
+    variant = traits.Str(
+        mandatory=True,
+        desc='unique label of spaces used in combination to generate CIFTI file'
+    )
 
 
 class _CiftiNameSourceOutputSpec(TraitedSpec):
@@ -272,7 +133,268 @@ class CiftiNameSource(SimpleInterface):
 
     def _run_interface(self, runtime):
         suffix = 'bold.dtseries'
-        if 'hcp' in self.inputs.variant:
-            suffix = 'space-hcp_bold.dtseries'
+        if 'hcp' in self.inputs.variant.lower():
+            suffix = 'space-fsLR_bold.dtseries'
+        elif 'fmriprep' in self.inputs.variant.lower():
+            suffix = 'space-fMRIPrep_bold.dtseries'
         self._results['out_name'] = suffix
         return runtime
+
+
+def _get_cifti_data(surface, volume, subjects_dir=None, density=None):
+    """
+    Fetch surface and volumetric label files for CIFTI creation.
+
+    Parameters
+    ----------
+    surface : str
+        Target surface space
+    volume : str
+        Target volume space
+    subjects_dir : str, optional
+        Path to FreeSurfer subjects directory (required `fsaverage5`/`fsaverage6` surfaces)
+    density : str, optional
+        Surface density (required for `fsLR` surfaces)
+
+    Returns
+    -------
+    annotation_files : list
+        Surface annotation files to allow removal of medial wall
+    label_file : str
+        Volumetric label file of subcortical structures
+
+    Examples
+    --------
+    >>> annots, label = _get_cifti_data('fsLR', 'MNI152NLin6Asym', density='32k')
+    >>> annots  # doctest: +ELLIPSIS
+    ['.../tpl-fsLR_hemi-L_den-32k_desc-nomedialwall_dparc.label.gii', \
+     '.../tpl-fsLR_hemi-R_den-32k_desc-nomedialwall_dparc.label.gii']
+    >>> label  # doctest: +ELLIPSIS
+    '.../tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz'
+
+    """
+    if surface not in CIFTI_SURFACES or volume not in CIFTI_VOLUMES:
+        raise NotImplementedError(
+            "Variant (surface: {0}, volume: {1}) is not supported".format(surface, volume)
+        )
+
+    tpl_kwargs = {'suffix': 'dseg'}
+    # fMRIPrep grayordinates
+    if volume == "MNI152NLin2009cAsym":
+        tpl_kwargs.update({'resolution': '2', 'desc': 'DKT31'})
+        annotation_files = sorted(glob(os.path.join(
+            subjects_dir,
+            surface,
+            'label',
+            '*h.aparc.annot'
+        )))
+    # HCP grayordinates
+    elif volume == 'MNI152NLin6Asym':
+        # templateflow specific resolutions (2mm, 1.6mm)
+        res = {'32k': '2', '59k': '6'}[density]
+        tpl_kwargs.update({'atlas': 'HCP', 'resolution': res})
+        annotation_files = [
+            str(f) for f in tf.get('fsLR', density=density, desc='nomedialwall', suffix='dparc')
+        ]
+
+    if len(annotation_files) != 2:
+        raise IOError("Invalid number of surface annotation files")
+    label_file = str(tf.get(volume, **tpl_kwargs))
+    return annotation_files, label_file
+
+
+def _get_cifti_variant(surface, volume, density=None):
+    """
+    Identify CIFTI variant and return metadata.
+
+    Parameters
+    ----------
+    surface : str
+        Target surface space
+    volume : str
+        Target volume space
+    density : str, optional
+        Surface density (required for `fsLR` surfaces)
+
+    Returns
+    -------
+    out_metadata : str
+        JSON file with variant metadata
+    variant : str
+        Name of CIFTI variant
+
+    Examples
+    --------
+    >>> metafile, variant = _get_cifti_variant('fsaverage5', 'MNI152NLin2009cAsym')
+    >>> metafile  # doctest: +ELLIPSIS
+    '.../dtseries_variant.json'
+    >>> variant
+    'fMRIPrep grayordinates'
+
+    >>> _, variant = _get_cifti_variant('fsLR', 'MNI152NLin6Asym', density='59k')
+    >>> variant
+    'HCP grayordinates'
+
+    """
+    if surface in ('fsaverage5', 'fsaverage6'):
+        density = {'fsaverage5': '10k', 'fsaverage6': '41k'}[surface]
+        surface = 'fsaverage'
+
+    for variant, targets in CIFTI_VARIANTS.items():
+        if all(target in targets for target in (surface, volume)):
+            break
+        variant = None
+    if variant is None:
+        raise NotImplementedError(
+            "No corresponding variant for (surface: {0}, volume: {1})".format(surface, volume)
+        )
+
+    out_metadata = os.path.abspath('dtseries_variant.json')
+    out_json = {
+        'space': variant,
+        'surface': surface,
+        'volume': volume,
+        'surface_density': density,
+    }
+    if surface == 'fsLR':
+        out_json['grayordinates'] = {'32k': '91k', '59k': '170k'}[density]
+
+    with open(out_metadata, 'w') as fp:
+        json.dump(out_json, fp)
+    return out_metadata, variant
+
+
+def _create_cifti_image(bold_file, label_file, bold_surfs, annotation_files, tr, targets):
+    """
+    Generate CIFTI image in target space.
+
+    Parameters
+    ----------
+    bold_file : str
+        BOLD volumetric timeseries
+    label_file : str
+        Subcortical label file
+    bold_surfs : list
+        BOLD surface timeseries [L,R]
+    annotation_files : list
+        Surface label files used to remove medial wall
+    tr : float
+        BOLD repetition time
+    targets : tuple or list
+        Surface and volumetric output spaces
+
+    Returns
+    -------
+    out :
+        BOLD data saved as CIFTI dtseries
+    """
+    bold_img = nb.load(bold_file)
+    label_img = nb.load(label_file)
+    if label_img.shape != bold_img.shape[:3]:
+        warnings.warn("Resampling bold volume to match label dimensions")
+        bold_img = resample_to_img(bold_img, label_img)
+
+    bold_data = bold_img.get_fdata(dtype='float32')
+    timepoints = bold_img.shape[3]
+    label_data = np.asanyarray(label_img.dataobj).astype('int16')
+
+    # Create brain models
+    idx_offset = 0
+    brainmodels = []
+    bm_ts = np.empty((timepoints, 0))
+
+    for structure, labels in CIFTI_STRUCT_WITH_LABELS.items():
+        if labels is None:  # surface model
+            model_type = "CIFTI_MODEL_TYPE_SURFACE"
+            # use the corresponding annotation
+            hemi = structure.split('_')[-1]
+            # currently only supports L/R cortex
+            surf = nb.load(bold_surfs[hemi == "RIGHT"])
+            surf_verts = len(surf.darrays[0].data)
+            if annotation_files[0].endswith('.annot'):
+                annot = nb.freesurfer.read_annot(annotation_files[hemi == "RIGHT"])
+                # remove medial wall
+                medial = np.nonzero(annot[0] != annot[2].index(b'unknown'))[0]
+            else:
+                annot = nb.load(annotation_files[hemi == "RIGHT"])
+                medial = np.nonzero(annot.darrays[0].data)[0]
+            # extract values across volumes
+            ts = np.array([tsarr.data[medial] for tsarr in surf.darrays])
+
+            vert_idx = ci.Cifti2VertexIndices(medial)
+            bm = ci.Cifti2BrainModel(
+                index_offset=idx_offset,
+                index_count=len(vert_idx),
+                model_type=model_type,
+                brain_structure=structure,
+                vertex_indices=vert_idx,
+                n_surface_vertices=surf_verts
+            )
+            idx_offset += len(vert_idx)
+            bm_ts = np.column_stack((bm_ts, ts))
+        else:
+            model_type = "CIFTI_MODEL_TYPE_VOXELS"
+            vox = []
+            ts = None
+            for label in labels:
+                ijk = np.nonzero(label_data == label)
+                if ijk[0].size == 0:  # skip label if nothing matches
+                    continue
+                ts = (bold_data[ijk] if ts is None
+                      else np.concatenate((ts, bold_data[ijk])))
+                vox += [[ijk[0][ix], ijk[1][ix], ijk[2][ix]]
+                        for ix, row in enumerate(ts)]
+
+            vox = ci.Cifti2VoxelIndicesIJK(vox)
+            bm = ci.Cifti2BrainModel(
+                index_offset=idx_offset,
+                index_count=len(vox),
+                model_type=model_type,
+                brain_structure=structure,
+                voxel_indices_ijk=vox
+            )
+            idx_offset += len(vox)
+            bm_ts = np.column_stack((bm_ts, ts.T))
+        # add each brain structure to list
+        brainmodels.append(bm)
+
+    # add volume information
+    brainmodels.append(
+        ci.Cifti2Volume(
+            bold_img.shape[:3],
+            ci.Cifti2TransformationMatrixVoxelIndicesIJKtoXYZ(-3, bold_img.affine)
+        )
+    )
+
+    # generate Matrix information
+    series_map = ci.Cifti2MatrixIndicesMap(
+        (0,),
+        'CIFTI_INDEX_TYPE_SERIES',
+        number_of_series_points=timepoints,
+        series_exponent=0,
+        series_start=0.0,
+        series_step=tr,
+        series_unit='SECOND'
+    )
+    geometry_map = ci.Cifti2MatrixIndicesMap(
+        (1, ),
+        'CIFTI_INDEX_TYPE_BRAIN_MODELS',
+        maps=brainmodels
+    )
+    # provide some metadata to CIFTI matrix
+    meta = {
+        "surface": targets[0],
+        "volume": targets[1],
+    }
+    # generate and save CIFTI image
+    matrix = ci.Cifti2Matrix()
+    matrix.append(series_map)
+    matrix.append(geometry_map)
+    matrix.metadata = ci.Cifti2MetaData(meta)
+    hdr = ci.Cifti2Header(matrix)
+    img = ci.Cifti2Image(bm_ts, hdr)
+    img.nifti_header.set_intent('NIFTI_INTENT_CONNECTIVITY_DENSE_SERIES')
+
+    out_file = "{}.dtseries.nii".format(split_filename(bold_file)[1])
+    ci.save(img, out_file)
+    return os.path.join(os.getcwd(), out_file)
