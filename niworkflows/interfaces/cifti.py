@@ -135,6 +135,8 @@ class CiftiNameSource(SimpleInterface):
         suffix = 'bold.dtseries'
         if 'hcp' in self.inputs.variant.lower():
             suffix = 'space-fsLR_bold.dtseries'
+        elif 'fmriprep' in self.inputs.variant.lower():
+            suffix = 'space-fMRIPrep_bold.dtseries'
         self._results['out_name'] = suffix
         return runtime
 
@@ -235,8 +237,7 @@ def _get_cifti_variant(surface, volume, density=None):
 
     """
     if surface in ('fsaverage5', 'fsaverage6'):
-        if not density:
-            density = {'fsaverage5': '10k', 'fsaverage6': '41k'}[surface]
+        density = {'fsaverage5': '10k', 'fsaverage6': '41k'}[surface]
         surface = 'fsaverage'
 
     for variant, targets in CIFTI_VARIANTS.items():
@@ -253,7 +254,7 @@ def _get_cifti_variant(surface, volume, density=None):
         'space': variant,
         'surface': surface,
         'volume': volume,
-        'density': density,
+        'surface_density': density,
     }
     if surface == 'fsLR':
         out_json['grayordinates'] = {'32k': '91k', '59k': '170k'}[density]
