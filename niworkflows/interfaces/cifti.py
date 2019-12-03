@@ -54,8 +54,7 @@ CIFTI_STRUCT_WITH_LABELS = {  # CITFI structures with corresponding labels
 }
 CIFTI_VARIANTS = {
     'HCP grayordinates': ('fsLR', 'MNI152NLin6Asym'),
-    'space1': ('fsaverage5', 'MNI152NLin2009cAsym'),
-    'space2': ('fsaverage6', 'MNI152NLin2009cAsym'),
+    'fMRIPrep grayordinates': ('fsaverage', 'MNI152NLin2009cAsym'),
 }
 
 
@@ -65,8 +64,8 @@ class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
                                 desc="CIFTI volumetric output space")
     surface_target = traits.Enum("fsLR", "fsaverage5", "fsaverage6", usedefault=True,
                                  desc="CIFTI surface target space")
-    density = traits.Enum(None, '32k', '59k', usedefault=True,
-                          desc='Surface vertices density. Only required for fsLR surfaces.')
+    density = traits.Enum('10k', '32k', '41k', '59k',
+                          desc='Surface vertices density.')
     TR = traits.Float(mandatory=True, desc="Repetition time")
     surface_bolds = traits.List(File(exists=True), mandatory=True,
                                 desc="list of surface BOLD GIFTI files"
@@ -76,8 +75,8 @@ class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
 
 class _GenerateCiftiOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="generated CIFTI file")
-    variant = traits.Str(desc="combination of target spaces label")
-    variant_key = File(exists=True, desc='file storing variant space information')
+    out_metadata = File(exists=True, desc='variant metadata JSON')
+    variant = traits.Str(desc="Name of variant space")
 
 
 class GenerateCifti(SimpleInterface):
@@ -99,7 +98,7 @@ class GenerateCifti(SimpleInterface):
             self.inputs.subjects_dir,
             self.inputs.density
         )
-        self._results['variant_key'], self._results['variant'] = _get_cifti_variant(
+        self._results['out_metadata'], self._results['variant'] = _get_cifti_variant(
             self.inputs.surface_target,
             self.inputs.volume_target,
             self.inputs.density
@@ -140,15 +139,15 @@ class CiftiNameSource(SimpleInterface):
         return runtime
 
 
-def _get_cifti_data(surface_target, volume_target, subjects_dir=None, density=None):
+def _get_cifti_data(surface, volume, subjects_dir=None, density=None):
     """
     Fetch surface and volumetric label files for CIFTI creation.
 
     Parameters
     ----------
-    surface_target : str
+    surface : str
         Target surface space
-    volume_target : str
+    volume : str
         Target volume space
     subjects_dir : str, optional
         Path to FreeSurfer subjects directory (required `fsaverage5`/`fsaverage6` surfaces)
@@ -172,54 +171,52 @@ def _get_cifti_data(surface_target, volume_target, subjects_dir=None, density=No
     '.../tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz'
 
     """
-    if surface_target not in CIFTI_SURFACES or volume_target not in CIFTI_VOLUMES:
+    if surface not in CIFTI_SURFACES or volume not in CIFTI_VOLUMES:
         raise NotImplementedError(
-            "Variant (surface: {0}, volume: {1}) is not supported".format(
-                surface_target, volume_target
-            )
+            "Variant (surface: {0}, volume: {1}) is not supported".format(surface, volume)
         )
 
     tpl_kwargs = {'suffix': 'dseg'}
-    if volume_target == "MNI152NLin2009cAsym":
+    # fMRIPrep grayordinates
+    if volume == "MNI152NLin2009cAsym":
         tpl_kwargs.update({'resolution': '2', 'desc': 'DKT31'})
         annotation_files = sorted(glob(os.path.join(
             subjects_dir,
-            surface_target,
+            surface,
             'label',
             '*h.aparc.annot'
         )))
-    elif volume_target == 'MNI152NLin6Asym':
+    # HCP grayordinates
+    elif volume == 'MNI152NLin6Asym':
+        # templateflow specific resolutions (2mm, 1.6mm)
         res = {'32k': '2', '59k': '6'}[density]
-        tpl_kwargs.update({
-            'atlas': 'HCP',
-            'resolution': res,
-        })
+        tpl_kwargs.update({'atlas': 'HCP', 'resolution': res})
         annotation_files = [
             str(f) for f in tf.get('fsLR', density=density, desc='nomedialwall', suffix='dparc')
         ]
 
     if len(annotation_files) != 2:
         raise IOError("Invalid number of surface annotation files")
-    label_file = str(tf.get(volume_target, **tpl_kwargs))
+    label_file = str(tf.get(volume, **tpl_kwargs))
     return annotation_files, label_file
 
 
-def _get_cifti_variant(surface_target, volume_target, density=None):
+def _get_cifti_variant(surface, volume, density=None):
     """
     Identify CIFTI variant and return metadata.
 
     Parameters
     ----------
-    surface_target : str
+    surface : str
         Target surface space
-    volume_target : str
+    volume : str
         Target volume space
     density : str, optional
         Surface density (required for `fsLR` surfaces)
 
     Returns
     -------
-    variant_key : str
+    out_metadata : str
         JSON file with variant metadata
     variant : str
         Name of CIFTI variant
@@ -230,37 +227,40 @@ def _get_cifti_variant(surface_target, volume_target, density=None):
     >>> metafile  # doctest: +ELLIPSIS
     '.../dtseries_variant.json'
     >>> variant
-    'space1'
+    'fMRIPrep grayordinates'
 
     >>> _, variant = _get_cifti_variant('fsLR', 'MNI152NLin6Asym', density='59k')
     >>> variant
     'HCP grayordinates'
 
     """
-    variant = None
-    for space, targets in CIFTI_VARIANTS.items():
-        if all(target in targets for target in (surface_target, volume_target)):
-            variant = space
+    if surface in ('fsaverage5', 'fsaverage6'):
+        if not density:
+            density = {'fsaverage5': '10k', 'fsaverage6': '41k'}[surface]
+        surface = 'fsaverage'
+
+    for variant, targets in CIFTI_VARIANTS.items():
+        if all(target in targets for target in (surface, volume)):
             break
+        variant = None
     if variant is None:
         raise NotImplementedError(
-            "No corresponding variant for (surface: {0}, volume: {1})".format(
-                surface_target, volume_target
-            )
+            "No corresponding variant for (surface: {0}, volume: {1})".format(surface, volume)
         )
 
-    variant_key = os.path.abspath('dtseries_variant.json')
+    out_metadata = os.path.abspath('dtseries_variant.json')
     out_json = {
         'space': variant,
-        'surfaces': surface_target,
-        'volume': volume_target
+        'surface': surface,
+        'volume': volume,
+        'density': density,
     }
-    if surface_target == 'fsLR':
+    if surface == 'fsLR':
         out_json['grayordinates'] = {'32k': '91k', '59k': '170k'}[density]
 
-    with open(variant_key, 'w') as fp:
+    with open(out_metadata, 'w') as fp:
         json.dump(out_json, fp)
-    return variant_key, variant
+    return out_metadata, variant
 
 
 def _create_cifti_image(bold_file, label_file, bold_surfs, annotation_files, tr, targets):
@@ -367,11 +367,11 @@ def _create_cifti_image(bold_file, label_file, bold_surfs, annotation_files, tr,
 
     # generate Matrix information
     series_map = ci.Cifti2MatrixIndicesMap(
-        (0, ),
+        (0,),
         'CIFTI_INDEX_TYPE_SERIES',
         number_of_series_points=timepoints,
         series_exponent=0,
-        series_start=0.,
+        series_start=0.0,
         series_step=tr,
         series_unit='SECOND'
     )
@@ -382,8 +382,8 @@ def _create_cifti_image(bold_file, label_file, bold_surfs, annotation_files, tr,
     )
     # provide some metadata to CIFTI matrix
     meta = {
-        "target_surface": targets[0],
-        "target_volume": targets[1],
+        "surface": targets[0],
+        "volume": targets[1],
     }
     # generate and save CIFTI image
     matrix = ci.Cifti2Matrix()
