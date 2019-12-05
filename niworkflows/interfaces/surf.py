@@ -88,6 +88,7 @@ class _GiftiNameSourceInputSpec(BaseInterfaceInputSpec):
     pattern = traits.Str(mandatory=True,
                          desc='input file name pattern (must capture named group "LR")')
     template = traits.Str(mandatory=True, desc='output file name template')
+    template_kwargs = traits.Dict(desc='additional template keyword value pairs')
 
 
 class _GiftiNameSourceOutputSpec(TraitedSpec):
@@ -99,7 +100,7 @@ class GiftiNameSource(SimpleInterface):
     Construct a new filename for a GIFTI file.
 
     Construct a new filename based on an input filename, a matching pattern,
-    and a related template.
+    and a related template, with optionally additional keywords.
 
     This interface is intended for use with GIFTI files, to generate names
     conforming to Section 9.0 of the `GIFTI Standard`_.
@@ -131,6 +132,15 @@ class GiftiNameSource(SimpleInterface):
     >>> res.outputs.out_name
     'space-fsaverage.R.func'
 
+    >>> namer = GiftiNameSource()
+    >>> namer.inputs.pattern = r'(?P<LR>[lr])h.(?P<space>\w+).gii'
+    >>> namer.inputs.template = r'space-{space}.{den}.{LR}.func'
+    >>> namer.inputs.in_file = 'rh.fsaverage.gii'
+    >>> namer.inputs.template_kwargs = {'den': '10k'}
+    >>> res = namer.run()
+    >>> res.outputs.out_name
+    'space-fsaverage.10k.R.func'
+
     .. testcleanup::
 
     >>> import os
@@ -147,6 +157,8 @@ class GiftiNameSource(SimpleInterface):
         in_file = os.path.basename(self.inputs.in_file)
         info = in_format.match(in_file).groupdict()
         info['LR'] = info['LR'].upper()
+        if self.inputs.template_kwargs:
+            info.update(self.inputs.template_kwargs)
         filefmt = self.inputs.template
         self._results['out_name'] = filefmt.format(**info)
         return runtime
