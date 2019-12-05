@@ -236,15 +236,17 @@ def _get_cifti_variant(surface, volume, density=None):
 
     Examples
     --------
-    >>> metafile, variant = _get_cifti_variant('fsaverage5', 'MNI152NLin2009cAsym')
+    >>> metafile, variant, _ = _get_cifti_variant('fsaverage5', 'MNI152NLin2009cAsym')
     >>> metafile  # doctest: +ELLIPSIS
     '.../dtseries_variant.json'
     >>> variant
     'fMRIPrep grayordinates'
 
-    >>> _, variant = _get_cifti_variant('fsLR', 'MNI152NLin6Asym', density='59k')
+    >>> _, variant, grayords = _get_cifti_variant('fsLR', 'MNI152NLin6Asym', density='59k')
     >>> variant
     'HCP grayordinates'
+    >>> grayords
+    '170k'
 
     """
     if surface in ('fsaverage5', 'fsaverage6'):
