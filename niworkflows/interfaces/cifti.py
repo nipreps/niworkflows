@@ -64,8 +64,8 @@ class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
                                 desc="CIFTI volumetric output space")
     surface_target = traits.Enum("fsLR", "fsaverage5", "fsaverage6", usedefault=True,
                                  desc="CIFTI surface target space")
-    density = traits.Enum('10k', '32k', '41k', '59k',
-                          desc='Surface vertices density.')
+    surface_density = traits.Enum('10k', '32k', '41k', '59k',
+                                  desc='Surface vertices density.')
     TR = traits.Float(mandatory=True, desc="Repetition time")
     surface_bolds = traits.List(File(exists=True), mandatory=True,
                                 desc="list of surface BOLD GIFTI files"
@@ -77,6 +77,7 @@ class _GenerateCiftiOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="generated CIFTI file")
     out_metadata = File(exists=True, desc='variant metadata JSON')
     variant = traits.Str(desc="Name of variant space")
+    density = traits.Str(desc="Total number of grayordinates")
 
 
 class GenerateCifti(SimpleInterface):
@@ -96,13 +97,20 @@ class GenerateCifti(SimpleInterface):
             self.inputs.surface_target,
             self.inputs.volume_target,
             self.inputs.subjects_dir,
-            self.inputs.density
+            self.inputs.surface_density
         )
-        self._results['out_metadata'], self._results['variant'] = _get_cifti_variant(
+        out_metadata, variant, density = _get_cifti_variant(
             self.inputs.surface_target,
             self.inputs.volume_target,
-            self.inputs.density
+            self.inputs.surface_density
         )
+        self._results.update({
+            'out_metadata': out_metadata,
+            'variant': variant,
+        })
+        if density:
+            self._results['density'] = density
+
         self._results["out_file"] = _create_cifti_image(
             self.inputs.bold_file,
             label_file,
@@ -119,6 +127,7 @@ class _CiftiNameSourceInputSpec(BaseInterfaceInputSpec):
         mandatory=True,
         desc='unique label of spaces used in combination to generate CIFTI file'
     )
+    density = traits.Str(desc='density label')
 
 
 class _CiftiNameSourceOutputSpec(TraitedSpec):
@@ -132,11 +141,13 @@ class CiftiNameSource(SimpleInterface):
     output_spec = _CiftiNameSourceOutputSpec
 
     def _run_interface(self, runtime):
-        suffix = 'bold.dtseries'
+        suffix = ''
         if 'hcp' in self.inputs.variant.lower():
-            suffix = 'space-fsLR_bold.dtseries'
-        elif 'fmriprep' in self.inputs.variant.lower():
-            suffix = 'space-fMRIPrep_bold.dtseries'
+            suffix += 'space-fsLR_'
+        if self.inputs.density:
+            suffix += 'den-{}_'.format(self.inputs.density)
+
+        suffix += 'bold.dtseries'
         self._results['out_name'] = suffix
         return runtime
 
@@ -249,6 +260,7 @@ def _get_cifti_variant(surface, volume, density=None):
             "No corresponding variant for (surface: {0}, volume: {1})".format(surface, volume)
         )
 
+    grayords = None
     out_metadata = os.path.abspath('dtseries_variant.json')
     out_json = {
         'space': variant,
@@ -257,11 +269,12 @@ def _get_cifti_variant(surface, volume, density=None):
         'surface_density': density,
     }
     if surface == 'fsLR':
-        out_json['grayordinates'] = {'32k': '91k', '59k': '170k'}[density]
+        grayords = {'32k': '91k', '59k': '170k'}[density]
+        out_json['grayordinates'] = grayords
 
     with open(out_metadata, 'w') as fp:
         json.dump(out_json, fp)
-    return out_metadata, variant
+    return out_metadata, variant, grayords
 
 
 def _create_cifti_image(bold_file, label_file, bold_surfs, annotation_files, tr, targets):
