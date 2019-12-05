@@ -134,12 +134,12 @@ class GiftiNameSource(SimpleInterface):
 
     >>> namer = GiftiNameSource()
     >>> namer.inputs.pattern = r'(?P<LR>[lr])h.(?P<space>\w+).gii'
-    >>> namer.inputs.template = r'space-{space}.{den}.{LR}.func'
+    >>> namer.inputs.template = r'space-{space}_density-{density}_hemi-{LR}.func'
     >>> namer.inputs.in_file = 'rh.fsaverage.gii'
-    >>> namer.inputs.template_kwargs = {'den': '10k'}
+    >>> namer.inputs.template_kwargs = {'density': '10k'}
     >>> res = namer.run()
     >>> res.outputs.out_name
-    'space-fsaverage.10k.R.func'
+    'space-fsaverage_density-10k_hemi-R.func'
 
     .. testcleanup::
 
