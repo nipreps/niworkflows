@@ -638,7 +638,7 @@ def init_n4_only_wf(atropos_model=None,
             :graph2use: orig
             :simple_form: yes
 
-            from smriprep.workflows.anatomical import init_n4_only_wf
+            from niworkflows.anat.ants import init_n4_only_wf
             wf = init_n4_only_wf()
 
     Parameters
