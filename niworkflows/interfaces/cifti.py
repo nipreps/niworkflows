@@ -135,7 +135,24 @@ class _CiftiNameSourceOutputSpec(TraitedSpec):
 
 
 class CiftiNameSource(SimpleInterface):
-    """Construct new filename based on unique label of spaces used to generate a CIFTI file."""
+    """
+    Construct new filename based on unique label of spaces used to generate a CIFTI file.
+
+    Examples
+    --------
+
+    >>> namer = CiftiNameSource()
+    >>> namer.inputs.variant = 'HCP grayordinates'
+    >>> res = namer.run()
+    >>> res.outputs.out_name
+    'space-fsLR_bold.dtseries'
+
+    >>> namer.inputs.density = '32k'
+    >>> res = namer.run()
+    >>> res.outputs.out_name
+    'space-fsLR_den-32k_bold.dtseries'
+
+    """
 
     input_spec = _CiftiNameSourceInputSpec
     output_spec = _CiftiNameSourceOutputSpec
