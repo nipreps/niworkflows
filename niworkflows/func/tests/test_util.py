@@ -10,7 +10,7 @@ from nilearn.image import load_img
 
 from niworkflows.interfaces.masks import ROIsPlot
 
-from ..util import init_bold_reference_wf
+from ..util import init_bold_reference_wf, _pass_dummy_scans
 
 
 def symmetric_overlap(img1, img2):
@@ -94,3 +94,14 @@ def test_masking(input_fname, expected_fname):
              copy=True)
 
     assert overlap > 0.95, input_fname
+
+
+@pytest.mark.parametrize('algo_dummy_scans,dummy_scans,expected_out', [
+    (2, 1, 1),
+    (2, None, 2),
+    (2, 0, 0),
+])
+def test_pass_dummy_scans(algo_dummy_scans, dummy_scans, expected_out):
+    skip_vols = _pass_dummy_scans(algo_dummy_scans, dummy_scans)
+
+    assert skip_vols == expected_out
