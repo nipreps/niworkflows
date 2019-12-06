@@ -446,5 +446,4 @@ def _pass_dummy_scans(algo_dummy_scans, dummy_scans=None):
     """
     if dummy_scans is None:
         return algo_dummy_scans
-    else:
-        return dummy_scans
+    return dummy_scans
