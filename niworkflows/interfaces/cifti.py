@@ -140,7 +140,6 @@ class CiftiNameSource(SimpleInterface):
 
     Examples
     --------
-
     >>> namer = CiftiNameSource()
     >>> namer.inputs.variant = 'HCP grayordinates'
     >>> res = namer.run()
