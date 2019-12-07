@@ -444,4 +444,6 @@ def _pass_dummy_scans(algo_dummy_scans, dummy_scans=None):
         number of volumes to skip
 
     """
-    return dummy_scans or algo_dummy_scans
+    if dummy_scans is None:
+        return algo_dummy_scans
+    return dummy_scans
