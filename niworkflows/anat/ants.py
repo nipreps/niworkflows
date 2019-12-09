@@ -659,7 +659,7 @@ def init_n4_only_wf(atropos_model=None,
         Allows to specify a particular segmentation model, overwriting
         the defaults based on ``bids_suffix``
     name : str, optional
-        Workflow name (default: antsBrainExtraction)
+        Workflow name (default: ``'n4_only_wf'``).
 
     Inputs
     ------
@@ -728,6 +728,12 @@ def init_n4_only_wf(atropos_model=None,
 
     # If atropos refine, do in4 twice
     if atropos_refine:
+        # Morphological dilation, radius=2
+        dil_brainmask = pe.Node(ImageMath(operation='MD', op2='2'),
+                                name='dil_brainmask')
+        # Get largest connected component
+        get_brainmask = pe.Node(ImageMath(operation='GetLargestComponent'),
+                                name='get_brainmask')
         atropos_model = atropos_model or list(
             ATROPOS_MODELS[bids_suffix].values())
         atropos_wf = init_atropos_wf(
@@ -752,8 +758,10 @@ def init_n4_only_wf(atropos_model=None,
                 ('output_image', 'inputnode.in_files')]),
             (thr_brainmask, atropos_wf, [
                 ('out_mask', 'inputnode.in_mask')]),
-            (thr_brainmask, atropos_wf, [
-                ('out_mask', 'inputnode.in_mask_dilated')]),  # Dilate?
+            (thr_brainmask, dil_brainmask, [('output_image', 'op1')]),
+            (dil_brainmask, get_brainmask, [('output_image', 'op1')]),
+            (get_brainmask, atropos_wf, [
+                ('output_image', 'inputnode.in_mask_dilated')]),
             (atropos_wf, sel_wm, [('outputnode.out_tpms', 'inlist')]),
             (sel_wm, inu_n4_final, [('out', 'weight_image')]),
             (atropos_wf, outputnode, [
