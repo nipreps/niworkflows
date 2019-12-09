@@ -1,3 +1,11 @@
+1.1.0 (December 9, 2019)
+========================
+The first minor release of the niworkflows 1.x series. Numerous interfaces (GenerateCifti, CiftiNameSource, GiftiNameSource) have been changed to be compatible with HCP grayordinates.
+
+* ENH: CIFTI / fsLR density (#436) @mgxd
+* ENH: Expand GenerateCifti & MedialNaNs interfaces to support HCP grayordinates / fsLR surfaces (#417) @mgxd
+
+
 1.0.2 (December 9, 2019)
 ========================
 Bug-fix release in the 1.0.x series.
