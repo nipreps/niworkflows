@@ -1,3 +1,11 @@
+1.0.2 (December 9, 2019)
+========================
+Bug-fix release in the 1.0.x series.
+
+* FIX: Permit dummy scans to be 0 (#438) @jdkent
+* MNT: Specify junit_family to suppress pytest DeprecationWarning (#432) @effigies
+
+
 1.0.1 (November 27, 2019)
 =========================
 Bug-fix release in the 1.0.x series.
