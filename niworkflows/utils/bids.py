@@ -163,7 +163,7 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
     }
     if bids_filters:
         for acq, entities in bids_filters.items():
-            queries[acq].update(entities)
+        queries[acq].update(entities)
 
     if task:
         queries['bold']['task'] = task
