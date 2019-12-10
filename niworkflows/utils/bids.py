@@ -161,7 +161,7 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
         't1w': {'datatype': 'anat', 'suffix': 'T1w'},
         'roi': {'datatype': 'anat', 'suffix': 'roi'},
     }
-    if bids_filters:
+    bids_filters = bids_filters or {}
         for acq, entities in bids_filters.items():
         queries[acq].update(entities)
 
