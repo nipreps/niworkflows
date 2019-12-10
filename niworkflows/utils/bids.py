@@ -146,6 +146,10 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
     ['.../ds054/sub-100185/anat/sub-100185_T1w.nii.gz']
     >>> bids_root['t2w']  # doctest: +ELLIPSIS
     []
+    >>> bids_root, _ = collect_data(str(datadir / 'ds051'), '01',
+    ...                             bids_validate=False, bids_filters={'t1w':{'run': 1}})
+    >>> bids_root['t1w']  # doctest: +ELLIPSIS
+    ['.../ds051/sub-01/anat/sub-01_run-01_T1w.nii.gz']
     """
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
