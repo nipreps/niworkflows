@@ -311,7 +311,7 @@ N4BiasFieldCorrection.""" % _ants_version, DeprecationWarning)
             ('reverse_transforms', 'transforms'),
             ('reverse_invert_flags', 'invert_transform_flags')]),
         (map_brainmask, thr_brainmask, [('output_image', 'input_image')]),
-        (thr_brainmask, dil_brainmask, [('out_mask', 'op1')]),
+        (thr_brainmask, dil_brainmask, [('output_image', 'op1')]),
         (dil_brainmask, get_brainmask, [('output_image', 'op1')]),
         (inu_n4_final, apply_mask, [('output_image', 'in_file')]),
         (get_brainmask, apply_mask, [('output_image', 'mask_file')]),
