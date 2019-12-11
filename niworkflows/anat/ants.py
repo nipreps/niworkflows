@@ -758,7 +758,7 @@ def init_n4_only_wf(atropos_model=None,
                 ('output_image', 'inputnode.in_files')]),
             (thr_brainmask, atropos_wf, [
                 ('out_mask', 'inputnode.in_mask')]),
-            (thr_brainmask, dil_brainmask, [('output_image', 'op1')]),
+            (thr_brainmask, dil_brainmask, [('out_mask', 'op1')]),
             (dil_brainmask, get_brainmask, [('output_image', 'op1')]),
             (get_brainmask, atropos_wf, [
                 ('output_image', 'inputnode.in_mask_dilated')]),
