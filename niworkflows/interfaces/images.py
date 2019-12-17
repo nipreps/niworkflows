@@ -12,7 +12,7 @@ from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface,
-    File, InputMultiPath, OutputMultiPath)
+    File, InputMultiPath, OutputMultiPath, isdefined)
 from nipype.interfaces import fsl
 
 LOGGER = logging.getLogger('nipype.interface')
@@ -21,9 +21,11 @@ LOGGER = logging.getLogger('nipype.interface')
 class _IntraModalMergeInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
                               desc='input files')
+    in_mask = File(exists=True, desc='input mask for grand mean scaling')
     hmc = traits.Bool(True, usedefault=True)
     zero_based_avg = traits.Bool(True, usedefault=True)
     to_ras = traits.Bool(True, usedefault=True)
+    grand_mean_scaling = traits.Bool(False, usedefault=True)
 
 
 class _IntraModalMergeOutputSpec(TraitedSpec):
@@ -54,23 +56,31 @@ class IntraModalMerge(SimpleInterface):
             in_files = [reorient(inf, newpath=runtime.cwd)
                         for inf in in_files]
 
-        run_hmc = len(in_files) > 1
+        run_hmc = self.inputs.hmc and len(in_files) > 1
 
         nii_list = []
+        # Remove one-sized extra dimensions
         for i, f in enumerate(in_files):
             filenii = nb.load(f)
             filenii = nb.squeeze_image(filenii)
             if len(filenii.shape) == 5:
                 raise RuntimeError('Input image (%s) is 5D.' % f)
-            nii_list += nb.four_to_three(filenii)
+            if filenii.dataobj.ndim == 4:
+                nii_list += nb.four_to_three(filenii)
+            else:
+                nii_list.append(filenii)
+
+        if len(nii_list) > 1:
+            filenii = nb.concat_images(nii_list)
+        else:
+            filenii = nii_list[0]
 
         merged_fname = fname_presuffix(self.inputs.in_files[0],
                                        suffix='_merged', newpath=runtime.cwd)
-        filenii = nb.concat_images(nii_list)
         filenii.to_filename(merged_fname)
-
         self._results['out_file'] = merged_fname
         self._results['out_avg'] = merged_fname
+
         if filenii.dataobj.ndim < 4:
             # TODO: generate identity out_mats and zero-filled out_movpar
             return runtime
@@ -84,7 +94,23 @@ class IntraModalMerge(SimpleInterface):
             self._results['out_mats'] = mcres.outputs.mat_file
             self._results['out_movpar'] = mcres.outputs.par_file
 
-        hmcdata = filenii.get_fdata(dtype='float32').mean(axis=3)
+        hmcdata = filenii.get_fdata(dtype='float32')
+        if self.inputs.grand_mean_scaling:
+            if not isdefined(self.inputs.mask):
+                mean = np.median(hmcdata, axis=-1)
+                thres = np.percentile(mean, 25)
+                mask = mean > thres
+            else:
+                mask = nb.load(self.inputs.in_mask).get_fdata(dtype='float32') > 0.5
+
+            nimgs = hmcdata.shape[-1]
+            means = np.median(hmcdata[mask[..., np.newaxis]].reshape((-1, nimgs)).T,
+                              axis=-1)
+            max_mean = means.max()
+            for i in range(nimgs):
+                hmcdata[..., i] *= max_mean / means[i]
+
+        hmcdata = hmcdata.mean(axis=3)
         if self.inputs.zero_based_avg:
             hmcdata -= hmcdata.min()
 
