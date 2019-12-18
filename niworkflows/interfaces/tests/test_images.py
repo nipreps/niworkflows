@@ -86,3 +86,35 @@ def test_signal_extraction_equivalence(tmp_path, nvols, nmasks, ext, factor):
     t2 = toc2 - toc
 
     assert t2 < t1 / factor
+
+
+@pytest.mark.parametrize('shape, mshape', [
+    ((10, 10, 10), (10, 10, 10)),
+    ((10, 10, 10, 1), (10, 10, 10)),
+    ((10, 10, 10, 1, 1), (10, 10, 10)),
+    ((10, 10, 10, 2), (10, 10, 10, 2)),
+    ((10, 10, 10, 2, 1), (10, 10, 10, 2)),
+    ((10, 10, 10, 2, 2), None)])
+def test_IntraModalMerge(tmpdir, shape, mshape):
+    """Exercise the various types of inputs."""
+    tmpdir.chdir()
+
+    data = np.random.normal(size=shape).astype('float32')
+    fname = str(tmpdir.join('file1.nii.gz'))
+    nb.Nifti1Image(data, np.eye(4), None).to_filename(fname)
+
+    if mshape is None:
+        with pytest.raises(RuntimeError):
+            im.IntraModalMerge(in_files=fname).run()
+        return
+
+    merged = str(im.IntraModalMerge(in_files=fname).run().outputs.out_file)
+    merged_data = nb.load(merged).get_fdata(dtype='float32')
+    assert merged_data.shape == mshape
+    assert np.allclose(np.squeeze(data), merged_data)
+
+    merged = str(im.IntraModalMerge(
+        in_files=[fname, fname], hmc=False).run().outputs.out_file)
+    merged_data = nb.load(merged).get_fdata(dtype='float32')
+    new_mshape = (*mshape[:3], 2 if len(mshape) == 3 else mshape[3] * 2)
+    assert merged_data.shape == new_mshape
