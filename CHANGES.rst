@@ -1,3 +1,9 @@
+1.1.2 (December 17, 2019)
+=========================
+Hotfix of 1.1.1
+
+* FIX: ``IntraModalMerge`` - Undefined input name used in ``_run_interface`` (#442)
+
 1.1.1 (December 17, 2019)
 =========================
 A bugfix release to support addressing `poldracklab/sdcflows#77
