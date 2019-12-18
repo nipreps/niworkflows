@@ -96,7 +96,7 @@ class IntraModalMerge(SimpleInterface):
 
         hmcdata = filenii.get_fdata(dtype='float32')
         if self.inputs.grand_mean_scaling:
-            if not isdefined(self.inputs.mask):
+            if not isdefined(self.inputs.in_mask):
                 mean = np.median(hmcdata, axis=-1)
                 thres = np.percentile(mean, 25)
                 mask = mean > thres
