@@ -21,21 +21,30 @@ The first minor release of the niworkflows 1.x series. Numerous interfaces (Gene
 * ENH: CIFTI / fsLR density (#436) @mgxd
 * ENH: Expand GenerateCifti & MedialNaNs interfaces to support HCP grayordinates / fsLR surfaces (#417) @mgxd
 
+1.0.x series
+============
+1.0.3 (December 18, 2019)
+-------------------------
+Hot-fix release in the 1.0.x series. Backported from 1.1.2.
+
+* FIX: ``IntraModalMerge`` - Undefined input name used in ``_run_interface`` (#442)
+* FIX: ``IntraModalMerge`` failed for dims (x, y, z, 1) (#441) @oesteban
+
 1.0.2 (December 9, 2019)
-========================
+------------------------
 Bug-fix release in the 1.0.x series.
 
 * FIX: Permit dummy scans to be 0 (#438) @jdkent
 * MNT: Specify junit_family to suppress pytest DeprecationWarning (#432) @effigies
 
 1.0.1 (November 27, 2019)
-=========================
+-------------------------
 Bug-fix release in the 1.0.x series.
 
 * FIX: Ensure data type of masked image matches T1.mgz (#430) @effigies
 
 1.0.0 (November 26, 2019)
-=========================
+-------------------------
 The first stable release of NIWorkflows.
 
 * CI: Drop setup.py install/develop installs (#428) @effigies
