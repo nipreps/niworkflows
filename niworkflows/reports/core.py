@@ -299,7 +299,16 @@ class Report(object):
             orderings = [s for s in subrep_cfg.get('ordering', '').strip().split(',') if s]
             queries = []
             for key in orderings:
+                # some files may not have an entity value
+                # (e.g., task-rest_run-1, task-flanker)
+                # Using None allows pybids to find those files
+                optional_value = "Do Not Add"
+                if '(None)' in key:
+                    optional_value = None
+                    key = key.replace("(None)", "")
                 values = getattr(self.layout, 'get_%s%s' % (key, PLURAL_SUFFIX[key]))()
+                if optional_value is None:
+                    values.append(optional_value)
                 if values:
                     queries.append((key, values))
 
