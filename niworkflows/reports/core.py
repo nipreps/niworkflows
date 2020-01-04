@@ -302,7 +302,7 @@ class Report(object):
             orderings = [s for s in subrep_cfg.get('ordering', '').strip().split(',') if s]
             entities, list_combos = self._process_orderings(orderings, self.layout)
 
-            if not any(list_combos):  # E.g. this is an anatomical reportlet
+            if not list_combos:  # E.g. this is an anatomical reportlet
                 reportlets = [Reportlet(self.layout, self.out_dir, config=cfg)
                               for cfg in subrep_cfg['reportlets']]
             else:
@@ -327,7 +327,7 @@ class Report(object):
             if reportlets:
                 sub_report = SubReport(
                     subrep_cfg['name'],
-                    isnested=any(list_combos),
+                    isnested=list_combos,
                     reportlets=reportlets,
                     title=subrep_cfg.get('title'))
                 self.sections.append(sub_report)
@@ -406,7 +406,7 @@ class Report(object):
         unique_values = [{value[idx] for value in all_value_combos}
                          for idx in range(len(orderings))]
         # if all values are None for an entity, we do not want to keep that entity
-        keep_idx = [False if len(val_set) == 1 and None in val_set
+        keep_idx = [False if (len(val_set) == 1 and None in val_set) or not val_set
                     else True for val_set in unique_values]
         # the "kept" entities
         entities = list(compress(orderings, keep_idx))
