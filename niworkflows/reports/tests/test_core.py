@@ -39,7 +39,19 @@ def test_report():
             (1, 'mixedgamblestask'),
             (2, 'mixedgamblestask'),
             (3, 'mixedgamblestask'),
-        ])
+        ]),
+        ([''],
+         [],
+         []),
+        (['session'],
+         [],
+         []),
+        ([],
+         [],
+         [],),
+        (['madeupentity'],
+         [],
+         [],),
     ]
 )
 def test_process_orderings(test_report, orderings,
