@@ -327,7 +327,7 @@ class Report(object):
             if reportlets:
                 sub_report = SubReport(
                     subrep_cfg['name'],
-                    isnested=list_combos,
+                    isnested=bool(list_combos),
                     reportlets=reportlets,
                     title=subrep_cfg.get('title'))
                 self.sections.append(sub_report)
