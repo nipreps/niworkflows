@@ -1,4 +1,2 @@
 coverage:
   range: "0...100"
-  ignore:          # files and folders that will be removed during processing
-    - "niworkflows/_version.py"
