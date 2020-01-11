@@ -234,7 +234,7 @@ class Report(object):
     >>> robj.generate_report()
     0
     >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
-    23585
+    36425
 
     .. testcleanup::
 
@@ -311,7 +311,7 @@ class Report(object):
                 reportlets = []
                 for c in list_combos:
                     # do not display entities with the value None.
-                    c =  list(filter(None, c))
+                    c = list(filter(None, c))
                     ent = list(compress(entities, c))
                     # Set a common title for this particular combination c
                     title = 'Reports for: %s.' % ', '.join(
