@@ -310,12 +310,15 @@ class Report(object):
                 # of ordering columns.
                 reportlets = []
                 for c in list_combos:
+                    # do not display entities with the value None.
+                    c =  list(filter(None, c))
+                    ent = list(compress(entities, c))
                     # Set a common title for this particular combination c
                     title = 'Reports for: %s.' % ', '.join(
-                        ['%s <span class="bids-entity">%s</span>' % (entities[i], c[i])
+                        ['%s <span class="bids-entity">%s</span>' % (ent[i], c[i])
                          for i in range(len(c))])
                     for cfg in subrep_cfg['reportlets']:
-                        cfg['bids'].update({entities[i]: c[i] for i in range(len(c))})
+                        cfg['bids'].update({ent[i]: c[i] for i in range(len(c))})
                         rlet = Reportlet(self.layout, self.out_dir, config=cfg)
                         if not rlet.is_empty():
                             rlet.title = title
@@ -398,7 +401,7 @@ class Report(object):
         -------
         entities: :obj:`list` of :obj:`str`
             The relevant orderings that had unique values
-        value_combos: :obj:`list` of :obj:`str`
+        value_combos: :obj:`list` of :obj:`tuple`
             Unique value combinations for the entities
 
         """
