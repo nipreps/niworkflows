@@ -48,7 +48,7 @@ def bids_sessions(tmpdir_factory):
         bids_path = build_path(entities, pattern)
         file_path = svg_dir / bids_path
         file_path.ensure()
-        f.savefig(file_path)
+        f.savefig(str(file_path))
 
     # create anatomical data for both sessions
     anat_opts = [
@@ -72,7 +72,7 @@ def bids_sessions(tmpdir_factory):
         bids_path = build_path(entities, pattern)
         file_path = svg_dir / bids_path
         file_path.ensure()
-        f.savefig(file_path)
+        f.savefig(str(file_path))
 
     return svg_dir.dirname
 
