@@ -387,20 +387,20 @@ class Report(object):
         """
         Generate relevant combinations of orderings with observed values.
 
-Arguments
----------
-orderings : :obj:`list` of :obj:`list` of :obj:`str`
-    Sections prescribing an ordering to select across sessions, acquisitions, runs, etc.
-layout : :obj:`bids.layout.BIDSLayout`
-    The BIDS layout
+        Arguments
+        ---------
+        orderings : :obj:`list` of :obj:`list` of :obj:`str`
+            Sections prescribing an ordering to select across sessions, acquisitions, runs, etc.
+        layout : :obj:`bids.layout.BIDSLayout`
+            The BIDS layout
 
         Returns
         -------
+        entities: :obj:`list` of :obj:`str`
+            The relevant orderings that had unique values
+        value_combos: :obj:`list` of :obj:`str`
+            Unique value combinations for the entities
 
-        entities: list
-            the relevant orderings that had unique values
-        value_combos: list
-            unique value combinations for the entities
         """
         # get a set of all unique entity combinations
         all_value_combos = {tuple(bids_file.get_entities().get(k, None) for k in orderings)
