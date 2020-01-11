@@ -8,7 +8,6 @@ from itertools import product
 
 import matplotlib.pyplot as plt
 from bids.layout.writing import build_path
-from bids.config import _default_settings
 
 import pytest
 
@@ -74,7 +73,7 @@ def bids_sessions(tmpdir_factory):
         file_path = svg_dir / bids_path
         file_path.ensure()
         f.savefig(file_path)
-    
+
     return svg_dir.dirname
 
 
@@ -94,6 +93,7 @@ def test_report2(bids_sessions):
     out_dir = tempfile.mkdtemp()
     return Report(Path(bids_sessions), Path(out_dir), 'fakeiuud',
                   subject_id='01', packagename='fmriprep')
+
 
 @pytest.mark.parametrize(
     "orderings,expected_entities,expected_value_combos",
@@ -143,12 +143,12 @@ def test_process_orderings_small(test_report1, orderings,
          ['session', 'task', 'run'],
          ('1', 't1', None),
          ('pre', 't3', 2),
-        ),
+         ),
         (['run', 'task', 'session'],
          ['run', 'task', 'session'],
          (None, 't1', '1'),
          (2, 't3', 'pre'),
-        ),
+         ),
         ([''], [], None, None),
         (['session'], ['session'], ('1',), ('pre',)),
         ([], [], None, None),
