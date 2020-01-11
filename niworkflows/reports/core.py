@@ -385,7 +385,14 @@ class Report(object):
     @staticmethod
     def _process_orderings(orderings, layout):
         """
-        generate relevant combinations of orderings with observed values
+        Generate relevant combinations of orderings with observed values.
+
+Arguments
+---------
+orderings : :obj:`list` of :obj:`list` of :obj:`str`
+    Sections prescribing an ordering to select across sessions, acquisitions, runs, etc.
+layout : :obj:`bids.layout.BIDSLayout`
+    The BIDS layout
 
         Returns
         -------
