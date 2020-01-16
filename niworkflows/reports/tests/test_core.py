@@ -5,7 +5,7 @@ from pathlib import Path
 from pkg_resources import resource_filename
 import tempfile
 from itertools import product
-from pkg_resources import resource_filename as pkgrf
+
 
 import matplotlib.pyplot as plt
 from bids.layout.writing import build_path
