@@ -319,8 +319,8 @@ class Report(object):
                         ['%s <span class="bids-entity">%s</span>' % (ent[i], c[i])
                          for i in range(len(c))])
                     for cfg in subrep_cfg['reportlets']:
-                        _ = [cfg['bids'].pop(k, None) for k in missing_entities]
-                        del _
+                        for m_e in missing_entities:
+                            cfg['bids'].pop(m_e, None)
                         cfg['bids'].update({ent[i]: c[i] for i in range(len(c))})
                         rlet = Reportlet(self.layout, self.out_dir, config=cfg)
                         if not rlet.is_empty():
