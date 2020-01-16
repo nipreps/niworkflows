@@ -3,17 +3,18 @@
 """Interfaces under evaluation before upstreaming to nipype.interfaces.utility."""
 from nipype.interfaces.io import add_traits
 from nipype.interfaces.base import (
-    InputMultiObject, Str, DynamicTraitedSpec, BaseInterface, isdefined
+    InputMultiObject, DynamicTraitedSpec, BaseInterface, isdefined, traits
 )
 
 
 class _KeySelectInputSpec(DynamicTraitedSpec):
-    key = Str(mandatory=True, desc='selective key')
-    keys = InputMultiObject(Str, mandatory=True, min=1, desc='index of keys')
+    key = traits.Any(mandatory=True, desc='selective key')
+    keys = InputMultiObject(traits.Any, mandatory=True, min=1, desc='index of keys')
+    no_hash = traits.Bool(False, desc='avoid calculating each keys hash')
 
 
 class _KeySelectOutputSpec(DynamicTraitedSpec):
-    key = Str(desc='propagates selected key')
+    key = traits.Any(desc='propagates selected key')
 
 
 class KeySelect(BaseInterface):
@@ -117,7 +118,7 @@ class KeySelect(BaseInterface):
             setattr(self.inputs, in_field, inputs[in_field])
 
     def _check_len(self, name, new):
-        if name == "keys":
+        if name == "keys" and self.inputs.no_hash is not True:
             nitems = len(new)
             if len(set(new)) != nitems:
                 raise ValueError('Found duplicated entries in the index of ordered keys')

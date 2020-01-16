@@ -240,7 +240,10 @@ class _DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     keep_dtype = traits.Bool(False, usedefault=True, desc='keep datatype suffix')
     meta_dict = traits.DictStrAny(desc='an input dictionary containing metadata')
     source_file = File(exists=False, mandatory=True, desc='the input func file')
-    space = Str('', usedefault=True, desc='Label for space field')
+    space = traits.Either(Str, traits.Tuple(Str, traits.Dict),
+                          default='', usedefault=True,
+                          desc='Label for space field. Accepts a template string or a '
+                               'tuple in the form of (template, {template specifications})')
     suffix = Str('', usedefault=True, desc='suffix appended to source_file')
 
 
@@ -439,7 +442,10 @@ desc-preproc_bold.json'
         if len(self.inputs.in_file) > 1 and not isdefined(self.inputs.extra_values):
             formatstr = formatbase + '{suffix}{i:04d}{dtype}{ext}'
 
-        space = '_space-{}'.format(self.inputs.space) if self.inputs.space else ''
+        if isinstance(self.inputs.space, tuple):
+            space = '_space-{}{}'.format(self.inputs.space[0], _join_dict(self.inputs.space[1]))
+        else:
+            space = '_space-{}'.format(self.inputs.space) if self.inputs.space else ''
         desc = '_desc-{}'.format(self.inputs.desc) if self.inputs.desc else ''
         suffix = '_{}'.format(self.inputs.suffix) if self.inputs.suffix else ''
         dtype = '' if not self.inputs.keep_dtype else ('_%s' % dtype)
@@ -687,3 +693,19 @@ class BIDSFreeSurferDir(SimpleInterface):
                                    ", this can be safely ignored", dest)
 
         return runtime
+
+
+def _join_tuple(tup):
+    try:
+        out = '-'.join(tup)
+    except TypeError:
+        tup = tuple(str(el) for el in tup)
+        out = '-'.join(tup)
+    return out
+
+
+def _join_dict(dct):
+    out = '_'.join([_join_tuple(el) for el in dct.items()])
+    if out:
+        out = '_' + out
+    return out
