@@ -5,6 +5,7 @@ from pathlib import Path
 from pkg_resources import resource_filename
 import tempfile
 from itertools import product
+from pkg_resources import resource_filename as pkgrf
 
 import matplotlib.pyplot as plt
 from bids.layout.writing import build_path
@@ -28,12 +29,16 @@ def bids_sessions(tmpdir_factory):
         "[_desc-{desc}]_{suffix<dseg|T1w|bold>}.{extension<svg>}"
     )
     subjects = ['01']
-    sessions = ['pre', '1']
     tasks = ['t1', 't2', 't3']
     runs = ['01', '02', None]
     descs = ['aroma', 'bbregister', 'carpetplot', 'rois']
     # create functional data for both sessions
-    all_combos = product(subjects, sessions, tasks, runs, descs)
+    ses1_combos = product(subjects, ['1'], tasks, runs, descs)
+    ses2_combos = product(subjects, ['2'], tasks, [None], descs)
+    # have no runs in the second session (ex: dmriprep test data)
+    # https://github.com/nipreps/dmriprep/pull/59
+    all_combos = list(ses1_combos) + list(ses2_combos)
+
     for subject, session, task, run, desc in all_combos:
         entities = {
             'subject': subject,
@@ -50,7 +55,7 @@ def bids_sessions(tmpdir_factory):
         file_path.ensure()
         f.savefig(str(file_path))
 
-    # create anatomical data for both sessions
+    # create anatomical data
     anat_opts = [
         {'desc': 'brain'},
         {'desc': 'conform'},
@@ -60,11 +65,10 @@ def bids_sessions(tmpdir_factory):
         {'space': 'MNI152NLin6Asym'},
         {'space': 'MNI152NLin2009cAsym'},
     ]
-    anat_combos = product(subjects, sessions, anat_opts)
-    for subject, session, anat_opt in anat_combos:
+    anat_combos = product(subjects, anat_opts)
+    for subject, anat_opt in anat_combos:
         anat_entities = {
             "subject": subject,
-            "session": session,
             "datatype": 'anat',
             "suffix": 't1w'
         }
@@ -142,15 +146,15 @@ def test_process_orderings_small(test_report1, orderings,
         (['session', 'task', 'run'],
          ['session', 'task', 'run'],
          ('1', 't1', None),
-         ('pre', 't3', 2),
+         ('2', 't3', None),
          ),
         (['run', 'task', 'session'],
          ['run', 'task', 'session'],
          (None, 't1', '1'),
-         (2, 't3', 'pre'),
+         (2, 't3', '1'),
          ),
         ([''], [], None, None),
-        (['session'], ['session'], ('1',), ('pre',)),
+        (['session'], ['session'], ('1',), ('2',)),
         ([], [], None, None),
         (['madeupentity'], [], None, None),
     ]
