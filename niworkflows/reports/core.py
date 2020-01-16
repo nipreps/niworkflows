@@ -313,11 +313,13 @@ class Report(object):
                     # do not display entities with the value None.
                     c = list(filter(None, c))
                     ent = list(compress(entities, c))
+                    missing_entities = list(set(entities) - set(ent))
                     # Set a common title for this particular combination c
                     title = 'Reports for: %s.' % ', '.join(
                         ['%s <span class="bids-entity">%s</span>' % (ent[i], c[i])
                          for i in range(len(c))])
                     for cfg in subrep_cfg['reportlets']:
+                        [cfg['bids'].pop(k, None) for k in missing_entities]
                         cfg['bids'].update({ent[i]: c[i] for i in range(len(c))})
                         rlet = Reportlet(self.layout, self.out_dir, config=cfg)
                         if not rlet.is_empty():
