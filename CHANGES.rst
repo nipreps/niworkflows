@@ -1,9 +1,17 @@
+1.0.4 (January 18, 2020)
+=========================
+Bug-fix release in the 1.0.x series.
+
+* FIX: Include reports for ``run``-less functional runs (Backport of gh-443 to 1.0.x series) (#445) @jdkent
+
+
 1.0.3 (December 18, 2019)
 =========================
 Hot-fix release in the 1.0.x series. Backported from 1.1.2.
 
 * FIX: ``IntraModalMerge`` - Undefined input name used in ``_run_interface`` (#442)
 * FIX: ``IntraModalMerge`` failed for dims (x, y, z, 1) (#441) @oesteban
+
 
 1.0.2 (December 9, 2019)
 ========================
