@@ -33,7 +33,7 @@ sections:
     caption: Brain extraction of the magnitude image from the fieldmap.
     subtitle: Skull stripped magnitude image
 - name: Functional
-  ordering: session,task,run
+  ordering: session,task,acquisition,ceagent,reconstruction,direction,run,echo
   reportlets:
   - bids: {datatype: func, desc: summary, suffix: bold}
   - bids: {datatype: func, desc: validation, suffix: bold}
