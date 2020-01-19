@@ -202,7 +202,7 @@ def test_generated_reportlets(bids_sessions, ordering):
     # the last section is the most recently run
     reportlets_num = len(report.sections[-1].reportlets)
     # if ordering does not contain all the relevent entities
-    # then their should be fewer reportlets than expected
+    # then there should be fewer reportlets than expected
     if all(ent in ordering for ent in needed_entities):
         assert reportlets_num == expected_reportlets_num
     else:
