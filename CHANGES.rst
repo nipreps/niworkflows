@@ -1,3 +1,10 @@
+1.1.3 (January 16, 2020)
+========================
+A fix/enhancement of the report generation system. With thanks to J. Kent for
+the contribution.
+
+* ENH/FIX: parse orderings to account for missing entities (#443)
+
 1.1.2 (December 17, 2019)
 =========================
 Hotfix of 1.1.1

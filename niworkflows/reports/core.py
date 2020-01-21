@@ -8,7 +8,7 @@ Generalizes report generation across BIDS-Apps
 """
 from pathlib import Path
 import re
-from itertools import product
+from itertools import compress
 from collections import defaultdict
 from pkg_resources import resource_filename as pkgrf
 from bids.layout import BIDSLayout, add_config_paths
@@ -234,7 +234,7 @@ class Report(object):
     >>> robj.generate_report()
     0
     >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
-    19369
+    36425
 
     .. testcleanup::
 
@@ -285,6 +285,9 @@ class Report(object):
         self.template_path = template_path.absolute()
         self.index(settings['sections'])
 
+    def init_layout(self):
+        self.layout = BIDSLayout(self.root, config='figures', validate=False)
+
     def index(self, config):
         """
         Traverse the reports config definition and instantiate reportlets.
@@ -292,34 +295,33 @@ class Report(object):
         This method also places figures in their final location.
         """
         # Initialize a BIDS layout
-        self.layout = BIDSLayout(self.root, config='figures', validate=False)
+        self.init_layout()
         for subrep_cfg in config:
             # First determine whether we need to split by some ordering
             # (ie. sessions / tasks / runs), which are separated by commas.
             orderings = [s for s in subrep_cfg.get('ordering', '').strip().split(',') if s]
-            queries = []
-            for key in orderings:
-                values = getattr(self.layout, 'get_%s%s' % (key, PLURAL_SUFFIX[key]))()
-                if values:
-                    queries.append((key, values))
+            entities, list_combos = self._process_orderings(orderings, self.layout)
 
-            if not queries:  # E.g. this is an anatomical reportlet
+            if not list_combos:  # E.g. this is an anatomical reportlet
                 reportlets = [Reportlet(self.layout, self.out_dir, config=cfg)
                               for cfg in subrep_cfg['reportlets']]
             else:
                 # Do not use dictionary for queries, as we need to preserve ordering
                 # of ordering columns.
                 reportlets = []
-                entities, values = zip(*queries)
-                combinations = list(product(*values))  # e.g.: [('rest', 1), ('rest', 2)]
-
-                for c in combinations:
+                for c in list_combos:
+                    # do not display entities with the value None.
+                    c = list(filter(None, c))
+                    ent = list(compress(entities, c))
+                    missing_entities = list(set(entities) - set(ent))
                     # Set a common title for this particular combination c
                     title = 'Reports for: %s.' % ', '.join(
-                        ['%s <span class="bids-entity">%s</span>' % (entities[i], c[i])
+                        ['%s <span class="bids-entity">%s</span>' % (ent[i], c[i])
                          for i in range(len(c))])
                     for cfg in subrep_cfg['reportlets']:
-                        cfg['bids'].update({entities[i]: c[i] for i in range(len(c))})
+                        for m_e in missing_entities:
+                            cfg['bids'].pop(m_e, None)
+                        cfg['bids'].update({ent[i]: c[i] for i in range(len(c))})
                         rlet = Reportlet(self.layout, self.out_dir, config=cfg)
                         if not rlet.is_empty():
                             rlet.title = title
@@ -331,7 +333,7 @@ class Report(object):
             if reportlets:
                 sub_report = SubReport(
                     subrep_cfg['name'],
-                    isnested=len(queries) > 0,
+                    isnested=bool(list_combos),
                     reportlets=reportlets,
                     title=subrep_cfg.get('title'))
                 self.sections.append(sub_report)
@@ -385,6 +387,50 @@ class Report(object):
         # Write out report
         (self.out_dir / self.out_filename).write_text(report_render, encoding='UTF-8')
         return len(self.errors)
+
+    @staticmethod
+    def _process_orderings(orderings, layout):
+        """
+        Generate relevant combinations of orderings with observed values.
+
+        Arguments
+        ---------
+        orderings : :obj:`list` of :obj:`list` of :obj:`str`
+            Sections prescribing an ordering to select across sessions, acquisitions, runs, etc.
+        layout : :obj:`bids.layout.BIDSLayout`
+            The BIDS layout
+
+        Returns
+        -------
+        entities: :obj:`list` of :obj:`str`
+            The relevant orderings that had unique values
+        value_combos: :obj:`list` of :obj:`tuple`
+            Unique value combinations for the entities
+
+        """
+        # get a set of all unique entity combinations
+        all_value_combos = {tuple(bids_file.get_entities().get(k, None) for k in orderings)
+                            for bids_file in layout.get()}
+        # remove the all None member if it exists
+        none_member = tuple([None for k in orderings])
+        if none_member in all_value_combos:
+            all_value_combos.remove(tuple([None for k in orderings]))
+        # see what values exist for each entity
+        unique_values = [{value[idx] for value in all_value_combos}
+                         for idx in range(len(orderings))]
+        # if all values are None for an entity, we do not want to keep that entity
+        keep_idx = [False if (len(val_set) == 1 and None in val_set) or not val_set
+                    else True for val_set in unique_values]
+        # the "kept" entities
+        entities = list(compress(orderings, keep_idx))
+        # the "kept" value combinations
+        value_combos = [tuple(compress(value_combo, keep_idx))
+                        for value_combo in all_value_combos]
+        # sort the value combinations alphabetically from the first entity to the last entity
+        value_combos.sort(key=lambda entry:
+                          tuple(str(value) if value is not None else '0' for value in entry))
+
+        return entities, value_combos
 
 
 def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config=None,
