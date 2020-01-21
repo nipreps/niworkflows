@@ -295,12 +295,13 @@ class DerivativesDataSink(SimpleInterface):
     >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)
     >>> dsink.inputs.in_file = str(tmpfile)
     >>> dsink.inputs.source_file = str(tricky_source)
+    >>> dsink.inputs.space = ('MNI152', {'res': '1'})
     >>> dsink.inputs.keep_dtype = True
     >>> dsink.inputs.desc = 'preproc'
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
     '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
-desc-preproc_bold.nii.gz'
+space-MNI152_res-1_desc-preproc_bold.nii.gz'
 
     >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
     >>> bids_dir.mkdir(parents=True, exist_ok=True)

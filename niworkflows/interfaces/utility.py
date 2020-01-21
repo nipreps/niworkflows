@@ -85,6 +85,22 @@ class KeySelect(BaseInterface):
     key = MNI152NLin6Asym
     <BLANKLINE>
 
+
+    >>> ks = KeySelect(fields=['field1', 'field2'])
+    >>> ks.inputs.keys = [('MNI152', {'res': 1}), ('MNI152', {'res': 2})]
+    Traceback (most recent call last):
+    TypeError: unhashable type: 'dict'
+    >>> ks.inputs.no_hash = True
+    >>> ks.inputs.keys = [('MNI152', {'res': 1}), ('MNI152', {'res': 2})]
+    >>> ks.inputs.field1 = ['foo', 'bar']
+    >>> ks.inputs.field2 = ['py', 'dra']
+    >>> ks.inputs.key = ('MNI152', {'res': 1})
+    >>> ks.run().outputs
+    <BLANKLINE>
+    field1 = foo
+    field2 = py
+    key = ('MNI152', {'res': 1})
+    <BLANKLINE>
     """
     input_spec = _KeySelectInputSpec
     output_spec = _KeySelectOutputSpec
