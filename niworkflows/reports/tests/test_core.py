@@ -2,10 +2,10 @@
 
 import os
 from pathlib import Path
-from pkg_resources import resource_filename
+from pkg_resources import resource_filename as pkgrf
 import tempfile
 from itertools import product
-
+from yaml import safe_load as load
 
 import matplotlib.pyplot as plt
 from bids.layout.writing import build_path
@@ -83,7 +83,7 @@ def bids_sessions(tmpdir_factory):
 
 @pytest.fixture()
 def test_report1():
-    test_data_path = resource_filename(
+    test_data_path = pkgrf(
         'niworkflows',
         os.path.join('data', 'tests', 'work', 'reportlets'))
     out_dir = tempfile.mkdtemp()
@@ -172,3 +172,38 @@ def test_process_orderings_large(test_report2, orderings,
     assert entities == expected_entities
     assert value_combos[0] == first_value_combo
     assert value_combos[-1] == last_value_combo
+
+
+@pytest.mark.parametrize(
+    "ordering",
+    [
+        ("session"),
+        ("task"),
+        ("run"),
+        ("session,task"),
+        ("session,task,run"),
+        ("session,task,acquisition,ceagent,reconstruction,direction,run,echo"),
+        ("session,task,run,madeupentity"),
+    ])
+def test_generated_reportlets(bids_sessions, ordering):
+    # make independent report
+    out_dir = tempfile.mkdtemp()
+    report = Report(Path(bids_sessions), Path(out_dir), 'fakeiuud',
+                    subject_id='01', packagename='fmriprep')
+    config = Path(pkgrf('niworkflows', 'reports/fmriprep.yml'))
+    settings = load(config.read_text())
+    # change settings to only include some missing ordering
+    settings['sections'][3]['ordering'] = ordering
+    report.index(settings['sections'])
+    # expected number of reportlets
+    expected_reportlets_num = len(report.layout.get(extension='svg'))
+    # bids_session uses these entities
+    needed_entities = ['session', 'task', 'run']
+    # the last section is the most recently run
+    reportlets_num = len(report.sections[-1].reportlets)
+    # if ordering does not contain all the relevent entities
+    # then there should be fewer reportlets than expected
+    if all(ent in ordering for ent in needed_entities):
+        assert reportlets_num == expected_reportlets_num
+    else:
+        assert reportlets_num < expected_reportlets_num
