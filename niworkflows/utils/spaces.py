@@ -1,6 +1,8 @@
 """Utilities for tracking and filtering spaces."""
 import attr
 import typing
+from bids.layout.writing import _expand_entities
+from collections import defaultdict
 from templateflow import api as _tfapi
 
 NONSTANDARD_REFERENCES = [
@@ -121,6 +123,40 @@ class Space:
     >>> sp1 == sp2
     True
 
+    >>> Space.from_string("MNI152NLin2009cAsym")
+    [Space(name='MNI152NLin2009cAsym', cohort=None, spec={})]
+
+    >>> # Bad name
+    >>> Space.from_string("shouldraise")
+    Traceback (most recent call last):
+      ...
+    ValueError: space identifier "shouldraise" is invalid.
+    ...
+
+    >>> # Missing cohort
+    >>> Space.from_string("MNIPediatricAsym")
+    Traceback (most recent call last):
+      ...
+    ValueError: standard space "MNIPediatricAsym" is not fully defined.
+    ...
+
+    >>> Space.from_string("MNIPediatricAsym:cohort-1")
+    [Space(name='MNIPediatricAsym', cohort='1', spec={})]
+
+    >>> Space.from_string("MNIPediatricAsym:cohort-1:cohort-2")
+    [Space(name='MNIPediatricAsym', cohort='1', spec={}),
+     Space(name='MNIPediatricAsym', cohort='2', spec={})]
+
+    >>> Space.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2")
+    [Space(name='MNIPediatricAsym', cohort='5', spec={'res': '2'}),
+     Space(name='MNIPediatricAsym', cohort='6', spec={'res': '2'})]
+
+    >>> Space.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2:res-iso1.6mm")
+    [Space(name='MNIPediatricAsym', cohort='5', spec={'res': '2'}),
+     Space(name='MNIPediatricAsym', cohort='5', spec={'res': 'iso1.6mm'}),
+     Space(name='MNIPediatricAsym', cohort='6', spec={'res': '2'}),
+     Space(name='MNIPediatricAsym', cohort='6', spec={'res': 'iso1.6mm'})]
+
     """
 
     _standard_spaces = tuple(_tfapi.templates())
@@ -195,6 +231,20 @@ class Space:
         if value is not None and not isinstance(value, dict):
             raise TypeError(
                 "invalid space specification: %s." % str(value))
+
+    @classmethod
+    def from_string(cls, value):
+        """Create a new Space from string."""
+        _args = value.split(':')
+        spec = defaultdict(list, {})
+        for modifier in _args[1:]:
+            mitems = modifier.split('-', 1)
+            spec[mitems[0]].append(len(mitems) == 1 or mitems[1])
+
+        allspecs = _expand_entities(spec)
+
+        return [cls(_args[0], s) for s in allspecs]
+
 
 
 class SpatialReferences:
