@@ -169,7 +169,7 @@ class Space:
     """The dictionary of specs."""
     standard: bool = attr.ib(default=False, repr=False)
     """Whether this space is standard or not."""
-    dim: bool = attr.ib(default=3, repr=False)
+    dim: int = attr.ib(default=3, repr=False)
     """Dimensionality of the sampling manifold."""
 
     def __attrs_post_init__(self):
