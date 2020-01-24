@@ -220,6 +220,10 @@ class SpatialReferences:
     >>> sp.get_nonstd_spaces(dim=(3,))
     ['func', 'anat']
 
+    >>> sp.get_nonstd_spaces(only_names=False, dim=(3,))
+    [Space(name='func', cohort=None, spec={}),
+     Space(name='anat', cohort=None, spec={})]
+
     >>> sp.get_std_spaces()
     ['MNI152NLin2009cAsym', 'fsaverage', 'MNIPediatricAsym:cohort-2']
 
@@ -358,7 +362,8 @@ class SpatialReferences:
         return [s for s in self._spaces
                 if s.standard and s.spec and s.dim in dim]
 
-    def get_nonstd_spaces(self, dim=(2, 3)):
+    def get_nonstd_spaces(self, only_names=True, dim=(2, 3)):
         """Return nonstandard spaces."""
-        return [s.name for s in self._spaces
+        return [s.name if only_names else s
+                for s in self._spaces
                 if not s.standard and s.dim in dim]
