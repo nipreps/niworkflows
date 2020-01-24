@@ -246,7 +246,6 @@ class Space:
         return [cls(_args[0], s) for s in allspecs]
 
 
-
 class SpatialReferences:
     """
     Manage specifications of spatial references.
