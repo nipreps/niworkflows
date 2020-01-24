@@ -53,7 +53,7 @@ class Space:
     >>> Space('func')
     Space(name='func', cohort=None, spec={})
 
-    Checks spaces with cohorts:
+    >>> # Checks spaces with cohorts:
     >>> Space('MNIPediatricAsym')
     Traceback (most recent call last):
       ...
@@ -82,13 +82,13 @@ class Space:
     ValueError: space identifier "shouldraise" is invalid.
     ...
 
-    Correctly assigns the density of legacy "fsaverage":
+    >>> # Correctly assigns the density of legacy "fsaverage":
     >>> Space(name='fsaverage')
     Space(name='fsaverage', cohort=None, spec={'den': '164k'})
     >>> Space(name='fsaverage6')
     Space(name='fsaverage', cohort=None, spec={'den': '41k'})
 
-    Overwrites density of legacy "fsaverage" specifications
+    >>> # Overwrites density of legacy "fsaverage" specifications
     >>> Space(name='fsaverage6', spec={'den': '10k'})
     Space(name='fsaverage', cohort=None, spec={'den': '41k'})
 
