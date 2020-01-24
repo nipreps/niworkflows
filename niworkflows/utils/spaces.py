@@ -1,6 +1,5 @@
 """Utilities for tracking and filtering spaces."""
 import attr
-import typing
 from collections import defaultdict
 from itertools import product
 from templateflow import api as _tfapi
@@ -161,15 +160,15 @@ class Space:
 
     _standard_spaces = tuple(_tfapi.templates())
 
-    name: str = attr.ib(default=None)
+    name = attr.ib(default=None, type=str)
     """Unique name designating this space."""
-    cohort: str = attr.ib(init=False, default=None)
+    cohort = attr.ib(init=False, default=None, type=str)
     """An attribute to accomodate cohorts from TemplateFlow."""
-    spec: typing.Dict = attr.ib(factory=dict)
+    spec = attr.ib(factory=dict)
     """The dictionary of specs."""
-    standard: bool = attr.ib(default=False, repr=False)
+    standard = attr.ib(default=False, repr=False, type=bool)
     """Whether this space is standard or not."""
-    dim: int = attr.ib(default=3, repr=False)
+    dim = attr.ib(default=3, repr=False, type=int)
     """Dimensionality of the sampling manifold."""
 
     def __attrs_post_init__(self):
