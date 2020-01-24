@@ -1,8 +1,8 @@
 """Utilities for tracking and filtering spaces."""
 import attr
 import typing
-from bids.layout.writing import _expand_entities
 from collections import defaultdict
+from itertools import product
 from templateflow import api as _tfapi
 
 NONSTANDARD_REFERENCES = [
@@ -359,7 +359,10 @@ class SpatialReferences:
         if not self._spaces:
             return False
         item = self.check_space(item)
-        return any([i == item for i in self._spaces])
+        for s in self._spaces:
+            if s == item:
+                return True
+        return False
 
     def __repr__(self):
         """Representation of this object."""
@@ -396,14 +399,12 @@ class SpatialReferences:
 
     def get_std_spaces(self, dim=(2, 3)):
         """Return only standard spaces."""
-        _names = [':cohort-'.join((s.name, s.cohort))
-                  if s.cohort else s.name
-                  for s in self._spaces if s.standard and s.dim in dim]
-
         names = []
-        for s in _names:
-            if s not in names:
-                names.append(s)
+        for s in self._spaces:
+            name = ':cohort-'.join((s.name, s.cohort)) if s.cohort else s.name
+            if s.standard and s.dim in dim and name not in names:
+                names.append(name)
+
         return names
 
     def get_templates(self, dim=(2, 3)):
@@ -416,3 +417,37 @@ class SpatialReferences:
         return [s.name if only_names else s
                 for s in self._spaces
                 if not s.standard and s.dim in dim]
+
+
+def _expand_entities(entities):
+    """
+    Generate multiple replacement queries based on all combinations of values.
+
+    Ported from PyBIDS
+
+    Examples
+    --------
+    >>> entities = {'subject': ['01', '02'], 'session': ['1', '2'], 'task': ['rest', 'finger']}
+    >>> out = _expand_entities(entities)
+    >>> len(out)
+    8
+    >>> {'subject': '01', 'session': '1', 'task': 'rest'} in out
+    True
+    >>> {'subject': '02', 'session': '1', 'task': 'rest'} in out
+    True
+    >>> {'subject': '01', 'session': '2', 'task': 'rest'} in out
+    True
+    >>> {'subject': '02', 'session': '2', 'task': 'rest'} in out
+    True
+    >>> {'subject': '01', 'session': '1', 'task': 'finger'} in out
+    True
+    >>> {'subject': '02', 'session': '1', 'task': 'finger'} in out
+    True
+    >>> {'subject': '01', 'session': '2', 'task': 'finger'} in out
+    True
+    >>> {'subject': '02', 'session': '2', 'task': 'finger'} in out
+    True
+    """
+    keys = list(entities.keys())
+    values = list(product(*[entities[k] for k in keys]))
+    return [{k: v for k, v in zip(keys, combs)} for combs in values]
