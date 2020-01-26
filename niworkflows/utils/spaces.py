@@ -24,7 +24,10 @@ FSAVERAGE_DENSITY = {
     'fsaverage6': '41k',
     'fsaverage': '164k',
 }
-"""A map of surface densities and legacy fsaverageX names."""
+"""A map of legacy fsaverageX names to surface densities."""
+
+FSAVERAGE_LEGACY = {v: k for k, v in FSAVERAGE_DENSITY.items()}
+"""A map of surface densities to legacy fsaverageX names."""
 
 
 @attr.s(slots=True, frozen=True)
@@ -35,22 +38,22 @@ class Space:
     Examples
     --------
     >>> Space('MNI152NLin2009cAsym')
-    Space(name='MNI152NLin2009cAsym', cohort=None, spec={})
+    Space(name='MNI152NLin2009cAsym', spec={})
 
     >>> Space('MNI152NLin2009cAsym', {})
-    Space(name='MNI152NLin2009cAsym', cohort=None, spec={})
+    Space(name='MNI152NLin2009cAsym', spec={})
 
     >>> Space('MNI152NLin2009cAsym', None)
-    Space(name='MNI152NLin2009cAsym', cohort=None, spec={})
+    Space(name='MNI152NLin2009cAsym', spec={})
 
     >>> Space('MNI152NLin2009cAsym', {'res': 1})
-    Space(name='MNI152NLin2009cAsym', cohort=None, spec={'res': 1})
+    Space(name='MNI152NLin2009cAsym', spec={'res': 1})
 
     >>> Space('MNIPediatricAsym', {'cohort': '1'})
-    Space(name='MNIPediatricAsym', cohort='1', spec={})
+    Space(name='MNIPediatricAsym', spec={'cohort': '1'})
 
     >>> Space('func')
-    Space(name='func', cohort=None, spec={})
+    Space(name='func', spec={})
 
     >>> # Checks spaces with cohorts:
     >>> Space('MNIPediatricAsym')
@@ -62,7 +65,7 @@ class Space:
     >>> Space(name='MNI152Lin', spec={'cohort': 1})
     Traceback (most recent call last):
       ...
-    ValueError: standard space "MNI152Lin" does not contain ...
+    ValueError: standard space "MNI152Lin" does not accept ...
 
     >>> Space('MNIPediatricAsym', {'cohort': '100'})
     Traceback (most recent call last):
@@ -83,13 +86,18 @@ class Space:
 
     >>> # Correctly assigns the density of legacy "fsaverage":
     >>> Space(name='fsaverage')
-    Space(name='fsaverage', cohort=None, spec={'den': '164k'})
+    Space(name='fsaverage', spec={'den': '164k'})
+    >>> Space(name='fsaverage').legacyname
+    'fsaverage'
     >>> Space(name='fsaverage6')
-    Space(name='fsaverage', cohort=None, spec={'den': '41k'})
-
+    Space(name='fsaverage', spec={'den': '41k'})
+    >>> Space(name='fsaverage6').legacyname
+    'fsaverage6'
     >>> # Overwrites density of legacy "fsaverage" specifications
     >>> Space(name='fsaverage6', spec={'den': '10k'})
-    Space(name='fsaverage', cohort=None, spec={'den': '41k'})
+    Space(name='fsaverage', spec={'den': '41k'})
+    >>> Space(name='fsaverage6', spec={'den': '10k'}).legacyname
+    'fsaverage6'
 
     >>> Space('func').standard
     False
@@ -97,8 +105,14 @@ class Space:
     >>> Space('MNI152Lin').standard
     True
 
+    >>> Space('MNI152Lin').fullname
+    'MNI152Lin'
+
     >>> Space('MNIPediatricAsym', {'cohort': 1}).standard
     True
+
+    >>> Space('MNIPediatricAsym', {'cohort': 1}).fullname
+    'MNIPediatricAsym:cohort-1'
 
     >>> Space('func') == Space('func')
     True
@@ -123,7 +137,7 @@ class Space:
     True
 
     >>> Space.from_string("MNI152NLin2009cAsym")
-    [Space(name='MNI152NLin2009cAsym', cohort=None, spec={})]
+    [Space(name='MNI152NLin2009cAsym', spec={})]
 
     >>> # Bad name
     >>> Space.from_string("shouldraise")
@@ -140,21 +154,21 @@ class Space:
     ...
 
     >>> Space.from_string("MNIPediatricAsym:cohort-1")
-    [Space(name='MNIPediatricAsym', cohort='1', spec={})]
+    [Space(name='MNIPediatricAsym', spec={'cohort': '1'})]
 
     >>> Space.from_string("MNIPediatricAsym:cohort-1:cohort-2")
-    [Space(name='MNIPediatricAsym', cohort='1', spec={}),
-     Space(name='MNIPediatricAsym', cohort='2', spec={})]
+    [Space(name='MNIPediatricAsym', spec={'cohort': '1'}),
+     Space(name='MNIPediatricAsym', spec={'cohort': '2'})]
 
     >>> Space.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2")
-    [Space(name='MNIPediatricAsym', cohort='5', spec={'res': '2'}),
-     Space(name='MNIPediatricAsym', cohort='6', spec={'res': '2'})]
+    [Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': '2'}),
+     Space(name='MNIPediatricAsym', spec={'cohort': '6', 'res': '2'})]
 
     >>> Space.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2:res-iso1.6mm")
-    [Space(name='MNIPediatricAsym', cohort='5', spec={'res': '2'}),
-     Space(name='MNIPediatricAsym', cohort='5', spec={'res': 'iso1.6mm'}),
-     Space(name='MNIPediatricAsym', cohort='6', spec={'res': '2'}),
-     Space(name='MNIPediatricAsym', cohort='6', spec={'res': 'iso1.6mm'})]
+    [Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': '2'}),
+     Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': 'iso1.6mm'}),
+     Space(name='MNIPediatricAsym', spec={'cohort': '6', 'res': '2'}),
+     Space(name='MNIPediatricAsym', spec={'cohort': '6', 'res': 'iso1.6mm'})]
 
     """
 
@@ -162,8 +176,6 @@ class Space:
 
     name = attr.ib(default=None, type=str)
     """Unique name designating this space."""
-    cohort = attr.ib(init=False, default=None, type=str)
-    """An attribute to accomodate cohorts from TemplateFlow."""
     spec = attr.ib(factory=dict)
     """The dictionary of specs."""
     standard = attr.ib(default=False, repr=False, type=bool)
@@ -191,20 +203,36 @@ class Space:
         if self.name in self._standard_spaces:
             object.__setattr__(self, "standard", True)
 
-        if self.spec and 'cohort' in self.spec:
-            spec = self.spec.copy()
-            value = spec.pop('cohort')
-            self._check_cohort('cohort', value)
-            object.__setattr__(self, "cohort", value)
-            object.__setattr__(self, "spec", spec)
-            return
+        _cohorts = ["%s" % t
+                    for t in _tfapi.TF_LAYOUT.get_cohorts(template=self.name)]
+        if "cohort" in self.spec:
+            if not _cohorts:
+                raise ValueError(
+                    'standard space "%s" does not accept a cohort '
+                    'specification.' % self.name)
 
-        _cohorts = _tfapi.TF_LAYOUT.get_cohorts(template=self.name)
-        if _cohorts:
+            if str(self.spec["cohort"]) not in _cohorts:
+                raise ValueError(
+                    'standard space "%s" does not contain any cohort '
+                    'named "%s".' % (self.name, self.spec["cohort"]))
+        elif _cohorts:
             _cohorts = ', '.join(['"cohort-%s"' % c for c in _cohorts])
             raise ValueError(
                 'standard space "%s" is not fully defined.\n'
                 'Set a valid cohort selector from: %s.' % (self.name, _cohorts))
+
+    @property
+    def fullname(self):
+        """Generate a full-name combining cohort."""
+        if "cohort" not in self.spec:
+            return self.name
+        return "%s:cohort-%s" % (self.name, self.spec["cohort"])
+
+    @property
+    def legacyname(self):
+        """Generate a legacy name for fsaverageX spaces."""
+        if self.name == "fsaverage":
+            return FSAVERAGE_LEGACY[self.spec["den"]]
 
     @name.validator
     def _check_name(self, attribute, value):
@@ -215,15 +243,6 @@ class Space:
             raise ValueError(
                 'space identifier "%s" is invalid.\nValid '
                 'identifiers are: %s' % (value, ', '.join(valid)))
-
-    @cohort.validator
-    def _check_cohort(self, attribute, value):
-        valid = ['%s' % c for c in _tfapi.TF_LAYOUT.get_cohorts(
-            template=self.name)]
-        if value is not None and str(value) not in valid:
-            raise ValueError(
-                'standard space "%s" does not contain any cohort '
-                'named "%s".' % (self.name, value))
 
     @spec.validator
     def _check_spec(self, attribute, value):
@@ -269,8 +288,8 @@ class SpatialReferences:
     ['func', 'anat']
 
     >>> sp.get_nonstd_spaces(only_names=False, dim=(3,))
-    [Space(name='func', cohort=None, spec={}),
-     Space(name='anat', cohort=None, spec={})]
+    [Space(name='func', spec={}),
+     Space(name='anat', spec={})]
 
     >>> sp.get_std_spaces()
     ['MNI152NLin2009cAsym', 'fsaverage', 'MNIPediatricAsym:cohort-2']
@@ -278,11 +297,14 @@ class SpatialReferences:
     >>> sp.get_std_spaces(dim=(3,))
     ['MNI152NLin2009cAsym', 'MNIPediatricAsym:cohort-2']
 
+    >>> sp.get_fs_spaces()
+    ['fsnative', 'fsaverage5', 'fsaverage6']
+
     >>> sp.get_templates()
-    [Space(name='fsaverage', cohort=None, spec={'den': '10k'}),
-     Space(name='fsaverage', cohort=None, spec={'den': '41k'}),
-     Space(name='MNI152NLin2009cAsym', cohort=None, spec={'res': 2}),
-     Space(name='MNI152NLin2009cAsym', cohort=None, spec={'res': 1})]
+    [Space(name='fsaverage', spec={'den': '10k'}),
+     Space(name='fsaverage', spec={'den': '41k'}),
+     Space(name='MNI152NLin2009cAsym', spec={'res': 2}),
+     Space(name='MNI152NLin2009cAsym', spec={'res': 1})]
 
     >>> sp.add(('MNIPediatricAsym', {'cohort': '2'}))
     >>> sp.get_std_spaces(dim=(3,))
@@ -318,6 +340,12 @@ class SpatialReferences:
     @staticmethod
     def check_space(space):
         """Build a :class:`Space` object."""
+        try:
+            if isinstance(space[0], Space):
+                return space[0]
+        except IndexError:
+            pass
+
         spec = {}
         if not isinstance(space, str):
             try:
@@ -396,26 +424,42 @@ class SpatialReferences:
         elif error is True:
             raise ValueError('space "%s" already in spaces.' % str(value))
 
-    def get_std_spaces(self, dim=(2, 3)):
+    def get_std_spaces(self, only_names=True, dim=(2, 3)):
         """Return only standard spaces."""
         names = []
+        std_spaces = []
         for s in self._spaces:
-            name = ':cohort-'.join((s.name, s.cohort)) if s.cohort else s.name
-            if s.standard and s.dim in dim and name not in names:
-                names.append(name)
-
-        return names
+            if s.standard and s.dim in dim and s.fullname not in names:
+                names.append(s.fullname)
+                std_spaces.append(s)
+        if only_names:
+            return names
+        return std_spaces
 
     def get_templates(self, dim=(2, 3)):
         """Return output spaces."""
         return [s for s in self._spaces
-                if s.standard and s.spec and s.dim in dim]
+                if s.standard and hasspec(s.spec, ('res', 'den')) and s.dim in dim]
 
     def get_nonstd_spaces(self, only_names=True, dim=(2, 3)):
         """Return nonstandard spaces."""
         return [s.name if only_names else s
                 for s in self._spaces
                 if not s.standard and s.dim in dim]
+
+    def get_fs_spaces(self):
+        """Return FreeSurfer spaces."""
+        return [s.legacyname or s.name
+                for s in self._spaces
+                if s.name in ("fsaverage", "fsnative")]
+
+
+def hasspec(value, specs):
+    """Check whether any of the keys are in a dict."""
+    for s in specs:
+        if s in value:
+            return True
+    return False
 
 
 def _expand_entities(entities):
@@ -446,6 +490,7 @@ def _expand_entities(entities):
     True
     >>> {'subject': '02', 'session': '2', 'task': 'finger'} in out
     True
+
     """
     keys = list(entities.keys())
     values = list(product(*[entities[k] for k in keys]))
