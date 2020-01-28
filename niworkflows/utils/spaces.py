@@ -490,28 +490,24 @@ def _expand_entities(entities):
 
     Ported from PyBIDS
 
+
+    .. testsetup::
+
+        >>> if PY_VERSION < (3, 6):
+        ...     pytest.skip("This doctest does not work on python <3.6")
+
     Examples
     --------
     >>> entities = {'subject': ['01', '02'], 'session': ['1', '2'], 'task': ['rest', 'finger']}
-    >>> out = _expand_entities(entities)
-    >>> len(out)
-    8
-    >>> {'subject': '01', 'session': '1', 'task': 'rest'} in out
-    True
-    >>> {'subject': '02', 'session': '1', 'task': 'rest'} in out
-    True
-    >>> {'subject': '01', 'session': '2', 'task': 'rest'} in out
-    True
-    >>> {'subject': '02', 'session': '2', 'task': 'rest'} in out
-    True
-    >>> {'subject': '01', 'session': '1', 'task': 'finger'} in out
-    True
-    >>> {'subject': '02', 'session': '1', 'task': 'finger'} in out
-    True
-    >>> {'subject': '01', 'session': '2', 'task': 'finger'} in out
-    True
-    >>> {'subject': '02', 'session': '2', 'task': 'finger'} in out
-    True
+    >>> _expand_entities(entities)
+    [{'subject': '01', 'session': '1', 'task': 'rest'},
+     {'subject': '02', 'session': '1', 'task': 'rest'},
+     {'subject': '01', 'session': '2', 'task': 'rest'},
+     {'subject': '02', 'session': '2', 'task': 'rest'},
+     {'subject': '01', 'session': '1', 'task': 'finger'},
+     {'subject': '02', 'session': '1', 'task': 'finger'},
+     {'subject': '01', 'session': '2', 'task': 'finger'},
+     {'subject': '02', 'session': '2', 'task': 'finger'}]
 
     """
     keys = list(entities.keys())
