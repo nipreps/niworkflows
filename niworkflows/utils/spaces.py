@@ -1,4 +1,5 @@
 """Utilities for tracking and filtering spaces."""
+import argparse
 import attr
 from collections import defaultdict
 from itertools import product
@@ -363,8 +364,8 @@ class SpatialReferences:
     def check_space(space):
         """Build a :class:`Space` object."""
         try:
-            if isinstance(space[0], Space):
-                return space[0]
+            if isinstance(space, Space):
+                return space
         except IndexError:
             pass
 
@@ -415,7 +416,7 @@ class SpatialReferences:
 
     def __repr__(self):
         """Representation of this object."""
-        return 'Imaging spaces: %s' % ', '.join(self._spaces)
+        return 'Imaging spaces: %s' % ', '.join([s.fullname for s in self.spaces])
 
     @property
     def spaces(self):
@@ -476,6 +477,14 @@ class SpatialReferences:
                 if s.name in ("fsaverage", "fsnative")]
 
 
+class StoreSpacesAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        spaces = getattr(namespace, self.dest) or []
+        for val in values:
+            spaces.extend(Space.from_string(val))
+        setattr(namespace, self.dest, spaces)
+
+
 def hasspec(value, specs):
     """Check whether any of the keys are in a dict."""
     for s in specs:
@@ -492,7 +501,6 @@ def _expand_entities(entities):
 
 
     .. testsetup::
-
         >>> if PY_VERSION < (3, 6):
         ...     pytest.skip("This doctest does not work on python <3.6")
 
