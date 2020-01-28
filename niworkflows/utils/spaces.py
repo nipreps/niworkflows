@@ -496,10 +496,32 @@ class SpatialReferences:
                 if not s.standard and s.dim in dim]
 
     def get_fs_spaces(self):
-        """Return FreeSurfer spaces."""
+        """
+        Return FreeSurfer spaces.
+
+        Discards nonlegacy fsaverage values (i.e., with nonstandard density value).
+
+        Examples
+        --------
+        >>> SpatialReferences([
+        ...     'fsnative',
+        ...     'fsaverage6',
+        ...     'fsaverage5',
+        ...     'MNI152NLin6Asym',
+        ... ]).get_fs_spaces()
+        ['fsnative', 'fsaverage6', 'fsaverage5']
+
+        >>> SpatialReferences([
+        ...     'fsnative',
+        ...     'fsaverage6',
+        ...     Space(name='fsaverage', spec={'den': '30k'})
+        ... ]).get_fs_spaces()
+        ['fsnative', 'fsaverage6']
+
+        """
         return [s.legacyname or s.name
                 for s in self._spaces
-                if s.name in ("fsaverage", "fsnative")]
+                if s.legacyname or s.name == "fsnative"]
 
 
 class OutputSpacesAction(argparse.Action):
