@@ -201,9 +201,12 @@ class Space:
         Space(name='fsaverage', spec={'den': '41k'})
         >>> Space(name='fsaverage6', spec={'den': '10k'}).legacyname
         'fsaverage6'
+        >>> # Return None if no legacy name
+        >>> Space(name='fsaverage', spec={'den': '30k'}).legacyname is None
+        True
 
         """
-        if self.name == "fsaverage":
+        if self.name == "fsaverage" and self.spec["den"] in FSAVERAGE_LEGACY:
             return FSAVERAGE_LEGACY[self.spec["den"]]
 
     @name.validator
@@ -506,7 +509,8 @@ class OutputSpacesAction(argparse.Action):
         """Execute parser."""
         spaces = getattr(namespace, self.dest) or SpatialReferences()
         for val in values:
-            spaces += Space.from_string(val)
+            for sp in Space.from_string(val):
+                spaces.add(sp)
         setattr(namespace, self.dest, spaces)
 
 

@@ -18,6 +18,10 @@ def parser():
     (("MNI152NLin6Asym",), 1),
     (("fsaverage:den-10k", "MNI152NLin6Asym"), 2),
     (("fsaverage:den-10k:den-30k", "MNI152NLin6Asym:res-1:res-2"), 4),
+    (("fsaverage:den-10k:den-30k", "MNI152NLin6Asym:res-1:res-2",
+      "fsaverage5"), 4),
+    (("fsaverage:den-10k:den-30k", "MNI152NLin6Asym:res-1:res-2",
+      "fsaverage:den-10k:den-30k", "MNI152NLin6Asym:res-1:res-2"), 4),
 ])
 def test_space_action(parser, spaces, expected):
     """Test action."""
