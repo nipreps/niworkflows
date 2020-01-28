@@ -136,40 +136,6 @@ class Space:
     >>> sp1 == sp2
     True
 
-    >>> Space.from_string("MNI152NLin2009cAsym")
-    [Space(name='MNI152NLin2009cAsym', spec={})]
-
-    >>> # Bad name
-    >>> Space.from_string("shouldraise")
-    Traceback (most recent call last):
-      ...
-    ValueError: space identifier "shouldraise" is invalid.
-    ...
-
-    >>> # Missing cohort
-    >>> Space.from_string("MNIPediatricAsym")
-    Traceback (most recent call last):
-      ...
-    ValueError: standard space "MNIPediatricAsym" is not fully defined.
-    ...
-
-    >>> Space.from_string("MNIPediatricAsym:cohort-1")
-    [Space(name='MNIPediatricAsym', spec={'cohort': '1'})]
-
-    >>> Space.from_string("MNIPediatricAsym:cohort-1:cohort-2")
-    [Space(name='MNIPediatricAsym', spec={'cohort': '1'}),
-     Space(name='MNIPediatricAsym', spec={'cohort': '2'})]
-
-    >>> Space.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2")
-    [Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': '2'}),
-     Space(name='MNIPediatricAsym', spec={'cohort': '6', 'res': '2'})]
-
-    >>> Space.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2:res-iso1.6mm")
-    [Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': '2'}),
-     Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': 'iso1.6mm'}),
-     Space(name='MNIPediatricAsym', spec={'cohort': '6', 'res': '2'}),
-     Space(name='MNIPediatricAsym', spec={'cohort': '6', 'res': 'iso1.6mm'})]
-
     """
 
     _standard_spaces = tuple(_tfapi.templates())
@@ -252,7 +218,58 @@ class Space:
 
     @classmethod
     def from_string(cls, value):
-        """Create a new Space from string."""
+        """
+        Parse a string to generate the corresponding list of Spaces.
+
+        Parameters
+        ----------
+        value: :obj:`str`
+            A string containing a space specification following *fMRIPrep*'s
+            language for ``--output-spaces``
+            (e.g., ``MNIPediatricAsym:cohort-1:cohort-2:res-1:res-2``).
+
+        Returns
+        -------
+        spaces : :obj:`list` of :obj:`Space`
+            A list of corresponding spaces given the input string.
+
+        Examples
+        --------
+        >>> Space.from_string("MNI152NLin2009cAsym")
+        [Space(name='MNI152NLin2009cAsym', spec={})]
+
+        >>> # Bad name
+        >>> Space.from_string("shouldraise")
+        Traceback (most recent call last):
+          ...
+        ValueError: space identifier "shouldraise" is invalid.
+        ...
+
+        >>> # Missing cohort
+        >>> Space.from_string("MNIPediatricAsym")
+        Traceback (most recent call last):
+          ...
+        ValueError: standard space "MNIPediatricAsym" is not fully defined.
+        ...
+
+        >>> Space.from_string("MNIPediatricAsym:cohort-1")
+        [Space(name='MNIPediatricAsym', spec={'cohort': '1'})]
+
+        >>> Space.from_string("MNIPediatricAsym:cohort-1:cohort-2")
+        [Space(name='MNIPediatricAsym', spec={'cohort': '1'}),
+         Space(name='MNIPediatricAsym', spec={'cohort': '2'})]
+
+        >>> Space.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2")
+        [Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': '2'}),
+         Space(name='MNIPediatricAsym', spec={'cohort': '6', 'res': '2'})]
+
+        >>> Space.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2:res-iso1.6mm")
+        [Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': '2'}),
+         Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': 'iso1.6mm'}),
+         Space(name='MNIPediatricAsym', spec={'cohort': '6', 'res': '2'}),
+         Space(name='MNIPediatricAsym', spec={'cohort': '6', 'res': 'iso1.6mm'})]
+
+        """
         _args = value.split(':')
         spec = defaultdict(list, {})
         for modifier in _args[1:]:
@@ -370,9 +387,9 @@ class SpatialReferences:
         if spaces is not None:
             if isinstance(spaces, str):
                 spaces = [spaces]
-            self.__add__(spaces)
+            self.__iadd__(spaces)
 
-    def __add__(self, b):
+    def __iadd__(self, b):
         """Append a list of transforms to the internal list."""
         if not isinstance(b, (list, tuple)):
             raise TypeError('Must be a list.')
