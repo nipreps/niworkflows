@@ -76,7 +76,7 @@ class Space:
     >>> Space('MNIPediatricAsym', 'blah')
     Traceback (most recent call last):
       ...
-    TypeError: invalid space specification...
+    TypeError: ...
 
     >>> Space('shouldraise')
     Traceback (most recent call last):
@@ -116,7 +116,8 @@ class Space:
 
     name = attr.ib(default=None, type=str)
     """Unique name designating this space."""
-    spec = attr.ib(factory=dict)
+    spec = attr.ib(factory=dict, validator=attr.validators.optional(
+        attr.validators.instance_of(dict)))
     """The dictionary of specs."""
     standard = attr.ib(default=False, repr=False, type=bool)
     """Whether this space is standard or not."""
@@ -213,12 +214,6 @@ class Space:
             raise ValueError(
                 'space identifier "%s" is invalid.\nValid '
                 'identifiers are: %s' % (value, ', '.join(valid)))
-
-    @spec.validator
-    def _check_spec(self, attribute, value):
-        if value is not None and not isinstance(value, dict):
-            raise TypeError(
-                "invalid space specification: %s." % str(value))
 
     @classmethod
     def from_string(cls, value):
