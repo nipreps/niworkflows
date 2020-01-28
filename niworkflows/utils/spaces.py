@@ -264,6 +264,9 @@ class Space:
         [Space(name='MNIPediatricAsym', spec={'cohort': '1'}),
          Space(name='MNIPediatricAsym', spec={'cohort': '2'})]
 
+        >>> Space.from_string("fsaverage:den-10k:den-164k")
+        [Space(name='fsaverage', spec={'den': '10k'}),
+         Space(name='fsaverage', spec={'den': '164k'})]
 
         >>> Space.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2")
         [Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': '2'}),
@@ -414,9 +417,11 @@ class SpatialReferences:
                 return True
         return False
 
-    def __repr__(self):
+    def __str__(self):
         """Representation of this object."""
-        return 'Imaging spaces:%s' % '\n  - '.join([] + [str(s) for s in self.spaces])
+        if not self._spaces:
+            return 'Spatial References: <none>.'
+        return 'Spatial References:%s' % '\n  - '.join([] + [str(s) for s in self.spaces])
 
     @property
     def spaces(self):
