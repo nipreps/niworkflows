@@ -220,6 +220,11 @@ class Space:
         """
         Parse a string to generate the corresponding list of Spaces.
 
+        .. testsetup::
+
+            >>> if PY_VERSION < (3, 6):
+            ...     pytest.skip("This doctest does not work on python <3.6")
+
         Parameters
         ----------
         value: :obj:`str`
@@ -257,6 +262,7 @@ class Space:
         >>> Space.from_string("MNIPediatricAsym:cohort-1:cohort-2")
         [Space(name='MNIPediatricAsym', spec={'cohort': '1'}),
          Space(name='MNIPediatricAsym', spec={'cohort': '2'})]
+
 
         >>> Space.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2")
         [Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': '2'}),

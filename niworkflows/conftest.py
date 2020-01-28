@@ -1,5 +1,6 @@
 """py.test configuration"""
 import os
+from sys import version_info
 from pathlib import Path
 import numpy as np
 import nibabel as nb
@@ -17,10 +18,12 @@ data_dir = Path(test_data_env) / 'BIDS-examples-1-enh-ds054'
 
 @pytest.fixture(autouse=True)
 def add_np(doctest_namespace):
+    doctest_namespace['PY_VERSION'] = version_info
     doctest_namespace['np'] = np
     doctest_namespace['nb'] = nb
     doctest_namespace['pd'] = pd
     doctest_namespace['os'] = os
+    doctest_namespace['pytest'] = pytest
     doctest_namespace['Path'] = Path
     doctest_namespace['datadir'] = data_dir
     doctest_namespace['bids_collect_data'] = collect_data
