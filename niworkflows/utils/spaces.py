@@ -84,7 +84,7 @@ class Space:
     ValueError: space identifier "shouldraise" is invalid.
     ...
 
-    # Check standard property
+    >>> # Check standard property
     >>> Space('func').standard
     False
     >>> Space('MNI152Lin').standard
