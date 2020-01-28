@@ -501,12 +501,12 @@ def _expand_entities(entities):
     >>> entities = {'subject': ['01', '02'], 'session': ['1', '2'], 'task': ['rest', 'finger']}
     >>> _expand_entities(entities)
     [{'subject': '01', 'session': '1', 'task': 'rest'},
-     {'subject': '02', 'session': '1', 'task': 'rest'},
-     {'subject': '01', 'session': '2', 'task': 'rest'},
-     {'subject': '02', 'session': '2', 'task': 'rest'},
      {'subject': '01', 'session': '1', 'task': 'finger'},
-     {'subject': '02', 'session': '1', 'task': 'finger'},
+     {'subject': '01', 'session': '2', 'task': 'rest'},
      {'subject': '01', 'session': '2', 'task': 'finger'},
+     {'subject': '02', 'session': '1', 'task': 'rest'},
+     {'subject': '02', 'session': '1', 'task': 'finger'},
+     {'subject': '02', 'session': '2', 'task': 'rest'},
      {'subject': '02', 'session': '2', 'task': 'finger'}]
 
     """
