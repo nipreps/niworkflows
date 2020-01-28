@@ -418,10 +418,27 @@ class SpatialReferences:
         return False
 
     def __str__(self):
-        """Representation of this object."""
-        if not self._spaces:
-            return 'Spatial References: <none>.'
-        return 'Spatial References:%s' % '\n  - '.join([] + [str(s) for s in self.spaces])
+        """
+        Representation of this object.
+
+        Examples
+        --------
+        >>> print(SpatialReferences())
+        Spatial References: <none>.
+
+        >>> print(SpatialReferences(['MNI152NLin2009cAsym']))
+        Spatial References:
+            - Space(name='MNI152NLin2009cAsym', spec={})
+
+        >>> print(SpatialReferences(['MNI152NLin2009cAsym', 'fsaverage5']))
+        Spatial References:
+            - Space(name='MNI152NLin2009cAsym', spec={})
+            - Space(name='fsaverage', spec={'den': '10k'})
+
+        """
+        spaces = '\n    - '.join([''] + [str(s) for s in self.spaces]) \
+            if self.spaces else ' <none>.'
+        return 'Spatial References:%s' % spaces
 
     @property
     def spaces(self):
@@ -482,11 +499,14 @@ class SpatialReferences:
                 if s.name in ("fsaverage", "fsnative")]
 
 
-class StoreSpacesAction(argparse.Action):
+class OutputSpacesAction(argparse.Action):
+    """Parse spatial references."""
+
     def __call__(self, parser, namespace, values, option_string=None):
-        spaces = getattr(namespace, self.dest) or []
+        """Execute parser."""
+        spaces = getattr(namespace, self.dest) or SpatialReferences()
         for val in values:
-            spaces.extend(Space.from_string(val))
+            spaces += Space.from_string(val)
         setattr(namespace, self.dest, spaces)
 
 
