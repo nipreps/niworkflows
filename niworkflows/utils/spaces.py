@@ -84,53 +84,27 @@ class Space:
     ValueError: space identifier "shouldraise" is invalid.
     ...
 
-    >>> # Correctly assigns the density of legacy "fsaverage":
-    >>> Space(name='fsaverage')
-    Space(name='fsaverage', spec={'den': '164k'})
-    >>> Space(name='fsaverage').legacyname
-    'fsaverage'
-    >>> Space(name='fsaverage6')
-    Space(name='fsaverage', spec={'den': '41k'})
-    >>> Space(name='fsaverage6').legacyname
-    'fsaverage6'
-    >>> # Overwrites density of legacy "fsaverage" specifications
-    >>> Space(name='fsaverage6', spec={'den': '10k'})
-    Space(name='fsaverage', spec={'den': '41k'})
-    >>> Space(name='fsaverage6', spec={'den': '10k'}).legacyname
-    'fsaverage6'
-
+    # Check standard property
     >>> Space('func').standard
     False
-
     >>> Space('MNI152Lin').standard
     True
-
-    >>> Space('MNI152Lin').fullname
-    'MNI152Lin'
-
     >>> Space('MNIPediatricAsym', {'cohort': 1}).standard
     True
 
-    >>> Space('MNIPediatricAsym', {'cohort': 1}).fullname
-    'MNIPediatricAsym:cohort-1'
-
+    >>> # Equality/inequality checks
     >>> Space('func') == Space('func')
     True
-
     >>> Space('func') != Space('MNI152Lin')
     True
-
     >>> Space('MNI152Lin', {'res': 1}) == Space('MNI152Lin', {'res': 1})
     True
-
     >>> Space('MNI152Lin', {'res': 1}) == Space('MNI152Lin', {'res': 2})
     False
-
     >>> sp1 = Space('MNIPediatricAsym', {'cohort': 1})
     >>> sp2 = Space('MNIPediatricAsym', {'cohort': 2})
     >>> sp1 == sp2
     False
-
     >>> sp1 = Space('MNIPediatricAsym', {'res': 1, 'cohort': 1})
     >>> sp2 = Space('MNIPediatricAsym', {'cohort': 1, 'res': 1})
     >>> sp1 == sp2
@@ -189,14 +163,44 @@ class Space:
 
     @property
     def fullname(self):
-        """Generate a full-name combining cohort."""
+        """
+        Generate a full-name combining cohort.
+
+        Examples
+        --------
+        >>> Space('MNI152Lin').fullname
+        'MNI152Lin'
+
+        >>> Space('MNIPediatricAsym', {'cohort': 1}).fullname
+        'MNIPediatricAsym:cohort-1'
+
+        """
         if "cohort" not in self.spec:
             return self.name
         return "%s:cohort-%s" % (self.name, self.spec["cohort"])
 
     @property
     def legacyname(self):
-        """Generate a legacy name for fsaverageX spaces."""
+        """
+        Generate a legacy name for fsaverageX spaces.
+
+        Examples
+        --------
+        >>> Space(name='fsaverage')
+        Space(name='fsaverage', spec={'den': '164k'})
+        >>> Space(name='fsaverage').legacyname
+        'fsaverage'
+        >>> Space(name='fsaverage6')
+        Space(name='fsaverage', spec={'den': '41k'})
+        >>> Space(name='fsaverage6').legacyname
+        'fsaverage6'
+        >>> # Overwrites density of legacy "fsaverage" specifications
+        >>> Space(name='fsaverage6', spec={'den': '10k'})
+        Space(name='fsaverage', spec={'den': '41k'})
+        >>> Space(name='fsaverage6', spec={'den': '10k'}).legacyname
+        'fsaverage6'
+
+        """
         if self.name == "fsaverage":
             return FSAVERAGE_LEGACY[self.spec["den"]]
 
