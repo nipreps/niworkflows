@@ -416,7 +416,7 @@ class SpatialReferences:
 
     def __repr__(self):
         """Representation of this object."""
-        return 'Imaging spaces: %s' % ', '.join([s.fullname for s in self.spaces])
+        return 'Imaging spaces:%s' % '\n  - '.join([] + [str(s) for s in self.spaces])
 
     @property
     def spaces(self):
@@ -501,6 +501,7 @@ def _expand_entities(entities):
 
 
     .. testsetup::
+
         >>> if PY_VERSION < (3, 6):
         ...     pytest.skip("This doctest does not work on python <3.6")
 
