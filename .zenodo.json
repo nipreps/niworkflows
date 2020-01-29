@@ -9,14 +9,19 @@
       "orcid": "0000-0001-8435-6191"
     },
     {
-      "name": "Blair, Ross",
-      "affiliation": "Department of Psychology, Stanford University, CA, USA",
-      "orcid": "0000-0003-3007-1056"
-    },
-    {
       "affiliation": "Department of Psychology, Stanford University, CA, USA",
       "name": "Markiewicz, Christopher J.",
       "orcid": "0000-0002-6533-164X"
+    },
+    {
+      "affiliation": "Department of Psychology, Stanford University, CA, USA",
+      "name": "Goncalves, Mathias",
+      "orcid": "0000-0002-7252-7771",
+    },
+    {
+      "name": "Blair, Ross",
+      "affiliation": "Department of Psychology, Stanford University, CA, USA",
+      "orcid": "0000-0003-3007-1056"
     },
     {
       "name": "Berleant, Shoshana L.",
@@ -56,12 +61,6 @@
       "name": "Tooley, Ursula A.",
       "affiliation": "Department of Neuroscience, University of Pennsylvania, PA, USA",
       "orcid": "0000-0001-6377-3885",
-      "type": "Researcher"
-    },
-    {
-      "affiliation": "McGovern Institute for Brain Research, MIT, MA, USA",
-      "name": "Goncalves, Mathias",
-      "orcid": "0000-0002-7252-7771",
       "type": "Researcher"
     },
     {

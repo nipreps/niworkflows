@@ -1,3 +1,12 @@
+1.1.4 (January 28, 2020)
+========================
+Minor enhancements to better represent spaces/spatial-references,
+and increasing the test coverage of the Reports System (with thanks to J. Kent
+for the contribution):
+
+* ENH: Separate ``Space`` and ``SpatialReferences`` (#451)
+* ENH+TST: Add all valid entities to the default report specification (#447)
+
 1.1.3 (January 16, 2020)
 ========================
 A fix/enhancement of the report generation system. With thanks to J. Kent for
