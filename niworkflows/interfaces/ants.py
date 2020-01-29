@@ -105,12 +105,12 @@ class ResampleImageBySpacing(ANTSCommand):
     >>> res = ResampleImageBySpacing(dimension=3)
     >>> res.inputs.input_image = nifti_fname
     >>> res.inputs.output_image = 'output.nii.gz'
-    >>> res.inputs.out_spacing = (4, 4, 4)
+    >>> res.inputs.out_spacing = (0.4, 0.4, 0.4)
     >>> res.inputs.apply_smoothing = True
     >>> res.inputs.addvox = 2
     >>> res.inputs.nn_interp = False
     >>> res.cmdline  #doctest: +ELLIPSIS
-    'ResampleImageBySpacing 3 .../test.nii.gz output.nii.gz 4 4 4 1 2 0'
+    'ResampleImageBySpacing 3 .../test.nii.gz output.nii.gz 0.4 0.4 0.4 1 2 0'
 
     """
 
@@ -123,7 +123,7 @@ class ResampleImageBySpacing(ANTSCommand):
             if len(value) != self.inputs.dimension:
                 raise ValueError('out_spacing dimensions should match dimension')
 
-            value = ' '.join(['%d' % d for d in value])
+            value = ' '.join(['%g' % d for d in value])
 
         return super(ResampleImageBySpacing, self)._format_arg(
             name, trait_spec, value)
