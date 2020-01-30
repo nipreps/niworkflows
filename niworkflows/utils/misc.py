@@ -225,12 +225,12 @@ def clean_directory(path):
     for f in os.scandir(path):  # switch to context manager when py35 dropped
         if f.is_file() or f.is_symlink():
             try:
-                os.unlink(f)
+                os.unlink(str(f))
             except OSError:
                 return False
         elif f.is_dir():
             try:
-                shutil.rmtree(f)
+                shutil.rmtree(str(f))
             except OSError:
                 return False
     return True

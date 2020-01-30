@@ -77,5 +77,5 @@ def _size(p, size=0):
         if f.is_file() or f.is_symlink():
             size += f.stat().st_size
         elif f.is_dir():
-            size += _size(f, size)
+            size += _size(f.path, size)
     return size
