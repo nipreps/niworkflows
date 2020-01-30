@@ -221,6 +221,11 @@ def clean_directory(path):
     Clears a directory of all contents.
 
     Returns `True` if no content remains. If any content cannot be removed, returns `False`.
+
+    Notes
+    -----
+    This function is not guaranteed to work across multiple threads or processes.
+
     """
     for f in os.scandir(path):  # switch to context manager when py35 dropped
         if f.is_file() or f.is_symlink():
