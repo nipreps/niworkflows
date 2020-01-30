@@ -28,7 +28,7 @@ def test_clean_protected(tmp_path):
     empty_size = _size(str(base))
     _gen_skeleton(base)  # initial skeleton
 
-    readonly = (base / 'readfile')
+    readonly = base / 'readfile'
     readonly.write_text('delete me')
     readonly.chmod(0o444)
 
