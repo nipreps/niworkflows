@@ -335,6 +335,23 @@ class SpatialReferences:
      Space(name='MNI152NLin2009cAsym', spec={'res': 2}),
      Space(name='MNI152NLin2009cAsym', spec={'res': 1})]
 
+    >>> sp.cached
+    Traceback (most recent call last):
+     ...
+    ValueError: Spaces have not ...
+
+    >>> sp.checkpoint()
+    >>> sp.cached
+    (Space(name='func', spec={}),
+     Space(name='fsnative', spec={}),
+     Space(name='MNI152NLin2009cAsym', spec={}),
+     Space(name='anat', spec={}),
+     Space(name='fsaverage', spec={'den': '10k'}),
+     Space(name='fsaverage', spec={'den': '41k'}),
+     Space(name='MNIPediatricAsym', spec={'cohort': '2'}),
+     Space(name='MNI152NLin2009cAsym', spec={'res': 2}),
+     Space(name='MNI152NLin2009cAsym', spec={'res': 1}))
+
     >>> sp.add(('MNIPediatricAsym', {'cohort': '2'}))
     >>> sp.get_std_spaces(dim=(3,))
     ['MNI152NLin2009cAsym', 'MNIPediatricAsym:cohort-2']
@@ -360,9 +377,14 @@ class SpatialReferences:
       ...
     ValueError: space ...
 
+    >>> sp.checkpoint()
+    Traceback (most recent call last):
+     ...
+    ValueError: Spaces have already ...
+
     """
 
-    __slots__ = ('_spaces',)
+    __slots__ = ('_spaces', '_cached')
     standard_spaces = tuple(_tfapi.templates())
     """List of supported standard reference spaces."""
 
@@ -396,6 +418,7 @@ class SpatialReferences:
         Output spaces are desired user outputs.
         """
         self._spaces = []
+        self._cached = None
         if spaces is not None:
             if isinstance(spaces, str):
                 spaces = [spaces]
@@ -447,6 +470,19 @@ class SpatialReferences:
     def spaces(self):
         """Get all specified spaces."""
         return self._spaces
+
+    @property
+    def cached(self):
+        """Get cached spaces. If cached has not been set, raise `AttributeError`"""
+        if self._cached is None:
+            raise ValueError("Spaces have not been cached")
+        return self._cached
+
+    def checkpoint(self):
+        """Cache and freeze current spaces to separate attribute"""
+        if self._cached is not None:
+            raise ValueError("Spaces have already been cached")
+        self._cached = tuple(self.spaces)
 
     @spaces.setter
     def spaces(self, value):
