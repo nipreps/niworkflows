@@ -338,9 +338,9 @@ class SpatialReferences:
     >>> sp.cached
     Traceback (most recent call last):
      ...
-    AttributeError: Spaces have not ...
+    ValueError: Spaces have not ...
 
-    >>> sp.cache_spaces()
+    >>> sp.checkpoint()
     >>> sp.cached
     (Space(name='func', spec={}),
      Space(name='fsnative', spec={}),
@@ -377,10 +377,10 @@ class SpatialReferences:
       ...
     ValueError: space ...
 
-    >>> sp.cache_spaces()
+    >>> sp.checkpoint()
     Traceback (most recent call last):
      ...
-    AttributeError: Spaces have already ...
+    ValueError: Spaces have already ...
 
     """
 
@@ -475,13 +475,13 @@ class SpatialReferences:
     def cached(self):
         """Get cached spaces. If cached has not been set, raise `AttributeError`"""
         if self._cached is None:
-            raise AttributeError("Spaces have not been cached")
+            raise ValueError("Spaces have not been cached")
         return self._cached
 
-    def cache_spaces(self):
+    def checkpoint(self):
         """Cache and freeze current spaces to separate attribute"""
         if self._cached is not None:
-            raise AttributeError("Spaces have already been cached")
+            raise ValueError("Spaces have already been cached")
         self._cached = tuple(self.spaces)
 
     @spaces.setter
