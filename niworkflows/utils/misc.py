@@ -3,10 +3,12 @@
 """
 Miscellaneous utilities
 """
+import os
+import shutil
 
 
 __all__ = ['get_template_specs', 'fix_multi_T1w_source_name', 'add_suffix', 'read_crashfile',
-           'splitext', '_copy_any']
+           'splitext', '_copy_any', 'clean_directory']
 
 
 def get_template_specs(in_template, template_spec=None, default_resolution=1):
@@ -211,6 +213,31 @@ def _copy_any(src, dst):
             else:
                 copyfileobj(f_in, f_out)
 
+    return True
+
+
+def clean_directory(path):
+    """
+    Clears a directory of all contents.
+
+    Returns `True` if no content remains. If any content cannot be removed, returns `False`.
+
+    Notes
+    -----
+    This function is not guaranteed to work across multiple threads or processes.
+
+    """
+    for f in os.scandir(path):  # switch to context manager when py35 dropped
+        if f.is_file() or f.is_symlink():
+            try:
+                os.unlink(f.path)
+            except OSError:
+                return False
+        elif f.is_dir():
+            try:
+                shutil.rmtree(f.path)
+            except OSError:
+                return False
     return True
 
 
