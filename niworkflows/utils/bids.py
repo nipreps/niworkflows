@@ -321,10 +321,10 @@ def check_pipeline_version(cvers, data_desc):
         Path to pipeline output's dataset_description.json
 
     """
-    if not Path(data_desc).exists():
+    if not Path(str(data_desc)).exists():
         return
 
-    with open(data_desc, encoding='utf-8') as fp:
+    with open(str(data_desc), encoding='utf-8') as fp:
         desc = json.load(fp)
     dvers = desc.get("PipelineDescription", {}).get("Version", "0+unknown")
     if Version(cvers) != Version(dvers):
