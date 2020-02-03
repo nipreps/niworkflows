@@ -508,17 +508,55 @@ class SpatialReferences:
         elif error is True:
             raise ValueError('space "%s" already in spaces.' % str(value))
 
-    def get_std_spaces(self, only_names=True, dim=(2, 3)):
-        """Return only standard spaces."""
-        names = []
-        std_spaces = []
-        for s in self._spaces:
-            if s.standard and s.dim in dim and s.fullname not in names:
-                names.append(s.fullname)
-                std_spaces.append(s)
-        if only_names:
-            return names
-        return std_spaces
+    def get_std_spaces(self, only_names=True, dim=(2, 3), cached=False):
+        """Return standard spaces.
+
+        Parameters
+        ----------
+        only_names : :obj:bool, optional
+            If `True` (default), return all unique :obj:Spaces names. If `False`,
+            return all `Space` entities.
+        dim : :obj:tuple, optional
+            Desired dimensions of the standard spaces (default is (2, 3))
+        cached : :obj:bool, optional
+            If `True`, query cached :obj:Spaces. If `False` (default), query all :obj:Spaces.
+
+        Examples
+        --------
+        >>> spaces = SpatialReferences(['MNI152NLin6Asym', ("fsaverage", {"den": "10k"})])
+        >>> spaces.get_std_spaces()
+        ['MNI152NLin6Asym', 'fsaverage']
+
+        >>> spaces.get_std_spaces(only_names=False)
+        [Space(name='MNI152NLin6Asym', spec={}),
+         Space(name='fsaverage', spec={'den': '10k'})]
+
+        >>> spaces.get_std_spaces(dim=(3,))
+        ['MNI152NLin6Asym']
+
+        >>> spaces.checkpoint()
+        >>> spaces.add(('MNI152NLin6Asym', {'res': '2'}))
+        >>> spaces.get_std_spaces()
+        ['MNI152NLin6Asym', 'fsaverage']
+
+        >>> spaces.get_std_spaces(only_names=False)
+        [Space(name='MNI152NLin6Asym', spec={}),
+         Space(name='fsaverage', spec={'den': '10k'}),
+         Space(name='MNI152NLin6Asym', spec={'res': '2'})]
+
+        >>> spaces.get_std_spaces(only_names=False, cached=True)
+        [Space(name='MNI152NLin6Asym', spec={}),
+         Space(name='fsaverage', spec={'den': '10k'})]
+        """
+        out = []
+        for s in self.spaces if not cached else self.cached:
+            if s.standard and s.dim in dim:
+                if only_names:
+                    if s.fullname not in out:
+                        out.append(s.fullname)
+                    continue
+                out.append(s)
+        return out
 
     def get_templates(self, dim=(2, 3)):
         """Return output spaces."""
