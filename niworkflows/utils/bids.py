@@ -321,7 +321,8 @@ def check_pipeline_version(cvers, data_desc):
         Path to pipeline output's dataset_description.json
 
     """
-    if not Path(str(data_desc)).exists():
+    data_desc = Path(data_desc)
+    if not data_desc.exists():
         return
 
     with open(str(data_desc), encoding='utf-8') as fp:
