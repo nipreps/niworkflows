@@ -512,15 +512,16 @@ class SpatialReferences:
             raise ValueError('space "%s" already in spaces.' % str(value))
 
     def get_std_spaces(self, only_names=True, dim=(2, 3)):
-        """Return standard spaces.
+        """
+        Return standard spaces.
 
         Parameters
         ----------
-        only_names : :obj:bool, optional
-            If `True` (default), return all unique :obj:Spaces names. If `False`,
-            return all `Space` entities.
-        dim : :obj:tuple, optional
-            Desired dimensions of the standard spaces (default is (2, 3))
+        only_names : :obj:`bool`, optional
+            If ``True`` (default), return all unique :class:`Space` names. If ``False``,
+            return all :class:`Space` entities.
+        dim : :obj:`tuple`, optional
+            Desired dimensions of the standard spaces (default is ``(2, 3)``)
 
         Examples
         --------
