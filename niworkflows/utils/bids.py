@@ -319,6 +319,7 @@ def check_pipeline_version(cvers, data_desc):
     >>> data = {"PipelineDescription": {"Version": "1.1.1rc5"}}
     >>> desc_file = Path(tmpdir) / 'sample_dataset_description.json'
     >>> desc_file.write_text(json.dumps(data))
+    48
 
     Parameters
     ----------
