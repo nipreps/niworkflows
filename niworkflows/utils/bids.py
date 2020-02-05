@@ -335,10 +335,6 @@ def check_pipeline_version(cvers, data_desc):
     >>> check_pipeline_version('1.2', 'sample_dataset_description.json')  # doctest: +ELLIPSIS
     'Previous output generated ...'
 
-    .. testcleanup::
-
-    >>> os.unlink('sample_dataset_description.json')
-
     """
     data_desc = Path(data_desc)
     if not data_desc.exists():
