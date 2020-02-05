@@ -629,6 +629,25 @@ def hasspec(value, specs):
     return False
 
 
+def format_reference(in_tuple):
+    """
+    Format a spatial reference given as a tuple.
+
+    Examples
+    --------
+    >>> format_space(('MNI152Lin', {'res': 1}))
+    'MNI152Lin_res-1'
+    >>> format_space(('MNIPediatricAsym:cohort-2', {'res': 2}))
+    'MNIPediatricAsym_cohort-2_res-2'
+
+    """
+    out = in_tuple[0].split(':')
+    res = in_tuple[1].get('res', None) or in_tuple[1].get('resolution', None)
+    if res:
+        out.append('-'.join(('res', str(res))))
+    return '_'.join(out)
+
+
 def _expand_entities(entities):
     """
     Generate multiple replacement queries based on all combinations of values.
