@@ -1,6 +1,6 @@
 """Test spaces."""
 import pytest
-from ..spaces import Space, SpatialReferences, OutputSpacesAction
+from ..spaces import Reference, SpatialReferences, OutputReferencesAction
 
 
 @pytest.fixture
@@ -9,7 +9,7 @@ def parser():
     import argparse
 
     pars = argparse.ArgumentParser()
-    pars.add_argument('--spaces', nargs='+', action=OutputSpacesAction,
+    pars.add_argument('--spaces', nargs='+', action=OutputReferencesAction,
                       help='user defined spaces')
     return pars
 
@@ -28,6 +28,6 @@ def test_space_action(parser, spaces, expected):
     pargs = parser.parse_args(args=('--spaces',) + spaces)
     parsed_spaces = pargs.spaces
     assert isinstance(parsed_spaces, SpatialReferences)
-    assert all(isinstance(sp, Space) for sp in parsed_spaces.spaces), \
-        "Every element must be a `Space`"
-    assert len(parsed_spaces.spaces) == expected
+    assert all(isinstance(sp, Reference) for sp in parsed_spaces.references), \
+        "Every element must be a `Reference`"
+    assert len(parsed_spaces.references) == expected
