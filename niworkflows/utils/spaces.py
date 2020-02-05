@@ -341,8 +341,8 @@ class SpatialReferences:
     ValueError: Spaces have not ...
 
     >>> sp.checkpoint()
-    >>> sp.cached
-    (Space(name='func', spec={}),
+    >>> sp.cached.spaces
+    [Space(name='func', spec={}),
      Space(name='fsnative', spec={}),
      Space(name='MNI152NLin2009cAsym', spec={}),
      Space(name='anat', spec={}),
@@ -350,7 +350,10 @@ class SpatialReferences:
      Space(name='fsaverage', spec={'den': '41k'}),
      Space(name='MNIPediatricAsym', spec={'cohort': '2'}),
      Space(name='MNI152NLin2009cAsym', spec={'res': 2}),
-     Space(name='MNI152NLin2009cAsym', spec={'res': 1}))
+     Space(name='MNI152NLin2009cAsym', spec={'res': 1})]
+
+    >>> sp.cached.get_fs_spaces()
+    ['fsnative', 'fsaverage5', 'fsaverage6']
 
     >>> sp.add(('MNIPediatricAsym', {'cohort': '2'}))
     >>> sp.get_std_spaces(dim=(3,))
@@ -482,7 +485,7 @@ class SpatialReferences:
         """Cache and freeze current spaces to separate attribute"""
         if self._cached is not None:
             raise ValueError("Spaces have already been cached")
-        self._cached = tuple(self.spaces)
+        self._cached = self.__class__(self.spaces)
 
     @spaces.setter
     def spaces(self, value):
@@ -508,7 +511,7 @@ class SpatialReferences:
         elif error is True:
             raise ValueError('space "%s" already in spaces.' % str(value))
 
-    def get_std_spaces(self, only_names=True, dim=(2, 3), cached=False):
+    def get_std_spaces(self, only_names=True, dim=(2, 3)):
         """Return standard spaces.
 
         Parameters
@@ -518,8 +521,6 @@ class SpatialReferences:
             return all `Space` entities.
         dim : :obj:tuple, optional
             Desired dimensions of the standard spaces (default is (2, 3))
-        cached : :obj:bool, optional
-            If `True`, query cached :obj:Spaces. If `False` (default), query all :obj:Spaces.
 
         Examples
         --------
@@ -534,7 +535,6 @@ class SpatialReferences:
         >>> spaces.get_std_spaces(dim=(3,))
         ['MNI152NLin6Asym']
 
-        >>> spaces.checkpoint()
         >>> spaces.add(('MNI152NLin6Asym', {'res': '2'}))
         >>> spaces.get_std_spaces()
         ['MNI152NLin6Asym', 'fsaverage']
@@ -544,12 +544,9 @@ class SpatialReferences:
          Space(name='fsaverage', spec={'den': '10k'}),
          Space(name='MNI152NLin6Asym', spec={'res': '2'})]
 
-        >>> spaces.get_std_spaces(only_names=False, cached=True)
-        [Space(name='MNI152NLin6Asym', spec={}),
-         Space(name='fsaverage', spec={'den': '10k'})]
         """
         out = []
-        for s in self.spaces if not cached else self.cached:
+        for s in self.spaces:
             if s.standard and s.dim in dim:
                 if only_names:
                     if s.fullname not in out:
