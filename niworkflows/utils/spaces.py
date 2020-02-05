@@ -341,8 +341,8 @@ class SpatialReferences:
     ValueError: Spaces have not ...
 
     >>> sp.checkpoint()
-    >>> sp.cached
-    (Space(name='func', spec={}),
+    >>> sp.cached.spaces
+    [Space(name='func', spec={}),
      Space(name='fsnative', spec={}),
      Space(name='MNI152NLin2009cAsym', spec={}),
      Space(name='anat', spec={}),
@@ -350,7 +350,10 @@ class SpatialReferences:
      Space(name='fsaverage', spec={'den': '41k'}),
      Space(name='MNIPediatricAsym', spec={'cohort': '2'}),
      Space(name='MNI152NLin2009cAsym', spec={'res': 2}),
-     Space(name='MNI152NLin2009cAsym', spec={'res': 1}))
+     Space(name='MNI152NLin2009cAsym', spec={'res': 1})]
+
+    >>> sp.cached.get_fs_spaces()
+    ['fsnative', 'fsaverage5', 'fsaverage6']
 
     >>> sp.add(('MNIPediatricAsym', {'cohort': '2'}))
     >>> sp.get_std_spaces(dim=(3,))
@@ -482,7 +485,7 @@ class SpatialReferences:
         """Cache and freeze current spaces to separate attribute"""
         if self._cached is not None:
             raise ValueError("Spaces have already been cached")
-        self._cached = tuple(self.spaces)
+        self._cached = self.__class__(self.spaces)
 
     @spaces.setter
     def spaces(self, value):
@@ -509,16 +512,49 @@ class SpatialReferences:
             raise ValueError('space "%s" already in spaces.' % str(value))
 
     def get_std_spaces(self, only_names=True, dim=(2, 3)):
-        """Return only standard spaces."""
-        names = []
-        std_spaces = []
-        for s in self._spaces:
-            if s.standard and s.dim in dim and s.fullname not in names:
-                names.append(s.fullname)
-                std_spaces.append(s)
-        if only_names:
-            return names
-        return std_spaces
+        """
+        Return standard spaces.
+
+        Parameters
+        ----------
+        only_names : :obj:`bool`, optional
+            If ``True`` (default), return all unique :class:`Space` names. If ``False``,
+            return all :class:`Space` entities.
+        dim : :obj:`tuple`, optional
+            Desired dimensions of the standard spaces (default is ``(2, 3)``)
+
+        Examples
+        --------
+        >>> spaces = SpatialReferences(['MNI152NLin6Asym', ("fsaverage", {"den": "10k"})])
+        >>> spaces.get_std_spaces()
+        ['MNI152NLin6Asym', 'fsaverage']
+
+        >>> spaces.get_std_spaces(only_names=False)
+        [Space(name='MNI152NLin6Asym', spec={}),
+         Space(name='fsaverage', spec={'den': '10k'})]
+
+        >>> spaces.get_std_spaces(dim=(3,))
+        ['MNI152NLin6Asym']
+
+        >>> spaces.add(('MNI152NLin6Asym', {'res': '2'}))
+        >>> spaces.get_std_spaces()
+        ['MNI152NLin6Asym', 'fsaverage']
+
+        >>> spaces.get_std_spaces(only_names=False)
+        [Space(name='MNI152NLin6Asym', spec={}),
+         Space(name='fsaverage', spec={'den': '10k'}),
+         Space(name='MNI152NLin6Asym', spec={'res': '2'})]
+
+        """
+        out = []
+        for s in self.spaces:
+            if s.standard and s.dim in dim:
+                if only_names:
+                    if s.fullname not in out:
+                        out.append(s.fullname)
+                    continue
+                out.append(s)
+        return out
 
     def get_templates(self, dim=(2, 3)):
         """Return output spaces."""
