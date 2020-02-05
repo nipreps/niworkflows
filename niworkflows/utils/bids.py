@@ -311,15 +311,13 @@ def group_multiecho(bold_sess):
 def check_pipeline_version(cvers, data_desc):
     """
     Searches for existing BIDS pipeline output and compares against current pipeline version.
-    Returns a warning string if there is a difference between versions, otherwise ``None``.
 
     .. testsetup::
 
     >>> import json
     >>> data = {"PipelineDescription": {"Version": "1.1.1rc5"}}
     >>> desc_file = Path(tmpdir) / 'sample_dataset_description.json'
-    >>> desc_file.write_text(json.dumps(data))
-    48
+    >>> _ = desc_file.write_text(json.dumps(data))
 
     Parameters
     ----------
@@ -330,11 +328,17 @@ def check_pipeline_version(cvers, data_desc):
 
     Examples
     --------
-    >>> check_pipeline_version('1.1.1rc5', 'sample_dataset_description.json')
+    >>> check_pipeline_version('1.1.1rc5', 'sample_dataset_description.json') is None
+    True
     >>> check_pipeline_version('1.1.1rc5+129.gbe0e5158', 'sample_dataset_description.json')
 
     >>> check_pipeline_version('1.2', 'sample_dataset_description.json')  # doctest: +ELLIPSIS
     'Previous output generated ...'
+
+    Returns
+    -------
+    message : :obj:`str` or :obj:`None`
+        A warning string if there is a difference between versions, otherwise ``None``.
 
     """
     data_desc = Path(data_desc)
