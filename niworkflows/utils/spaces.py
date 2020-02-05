@@ -635,9 +635,9 @@ def format_reference(in_tuple):
 
     Examples
     --------
-    >>> format_space(('MNI152Lin', {'res': 1}))
+    >>> format_reference(('MNI152Lin', {'res': 1}))
     'MNI152Lin_res-1'
-    >>> format_space(('MNIPediatricAsym:cohort-2', {'res': 2}))
+    >>> format_reference(('MNIPediatricAsym:cohort-2', {'res': 2}))
     'MNIPediatricAsym_cohort-2_res-2'
 
     """
