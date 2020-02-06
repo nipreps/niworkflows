@@ -32,82 +32,82 @@ FSAVERAGE_LEGACY = {v: k for k, v in FSAVERAGE_DENSITY.items()}
 
 
 @attr.s(slots=True, frozen=True)
-class Space:
+class Reference:
     """
     Represent a (non)standard space specification.
 
     Examples
     --------
-    >>> Space('MNI152NLin2009cAsym')
-    Space(name='MNI152NLin2009cAsym', spec={})
+    >>> Reference('MNI152NLin2009cAsym')
+    Reference(space='MNI152NLin2009cAsym', spec={})
 
-    >>> Space('MNI152NLin2009cAsym', {})
-    Space(name='MNI152NLin2009cAsym', spec={})
+    >>> Reference('MNI152NLin2009cAsym', {})
+    Reference(space='MNI152NLin2009cAsym', spec={})
 
-    >>> Space('MNI152NLin2009cAsym', None)
-    Space(name='MNI152NLin2009cAsym', spec={})
+    >>> Reference('MNI152NLin2009cAsym', None)
+    Reference(space='MNI152NLin2009cAsym', spec={})
 
-    >>> Space('MNI152NLin2009cAsym', {'res': 1})
-    Space(name='MNI152NLin2009cAsym', spec={'res': 1})
+    >>> Reference('MNI152NLin2009cAsym', {'res': 1})
+    Reference(space='MNI152NLin2009cAsym', spec={'res': 1})
 
-    >>> Space('MNIPediatricAsym', {'cohort': '1'})
-    Space(name='MNIPediatricAsym', spec={'cohort': '1'})
+    >>> Reference('MNIPediatricAsym', {'cohort': '1'})
+    Reference(space='MNIPediatricAsym', spec={'cohort': '1'})
 
-    >>> Space('func')
-    Space(name='func', spec={})
+    >>> Reference('func')
+    Reference(space='func', spec={})
 
     >>> # Checks spaces with cohorts:
-    >>> Space('MNIPediatricAsym')
+    >>> Reference('MNIPediatricAsym')
     Traceback (most recent call last):
       ...
     ValueError: standard space "MNIPediatricAsym" is not fully defined.
     ...
 
-    >>> Space(name='MNI152Lin', spec={'cohort': 1})
+    >>> Reference(space='MNI152Lin', spec={'cohort': 1})
     Traceback (most recent call last):
       ...
     ValueError: standard space "MNI152Lin" does not accept ...
 
-    >>> Space('MNIPediatricAsym', {'cohort': '100'})
+    >>> Reference('MNIPediatricAsym', {'cohort': '100'})
     Traceback (most recent call last):
       ...
     ValueError: standard space "MNIPediatricAsym" does not contain ...
     ...
 
-    >>> Space('MNIPediatricAsym', 'blah')
+    >>> Reference('MNIPediatricAsym', 'blah')
     Traceback (most recent call last):
       ...
     TypeError: ...
 
-    >>> Space('shouldraise')
+    >>> Reference('shouldraise')
     Traceback (most recent call last):
       ...
     ValueError: space identifier "shouldraise" is invalid.
     ...
 
     >>> # Check standard property
-    >>> Space('func').standard
+    >>> Reference('func').standard
     False
-    >>> Space('MNI152Lin').standard
+    >>> Reference('MNI152Lin').standard
     True
-    >>> Space('MNIPediatricAsym', {'cohort': 1}).standard
+    >>> Reference('MNIPediatricAsym', {'cohort': 1}).standard
     True
 
     >>> # Equality/inequality checks
-    >>> Space('func') == Space('func')
+    >>> Reference('func') == Reference('func')
     True
-    >>> Space('func') != Space('MNI152Lin')
+    >>> Reference('func') != Reference('MNI152Lin')
     True
-    >>> Space('MNI152Lin', {'res': 1}) == Space('MNI152Lin', {'res': 1})
+    >>> Reference('MNI152Lin', {'res': 1}) == Reference('MNI152Lin', {'res': 1})
     True
-    >>> Space('MNI152Lin', {'res': 1}) == Space('MNI152Lin', {'res': 2})
+    >>> Reference('MNI152Lin', {'res': 1}) == Reference('MNI152Lin', {'res': 2})
     False
-    >>> sp1 = Space('MNIPediatricAsym', {'cohort': 1})
-    >>> sp2 = Space('MNIPediatricAsym', {'cohort': 2})
+    >>> sp1 = Reference('MNIPediatricAsym', {'cohort': 1})
+    >>> sp2 = Reference('MNIPediatricAsym', {'cohort': 2})
     >>> sp1 == sp2
     False
-    >>> sp1 = Space('MNIPediatricAsym', {'res': 1, 'cohort': 1})
-    >>> sp2 = Space('MNIPediatricAsym', {'cohort': 1, 'res': 1})
+    >>> sp1 = Reference('MNIPediatricAsym', {'res': 1, 'cohort': 1})
+    >>> sp2 = Reference('MNIPediatricAsym', {'cohort': 1, 'res': 1})
     >>> sp1 == sp2
     True
 
@@ -115,8 +115,8 @@ class Space:
 
     _standard_spaces = tuple(_tfapi.templates())
 
-    name = attr.ib(default=None, type=str)
-    """Unique name designating this space."""
+    space = attr.ib(default=None, type=str)
+    """Name designating this space."""
     spec = attr.ib(factory=dict, validator=attr.validators.optional(
         attr.validators.instance_of(dict)))
     """The dictionary of specs."""
@@ -130,38 +130,38 @@ class Space:
         if self.spec is None:
             object.__setattr__(self, "spec", {})
 
-        if self.name.startswith('fsaverage'):
-            name = self.name
-            object.__setattr__(self, "name", "fsaverage")
+        if self.space.startswith('fsaverage'):
+            space = self.space
+            object.__setattr__(self, "space", "fsaverage")
 
-            if 'den' not in self.spec or name != "fsaverage":
+            if 'den' not in self.spec or space != "fsaverage":
                 spec = self.spec.copy()
-                spec['den'] = FSAVERAGE_DENSITY[name]
+                spec['den'] = FSAVERAGE_DENSITY[space]
                 object.__setattr__(self, "spec", spec)
 
-        if self.name.startswith('fs'):
+        if self.space.startswith('fs'):
             object.__setattr__(self, "dim", 2)
 
-        if self.name in self._standard_spaces:
+        if self.space in self._standard_spaces:
             object.__setattr__(self, "standard", True)
 
         _cohorts = ["%s" % t
-                    for t in _tfapi.TF_LAYOUT.get_cohorts(template=self.name)]
+                    for t in _tfapi.TF_LAYOUT.get_cohorts(template=self.space)]
         if "cohort" in self.spec:
             if not _cohorts:
                 raise ValueError(
                     'standard space "%s" does not accept a cohort '
-                    'specification.' % self.name)
+                    'specification.' % self.space)
 
             if str(self.spec["cohort"]) not in _cohorts:
                 raise ValueError(
                     'standard space "%s" does not contain any cohort '
-                    'named "%s".' % (self.name, self.spec["cohort"]))
+                    'named "%s".' % (self.space, self.spec["cohort"]))
         elif _cohorts:
             _cohorts = ', '.join(['"cohort-%s"' % c for c in _cohorts])
             raise ValueError(
                 'standard space "%s" is not fully defined.\n'
-                'Set a valid cohort selector from: %s.' % (self.name, _cohorts))
+                'Set a valid cohort selector from: %s.' % (self.space, _cohorts))
 
     @property
     def fullname(self):
@@ -170,16 +170,16 @@ class Space:
 
         Examples
         --------
-        >>> Space('MNI152Lin').fullname
+        >>> Reference('MNI152Lin').fullname
         'MNI152Lin'
 
-        >>> Space('MNIPediatricAsym', {'cohort': 1}).fullname
+        >>> Reference('MNIPediatricAsym', {'cohort': 1}).fullname
         'MNIPediatricAsym:cohort-1'
 
         """
         if "cohort" not in self.spec:
-            return self.name
-        return "%s:cohort-%s" % (self.name, self.spec["cohort"])
+            return self.space
+        return "%s:cohort-%s" % (self.space, self.spec["cohort"])
 
     @property
     def legacyname(self):
@@ -188,28 +188,28 @@ class Space:
 
         Examples
         --------
-        >>> Space(name='fsaverage')
-        Space(name='fsaverage', spec={'den': '164k'})
-        >>> Space(name='fsaverage').legacyname
+        >>> Reference(space='fsaverage')
+        Reference(space='fsaverage', spec={'den': '164k'})
+        >>> Reference(space='fsaverage').legacyname
         'fsaverage'
-        >>> Space(name='fsaverage6')
-        Space(name='fsaverage', spec={'den': '41k'})
-        >>> Space(name='fsaverage6').legacyname
+        >>> Reference(space='fsaverage6')
+        Reference(space='fsaverage', spec={'den': '41k'})
+        >>> Reference(space='fsaverage6').legacyname
         'fsaverage6'
         >>> # Overwrites density of legacy "fsaverage" specifications
-        >>> Space(name='fsaverage6', spec={'den': '10k'})
-        Space(name='fsaverage', spec={'den': '41k'})
-        >>> Space(name='fsaverage6', spec={'den': '10k'}).legacyname
+        >>> Reference(space='fsaverage6', spec={'den': '10k'})
+        Reference(space='fsaverage', spec={'den': '41k'})
+        >>> Reference(space='fsaverage6', spec={'den': '10k'}).legacyname
         'fsaverage6'
-        >>> # Return None if no legacy name
-        >>> Space(name='fsaverage', spec={'den': '30k'}).legacyname is None
+        >>> # Return None if no legacy space
+        >>> Reference(space='fsaverage', spec={'den': '30k'}).legacyname is None
         True
 
         """
-        if self.name == "fsaverage" and self.spec["den"] in FSAVERAGE_LEGACY:
+        if self.space == "fsaverage" and self.spec["den"] in FSAVERAGE_LEGACY:
             return FSAVERAGE_LEGACY[self.spec["den"]]
 
-    @name.validator
+    @space.validator
     def _check_name(self, attribute, value):
         if value.startswith('fsaverage'):
             return
@@ -222,7 +222,7 @@ class Space:
     @classmethod
     def from_string(cls, value):
         """
-        Parse a string to generate the corresponding list of Spaces.
+        Parse a string to generate the corresponding list of References.
 
         .. testsetup::
 
@@ -238,48 +238,48 @@ class Space:
 
         Returns
         -------
-        spaces : :obj:`list` of :obj:`Space`
+        spaces : :obj:`list` of :obj:`Reference`
             A list of corresponding spaces given the input string.
 
         Examples
         --------
-        >>> Space.from_string("MNI152NLin2009cAsym")
-        [Space(name='MNI152NLin2009cAsym', spec={})]
+        >>> Reference.from_string("MNI152NLin2009cAsym")
+        [Reference(space='MNI152NLin2009cAsym', spec={})]
 
-        >>> # Bad name
-        >>> Space.from_string("shouldraise")
+        >>> # Bad space name
+        >>> Reference.from_string("shouldraise")
         Traceback (most recent call last):
           ...
         ValueError: space identifier "shouldraise" is invalid.
         ...
 
         >>> # Missing cohort
-        >>> Space.from_string("MNIPediatricAsym")
+        >>> Reference.from_string("MNIPediatricAsym")
         Traceback (most recent call last):
           ...
         ValueError: standard space "MNIPediatricAsym" is not fully defined.
         ...
 
-        >>> Space.from_string("MNIPediatricAsym:cohort-1")
-        [Space(name='MNIPediatricAsym', spec={'cohort': '1'})]
+        >>> Reference.from_string("MNIPediatricAsym:cohort-1")
+        [Reference(space='MNIPediatricAsym', spec={'cohort': '1'})]
 
-        >>> Space.from_string("MNIPediatricAsym:cohort-1:cohort-2")
-        [Space(name='MNIPediatricAsym', spec={'cohort': '1'}),
-         Space(name='MNIPediatricAsym', spec={'cohort': '2'})]
+        >>> Reference.from_string("MNIPediatricAsym:cohort-1:cohort-2")
+        [Reference(space='MNIPediatricAsym', spec={'cohort': '1'}),
+         Reference(space='MNIPediatricAsym', spec={'cohort': '2'})]
 
-        >>> Space.from_string("fsaverage:den-10k:den-164k")
-        [Space(name='fsaverage', spec={'den': '10k'}),
-         Space(name='fsaverage', spec={'den': '164k'})]
+        >>> Reference.from_string("fsaverage:den-10k:den-164k")
+        [Reference(space='fsaverage', spec={'den': '10k'}),
+         Reference(space='fsaverage', spec={'den': '164k'})]
 
-        >>> Space.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2")
-        [Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': '2'}),
-         Space(name='MNIPediatricAsym', spec={'cohort': '6', 'res': '2'})]
+        >>> Reference.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2")
+        [Reference(space='MNIPediatricAsym', spec={'cohort': '5', 'res': '2'}),
+         Reference(space='MNIPediatricAsym', spec={'cohort': '6', 'res': '2'})]
 
-        >>> Space.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2:res-iso1.6mm")
-        [Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': '2'}),
-         Space(name='MNIPediatricAsym', spec={'cohort': '5', 'res': 'iso1.6mm'}),
-         Space(name='MNIPediatricAsym', spec={'cohort': '6', 'res': '2'}),
-         Space(name='MNIPediatricAsym', spec={'cohort': '6', 'res': 'iso1.6mm'})]
+        >>> Reference.from_string("MNIPediatricAsym:cohort-5:cohort-6:res-2:res-iso1.6mm")
+        [Reference(space='MNIPediatricAsym', spec={'cohort': '5', 'res': '2'}),
+         Reference(space='MNIPediatricAsym', spec={'cohort': '5', 'res': 'iso1.6mm'}),
+         Reference(space='MNIPediatricAsym', spec={'cohort': '6', 'res': '2'}),
+         Reference(space='MNIPediatricAsym', spec={'cohort': '6', 'res': 'iso1.6mm'})]
 
         """
         _args = value.split(':')
@@ -310,53 +310,49 @@ class SpatialReferences:
     ...     ('MNI152NLin2009cAsym', {'res': 2}),
     ...     ('MNI152NLin2009cAsym', {'res': 1}),
     ... ])
-    >>> sp.get_nonstd_spaces()
+    >>> sp.get_spaces(standard=False)
     ['func', 'fsnative', 'anat']
 
-    >>> sp.get_nonstd_spaces(dim=(3,))
+    >>> sp.get_spaces(standard=False, dim=(3,))
     ['func', 'anat']
 
-    >>> sp.get_nonstd_spaces(only_names=False, dim=(3,))
-    [Space(name='func', spec={}),
-     Space(name='anat', spec={})]
-
-    >>> sp.get_std_spaces()
+    >>> sp.get_spaces(nonstandard=False)
     ['MNI152NLin2009cAsym', 'fsaverage', 'MNIPediatricAsym:cohort-2']
 
-    >>> sp.get_std_spaces(dim=(3,))
+    >>> sp.get_spaces(nonstandard=False, dim=(3,))
     ['MNI152NLin2009cAsym', 'MNIPediatricAsym:cohort-2']
 
     >>> sp.get_fs_spaces()
     ['fsnative', 'fsaverage5', 'fsaverage6']
 
-    >>> sp.get_templates()
-    [Space(name='fsaverage', spec={'den': '10k'}),
-     Space(name='fsaverage', spec={'den': '41k'}),
-     Space(name='MNI152NLin2009cAsym', spec={'res': 2}),
-     Space(name='MNI152NLin2009cAsym', spec={'res': 1})]
+    >>> sp.get_standard(full_spec=True)
+    [Reference(space='fsaverage', spec={'den': '10k'}),
+     Reference(space='fsaverage', spec={'den': '41k'}),
+     Reference(space='MNI152NLin2009cAsym', spec={'res': 2}),
+     Reference(space='MNI152NLin2009cAsym', spec={'res': 1})]
 
     >>> sp.cached
     Traceback (most recent call last):
      ...
-    ValueError: Spaces have not ...
+    ValueError: References have not ...
 
     >>> sp.checkpoint()
-    >>> sp.cached.spaces
-    [Space(name='func', spec={}),
-     Space(name='fsnative', spec={}),
-     Space(name='MNI152NLin2009cAsym', spec={}),
-     Space(name='anat', spec={}),
-     Space(name='fsaverage', spec={'den': '10k'}),
-     Space(name='fsaverage', spec={'den': '41k'}),
-     Space(name='MNIPediatricAsym', spec={'cohort': '2'}),
-     Space(name='MNI152NLin2009cAsym', spec={'res': 2}),
-     Space(name='MNI152NLin2009cAsym', spec={'res': 1})]
+    >>> sp.cached.references
+    [Reference(space='func', spec={}),
+     Reference(space='fsnative', spec={}),
+     Reference(space='MNI152NLin2009cAsym', spec={}),
+     Reference(space='anat', spec={}),
+     Reference(space='fsaverage', spec={'den': '10k'}),
+     Reference(space='fsaverage', spec={'den': '41k'}),
+     Reference(space='MNIPediatricAsym', spec={'cohort': '2'}),
+     Reference(space='MNI152NLin2009cAsym', spec={'res': 2}),
+     Reference(space='MNI152NLin2009cAsym', spec={'res': 1})]
 
     >>> sp.cached.get_fs_spaces()
     ['fsnative', 'fsaverage5', 'fsaverage6']
 
     >>> sp.add(('MNIPediatricAsym', {'cohort': '2'}))
-    >>> sp.get_std_spaces(dim=(3,))
+    >>> sp.get_spaces(nonstandard=False, dim=(3,))
     ['MNI152NLin2009cAsym', 'MNIPediatricAsym:cohort-2']
 
     >>> sp += [('MNIPediatricAsym', {'cohort': '2'})]
@@ -365,11 +361,11 @@ class SpatialReferences:
     ValueError: space ...
 
     >>> sp += [('MNIPediatricAsym', {'cohort': '1'})]
-    >>> sp.get_std_spaces(dim=(3,))
+    >>> sp.get_spaces(nonstandard=False, dim=(3,))
     ['MNI152NLin2009cAsym', 'MNIPediatricAsym:cohort-2', 'MNIPediatricAsym:cohort-1']
 
     >>> sp.insert(0, ('MNIPediatricAsym', {'cohort': '3'}))
-    >>> sp.get_std_spaces(dim=(3,))
+    >>> sp.get_spaces(nonstandard=False, dim=(3,))
     ['MNIPediatricAsym:cohort-3',
      'MNI152NLin2009cAsym',
      'MNIPediatricAsym:cohort-2',
@@ -383,19 +379,19 @@ class SpatialReferences:
     >>> sp.checkpoint()
     Traceback (most recent call last):
      ...
-    ValueError: Spaces have already ...
+    ValueError: References have already ...
 
     """
 
-    __slots__ = ('_spaces', '_cached')
+    __slots__ = ('_refs', '_cached')
     standard_spaces = tuple(_tfapi.templates())
     """List of supported standard reference spaces."""
 
     @staticmethod
     def check_space(space):
-        """Build a :class:`Space` object."""
+        """Build a :class:`Reference` object."""
         try:
-            if isinstance(space, Space):
+            if isinstance(space, Reference):
                 return space
         except IndexError:
             pass
@@ -410,9 +406,9 @@ class SpatialReferences:
                 space = (None, )
 
             space = space[0]
-        return Space(space, spec)
+        return Reference(space, spec)
 
-    def __init__(self, spaces=None):
+    def __init__(self, spaces=None, checkpoint=False):
         """
         Maintain the bookkeeping of spaces and templates.
 
@@ -420,12 +416,15 @@ class SpatialReferences:
         can vary based on user arguments.
         Output spaces are desired user outputs.
         """
-        self._spaces = []
+        self._refs = []
         self._cached = None
         if spaces is not None:
             if isinstance(spaces, str):
                 spaces = [spaces]
             self.__iadd__(spaces)
+
+            if checkpoint is True:
+                self.checkpoint()
 
     def __iadd__(self, b):
         """Append a list of transforms to the internal list."""
@@ -438,10 +437,10 @@ class SpatialReferences:
 
     def __contains__(self, item):
         """Implement the ``in`` builtin."""
-        if not self._spaces:
+        if not self.references:
             return False
         item = self.check_space(item)
-        for s in self._spaces:
+        for s in self.references:
             if s == item:
                 return True
         return False
@@ -457,49 +456,45 @@ class SpatialReferences:
 
         >>> print(SpatialReferences(['MNI152NLin2009cAsym']))
         Spatial References:
-            - Space(name='MNI152NLin2009cAsym', spec={})
+            - Reference(space='MNI152NLin2009cAsym', spec={})
 
         >>> print(SpatialReferences(['MNI152NLin2009cAsym', 'fsaverage5']))
         Spatial References:
-            - Space(name='MNI152NLin2009cAsym', spec={})
-            - Space(name='fsaverage', spec={'den': '10k'})
+            - Reference(space='MNI152NLin2009cAsym', spec={})
+            - Reference(space='fsaverage', spec={'den': '10k'})
 
         """
-        spaces = '\n    - '.join([''] + [str(s) for s in self.spaces]) \
-            if self.spaces else ' <none>.'
+        spaces = '\n    - '.join([''] + [str(s) for s in self.references]) \
+            if self.references else ' <none>.'
         return 'Spatial References:%s' % spaces
 
     @property
-    def spaces(self):
-        """Get all specified spaces."""
-        return self._spaces
+    def references(self):
+        """Get all specified references."""
+        return self._refs
 
     @property
     def cached(self):
-        """Get cached spaces. If cached has not been set, raise `AttributeError`"""
+        """Get cached spaces, raise error if not cached."""
         if self._cached is None:
-            raise ValueError("Spaces have not been cached")
+            raise ValueError("References have not been cached")
         return self._cached
 
     def checkpoint(self):
-        """Cache and freeze current spaces to separate attribute"""
+        """Cache and freeze current spaces to separate attribute."""
         if self._cached is not None:
-            raise ValueError("Spaces have already been cached")
-        self._cached = self.__class__(self.spaces)
-
-    @spaces.setter
-    def spaces(self, value):
-        self._spaces = value
+            raise ValueError("References have already been cached")
+        self._cached = self.__class__(self.references)
 
     def add(self, value):
         """Add one more space, without erroring if it exists."""
         if value not in self:
-            self.spaces += [self.check_space(value)]
+            self._refs += [self.check_space(value)]
 
     def append(self, value):
         """Concatenate one more space."""
         if value not in self:
-            self.spaces += [self.check_space(value)]
+            self._refs += [self.check_space(value)]
             return
 
         raise ValueError('space "%s" already in spaces.' % str(value))
@@ -507,65 +502,93 @@ class SpatialReferences:
     def insert(self, index, value, error=True):
         """Concatenate one more space."""
         if value not in self:
-            self.spaces.insert(index, self.check_space(value))
+            self._refs.insert(index, self.check_space(value))
         elif error is True:
             raise ValueError('space "%s" already in spaces.' % str(value))
 
-    def get_std_spaces(self, only_names=True, dim=(2, 3)):
+    def get_spaces(self, standard=True, nonstandard=True, dim=(2, 3)):
         """
-        Return standard spaces.
+        Return space names.
 
         Parameters
         ----------
-        only_names : :obj:`bool`, optional
-            If ``True`` (default), return all unique :class:`Space` names. If ``False``,
-            return all :class:`Space` entities.
+        standard : :obj:`bool`, optional
+            Return standard spaces.
+        nonstandard : :obj:`bool`, optional
+            Return nonstandard spaces.
         dim : :obj:`tuple`, optional
             Desired dimensions of the standard spaces (default is ``(2, 3)``)
 
         Examples
         --------
         >>> spaces = SpatialReferences(['MNI152NLin6Asym', ("fsaverage", {"den": "10k"})])
-        >>> spaces.get_std_spaces()
+        >>> spaces.get_spaces()
         ['MNI152NLin6Asym', 'fsaverage']
 
-        >>> spaces.get_std_spaces(only_names=False)
-        [Space(name='MNI152NLin6Asym', spec={}),
-         Space(name='fsaverage', spec={'den': '10k'})]
+        >>> spaces.get_spaces(standard=False)
+        []
 
-        >>> spaces.get_std_spaces(dim=(3,))
+        >>> spaces.get_spaces(dim=(3,))
         ['MNI152NLin6Asym']
 
         >>> spaces.add(('MNI152NLin6Asym', {'res': '2'}))
-        >>> spaces.get_std_spaces()
+        >>> spaces.get_spaces()
         ['MNI152NLin6Asym', 'fsaverage']
 
-        >>> spaces.get_std_spaces(only_names=False)
-        [Space(name='MNI152NLin6Asym', spec={}),
-         Space(name='fsaverage', spec={'den': '10k'}),
-         Space(name='MNI152NLin6Asym', spec={'res': '2'})]
+        >>> spaces.add(('func', {}))
+        >>> spaces.get_spaces()
+        ['MNI152NLin6Asym', 'fsaverage', 'func']
+
+        >>> spaces.get_spaces(nonstandard=False)
+        ['MNI152NLin6Asym', 'fsaverage']
+
+        >>> spaces.get_spaces(standard=False)
+        ['func']
 
         """
         out = []
-        for s in self.spaces:
-            if s.standard and s.dim in dim:
-                if only_names:
-                    if s.fullname not in out:
-                        out.append(s.fullname)
-                    continue
-                out.append(s)
+        for s in self.references:
+            if (
+                s.fullname not in out
+                and (s.standard is standard or s.standard is not nonstandard)
+                and s.dim in dim
+            ):
+                out.append(s.fullname)
         return out
 
-    def get_templates(self, dim=(2, 3)):
-        """Return output spaces."""
-        return [s for s in self._spaces
-                if s.standard and hasspec(s.spec, ('res', 'den')) and s.dim in dim]
+    def get_standard(self, full_spec=False, dim=(2, 3)):
+        """
+        Return output spaces.
 
-    def get_nonstd_spaces(self, only_names=True, dim=(2, 3)):
+        Parameters
+        ----------
+        full_spec : :obj:`bool`
+            Return only fully-specified standard references (i.e., they must either
+            have density or resolution set).
+        dim : :obj:`tuple`, optional
+            Desired dimensions of the standard spaces (default is ``(2, 3)``)
+
+        """
+        if not full_spec:
+            return [s for s in self.references if s.standard and s.dim in dim]
+
+        return [
+            s for s in self.references
+            if s.standard
+            and s.dim in dim
+            and (hasspec('res', s.spec) or hasspec('den', s.spec))
+        ]
+
+    def get_nonstandard(self, full_spec=False, dim=(2, 3)):
         """Return nonstandard spaces."""
-        return [s.name if only_names else s
-                for s in self._spaces
-                if not s.standard and s.dim in dim]
+        if not full_spec:
+            return [s.space for s in self.references if not s.standard and s.dim in dim]
+        return [
+            s.space for s in self.references
+            if not s.standard
+            and s.dim in dim
+            and (hasspec('res', s.spec) or hasspec('den', s.spec))
+        ]
 
     def get_fs_spaces(self):
         """
@@ -586,24 +609,29 @@ class SpatialReferences:
         >>> SpatialReferences([
         ...     'fsnative',
         ...     'fsaverage6',
-        ...     Space(name='fsaverage', spec={'den': '30k'})
+        ...     Reference(space='fsaverage', spec={'den': '30k'})
         ... ]).get_fs_spaces()
         ['fsnative', 'fsaverage6']
 
         """
-        return [s.legacyname or s.name
-                for s in self._spaces
-                if s.legacyname or s.name == "fsnative"]
+        return [s.legacyname or s.space
+                for s in self.references
+                if s.legacyname or s.space == "fsnative"]
 
 
-class OutputSpacesAction(argparse.Action):
+class OutputReferencesAction(argparse.Action):
     """Parse spatial references."""
 
     def __call__(self, parser, namespace, values, option_string=None):
         """Execute parser."""
         spaces = getattr(namespace, self.dest) or SpatialReferences()
         for val in values:
-            for sp in Space.from_string(val):
+            val = val.rstrip(":")
+            # Should we support some sort of explicit "default" resolution?
+            # https://github.com/poldracklab/niworkflows/pull/457#discussion_r375510227
+            # if ":res-" not in val or ":resolution-" not in val:
+            #     val = ":".join((val, "res-default"))
+            for sp in Reference.from_string(val):
                 spaces.add(sp)
         setattr(namespace, self.dest, spaces)
 
@@ -614,6 +642,25 @@ def hasspec(value, specs):
         if s in value:
             return True
     return False
+
+
+def format_reference(in_tuple):
+    """
+    Format a spatial reference given as a tuple.
+
+    Examples
+    --------
+    >>> format_reference(('MNI152Lin', {'res': 1}))
+    'MNI152Lin_res-1'
+    >>> format_reference(('MNIPediatricAsym:cohort-2', {'res': 2}))
+    'MNIPediatricAsym_cohort-2_res-2'
+
+    """
+    out = in_tuple[0].split(':')
+    res = in_tuple[1].get('res', None) or in_tuple[1].get('resolution', None)
+    if res:
+        out.append('-'.join(('res', str(res))))
+    return '_'.join(out)
 
 
 def _expand_entities(entities):
