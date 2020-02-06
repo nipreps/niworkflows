@@ -423,8 +423,8 @@ class SpatialReferences:
                 spaces = [spaces]
             self.__iadd__(spaces)
 
-        if checkpoint is True:
-            self.checkpoint()
+            if checkpoint is True:
+                self.checkpoint()
 
     def __iadd__(self, b):
         """Append a list of transforms to the internal list."""
