@@ -731,7 +731,7 @@ class SignalExtraction(SimpleInterface):
             raise NotImplementedError(
                 "Input image and mask should be of "
                 "same dimensions before running SignalExtraction"
-                )
+            )
         # Load the mask.
         # If mask is a list, each mask is treated as its own ROI/parcel
         # If mask is a 3D, each integer is treated as its own ROI/parcel

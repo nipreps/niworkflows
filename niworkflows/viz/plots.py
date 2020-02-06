@@ -646,7 +646,7 @@ def compcor_variance_plot(metadata_files, metadata_sources=None,
                        fontsize='x-small', bbox=bbox_txt)
             ax[m].text(varexp[thr][0], 25,
                        '{} components explain\n{:.0f}% of variance'.format(
-                            varexp[thr][0], 100 * thr),
+                       varexp[thr][0], 100 * thr),
                        rotation=90,
                        horizontalalignment='center',
                        fontsize='xx-small',

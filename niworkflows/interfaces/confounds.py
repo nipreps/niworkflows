@@ -216,8 +216,8 @@ def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
     mask = mask.intersection(indices)
     if minimum_contiguous is not None:
         post_final = data.shape[0] + 1
-        epoch_length = np.diff(sorted(mask |
-                                      set([-1, post_final]))) - 1
+        epoch_length = np.diff(
+            sorted(mask | set([-1, post_final]))) - 1
         epoch_end = sorted(mask | set([post_final]))
         for end, length in zip(epoch_end, epoch_length):
             if length < minimum_contiguous:

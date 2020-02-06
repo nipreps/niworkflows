@@ -129,8 +129,8 @@ def test_ReadSidecarJSON_connection(testdata_dir, field):
 
     reg_fields = ['RepetitionTime']
     n = pe.Node(ReadSidecarJSON(fields=reg_fields), name='node')
-    n.inputs.in_file = str(testdata_dir / 'ds054' / 'sub-100185' / 'fmap' /
-                           'sub-100185_phasediff.nii.gz')
+    n.inputs.in_file = str(testdata_dir / 'ds054' / 'sub-100185' / 'fmap'
+                           / 'sub-100185_phasediff.nii.gz')
     o = pe.Node(niu.IdentityInterface(fields=['out_port']), name='o')
     wf = pe.Workflow(name='json')
 
@@ -149,7 +149,7 @@ def test_ReadSidecarJSON_connection(testdata_dir, field):
 @pytest.mark.parametrize("derivatives, subjects_dir", [
     (os.getenv('FREESURFER_HOME'), 'subjects'),
     ('/tmp', "%s/%s" % (os.getenv('FREESURFER_HOME'), 'subjects'))
-    ])
+])
 def test_fsdir_noaction(derivatives, subjects_dir):
     """ Using $FREESURFER_HOME/subjects should exit early, however constructed """
     fshome = os.environ['FREESURFER_HOME']

@@ -10,14 +10,14 @@ import pytest
 
 
 @pytest.mark.parametrize('qform_add, sform_add, expectation', [
-            (0, 0, "no_warn"),
-            (0, 1e-14, "no_warn"),
-            (0, 1e-09, "no_warn"),
-            (1e-6, 0, "warn"),
-            (0, 1e-6, "warn"),
-            (1e-5, 0, "warn"),
-            (0, 1e-5, "warn"),
-            (1e-3, 1e-3, "no_warn")
+    (0, 0, "no_warn"),
+    (0, 1e-14, "no_warn"),
+    (0, 1e-09, "no_warn"),
+    (1e-6, 0, "warn"),
+    (0, 1e-6, "warn"),
+    (1e-5, 0, "warn"),
+    (0, 1e-5, "warn"),
+    (1e-3, 1e-3, "no_warn")
 ])
 # just a diagonal of ones in qform and sform and see that this doesn't warn
 # only look at the 2 areas of images.py that I added and get code coverage of those

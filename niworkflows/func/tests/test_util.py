@@ -23,8 +23,8 @@ def symmetric_overlap(img1, img2):
     return overlap / np.sqrt(total1 * total2)
 
 
-@pytest.mark.skipif(not os.getenv('FMRIPREP_REGRESSION_SOURCE') or
-                    not os.getenv('FMRIPREP_REGRESSION_TARGETS'),
+@pytest.mark.skipif(not os.getenv('FMRIPREP_REGRESSION_SOURCE')
+                    or not os.getenv('FMRIPREP_REGRESSION_TARGETS'),
                     reason='FMRIPREP_REGRESSION_{SOURCE,TARGETS} env vars not set')
 @pytest.mark.parametrize('input_fname,expected_fname', [
     (os.path.join(os.getenv('FMRIPREP_REGRESSION_SOURCE', ''),

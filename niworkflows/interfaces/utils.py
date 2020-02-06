@@ -425,8 +425,11 @@ class SanitizeImage(SimpleInterface):
 </p>
 """
 
-        if (self.inputs.max_32bit and
-                np.dtype(img.get_data_dtype()).itemsize > 4) or self.inputs.n_volumes_to_discard:
+        if (
+            (self.inputs.max_32bit
+             and np.dtype(img.get_data_dtype()).itemsize > 4)
+            or self.inputs.n_volumes_to_discard
+        ):
             # force float32 only if 64 bit dtype is detected
             if (self.inputs.max_32bit and np.dtype(img.get_data_dtype()).itemsize > 4):
                 in_data = img.get_fdata(dtype=np.float32)
@@ -905,8 +908,10 @@ def _tpm2roi(in_tpm, in_mask, mask_erosion_mm=None, erosion_mm=None,
     roi_mask = (tpm_img.get_fdata() >= pthres).astype(np.uint8)
 
     eroded_mask_file = None
-    erode_in = (mask_erosion_mm is not None and mask_erosion_mm > 0 or
-                mask_erosion_prop is not None and mask_erosion_prop < 1)
+    erode_in = (
+        (mask_erosion_mm is not None and mask_erosion_mm > 0)
+        or (mask_erosion_prop is not None and mask_erosion_prop < 1)
+    )
     if erode_in:
         eroded_mask_file = fname_presuffix(in_mask, suffix='_eroded',
                                            newpath=newpath)
@@ -929,8 +934,10 @@ def _tpm2roi(in_tpm, in_mask, mask_erosion_mm=None, erosion_mm=None,
         roi_mask[~mask_data] = 0
 
     # shrinking
-    erode_out = (erosion_mm is not None and erosion_mm > 0 or
-                 erosion_prop is not None and erosion_prop < 1)
+    erode_out = (
+        (erosion_mm is not None and erosion_mm > 0)
+        or (erosion_prop is not None and erosion_prop < 1)
+    )
     if erode_out:
         if erosion_mm:
             iter_n = max(int(erosion_mm / max(tpm_img.header.get_zooms())), 1)

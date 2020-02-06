@@ -499,8 +499,8 @@ desc-preproc_bold.json'
                 k: getattr(self.inputs, k)
                 for k in meta_fields if k not in self._static_traits})
             if self._metadata:
-                sidecar = (Path(self._results['out_file'][0]).parent /
-                           ('%s.json' % _splitext(self._results['out_file'][0])[0]))
+                sidecar = (Path(self._results['out_file'][0]).parent
+                           / ('%s.json' % _splitext(self._results['out_file'][0])[0]))
                 sidecar.write_text(dumps(self._metadata, sort_keys=True, indent=2))
                 self._results['out_meta'] = str(sidecar)
         return runtime

@@ -612,8 +612,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
         noise_components = np.loadtxt(noise_components_file,
                                       dtype=int, delimiter=',', ndmin=1)
         # Activate warning row if pertinent
-        warning_row = int(noise_components.size == 0 or
-                          noise_components.size == n_components)
+        warning_row = int(noise_components.size in (0, n_components))
         classified_colors = {True: 'r', False: 'g'}
 
     n_rows = int((n_components + (n_components % 2)) / 2)

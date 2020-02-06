@@ -126,8 +126,8 @@ class Merge(SimpleInterface):
         if isdefined(self.inputs.header_source):
             src_hdr = nb.load(self.inputs.header_source).header
             new_nii.header.set_xyzt_units(t=src_hdr.get_xyzt_units()[-1])
-            new_nii.header.set_zooms(list(new_nii.header.get_zooms()[:3]) +
-                                     [src_hdr.get_zooms()[3]])
+            new_nii.header.set_zooms(list(new_nii.header.get_zooms()[:3])
+                                     + [src_hdr.get_zooms()[3]])
 
         new_nii.to_filename(self._results['out_file'])
 
