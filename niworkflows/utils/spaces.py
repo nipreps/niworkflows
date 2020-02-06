@@ -628,6 +628,7 @@ class OutputReferencesAction(argparse.Action):
         for val in values:
             val = val.rstrip(":")
             # Should we support some sort of explicit "default" resolution?
+            # https://github.com/poldracklab/niworkflows/pull/457#discussion_r375510227
             # if ":res-" not in val or ":resolution-" not in val:
             #     val = ":".join((val, "res-default"))
             for sp in Reference.from_string(val):
