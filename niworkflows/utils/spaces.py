@@ -408,7 +408,7 @@ class SpatialReferences:
             space = space[0]
         return Reference(space, spec)
 
-    def __init__(self, spaces=None):
+    def __init__(self, spaces=None, checkpoint=False):
         """
         Maintain the bookkeeping of spaces and templates.
 
@@ -422,6 +422,9 @@ class SpatialReferences:
             if isinstance(spaces, str):
                 spaces = [spaces]
             self.__iadd__(spaces)
+
+        if checkpoint is True:
+            self.checkpoint()
 
     def __iadd__(self, b):
         """Append a list of transforms to the internal list."""
@@ -569,12 +572,23 @@ class SpatialReferences:
         if not full_spec:
             return [s for s in self.references if s.standard and s.dim in dim]
 
-        return [s for s in self.references
-                if s.standard and s.dim in dim and hasspec('res', s.spec) or hasspec('den', s.spec)]
+        return [
+            s for s in self.references
+            if s.standard
+            and s.dim in dim
+            and (hasspec('res', s.spec) or hasspec('den', s.spec))
+        ]
 
-    def get_nonstandard(self, dim=(2, 3)):
+    def get_nonstandard(self, full_spec=False, dim=(2, 3)):
         """Return nonstandard spaces."""
-        return [s.space for s in self.references if not s.standard and s.dim in dim]
+        if not full_spec:
+            return [s.space for s in self.references if not s.standard and s.dim in dim]
+        return [
+            s.space for s in self.references
+            if not s.standard
+            and s.dim in dim
+            and (hasspec('res', s.spec) or hasspec('den', s.spec))
+        ]
 
     def get_fs_spaces(self):
         """
