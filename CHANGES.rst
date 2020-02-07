@@ -1,3 +1,9 @@
+1.1.6 (February 7, 2020)
+========================
+Update NiBabel pinned version.
+
+* MAINT: Update nibabel's pin to >=3.0.1
+
 1.1.5 (February 6, 2020)
 ========================
 A refactor of recently introduced spaces/references/spatial-references objects,
@@ -6,9 +12,9 @@ and some methods for upstream pipelines.
 * ENH: Revision of spaces module for consistency (#457)
 * ENH: Add BIDS output version checker (#456)
 * ENH: Standard space querying (#455)
-* ENH: Add cache to SpatialReferences (#453)
+* ENH: Add cache to ``SpatialReferences`` (#453)
 * ENH: Add helper function for cleaning a directory (#454)
-* FIX: Parsing of floats in ResampleImageBySpacing (#452)
+* FIX: Parsing of floats in ``ResampleImageBySpacing`` (#452)
 
 1.1.4 (January 28, 2020)
 ========================
