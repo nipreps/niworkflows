@@ -121,7 +121,7 @@ def collect_participants(bids_dir, participant_label=None, strict=False,
 
 
 def collect_data(bids_dir, participant_label, task=None, echo=None,
-                 bids_validate=True):
+                 bids_validate=True, bids_filters=None):
     """
     Uses pybids to retrieve the input data for a given participant
     >>> bids_root, _ = collect_data(str(datadir / 'ds054'), '100185',
@@ -148,6 +148,10 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
     ['.../ds054/sub-100185/anat/sub-100185_T1w.nii.gz']
     >>> bids_root['t2w']  # doctest: +ELLIPSIS
     []
+    >>> bids_root, _ = collect_data(str(datadir / 'ds051'), '01',
+    ...                             bids_validate=False, bids_filters={'t1w':{'run': 1}})
+    >>> bids_root['t1w']  # doctest: +ELLIPSIS
+    ['.../ds051/sub-01/anat/sub-01_run-01_T1w.nii.gz']
     """
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
@@ -163,6 +167,9 @@ def collect_data(bids_dir, participant_label, task=None, echo=None,
         't1w': {'datatype': 'anat', 'suffix': 'T1w'},
         'roi': {'datatype': 'anat', 'suffix': 'roi'},
     }
+    bids_filters = bids_filters or {}
+    for acq, entities in bids_filters.items():
+        queries[acq].update(entities)
 
     if task:
         queries['bold']['task'] = task
