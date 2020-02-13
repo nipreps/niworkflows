@@ -331,12 +331,16 @@ class SpatialReferences:
      Reference(space='MNI152NLin2009cAsym', spec={'res': 2}),
      Reference(space='MNI152NLin2009cAsym', spec={'res': 1})]
 
+    >>> sp.is_cached()
+    False
     >>> sp.cached
     Traceback (most recent call last):
      ...
     ValueError: References have not ...
 
     >>> sp.checkpoint()
+    >>> sp.is_cached()
+    True
     >>> sp.cached.references
     [Reference(space='func', spec={}),
      Reference(space='fsnative', spec={}),
