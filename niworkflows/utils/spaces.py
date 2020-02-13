@@ -490,7 +490,7 @@ class SpatialReferences:
     @property
     def cached(self):
         """Get cached spaces, raise error if not cached."""
-        if self._cached is None:
+        if not self.is_cached():
             raise ValueError("References have not been cached")
         return self._cached
 
@@ -499,7 +499,7 @@ class SpatialReferences:
 
     def checkpoint(self, force=False):
         """Cache and freeze current spaces to separate attribute."""
-        if self._cached is not None and not force:
+        if self.is_cached() and not force:
             raise ValueError("References have already been cached")
         self._cached = self.__class__(self.references)
 
