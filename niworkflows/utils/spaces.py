@@ -381,6 +381,20 @@ class SpatialReferences:
      ...
     ValueError: References have already ...
 
+    >>> sp.checkpoint(force=True)
+    >>> sp.cached.references
+    [Reference(space='MNIPediatricAsym', spec={'cohort': '3'}),
+     Reference(space='func', spec={}),
+     Reference(space='fsnative', spec={}),
+     Reference(space='MNI152NLin2009cAsym', spec={}),
+     Reference(space='anat', spec={}),
+     Reference(space='fsaverage', spec={'den': '10k'}),
+     Reference(space='fsaverage', spec={'den': '41k'}),
+     Reference(space='MNIPediatricAsym', spec={'cohort': '2'}),
+     Reference(space='MNI152NLin2009cAsym', spec={'res': 2}),
+     Reference(space='MNI152NLin2009cAsym', spec={'res': 1}),
+     Reference(space='MNIPediatricAsym', spec={'cohort': '1'})]
+
     """
 
     __slots__ = ('_refs', '_cached')
@@ -480,9 +494,12 @@ class SpatialReferences:
             raise ValueError("References have not been cached")
         return self._cached
 
-    def checkpoint(self):
+    def is_cached(self):
+        return self._cached is not None
+
+    def checkpoint(self, force=False):
         """Cache and freeze current spaces to separate attribute."""
-        if self._cached is not None:
+        if self._cached is not None and not force:
             raise ValueError("References have already been cached")
         self._cached = self.__class__(self.references)
 
@@ -625,6 +642,9 @@ class OutputReferencesAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         """Execute parser."""
         spaces = getattr(namespace, self.dest) or SpatialReferences()
+        if not values:
+            # option was called without any output spaces, so user does not want outputs
+            spaces.checkpoint()
         for val in values:
             val = val.rstrip(":")
             # Should we support some sort of explicit "default" resolution?
