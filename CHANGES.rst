@@ -1,3 +1,11 @@
+1.1.7 (February 14, 2020)
+=========================
+Minor improvements to enable fMRIPrep 20.0.0 release.
+
+* ENH: Revise SpatialReference caching for ease of use, accessibility (#461) @mgxd
+* ENH: Downgrade log level for superfluous scans (#460) @mgxd
+* ENH: Enable optional BIDS entity filtering to data collection utility (#407) @bpinsard
+
 1.1.6 (February 7, 2020)
 ========================
 Update NiBabel pinned version.
