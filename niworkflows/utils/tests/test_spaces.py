@@ -9,7 +9,10 @@ def parser():
     import argparse
 
     pars = argparse.ArgumentParser()
-    pars.add_argument('--spaces', nargs='+', action=OutputReferencesAction,
+    pars.add_argument('--spaces',
+                      nargs='*',
+                      default=SpatialReferences(),
+                      action=OutputReferencesAction,
                       help='user defined spaces')
     return pars
 
@@ -25,9 +28,16 @@ def parser():
 ])
 def test_space_action(parser, spaces, expected):
     """Test action."""
-    pargs = parser.parse_args(args=('--spaces',) + spaces)
+    pargs = parser.parse_known_args(args=('--spaces',) + spaces)[0]
     parsed_spaces = pargs.spaces
     assert isinstance(parsed_spaces, SpatialReferences)
     assert all(isinstance(sp, Reference) for sp in parsed_spaces.references), \
         "Every element must be a `Reference`"
     assert len(parsed_spaces.references) == expected
+
+
+@pytest.mark.parametrize("flag,expected", [(('--spaces',), True), (None, False)])
+def test_space_action_edgecases(parser, flag, expected):
+    pargs = parser.parse_known_args(flag)[0]
+    spaces = pargs.spaces
+    assert spaces.is_cached() is expected
