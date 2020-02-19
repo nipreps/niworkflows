@@ -47,9 +47,7 @@ class ApplyMask(SimpleInterface):
         if img.dataobj.ndim == msk.ndim + 1:
             msk = msk[..., np.newaxis]
 
-        data = img.get_fdata()
-        data *= msk
-        masked = img.__class__(data, None, img.header)
+        masked = img.__class__(img.dataobj * msk, None, img.header)
         masked.to_filename(self._results['out_file'])
         return runtime
 
