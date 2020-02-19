@@ -48,7 +48,7 @@ class ApplyMask(SimpleInterface):
             msk = msk[..., np.newaxis]
 
         data = img.get_fdata()
-        data[~msk] = 0.0
+        data *= msk
         masked = img.__class__(data, None, img.header)
         masked.to_filename(self._results['out_file'])
         return runtime
