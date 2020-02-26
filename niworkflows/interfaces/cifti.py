@@ -2,7 +2,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Handling connectivity: combines FreeSurfer surfaces with subcortical volumes."""
 from pathlib import Path
-from glob import glob
 import json
 import warnings
 
@@ -248,7 +247,7 @@ def _get_cifti_variant(surface, volume, density=None):
     Examples
     --------
     >>> metafile, variant, _ = _get_cifti_variant('fsaverage5', 'MNI152NLin2009cAsym')
-    >>> metafile  # doctest: +ELLIPSIS
+    >>> str(metafile)  # doctest: +ELLIPSIS
     '.../dtseries_variant.json'
     >>> variant
     'fMRIPrep grayordinates'
