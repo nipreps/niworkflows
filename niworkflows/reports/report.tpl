@@ -49,10 +49,9 @@ div#boilerplate pre {
     background-color: #F8F9FA;
 }
 
-.nipype_error div {
+#errors div, #errors p {
     padding-left: 1em;
 }
-
 </style>
 </head>
 <body>
@@ -132,7 +131,7 @@ div#boilerplate pre {
 <div id="errors">
     <h1 class="sub-report-title">Errors</h1>
     {% for error in errors %}
-    <details class="nipype_error">
+    <details>
         <summary>Node Name: {{ error.node }}</summary><br>
         <div>
             File: <code>{{ error.file }}</code><br>
@@ -147,9 +146,7 @@ div#boilerplate pre {
         </div>
     </details>
     {% else %}
-    <ul>
-        <li>No errors to report!</li>
-    </ul>
+    <p>No errors to report!</p>
     {% endfor %}
 </div>
 
