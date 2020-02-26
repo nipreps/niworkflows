@@ -284,7 +284,7 @@ def _get_cifti_variant(surface, volume, density=None):
         grayords = {'32k': '91k', '59k': '170k'}[density]
         out_json['grayordinates'] = grayords
 
-    out_metadata.write_text(json.dumps(out_json, indent=1))
+    out_metadata.write_text(json.dumps(out_json, indent=2))
     return out_metadata, variant, grayords
 
 
