@@ -1,7 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Handling connectivity: combines FreeSurfer surfaces with subcortical volumes."""
-import os
+from pathlib import Path
 from glob import glob
 import json
 import warnings
@@ -209,12 +209,7 @@ def _get_cifti_data(surface, volume, subjects_dir=None, density=None):
     # fMRIPrep grayordinates
     if volume == "MNI152NLin2009cAsym":
         tpl_kwargs.update({'resolution': '2', 'desc': 'DKT31'})
-        annotation_files = sorted(glob(os.path.join(
-            subjects_dir,
-            surface,
-            'label',
-            '*h.aparc.annot'
-        )))
+        annotation_files = sorted((subjects_dir / surface / 'label').glob('*h.aparc.annot'))
     # HCP grayordinates
     elif volume == 'MNI152NLin6Asym':
         # templateflow specific resolutions (2mm, 1.6mm)
@@ -279,7 +274,7 @@ def _get_cifti_variant(surface, volume, density=None):
         )
 
     grayords = None
-    out_metadata = os.path.abspath('dtseries_variant.json')
+    out_metadata = Path.cwd() / 'dtseries_variant.json'
     out_json = {
         'space': variant,
         'surface': surface,
@@ -290,8 +285,7 @@ def _get_cifti_variant(surface, volume, density=None):
         grayords = {'32k': '91k', '59k': '170k'}[density]
         out_json['grayordinates'] = grayords
 
-    with open(out_metadata, 'w') as fp:
-        json.dump(out_json, fp)
+    out_metadata.write_text(json.dumps(out_json, indent=1))
     return out_metadata, variant, grayords
 
 
@@ -428,4 +422,4 @@ def _create_cifti_image(bold_file, label_file, bold_surfs, annotation_files, tr,
 
     out_file = "{}.dtseries.nii".format(split_filename(bold_file)[1])
     ci.save(img, out_file)
-    return os.path.join(os.getcwd(), out_file)
+    return Path.cwd() / out_file
