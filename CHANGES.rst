@@ -48,8 +48,8 @@ Hotfix of 1.1.1
 
 1.1.1 (December 17, 2019)
 =========================
-A bugfix release to support addressing `poldracklab/sdcflows#77
-<https://github.com/poldracklab/sdcflows/issues/77>`__.
+A bugfix release to support addressing `nipreps/sdcflows#77
+<https://github.com/nipreps/sdcflows/issues/77>`__.
 With thanks to Alejandro De La Vega for contributions.
 
 * FIX: ``IntraModalMerge`` failed for dims (x, y, z, 1) (#441) @oesteban
@@ -202,7 +202,7 @@ Hotfix addressing x-form issues on our ``antsBrainExtraction``'s interpretation.
 ---------------------
 A hotfix over latest hotfix.
 
-  * FIX: Minor bug introduced with #358 (`ed7a8e <https://github.com/poldracklab/niworkflows/commit/ed7a8e6ca350d06ff5f4d9fe8bd7ed2f06ada9ad>`__) @oesteban
+  * FIX: Minor bug introduced with #358 (`ed7a8e <https://github.com/nipreps/niworkflows/commit/ed7a8e6ca350d06ff5f4d9fe8bd7ed2f06ada9ad>`__) @oesteban
 
 0.9.1 (May 3, 2019)
 -------------------
@@ -426,18 +426,18 @@ With thanks to @mgxd for the new atlas.
 
 0.3.4 (February 22, 2018)
 -------------------------
-* [ENH] Remove extensions from the nifti header (`#226 <https://github.com/poldracklab/niworkflows/pull/226>`_)
-* [FIX] Fixing conda version (`#227 <https://github.com/poldracklab/niworkflows/pull/227>`_)
-* [TST] Speed-up long tests (`#225 <https://github.com/poldracklab/niworkflows/pull/225>`_)
-* [TST] Migrate to CircleCI 2.0 (`#224 <https://github.com/poldracklab/niworkflows/pull/224>`_)
+* [ENH] Remove extensions from the nifti header (`#226 <https://github.com/nipreps/niworkflows/pull/226>`_)
+* [FIX] Fixing conda version (`#227 <https://github.com/nipreps/niworkflows/pull/227>`_)
+* [TST] Speed-up long tests (`#225 <https://github.com/nipreps/niworkflows/pull/225>`_)
+* [TST] Migrate to CircleCI 2.0 (`#224 <https://github.com/nipreps/niworkflows/pull/224>`_)
 
 0.3.3
 -----
-* [ENH] Added SanitizeImage interface (https://github.com/poldracklab/niworkflows/pull/221)
+* [ENH] Added SanitizeImage interface (https://github.com/nipreps/niworkflows/pull/221)
 
 0.3.1
 -----
-* [FIX] broken normalization retries (https://github.com/poldracklab/niworkflows/pull/220)
+* [FIX] broken normalization retries (https://github.com/nipreps/niworkflows/pull/220)
 
 0.3.0
 -----
@@ -464,7 +464,7 @@ With thanks to @mgxd for the new atlas.
 
 0.2.4
 -----
-* [FIX] Regression of poldracklab/fmriprep#868 - updated nipy/nipype#2325
+* [FIX] Regression of nipreps/fmriprep#868 - updated nipy/nipype#2325
   to fix it.
 
 0.2.3

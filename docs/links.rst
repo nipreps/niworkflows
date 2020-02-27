@@ -14,6 +14,6 @@
 .. _`Connectome Workbench`: https://www.humanconnectome.org/software/connectome-workbench.html
 .. _`Docker Engine`: https://www.docker.com/products/container-runtime
 .. _`Docker installation`: https://docs.docker.com/install/
-.. _`Docker Hub`: https://hub.docker.com/r/poldracklab/niworkflows/tags
+.. _`Docker Hub`: https://hub.docker.com/r/nipreps/niworkflows/tags
 .. _Singularity: https://github.com/singularityware/singularity
 .. _TACC: https://www.tacc.utexas.edu/

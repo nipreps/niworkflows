@@ -176,8 +176,8 @@ ARG VCS_REF
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.name="niworkflows" \
       org.label-schema.description="niworkflows - NeuroImaging workflows" \
-      org.label-schema.url="https://github.com/poldracklab/niworkflows" \
+      org.label-schema.url="https://github.com/nipreps/niworkflows" \
       org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url="https://github.com/poldracklab/niworkflows" \
+      org.label-schema.vcs-url="https://github.com/nipreps/niworkflows" \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"

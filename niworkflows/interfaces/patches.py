@@ -12,7 +12,7 @@ from nipype.algorithms import confounds as nac
 class RobustACompCor(nac.ACompCor):
     """
     Runs aCompCor several times if it suddenly fails with
-    https://github.com/poldracklab/fmriprep/issues/776
+    https://github.com/nipreps/fmriprep/issues/776
 
     """
 
@@ -35,7 +35,7 @@ class RobustACompCor(nac.ACompCor):
 class RobustTCompCor(nac.TCompCor):
     """
     Runs tCompCor several times if it suddenly fails with
-    https://github.com/poldracklab/fmriprep/issues/940
+    https://github.com/nipreps/fmriprep/issues/940
 
     """
 
