@@ -189,10 +189,10 @@ class TruncateLTA(object):
     See the following issues for discussion:
 
     * https://github.com/freesurfer/freesurfer/pull/180
-    * https://github.com/poldracklab/fmriprep/issues/768
-    * https://github.com/poldracklab/fmriprep/pull/778
-    * https://github.com/poldracklab/fmriprep/issues/1268
-    * https://github.com/poldracklab/fmriprep/pull/1274
+    * https://github.com/nipreps/fmriprep/issues/768
+    * https://github.com/nipreps/fmriprep/pull/778
+    * https://github.com/nipreps/fmriprep/issues/1268
+    * https://github.com/nipreps/fmriprep/pull/1274
 
     """
 
@@ -222,7 +222,7 @@ class PatchedConcatenateLTA(TruncateLTA, ConcatenateLTA):
     `fixed here <https://github.com/freesurfer/freesurfer/pull/180>`__.
 
     The original FMRIPREP's issue is found
-    `here <https://github.com/poldracklab/fmriprep/issues/768>`__.
+    `here <https://github.com/nipreps/fmriprep/issues/768>`__.
 
     the fix is now done through mixin with TruncateLTA
     """

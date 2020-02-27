@@ -206,7 +206,7 @@ def _copy_any(src, dst):
     with src_open(src, 'rb') as f_in:
         with open(dst, 'wb') as f_out:
             if dst_isgz:
-                # Remove FNAME header from gzip (poldracklab/fmriprep#1480)
+                # Remove FNAME header from gzip (nipreps/fmriprep#1480)
                 gz_out = gzip.GzipFile('', 'wb', 9, f_out, 0.)
                 copyfileobj(f_in, gz_out)
                 gz_out.close()
