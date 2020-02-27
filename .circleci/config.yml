@@ -425,6 +425,22 @@ jobs:
       - store_artifacts:
           path: ./docs/_build/no_version_html
       - run:
+          name: Install niworkflows
+          command: |
+            pip install --no-cache-dir -e .[all]
+      - run:
+          name: Build only this commit with coverage collection
+          command: |
+            make -C docs/ clean
+            coverage run --source=niworkflows $( which sphinx-build ) \
+                -b html -W -d docs/_build/no_version_doctrees ./docs/ docs/_build/no_version_html
+            coverage xml
+            python -m codecov --flags documentation -e CIRCLE_JOB
+      - run:
+          name: Uninstall NiWorkflows
+          command: |
+            pip uninstall -y niworkflows
+      - run:
           name: Generate Versioned Docs
           command: |
             set +e
@@ -434,6 +450,7 @@ jobs:
               echo "Not a tag or master branch - skipping versioned docs."
               circleci step halt
             else
+              make -C docs/ clean
               make -f ./docs/Makefile versioned CURBRANCH=${CIRCLE_TAG:-$CIRCLE_BRANCH}
             fi
       - save_cache:
