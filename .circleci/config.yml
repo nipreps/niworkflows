@@ -220,6 +220,7 @@ jobs:
             sudo setfacl -d -m group:ubuntu:rwx $PWD
             sudo setfacl -m group:ubuntu:rwx $PWD
             docker run -u $( id -u ) -it --rm=false -w /src/niworkflows \
+              -e COVERAGE_FILE=/tmp/summaries/.pytest.coverage \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
               -v ${PWD}:/tmp niworkflows:py3 \
               pytest --junit-xml=/tmp/summaries/pytest.xml \
@@ -240,6 +241,7 @@ jobs:
           no_output_timeout: 2h
           command: |
             docker run -u $( id -u ) -it --rm=false -w /src/niworkflows \
+              -e COVERAGE_FILE=/tmp/summaries/.reportlets.coverage \
               -e SAVE_CIRCLE_ARTIFACTS="/tmp/artifacts/" \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
               -v /tmp/fslicense/license.txt:/opt/freesurfer/license.txt:ro \
@@ -310,6 +312,7 @@ jobs:
           command: |
             mkdir -p /tmp/masks/reports && \
             docker run -ti --rm=false  -w /src/niworkflows \
+              -e COVERAGE_FILE=/tmp/masks/.coverage \
               -v /tmp/data:/tmp/data -v /tmp/masks:/tmp/masks \
               -e FMRIPREP_REGRESSION_SOURCE=/tmp/data/fmriprep_bold_truncated \
               -e FMRIPREP_REGRESSION_TARGETS=/tmp/data/fmriprep_bold_mask \
@@ -427,15 +430,17 @@ jobs:
       - run:
           name: Install niworkflows
           command: |
+            pip install --no-cache-dir codecov
             pip install --no-cache-dir -e .[all]
       - run:
           name: Build only this commit with coverage collection
           command: |
             make -C docs/ clean
+            export COVERAGE_FILE=/tmp/.coverage
             coverage run --source=niworkflows $( which sphinx-build ) \
                 -b html -W -d docs/_build/no_version_doctrees ./docs/ docs/_build/no_version_html
-            coverage xml
-            python -m codecov --flags documentation -e CIRCLE_JOB
+            coverage xml -o /tmp/documentation.xml
+            python -m codecov --file /tmp/documentation.xml --flags documentation -e CIRCLE_JOB
       - run:
           name: Uninstall NiWorkflows
           command: |
