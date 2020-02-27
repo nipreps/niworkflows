@@ -93,4 +93,4 @@ script:
 
 after_script:
   - python -m pip install codecov
-  - codecov
+  - python -m codecov --flags travis --file cov.xml -e $TRAVIS_JOB_NUMBER
