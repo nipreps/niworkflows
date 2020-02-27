@@ -49,6 +49,9 @@ div#boilerplate pre {
     background-color: #F8F9FA;
 }
 
+#errors div, #errors p {
+    padding-left: 1em;
+}
 </style>
 </head>
 <body>
@@ -127,12 +130,10 @@ div#boilerplate pre {
 
 <div id="errors">
     <h1 class="sub-report-title">Errors</h1>
-    <ul>
     {% for error in errors %}
-        <li>
-        <div class="nipype_error">
-            Node Name: <a target="_self" onclick="toggle('{{error.file|replace('.', '')}}_details_id');">{{ error.node }}</a><br>
-            <div id="{{error.file|replace('.', '')}}_details_id" style="display:none">
+    <details>
+        <summary>Node Name: {{ error.node }}</summary><br>
+        <div>
             File: <code>{{ error.file }}</code><br>
             Working Directory: <code>{{ error.node_dir }}</code><br>
             Inputs: <br>
@@ -142,13 +143,11 @@ div#boilerplate pre {
             {% endfor %}
             </ul>
             <pre>{{ error.traceback }}</pre>
-            </div>
         </div>
-        </li>
+    </details>
     {% else %}
-        <li>No errors to report!</li>
+    <p>No errors to report!</p>
     {% endfor %}
-    </ul>
 </div>
 
 

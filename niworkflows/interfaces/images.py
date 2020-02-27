@@ -420,25 +420,28 @@ class ValidateImage(SimpleInterface):
         elif (valid_sform and sform_code > 0) and (not matching_affines or qform_code == 0):
             img.set_qform(sform, sform_code)
             new_qform = img.get_qform()
-            if np.allclose(new_qform, qform) and qform_code > 0:
-                # False alarm
-                self._results['out_file'] = self.inputs.in_file
-                open(out_report, 'w').close()
-                self._results['out_report'] = out_report
-                return runtime
-            diff = np.linalg.inv(qform) @ new_qform
-            trans, rot, _, _ = transforms3d.affines.decompose44(diff)
-            angle = transforms3d.axangles.mat2axangle(rot)[1]
-            total_trans = np.sqrt(np.sum(trans * trans))  # Add angle and total_trans to report
-            warning_txt = 'Note on orientation: qform matrix overwritten'
-            description = """\
+            if valid_qform:
+                # False alarm - the difference is due to precision loss of qform
+                if np.allclose(new_qform, qform) and qform_code > 0:
+                    self._results['out_file'] = self.inputs.in_file
+                    open(out_report, 'w').close()
+                    self._results['out_report'] = out_report
+                    return runtime
+                # Replacing an existing, valid qform. Report magnitude of change.
+                diff = np.linalg.inv(qform) @ new_qform
+                trans, rot, _, _ = transforms3d.affines.decompose44(diff)
+                angle = transforms3d.axangles.mat2axangle(rot)[1]
+                total_trans = np.sqrt(np.sum(trans * trans))  # Add angle and total_trans to report
+                warning_txt = 'Note on orientation: qform matrix overwritten'
+                description = """\
     <p class="elem-desc">
     The qform has been copied from sform.
     The difference in angle is {angle:.02g}.
     The difference in translation is {total_trans:.02g}.
     </p>
     """.format(angle=angle, total_trans=total_trans)
-            if not valid_qform and qform_code > 0:
+            elif qform_code > 0:
+                # qform code indicates the qform is supposed to be valid. Use more stridency.
                 warning_txt = 'WARNING - Invalid qform information'
                 description = """\
 <p class="elem-desc">
@@ -448,6 +451,10 @@ class ValidateImage(SimpleInterface):
     by the scanner is advised.
 </p>
 """
+            else:  # qform_code == 0
+                # qform is not expected to be valids. Simple note.
+                warning_txt = 'Note on orientation: qform matrix overwritten'
+                description = '<p class="elem-desc">The qform has been copied from sform.</p>'
         # Rows 5-6:
         else:
             affine = img.header.get_base_affine()

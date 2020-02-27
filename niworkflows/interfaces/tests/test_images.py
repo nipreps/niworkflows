@@ -34,11 +34,51 @@ def test_qformsform_warning(tmp_path, qform_add, sform_add, expectation):
     validate = pe.Node(im.ValidateImage(), name='validate', base_dir=str(tmp_path))
     validate.inputs.in_file = fname
     res = validate.run()
+    out_report = Path(res.outputs.out_report).read_text()
     if expectation == 'warn':
-        assert "Note on" in Path(res.outputs.out_report).read_text()
-        assert len(Path(res.outputs.out_report).read_text()) > 0
+        assert "Note on" in out_report
     elif expectation == 'no_warn':
-        assert len(Path(res.outputs.out_report).read_text()) == 0
+        assert len(out_report) == 0
+
+
+@pytest.mark.parametrize('qform_code, warning_text', [
+    (0, "Note on orientation"),
+    (1, "WARNING - Invalid qform"),
+])
+def test_bad_qform(tmp_path, qform_code, warning_text):
+    fname = str(tmp_path / 'test.nii')
+
+    # make a random image
+    random_data = np.random.random(size=(5, 5, 5) + (5,))
+    img = nb.Nifti1Image(random_data, np.eye(4))
+
+    # Some magic terms from a bad qform in the wild
+    img.header['qform_code'] = qform_code
+    img.header['quatern_b'] = 0
+    img.header['quatern_c'] = 0.998322
+    img.header['quatern_d'] = -0.0579125
+    img.to_filename(fname)
+
+    validate = pe.Node(im.ValidateImage(), name='validate', base_dir=str(tmp_path))
+    validate.inputs.in_file = fname
+    res = validate.run()
+    assert warning_text in Path(res.outputs.out_report).read_text()
+
+
+def test_no_good_affines(tmp_path):
+    fname = str(tmp_path / 'test.nii')
+
+    # make a random image
+    random_data = np.random.random(size=(5, 5, 5) + (5,))
+    img = nb.Nifti1Image(random_data, None)
+    img.header['qform_code'] = 0
+    img.header['sform_code'] = 0
+    img.to_filename(fname)
+
+    validate = pe.Node(im.ValidateImage(), name='validate', base_dir=str(tmp_path))
+    validate.inputs.in_file = fname
+    res = validate.run()
+    assert 'WARNING - Missing orientation information' in Path(res.outputs.out_report).read_text()
 
 
 @pytest.mark.parametrize('nvols, nmasks, ext, factor', [

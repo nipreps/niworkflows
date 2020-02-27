@@ -234,7 +234,7 @@ class Report(object):
     >>> robj.generate_report()
     0
     >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
-    36425
+    36450
 
     .. testcleanup::
 
