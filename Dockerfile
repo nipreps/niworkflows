@@ -161,8 +161,8 @@ RUN python -c "from templateflow import api as tfapi; \
                tfapi.get(['OASIS30ANTs', 'NKI'], resolution=1, desc='BrainCerebellumRegistration', suffix='mask'); "
 
 COPY . niworkflows/
-RUN cd niworkflows/ && \
-    pip install --no-cache-dir -e .[all] && \
+WORKDIR /src/niworkflows/
+RUN pip install --no-cache-dir -e .[all] && \
     rm -rf $HOME/.cache/pip
 
 # Cleanup and ensure perms.
