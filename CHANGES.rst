@@ -1,3 +1,14 @@
+1.1.8 (February 26, 2020)
+=========================
+Bug-fix release in the 1.1.x series.
+
+This release includes some minor improvements to formatting of reports and derivative metadata.
+
+* FIX: Check fo valid qform before calculating change (#466) @effigies
+* ENH: Display errors as summary/details elements (#464) @effigies
+* ENH: Add a pure-Python ApplyMask interface, based on NiBabel (#463) @oesteban
+* RF: Replace ``os`` operations with ``pathlib``, indent JSON sidecars (#467) @mgxd
+
 1.1.7 (February 14, 2020)
 =========================
 Minor improvements to enable fMRIPrep 20.0.0 release.
