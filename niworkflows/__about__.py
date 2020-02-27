@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 These pipelines are developed by the Poldrack lab at Stanford University
-(https://poldracklab.stanford.edu/) for use at
+(https://nipreps.stanford.edu/) for use at
 the Center for Reproducible Neuroscience (http://reproducibility.stanford.edu/),
 as well as for open-source software distribution.
 """

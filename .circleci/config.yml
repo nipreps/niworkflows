@@ -2,6 +2,13 @@ docs_deploy: &docs
   docker:
     - image: node:8.10.0
   steps:
+    - run:
+        name: Check whether this is the original repo
+        command: |
+          if [[ "$CIRCLE_PROJECT_USERNAME" != "nipreps" ]]; then
+              echo "Not in nipreps/niworkflows - skipping docs deploy."
+              circleci step halt
+          fi
     - checkout
     - attach_workspace:
         at: docs/_build
@@ -12,11 +19,11 @@ docs_deploy: &docs
         name: Install and configure dependencies
         command: |
           npm install -g --silent gh-pages@2.0.1
-          git config user.email "rosswilsonblair+niworkflows-circleci@gmail.com"
-          git config user.name "ci-build"
+          git config user.email "nipreps@gmail.com"
+          git config user.name "Documentation Push"
     - add_ssh_keys:
         fingerprints:
-          - "6b:ba:eb:a8:cb:f7:67:eb:9b:5d:54:91:e8:b3:98:16"
+          - "c8:a8:55:7d:1e:08:92:c2:86:29:7b:b4:4b:88:24:51"
     - run:
         name: Deploy docs to gh-pages branch
         command: gh-pages --dotfiles --message "doc(update) [skip ci]" --dist docs/_build/html

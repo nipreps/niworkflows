@@ -8,7 +8,7 @@ Make sure all of *NIWorkflows*' `External Dependencies`_ are installed.
 These tools must be installed and their binaries available in the
 system's ``$PATH``.
 A relatively interpretable description of how your environment can be set-up
-is found in the `Dockerfile <https://github.com/poldracklab/niworkflows/blob/master/Dockerfile>`_.
+is found in the `Dockerfile <https://github.com/nipreps/niworkflows/blob/master/Dockerfile>`_.
 As an additional installation setting, FreeSurfer requires a license file ..
 
 On a functional Python 3.5 (or above) environment with ``pip`` installed,

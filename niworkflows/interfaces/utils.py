@@ -236,7 +236,7 @@ def _gen_reference(fixed_image, moving_image, fov_mask=None, out_file=None,
     new_zooms = reoriented_moving_img.header.get_zooms()[:3]
 
     # Avoid small differences in reported resolution to cause changes to
-    # FOV. See https://github.com/poldracklab/fmriprep/issues/512
+    # FOV. See https://github.com/nipreps/fmriprep/issues/512
     # A positive diagonal affine is RAS, hence the need to reorient above.
     new_affine = np.diag(np.round(new_zooms, 3))
 
@@ -321,7 +321,7 @@ class SanitizeImage(SimpleInterface):
     problematic combinations of values. Removes any extension form the header
     if present.
     This interface implements the `following logic
-    <https://github.com/poldracklab/fmriprep/issues/873#issuecomment-349394544>`_:
+    <https://github.com/nipreps/fmriprep/issues/873#issuecomment-349394544>`_:
     +-------------------+------------------+------------------+------------------\
 +------------------------------------------------+
     | valid quaternions | `qform_code > 0` | `sform_code > 0` | `qform == sform` \

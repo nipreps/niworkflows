@@ -332,7 +332,7 @@ class ValidateImage(SimpleInterface):
     Check the correctness of x-form headers (matrix and code).
 
     This interface implements the `following logic
-    <https://github.com/poldracklab/fmriprep/issues/873#issuecomment-349394544>`_:
+    <https://github.com/nipreps/fmriprep/issues/873#issuecomment-349394544>`_:
 
     +-------------------+------------------+------------------+------------------\
 +------------------------------------------------+
