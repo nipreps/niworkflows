@@ -150,7 +150,7 @@ RUN python -c "from matplotlib import font_manager" && \
 WORKDIR /src/
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt && \
-    rm -rf $HOME/.cache/pip
+    rm -rf $HOME/.cache/pip requirements.txt
 
 # Precaching atlases
 RUN python -c "from templateflow import api as tfapi; \
@@ -161,7 +161,8 @@ RUN python -c "from templateflow import api as tfapi; \
                tfapi.get(['OASIS30ANTs', 'NKI'], resolution=1, desc='BrainCerebellumRegistration', suffix='mask'); "
 
 COPY . niworkflows/
-RUN pip install --no-cache-dir /src/niworkflows[all] && \
+RUN cd niworkflows/ && \
+    pip install --no-cache-dir -e .[all] && \
     rm -rf $HOME/.cache/pip
 
 # Cleanup and ensure perms.

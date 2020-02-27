@@ -18,6 +18,8 @@ src/
 .git/
 .github/
 .gitignore
+.gitattributes
+.gitmodules
 
 # ci
 .circleci/

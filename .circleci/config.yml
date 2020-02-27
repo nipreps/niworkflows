@@ -219,14 +219,14 @@ jobs:
             mkdir -p $PWD/artifacts $PWD/summaries
             sudo setfacl -d -m group:ubuntu:rwx $PWD
             sudo setfacl -m group:ubuntu:rwx $PWD
-            docker run -u $( id -u ) -it --rm=false \
+            docker run -u $( id -u ) -it --rm=false -w /src/niworkflows \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
               -v ${PWD}:/tmp niworkflows:py3 \
               pytest --junit-xml=/tmp/summaries/pytest.xml \
                      --cov niworkflows --cov-report xml:/tmp/summaries/unittests.xml \
-                     --ignore=/src/niworkflows/niworkflows/tests/ \
-                     --ignore=/src/niworkflows/niworkflows/func/tests/ \
-                     /src/niworkflows/niworkflows
+                     --ignore=niworkflows/tests/ \
+                     --ignore=niworkflows/func/tests/ \
+                     niworkflows/
 
       - run:
           name: Submit unit test coverage
@@ -239,14 +239,14 @@ jobs:
           name: Run reportlet tests
           no_output_timeout: 2h
           command: |
-            docker run -u $( id -u ) -it --rm=false \
+            docker run -u $( id -u ) -it --rm=false -w /src/niworkflows \
               -e SAVE_CIRCLE_ARTIFACTS="/tmp/artifacts/" \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
               -v /tmp/fslicense/license.txt:/opt/freesurfer/license.txt:ro \
               -v ${PWD}:/tmp niworkflows:py3 \
               pytest -n auto --junit-xml=/tmp/summaries/reportlets.xml \
                      --cov niworkflows --cov-report xml:/tmp/summaries/reportlets.xml \
-                     /src/niworkflows/niworkflows/tests/
+                     niworkflows/tests/
       - run:
           name: Submit reportlet test coverage
           command: |
@@ -309,7 +309,7 @@ jobs:
           no_output_timeout: 2h
           command: |
             mkdir -p /tmp/masks/reports && \
-            docker run -ti --rm=false \
+            docker run -ti --rm=false  -w /src/niworkflows \
               -v /tmp/data:/tmp/data -v /tmp/masks:/tmp/masks \
               -e FMRIPREP_REGRESSION_SOURCE=/tmp/data/fmriprep_bold_truncated \
               -e FMRIPREP_REGRESSION_TARGETS=/tmp/data/fmriprep_bold_mask \
@@ -317,7 +317,7 @@ jobs:
               niworkflows:py3 \
               pytest --junit-xml=/tmp/masks/regression.xml \
                      --cov niworkflows --cov-report xml:/tmp/masks/coverage.xml \
-                     /src/niworkflows/niworkflows/func/tests/
+                     niworkflows/func/tests/
 
       - run:
           name: Submit masks test coverage
