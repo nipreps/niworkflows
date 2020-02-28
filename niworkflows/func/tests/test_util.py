@@ -10,7 +10,7 @@ from nilearn.image import load_img
 
 from niworkflows.interfaces.masks import ROIsPlot
 
-from ..util import init_bold_reference_wf, _pass_dummy_scans
+from ..util import init_bold_reference_wf
 
 
 def symmetric_overlap(img1, img2):
@@ -58,20 +58,29 @@ def symmetric_overlap(img1, img2):
     )
 ])
 def test_masking(input_fname, expected_fname):
-    bold_reference_wf = init_bold_reference_wf(omp_nthreads=1)
-    bold_reference_wf.inputs.inputnode.bold_file = input_fname
+    basename = Path(input_fname).name
+    dsname = Path(expected_fname).parent.name
 
     # Reconstruct base_fname from above
-    dirname, basename = os.path.split(input_fname)
-    dsname = os.path.basename(dirname)
     reports_dir = Path(os.getenv('FMRIPREP_REGRESSION_REPORTS', ''))
     newpath = reports_dir / dsname
+
+    name = basename.rstrip('_bold.nii.gz').replace('-', '_')
+    bold_reference_wf = init_bold_reference_wf(omp_nthreads=1, name=name)
+    bold_reference_wf.inputs.inputnode.bold_file = input_fname
+    base_dir = os.getenv('CACHED_WORK_DIRECTORY')
+    if base_dir:
+        base_dir = Path(base_dir) / dsname
+        base_dir.mkdir(parents=True, exist_ok=True)
+        bold_reference_wf.base_dir = str(base_dir)
+
     out_fname = fname_presuffix(basename, suffix='_masks.svg', use_ext=False,
                                 newpath=str(newpath))
     newpath.mkdir(parents=True, exist_ok=True)
 
     mask_diff_plot = pe.Node(ROIsPlot(colors=['limegreen'], levels=[0.5]),
                              name='mask_diff_plot')
+    mask_diff_plot.always_run = True
     mask_diff_plot.inputs.in_mask = expected_fname
     mask_diff_plot.inputs.out_report = out_fname
 
@@ -94,14 +103,3 @@ def test_masking(input_fname, expected_fname):
              copy=True)
 
     assert overlap > 0.95, input_fname
-
-
-@pytest.mark.parametrize('algo_dummy_scans,dummy_scans,expected_out', [
-    (2, 1, 1),
-    (2, None, 2),
-    (2, 0, 0),
-])
-def test_pass_dummy_scans(algo_dummy_scans, dummy_scans, expected_out):
-    skip_vols = _pass_dummy_scans(algo_dummy_scans, dummy_scans)
-
-    assert skip_vols == expected_out

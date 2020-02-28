@@ -241,5 +241,27 @@ def clean_directory(path):
     return True
 
 
+def pass_dummy_scans(algo_dummy_scans, dummy_scans=None):
+    """
+    Graft manually provided number of dummy scans, if necessary.
+
+    Parameters
+    ----------
+    algo_dummy_scans : int
+        number of volumes to skip determined by an algorithm
+    dummy_scans : int or None
+        number of volumes to skip determined by the user
+
+    Returns
+    -------
+    skip_vols_num : int
+        number of volumes to skip
+
+    """
+    if dummy_scans is None:
+        return algo_dummy_scans
+    return dummy_scans
+
+
 if __name__ == '__main__':
     pass
