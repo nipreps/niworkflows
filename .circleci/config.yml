@@ -31,66 +31,69 @@ docs_deploy: &docs
 version: 2
 jobs:
   build:
+    machine:
+      image: circleci/classic:201711-01
+    working_directory: /tmp/src/niworkflows
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
       SCRATCH: "/scratch"
-    docker:
-      - image: docker:18.01.0-ce-git
-    working_directory: /tmp/src/niworkflows
     steps:
-      - run:
-          name: Install parallel gzip and python3
-          command: |
-            apk add --no-cache pigz python3
       - restore_cache:
           keys:
-            - docker-v1-{{ .Branch }}-{{ epoch }}
-            - docker-v1-{{ .Branch }}-
-            - docker-v1-master-
-            - docker-v1-
+            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-
+            - build-v1-master-
+            - build-v1-
           paths:
-            - /tmp/cache/docker.tar.gz
-      - checkout
-      - setup_remote_docker
+            - /tmp/docker
+
       - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
+          name: Set-up a Docker registry
           command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
+            docker run -d -p 5000:5000 --restart=always --name=registry \
+                -v /tmp/docker:/var/lib/registry registry:2
       - run:
-          name: Build Docker image
+          name: Pull existing images
+          command: |
+            set +e
+            docker pull localhost:5000/ubuntu
+            success=$?
+            set -e
+            if [[ "$success" = "0" ]]; then
+                echo "Pulling from local registry"
+                docker tag localhost:5000/ubuntu ubuntu:xenial-20191010
+                docker pull localhost:5000/niworkflows
+                docker tag localhost:5000/niworkflows niworkflows:latest
+            else
+                echo "Pulling from Docker Hub"
+                docker pull ubuntu:xenial-20191010
+                docker tag ubuntu:xenial-20191010 localhost:5000/ubuntu
+                docker push localhost:5000/ubuntu
+            fi
+
+      - checkout
+      - run:
+          name: Build Docker image & push to registry
           no_output_timeout: 60m
           command: |
             e=1 && for i in {1..5}; do
-              docker build \
-                --cache-from=niworkflows:py3 \
-                --rm=false \
-                -t niworkflows:py3 \
+              docker build --rm \
+                -t niworkflows:latest \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
                 --build-arg VCS_REF=`git rev-parse --short HEAD` . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
+            docker tag niworkflows:latest localhost:5000/niworkflows
+            docker push localhost:5000/niworkflows
       - run:
-          name: Docker save
-          no_output_timeout: 40m
+          name: Docker registry garbage collection
           command: |
-            mkdir -p /tmp/cache
-            docker save ubuntu:xenial-20161213 niworkflows:py3 \
-            | pigz -8 -p 3 > /tmp/cache/docker.tar.gz
+            docker exec -it registry /bin/registry garbage-collect --delete-untagged \
+                /etc/docker/registry/config.yml
       - save_cache:
-          key: docker-v1-{{ .Branch }}-{{ epoch }}
+          key: build-v1-{{ .Branch }}-{{ epoch }}
           paths:
-            - /tmp/cache/docker.tar.gz
-
-      # - persist_to_workspace:
-      #     root: /tmp
-      #     paths:
-      #       - cache/docker.tar.gz
+            - /tmp/docker
 
   get_data:
     machine:
@@ -185,24 +188,20 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - docker-v1-{{ .Branch }}-{{ epoch }}
-            - docker-v1-{{ .Branch }}-
-            - docker-v1-master-
-            - docker-v1-
+            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-
+            - build-v1-master-
+            - build-v1-
+      - run:
+          name: Set-up a Docker registry & pull
+          command: |
+            docker run -d -p 5000:5000 --restart=always --name=registry \
+                -v /tmp/docker:/var/lib/registry registry:2
+            docker pull localhost:5000/niworkflows
+            docker tag localhost:5000/niworkflows niworkflows:latest
 
       - checkout:
           path: /tmp/src/niworkflows
-      - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              sudo apt update && sudo apt -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
       - run:
           name: Set PR number
           command: |
@@ -222,7 +221,7 @@ jobs:
             docker run -u $( id -u ) -it --rm=false -w /src/niworkflows \
               -e COVERAGE_FILE=/tmp/summaries/.pytest.coverage \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
-              -v ${PWD}:/tmp niworkflows:py3 \
+              -v ${PWD}:/tmp niworkflows:latest \
               pytest --junit-xml=/tmp/summaries/pytest.xml \
                      --cov niworkflows --cov-report xml:/tmp/summaries/unittests.xml \
                      --ignore=niworkflows/tests/ \
@@ -245,7 +244,7 @@ jobs:
               -e SAVE_CIRCLE_ARTIFACTS="/tmp/artifacts/" \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
               -v /tmp/fslicense/license.txt:/opt/freesurfer/license.txt:ro \
-              -v ${PWD}:/tmp niworkflows:py3 \
+              -v ${PWD}:/tmp niworkflows:latest \
               pytest -n auto --junit-xml=/tmp/summaries/reportlets.xml \
                      --cov niworkflows --cov-report xml:/tmp/summaries/reportlets.xml \
                      niworkflows/tests/
@@ -275,27 +274,24 @@ jobs:
           at: /tmp
       - restore_cache:
           keys:
-            - docker-v1-{{ .Branch }}-{{ epoch }}
-            - docker-v1-{{ .Branch }}-
-            - docker-v1-master-
-            - docker-v1-
+            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-
+            - build-v1-master-
+            - build-v1-
+      - run:
+          name: Set-up a Docker registry & pull
+          command: |
+            docker run -d -p 5000:5000 --restart=always --name=registry \
+                -v /tmp/docker:/var/lib/registry registry:2
+            docker pull localhost:5000/niworkflows
+            docker tag localhost:5000/niworkflows niworkflows:latest
+
       - restore_cache:
           keys:
             - regression-v2-{{ .Revision }}
 
       - checkout:
           path: /tmp/src/niworkflows
-      - run:
-          name: Load Docker image layer cache
-          no_output_timeout: 30m
-          command: |
-            docker info
-            set +o pipefail
-            if [ -f /tmp/cache/docker.tar.gz ]; then
-              sudo apt update && sudo apt -y install pigz
-              pigz -d --stdout /tmp/cache/docker.tar.gz | docker load
-              docker images
-            fi
       - run:
           name: Set PR number
           command: |
@@ -317,7 +313,7 @@ jobs:
               -e FMRIPREP_REGRESSION_SOURCE=/tmp/data/fmriprep_bold_truncated \
               -e FMRIPREP_REGRESSION_TARGETS=/tmp/data/fmriprep_bold_mask \
               -e FMRIPREP_REGRESSION_REPORTS=/tmp/masks/reports \
-              niworkflows:py3 \
+              niworkflows:latest \
               pytest --junit-xml=/tmp/masks/regression.xml \
                      --cov niworkflows --cov-report xml:/tmp/masks/coverage.xml \
                      niworkflows/func/tests/
