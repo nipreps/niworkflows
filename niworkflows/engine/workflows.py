@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-Supercharging Nipype's workflow engine
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Supercharging Nipype's workflow engine.
 
 Add special features to the Nipype's vanilla workflows
 """
@@ -14,23 +12,23 @@ class LiterateWorkflow(pe.Workflow):
     """Controls the setup and execution of a pipeline of processes."""
 
     def __init__(self, name, base_dir=None):
-        """Create a workflow object.
+        """
+        Create a workflow object.
+
         Parameters
         ----------
-        name : alphanumeric string
+        name : alphanumeric :obj:`str`
             unique identifier for the workflow
-        base_dir : string, optional
+        base_dir : :obj:`str`, optional
             path to workflow storage
+
         """
         super(LiterateWorkflow, self).__init__(name, base_dir)
         self.__desc__ = None
         self.__postdesc__ = None
 
     def visit_desc(self):
-        """
-        Builds a citation boilerplate by visiting all workflows
-        appending their ``__desc__`` field
-        """
+        """Build a citation boilerplate by visiting all workflows."""
         desc = []
 
         if self.__desc__:
