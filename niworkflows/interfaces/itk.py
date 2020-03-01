@@ -4,8 +4,6 @@
 import os
 from mimetypes import guess_type
 from tempfile import TemporaryDirectory
-import numpy as np
-import nibabel as nb
 
 from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
@@ -139,68 +137,6 @@ class MultiApplyTransforms(SimpleInterface):
             with open(self._results['log_cmdline'], 'w') as cmdfile:
                 print('\n-------\n'.join([el[1] for el in out_files]),
                       file=cmdfile)
-        return runtime
-
-
-class _FUGUEvsm2ANTSwarpInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True,
-                   desc='input displacements field map')
-    pe_dir = traits.Enum('i', 'i-', 'j', 'j-', 'k', 'k-',
-                         desc='phase-encoding axis')
-
-
-class _FUGUEvsm2ANTSwarpOutputSpec(TraitedSpec):
-    out_file = File(desc='the output warp field')
-
-
-class FUGUEvsm2ANTSwarp(SimpleInterface):
-    """Convert a voxel-shift-map to ants warp."""
-    input_spec = _FUGUEvsm2ANTSwarpInputSpec
-    output_spec = _FUGUEvsm2ANTSwarpOutputSpec
-
-    def _run_interface(self, runtime):
-
-        nii = nb.load(self.inputs.in_file)
-
-        phaseEncDim = {'i': 0, 'j': 1, 'k': 2}[self.inputs.pe_dir[0]]
-
-        if len(self.inputs.pe_dir) == 2:
-            phaseEncSign = 1.0
-        else:
-            phaseEncSign = -1.0
-
-        # Fix header
-        hdr = nii.header.copy()
-        hdr.set_data_dtype(np.dtype('<f4'))
-        hdr.set_intent('vector', (), '')
-
-        # Get data, convert to mm
-        data = nii.get_fdata()
-
-        aff = np.diag([1.0, 1.0, -1.0])
-        if np.linalg.det(aff) < 0 and phaseEncDim != 0:
-            # Reverse direction since ITK is LPS
-            aff *= -1.0
-
-        aff = aff.dot(nii.affine[:3, :3])
-
-        data *= phaseEncSign * nii.header.get_zooms()[phaseEncDim]
-
-        # Add missing dimensions
-        zeros = np.zeros_like(data)
-        field = [zeros, zeros]
-        field.insert(phaseEncDim, data)
-        field = np.stack(field, -1)
-        # Add empty axis
-        field = field[:, :, :, np.newaxis, :]
-
-        # Write out
-        self._results['out_file'] = fname_presuffix(
-            self.inputs.in_file, suffix='_antswarp', newpath=runtime.cwd)
-        nb.Nifti1Image(
-            field.astype(np.dtype('<f4')), nii.affine, hdr).to_filename(
-                self._results['out_file'])
-
         return runtime
 
 
