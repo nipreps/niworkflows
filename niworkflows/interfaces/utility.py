@@ -89,6 +89,36 @@ class KeySelect(BaseInterface):
     output_spec = _KeySelectOutputSpec
 
     def __init__(self, keys=None, fields=None, **inputs):
+        """
+        Instantiate a KeySelect utility interface.
+
+        Examples
+        --------
+        >>> ks = KeySelect(fields='field1')
+        >>> ks.inputs
+        <BLANKLINE>
+        field1 = <undefined>
+        key = <undefined>
+        keys = <undefined>
+        <BLANKLINE>
+
+        >>> ks = KeySelect(fields='field1', field1=['a', 'b'])
+        >>> ks.inputs
+        <BLANKLINE>
+        field1 = ['a', 'b']
+        key = <undefined>
+        keys = <undefined>
+        <BLANKLINE>
+
+        >>> ks = KeySelect()
+        Traceback (most recent call last):
+        ValueError: A list or multiplexed...
+
+        >>> ks = KeySelect(fields='key')
+        Traceback (most recent call last):
+        ValueError: Some fields are invalid...
+
+        """
         # Call constructor
         super(KeySelect, self).__init__(**inputs)
 
@@ -151,6 +181,5 @@ class KeySelect(BaseInterface):
 
     def _outputs(self):
         base = super(KeySelect, self)._outputs()
-        if self._fields:
-            base = add_traits(base, self._fields)
+        base = add_traits(base, self._fields)
         return base
