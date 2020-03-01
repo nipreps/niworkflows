@@ -20,6 +20,7 @@ from ..interfaces.images import ValidateImage, MatchHeader
 from ..interfaces.masks import SimpleShowMaskRPT
 from ..interfaces.registration import EstimateReferenceImage
 from ..interfaces.utils import CopyXForm
+from ..utils.misc import pass_dummy_scans as _pass_dummy_scans
 
 
 DEFAULT_MEMORY_MIN_GB = 0.01
@@ -425,25 +426,3 @@ def init_skullstrip_bold_wf(name='skullstrip_bold_wf'):
     ])
 
     return workflow
-
-
-def _pass_dummy_scans(algo_dummy_scans, dummy_scans=None):
-    """
-    Graft manually provided number of dummy scans, if necessary.
-
-    Parameters
-    ----------
-    algo_dummy_scans : int
-        number of volumes to skip determined by an algorithm
-    dummy_scans : int or None
-        number of volumes to skip determined by the user
-
-    Returns
-    -------
-    skip_vols_num : int
-        number of volumes to skip
-
-    """
-    if dummy_scans is None:
-        return algo_dummy_scans
-    return dummy_scans

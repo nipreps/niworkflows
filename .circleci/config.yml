@@ -32,7 +32,7 @@ version: 2
 jobs:
   build:
     machine:
-      image: circleci/classic:201711-01
+      image: circleci/classic:201808-01
     working_directory: /tmp/src/niworkflows
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
@@ -98,7 +98,7 @@ jobs:
   get_data:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201711-01
+      image: circleci/classic:201808-01
     working_directory: /home/circleci/data
     steps:
       - restore_cache:
@@ -146,7 +146,7 @@ jobs:
   get_regression_data:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201711-01
+      image: circleci/classic:201808-01
     working_directory: /home/circleci/data
     steps:
       - restore_cache:
@@ -181,7 +181,7 @@ jobs:
 
   test_pytest:
     machine:
-      image: circleci/classic:201711-01
+      image: circleci/classic:201808-01
     working_directory: /tmp/tests
     steps:
       - attach_workspace:
@@ -267,7 +267,7 @@ jobs:
 
   test_masks:
     machine:
-      image: circleci/classic:201711-01
+      image: circleci/classic:201808-01
     working_directory: /tmp/masks
     steps:
       - attach_workspace:
@@ -289,41 +289,60 @@ jobs:
       - restore_cache:
           keys:
             - regression-v2-{{ .Revision }}
-
-      - checkout:
-          path: /tmp/src/niworkflows
-      - run:
-          name: Set PR number
-          command: |
-            echo 'export CIRCLE_PR_NUMBER="${CIRCLE_PR_NUMBER:-${CIRCLE_PULL_REQUEST##*/}}"' >> $BASH_ENV
-            source $BASH_ENV
-            echo $CIRCLE_PR_NUMBER
-      - run:
-          name: Get codecov
-          command: python -m pip install codecov
-
+      - restore_cache:
+          keys:
+            - masks-workdir-v1-{{ .Branch }}-{{epoch}}
+            - masks-workdir-v1-{{ .Branch }}-
+            - masks-workdir-v1-master-
+            - masks-workdir-v1-
       - run:
           name: Run regression tests on EPI masks
           no_output_timeout: 2h
           command: |
-            mkdir -p /tmp/masks/reports && \
-            docker run -ti --rm=false  -w /src/niworkflows \
-              -e COVERAGE_FILE=/tmp/masks/.coverage \
-              -v /tmp/data:/tmp/data -v /tmp/masks:/tmp/masks \
+            mkdir -p /tmp/masks/{reports,workdir} && \
+            docker run -ti -u $(id -u) -w /src/niworkflows \
+              -e COVERAGE_FILE=/tmp/masks/reports/.coverage \
+              -v /tmp/data:/tmp/data -v /tmp/masks/reports:/tmp/masks/reports \
               -e FMRIPREP_REGRESSION_SOURCE=/tmp/data/fmriprep_bold_truncated \
               -e FMRIPREP_REGRESSION_TARGETS=/tmp/data/fmriprep_bold_mask \
               -e FMRIPREP_REGRESSION_REPORTS=/tmp/masks/reports \
+              -e CACHED_WORK_DIRECTORY=/tmp/work -v /tmp/masks/workdir:/tmp/work \
               niworkflows:latest \
-              pytest --junit-xml=/tmp/masks/regression.xml \
-                     --cov niworkflows --cov-report xml:/tmp/masks/coverage.xml \
+              coverage run -p --rcfile=setup.cfg \
+                     -m pytest --junit-xml=/tmp/masks/reports/regression.xml \
                      niworkflows/func/tests/
+      - save_cache:
+         key: masks-workdir-v1-{{ .Branch }}-{{ epoch }}
+         paths:
+            - /tmp/masks/workdir
+      - store_artifacts:
+          path: /tmp/masks/reports
+      - store_test_results:
+          path: /tmp/masks/reports
 
       - run:
-          name: Submit masks test coverage
+          name: Coverage preparation
           command: |
-            python -m codecov --file /tmp/masks/coverage.xml --root /tmp/src/niworkflows \
-                --flags masks -e CIRCLE_JOB
-
+            docker run -ti -u $(id -u) -w /tmp/masks/reports \
+              -e COVERAGE_FILE=/tmp/masks/reports/.coverage \
+              -v /tmp/masks/reports:/tmp/masks/reports \
+              niworkflows:latest coverage combine
+            docker run -ti -u $(id -u) -w /tmp/masks/reports \
+              -e COVERAGE_FILE=/tmp/masks/reports/.coverage \
+              -v /tmp/masks/reports:/tmp/masks/reports \
+              niworkflows:latest coverage xml -o coverage.xml
+      - checkout:
+          path: /tmp/src/niworkflows
+      - run:
+          name: Get codecov
+          command: python -m pip install codecov
+      - run:
+          name: Submit masks test coverage
+          working_directory: /tmp/src/niworkflows
+          command: |
+            cp /tmp/masks/reports/coverage.xml .
+            sed -i "s+/src/niworkflows+/tmp/src/niworkflows+g" coverage.xml
+            python -m codecov --file coverage.xml --flags masks -e CIRCLE_JOB
       - run:
           name: Package new masks
           when: always
@@ -331,16 +350,12 @@ jobs:
           working_directory: /tmp/data
           command: |
             tar cfz /tmp/masks/fmriprep_bold_mask.tar.gz fmriprep_bold_mask/*/*.nii.gz
-
       - store_artifacts:
-          path: /tmp/masks
-
-      - store_test_results:
-          path: /tmp/masks
+          path: /tmp/masks/fmriprep_bold_mask.tar.gz
 
   test_package:
     machine:
-      image: circleci/classic:201711-01
+      image: circleci/classic:201808-01
     working_directory: /tmp/src/niworkflows
     steps:
       - checkout
@@ -365,7 +380,7 @@ jobs:
 
   deploy:
     machine:
-      image: circleci/classic:201711-01
+      image: circleci/classic:201808-01
     working_directory: /tmp/src/niworkflows
     steps:
       - checkout

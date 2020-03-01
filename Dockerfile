@@ -156,6 +156,7 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 RUN python -c "from templateflow import api as tfapi; \
                tfapi.get(['MNI152Lin', 'MNI152NLin2009cAsym', 'OASIS30ANTs'], suffix='T1w'); \
                tfapi.get(['MNI152Lin', 'MNI152NLin2009cAsym', 'OASIS30ANTs'], desc='brain', suffix='mask'); \
+               tfapi.get(['MNI152NLin2009cAsym'], desc='fMRIPrep', suffix='boldref'); \
                tfapi.get('OASIS30ANTs', resolution=1, desc='4', suffix='dseg'); \
                tfapi.get(['OASIS30ANTs', 'NKI'], resolution=1, label='brain', suffix='probseg'); \
                tfapi.get(['OASIS30ANTs', 'NKI'], resolution=1, desc='BrainCerebellumRegistration', suffix='mask'); "
@@ -164,6 +165,8 @@ COPY . niworkflows/
 WORKDIR /src/niworkflows/
 RUN pip install --no-cache-dir -e .[all] && \
     rm -rf $HOME/.cache/pip
+
+COPY docker/files/nipype.cfg /home/niworkflows/.nipype/nipype.cfg
 
 # Cleanup and ensure perms.
 RUN rm -rf $HOME/.npm $HOME/.conda $HOME/.empty && \
