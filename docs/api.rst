@@ -7,7 +7,6 @@ Information on specific functions, classes, and methods.
    :glob:
 
    api/niworkflows.anat
-   api/niworkflows.common
    api/niworkflows.dwi
    api/niworkflows.engine
    api/niworkflows.func
