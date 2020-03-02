@@ -390,7 +390,7 @@ def init_atropos_wf(name='atropos_wf',
                     omp_nthreads=None,
                     mem_gb=3.0,
                     padding=10,
-                    in_segmentation_model=list(ATROPOS_MODELS['T1w'].values())):
+                    in_segmentation_model=tuple(ATROPOS_MODELS['T1w'].values())):
     """
     Create an ANTs' ATROPOS workflow for brain tissue segmentation.
 
