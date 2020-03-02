@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Helper tools for visualization purposes"""
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-import os
 import os.path as op
+from shutil import which
 import subprocess
 import base64
 import re
@@ -22,83 +19,25 @@ from nilearn.plotting import plot_anat
 from svgutils.transform import SVGFigure
 from seaborn import color_palette
 
-from .. import NIWORKFLOWS_LOG
 from nipype.utils import filemanip
-
-try:
-    from shutil import which
-except ImportError:
-
-    def which(cmd):
-        """
-        A homemade which command
-
-        >>> from niworkflows.viz.utils import which
-        >>> which('ls')
-        True
-        >>> which('madeoutcommand')
-        False
-
-        """
-
-        try:
-            subprocess.run([cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                           close_fds=True)
-        except OSError as e:
-            from errno import ENOENT
-            if e.errno == ENOENT:
-                return False
-            raise e
-        return True
+from .. import NIWORKFLOWS_LOG
 
 
 SVGNS = "http://www.w3.org/2000/svg"
 PY3 = version_info[0] > 2
 
-# Patch subprocess in python 2
-if not hasattr(subprocess, 'DEVNULL'):
-    setattr(subprocess, 'DEVNULL', -3)
 
-if not hasattr(subprocess, 'run'):
-    def _run(args, input=None, stdout=None, stderr=None, shell=False, check=False,
-             close_fds=False):
-        from collections import namedtuple
-
-        devnull = open(os.devnull, 'r+')
-        stdin = subprocess.PIPE if input is not None else None
-
-        if stdout == subprocess.DEVNULL:
-            stdout = devnull
-
-        if stderr == subprocess.DEVNULL:
-            stderr = devnull
-
-        proc = subprocess.Popen(args, stdout=stdout, shell=shell, stdin=stdin,
-                                close_fds=close_fds)
-        result = namedtuple('CompletedProcess', 'stdout stderr')
-        res = result(*proc.communicate(input=input))
-
-        devnull.close()
-
-        if check and proc.returncode != 0:
-            raise subprocess.CalledProcessError(proc.returncode, args)
-
-        return res
-    setattr(subprocess, 'run', _run)
-
-
-def robust_set_limits(data, plot_params):
+def robust_set_limits(data, plot_params, percentiles=(15, 99.8)):
+    """Set (vmax, vmin) based on percentiles of the data."""
     plot_params['vmin'] = plot_params.get(
-        'vmin', np.percentile(data, 15))
+        'vmin', np.percentile(data, percentiles[0]))
     plot_params['vmax'] = plot_params.get(
-        'vmax', np.percentile(data, 99.8))
+        'vmax', np.percentile(data, percentiles[1]))
     return plot_params
 
 
 def svg_compress(image, compress='auto'):
-    ''' takes an image as created by nilearn.plotting and returns a blob svg.
-    Performs compression (can be disabled). A bit hacky. '''
-
+    """Generate a blob SVG from a matplotlib figure, may perform compression."""
     # Check availability of svgo and cwebp
     has_compress = all((which('svgo'), which('cwebp')))
     if compress is True and not has_compress:
@@ -161,9 +100,7 @@ def svg_compress(image, compress='auto'):
 
 
 def svg2str(display_object, dpi=300):
-    """
-    Serializes a nilearn display object as a string
-    """
+    """Serialize a nilearn display object to string."""
     from io import StringIO
     image_buf = StringIO()
     display_object.frame_axes.figure.savefig(
@@ -173,9 +110,7 @@ def svg2str(display_object, dpi=300):
 
 
 def extract_svg(display_object, dpi=300, compress='auto'):
-    """
-    Removes the preamble of the svg files generated with nilearn
-    """
+    """Remove the preamble of the svg files generated with nilearn."""
     image_svg = svg2str(display_object, dpi)
     if compress is True or compress == 'auto':
         image_svg = svg_compress(image_svg, compress)
@@ -197,7 +132,7 @@ def extract_svg(display_object, dpi=300, compress='auto'):
 
 
 def cuts_from_bbox(mask_nii, cuts=3):
-    """Finds equi-spaced cuts for presenting images"""
+    """Find equi-spaced cuts for presenting images."""
     from nibabel.affines import apply_affine
 
     mask_data = np.asanyarray(mask_nii.dataobj) > 0.0
