@@ -25,7 +25,6 @@ def _reorient_wf(name='ReorientWorkflow'):
 
 def test_boilerplate():
     """Check the boilerplate is generated."""
-
     workflow = Workflow(name='test')
     workflow.__desc__ = "Outer workflow. "
     workflow.__postdesc__ = "Outer workflow (postdesc)."
