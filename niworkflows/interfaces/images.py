@@ -307,7 +307,8 @@ class Conform(SimpleInterface):
             out_name = fname
 
         transform = ornt_xfm.dot(conform_xfm)
-        assert np.allclose(orig_img.affine.dot(transform), target_affine)
+        if not np.allclose(orig_img.affine.dot(transform), target_affine):
+            raise ValueError("Original and target affines are not similar")
 
         mat_name = fname_presuffix(fname, suffix='.mat', newpath=runtime.cwd, use_ext=False)
         np.savetxt(mat_name, transform, fmt='%.08f')

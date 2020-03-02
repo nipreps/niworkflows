@@ -1,22 +1,20 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Helper tools for visualization purposes"""
-import os.path as op
+from pathlib import Path
 from shutil import which
 import subprocess
 import base64
 import re
-from sys import version_info
 from uuid import uuid4
 from io import StringIO
 
 import numpy as np
 import nibabel as nb
 
-from lxml import etree
 from nilearn import image as nlimage
 from nilearn.plotting import plot_anat
-from svgutils.transform import SVGFigure
+from svgutils.transform import fromstring, SVGFigure, GroupElement
 from seaborn import color_palette
 
 from nipype.utils import filemanip
@@ -24,7 +22,6 @@ from .. import NIWORKFLOWS_LOG
 
 
 SVGNS = "http://www.w3.org/2000/svg"
-PY3 = version_info[0] > 2
 
 
 def robust_set_limits(data, plot_params, percentiles=(15, 99.8)):
@@ -229,19 +226,9 @@ def plot_segs(image_nii, seg_niis, out_file, bbox_nii=None, masked=False,
         plot_params['cut_coords'] = cuts[d]
         svg = _plot_anat_with_contours(image_nii, segs=seg_niis, compress=compress,
                                        **plot_params)
-
         # Find and replace the figure_1 id.
-        try:
-            xml_data = etree.fromstring(svg)
-        except etree.XMLSyntaxError as e:
-            NIWORKFLOWS_LOG.info(e)
-            return
-        find_text = etree.ETXPath("//{%s}g[@id='figure_1']" % SVGNS)
-        find_text(xml_data)[0].set('id', 'segmentation-%s-%s' % (d, uuid4()))
-
-        svg_fig = SVGFigure()
-        svg_fig.root = xml_data
-        out_files.append(svg_fig)
+        svg = svg.replace('figure_1', 'segmentation-%s-%s' % (d, uuid4()), 1)
+        out_files.append(fromstring(svg))
 
     return out_files
 
@@ -333,17 +320,8 @@ def plot_registration(anat_nii, div_id, plot_params=None,
         display.close()
 
         # Find and replace the figure_1 id.
-        try:
-            xml_data = etree.fromstring(svg)
-        except etree.XMLSyntaxError as e:
-            NIWORKFLOWS_LOG.info(e)
-            return
-        find_text = etree.ETXPath("//{%s}g[@id='figure_1']" % SVGNS)
-        find_text(xml_data)[0].set('id', '%s-%s-%s' % (div_id, mode, uuid4()))
-
-        svg_fig = SVGFigure()
-        svg_fig.root = xml_data
-        out_files.append(svg_fig)
+        svg = svg.replace('figure_1', '%s-%s-%s' % (div_id, mode, uuid4()), 1)
+        out_files.append(fromstring(svg))
 
     return out_files
 
@@ -353,7 +331,6 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     Composes the input svgs into one standalone svg and inserts
     the CSS code for the flickering animation
     """
-    import svgutils.transform as svgt
 
     if fg_svgs is None:
         fg_svgs = []
@@ -380,7 +357,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
 
     # Compose the views panel: total size is the width of
     # any element (used the first here) and the sum of heights
-    fig = svgt.SVGFigure(width, heights[:nsvgs].sum())
+    fig = SVGFigure(width, heights[:nsvgs].sum())
 
     yoffset = 0
     for i, r in enumerate(roots):
@@ -393,8 +370,8 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     # Group background and foreground panels in two groups
     if fg_svgs:
         newroots = [
-            svgt.GroupElement(roots[:nsvgs], {'class': 'background-svg'}),
-            svgt.GroupElement(roots[nsvgs:], {'class': 'foreground-svg'})
+            GroupElement(roots[:nsvgs], {'class': 'background-svg'}),
+            GroupElement(roots[nsvgs:], {'class': 'foreground-svg'})
         ]
     else:
         newroots = roots
@@ -402,12 +379,11 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     fig.root.attrib.pop("width")
     fig.root.attrib.pop("height")
     fig.root.set("preserveAspectRatio", "xMidYMid meet")
-    out_file = op.abspath(out_file)
-    fig.save(out_file)
+    out_file = Path(out_file).absolute()
+    fig.save(str(out_file))
 
     # Post processing
-    with open(out_file, 'r' if PY3 else 'rb') as f:
-        svg = f.read().split('\n')
+    svg = out_file.read_text().splitlines()
 
     # Remove <?xml... line
     if svg[0].startswith("<?xml"):
@@ -422,9 +398,8 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
 .foreground-svg:hover { animation-play-state: running;}
 </style>""" % tuple([uuid4()] * 2))
 
-    with open(out_file, 'w' if PY3 else 'wb') as f:
-        f.write('\n'.join(svg))
-    return out_file
+    out_file.write_text("\n".join(svg))
+    return str(out_file)
 
 
 def transform_to_2d(data, max_axis):
@@ -459,32 +434,31 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     from functional MRI data.
 
     Parameters
-
-        melodic_dir : str
-            Path pointing to the outputs of MELODIC
-        in_file :  str
-            Path pointing to the reference fMRI dataset. This file
-            will be used to extract the TR value, if the ``tr`` argument
-            is not set. This file will be used to calculate a mask
-            if ``report_mask`` is not provided.
-        tr : float
-            Repetition time in seconds
-        out_file : str
-            Path where the resulting SVG file will be stored
-        compress : ``'auto'`` or bool
-            Whether SVG should be compressed. If ``'auto'``, compression
-            will be executed if dependencies are installed (SVGO)
-        report_mask : str
-            Path to a brain mask corresponding to ``in_file``
-        noise_components_file : str
-            A CSV file listing the indexes of components classified as noise
-            by some manual or automated (e.g. ICA-AROMA) procedure. If a
-            ``noise_components_file`` is provided, then components will be
-            plotted with red/green colors (correspondingly to whether they
-            are in the file -noise components, red-, or not -signal, green-).
-            When all or none of the components are in the file, a warning
-            is printed at the top.
-
+    ----------
+    melodic_dir : str
+        Path pointing to the outputs of MELODIC
+    in_file :  str
+        Path pointing to the reference fMRI dataset. This file
+        will be used to extract the TR value, if the ``tr`` argument
+        is not set. This file will be used to calculate a mask
+        if ``report_mask`` is not provided.
+    tr : float
+        Repetition time in seconds
+    out_file : str
+        Path where the resulting SVG file will be stored
+    compress : ``'auto'`` or bool
+        Whether SVG should be compressed. If ``'auto'``, compression
+        will be executed if dependencies are installed (SVGO)
+    report_mask : str
+        Path to a brain mask corresponding to ``in_file``
+    noise_components_file : str
+        A CSV file listing the indexes of components classified as noise
+        by some manual or automated (e.g. ICA-AROMA) procedure. If a
+        ``noise_components_file`` is provided, then components will be
+        plotted with red/green colors (correspondingly to whether they
+        are in the file -noise components, red-, or not -signal, green-).
+        When all or none of the components are in the file, a warning
+        is printed at the top.
 
     """
     from nilearn.image import index_img, iter_img
