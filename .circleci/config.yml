@@ -186,6 +186,11 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
+      - checkout:
+          path: /tmp/src/niworkflows
+      - run:
+          name: Get codecov
+          command: python -m pip install codecov
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ epoch }}
@@ -199,18 +204,6 @@ jobs:
                 -v /tmp/docker:/var/lib/registry registry:2
             docker pull localhost:5000/niworkflows
             docker tag localhost:5000/niworkflows niworkflows:latest
-
-      - checkout:
-          path: /tmp/src/niworkflows
-      - run:
-          name: Set PR number
-          command: |
-            echo 'export CIRCLE_PR_NUMBER="${CIRCLE_PR_NUMBER:-${CIRCLE_PULL_REQUEST##*/}}"' >> $BASH_ENV
-            source $BASH_ENV
-            echo $CIRCLE_PR_NUMBER
-      - run:
-          name: Get codecov
-          command: python -m pip install codecov
       - run:
           name: Run unit tests
           no_output_timeout: 2h
@@ -231,8 +224,8 @@ jobs:
       - run:
           name: Submit unit test coverage
           command: |
-            python -m codecov --file summaries/unittests.xml \
-                --root /tmp/src/niworkflows \
+            cd /tmp/src/niworkflows
+            python -m codecov --file /tmp/tests/summaries/unittests.xml \
                 --flags unittests -e CIRCLE_JOB
 
       - run:
@@ -251,7 +244,8 @@ jobs:
       - run:
           name: Submit reportlet test coverage
           command: |
-            python -m codecov --file summaries/reportlets.xml --root /tmp/src/niworkflows \
+            cd /tmp/src/niworkflows
+            python -m codecov --file /tmp/tests/summaries/reportlets.xml \
                 --flags reportlettests -e CIRCLE_JOB
 
       - run:
