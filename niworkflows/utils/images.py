@@ -1,3 +1,4 @@
+"""Utilities to manipulate images."""
 import nibabel as nb
 import numpy as np
 
@@ -72,23 +73,29 @@ def overwrite_header(img, fname):
 
     ondisk = nb.load(fname, mmap=False)
 
-    try:
-        assert isinstance(ondisk.header, img.header_class)
-        # Check that the data block should be the same size
-        assert ondisk.get_data_dtype() == img.get_data_dtype()
-        assert img.header.get_data_shape() == ondisk.shape
-        # At the same offset from the start of the file
-        assert img.header['vox_offset'] == ondisk.dataobj.offset
-        # With the same scale factors
-        assert np.allclose(img.header['scl_slope'], ondisk.dataobj.slope, equal_nan=True)
-        assert np.allclose(img.header['scl_inter'], ondisk.dataobj.inter, equal_nan=True)
-    except AssertionError as e:
-        raise ValueError("Cannot write header without compromising data") from e
-    else:
-        data = np.asarray(dataobj.get_unscaled())
-        img._dataobj = data  # Allow old dataobj to be garbage collected
-        del ondisk, img, dataobj  # Drop everything we don't need, to be safe
-        unsafe_write_nifti_header_and_data(fname, header, data)
+    errmsg = "Cannot overwrite header (reason: {}).".format
+    if not isinstance(ondisk.header, img.header_class):
+        raise ValueError(errmsg("inconsistent header objects"))
+
+    if (
+        ondisk.get_data_dtype() != img.get_data_dtype()
+        or img.header.get_data_shape() != ondisk.shape
+    ):
+        raise ValueError(errmsg("data blocks are not the same size"))
+
+    if img.header['vox_offset'] != ondisk.dataobj.offset:
+        raise ValueError(errmsg("change in offset from start of file"))
+
+    if (
+        not np.allclose(img.header['scl_slope'], ondisk.dataobj.slope, equal_nan=True)
+        or not np.allclose(img.header['scl_inter'], ondisk.dataobj.inter, equal_nan=True)
+    ):
+        raise ValueError(errmsg("change in scale factors"))
+
+    data = np.asarray(dataobj.get_unscaled())
+    img._dataobj = data  # Allow old dataobj to be garbage collected
+    del ondisk, img, dataobj  # Drop everything we don't need, to be safe
+    unsafe_write_nifti_header_and_data(fname, header, data)
 
 
 def update_header_fields(fname, **kwargs):

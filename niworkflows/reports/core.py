@@ -378,7 +378,7 @@ class Report(object):
 
         env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(searchpath=str(self.template_path.parent)),
-            trim_blocks=True, lstrip_blocks=True
+            trim_blocks=True, lstrip_blocks=True, autoescape=False
         )
         report_tpl = env.get_template(self.template_path.name)
         report_render = report_tpl.render(sections=self.sections, errors=self.errors,

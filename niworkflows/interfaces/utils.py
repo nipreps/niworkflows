@@ -724,7 +724,8 @@ class JoinTSVColumns(SimpleInterface):
         with open(self.inputs.join_file) as ifh:
             join = ifh.read().splitlines(keepends=False)
 
-        assert len(data) == len(join)
+        if len(data) != len(join):
+            raise ValueError("Number of columns in datasets do not match")
 
         merged = []
         for d, j in zip(data, join):

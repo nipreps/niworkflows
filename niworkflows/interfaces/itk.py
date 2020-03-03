@@ -109,7 +109,10 @@ class MultiApplyTransforms(SimpleInterface):
         tmp_folder = TemporaryDirectory(prefix='tmp-', dir=runtime.cwd)
 
         xfms_list = _arrange_xfms(transforms, num_files, tmp_folder)
-        assert len(xfms_list) == num_files
+        if len(xfms_list) != num_files:
+            raise ValueError(
+                "Number of files and entries in the transforms list do not match"
+            )
 
         # Inputs are ready to run in parallel
         if num_threads < 1:
