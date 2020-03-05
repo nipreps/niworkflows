@@ -219,6 +219,19 @@ class Reference:
                 'space identifier "%s" is invalid.\nValid '
                 'identifiers are: %s' % (value, ', '.join(valid)))
 
+    def __str__(self):
+        """
+        Format this reference.
+
+        Examples
+        --------
+        >>> str(Reference(space='MNIPediatricAsym', spec={'cohort': 2, 'res': 1}))
+        'MNIPediatricAsym:cohort-2:res-1'
+
+        """
+        return ':'.join([self.space] + [
+            '-'.join((k, str(v))) for k, v in sorted(self.spec.items())])
+
     @classmethod
     def from_string(cls, value):
         """
@@ -473,18 +486,14 @@ class SpatialReferences:
         Spatial References: <none>.
 
         >>> print(SpatialReferences(['MNI152NLin2009cAsym']))
-        Spatial References:
-            - Reference(space='MNI152NLin2009cAsym', spec={})
+        Spatial References: MNI152NLin2009cAsym
 
         >>> print(SpatialReferences(['MNI152NLin2009cAsym', 'fsaverage5']))
-        Spatial References:
-            - Reference(space='MNI152NLin2009cAsym', spec={})
-            - Reference(space='fsaverage', spec={'den': '10k'})
+        Spatial References: MNI152NLin2009cAsym, fsaverage:den-10k
 
         """
-        spaces = '\n    - '.join([''] + [str(s) for s in self.references]) \
-            if self.references else ' <none>.'
-        return 'Spatial References:%s' % spaces
+        spaces = ', '.join([str(s) for s in self.references]) or '<none>.'
+        return 'Spatial References: %s' % spaces
 
     @property
     def references(self):
