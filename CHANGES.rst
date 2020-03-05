@@ -1,3 +1,18 @@
+1.1.9 (March 05, 2020)
+======================
+Bug-fix release in the 1.1.x series.
+
+This release contains maintenance actions on the CI infrastructure after
+migration to the `NiPreps organization <https://www.nipreps.org>`__.
+
+  * FIX: replace mutable ``list`` with ``tuple`` in ANTs' workflow (#473)
+  * MAINT: Pacify security patterns found by Codacy (#474)
+  * MAINT: Miscellaneous housekeeping (#472)
+  * MAINT: Fix test_masks (#470)
+  * MAINT: Use docker-registry for caching on CircleCI (#471)
+  * MAINT: Revise code coverage collection (#469)
+  * MAINT: Transfer to nipreps organization (#468)
+
 1.1.8 (February 26, 2020)
 =========================
 Bug-fix release in the 1.1.x series.
@@ -7,7 +22,7 @@ This release includes some minor improvements to formatting of reports and deriv
 * FIX: Check fo valid qform before calculating change (#466) @effigies
 * ENH: Display errors as summary/details elements (#464) @effigies
 * ENH: Add a pure-Python ApplyMask interface, based on NiBabel (#463) @oesteban
-* RF: Replace ``os`` operations with ``pathlib``, indent JSON sidecars (#467) @mgxd
+* MAINT: Replace ``os`` operations with ``pathlib``, indent JSON sidecars (#467) @mgxd
 
 1.1.7 (February 14, 2020)
 =========================
