@@ -1,3 +1,9 @@
+1.1.10 (March 11, 2020)
+=======================
+Bug-fix release in the 1.1.x series.
+
+  * ENH: Overwrite attr's string conversion dunders (#475)
+
 1.1.9 (March 05, 2020)
 ======================
 Bug-fix release in the 1.1.x series.
