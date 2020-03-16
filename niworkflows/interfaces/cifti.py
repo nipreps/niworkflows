@@ -446,4 +446,6 @@ def _reorient_image(img, orient_img, orient_target):
     """
     if orient_img == tuple('RAS') and orient_target == tuple('LAS'):  # RAS -> LAS
         return img.as_reoriented([[0, -1], [1, 1], [2, 1]])
-    raise NotImplementedError(f"Cannot reorient {orient_img} to {orient_target}.")
+    raise NotImplementedError(
+        "Cannot reorient {0} to {1}.".format(orient_img, orient_target)
+    )
