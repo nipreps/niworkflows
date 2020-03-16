@@ -318,6 +318,11 @@ def _create_cifti_image(bold_file, label_file, bold_surfs, annotation_files, tr,
         warnings.warn("Resampling bold volume to match label dimensions")
         bold_img = resample_to_img(bold_img, label_img)
 
+    bold_orient = nb.aff2axcodes(bold_img.affine)
+    label_orient = nb.aff2axcodes(label_img.affine)
+    if bold_orient != label_orient:
+        bold_img = _reorient_image(bold_img, bold_orient, label_orient)
+
     bold_data = bold_img.get_fdata(dtype='float32')
     timepoints = bold_img.shape[3]
     label_data = np.asanyarray(label_img.dataobj).astype('int16')
@@ -422,3 +427,23 @@ def _create_cifti_image(bold_file, label_file, bold_surfs, annotation_files, tr,
     out_file = "{}.dtseries.nii".format(split_filename(bold_file)[1])
     ci.save(img, out_file)
     return Path.cwd() / out_file
+
+
+def _reorient_image(img, orient_img, orient_target):
+    """
+    Coerce an image to a target orientation.
+
+    .. note::
+        Only RAS -> LAS conversion is currently supported
+
+    Parameters
+    ----------
+    img : `spatialimage`
+    orient_img : tuple
+        axis direction codes
+    orient_target : tuple
+        axis direction codes
+    """
+    if orient_img == tuple('RAS') and orient_target == tuple('LAS'):  # RAS -> LAS
+        return img.as_reoriented([[0, -1], [1, 1], [2, 1]])
+    raise NotImplementedError(f"Cannot reorient {orient_img} to {orient_target}.")
