@@ -322,6 +322,7 @@ def _create_cifti_image(bold_file, label_file, bold_surfs, annotation_files, tr,
     label_orient = nb.aff2axcodes(label_img.affine)
     if bold_orient != label_orient:
         bold_img = _reorient_image(bold_img, bold_orient, label_orient)
+    assert nb.aff2axcodes(bold_img) == label_orient == tuple('LAS')
 
     bold_data = bold_img.get_fdata(dtype='float32')
     timepoints = bold_img.shape[3]
@@ -443,6 +444,21 @@ def _reorient_image(img, orient_img, orient_target):
         axis direction codes
     orient_target : tuple
         axis direction codes
+
+    .. testsetup::
+    >>> img = nb.load(Path(test_data) / 'testRobustMNINormalizationRPTMovingWarpedImage.nii.gz')
+
+    Examples
+    --------
+    >>> nimg = _reorient_image(img, ('R', 'A', 'S'), ('L', 'A', 'S'))
+    >>> nb.aff2axcodes(nimg.affine)
+    ('L', 'A', 'S')
+
+    >>> _reorient_image(img, ('R', 'A', 'S'), ('L', 'P', 'I'))
+    Traceback (most recent call last):
+      ...
+    NotImplementedError: Cannot reorient ...
+
     """
     if orient_img == tuple('RAS') and orient_target == tuple('LAS'):  # RAS -> LAS
         return img.as_reoriented([[0, -1], [1, 1], [2, 1]])
