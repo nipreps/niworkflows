@@ -1,3 +1,9 @@
+1.1.11 (March 17, 2020)
+=======================
+Bug-fix release to improve CIFTI compatibility with workbench tools.
+
+  * FIX: Ensure BOLD and label orientations are equal (#477)
+
 1.1.10 (March 11, 2020)
 =======================
 Bug-fix release in the 1.1.x series.
