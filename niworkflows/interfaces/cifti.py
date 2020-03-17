@@ -318,11 +318,7 @@ def _create_cifti_image(bold_file, label_file, bold_surfs, annotation_files, tr,
         warnings.warn("Resampling bold volume to match label dimensions")
         bold_img = resample_to_img(bold_img, label_img)
 
-    bold_orient = nb.aff2axcodes(bold_img.affine)
-    label_orient = nb.aff2axcodes(label_img.affine)
-    if bold_orient != label_orient:
-        bold_img = _reorient_image(bold_img, bold_orient, label_orient)
-    assert nb.aff2axcodes(bold_img) == label_orient == tuple('LAS')
+    bold_img = _reorient_image(bold_img, target_img=label_img)
 
     bold_data = bold_img.get_fdata(dtype='float32')
     timepoints = bold_img.shape[3]
@@ -430,7 +426,7 @@ def _create_cifti_image(bold_file, label_file, bold_surfs, annotation_files, tr,
     return Path.cwd() / out_file
 
 
-def _reorient_image(img, orient_img, orient_target):
+def _reorient_image(img, *, target_img=None, orientation=None):
     """
     Coerce an image to a target orientation.
 
@@ -439,29 +435,49 @@ def _reorient_image(img, orient_img, orient_target):
 
     Parameters
     ----------
-    img : `spatialimage`
-    orient_img : tuple
-        axis direction codes
-    orient_target : tuple
-        axis direction codes
+    img : :obj:`SpatialImage`
+        image to be reoriented
+    target_img : :obj:`SpatialImage`, optional
+        target in desired orientation
+    orientation : :obj:`str` or :obj:`tuple`, optional
+        desired orientation, if no target image is provided
 
     .. testsetup::
     >>> img = nb.load(Path(test_data) / 'testRobustMNINormalizationRPTMovingWarpedImage.nii.gz')
+    >>> las_img = img.as_reoriented([[0, -1], [1, 1], [2, 1]])
 
     Examples
     --------
-    >>> nimg = _reorient_image(img, ('R', 'A', 'S'), ('L', 'A', 'S'))
+    >>> nimg = _reorient_image(img, target_img=las_img)
     >>> nb.aff2axcodes(nimg.affine)
     ('L', 'A', 'S')
 
-    >>> _reorient_image(img, ('R', 'A', 'S'), ('L', 'P', 'I'))
+    >>> nimg = _reorient_image(img, orientation='LAS')
+    >>> nb.aff2axcodes(nimg.affine)
+    ('L', 'A', 'S')
+
+    >>> _reorient_image(img, orientation='LPI')
     Traceback (most recent call last):
       ...
     NotImplementedError: Cannot reorient ...
 
+    >>> _reorient_image(img)
+    Traceback (most recent call last):
+      ...
+    RuntimeError: No orientation ...
+
     """
-    if orient_img == tuple('RAS') and orient_target == tuple('LAS'):  # RAS -> LAS
+    orient0 = nb.aff2axcodes(img.affine)
+    if target_img is not None:
+        orient1 = nb.aff2axcodes(target_img.affine)
+    elif orientation is not None:
+        orient1 = tuple(orientation)
+    else:
+        raise RuntimeError("No orientation to reorient to!")
+
+    if orient0 == tuple('RAS') and orient1 == tuple('LAS'):  # RAS -> LAS
         return img.as_reoriented([[0, -1], [1, 1], [2, 1]])
-    raise NotImplementedError(
-        "Cannot reorient {0} to {1}.".format(orient_img, orient_target)
-    )
+    else:
+        raise NotImplementedError(
+            "Cannot reorient {0} to {1}.".format(orient0, orient1)
+        )
