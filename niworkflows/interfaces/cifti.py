@@ -448,6 +448,10 @@ def _reorient_image(img, *, target_img=None, orientation=None):
 
     Examples
     --------
+    >>> nimg = _reorient_image(img, target_img=img)
+    >>> nb.aff2axcodes(nimg.affine)
+    ('R', 'A', 'S')
+
     >>> nimg = _reorient_image(img, target_img=las_img)
     >>> nb.aff2axcodes(nimg.affine)
     ('L', 'A', 'S')
@@ -475,7 +479,9 @@ def _reorient_image(img, *, target_img=None, orientation=None):
     else:
         raise RuntimeError("No orientation to reorient to!")
 
-    if orient0 == tuple('RAS') and orient1 == tuple('LAS'):  # RAS -> LAS
+    if orient0 == orient1:  # already in desired orientation
+        return img
+    elif orient0 == tuple('RAS') and orient1 == tuple('LAS'):  # RAS -> LAS
         return img.as_reoriented([[0, -1], [1, 1], [2, 1]])
     else:
         raise NotImplementedError(
