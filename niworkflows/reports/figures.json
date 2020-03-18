@@ -29,7 +29,7 @@
             "pattern": "[_/\\\\]rec-([a-zA-Z0-9]+)"
         },
         {
-            "name": "dir",
+            "name": "direction",
             "pattern": "[_/\\\\]dir-([a-zA-Z0-9]+)"
         },
         {
