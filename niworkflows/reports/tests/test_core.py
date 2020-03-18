@@ -24,26 +24,28 @@ def bids_sessions(tmpdir_factory):
     pattern = (
         "sub-{subject}[/ses-{session}]/{datatype<anat|func>}/"
         "sub-{subject}[_ses-{session}][_task-{task}][_acq-{acquisition}]"
-        "[_ce-{contrast}][_dir-{direction}][_rec-{reconstruction}]"
+        "[_ce-{ceagent}][_dir-{direction}][_rec-{reconstruction}]"
         "[_mod-{modality}][_run-{run}][_echo-{echo}][_space-{space}]"
         "[_desc-{desc}]_{suffix<dseg|T1w|bold>}.{extension<svg>}"
     )
     subjects = ['01']
     tasks = ['t1', 't2', 't3']
     runs = ['01', '02', None]
+    ces = ['none', 'Gd']
     descs = ['aroma', 'bbregister', 'carpetplot', 'rois']
     # create functional data for both sessions
-    ses1_combos = product(subjects, ['1'], tasks, runs, descs)
-    ses2_combos = product(subjects, ['2'], tasks, [None], descs)
+    ses1_combos = product(subjects, ['1'], tasks, [None], runs, descs)
+    ses2_combos = product(subjects, ['2'], tasks, ces, [None], descs)
     # have no runs in the second session (ex: dmriprep test data)
     # https://github.com/nipreps/dmriprep/pull/59
     all_combos = list(ses1_combos) + list(ses2_combos)
 
-    for subject, session, task, run, desc in all_combos:
+    for subject, session, task, ce, run, desc in all_combos:
         entities = {
             'subject': subject,
             'session': session,
             'task': task,
+            'ceagent': ce,
             'run': run,
             'desc': desc,
             'extension': 'svg',
@@ -143,10 +145,10 @@ def test_process_orderings_small(test_report1, orderings,
 @pytest.mark.parametrize(
     "orderings,expected_entities,first_value_combo,last_value_combo",
     [
-        (['session', 'task', 'run'],
-         ['session', 'task', 'run'],
-         ('1', 't1', None),
-         ('2', 't3', None),
+        (['session', 'task', 'ceagent', 'run'],
+         ['session', 'task', 'ceagent', 'run'],
+         ('1', 't1', None, None),
+         ('2', 't3', 'none', None),
          ),
         (['run', 'task', 'session'],
          ['run', 'task', 'session'],
