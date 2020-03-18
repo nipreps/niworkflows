@@ -184,6 +184,7 @@ def test_process_orderings_large(test_report2, orderings,
         ("run"),
         ("session,task"),
         ("session,task,run"),
+        ("session,task,ceagent,run"),
         ("session,task,acquisition,ceagent,reconstruction,direction,run,echo"),
         ("session,task,run,madeupentity"),
     ])
@@ -200,7 +201,7 @@ def test_generated_reportlets(bids_sessions, ordering):
     # expected number of reportlets
     expected_reportlets_num = len(report.layout.get(extension='svg'))
     # bids_session uses these entities
-    needed_entities = ['session', 'task', 'run']
+    needed_entities = ['session', 'task', 'ceagent', 'run']
     # the last section is the most recently run
     reportlets_num = len(report.sections[-1].reportlets)
     # if ordering does not contain all the relevent entities
