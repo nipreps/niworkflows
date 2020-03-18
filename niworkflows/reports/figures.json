@@ -21,7 +21,7 @@
             "pattern": "[_/\\\\]acq-([a-zA-Z0-9]+)"
         },
         {
-            "name": "ce",
+            "name": "ceagent",
             "pattern": "[_/\\\\]ce-([a-zA-Z0-9]+)"
         },
         {
