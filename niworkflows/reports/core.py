@@ -312,7 +312,7 @@ class Report(object):
                 for c in list_combos:
                     # do not display entities with the value None.
                     c_filt = list(filter(None, c))
-                    ent_filt = list(compress(entities, c_filt))
+                    ent_filt = list(compress(entities, c))
                     # Set a common title for this particular combination c
                     title = 'Reports for: %s.' % ', '.join(
                         ['%s <span class="bids-entity">%s</span>' % (ent_filt[i], c_filt[i])
