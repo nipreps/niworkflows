@@ -9,6 +9,7 @@ from yaml import safe_load as load
 
 import matplotlib.pyplot as plt
 from bids.layout.writing import build_path
+from bids.layout import BIDSLayout
 
 import pytest
 
@@ -204,9 +205,12 @@ def test_generated_reportlets(bids_sessions, ordering):
     needed_entities = ['session', 'task', 'ceagent', 'run']
     # the last section is the most recently run
     reportlets_num = len(report.sections[-1].reportlets)
+    # get the number of figures in the output directory
+    out_layout = BIDSLayout(out_dir, config='figures', validate=False)
+    out_figs = len(out_layout.get())
     # if ordering does not contain all the relevent entities
     # then there should be fewer reportlets than expected
     if all(ent in ordering for ent in needed_entities):
-        assert reportlets_num == expected_reportlets_num
+        assert reportlets_num == expected_reportlets_num == out_figs
     else:
-        assert reportlets_num < expected_reportlets_num
+        assert reportlets_num < expected_reportlets_num == out_figs
