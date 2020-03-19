@@ -21,7 +21,7 @@
             "pattern": "[_/\\\\]acq-([a-zA-Z0-9]+)"
         },
         {
-            "name": "ce",
+            "name": "ceagent",
             "pattern": "[_/\\\\]ce-([a-zA-Z0-9]+)"
         },
         {
@@ -29,7 +29,7 @@
             "pattern": "[_/\\\\]rec-([a-zA-Z0-9]+)"
         },
         {
-            "name": "dir",
+            "name": "direction",
             "pattern": "[_/\\\\]dir-([a-zA-Z0-9]+)"
         },
         {
@@ -47,7 +47,7 @@
         },
         {
             "name": "echo",
-            "pattern": "[_/\\\\]echo-([0-9]+)\\_bold."
+            "pattern": "[_/\\\\]echo-([0-9]+)"
         },
         {
             "name": "recording",
@@ -112,7 +112,7 @@
     ],
 
     "default_path_patterns": [
-        "sub-{subject}[/ses-{session}]/{datatype<anat|figures>}/sub-{subject}[_ses-{session}][_acq-{acquisition}][_ce-{contrast}][_rec-{reconstruction}][_space-{space}][_desc-{desc}]_{suffix<T1w|T2w|T1rho|T1map|T2map|T2star|FLAIR|FLASH|PDmap|PD|PDT2|inplaneT[12]|angio|dseg|mask>}.{extension<html|svg>}",
-        "sub-{subject}[/ses-{session}]/{datatype<func|figures>}/sub-{subject}[_ses-{session}]_task-{task}[_acq-{acquisition}][_rec-{reconstruction}][_run-{run}][_echo-{echo}][_space-{space}][_desc-{desc}]_{suffix<bold>}.{extension<html|svg>}"
+        "sub-{subject}[/ses-{session}]/{datatype<anat|figures>}/sub-{subject}[_ses-{session}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_space-{space}][_desc-{desc}]_{suffix<T1w|T2w|T1rho|T1map|T2map|T2star|FLAIR|FLASH|PDmap|PD|PDT2|inplaneT[12]|angio|dseg|mask>}.{extension<html|svg>}",
+        "sub-{subject}[/ses-{session}]/{datatype<func|figures>}/sub-{subject}[_ses-{session}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_dir-{direction}][_rec-{reconstruction}][_run-{run}][_echo-{echo}][_space-{space}][_desc-{desc}]_{suffix<bold>}.{extension<html|svg>}"
     ]
 }

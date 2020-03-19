@@ -234,7 +234,7 @@ class Report(object):
     >>> robj.generate_report()
     0
     >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
-    36450
+    36540
 
     .. testcleanup::
 
@@ -311,17 +311,14 @@ class Report(object):
                 reportlets = []
                 for c in list_combos:
                     # do not display entities with the value None.
-                    c = list(filter(None, c))
-                    ent = list(compress(entities, c))
-                    missing_entities = list(set(entities) - set(ent))
+                    c_filt = list(filter(None, c))
+                    ent_filt = list(compress(entities, c))
                     # Set a common title for this particular combination c
                     title = 'Reports for: %s.' % ', '.join(
-                        ['%s <span class="bids-entity">%s</span>' % (ent[i], c[i])
-                         for i in range(len(c))])
+                        ['%s <span class="bids-entity">%s</span>' % (ent_filt[i], c_filt[i])
+                         for i in range(len(c_filt))])
                     for cfg in subrep_cfg['reportlets']:
-                        for m_e in missing_entities:
-                            cfg['bids'].pop(m_e, None)
-                        cfg['bids'].update({ent[i]: c[i] for i in range(len(c))})
+                        cfg['bids'].update({entities[i]: c[i] for i in range(len(c))})
                         rlet = Reportlet(self.layout, self.out_dir, config=cfg)
                         if not rlet.is_empty():
                             rlet.title = title

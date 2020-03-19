@@ -9,6 +9,7 @@ from yaml import safe_load as load
 
 import matplotlib.pyplot as plt
 from bids.layout.writing import build_path
+from bids.layout import BIDSLayout
 
 import pytest
 
@@ -24,26 +25,28 @@ def bids_sessions(tmpdir_factory):
     pattern = (
         "sub-{subject}[/ses-{session}]/{datatype<anat|func>}/"
         "sub-{subject}[_ses-{session}][_task-{task}][_acq-{acquisition}]"
-        "[_ce-{contrast}][_dir-{direction}][_rec-{reconstruction}]"
+        "[_ce-{ceagent}][_dir-{direction}][_rec-{reconstruction}]"
         "[_mod-{modality}][_run-{run}][_echo-{echo}][_space-{space}]"
         "[_desc-{desc}]_{suffix<dseg|T1w|bold>}.{extension<svg>}"
     )
     subjects = ['01']
     tasks = ['t1', 't2', 't3']
     runs = ['01', '02', None]
+    ces = ['none', 'Gd']
     descs = ['aroma', 'bbregister', 'carpetplot', 'rois']
     # create functional data for both sessions
-    ses1_combos = product(subjects, ['1'], tasks, runs, descs)
-    ses2_combos = product(subjects, ['2'], tasks, [None], descs)
+    ses1_combos = product(subjects, ['1'], tasks, [None], runs, descs)
+    ses2_combos = product(subjects, ['2'], tasks, ces, [None], descs)
     # have no runs in the second session (ex: dmriprep test data)
     # https://github.com/nipreps/dmriprep/pull/59
     all_combos = list(ses1_combos) + list(ses2_combos)
 
-    for subject, session, task, run, desc in all_combos:
+    for subject, session, task, ce, run, desc in all_combos:
         entities = {
             'subject': subject,
             'session': session,
             'task': task,
+            'ceagent': ce,
             'run': run,
             'desc': desc,
             'extension': 'svg',
@@ -143,10 +146,10 @@ def test_process_orderings_small(test_report1, orderings,
 @pytest.mark.parametrize(
     "orderings,expected_entities,first_value_combo,last_value_combo",
     [
-        (['session', 'task', 'run'],
-         ['session', 'task', 'run'],
-         ('1', 't1', None),
-         ('2', 't3', None),
+        (['session', 'task', 'ceagent', 'run'],
+         ['session', 'task', 'ceagent', 'run'],
+         ('1', 't1', None, None),
+         ('2', 't3', 'none', None),
          ),
         (['run', 'task', 'session'],
          ['run', 'task', 'session'],
@@ -182,6 +185,7 @@ def test_process_orderings_large(test_report2, orderings,
         ("run"),
         ("session,task"),
         ("session,task,run"),
+        ("session,task,ceagent,run"),
         ("session,task,acquisition,ceagent,reconstruction,direction,run,echo"),
         ("session,task,run,madeupentity"),
     ])
@@ -198,12 +202,15 @@ def test_generated_reportlets(bids_sessions, ordering):
     # expected number of reportlets
     expected_reportlets_num = len(report.layout.get(extension='svg'))
     # bids_session uses these entities
-    needed_entities = ['session', 'task', 'run']
+    needed_entities = ['session', 'task', 'ceagent', 'run']
     # the last section is the most recently run
     reportlets_num = len(report.sections[-1].reportlets)
+    # get the number of figures in the output directory
+    out_layout = BIDSLayout(out_dir, config='figures', validate=False)
+    out_figs = len(out_layout.get())
     # if ordering does not contain all the relevent entities
     # then there should be fewer reportlets than expected
     if all(ent in ordering for ent in needed_entities):
-        assert reportlets_num == expected_reportlets_num
+        assert reportlets_num == expected_reportlets_num == out_figs
     else:
-        assert reportlets_num < expected_reportlets_num
+        assert reportlets_num < expected_reportlets_num == out_figs

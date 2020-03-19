@@ -1,3 +1,16 @@
+1.1.12 (March 19, 2020)
+=======================
+Bug-fix release in the 1.1.x series.
+
+  * FIX: Update naming patterns in figures.json (#483)
+  * FIX: Add CE agent to output figure filename templates (#482)
+
+1.1.11 (March 17, 2020)
+=======================
+Bug-fix release to improve CIFTI compatibility with workbench tools.
+
+  * FIX: Ensure BOLD and label orientations are equal (#477)
+
 1.1.10 (March 11, 2020)
 =======================
 Bug-fix release in the 1.1.x series.
