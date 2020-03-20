@@ -318,7 +318,9 @@ def _create_cifti_image(bold_file, label_file, bold_surfs, annotation_files, tr,
         warnings.warn("Resampling bold volume to match label dimensions")
         bold_img = resample_to_img(bold_img, label_img)
 
-    bold_img = _reorient_image(bold_img, target_img=label_img)
+    # ensure images match HCP orientation (LAS)
+    bold_img = _reorient_image(bold_img, orientation='LAS')
+    label_img = _reorient_image(label_img, orientation='LAS')
 
     bold_data = bold_img.get_fdata(dtype='float32')
     timepoints = bold_img.shape[3]
