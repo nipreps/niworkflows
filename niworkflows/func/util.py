@@ -345,6 +345,8 @@ def init_enhance_and_skullstrip_bold_wf(
     apply_mask = pe.Node(fsl.ApplyMask(), name="apply_mask")
 
     if not pre_mask:
+        from ..interfaces.nibabel import Binarize
+
         bold_template = get_template(
             "MNI152NLin2009cAsym", resolution=2, desc="fMRIPrep", suffix="boldref"
         )
@@ -383,10 +385,22 @@ def init_enhance_and_skullstrip_bold_wf(
         norm.inputs.fixed_image = str(bold_template)
         map_brainmask = pe.Node(
             ApplyTransforms(
-                interpolation="MultiLabel", input_image=str(brain_mask)
+                interpolation="BSpline",
+                float=True,
+                # Use the higher resolution and probseg for numerical stability in rounding
+                input_image=str(
+                    get_template(
+                        "MNI152NLin2009cAsym",
+                        resolution=1,
+                        desc="brain",
+                        suffix="probseg",
+                    )
+                ),
             ),
             name="map_brainmask",
         )
+        binarize_mask = pe.Node(Binarize(thresh_low=0.75), name="binarize_mask")
+
         # fmt: off
         workflow.connect([
             (inputnode, init_aff, [("in_file", "moving_image")]),
@@ -397,7 +411,8 @@ def init_enhance_and_skullstrip_bold_wf(
                 ("reverse_invert_flags", "invert_transform_flags"),
                 ("reverse_transforms", "transforms"),
             ]),
-            (map_brainmask, pre_dilate, [("output_image", "in_file")]),
+            (map_brainmask, binarize_mask, [("output_image", "in_file")]),
+            (binarize_mask, pre_dilate, [("out_mask", "in_file")]),
         ])
         # fmt: on
     else:
