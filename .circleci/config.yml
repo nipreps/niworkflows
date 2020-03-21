@@ -151,8 +151,8 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - regression-v2-{{ .Revision }}
-            - regression-v2-
+            - regression-v3-{{ .Revision }}
+            - regression-v3-
       - run:
           name: Get truncated BOLD series
           command: |
@@ -175,7 +175,7 @@ jobs:
               echo "Pre-computed masks were cached"
             fi
       - save_cache:
-         key: regression-v2-{{ .Revision }}-{{ epoch }}
+         key: regression-v3-{{ .Revision }}-{{ epoch }}
          paths:
             - /tmp/data
 
@@ -282,7 +282,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - regression-v2-{{ .Revision }}
+            - regression-v3-{{ .Revision }}
       - restore_cache:
           keys:
             - masks-workdir-v2-{{ .Branch }}-{{epoch}}
@@ -306,19 +306,12 @@ jobs:
                      -m pytest --junit-xml=/tmp/masks/reports/regression.xml \
                      niworkflows/func/tests/
       - run:
-          name: Package new masks
-          when: always
-          no_output_timeout: 10m
-          command: |
-            cd reports/
-            tar cvfz /tmp/masks/fmriprep_bold_mask.tar.gz fmriprep_bold_mask/*/*.nii.gz
-      - store_artifacts:
-          path: /tmp/masks/fmriprep_bold_mask.tar.gz
-
-      - run:
           name: Clear reports folder & delete plot generator cache
           command: |
+            pushd reports/
+            tar cvfz fmriprep_bold_mask.tar.gz fmriprep_bold_mask/*/*.nii.gz
             rm -rf /tmp/masks/reports/fmriprep_bold_mask/
+            popd
             find workdir/ -name "mask_diff_plot" -exec rm -rf {} +
       - store_artifacts:
           path: /tmp/masks/reports
