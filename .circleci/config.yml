@@ -285,10 +285,10 @@ jobs:
             - regression-v2-{{ .Revision }}
       - restore_cache:
           keys:
-            - masks-workdir-v1-{{ .Branch }}-{{epoch}}
-            - masks-workdir-v1-{{ .Branch }}-
-            - masks-workdir-v1-master-
-            - masks-workdir-v1-
+            - masks-workdir-v2-{{ .Branch }}-{{epoch}}
+            - masks-workdir-v2-{{ .Branch }}-
+            - masks-workdir-v2-master-
+            - masks-workdir-v2-
       - run:
           name: Run regression tests on EPI masks
           no_output_timeout: 2h
@@ -305,14 +305,29 @@ jobs:
               coverage run -p --rcfile=setup.cfg \
                      -m pytest --junit-xml=/tmp/masks/reports/regression.xml \
                      niworkflows/func/tests/
-      - save_cache:
-         key: masks-workdir-v1-{{ .Branch }}-{{ epoch }}
-         paths:
-            - /tmp/masks/workdir
+      - run:
+          name: Package new masks
+          when: always
+          no_output_timeout: 10m
+          command: |
+            cd reports/
+            tar cvfz /tmp/masks/fmriprep_bold_mask.tar.gz fmriprep_bold_mask/*/*.nii.gz
+      - store_artifacts:
+          path: /tmp/masks/fmriprep_bold_mask.tar.gz
+
+      - run:
+          name: Clear reports folder & delete plot generator cache
+          command: |
+            rm -rf /tmp/masks/reports/fmriprep_bold_mask/
+            find workdir/ -name "mask_diff_plot" -exec rm -rf {} +
       - store_artifacts:
           path: /tmp/masks/reports
       - store_test_results:
           path: /tmp/masks/reports
+      - save_cache:
+         key: masks-workdir-v2-{{ .Branch }}-{{ epoch }}
+         paths:
+            - /tmp/masks/workdir
 
       - run:
           name: Coverage preparation
@@ -337,15 +352,6 @@ jobs:
             cp /tmp/masks/reports/coverage.xml .
             sed -i "s+/src/niworkflows+/tmp/src/niworkflows+g" coverage.xml
             python -m codecov --file coverage.xml --flags masks -e CIRCLE_JOB
-      - run:
-          name: Package new masks
-          when: always
-          no_output_timeout: 10m
-          working_directory: /tmp/data
-          command: |
-            tar cfz /tmp/masks/fmriprep_bold_mask.tar.gz fmriprep_bold_mask/*/*.nii.gz
-      - store_artifacts:
-          path: /tmp/masks/fmriprep_bold_mask.tar.gz
 
   test_package:
     machine:
