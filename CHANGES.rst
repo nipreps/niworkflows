@@ -1,3 +1,9 @@
+1.2.0 (TBD)
+===========
+First release in the 1.2.x series.
+
+  * ENH: Ensure subcortical volume in CIFTI is in LAS orientation (#484)
+
 1.1.12 (March 19, 2020)
 =======================
 Bug-fix release in the 1.1.x series.
