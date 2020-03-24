@@ -7,7 +7,7 @@ from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     traits, TraitedSpec, BaseInterfaceInputSpec, File,
-    SimpleInterface
+    SimpleInterface, OutputMultiPath, InputMultiPath
 )
 
 IFLOGGER = logging.getLogger('nipype.interface')
@@ -88,4 +88,68 @@ class Binarize(SimpleInterface):
                                 img.header)
         maskimg.to_filename(self._results['out_mask'])
 
+        return runtime
+
+class _Save4Dto3DInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True, desc='input 4d image')
+
+
+class _Save4Dto3DOutputSpec(TraitedSpec):
+    out_files = OutputMultiPath(File(exists=True),
+                                     desc='output list of 3d images')
+
+
+class Save4Dto3D(SimpleInterface):
+    """Split a 4D dataset along the last dimension
+    into multiple 3D volumes."""
+
+    input_spec = _Save4Dto3DInputSpec
+    output_spec = _Save4Dto3DOutputSpec
+
+    def _run_interface(self, runtime):
+        filenii = nb.load(self.inputs.in_file)
+        if len(filenii.shape) != 4:
+            raise RuntimeError('Input image (%s) is not 4D.' % filenii)
+
+        files_3d = nb.four_to_three(filenii)
+        out_files = []
+        for i, file_3d in enumerate(files_3d):
+            out_file = fname_presuffix(in_file, suffix="_tmp_{}".format(i))
+            file_3d.to_filename(out_file)
+            out_files.append(out_file)
+
+        self._results['out_files'] = out_files
+        return runtime
+
+
+class _Save3Dto4DInputSpec(BaseInterfaceInputSpec):
+    in_files = InputMultiPath(File(exists=True, mandatory=True,
+                                   desc='input list of 3d images'))
+
+
+class _Save3Dto4DOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output list of 3d images')
+
+
+class Save3Dto4D(SimpleInterface):
+    """Merge a list of 3D volumes along the last dimension into a single
+    4D image."""
+
+    input_spec = _Save4Dto3DInputSpec
+    output_spec = _Save4Dto3DOutputSpec
+
+    def _run_interface(self, runtime):
+        nii_list = []
+        for i, f in enumerate(self.inputs.in_files):
+            filenii = nb.load(f)
+            filenii = nb.squeeze_image(filenii)
+            if len(filenii.shape) != 3:
+                raise RuntimeError('Input image (%s) is not 3D.' % f)
+            else:
+                nii_list.append(filenii)
+        img_4d = nb.funcs.concat_images(nii_list)
+        out_file = fname_presuffix(self.inputs.in_files[0], suffix="_merged")
+        img_4d.to_filename(out_file)
+
+        self._results['out_file'] = out_file
         return runtime
