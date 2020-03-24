@@ -99,7 +99,7 @@ class _Save4Dto3DOutputSpec(TraitedSpec):
                                      desc='output list of 3d images')
 
 
-class Save4Dto3D(SimpleInterface):
+class FourToThree(SimpleInterface):
     """Split a 4D dataset along the last dimension
     into multiple 3D volumes."""
 
