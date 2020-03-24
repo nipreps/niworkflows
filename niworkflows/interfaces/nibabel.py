@@ -7,7 +7,7 @@ from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     traits, TraitedSpec, BaseInterfaceInputSpec, File,
-    SimpleInterface, OutputMultiPath, InputMultiPath
+    SimpleInterface, OutputMultiObject, InputMultiObject
 )
 
 IFLOGGER = logging.getLogger('nipype.interface')
