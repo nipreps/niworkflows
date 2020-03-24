@@ -91,11 +91,11 @@ class Binarize(SimpleInterface):
         return runtime
 
 
-class _Save4Dto3DInputSpec(BaseInterfaceInputSpec):
+class _FourToThreeInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input 4d image')
 
 
-class _Save4Dto3DOutputSpec(TraitedSpec):
+class _FourToThreeOutputSpec(TraitedSpec):
     out_files = OutputMultiPath(File(exists=True),
                                      desc='output list of 3d images')
 
@@ -104,8 +104,8 @@ class FourToThree(SimpleInterface):
     """Split a 4D dataset along the last dimension
     into multiple 3D volumes."""
 
-    input_spec = _Save4Dto3DInputSpec
-    output_spec = _Save4Dto3DOutputSpec
+    input_spec = _FourToThreeInputSpec
+    output_spec = _FourToThreeOutputSpec
 
     def _run_interface(self, runtime):
         filenii = nb.load(self.inputs.in_file)
@@ -123,21 +123,21 @@ class FourToThree(SimpleInterface):
         return runtime
 
 
-class _Save3Dto4DInputSpec(BaseInterfaceInputSpec):
+class _ConcatImagesInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True, mandatory=True,
                                    desc='input list of 3d images'))
 
 
-class _Save3Dto4DOutputSpec(TraitedSpec):
+class _ConcatImagesOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='output list of 3d images')
 
 
-class Save3Dto4D(SimpleInterface):
+class ConcatImages(SimpleInterface):
     """Merge a list of 3D volumes along the last dimension into a single
     4D image."""
 
-    input_spec = _Save4Dto3DInputSpec
-    output_spec = _Save4Dto3DOutputSpec
+    input_spec = _ConcatImagesInputSpec
+    output_spec = _ConcatImagesOutputSpec
 
     def _run_interface(self, runtime):
         nii_list = []
