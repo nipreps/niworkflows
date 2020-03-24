@@ -90,6 +90,7 @@ class Binarize(SimpleInterface):
 
         return runtime
 
+
 class _Save4Dto3DInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input 4d image')
 
