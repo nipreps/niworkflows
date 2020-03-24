@@ -140,7 +140,7 @@ class Save3Dto4D(SimpleInterface):
 
     def _run_interface(self, runtime):
         nii_list = []
-        for i, f in enumerate(self.inputs.in_files):
+        for f in self.inputs.in_files:
             filenii = nb.load(f)
             filenii = nb.squeeze_image(filenii)
             if len(filenii.shape) != 3:
