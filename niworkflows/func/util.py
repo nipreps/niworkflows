@@ -399,7 +399,7 @@ def init_enhance_and_skullstrip_bold_wf(
             ),
             name="map_brainmask",
         )
-        binarize_mask = pe.Node(Binarize(thresh_low=0.75), name="binarize_mask")
+        binarize_mask = pe.Node(Binarize(thresh_low=0.5), name="binarize_mask")
 
         # fmt: off
         workflow.connect([
