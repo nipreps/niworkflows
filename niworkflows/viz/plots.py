@@ -5,6 +5,7 @@
 
 import numpy as np
 import nibabel as nb
+from nibabel.spatialimages import HeaderDataError, ImageFileError
 import pandas as pd
 
 import matplotlib.pyplot as plt
@@ -28,29 +29,44 @@ class fMRIPlot(object):
     """
     Generates the fMRI Summary Plot
     """
-    __slots__ = ['func_file', 'mask_data',
-                 'tr', 'seg_data', 'confounds', 'spikes']
+    __slots__ = ('func_file', 'mask_data', 'tr', 'seg_data', 'confounds', 'spikes', '_cifti')
 
-    def __init__(self, func_file, mask_file=None, data=None, conf_file=None, seg_file=None,
-                 tr=None, usecols=None, units=None, vlines=None, spikes_files=None):
+    def __init__(
+        self,
+        func_file,
+        mask_file=None,
+        data=None,
+        conf_file=None,
+        seg_file=None,
+        tr=None,
+        usecols=None,
+        units=None,
+        vlines=None,
+        spikes_files=None,
+    ):
+        self._cifti = False
+        try:
+            func_img = nb.cifti2.load(func_file)
+            self._cifti = True
+        except (ImageFileError, HeaderDataError):
+            func_img = nb.load(func_file)
+
         self.func_file = func_file
-        func_nii = nb.load(func_file)
-        self.tr = tr if tr is not None else func_nii.header.get_zooms()[-1]
-
-        self.mask_data = nb.fileslice.strided_scalar(func_nii.shape[:3], np.uint8(1))
-        if mask_file:
-            self.mask_data = np.asanyarray(nb.load(mask_file).dataobj).astype('uint8')
-
+        self.tr = tr or _get_tr(func_img, self._cifti)
+        self.mask_data = None
         self.seg_data = None
-        if seg_file:
-            self.seg_data = np.asanyarray(nb.load(seg_file).dataobj)
+
+        if not self._cifti:
+            self.mask_data = nb.fileslice.strided_scalar(func_img.shape[:3], np.uint8(1))
+            if mask_file:
+                self.mask_data = np.asanyarray(nb.load(mask_file).dataobj).astype('uint8')
+            if seg_file:
+                self.seg_data = np.asanyarray(nb.load(seg_file).dataobj)
 
         if units is None:
             units = {}
-
         if vlines is None:
             vlines = {}
-
         self.confounds = {}
         if data is None and conf_file:
             data = pd.read_csv(conf_file, sep=r'[\t\s]+',
@@ -101,7 +117,10 @@ class fMRIPlot(object):
                 name=name, **kwargs)
             grid_id += 1
 
-        plot_carpet(self.func_file, self.seg_data, subplot=grid[-1], tr=self.tr)
+        if self._cifti:
+            plot_cifti_carpet(self.func_file, subplot=grid[-1], tr=self.tr)
+        else:
+            plot_carpet(self.func_file, self.seg_data, subplot=grid[-1], tr=self.tr)
         # spikesplot_cb([0.7, 0.78, 0.2, 0.008])
         return figure
 
@@ -268,6 +287,126 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
         figure = None
         return output_file
 
+    return [ax0, ax1], gs
+
+
+def plot_cifti_carpet(cimg, detrend=True, subplot=None, title=None, output_file=None, tr=None):
+    """
+    Plot a CIFTI image representation of voxel intensities across time also know
+    as the "carpet plot" or "Power plot". See Jonathan Power Neuroimage
+    2017 Jul 1; 154:150-158.
+    Parameters
+    ----------
+        cimg : Path
+            Dense timeseries CIFTI image file
+        detrend : boolean, optional
+            Detrend and standardize the data prior to plotting.
+        subplot : Subplot, optional
+            Subplot to plot figure on.
+        title : string, optional
+            The title displayed on the figure.
+        output_file : string, or None, optional
+            The name of an image file to export the plot to. Valid extensions
+            are .png, .pdf, .svg. If output_file is not None, the plot
+            is saved to a file, and the display is closed.
+        tr : float , optional
+            Specify the TR, if specified it uses this value. If left as None,
+            # Frames is plotted instead of time.
+    """
+
+    assert cimg.nifti_header.get_intent()[0] == 'ConnDenseSeries', 'Not a dense timeseries'
+
+    matrix = cimg.header.matrix
+    # Define TR and number of frames
+    notr = False
+    if tr is None:
+        notr = True
+        tr = 1.
+
+    data = cimg.get_fdata().T
+    struct_map = {'LEFT_CORTEX': 1, 'RIGHT_CORTEX': 2, 'SUBCORTICAL': 3, 'CEREBELLUM': 4}
+    seg = np.zeros((data.shape[0], ), dtype='uint32')
+    for bm in matrix.get_index_map(1).brain_models:
+        if 'CORTEX' in bm.brain_structure:
+            lidx = (1, 2)['RIGHT' in bm.brain_structure]
+        elif 'CEREBELLUM' in bm.brain_structure:
+            lidx = 4
+        else:
+            lidx = 3
+        index_final = bm.index_offset + bm.index_count
+        seg[bm.index_offset:index_final] = lidx
+    assert len(seg[seg < 1]) == 0, "Unassigned labels"
+
+    # reorder preserving as much continuity as possible
+    order = seg.argsort(kind='stable')
+
+    # Detrend data
+    v = (None, None)
+    if detrend:
+        data = clean(data.T, t_r=tr).T
+        v = (-2, 2)
+
+    # If subplot is not defined
+    if subplot is None:
+        subplot = mgs.GridSpec(1, 1)[0]
+
+    # Define nested GridSpec
+    wratios = [1, 100, 20]
+    gs = mgs.GridSpecFromSubplotSpec(1, 2, subplot_spec=subplot,
+                                     width_ratios=wratios[:2],
+                                     wspace=0.0)
+
+    mycolors = [cm.get_cmap('Paired').colors[i] for i in (1, 0, 7, 3)]
+    cmap = ListedColormap(mycolors)
+    assert len(cmap.colors) == len(struct_map), \
+        "Mismatch between expected # of structures and colors"
+
+    # Segmentation colorbar
+    ax0 = plt.subplot(gs[0])
+    ax0.set_yticks([])
+    ax0.set_xticks([])
+    ax0.imshow(seg[order, np.newaxis], interpolation='none', aspect='auto', cmap=cmap)
+    ax0.grid(False)
+    ax0.spines["left"].set_visible(False)
+    ax0.spines["bottom"].set_color('none')
+    ax0.spines["bottom"].set_visible(False)
+
+    # Carpet plot
+    ax1 = plt.subplot(gs[1])
+    ax1.imshow(data[order], interpolation='nearest', aspect='auto', cmap='gray',
+               vmin=v[0], vmax=v[1])
+    ax1.grid(False)
+    ax1.set_yticks([])
+    ax1.set_yticklabels([])
+
+    # Set 10 frame markers in X axis
+    interval = max((int(data.shape[-1] + 1) // 10, int(data.shape[-1] + 1) // 5, 1))
+    xticks = list(range(0, data.shape[-1])[::interval])
+    ax1.set_xticks(xticks)
+    ax1.set_xlabel('time (frame #)' if notr else 'time (s)')
+    labels = tr * (np.array(xticks))
+    ax1.set_xticklabels(['%.02f' % t for t in labels.tolist()], fontsize=5)
+
+    # Remove and redefine spines
+    for side in ["top", "right"]:
+        # Toggle the spine objects
+        ax0.spines[side].set_color('none')
+        ax0.spines[side].set_visible(False)
+        ax1.spines[side].set_color('none')
+        ax1.spines[side].set_visible(False)
+
+    ax1.yaxis.set_ticks_position('left')
+    ax1.xaxis.set_ticks_position('bottom')
+    ax1.spines["bottom"].set_visible(False)
+    ax1.spines["left"].set_color('none')
+    ax1.spines["left"].set_visible(False)
+
+    if output_file is not None:
+        figure = plt.gcf()
+        figure.savefig(output_file, bbox_inches='tight')
+        plt.close(figure)
+        figure = None
+        return output_file
     return [ax0, ax1], gs
 
 
@@ -770,3 +909,11 @@ def confounds_correlation_plot(confounds_file, output_file=None, figure=None,
         figure = None
         return output_file
     return [ax0, ax1], gs
+
+
+def _get_tr(img, is_cifti=False):
+    if is_cifti:
+        tr = img.header.matrix.get_index_map(0).series_step
+    else:
+        tr = img.header.get_zooms()[-1]
+    return tr
