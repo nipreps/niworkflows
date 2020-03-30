@@ -24,6 +24,20 @@ def test_carpetplot():
     )
 
 
+def test_cifti_carpetplot():
+    out_file = None
+    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+    if save_artifacts:
+        out_file = os.path.join(save_artifacts, 'carpetplot2.svg')
+    viz.plot_cifti_carpet(
+        os.path.join(
+            datadir,
+            'sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii'
+        ),
+        output_file=out_file
+    )
+
+
 def test_plot_melodic_components(tmp_path):
     """Test plotting melodic components"""
     import numpy as np
