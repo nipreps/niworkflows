@@ -292,27 +292,29 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
 
 def plot_cifti_carpet(img, detrend=True, subplot=None, title=None, output_file=None, tr=None):
     """
-    Plot a CIFTI image representation of voxel intensities across time also know
+    Plot a dense timeseries intensities across time also known
     as the "carpet plot" or "Power plot". See Jonathan Power Neuroimage
     2017 Jul 1; 154:150-158.
+
     Parameters
     ----------
-        img : Path
-            Dense timeseries CIFTI image file
-        detrend : boolean, optional
-            Detrend and standardize the data prior to plotting.
-        subplot : Subplot, optional
-            Subplot to plot figure on.
-        title : string, optional
-            The title displayed on the figure.
-        output_file : string, or None, optional
-            The name of an image file to export the plot to. Valid extensions
-            are .png, .pdf, .svg. If output_file is not None, the plot
-            is saved to a file, and the display is closed.
-        tr : float , optional
-            Specify the TR, if specified it uses this value. If left as None,
-            # Frames is plotted instead of time.
+    img : Path
+        Dense timeseries CIFTI image file
+    detrend : boolean, optional
+        Detrend and standardize the data prior to plotting.
+    subplot : Subplot, optional
+        Subplot to plot figure on.
+    title : string, optional
+        The title displayed on the figure.
+    output_file : string, optional
+        The name of an image file to export the plot to. Valid extensions
+        are .png, .pdf, .svg. If output_file is not None, the plot
+        is saved to a file, and the display is closed.
+    tr : float, optional
+        Specify the TR, if specified it uses this value. If left as None,
+        number of frames is plotted instead of time.
     """
+
     cimg = nb.cifti2.load(img)
     assert cimg.nifti_header.get_intent()[0] == 'ConnDenseSeries', 'Not a dense timeseries'
 
