@@ -25,7 +25,7 @@ from seaborn import color_palette
 DINA4_LANDSCAPE = (11.69, 8.27)
 
 
-class fMRIPlot(object):
+class fMRIPlot:
     """
     Generates the fMRI Summary Plot
     """
@@ -290,14 +290,14 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
     return [ax0, ax1], gs
 
 
-def plot_cifti_carpet(cimg, detrend=True, subplot=None, title=None, output_file=None, tr=None):
+def plot_cifti_carpet(img, detrend=True, subplot=None, title=None, output_file=None, tr=None):
     """
     Plot a CIFTI image representation of voxel intensities across time also know
     as the "carpet plot" or "Power plot". See Jonathan Power Neuroimage
     2017 Jul 1; 154:150-158.
     Parameters
     ----------
-        cimg : Path
+        img : Path
             Dense timeseries CIFTI image file
         detrend : boolean, optional
             Detrend and standardize the data prior to plotting.
@@ -313,7 +313,7 @@ def plot_cifti_carpet(cimg, detrend=True, subplot=None, title=None, output_file=
             Specify the TR, if specified it uses this value. If left as None,
             # Frames is plotted instead of time.
     """
-
+    cimg = nb.cifti2.load(img)
     assert cimg.nifti_header.get_intent()[0] == 'ConnDenseSeries', 'Not a dense timeseries'
 
     matrix = cimg.header.matrix
