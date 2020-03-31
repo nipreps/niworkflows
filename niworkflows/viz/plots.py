@@ -914,6 +914,23 @@ def confounds_correlation_plot(confounds_file, output_file=None, figure=None,
 
 
 def _get_tr(img, is_cifti=False):
+    """
+    Attempt to extract repetition time from NIfTI/CIFTI header
+
+    .. testsetup::
+    >>> nii = nb.load(Path(test_data) /
+    ...    'sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz')
+    >>> ci = nb.load(Path(test_data) /
+    ...    'sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii')
+
+    Examples
+    --------
+    >>> _get_tr(nii)
+    2.2
+    >>> _get_tr(ci, is_cifti=True)
+    2.0
+    """
+
     if is_cifti:
         tr = img.header.matrix.get_index_map(0).series_step
     else:

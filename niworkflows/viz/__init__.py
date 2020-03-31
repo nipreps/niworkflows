@@ -6,4 +6,4 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from .plots import plot_carpet, plot_cifti_carpet
 from .utils import SVGNS
 
-__all__ = ['plot_carpet', 'SVGNS']
+__all__ = ['plot_carpet', 'plot_cifti_carpet', 'SVGNS']
