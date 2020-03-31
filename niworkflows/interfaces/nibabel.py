@@ -96,7 +96,7 @@ class _FourToThreeInputSpec(BaseInterfaceInputSpec):
 
 
 class _FourToThreeOutputSpec(TraitedSpec):
-    out_files = OutputMultiPath(File(exists=True),
+    out_files = OutputMultiObject(File(exists=True),
                                      desc='output list of 3d images')
 
 
