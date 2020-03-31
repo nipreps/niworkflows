@@ -102,7 +102,7 @@ class _FourToThreeOutputSpec(TraitedSpec):
 
 class FourToThree(SimpleInterface):
     """Split a 4D dataset along the last dimension
-    into multiple 3D volumes."""
+    into a series of 3D volumes."""
 
     input_spec = _FourToThreeInputSpec
     output_spec = _FourToThreeOutputSpec
@@ -123,21 +123,21 @@ class FourToThree(SimpleInterface):
         return runtime
 
 
-class _ConcatImagesInputSpec(BaseInterfaceInputSpec):
+class _MergeSeriesInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiObject(File(exists=True, mandatory=True,
                                    desc='input list of 3d images'))
 
 
-class _ConcatImagesOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='output list of 3d images')
+class _MergeSeriesOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output 4d image')
 
 
-class ConcatImages(SimpleInterface):
-    """Merge a list of 3D volumes along the last dimension into a single
+class MergeSeries(SimpleInterface):
+    """Merge a series of 3D volumes along the last dimension into a single
     4D image."""
 
-    input_spec = _ConcatImagesInputSpec
-    output_spec = _ConcatImagesOutputSpec
+    input_spec = _MergeSeriesInputSpec
+    output_spec = _MergeSeriesOutputSpec
 
     def _run_interface(self, runtime):
         nii_list = []
