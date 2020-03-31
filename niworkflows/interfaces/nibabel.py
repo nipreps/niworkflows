@@ -124,7 +124,7 @@ class FourToThree(SimpleInterface):
 
 
 class _ConcatImagesInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiPath(File(exists=True, mandatory=True,
+    in_files = InputMultiObject(File(exists=True, mandatory=True,
                                    desc='input list of 3d images'))
 
 
