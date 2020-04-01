@@ -28,7 +28,7 @@ class fMRIPlot:
     """
     Generates the fMRI Summary Plot
     """
-    __slots__ = ('func_file', 'mask_data', 'tr', 'seg_data', 'confounds', 'spikes', '_cifti')
+    __slots__ = ('func_file', 'mask_data', 'tr', 'seg_data', 'confounds', 'spikes')
 
     def __init__(
         self,
