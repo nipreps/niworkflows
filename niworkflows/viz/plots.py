@@ -830,13 +830,9 @@ def _get_tr(img):
     >>> _get_tr(nb.load(Path(test_data) /
     ...    'sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz'))
     2.2
-    >>> _get_tr(Path(test_data) /
+    >>> _get_tr(nb.load(Path(test_data) /
     ...    'sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii'))
     2.0
-    >>> _get_tr('madeupfile.nii')
-    Traceback (most recent call last):
-     ...
-    ValueError: Could not extract ...
     """
 
     try:
