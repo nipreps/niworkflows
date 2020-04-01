@@ -7,6 +7,7 @@ from pathlib import Path
 from shutil import copytree, rmtree
 
 import nibabel as nb
+import numpy as np
 
 from nipype import logging
 from nipype.interfaces.base import (
@@ -238,6 +239,7 @@ class _DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     in_file = InputMultiObject(File(exists=True), mandatory=True,
                                desc='the object to be saved')
     keep_dtype = traits.Bool(False, usedefault=True, desc='keep datatype suffix')
+    data_dtype = Str(desc='NumPy datatype to coerce NIfTI data to')
     meta_dict = traits.DictStrAny(desc='an input dictionary containing metadata')
     source_file = File(exists=False, mandatory=True, desc='the input func file')
     space = Str('', usedefault=True, desc='Label for space field')
@@ -464,34 +466,45 @@ desc-preproc_bold.json'
             self._results['out_file'].append(out_file)
             self._results['compression'].append(_copy_any(fname, out_file))
 
-            is_nii = out_file.endswith('.nii') or out_file.endswith('.nii.gz')
-            if self.inputs.check_hdr and is_nii:
+            is_nii = out_file.endswith(('.nii', '.nii.gz'))
+            if is_nii and any((self.inputs.check_hdr, self.inputs.data_dtype)):
                 # Do not use mmap; if we need to access the data at all, it will be to
                 # rewrite, risking a BusError
                 nii = nb.load(out_file, mmap=False)
                 if not isinstance(nii, (nb.Nifti1Image, nb.Nifti2Image)):
                     # .dtseries.nii are CIfTI2, therefore skip check
                     return runtime
-                hdr = nii.header
-                curr_units = tuple([None if u == 'unknown' else u
-                                    for u in hdr.get_xyzt_units()])
-                curr_codes = (int(hdr['qform_code']), int(hdr['sform_code']))
 
-                # Default to mm, use sec if data type is bold
-                units = (curr_units[0] or 'mm', 'sec' if dtype == '_bold' else None)
-                xcodes = (1, 1)  # Derivative in its original scanner space
-                if self.inputs.space:
-                    xcodes = (4, 4) if self.inputs.space in STANDARD_SPACES \
-                        else (2, 2)
+                if self.inputs.check_hdr:
+                    hdr = nii.header
+                    curr_units = tuple([None if u == 'unknown' else u
+                                        for u in hdr.get_xyzt_units()])
+                    curr_codes = (int(hdr['qform_code']), int(hdr['sform_code']))
 
-                if curr_codes != xcodes or curr_units != units:
-                    self._results['fixed_hdr'][i] = True
-                    hdr.set_qform(nii.affine, xcodes[0])
-                    hdr.set_sform(nii.affine, xcodes[1])
-                    hdr.set_xyzt_units(*units)
+                    # Default to mm, use sec if data type is bold
+                    units = (curr_units[0] or 'mm', 'sec' if dtype == '_bold' else None)
+                    xcodes = (1, 1)  # Derivative in its original scanner space
+                    if self.inputs.space:
+                        xcodes = (4, 4) if self.inputs.space in STANDARD_SPACES \
+                            else (2, 2)
 
-                    # Rewrite file with new header
-                    overwrite_header(nii, out_file)
+                    if curr_codes != xcodes or curr_units != units:
+                        self._results['fixed_hdr'][i] = True
+                        hdr.set_qform(nii.affine, xcodes[0])
+                        hdr.set_sform(nii.affine, xcodes[1])
+                        hdr.set_xyzt_units(*units)
+
+                        # Rewrite file with new header
+                        overwrite_header(nii, out_file)
+
+                if self.inputs.data_dtype:
+                    if self.inputs.check_hdr:
+                        # load updated NIfTI
+                        nii = nb.load(out_file, mmap=False)
+                    data_dtype = np.dtype(self.inputs.data_dtype)
+                    if nii.get_data_dtype() != data_dtype:
+                        nii.set_data_dtype(data_dtype)
+                        nii.to_filename(out_file)
 
         if len(self._results['out_file']) == 1:
             meta_fields = self.inputs.copyable_trait_names()
