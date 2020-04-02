@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Interfaces for handling BIDS-like neuroimaging structures."""
 
+from collections import defaultdict
 from json import dumps
 from pathlib import Path
 from shutil import copytree, rmtree
@@ -25,6 +26,18 @@ from ..utils.misc import splitext as _splitext, _copy_any
 
 STANDARD_SPACES = _get_template_list()
 LOGGER = logging.getLogger('nipype.interface')
+
+
+def _none():
+    return None
+
+
+# Automatically coerce certain suffixes (DerivativesDataSink)
+DEFAULT_DTYPES = defaultdict(_none, (
+    ("mask", "uint8"),
+    ("dseg", "int16"),
+    ("probseg", "float32"))
+)
 
 
 class _BIDSBaseInputSpec(BaseInterfaceInputSpec):
@@ -467,7 +480,8 @@ desc-preproc_bold.json'
             self._results['compression'].append(_copy_any(fname, out_file))
 
             is_nii = out_file.endswith(('.nii', '.nii.gz'))
-            if is_nii and any((self.inputs.check_hdr, self.inputs.data_dtype)):
+            data_dtype = self.inputs.data_dtype or DEFAULT_DTYPES[self.inputs.suffix]
+            if is_nii and any((self.inputs.check_hdr, data_dtype)):
                 # Do not use mmap; if we need to access the data at all, it will be to
                 # rewrite, risking a BusError
                 nii = nb.load(out_file, mmap=False)
@@ -497,11 +511,11 @@ desc-preproc_bold.json'
                         # Rewrite file with new header
                         overwrite_header(nii, out_file)
 
-                if self.inputs.data_dtype:
+                if data_dtype:
                     if self.inputs.check_hdr:
                         # load updated NIfTI
                         nii = nb.load(out_file, mmap=False)
-                    data_dtype = np.dtype(self.inputs.data_dtype)
+                    data_dtype = np.dtype(data_dtype)
                     if nii.get_data_dtype() != data_dtype:
                         nii.set_data_dtype(data_dtype)
                         nii.to_filename(out_file)
