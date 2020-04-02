@@ -3,6 +3,7 @@
 """Helper tools for visualization purposes"""
 from pathlib import Path
 from shutil import which
+from tempfile import TemporaryDirectory
 import subprocess
 import base64
 import re
@@ -327,10 +328,15 @@ def plot_registration(anat_nii, div_id, plot_params=None,
 
 
 def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
-    """
-    Composes the input svgs into one standalone svg and inserts
-    the CSS code for the flickering animation
-    """
+    """Compose the input svgs into one standalone svg with CSS flickering animation."""
+    out_file = Path(out_file).absolute()
+    out_file.write_text("\n".join(
+        _compose_view(bg_svgs, fg_svgs, ref=ref)
+    ))
+    return str(out_file)
+
+
+def _compose_view(bg_svgs, fg_svgs, ref=0):
 
     if fg_svgs is None:
         fg_svgs = []
@@ -379,11 +385,12 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
     fig.root.attrib.pop("width")
     fig.root.attrib.pop("height")
     fig.root.set("preserveAspectRatio", "xMidYMid meet")
-    out_file = Path(out_file).absolute()
-    fig.save(str(out_file))
 
-    # Post processing
-    svg = out_file.read_text().splitlines()
+    with TemporaryDirectory() as tmpdirname:
+        out_file = Path(tmpdirname) / "tmp.svg"
+        fig.save(str(out_file))
+        # Post processing
+        svg = out_file.read_text().splitlines()
 
     # Remove <?xml... line
     if svg[0].startswith("<?xml"):
@@ -398,8 +405,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
 .foreground-svg:hover { animation-play-state: running;}
 </style>""" % tuple([uuid4()] * 2))
 
-    out_file.write_text("\n".join(svg))
-    return str(out_file)
+    return svg
 
 
 def transform_to_2d(data, max_axis):
