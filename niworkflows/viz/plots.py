@@ -177,9 +177,10 @@ def plot_carpet(func, atlaslabels=None, detrend=True, nskip=0, size=(950, 800),
                 lidx = 3
             index_final = bm.index_offset + bm.index_count
             seg[bm.index_offset:index_final] = lidx
-
         assert len(seg[seg < 1]) == 0, "Unassigned labels"
 
+        # Decimate data
+        data, seg = _decimate_data(data, seg, size)
         # preserve as much continuity as possible
         order = seg.argsort(kind='stable')
 
@@ -207,14 +208,8 @@ def plot_carpet(func, atlaslabels=None, detrend=True, nskip=0, size=(950, 800),
         # Apply lookup table
         seg = lut[oseg.astype(int)]
 
-        p_dec = 1 + data.shape[0] // size[0]
-        if p_dec:
-            data = data[::p_dec, :]
-            seg = seg[::p_dec]
-        t_dec = 1 + data.shape[1] // size[1]
-        if t_dec:
-            data = data[:, ::t_dec]
-
+        # Decimate data
+        data, seg = _decimate_data(data, seg, size)
         # Order following segmentation labels
         order = np.argsort(seg)[::-1]
         # Set colormap
@@ -840,3 +835,26 @@ def _get_tr(img):
     except AttributeError:
         return img.header.get_zooms()[-1]
     raise RuntimeError("Could not extract TR - unknown data structure type")
+
+
+def _decimate_data(data, seg, size):
+    """Decimate timeseries data
+
+    Parameters
+    ----------
+    data : ndarray
+        2 element array of timepoints and samples
+    seg : ndarray
+        1 element array of samples
+    size : tuple
+        2 element for P/T decimation
+
+    """
+    p_dec = 1 + data.shape[0] // size[0]
+    if p_dec:
+        data = data[::p_dec, :]
+        seg = seg[::p_dec]
+    t_dec = 1 + data.shape[1] // size[1]
+    if t_dec:
+        data = data[:, ::t_dec]
+    return data, seg
