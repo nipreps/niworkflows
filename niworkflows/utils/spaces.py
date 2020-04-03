@@ -660,10 +660,13 @@ class OutputReferencesAction(argparse.Action):
             spaces.checkpoint()
         for val in values:
             val = val.rstrip(":")
-            # Should we support some sort of explicit "default" resolution?
-            # https://github.com/nipreps/niworkflows/pull/457#discussion_r375510227
-            # if ":res-" not in val or ":resolution-" not in val:
-            #     val = ":".join((val, "res-default"))
+            if (
+                not val.split(':')[0].startswith('fs')
+                and ":res-" not in val
+                and ":resolution-" not in val
+            ):
+                # by default, explicitly set volumetric resolution to native
+                val = ":".join((val, "res-native"))
             for sp in Reference.from_string(val):
                 spaces.add(sp)
         setattr(namespace, self.dest, spaces)
