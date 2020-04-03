@@ -19,28 +19,28 @@ XFORM_CODES = {
 BOLD_PATH = 'ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.gz'
 
 
-@pytest.mark.parametrize('space, size, units, xcodes, zipped, fixed', [
-    ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (2, 2), True, [False]),
-    ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (0, 2), True, [True]),
-    ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (0, 0), True, [True]),
-    ('T1w', (30, 30, 30, 10), ('mm', None), (2, 2), True, [True]),
-    ('T1w', (30, 30, 30, 10), (None, None), (0, 2), True, [True]),
-    ('T1w', (30, 30, 30, 10), (None, 'sec'), (0, 0), True, [True]),
-    ('MNI152Lin', (30, 30, 30, 10), ('mm', 'sec'), (4, 4), True, [False]),
-    ('MNI152Lin', (30, 30, 30, 10), ('mm', 'sec'), (0, 2), True, [True]),
-    ('MNI152Lin', (30, 30, 30, 10), ('mm', 'sec'), (0, 0), True, [True]),
-    ('MNI152Lin', (30, 30, 30, 10), ('mm', None), (4, 4), True, [True]),
-    ('MNI152Lin', (30, 30, 30, 10), (None, None), (0, 2), True, [True]),
-    ('MNI152Lin', (30, 30, 30, 10), (None, 'sec'), (0, 0), True, [True]),
-    (None, (30, 30, 30, 10), ('mm', 'sec'), (1, 1), True, [False]),
-    (None, (30, 30, 30, 10), ('mm', 'sec'), (0, 0), True, [True]),
-    (None, (30, 30, 30, 10), ('mm', 'sec'), (0, 2), True, [True]),
-    (None, (30, 30, 30, 10), ('mm', None), (1, 1), True, [True]),
-    (None, (30, 30, 30, 10), (None, None), (0, 2), True, [True]),
-    (None, (30, 30, 30, 10), (None, 'sec'), (0, 0), True, [True]),
-    (None, (30, 30, 30, 10), (None, 'sec'), (0, 0), False, [True]),
+@pytest.mark.parametrize('space, size, units, xcodes, zipped, fixed, data_dtype', [
+    ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (2, 2), True, [False], None),
+    ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (0, 2), True, [True], None),
+    ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (0, 0), True, [True], '<i4'),
+    ('T1w', (30, 30, 30, 10), ('mm', None), (2, 2), True, [True], '<f4'),
+    ('T1w', (30, 30, 30, 10), (None, None), (0, 2), True, [True], None),
+    ('T1w', (30, 30, 30, 10), (None, 'sec'), (0, 0), True, [True], None),
+    ('MNI152Lin', (30, 30, 30, 10), ('mm', 'sec'), (4, 4), True, [False], None),
+    ('MNI152Lin', (30, 30, 30, 10), ('mm', 'sec'), (0, 2), True, [True], None),
+    ('MNI152Lin', (30, 30, 30, 10), ('mm', 'sec'), (0, 0), True, [True], None),
+    ('MNI152Lin', (30, 30, 30, 10), ('mm', None), (4, 4), True, [True], None),
+    ('MNI152Lin', (30, 30, 30, 10), (None, None), (0, 2), True, [True], None),
+    ('MNI152Lin', (30, 30, 30, 10), (None, 'sec'), (0, 0), True, [True], None),
+    (None, (30, 30, 30, 10), ('mm', 'sec'), (1, 1), True, [False], None),
+    (None, (30, 30, 30, 10), ('mm', 'sec'), (0, 0), True, [True], None),
+    (None, (30, 30, 30, 10), ('mm', 'sec'), (0, 2), True, [True], None),
+    (None, (30, 30, 30, 10), ('mm', None), (1, 1), True, [True], None),
+    (None, (30, 30, 30, 10), (None, None), (0, 2), True, [True], None),
+    (None, (30, 30, 30, 10), (None, 'sec'), (0, 0), True, [True], None),
+    (None, (30, 30, 30, 10), (None, 'sec'), (0, 0), False, [True], None),
 ])
-def test_DerivativesDataSink_bold(tmp_path, space, size, units, xcodes, zipped, fixed):
+def test_DerivativesDataSink_bold(tmp_path, space, size, units, xcodes, zipped, fixed, data_dtype):
     fname = str(tmp_path / 'source.nii') + ('.gz' if zipped else '')
 
     hdr = nb.Nifti1Header()
@@ -53,6 +53,7 @@ def test_DerivativesDataSink_bold(tmp_path, space, size, units, xcodes, zipped, 
     dds = bintfs.DerivativesDataSink(
         base_directory=str(tmp_path),
         keep_dtype=True,
+        data_dtype=data_dtype or Undefined,
         desc='preproc',
         source_file=BOLD_PATH,
         space=space or Undefined,
@@ -61,6 +62,8 @@ def test_DerivativesDataSink_bold(tmp_path, space, size, units, xcodes, zipped, 
 
     nii = nb.load(dds.outputs.out_file)
     assert dds.outputs.fixed_hdr == fixed
+    if data_dtype:
+        assert nii.get_data_dtype() == np.dtype(data_dtype)
     assert int(nii.header['qform_code']) == XFORM_CODES[space]
     assert int(nii.header['sform_code']) == XFORM_CODES[space]
     assert nii.header.get_xyzt_units() == ('mm', 'sec')
