@@ -117,9 +117,8 @@ class SplitSeries(SimpleInterface):
         for i, file_3d in enumerate(files_3d):
             out_file = fname_presuffix(in_file, suffix=f"_idx-{i:03}")
             file_3d.to_filename(out_file)
-            out_files.append(out_file)
+            self._results['out_files'].append(out_file)
 
-        self._results['out_files'] = out_files
         return runtime
 
 
