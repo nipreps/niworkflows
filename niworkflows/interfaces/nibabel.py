@@ -125,7 +125,7 @@ class FourToThree(SimpleInterface):
 
 class _MergeSeriesInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiObject(File(exists=True, mandatory=True,
-                                   desc='input list of 3d images'))
+                                     desc='input list of 3d images'))
 
 
 class _MergeSeriesOutputSpec(TraitedSpec):
