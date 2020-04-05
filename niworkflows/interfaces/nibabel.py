@@ -100,7 +100,7 @@ class _FourToThreeOutputSpec(TraitedSpec):
                                      desc='output list of 3d images')
 
 
-class FourToThree(SimpleInterface):
+class SplitSeries(SimpleInterface):
     """Split a 4D dataset along the last dimension
     into a series of 3D volumes."""
 
