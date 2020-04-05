@@ -113,7 +113,7 @@ class FourToThree(SimpleInterface):
             raise RuntimeError('Input image (%s) is not 4D.' % filenii)
 
         files_3d = nb.four_to_three(filenii)
-        out_files = []
+        self._results['out_files'] = []
         for i, file_3d in enumerate(files_3d):
             out_file = fname_presuffix(in_file, suffix=f"_idx-{i:03}")
             file_3d.to_filename(out_file)
