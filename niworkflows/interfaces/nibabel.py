@@ -115,7 +115,7 @@ class FourToThree(SimpleInterface):
         files_3d = nb.four_to_three(filenii)
         out_files = []
         for i, file_3d in enumerate(files_3d):
-            out_file = fname_presuffix(in_file, suffix="_tmp_{}".format(i))
+            out_file = fname_presuffix(in_file, suffix=f"_idx-{i:03}")
             file_3d.to_filename(out_file)
             out_files.append(out_file)
 
