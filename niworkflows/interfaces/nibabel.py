@@ -133,8 +133,7 @@ class _MergeSeriesOutputSpec(TraitedSpec):
 
 
 class MergeSeries(SimpleInterface):
-    """Merge a series of 3D volumes along the last dimension into a single
-    4D image."""
+    """Merge a series of 3D volumes along the last dimension into a single 4D image."""
 
     input_spec = _MergeSeriesInputSpec
     output_spec = _MergeSeriesOutputSpec
