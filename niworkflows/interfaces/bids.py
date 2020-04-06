@@ -454,6 +454,10 @@ desc-preproc_bold.json'
         if len(self.inputs.in_file) > 1 and not isdefined(self.inputs.extra_values):
             formatstr = formatbase + '{suffix}{i:04d}{dtype}{ext}'
 
+        if self.inputs.space and '_res-native' in self.inputs.space:
+            # strip native tag
+            self.inputs.space = self.inputs.space.split('_')[0]
+
         space = '_space-{}'.format(self.inputs.space) if self.inputs.space else ''
         desc = '_desc-{}'.format(self.inputs.desc) if self.inputs.desc else ''
         suffix = '_{}'.format(self.inputs.suffix) if self.inputs.suffix else ''
