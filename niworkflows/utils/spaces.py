@@ -661,7 +661,8 @@ class OutputReferencesAction(argparse.Action):
         for val in values:
             val = val.rstrip(":")
             if (
-                not val.split(':')[0].startswith('fs')
+                val not in NONSTANDARD_REFERENCES
+                and not val.split(':')[0].startswith('fs')
                 and ":res-" not in val
                 and ":resolution-" not in val
             ):

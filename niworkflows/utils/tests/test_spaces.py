@@ -34,7 +34,8 @@ def parser():
       "fsaverage:den-10k:den-30k", "MNI152NLin6Asym:res-1:res-2"), (
         "fsaverage:den-10k", "fsaverage:den-30k",
         "MNI152NLin6Asym:res-1", "MNI152NLin6Asym:res-2"
-    ))
+    )),
+    (("MNI152NLin6Asym", "func"), ("MNI152NLin6Asym:res-native", "func"))
 ])
 def test_space_action(parser, spaces, expected):
     """Test action."""
