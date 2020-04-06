@@ -6,7 +6,7 @@ packaging
 pydot>=1.2.3
 pydotplus
 sphinx-argparse
-sphinx>=2.1.2
+sphinx>=2.1.2,<3.0
 sphinx_rtd_theme
 sphinxcontrib-apidoc ~= 0.3.0
 templateflow
