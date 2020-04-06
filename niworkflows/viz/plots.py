@@ -24,33 +24,42 @@ from seaborn import color_palette
 DINA4_LANDSCAPE = (11.69, 8.27)
 
 
-class fMRIPlot(object):
+class fMRIPlot:
     """
     Generates the fMRI Summary Plot
     """
-    __slots__ = ['func_file', 'mask_data',
-                 'tr', 'seg_data', 'confounds', 'spikes']
+    __slots__ = ('func_file', 'mask_data', 'tr', 'seg_data', 'confounds', 'spikes')
 
-    def __init__(self, func_file, mask_file=None, data=None, conf_file=None, seg_file=None,
-                 tr=None, usecols=None, units=None, vlines=None, spikes_files=None):
+    def __init__(
+        self,
+        func_file,
+        mask_file=None,
+        data=None,
+        conf_file=None,
+        seg_file=None,
+        tr=None,
+        usecols=None,
+        units=None,
+        vlines=None,
+        spikes_files=None,
+    ):
+        func_img = nb.load(func_file)
         self.func_file = func_file
-        func_nii = nb.load(func_file)
-        self.tr = tr if tr is not None else func_nii.header.get_zooms()[-1]
-
-        self.mask_data = nb.fileslice.strided_scalar(func_nii.shape[:3], np.uint8(1))
-        if mask_file:
-            self.mask_data = np.asanyarray(nb.load(mask_file).dataobj).astype('uint8')
-
+        self.tr = tr or _get_tr(func_img)
+        self.mask_data = None
         self.seg_data = None
-        if seg_file:
-            self.seg_data = np.asanyarray(nb.load(seg_file).dataobj)
+
+        if not isinstance(func_img, nb.Cifti2Image):
+            self.mask_data = nb.fileslice.strided_scalar(func_img.shape[:3], np.uint8(1))
+            if mask_file:
+                self.mask_data = np.asanyarray(nb.load(mask_file).dataobj).astype('uint8')
+            if seg_file:
+                self.seg_data = np.asanyarray(nb.load(seg_file).dataobj)
 
         if units is None:
             units = {}
-
         if vlines is None:
             vlines = {}
-
         self.confounds = {}
         if data is None and conf_file:
             data = pd.read_csv(conf_file, sep=r'[\t\s]+',
@@ -101,14 +110,14 @@ class fMRIPlot(object):
                 name=name, **kwargs)
             grid_id += 1
 
-        plot_carpet(self.func_file, self.seg_data, subplot=grid[-1], tr=self.tr)
+        plot_carpet(self.func_file, atlaslabels=self.seg_data, subplot=grid[-1], tr=self.tr)
         # spikesplot_cb([0.7, 0.78, 0.2, 0.008])
         return figure
 
 
-def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
+def plot_carpet(func, atlaslabels=None, detrend=True, nskip=0, size=(950, 800),
                 subplot=None, title=None, output_file=None, legend=False,
-                lut=None, tr=None):
+                tr=None, lut=None):
     """
     Plot an image representation of voxel intensities across time also know
     as the "carpet plot" or "Power plot". See Jonathan Power Neuroimage
@@ -117,21 +126,20 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
     Parameters
     ----------
 
-        img : Niimg-like object
-            See http://nilearn.github.io/manipulating_images/input_output.html
-            4D input image
-        atlaslabels: ndarray
+        func : string
+            Path to NIfTI or CIFTI BOLD image
+        atlaslabels: ndarray, optional
             A 3D array of integer labels from an atlas, resampled into ``img`` space.
+            Required if ``func`` is a NIfTI image.
         detrend : boolean, optional
             Detrend and standardize the data prior to plotting.
-        nskip : int
+        nskip : int, optional
             Number of volumes at the beginning of the scan marked as nonsteady state.
-        long_cutoff : int
-            Number of TRs to consider img too long (and decimate the time direction
-            to save memory)
-        axes : matplotlib axes, optional
-            The axes used to display the plot. If None, the complete
-            figure is used.
+            Not used.
+        size : tuple, optional
+            Size of figure.
+        subplot : matplotlib Subplot, optional
+            Subplot to plot figure on.
         title : string, optional
             The title displayed on the figure.
         output_file : string, or None, optional
@@ -143,50 +151,96 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
             overlay.
         tr : float , optional
             Specify the TR, if specified it uses this value. If left as None,
-            # Frames is plotted instead of time.
-    """
+            # of frames is plotted instead of time.
+        lut : ndarray, optional
+            Look up table for segmentations
 
-    # Define TR and number of frames
+    """
+    epinii = None
+    segnii = None
+    nslices = None
+    img = nb.load(func)
+
+    if isinstance(img, nb.Cifti2Image):
+        assert img.nifti_header.get_intent()[0] == 'ConnDenseSeries', 'Not a dense timeseries'
+
+        data = img.get_fdata().T
+        matrix = img.header.matrix
+        struct_map = {'LEFT_CORTEX': 1, 'RIGHT_CORTEX': 2, 'SUBCORTICAL': 3, 'CEREBELLUM': 4}
+        seg = np.zeros((data.shape[0], ), dtype='uint32')
+        for bm in matrix.get_index_map(1).brain_models:
+            if 'CORTEX' in bm.brain_structure:
+                lidx = (1, 2)['RIGHT' in bm.brain_structure]
+            elif 'CEREBELLUM' in bm.brain_structure:
+                lidx = 4
+            else:
+                lidx = 3
+            index_final = bm.index_offset + bm.index_count
+            seg[bm.index_offset:index_final] = lidx
+        assert len(seg[seg < 1]) == 0, "Unassigned labels"
+
+        # Decimate data
+        data, seg = _decimate_data(data, seg, size)
+        # preserve as much continuity as possible
+        order = seg.argsort(kind='stable')
+
+        cmap = ListedColormap([cm.get_cmap('Paired').colors[i] for i in (1, 0, 7, 3)])
+        assert len(cmap.colors) == len(struct_map), \
+            "Mismatch between expected # of structures and colors"
+
+        # ensure no legend for CIFTI
+        legend = False
+
+    else:  # Volumetric NIfTI
+        img_nii = check_niimg_4d(img, dtype='auto',)
+        func_data = _safe_get_data(img_nii, ensure_finite=True)
+        ntsteps = func_data.shape[-1]
+        data = func_data[atlaslabels > 0].reshape(-1, ntsteps)
+        oseg = atlaslabels[atlaslabels > 0].reshape(-1)
+
+        # Map segmentation
+        if lut is None:
+            lut = np.zeros((256, ), dtype='int')
+            lut[1:11] = 1
+            lut[255] = 2
+            lut[30:99] = 3
+            lut[100:201] = 4
+        # Apply lookup table
+        seg = lut[oseg.astype(int)]
+
+        # Decimate data
+        data, seg = _decimate_data(data, seg, size)
+        # Order following segmentation labels
+        order = np.argsort(seg)[::-1]
+        # Set colormap
+        cmap = ListedColormap(cm.get_cmap('tab10').colors[:4][::-1])
+
+        if legend:
+            epiavg = func_data.mean(3)
+            epinii = nb.Nifti1Image(epiavg, img_nii.affine, img_nii.header)
+            segnii = nb.Nifti1Image(lut[atlaslabels.astype(int)], epinii.affine, epinii.header)
+            segnii.set_data_dtype('uint8')
+            nslices = epiavg.shape[-1]
+
+    return _carpet(data, seg, order, cmap,
+                   epinii=epinii, segnii=segnii, nslices=nslices, tr=tr,
+                   subplot=subplot, title=title, output_file=output_file)
+
+
+def _carpet(data, seg, order, cmap,
+            tr=None, detrend=True, subplot=None, legend=False, title=None,
+            output_file=None, epinii=None, segnii=None, nslices=None):
+    """Common carpetplot building code for volumetric / CIFTI plots"""
     notr = False
     if tr is None:
         notr = True
         tr = 1.
-
-    img_nii = check_niimg_4d(img, dtype='auto',)
-    func_data = _safe_get_data(img_nii, ensure_finite=True)
-    ntsteps = func_data.shape[-1]
-
-    data = func_data[atlaslabels > 0].reshape(-1, ntsteps)
-    seg = atlaslabels[atlaslabels > 0].reshape(-1)
-
-    # Map segmentation
-    if lut is None:
-        lut = np.zeros((256, ), dtype='int')
-        lut[1:11] = 1
-        lut[255] = 2
-        lut[30:99] = 3
-        lut[100:201] = 4
-
-    # Apply lookup table
-    newsegm = lut[seg.astype(int)]
-
-    p_dec = 1 + data.shape[0] // size[0]
-    if p_dec:
-        data = data[::p_dec, :]
-        newsegm = newsegm[::p_dec]
-
-    t_dec = 1 + data.shape[1] // size[1]
-    if t_dec:
-        data = data[:, ::t_dec]
 
     # Detrend data
     v = (None, None)
     if detrend:
         data = clean(data.T, t_r=tr).T
         v = (-2, 2)
-
-    # Order following segmentation labels
-    order = np.argsort(newsegm)[::-1]
 
     # If subplot is not defined
     if subplot is None:
@@ -198,14 +252,12 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
                                      width_ratios=wratios[:2 + int(legend)],
                                      wspace=0.0)
 
-    mycolors = ListedColormap(cm.get_cmap('tab10').colors[:4][::-1])
-
     # Segmentation colorbar
     ax0 = plt.subplot(gs[0])
     ax0.set_yticks([])
     ax0.set_xticks([])
-    ax0.imshow(newsegm[order, np.newaxis], interpolation='none', aspect='auto',
-               cmap=mycolors, vmin=1, vmax=4)
+    ax0.imshow(seg[order, np.newaxis], interpolation='none', aspect='auto', cmap=cmap)
+
     ax0.grid(False)
     ax0.spines["left"].set_visible(False)
     ax0.spines["bottom"].set_color('none')
@@ -213,7 +265,7 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
 
     # Carpet plot
     ax1 = plt.subplot(gs[1])
-    ax1.imshow(data[order, ...], interpolation='nearest', aspect='auto', cmap='gray',
+    ax1.imshow(data[order], interpolation='nearest', aspect='auto', cmap='gray',
                vmin=v[0], vmax=v[1])
 
     ax1.grid(False)
@@ -224,11 +276,8 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
     interval = max((int(data.shape[-1] + 1) // 10, int(data.shape[-1] + 1) // 5, 1))
     xticks = list(range(0, data.shape[-1])[::interval])
     ax1.set_xticks(xticks)
-    if notr:
-        ax1.set_xlabel('time (frame #)')
-    else:
-        ax1.set_xlabel('time (s)')
-    labels = tr * (np.array(xticks)) * t_dec
+    ax1.set_xlabel('time (frame #)' if notr else 'time (s)')
+    labels = tr * (np.array(xticks))
     ax1.set_xticklabels(['%.02f' % t for t in labels.tolist()], fontsize=5)
 
     # Remove and redefine spines
@@ -245,20 +294,15 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
     ax1.spines["left"].set_color('none')
     ax1.spines["left"].set_visible(False)
 
+    ax2 = None
     if legend:
         gslegend = mgs.GridSpecFromSubplotSpec(
             5, 1, subplot_spec=gs[2], wspace=0.0, hspace=0.0)
-        epiavg = func_data.mean(3)
-        epinii = nb.Nifti1Image(epiavg, img_nii.affine, img_nii.header)
-        segnii = nb.Nifti1Image(lut[atlaslabels.astype(int)], epinii.affine, epinii.header)
-        segnii.set_data_dtype('uint8')
-
-        nslices = epiavg.shape[-1]
         coords = np.linspace(int(0.10 * nslices), int(0.95 * nslices), 5).astype(np.uint8)
         for i, c in enumerate(coords.tolist()):
             ax2 = plt.subplot(gslegend[i])
             plot_img(segnii, bg_img=epinii, axes=ax2, display_mode='z',
-                     annotate=False, cut_coords=[c], threshold=0.1, cmap=mycolors,
+                     annotate=False, cut_coords=[c], threshold=0.1, cmap=cmap,
                      interpolation='nearest')
 
     if output_file is not None:
@@ -268,7 +312,7 @@ def plot_carpet(img, atlaslabels, detrend=True, nskip=0, size=(950, 800),
         figure = None
         return output_file
 
-    return [ax0, ax1], gs
+    return (ax0, ax1, ax2), gs
 
 
 def spikesplot(ts_z, outer_gs=None, tr=None, zscored=True, spike_thresh=6., title='Spike plot',
@@ -770,3 +814,47 @@ def confounds_correlation_plot(confounds_file, output_file=None, figure=None,
         figure = None
         return output_file
     return [ax0, ax1], gs
+
+
+def _get_tr(img):
+    """
+    Attempt to extract repetition time from NIfTI/CIFTI header
+
+    Examples
+    --------
+    >>> _get_tr(nb.load(Path(test_data) /
+    ...    'sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz'))
+    2.2
+    >>> _get_tr(nb.load(Path(test_data) /
+    ...    'sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii'))
+    2.0
+    """
+
+    try:
+        return img.header.matrix.get_index_map(0).series_step
+    except AttributeError:
+        return img.header.get_zooms()[-1]
+    raise RuntimeError("Could not extract TR - unknown data structure type")
+
+
+def _decimate_data(data, seg, size):
+    """Decimate timeseries data
+
+    Parameters
+    ----------
+    data : ndarray
+        2 element array of timepoints and samples
+    seg : ndarray
+        1 element array of samples
+    size : tuple
+        2 element for P/T decimation
+
+    """
+    p_dec = 1 + data.shape[0] // size[0]
+    if p_dec:
+        data = data[::p_dec, :]
+        seg = seg[::p_dec]
+    t_dec = 1 + data.shape[1] // size[1]
+    if t_dec:
+        data = data[:, ::t_dec]
+    return data, seg

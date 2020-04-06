@@ -6,7 +6,7 @@ import pandas as pd
 
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    File, BaseInterfaceInputSpec, TraitedSpec, SimpleInterface, traits
+    File, BaseInterfaceInputSpec, TraitedSpec, SimpleInterface, traits, isdefined
 )
 from ..viz.plots import (
     fMRIPlot, compcor_variance_plot, confounds_correlation_plot
@@ -15,8 +15,8 @@ from ..viz.plots import (
 
 class _FMRISummaryInputSpec(BaseInterfaceInputSpec):
     in_func = File(exists=True, mandatory=True, desc='')
-    in_mask = File(exists=True, mandatory=True, desc='')
-    in_segm = File(exists=True, mandatory=True, desc='')
+    in_mask = File(exists=True, desc='')
+    in_segm = File(exists=True, desc='')
     in_spikes_bg = File(exists=True, mandatory=True, desc='')
     fd = File(exists=True, mandatory=True, desc='')
     fd_thres = traits.Float(0.2, usedefault=True, desc='')
@@ -56,8 +56,8 @@ class FMRISummary(SimpleInterface):
 
         fig = fMRIPlot(
             self.inputs.in_func,
-            mask_file=self.inputs.in_mask,
-            seg_file=self.inputs.in_segm,
+            mask_file=self.inputs.in_mask if isdefined(self.inputs.in_mask) else None,
+            seg_file=self.inputs.in_segm if isdefined(self.inputs.seg_file) else None,
             spikes_files=[self.inputs.in_spikes_bg],
             tr=self.inputs.tr,
             data=dataframe[['outliers', 'DVARS', 'FD']],
