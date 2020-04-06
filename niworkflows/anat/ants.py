@@ -721,9 +721,9 @@ def init_n4_only_wf(atropos_model=None,
         (inputnode, inu_n4_final, [('in_files', 'input_image')]),
         (inputnode, thr_brainmask, [(('in_files', _pop), 'in_file')]),
         (thr_brainmask, outputnode, [('out_mask', 'out_mask')]),
-        (inu_n4_final, outputnode, [('output_image', 'out_file')]),
-        (inu_n4_final, outputnode, [('output_image', 'bias_corrected')]),
-        (inu_n4_final, outputnode, [('bias_image', 'bias_image')])
+        (inu_n4_final, outputnode, [(('output_image', _pop), 'out_file')]),
+        (inu_n4_final, outputnode, [(('output_image', _pop), 'bias_corrected')]),
+        (inu_n4_final, outputnode, [(('bias_image', _pop), 'bias_image')])
     ])
 
     # If atropos refine, do in4 twice
