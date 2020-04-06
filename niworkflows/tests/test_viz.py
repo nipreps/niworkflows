@@ -10,17 +10,30 @@ from pathlib import Path
 
 def test_carpetplot():
     """Write a carpetplot"""
-    out_file = None
+    out_file_nifti = None
+    out_file_cifti = None
     save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
     if save_artifacts:
-        out_file = os.path.join(save_artifacts, 'carpetplot.svg')
+        out_file_nifti = os.path.join(save_artifacts, 'carpetplot_nifti.svg')
+        out_file_cifti = os.path.join(save_artifacts, 'carpetplot_cifti.svg')
+
+    # volumetric NIfTI
     viz.plot_carpet(
         os.path.join(datadir, 'sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz'),
-        np.asanyarray(nb.load(os.path.join(
+        atlaslabels=np.asanyarray(nb.load(os.path.join(
             datadir,
             'sub-ds205s03_task-functionallocalizer_run-01_bold_parc.nii.gz')).dataobj),
-        output_file=out_file,
+        output_file=out_file_nifti,
         legend=True
+    )
+
+    # CIFTI
+    viz.plot_carpet(
+        os.path.join(
+            datadir,
+            'sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii'
+        ),
+        output_file=out_file_cifti,
     )
 
 
