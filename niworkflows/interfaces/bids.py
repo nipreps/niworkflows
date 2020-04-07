@@ -36,7 +36,8 @@ def _none():
 DEFAULT_DTYPES = defaultdict(_none, (
     ("mask", "uint8"),
     ("dseg", "int16"),
-    ("probseg", "float32"))
+    ("probseg", "float32"),
+    ("boldref", "source"))
 )
 
 
@@ -252,7 +253,8 @@ class _DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     in_file = InputMultiObject(File(exists=True), mandatory=True,
                                desc='the object to be saved')
     keep_dtype = traits.Bool(False, usedefault=True, desc='keep datatype suffix')
-    data_dtype = Str(desc='NumPy datatype to coerce NIfTI data to')
+    data_dtype = Str(desc='NumPy datatype to coerce NIfTI data to, or `source` to'
+                          'match the input file dtype')
     meta_dict = traits.DictStrAny(desc='an input dictionary containing metadata')
     source_file = File(exists=False, mandatory=True, desc='the input func file')
     space = Str('', usedefault=True, desc='Label for space field')
@@ -521,6 +523,8 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                     if self.inputs.check_hdr:
                         # load updated NIfTI
                         nii = nb.load(out_file, mmap=False)
+                    if data_dtype == 'source':  # match source dtype
+                        data_dtype = nb.load(self.inputs.source_file).get_data_dtype()
                     data_dtype = np.dtype(data_dtype)
                     if nii.get_data_dtype() != data_dtype:
                         nii.set_data_dtype(data_dtype)
