@@ -342,11 +342,12 @@ desc-preproc_bold.json'
     >>> dsink.inputs.source_file = str(tricky_source)
     >>> dsink.inputs.keep_dtype = True
     >>> dsink.inputs.desc = 'preproc'
+    >>> dsink.inputs.space = 'MNI152NLin6Asym_res-01'
     >>> dsink.inputs.RepetitionTime = 0.75
     >>> res = dsink.run()
     >>> res.outputs.out_meta  # doctest: +ELLIPSIS
     '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
-desc-preproc_bold.json'
+space-MNI152NLin6Asym_res-01_desc-preproc_bold.json'
 
     >>> lines = Path(res.outputs.out_meta).read_text().splitlines()
     >>> lines[1]
@@ -365,12 +366,13 @@ desc-preproc_bold.json'
     >>> dsink.inputs.source_file = str(tricky_source)
     >>> dsink.inputs.keep_dtype = True
     >>> dsink.inputs.desc = 'preproc'
+    >>> dsink.inputs.space = 'MNI152NLin6Asym_res-native'
     >>> dsink.inputs.RepetitionTime = 0.75
     >>> dsink.inputs.meta_dict = {'RepetitionTime': 1.75, 'SkullStripped': False, 'Z': 'val'}
     >>> res = dsink.run()
     >>> res.outputs.out_meta  # doctest: +ELLIPSIS
     '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
-desc-preproc_bold.json'
+space-MNI152NLin6Asym_desc-preproc_bold.json'
 
     >>> lines = Path(res.outputs.out_meta).read_text().splitlines()
     >>> lines[1]
@@ -453,6 +455,10 @@ desc-preproc_bold.json'
         formatstr = formatbase + '{extra}{suffix}{dtype}{ext}'
         if len(self.inputs.in_file) > 1 and not isdefined(self.inputs.extra_values):
             formatstr = formatbase + '{suffix}{i:04d}{dtype}{ext}'
+
+        if self.inputs.space and '_res-native' in self.inputs.space:
+            # strip native tag
+            self.inputs.space = self.inputs.space.split('_')[0]
 
         space = '_space-{}'.format(self.inputs.space) if self.inputs.space else ''
         desc = '_desc-{}'.format(self.inputs.desc) if self.inputs.desc else ''
