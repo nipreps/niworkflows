@@ -667,6 +667,9 @@ class OutputReferencesAction(argparse.Action):
                 and ":resolution-" not in val
             ):
                 # by default, explicitly set volumetric resolution to native
+                # relevant discussions:
+                # https://github.com/nipreps/niworkflows/pull/457#discussion_r375510227
+                # https://github.com/nipreps/niworkflows/pull/494
                 val = ":".join((val, "res-native"))
             for sp in Reference.from_string(val):
                 spaces.add(sp)
