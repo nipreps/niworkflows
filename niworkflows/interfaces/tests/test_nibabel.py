@@ -91,7 +91,7 @@ def test_SplitSeries(tmp_path):
     with pytest.raises(RuntimeError):
         SplitSeries(in_file=str(in_file)).run()
 
-    split = SplitSeries(in_file=str(in_file), accept_3D=True).run()
+    split = SplitSeries(in_file=str(in_file), allow_3D=True).run()
     assert isinstance(split.outputs.out_files, str)
 
     # Test the 3D
@@ -102,7 +102,7 @@ def test_SplitSeries(tmp_path):
     with pytest.raises(RuntimeError):
         SplitSeries(in_file=str(in_file)).run()
 
-    split = SplitSeries(in_file=str(in_file), accept_3D=True).run()
+    split = SplitSeries(in_file=str(in_file), allow_3D=True).run()
     assert isinstance(split.outputs.out_files, str)
 
     # Test the 5D
@@ -114,7 +114,7 @@ def test_SplitSeries(tmp_path):
         SplitSeries(in_file=str(in_file)).run()
 
     with pytest.raises(RuntimeError):
-        SplitSeries(in_file=str(in_file), accept_3D=True).run()
+        SplitSeries(in_file=str(in_file), allow_3D=True).run()
 
     # Test splitting ANTs warpfields
     data = np.ones((20, 20, 20, 1, 3), dtype=float)
@@ -123,6 +123,7 @@ def test_SplitSeries(tmp_path):
 
     split = SplitSeries(in_file=str(in_file)).run()
     assert len(split.outputs.out_files) == 3
+
 
 def test_MergeSeries(tmp_path):
     """Test 3-to-4 NIfTI concatenation interface."""

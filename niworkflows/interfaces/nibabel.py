@@ -94,7 +94,7 @@ class Binarize(SimpleInterface):
 
 class _FourToThreeInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input 4d image')
-    accept_3D = traits.Bool(False, usedefault=True, desc='do not fail if a 3D volume is passed in')
+    allow_3D = traits.Bool(False, usedefault=True, desc='do not fail if a 3D volume is passed in')
 
 
 class _FourToThreeOutputSpec(TraitedSpec):
@@ -110,9 +110,12 @@ class SplitSeries(SimpleInterface):
 
     def _run_interface(self, runtime):
         filenii = nb.squeeze_image(nb.load(self.inputs.in_file))
+        filenii = filenii.__class__(
+            np.squeeze(filenii.dataobj), filenii.affine, filenii.header
+        )
         ndim = filenii.dataobj.ndim
         if ndim != 4:
-            if self.inputs.accept_3D and ndim == 3:
+            if self.inputs.allow_3D and ndim == 3:
                 out_file = str(
                     Path(fname_presuffix(self.inputs.in_file, suffix=f"_idx-000")).absolute()
                 )
@@ -120,7 +123,9 @@ class SplitSeries(SimpleInterface):
                 filenii.to_filename(out_file)
                 return runtime
             raise RuntimeError(
-                f"Input image image is {ndim}D ({'x'.join(['%d' % s for s in filenii.shape])}).")
+                f"Input image <{self.inputs.in_file}> is {ndim}D "
+                f"({'x'.join(['%d' % s for s in filenii.shape])})."
+            )
 
         files_3d = nb.four_to_three(filenii)
         self._results['out_files'] = []
