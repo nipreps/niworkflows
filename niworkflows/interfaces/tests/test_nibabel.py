@@ -4,7 +4,7 @@ import numpy as np
 import nibabel as nb
 import pytest
 
-from ..nibabel import Binarize, ApplyMask
+from ..nibabel import Binarize, ApplyMask, SplitSeries, MergeSeries
 
 
 def test_Binarize(tmp_path):
@@ -69,3 +69,79 @@ def test_ApplyMask(tmp_path):
         ApplyMask(in_file=str(in_file), in_mask=str(in_mask), threshold=0.4).run()
     with pytest.raises(ValueError):
         ApplyMask(in_file=str(in_file4d), in_mask=str(in_mask), threshold=0.4).run()
+
+
+def test_SplitSeries(tmp_path):
+    """Test 4-to-3 NIfTI split interface."""
+    os.chdir(str(tmp_path))
+
+    # Test the 4D
+    data = np.ones((20, 20, 20, 15), dtype=float)
+    in_file = tmp_path / 'input4D.nii.gz'
+    nb.Nifti1Image(data, np.eye(4), None).to_filename(str(in_file))
+
+    split = SplitSeries(in_file=str(in_file)).run()
+    assert len(split.outputs.out_files) == 15
+
+    # Test the 3D
+    data = np.ones((20, 20, 20), dtype=float)
+    in_file = tmp_path / 'input3D.nii.gz'
+    nb.Nifti1Image(data, np.eye(4), None).to_filename(str(in_file))
+
+    with pytest.raises(RuntimeError):
+        SplitSeries(in_file=str(in_file)).run()
+
+    split = SplitSeries(in_file=str(in_file), accept_3D=True).run()
+    assert isinstance(split.outputs.out_files, str)
+
+    # Test the 3D
+    data = np.ones((20, 20, 20, 1), dtype=float)
+    in_file = tmp_path / 'input3D.nii.gz'
+    nb.Nifti1Image(data, np.eye(4), None).to_filename(str(in_file))
+
+    with pytest.raises(RuntimeError):
+        SplitSeries(in_file=str(in_file)).run()
+
+    split = SplitSeries(in_file=str(in_file), accept_3D=True).run()
+    assert isinstance(split.outputs.out_files, str)
+
+    # Test the 5D
+    data = np.ones((20, 20, 20, 2, 2), dtype=float)
+    in_file = tmp_path / 'input5D.nii.gz'
+    nb.Nifti1Image(data, np.eye(4), None).to_filename(str(in_file))
+
+    with pytest.raises(RuntimeError):
+        SplitSeries(in_file=str(in_file)).run()
+
+    with pytest.raises(RuntimeError):
+        SplitSeries(in_file=str(in_file), accept_3D=True).run()
+
+    # Test splitting ANTs warpfields
+    data = np.ones((20, 20, 20, 1, 3), dtype=float)
+    in_file = tmp_path / 'warpfield.nii.gz'
+    nb.Nifti1Image(data, np.eye(4), None).to_filename(str(in_file))
+
+    split = SplitSeries(in_file=str(in_file)).run()
+    assert len(split.outputs.out_files) == 3
+
+def test_MergeSeries(tmp_path):
+    """Test 3-to-4 NIfTI concatenation interface."""
+    os.chdir(str(tmp_path))
+
+    data = np.ones((20, 20, 20), dtype=float)
+    in_file = tmp_path / 'input3D.nii.gz'
+    nb.Nifti1Image(data, np.eye(4), None).to_filename(str(in_file))
+
+    merge = MergeSeries(in_files=[str(in_file)] * 5).run()
+    assert nb.load(merge.outputs.out_file).dataobj.shape == (20, 20, 20, 5)
+
+    in_4D = tmp_path / 'input4D.nii.gz'
+    nb.Nifti1Image(
+        np.ones((20, 20, 20, 4), dtype=float), np.eye(4), None
+    ).to_filename(str(in_4D))
+
+    merge = MergeSeries(in_files=[str(in_file)] + [str(in_4D)]).run()
+    assert nb.load(merge.outputs.out_file).dataobj.shape == (20, 20, 20, 5)
+
+    with pytest.raises(ValueError):
+        MergeSeries(in_files=[str(in_file)] + [str(in_4D)], allow_4D=False).run()

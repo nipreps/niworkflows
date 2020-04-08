@@ -1,6 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Nibabel-based interfaces."""
+from pathlib import Path
 import numpy as np
 import nibabel as nb
 from nipype import logging
@@ -98,12 +99,11 @@ class _FourToThreeInputSpec(BaseInterfaceInputSpec):
 
 class _FourToThreeOutputSpec(TraitedSpec):
     out_files = OutputMultiObject(File(exists=True),
-                                     desc='output list of 3d images')
+                                  desc='output list of 3d images')
 
 
 class SplitSeries(SimpleInterface):
-    """Split a 4D dataset along the last dimension
-    into a series of 3D volumes."""
+    """Split a 4D dataset along the last dimension into a series of 3D volumes."""
 
     input_spec = _FourToThreeInputSpec
     output_spec = _FourToThreeOutputSpec
@@ -119,7 +119,8 @@ class SplitSeries(SimpleInterface):
                 self._results['out_files'] = out_file
                 filenii.to_filename(out_file)
                 return runtime
-            raise RuntimeError(f"Input image image is {ndim}D.")
+            raise RuntimeError(
+                f"Input image image is {ndim}D ({'x'.join(['%d' % s for s in filenii.shape])}).")
 
         files_3d = nb.four_to_three(filenii)
         self._results['out_files'] = []
@@ -137,7 +138,8 @@ class SplitSeries(SimpleInterface):
 class _MergeSeriesInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiObject(File(exists=True, mandatory=True,
                                      desc='input list of 3d images'))
-    allow_4D = traits.Bool(True, usedefault=True, desc='whether 4D images are allowed to be concatenated')
+    allow_4D = traits.Bool(True, usedefault=True,
+                           desc='whether 4D images are allowed to be concatenated')
 
 
 class _MergeSeriesOutputSpec(TraitedSpec):
@@ -153,15 +155,18 @@ class MergeSeries(SimpleInterface):
     def _run_interface(self, runtime):
         nii_list = []
         for f in self.inputs.in_files:
-            filenii = nb.load(f)
-            filenii = nb.squeeze_image(filenii)
-            if filenii.dataobj.ndim == 3:
+            filenii = nb.squeeze_image(nb.load(f))
+            ndim = filenii.dataobj.ndim
+            if ndim == 3:
                 nii_list.append(filenii)
-            elif self.inputs.allow_4D and filenii.dataobj.ndim == 4:
+                continue
+            elif self.inputs.allow_4D and ndim == 4:
                 nii_list += nb.four_to_three(filenii)
+                continue
             else:
                 raise ValueError("Input image has an incorrect number of dimensions"
-                                 f" ({filenii.dataobj.ndim}).")
+                                 f" ({ndim}).")
+
         img_4d = nb.concat_images(nii_list)
         out_file = fname_presuffix(self.inputs.in_files[0], suffix="_merged")
         img_4d.to_filename(out_file)
