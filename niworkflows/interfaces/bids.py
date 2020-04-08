@@ -519,12 +519,19 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                         # Rewrite file with new header
                         overwrite_header(nii, out_file)
 
+                if data_dtype == 'source':  # match source dtype
+                    try:
+                        data_dtype = nb.load(self.inputs.source_file).get_data_dtype()
+                    except Exception:
+                        LOGGER.warning(
+                            f"Could not get data type of file {self.inputs.source_file}"
+                        )
+                        data_dtype = None
+
                 if data_dtype:
                     if self.inputs.check_hdr:
                         # load updated NIfTI
                         nii = nb.load(out_file, mmap=False)
-                    if data_dtype == 'source':  # match source dtype
-                        data_dtype = nb.load(self.inputs.source_file).get_data_dtype()
                     data_dtype = np.dtype(data_dtype)
                     if nii.get_data_dtype() != data_dtype:
                         nii.set_data_dtype(data_dtype)
