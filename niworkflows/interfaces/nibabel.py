@@ -99,22 +99,22 @@ class Binarize(SimpleInterface):
         return runtime
 
 
-class _FourToThreeInputSpec(BaseInterfaceInputSpec):
+class _SplitSeriesInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="input 4d image")
     allow_3D = traits.Bool(
         False, usedefault=True, desc="do not fail if a 3D volume is passed in"
     )
 
 
-class _FourToThreeOutputSpec(TraitedSpec):
+class _SplitSeriesOutputSpec(TraitedSpec):
     out_files = OutputMultiObject(File(exists=True), desc="output list of 3d images")
 
 
 class SplitSeries(SimpleInterface):
     """Split a 4D dataset along the last dimension into a series of 3D volumes."""
 
-    input_spec = _FourToThreeInputSpec
-    output_spec = _FourToThreeOutputSpec
+    input_spec = _SplitSeriesInputSpec
+    output_spec = _SplitSeriesOutputSpec
 
     def _run_interface(self, runtime):
         filenii = nb.squeeze_image(nb.load(self.inputs.in_file))
