@@ -93,6 +93,7 @@ class Binarize(SimpleInterface):
 
 class _FourToThreeInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input 4d image')
+    accept_3D = traits.Bool(False, usedefault=True, desc='do not fail if a 3D volume is passed in')
 
 
 class _FourToThreeOutputSpec(TraitedSpec):
@@ -108,14 +109,25 @@ class SplitSeries(SimpleInterface):
     output_spec = _FourToThreeOutputSpec
 
     def _run_interface(self, runtime):
-        filenii = nb.load(self.inputs.in_file)
-        if len(filenii.shape) != 4:
-            raise RuntimeError('Input image (%s) is not 4D.' % filenii)
+        filenii = nb.squeeze_image(nb.load(self.inputs.in_file))
+        ndim = filenii.dataobj.ndim
+        if ndim != 4:
+            if self.inputs.accept_3D and ndim == 3:
+                out_file = str(
+                    Path(fname_presuffix(self.inputs.in_file, suffix=f"_idx-000")).absolute()
+                )
+                self._results['out_files'] = out_file
+                filenii.to_filename(out_file)
+                return runtime
+            raise RuntimeError(f"Input image image is {ndim}D.")
 
         files_3d = nb.four_to_three(filenii)
         self._results['out_files'] = []
+        in_file = self.inputs.in_file
         for i, file_3d in enumerate(files_3d):
-            out_file = fname_presuffix(in_file, suffix=f"_idx-{i:03}")
+            out_file = str(
+                Path(fname_presuffix(in_file, suffix=f"_idx-{i:03}")).absolute()
+            )
             file_3d.to_filename(out_file)
             self._results['out_files'].append(out_file)
 
@@ -125,6 +137,7 @@ class SplitSeries(SimpleInterface):
 class _MergeSeriesInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiObject(File(exists=True, mandatory=True,
                                      desc='input list of 3d images'))
+    allow_4D = traits.Bool(True, usedefault=True, desc='whether 4D images are allowed to be concatenated')
 
 
 class _MergeSeriesOutputSpec(TraitedSpec):
@@ -142,11 +155,14 @@ class MergeSeries(SimpleInterface):
         for f in self.inputs.in_files:
             filenii = nb.load(f)
             filenii = nb.squeeze_image(filenii)
-            if len(filenii.shape) != 3:
-                raise RuntimeError('Input image (%s) is not 3D.' % f)
-            else:
+            if filenii.dataobj.ndim == 3:
                 nii_list.append(filenii)
-        img_4d = nb.funcs.concat_images(nii_list)
+            elif self.inputs.allow_4D and filenii.dataobj.ndim == 4:
+                nii_list += nb.four_to_three(filenii)
+            else:
+                raise ValueError("Input image has an incorrect number of dimensions"
+                                 f" ({filenii.dataobj.ndim}).")
+        img_4d = nb.concat_images(nii_list)
         out_file = fname_presuffix(self.inputs.in_files[0], suffix="_merged")
         img_4d.to_filename(out_file)
 
