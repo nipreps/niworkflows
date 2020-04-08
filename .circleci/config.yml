@@ -151,8 +151,8 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - regression-v3-{{ .Revision }}
-            - regression-v3-
+            - regression-v4-{{ .Revision }}
+            - regression-v4-
       - run:
           name: Get truncated BOLD series
           command: |
@@ -175,7 +175,7 @@ jobs:
               echo "Pre-computed masks were cached"
             fi
       - save_cache:
-         key: regression-v3-{{ .Revision }}-{{ epoch }}
+         key: regression-v4-{{ .Revision }}-{{ epoch }}
          paths:
             - /tmp/data
 
@@ -282,7 +282,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - regression-v3-{{ .Revision }}
+            - regression-v4-{{ .Revision }}
       - restore_cache:
           keys:
             - masks-workdir-v2-{{ .Branch }}-{{epoch}}
