@@ -5,6 +5,7 @@ First release in the 1.2.x series.
   * ENH: Ensure subcortical volume in CIFTI is in LAS orientation (#484)
   * ENH: Produce carpetplot from CIFTI file (#491)
   * ENH: Option to set DerivativesDataSink datatype (#492) (#495)
+  * FIX: Increase fault tolerance of DerivativesDataSink (#497)
   * FIX: Match N4-only workflow outputs to brain extraction workflow (#496)
   * FIX: Set default volumetric resolution within OutputReferencesAction to native (#494)
   * MAINT: Transfer brainmask script from fMRIPrep (#488)
