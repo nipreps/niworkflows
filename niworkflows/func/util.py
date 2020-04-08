@@ -392,7 +392,7 @@ def init_enhance_and_skullstrip_bold_wf(
                     get_template(
                         "MNI152NLin2009cAsym",
                         resolution=1,
-                        desc="brain",
+                        label="brain",
                         suffix="probseg",
                     )
                 ),
