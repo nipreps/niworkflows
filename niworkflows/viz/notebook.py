@@ -3,7 +3,6 @@ from pathlib import Path
 import numpy as np
 import nibabel as nb
 from .utils import compose_view, plot_registration, cuts_from_bbox
-from IPython.display import SVG, display as _disp
 
 
 def display(
@@ -15,6 +14,7 @@ def display(
     moving_label="M",
 ):
     """Plot the flickering panels to show a registration process."""
+    from IPython.display import SVG, display as _disp
     if isinstance(fixed_image, (str, Path)):
         fixed_image = nb.load(str(fixed_image))
     if isinstance(moving_image, (str, Path)):
