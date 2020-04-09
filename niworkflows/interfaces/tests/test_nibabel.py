@@ -77,7 +77,7 @@ def test_ApplyMask(tmp_path):
 
 def test_SplitSeries(tmp_path):
     """Test 4-to-3 NIfTI split interface."""
-    os.chdir(str(tmp_path))
+    os.chdir(tmp_path)
 
     # Test the 4D
     data = np.ones((20, 20, 20, 15), dtype=float)
