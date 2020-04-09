@@ -15,6 +15,7 @@ def display(
 ):
     """Plot the flickering panels to show a registration process."""
     from IPython.display import SVG, display as _disp
+
     if isinstance(fixed_image, (str, Path)):
         fixed_image = nb.load(str(fixed_image))
     if isinstance(moving_image, (str, Path)):
@@ -28,24 +29,34 @@ def display(
             cuts = cuts_from_bbox(contour, cuts=n_cuts)
         else:
             hdr = fixed_image.header.copy()
-            hdr.set_data_dtype('uint8')
+            hdr.set_data_dtype("uint8")
             mask_nii = nb.Nifti1Image(
-                np.ones(fixed_image.shape, dtype='uint8'),
-                fixed_image.affine, hdr)
+                np.ones(fixed_image.shape, dtype="uint8"), fixed_image.affine, hdr
+            )
             cuts = cuts_from_bbox(mask_nii, cuts=n_cuts)
 
     # Call composer
-    _disp(SVG(compose_view(
-        plot_registration(fixed_image, 'fixed-image',
-                          estimate_brightness=True,
-                          cuts=cuts,
-                          label=fixed_label,
-                          contour=contour,
-                          compress=False),
-        plot_registration(moving_image, 'moving-image',
-                          estimate_brightness=True,
-                          cuts=cuts,
-                          label=moving_label,
-                          contour=contour,
-                          compress=False),
-    )))
+    _disp(
+        SVG(
+            compose_view(
+                plot_registration(
+                    fixed_image,
+                    "fixed-image",
+                    estimate_brightness=True,
+                    cuts=cuts,
+                    label=fixed_label,
+                    contour=contour,
+                    compress=False,
+                ),
+                plot_registration(
+                    moving_image,
+                    "moving-image",
+                    estimate_brightness=True,
+                    cuts=cuts,
+                    label=moving_label,
+                    contour=contour,
+                    compress=False,
+                ),
+            )
+        )
+    )

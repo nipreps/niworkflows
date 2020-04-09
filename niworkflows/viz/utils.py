@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Helper tools for visualization purposes"""
+"""Helper tools for visualization purposes."""
 from pathlib import Path
 from shutil import which
 from tempfile import TemporaryDirectory
@@ -27,34 +27,41 @@ SVGNS = "http://www.w3.org/2000/svg"
 
 def robust_set_limits(data, plot_params, percentiles=(15, 99.8)):
     """Set (vmax, vmin) based on percentiles of the data."""
-    plot_params['vmin'] = plot_params.get(
-        'vmin', np.percentile(data, percentiles[0]))
-    plot_params['vmax'] = plot_params.get(
-        'vmax', np.percentile(data, percentiles[1]))
+    plot_params["vmin"] = plot_params.get("vmin", np.percentile(data, percentiles[0]))
+    plot_params["vmax"] = plot_params.get("vmax", np.percentile(data, percentiles[1]))
     return plot_params
 
 
-def svg_compress(image, compress='auto'):
+def svg_compress(image, compress="auto"):
     """Generate a blob SVG from a matplotlib figure, may perform compression."""
     # Check availability of svgo and cwebp
-    has_compress = all((which('svgo'), which('cwebp')))
+    has_compress = all((which("svgo"), which("cwebp")))
     if compress is True and not has_compress:
-        raise RuntimeError('Compression is required, but svgo or cwebp are not installed')
+        raise RuntimeError(
+            "Compression is required, but svgo or cwebp are not installed"
+        )
     else:
-        compress = (compress is True or compress == 'auto') and has_compress
+        compress = (compress is True or compress == "auto") and has_compress
 
     # Compress the SVG file using SVGO
     if compress:
-        cmd = 'svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues'
+        cmd = "svgo -i - -o - -q -p 3 --pretty --disable=cleanupNumericValues"
         try:
-            pout = subprocess.run(cmd, input=image.encode('utf-8'), stdout=subprocess.PIPE,
-                                  shell=True, check=True, close_fds=True).stdout
+            pout = subprocess.run(
+                cmd,
+                input=image.encode("utf-8"),
+                stdout=subprocess.PIPE,
+                shell=True,
+                check=True,
+                close_fds=True,
+            ).stdout
         except OSError as e:
             from errno import ENOENT
+
             if compress is True and e.errno == ENOENT:
                 raise e
         else:
-            image = pout.decode('utf-8')
+            image = pout.decode("utf-8")
 
     # Convert all of the rasters inside the SVG file with 80% compressed WEBP
     if compress:
@@ -66,20 +73,24 @@ def svg_compress(image, compress='auto'):
                     while "/>" not in line:
                         line = fp.readline()
                         tmp_lines.append(line)
-                    content = ''.join(tmp_lines).replace('\n', '').replace(
-                        ',  ', ',')
+                    content = "".join(tmp_lines).replace("\n", "").replace(",  ", ",")
 
-                    left = content.split('base64,')[0] + 'base64,'
+                    left = content.split("base64,")[0] + "base64,"
                     left = left.replace("image/png", "image/webp")
-                    right = content.split('base64,')[1]
+                    right = content.split("base64,")[1]
                     png_b64 = right.split('"')[0]
                     right = '"' + '"'.join(right.split('"')[1:])
 
                     cmd = "cwebp -quiet -noalpha -q 80 -o - -- -"
                     pout = subprocess.run(
-                        cmd, input=base64.b64decode(png_b64), shell=True,
-                        stdout=subprocess.PIPE, check=True, close_fds=True).stdout
-                    webpimg = base64.b64encode(pout).decode('utf-8')
+                        cmd,
+                        input=base64.b64decode(png_b64),
+                        shell=True,
+                        stdout=subprocess.PIPE,
+                        check=True,
+                        close_fds=True,
+                    ).stdout
+                    webpimg = base64.b64encode(pout).decode("utf-8")
                     new_lines.append(left + webpimg + right)
                 else:
                     new_lines.append(line)
@@ -89,40 +100,41 @@ def svg_compress(image, compress='auto'):
 
     svg_start = 0
     for i, line in enumerate(lines):
-        if '<svg ' in line:
+        if "<svg " in line:
             svg_start = i
             continue
 
     image_svg = lines[svg_start:]  # strip out extra DOCTYPE, etc headers
-    return ''.join(image_svg)  # straight up giant string
+    return "".join(image_svg)  # straight up giant string
 
 
 def svg2str(display_object, dpi=300):
     """Serialize a nilearn display object to string."""
     from io import StringIO
+
     image_buf = StringIO()
     display_object.frame_axes.figure.savefig(
-        image_buf, dpi=dpi, format='svg',
-        facecolor='k', edgecolor='k')
+        image_buf, dpi=dpi, format="svg", facecolor="k", edgecolor="k"
+    )
     return image_buf.getvalue()
 
 
-def extract_svg(display_object, dpi=300, compress='auto'):
+def extract_svg(display_object, dpi=300, compress="auto"):
     """Remove the preamble of the svg files generated with nilearn."""
     image_svg = svg2str(display_object, dpi)
-    if compress is True or compress == 'auto':
+    if compress is True or compress == "auto":
         image_svg = svg_compress(image_svg, compress)
-    image_svg = re.sub(' height="[0-9]+[a-z]*"', '', image_svg, count=1)
-    image_svg = re.sub(' width="[0-9]+[a-z]*"', '', image_svg, count=1)
-    image_svg = re.sub(' viewBox',
-                       ' preseveAspectRation="xMidYMid meet" viewBox',
-                       image_svg, count=1)
-    start_tag = '<svg '
+    image_svg = re.sub(' height="[0-9]+[a-z]*"', "", image_svg, count=1)
+    image_svg = re.sub(' width="[0-9]+[a-z]*"', "", image_svg, count=1)
+    image_svg = re.sub(
+        " viewBox", ' preseveAspectRation="xMidYMid meet" viewBox', image_svg, count=1
+    )
+    start_tag = "<svg "
     start_idx = image_svg.find(start_tag)
-    end_tag = '</svg>'
+    end_tag = "</svg>"
     end_idx = image_svg.rfind(end_tag)
     if start_idx is -1 or end_idx is -1:
-        NIWORKFLOWS_LOG.info('svg tags not found in extract_svg')
+        NIWORKFLOWS_LOG.info("svg tags not found in extract_svg")
     # rfind gives the start index of the substr. We want this substr
     # included in our return value so we add its length to the index.
     end_idx += len(end_tag)
@@ -152,9 +164,9 @@ def cuts_from_bbox(mask_nii, cuts=3):
     # of the slice elements to be masked drops almost empty boxes
     # in the mosaic of axial planes (and also addresses #281)
     ijk_th = [
-        int((mask_data.shape[1] * mask_data.shape[2]) * 0.2),   # sagittal
-        int((mask_data.shape[0] * mask_data.shape[2]) * 0.0),   # coronal
-        int((mask_data.shape[0] * mask_data.shape[1]) * 0.3),   # axial
+        int((mask_data.shape[1] * mask_data.shape[2]) * 0.2),  # sagittal
+        int((mask_data.shape[0] * mask_data.shape[2]) * 0.0),  # coronal
+        int((mask_data.shape[0] * mask_data.shape[1]) * 0.3),  # axial
     ]
 
     vox_coords = []
@@ -174,19 +186,18 @@ def cuts_from_bbox(mask_nii, cuts=3):
 
     ras_coords = []
     for cross in np.array(vox_coords).T:
-        ras_coords.append(apply_affine(
-            mask_nii.affine, cross).tolist())
+        ras_coords.append(apply_affine(mask_nii.affine, cross).tolist())
     ras_cuts = [list(coords) for coords in np.transpose(ras_coords)]
-    return {k: v for k, v in zip(['x', 'y', 'z'], ras_cuts)}
+    return {k: v for k, v in zip(["x", "y", "z"], ras_cuts)}
 
 
 def _3d_in_file(in_file):
-    ''' if self.inputs.in_file is 3d, return it.
+    """ if self.inputs.in_file is 3d, return it.
     if 4d, pick an arbitrary volume and return that.
 
     if in_file is a list of files, return an arbitrary file from
     the list, and an arbitrary volume from that file
-    '''
+    """
 
     in_file = filemanip.filename_to_list(in_file)[0]
 
@@ -201,8 +212,16 @@ def _3d_in_file(in_file):
     return nlimage.index_img(in_file, 0)
 
 
-def plot_segs(image_nii, seg_niis, out_file, bbox_nii=None, masked=False,
-              colors=None, compress='auto', **plot_params):
+def plot_segs(
+    image_nii,
+    seg_niis,
+    out_file,
+    bbox_nii=None,
+    masked=False,
+    colors=None,
+    compress="auto",
+    **plot_params
+):
     """ plot segmentation as contours over the image (e.g. anatomical).
     seg_niis should be a list of files. mask_nii helps determine the cut
     coordinates. plot_params will be passed on to nilearn plot_* functions. If
@@ -220,34 +239,33 @@ def plot_segs(image_nii, seg_niis, out_file, bbox_nii=None, masked=False,
         bbox_nii = nlimage.threshold_img(bbox_nii, 1e-3)
 
     cuts = cuts_from_bbox(bbox_nii, cuts=7)
-    plot_params['colors'] = colors or plot_params.get('colors', None)
+    plot_params["colors"] = colors or plot_params.get("colors", None)
     out_files = []
-    for d in plot_params.pop('dimensions', ('z', 'x', 'y')):
-        plot_params['display_mode'] = d
-        plot_params['cut_coords'] = cuts[d]
-        svg = _plot_anat_with_contours(image_nii, segs=seg_niis, compress=compress,
-                                       **plot_params)
+    for d in plot_params.pop("dimensions", ("z", "x", "y")):
+        plot_params["display_mode"] = d
+        plot_params["cut_coords"] = cuts[d]
+        svg = _plot_anat_with_contours(
+            image_nii, segs=seg_niis, compress=compress, **plot_params
+        )
         # Find and replace the figure_1 id.
-        svg = svg.replace('figure_1', 'segmentation-%s-%s' % (d, uuid4()), 1)
+        svg = svg.replace("figure_1", "segmentation-%s-%s" % (d, uuid4()), 1)
         out_files.append(fromstring(svg))
 
     return out_files
 
 
-def _plot_anat_with_contours(image, segs=None, compress='auto',
-                             **plot_params):
+def _plot_anat_with_contours(image, segs=None, compress="auto", **plot_params):
     nsegs = len(segs or [])
     plot_params = plot_params or {}
     # plot_params' values can be None, however they MUST NOT
     # be None for colors and levels from this point on.
-    colors = plot_params.pop('colors', None) or []
-    levels = plot_params.pop('levels', None) or []
+    colors = plot_params.pop("colors", None) or []
+    levels = plot_params.pop("levels", None) or []
     missing = nsegs - len(colors)
     if missing > 0:  # missing may be negative
         colors = colors + color_palette("husl", missing)
 
-    colors = [[c] if not isinstance(c, list) else c
-              for c in colors]
+    colors = [[c] if not isinstance(c, list) else c for c in colors]
 
     if not levels:
         levels = [[0.5]] * nsegs
@@ -256,24 +274,30 @@ def _plot_anat_with_contours(image, segs=None, compress='auto',
     display = plot_anat(image, **plot_params)
 
     # remove plot_anat -specific parameters
-    plot_params.pop('display_mode')
-    plot_params.pop('cut_coords')
+    plot_params.pop("display_mode")
+    plot_params.pop("cut_coords")
 
-    plot_params['linewidths'] = 0.5
+    plot_params["linewidths"] = 0.5
     for i in reversed(range(nsegs)):
-        plot_params['colors'] = colors[i]
-        display.add_contours(segs[i], levels=levels[i],
-                             **plot_params)
+        plot_params["colors"] = colors[i]
+        display.add_contours(segs[i], levels=levels[i], **plot_params)
 
     svg = extract_svg(display, compress=compress)
     display.close()
     return svg
 
 
-def plot_registration(anat_nii, div_id, plot_params=None,
-                      order=('z', 'x', 'y'), cuts=None,
-                      estimate_brightness=False, label=None, contour=None,
-                      compress='auto'):
+def plot_registration(
+    anat_nii,
+    div_id,
+    plot_params=None,
+    order=("z", "x", "y"),
+    cuts=None,
+    estimate_brightness=False,
+    label=None,
+    contour=None,
+    compress="auto",
+):
     """
     Plots the foreground and background views
     Default order is: axial, coronal, sagittal
@@ -286,12 +310,12 @@ def plot_registration(anat_nii, div_id, plot_params=None,
 
     out_files = []
     if estimate_brightness:
-        plot_params = robust_set_limits(anat_nii.get_fdata().reshape(-1),
-                                        plot_params)
+        plot_params = robust_set_limits(anat_nii.get_fdata().reshape(-1), plot_params)
 
     # FreeSurfer ribbon.mgz
     ribbon = contour is not None and np.array_equal(
-        np.unique(contour.get_fdata()), [0, 2, 3, 41, 42])
+        np.unique(contour.get_fdata()), [0, 2, 3, 41, 42]
+    )
 
     if ribbon:
         contour_data = contour.get_fdata() % 39
@@ -300,39 +324,36 @@ def plot_registration(anat_nii, div_id, plot_params=None,
 
     # Plot each cut axis
     for i, mode in enumerate(list(order)):
-        plot_params['display_mode'] = mode
-        plot_params['cut_coords'] = cuts[mode]
+        plot_params["display_mode"] = mode
+        plot_params["cut_coords"] = cuts[mode]
         if i == 0:
-            plot_params['title'] = label
+            plot_params["title"] = label
         else:
-            plot_params['title'] = None
+            plot_params["title"] = None
 
         # Generate nilearn figure
         display = plot_anat(anat_nii, **plot_params)
         if ribbon:
-            kwargs = {'levels': [0.5], 'linewidths': 0.5}
-            display.add_contours(white, colors='b', **kwargs)
-            display.add_contours(pial, colors='r', **kwargs)
+            kwargs = {"levels": [0.5], "linewidths": 0.5}
+            display.add_contours(white, colors="b", **kwargs)
+            display.add_contours(pial, colors="r", **kwargs)
         elif contour is not None:
-            display.add_contours(contour, colors='b', levels=[0.5],
-                                 linewidths=0.5)
+            display.add_contours(contour, colors="b", levels=[0.5], linewidths=0.5)
 
         svg = extract_svg(display, compress=compress)
         display.close()
 
         # Find and replace the figure_1 id.
-        svg = svg.replace('figure_1', '%s-%s-%s' % (div_id, mode, uuid4()), 1)
+        svg = svg.replace("figure_1", "%s-%s-%s" % (div_id, mode, uuid4()), 1)
         out_files.append(fromstring(svg))
 
     return out_files
 
 
-def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
+def compose_view(bg_svgs, fg_svgs, ref=0, out_file="report.svg"):
     """Compose the input svgs into one standalone svg with CSS flickering animation."""
     out_file = Path(out_file).absolute()
-    out_file.write_text("\n".join(
-        _compose_view(bg_svgs, fg_svgs, ref=ref)
-    ))
+    out_file.write_text("\n".join(_compose_view(bg_svgs, fg_svgs, ref=ref)))
     return str(out_file)
 
 
@@ -376,8 +397,8 @@ def _compose_view(bg_svgs, fg_svgs, ref=0):
     # Group background and foreground panels in two groups
     if fg_svgs:
         newroots = [
-            GroupElement(roots[:nsvgs], {'class': 'background-svg'}),
-            GroupElement(roots[nsvgs:], {'class': 'foreground-svg'})
+            GroupElement(roots[:nsvgs], {"class": "background-svg"}),
+            GroupElement(roots[nsvgs:], {"class": "foreground-svg"}),
         ]
     else:
         newroots = roots
@@ -398,12 +419,16 @@ def _compose_view(bg_svgs, fg_svgs, ref=0):
 
     # Add styles for the flicker animation
     if fg_svgs:
-        svg.insert(2, """\
+        svg.insert(
+            2,
+            """\
 <style type="text/css">
 @keyframes flickerAnimation%s { 0%% {opacity: 1;} 100%% { opacity: 0; }}
 .foreground-svg { animation: 1s ease-in-out 0s alternate none infinite paused flickerAnimation%s;}
 .foreground-svg:hover { animation-play-state: running;}
-</style>""" % tuple([uuid4()] * 2))
+</style>"""
+            % tuple([uuid4()] * 2),
+        )
 
     return svg
 
@@ -414,6 +439,7 @@ def transform_to_2d(data, max_axis):
     preservation of the signs. Adapted from nilearn.
     """
     import numpy as np
+
     # get the shape of the array we are projecting to
     new_shape = list(data.shape)
     del new_shape[max_axis]
@@ -431,10 +457,15 @@ def transform_to_2d(data, max_axis):
     return np.rot90(maximum_intensity_data)
 
 
-def plot_melodic_components(melodic_dir, in_file, tr=None,
-                            out_file='melodic_reportlet.svg',
-                            compress='auto', report_mask=None,
-                            noise_components_file=None):
+def plot_melodic_components(
+    melodic_dir,
+    in_file,
+    tr=None,
+    out_file="melodic_reportlet.svg",
+    compress="auto",
+    report_mask=None,
+    noise_components_file=None,
+):
     """
     Plots the spatiotemporal components extracted by FSL MELODIC
     from functional MRI data.
@@ -474,6 +505,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     import seaborn as sns
     from matplotlib.gridspec import GridSpec
     import os
+
     sns.set_style("white")
     current_palette = sns.color_palette()
     in_nii = nb.load(in_file)
@@ -481,22 +513,24 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
         tr = in_nii.header.get_zooms()[3]
         units = in_nii.header.get_xyzt_units()
         if units:
-            if units[-1] == 'msec':
+            if units[-1] == "msec":
                 tr = tr / 1000.0
-            elif units[-1] == 'usec':
+            elif units[-1] == "usec":
                 tr = tr / 1000000.0
-            elif units[-1] != 'sec':
-                NIWORKFLOWS_LOG.warning('Unknown repetition time units '
-                                        'specified - assuming seconds')
+            elif units[-1] != "sec":
+                NIWORKFLOWS_LOG.warning(
+                    "Unknown repetition time units " "specified - assuming seconds"
+                )
         else:
             NIWORKFLOWS_LOG.warning(
-                'Repetition time units not specified - assuming seconds')
+                "Repetition time units not specified - assuming seconds"
+            )
 
     from nilearn.input_data import NiftiMasker
     from nilearn.plotting import cm
 
     if not report_mask:
-        nifti_masker = NiftiMasker(mask_strategy='epi')
+        nifti_masker = NiftiMasker(mask_strategy="epi")
         nifti_masker.fit(index_img(in_nii, range(2)))
         mask_img = nifti_masker.mask_img_
     else:
@@ -515,7 +549,7 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     f = Ny * (np.array(list(range(1, power.shape[0] + 1)))) / (power.shape[0])
 
     # Set default colors
-    color_title = 'k'
+    color_title = "k"
     color_time = current_palette[0]
     color_power = current_palette[1]
     classified_colors = None
@@ -524,37 +558,42 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
     # Only if the components file has been provided, a warning banner will
     # be issued if all or none of the components were classified as noise
     if noise_components_file:
-        noise_components = np.loadtxt(noise_components_file,
-                                      dtype=int, delimiter=',', ndmin=1)
+        noise_components = np.loadtxt(
+            noise_components_file, dtype=int, delimiter=",", ndmin=1
+        )
         # Activate warning row if pertinent
         warning_row = int(noise_components.size in (0, n_components))
-        classified_colors = {True: 'r', False: 'g'}
+        classified_colors = {True: "r", False: "g"}
 
     n_rows = int((n_components + (n_components % 2)) / 2)
     fig = plt.figure(figsize=(6.5 * 1.5, (n_rows + warning_row) * 0.85))
-    gs = GridSpec(n_rows * 2 + warning_row, 9,
-                  width_ratios=[1, 1, 1, 4, 0.001, 1, 1, 1, 4, ],
-                  height_ratios=[5] * warning_row + [1.1, 1] * n_rows)
+    gs = GridSpec(
+        n_rows * 2 + warning_row,
+        9,
+        width_ratios=[1, 1, 1, 4, 0.001, 1, 1, 1, 4],
+        height_ratios=[5] * warning_row + [1.1, 1] * n_rows,
+    )
 
     if warning_row:
         ax = fig.add_subplot(gs[0, :])
-        ncomps = 'NONE of the'
+        ncomps = "NONE of the"
         if noise_components.size == n_components:
-            ncomps = 'ALL'
+            ncomps = "ALL"
         ax.annotate(
-            'WARNING: {} components were classified as noise'.format(ncomps),
-            xy=(0.0, 0.5), xycoords='axes fraction',
-            xytext=(0.01, 0.5), textcoords='axes fraction',
-            size=12, color='#ea8800',
-            bbox=dict(boxstyle="round",
-                      fc='#f7dcb7',
-                      ec='#FC990E'))
+            "WARNING: {} components were classified as noise".format(ncomps),
+            xy=(0.0, 0.5),
+            xycoords="axes fraction",
+            xytext=(0.01, 0.5),
+            textcoords="axes fraction",
+            size=12,
+            color="#ea8800",
+            bbox=dict(boxstyle="round", fc="#f7dcb7", ec="#FC990E"),
+        )
         ax.axes.get_xaxis().set_visible(False)
         ax.axes.get_yaxis().set_visible(False)
 
     titlefmt = "C{id:d}{noise}: Tot. var. expl. {var:.2g}%".format
-    for i, img in enumerate(
-            iter_img(os.path.join(melodic_dir, "melodic_IC.nii.gz"))):
+    for i, img in enumerate(iter_img(os.path.join(melodic_dir, "melodic_IC.nii.gz"))):
 
         col = i % 2
         row = i // 2
@@ -571,48 +610,63 @@ def plot_melodic_components(melodic_dir, in_file, tr=None,
             ax1 = fig.add_subplot(gs[l_row:l_row + 2, j + col * 5])
             sl = transform_to_2d(data, j)
             m = np.abs(sl).max()
-            ax1.imshow(sl, vmin=-m, vmax=+m, cmap=cm.cold_white_hot,
-                       interpolation="nearest")
-            ax1.contour(mask_sl[j], levels=[0.5], colors='k', linewidths=0.5)
+            ax1.imshow(
+                sl, vmin=-m, vmax=+m, cmap=cm.cold_white_hot, interpolation="nearest"
+            )
+            ax1.contour(mask_sl[j], levels=[0.5], colors="k", linewidths=0.5)
             plt.axis("off")
-            ax1.autoscale_view('tight')
+            ax1.autoscale_view("tight")
             if j == 0:
                 ax1.set_title(
-                    titlefmt(id=i + 1,
-                             noise=' [noise]' * is_noise,
-                             var=stats[i, 1]),
-                    x=0, y=1.18, fontsize=7,
-                    horizontalalignment='left',
-                    verticalalignment='top',
-                    color=color_title)
+                    titlefmt(id=i + 1, noise=" [noise]" * is_noise, var=stats[i, 1]),
+                    x=0,
+                    y=1.18,
+                    fontsize=7,
+                    horizontalalignment="left",
+                    verticalalignment="top",
+                    color=color_title,
+                )
 
         ax2 = fig.add_subplot(gs[l_row, 3 + col * 5])
         ax3 = fig.add_subplot(gs[l_row + 1, 3 + col * 5])
 
-        ax2.plot(np.arange(len(timeseries[:, i])) * tr, timeseries[:, i],
-                 linewidth=min(200 / len(timeseries[:, i]), 1.0),
-                 color=color_time)
+        ax2.plot(
+            np.arange(len(timeseries[:, i])) * tr,
+            timeseries[:, i],
+            linewidth=min(200 / len(timeseries[:, i]), 1.0),
+            color=color_time,
+        )
         ax2.set_xlim([0, len(timeseries[:, i]) * tr])
         ax2.axes.get_yaxis().set_visible(False)
-        ax2.autoscale_view('tight')
-        ax2.tick_params(axis='both', which='major', pad=0)
+        ax2.autoscale_view("tight")
+        ax2.tick_params(axis="both", which="major", pad=0)
         sns.despine(left=True, bottom=True)
         for tick in ax2.xaxis.get_major_ticks():
             tick.label.set_fontsize(6)
             tick.label.set_color(color_time)
 
-        ax3.plot(f[0:], power[0:, i], color=color_power,
-                 linewidth=min(100 / len(power[0:, i]), 1.0))
+        ax3.plot(
+            f[0:],
+            power[0:, i],
+            color=color_power,
+            linewidth=min(100 / len(power[0:, i]), 1.0),
+        )
         ax3.set_xlim([f[0], f.max()])
         ax3.axes.get_yaxis().set_visible(False)
-        ax3.autoscale_view('tight')
-        ax3.tick_params(axis='both', which='major', pad=0)
+        ax3.autoscale_view("tight")
+        ax3.tick_params(axis="both", which="major", pad=0)
         for tick in ax3.xaxis.get_major_ticks():
             tick.label.set_fontsize(6)
             tick.label.set_color(color_power)
         sns.despine(left=True, bottom=True)
 
     plt.subplots_adjust(hspace=0.5)
-    fig.savefig(out_file, dpi=300, format='svg', transparent=True,
-                bbox_inches='tight', pad_inches=0.01)
+    fig.savefig(
+        out_file,
+        dpi=300,
+        format="svg",
+        transparent=True,
+        bbox_inches="tight",
+        pad_inches=0.01,
+    )
     fig.clf()

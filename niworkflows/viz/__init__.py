@@ -3,4 +3,4 @@
 from .plots import plot_carpet
 from .utils import SVGNS
 
-__all__ = ['plot_carpet', 'SVGNS']
+__all__ = ["plot_carpet", "SVGNS"]
