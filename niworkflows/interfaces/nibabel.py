@@ -101,9 +101,6 @@ class Binarize(SimpleInterface):
 
 class _SplitSeriesInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="input 4d image")
-    allow_3D = traits.Bool(
-        False, usedefault=True, desc="do not fail if a 3D volume is passed in"
-    )
 
 
 class _SplitSeriesOutputSpec(TraitedSpec):
@@ -117,34 +114,20 @@ class SplitSeries(SimpleInterface):
     output_spec = _SplitSeriesOutputSpec
 
     def _run_interface(self, runtime):
-        filenii = nb.squeeze_image(nb.load(self.inputs.in_file))
-        filenii = filenii.__class__(
-            np.squeeze(filenii.dataobj), filenii.affine, filenii.header
-        )
-        ndim = filenii.dataobj.ndim
-        if ndim != 4:
-            if self.inputs.allow_3D and ndim == 3:
-                out_file = str(
-                    Path(
-                        fname_presuffix(self.inputs.in_file, suffix=f"_idx-000")
-                    ).absolute()
-                )
-                self._results["out_files"] = out_file
-                filenii.to_filename(out_file)
-                return runtime
-            raise RuntimeError(
-                f"Input image <{self.inputs.in_file}> is {ndim}D "
-                f"({'x'.join(['%d' % s for s in filenii.shape])})."
-            )
-
-        files_3d = nb.four_to_three(filenii)
-        self._results["out_files"] = []
         in_file = self.inputs.in_file
-        for i, file_3d in enumerate(files_3d):
+        img = nb.load(in_file)
+        extra_dims = tuple(dim for dim in img.shape[3:] if dim > 1) or (1,)
+        if len(extra_dims) != 1:
+            raise ValueError(f"Invalid shape {'x'.join(str(s) for s in img.shape)}")
+        img = img.__class__(img.dataobj.reshape(img.shape[:3] + extra_dims),
+                            img.affine, img.header)
+
+        self._results["out_files"] = []
+        for i, img_3d in enumerate(nb.four_to_three(img)):
             out_file = str(
                 Path(fname_presuffix(in_file, suffix=f"_idx-{i:03}")).absolute()
             )
-            file_3d.to_filename(out_file)
+            img_3d.to_filename(out_file)
             self._results["out_files"].append(out_file)
 
         return runtime
