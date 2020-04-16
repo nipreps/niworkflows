@@ -585,22 +585,6 @@ def reorient(in_file, newpath=None):
     return out_file
 
 
-def extract_wm(in_seg, wm_label=3, newpath=None):
-    import nibabel as nb
-    import numpy as np
-    from nipype.utils.filemanip import fname_presuffix
-
-    nii = nb.load(in_seg)
-    data = np.zeros(nii.shape, dtype=np.uint8)
-    data[np.asanyarray(nii.dataobj) == wm_label] = 1
-
-    out_file = fname_presuffix(in_seg, suffix='_wm', newpath=newpath)
-    new = nb.Nifti1Image(data, nii.affine, nii.header)
-    new.set_data_dtype(np.uint8)
-    new.to_filename(out_file)
-    return out_file
-
-
 def normalize_xform(img):
     """
     Set identical, valid qform and sform matrices in an image.

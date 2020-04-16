@@ -2,7 +2,7 @@ import nibabel as nb
 import numpy as np
 
 import pytest
-from ..images import update_header_fields, overwrite_header
+from ..images import update_header_fields, overwrite_header, dseg_label
 
 
 def random_image():
@@ -71,3 +71,18 @@ def test_overwrite_header_reject_mmap(tmp_path):
     img = nb.load(fname, mmap=True)
     with pytest.raises(ValueError):
         overwrite_header(img, fname)
+
+
+def test_dseg_label(tmp_path):
+    fname = str(tmp_path / 'test_file.nii.gz')
+
+    data = np.dstack((
+        np.zeros((20, 20), dtype='int16'),
+        np.ones((20, 20), dtype='int16'),
+        np.ones((20, 20), dtype='int16') * 2,
+        np.ones((20, 20), dtype='int16') * 3,
+    ))
+    nb.Nifti1Image(data, np.eye(4), None).to_filename(fname)
+
+    new_im = nb.load(dseg_label(fname, label=2, newpath=tmp_path))
+    assert np.all((data == 2).astype('int16') == np.int16(new_im.dataobj))
