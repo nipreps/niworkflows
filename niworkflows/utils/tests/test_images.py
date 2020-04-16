@@ -84,5 +84,5 @@ def test_dseg_label(tmp_path):
     ))
     nb.Nifti1Image(data, np.eye(4), None).to_filename(fname)
 
-    new_im = nb.load(dseg_label(fname, label=2))
+    new_im = nb.load(dseg_label(fname, label=2, newpath=tmp_path))
     assert np.all((data == 2).astype('int16') == np.int16(new_im.dataobj))
