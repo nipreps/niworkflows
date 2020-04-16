@@ -107,3 +107,25 @@ def update_header_fields(fname, **kwargs):
     for field, value in kwargs.items():
         img.header[field] = value
     overwrite_header(img, fname)
+
+
+def dseg_label(in_seg, label, newpath=None):
+    """Extract a particular label from a discrete segmentation."""
+    from pathlib import Path
+    import nibabel as nb
+    import numpy as np
+    from nipype.utils.filemanip import fname_presuffix
+
+    if newpath is None:
+        newpath = Path()
+    newpath = Path()
+
+    nii = nb.load(in_seg)
+    data = np.asanyarray(nii.dataobj, dtype='int16') == label
+
+    out_file = fname_presuffix(in_seg, suffix='_mask',
+                               newpath=str(newpath.absolute()))
+    new = nb.Nifti1Image(data, nii.affine, nii.header)
+    new.set_data_dtype(np.uint8)
+    new.to_filename(out_file)
+    return out_file
