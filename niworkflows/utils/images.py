@@ -118,7 +118,7 @@ def dseg_label(in_seg, label, newpath=None):
 
     if newpath is None:
         newpath = Path()
-    newpath = Path()
+    newpath = Path(newpath)
 
     nii = nb.load(in_seg)
     data = np.asanyarray(nii.dataobj, dtype='int16') == label
