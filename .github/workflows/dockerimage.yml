@@ -17,7 +17,7 @@ jobs:
                   --build-arg VCS_REF=`git rev-parse --short HEAD`
     - name: Run tests inside container
       run: |
-        docker run -u $( id -u ) -it --rm -w /src/niworkflows \
+        docker run -u $( id -u ) --rm -w /src/niworkflows \
                    -e COVERAGE_FILE=/tmp/summaries/.pytest.coverage \
                    -e TEST_DATA_HOME=/data -v /tmp/data:/data \
                    -v ${PWD}:/tmp niworkflows:latest \
