@@ -116,16 +116,14 @@ def dseg_label(in_seg, label, newpath=None):
     import numpy as np
     from nipype.utils.filemanip import fname_presuffix
 
-    if newpath is None:
-        newpath = Path()
-    newpath = Path(newpath)
+    newpath = Path(newpath or '.')
 
     nii = nb.load(in_seg)
-    data = np.asanyarray(nii.dataobj, dtype='int16') == label
+    data = np.int16(nii.dataobj) == label
 
     out_file = fname_presuffix(in_seg, suffix='_mask',
                                newpath=str(newpath.absolute()))
-    new = nb.Nifti1Image(data, nii.affine, nii.header)
+    new = nii.__class__(data, nii.affine, nii.header)
     new.set_data_dtype(np.uint8)
     new.to_filename(out_file)
     return out_file
