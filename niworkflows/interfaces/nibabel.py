@@ -125,7 +125,8 @@ class SplitSeries(SimpleInterface):
         self._results["out_files"] = []
         for i, img_3d in enumerate(nb.four_to_three(img)):
             out_file = str(
-                Path(fname_presuffix(in_file, suffix=f"_idx-{i:03}")).absolute()
+                Path(fname_presuffix(in_file, suffix=f"_idx-{i:03}",
+                                     newpath=runtime.cwd)).absolute()
             )
             img_3d.to_filename(out_file)
             self._results["out_files"].append(out_file)
@@ -169,7 +170,8 @@ class MergeSeries(SimpleInterface):
                 )
 
         img_4d = nb.concat_images(nii_list)
-        out_file = fname_presuffix(self.inputs.in_files[0], suffix="_merged")
+        out_file = fname_presuffix(self.inputs.in_files[0], suffix="_merged",
+                                   newpath=runtime.cwd)
         img_4d.to_filename(out_file)
 
         self._results["out_file"] = out_file
