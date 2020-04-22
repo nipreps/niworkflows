@@ -2,6 +2,8 @@
 ===========
 First release in the 1.2.x series.
 
+  * FIX: Add DWI default patterns for dMRIPrep's reportlets (#504)
+  * FIX: Merge/SplitSeries write to path of input image, instead of cwd (#503)
   * FIX: Better generalization and renaming+relocation in the API of ``extract_wm`` (#500)
   * FIX: Increase fault tolerance of DerivativesDataSink (#497)
   * FIX: Match N4-only workflow outputs to brain extraction workflow (#496)
