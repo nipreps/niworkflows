@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Nibabel-based interfaces."""
-from pathlib import Path
 import numpy as np
 import nibabel as nb
 from nipype import logging
@@ -124,10 +123,8 @@ class SplitSeries(SimpleInterface):
 
         self._results["out_files"] = []
         for i, img_3d in enumerate(nb.four_to_three(img)):
-            out_file = str(
-                Path(fname_presuffix(in_file, suffix=f"_idx-{i:03}",
-                                     newpath=runtime.cwd)).absolute()
-            )
+            out_file = fname_presuffix(in_file, suffix=f"_idx-{i:03}",
+                                       newpath=runtime.cwd)
             img_3d.to_filename(out_file)
             self._results["out_files"].append(out_file)
 
