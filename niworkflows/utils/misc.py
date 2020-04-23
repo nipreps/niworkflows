@@ -263,5 +263,28 @@ def pass_dummy_scans(algo_dummy_scans, dummy_scans=None):
     return dummy_scans
 
 
+def check_valid_fs_license():
+    """Quickly runs mri_convert to weed out FreeSurfer license issues"""
+    import subprocess as sp
+    from tempfile import TemporaryDirectory
+
+    import nibabel as nb
+    import numpy as np
+
+    with TemporaryDirectory():
+        tmp_file = 'test.nii.gz'
+        # create test NIfTI
+        nb.Nifti1Image(np.zeros((5, 5, 5)), np.eye(4)).to_filename(tmp_file)
+        # quick FreeSurfer command
+        _cmd = (
+            'mri_convert',
+            '--out_type', 'mgz',
+            '--input_volume', tmp_file,
+            '--output_volume', 'out.mgz'
+        )
+        proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.PIPE)
+    return "ERROR: FreeSurfer license file" not in proc.stderr.decode()
+
+
 if __name__ == '__main__':
     pass
