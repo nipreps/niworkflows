@@ -13,13 +13,12 @@ from warnings import warn
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces.ants import (
-    AI,
     Atropos,
     MultiplyImages,
     N4BiasFieldCorrection,
-    ResampleImageBySpacing,
     ThresholdImage,
 )
+from nipype.interfaces.ants.utils import AI, ResampleImageBySpacing
 
 from ..utils.misc import get_template_specs
 from ..utils.connections import pop_file as _pop
