@@ -12,24 +12,25 @@ from warnings import warn
 # nipype
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
-from nipype.interfaces.fsl.maths import ApplyMask
-from nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
+from nipype.interfaces.ants import (
+    AI,
+    Atropos,
+    MultiplyImages,
+    N4BiasFieldCorrection,
+    ResampleImageBySpacing,
+    ThresholdImage,
+)
 
 from ..utils.misc import get_template_specs
 from ..utils.connections import pop_file as _pop
 
 # niworkflows
-from ..interfaces.ants import (
-    ImageMath,
-    ResampleImageBySpacing,
-    AI,
-    ThresholdImage,
-)
+from ..interfaces.nibabel import ApplyMask
+from ..interfaces.ants import ImageMath
 from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
     FixHeaderApplyTransforms as ApplyTransforms,
 )
-from ..interfaces.utils import CopyXForm
 from ..interfaces.nibabel import Binarize
 
 
@@ -84,7 +85,7 @@ def init_brain_extraction_wf(
     Parameters
     ----------
     in_template : str
-        Name of the skull-stripping template ('OASIS30ANTs', 'NKI', or
+        Name of the skull-stripping template ("OASIS30ANTs", "NKI", or
         path).
         The brain template from which regions will be projected
         Anatomical template created using e.g. LPBA40 data set with
@@ -199,12 +200,6 @@ def init_brain_extraction_wf(
             ]
         ),
         name="outputnode",
-    )
-
-    copy_xform = pe.Node(
-        CopyXForm(fields=["out_file", "out_mask", "bias_corrected", "bias_image"]),
-        name="copy_xform",
-        run_without_submitting=True,
     )
 
     trunc = pe.MapNode(
@@ -338,7 +333,6 @@ N4BiasFieldCorrection."""
     # fmt: off
     wf.connect([
         (inputnode, trunc, [("in_files", "op1")]),
-        (inputnode, copy_xform, [(("in_files", _pop), "hdr_file")]),
         (inputnode, inu_n4_final, [("in_files", "input_image")]),
         (inputnode, init_aff, [("in_mask", "fixed_image_mask")]),
         (inputnode, norm, [("in_mask", fixed_mask_trait)]),
@@ -356,19 +350,11 @@ N4BiasFieldCorrection."""
         (thr_brainmask, dil_brainmask, [("output_image", "op1")]),
         (dil_brainmask, get_brainmask, [("output_image", "op1")]),
         (inu_n4_final, apply_mask, [("output_image", "in_file")]),
-        (get_brainmask, apply_mask, [("output_image", "mask_file")]),
-        (get_brainmask, copy_xform, [("output_image", "out_mask")]),
-        (apply_mask, copy_xform, [("out_file", "out_file")]),
-        (inu_n4_final, copy_xform, [
-            ("output_image", "bias_corrected"),
-            ("bias_image", "bias_image"),
-        ]),
-        (copy_xform, outputnode, [
-            ("out_file", "out_file"),
-            ("out_mask", "out_mask"),
-            ("bias_corrected", "bias_corrected"),
-            ("bias_image", "bias_image"),
-        ]),
+        (get_brainmask, apply_mask, [("output_image", "in_mask")]),
+        (get_brainmask, outputnode, [("output_image", "out_mask")]),
+        (inu_n4_final, outputnode, [("output_image", "bias_corrected"),
+                                    ("bias_image", "bias_image")]),
+        (apply_mask, outputnode, [("out_file", "out_file")]),
     ])
     # fmt: on
 
@@ -418,8 +404,8 @@ N4BiasFieldCorrection."""
 
         # fmt: off
         wf.disconnect([
-            (get_brainmask, apply_mask, [("output_image", "mask_file")]),
-            (copy_xform, outputnode, [("out_mask", "out_mask")]),
+            (get_brainmask, apply_mask, [("output_image", "in_mask")]),
+            (get_brainmask, outputnode, [("output_image", "out_mask")]),
         ])
         wf.connect([
             (inu_n4, atropos_wf, [("output_image", "inputnode.in_files")]),
@@ -429,7 +415,7 @@ N4BiasFieldCorrection."""
             ]),
             (atropos_wf, sel_wm, [("outputnode.out_tpms", "inlist")]),
             (sel_wm, inu_n4_final, [("out", "weight_image")]),
-            (atropos_wf, apply_mask, [("outputnode.out_mask", "mask_file")]),
+            (atropos_wf, apply_mask, [("outputnode.out_mask", "in_mask")]),
             (atropos_wf, outputnode, [
                 ("outputnode.out_mask", "out_mask"),
                 ("outputnode.out_segm", "out_segm"),
@@ -508,7 +494,6 @@ def init_atropos_wf(
     out_tpms : str
         Output :abbr:`TPMs (tissue probability maps)`
 
-
     """
     wf = pe.Workflow(name)
 
@@ -519,12 +504,6 @@ def init_atropos_wf(
     outputnode = pe.Node(
         niu.IdentityInterface(fields=["out_mask", "out_segm", "out_tpms"]),
         name="outputnode",
-    )
-
-    copy_xform = pe.Node(
-        CopyXForm(fields=["out_mask", "out_segm", "out_tpms"]),
-        name="copy_xform",
-        run_without_submitting=True,
     )
 
     # Run atropos (core node)
@@ -645,17 +624,16 @@ def init_atropos_wf(
         ImageMath(operation="PadImage", op2="-%d" % padding), name="27_depad_csf"
     )
 
-    msk_conform = pe.Node(niu.Function(function=_conform_mask), name="msk_conform")
+    msk_dtype = pe.Node(niu.Function(function=_ensure_dtype), name="msk_dtype")
+    msk_dtype.inputs.dtype = "uint8"
     merge_tpms = pe.Node(niu.Merge(in_segmentation_model[0]), name="merge_tpms")
     # fmt: off
     wf.connect([
-        (inputnode, copy_xform, [(("in_files", _pop), "hdr_file")]),
         (inputnode, pad_mask, [("in_mask", "op1")]),
         (inputnode, atropos, [
             ("in_files", "intensity_images"),
             ("in_mask_dilated", "mask_image"),
         ]),
-        (inputnode, msk_conform, [(("in_files", _pop), "in_reference")]),
         (atropos, pad_segm, [("classified_image", "op1")]),
         (pad_segm, sel_labels, [("output_image", "in_segm")]),
         (sel_labels, get_wm, [("out_wm", "op1")]),
@@ -688,15 +666,10 @@ def init_atropos_wf(
         (depad_csf, merge_tpms, [("output_image", "in1")]),
         (depad_gm, merge_tpms, [("output_image", "in2")]),
         (depad_wm, merge_tpms, [("output_image", "in3")]),
-        (depad_mask, msk_conform, [("output_image", "in_mask")]),
-        (msk_conform, copy_xform, [("out", "out_mask")]),
-        (depad_segm, copy_xform, [("output_image", "out_segm")]),
-        (merge_tpms, copy_xform, [("out", "out_tpms")]),
-        (copy_xform, outputnode, [
-            ("out_mask", "out_mask"),
-            ("out_segm", "out_segm"),
-            ("out_tpms", "out_tpms"),
-        ]),
+        (depad_mask, msk_dtype, [("output_image", "in_mask")]),
+        (msk_dtype, outputnode, [("out", "out_mask")]),
+        (depad_segm, outputnode, [("output_image", "out_segm")]),
+        (merge_tpms, outputnode, [("out", "out_tpms")]),
     ])
     # fmt: on
     return wf
@@ -748,7 +721,7 @@ def init_n4_only_wf(
         Allows to specify a particular segmentation model, overwriting
         the defaults based on ``bids_suffix``
     name : str, optional
-        Workflow name (default: ``'n4_only_wf'``).
+        Workflow name (default: ``"n4_only_wf"``).
 
     Inputs
     ------
@@ -918,26 +891,17 @@ def _select_labels(in_segm, labels):
     return out_files
 
 
-def _conform_mask(in_mask, in_reference):
-    """Ensures the mask headers make sense and match those of the T1w"""
+def _ensure_dtype(in_mask, dtype="uint8"):
+    """Ensure the mask headers make sense and match those of the T1w."""
     from pathlib import Path
     import numpy as np
     import nibabel as nb
     from nipype.utils.filemanip import fname_presuffix
 
-    ref = nb.load(in_reference)
     nii = nb.load(in_mask)
     hdr = nii.header.copy()
-    hdr.set_data_dtype("int16")
+    hdr.set_data_dtype(dtype)
     hdr.set_slope_inter(1, 0)
-
-    qform, qcode = ref.header.get_qform(coded=True)
-    if qcode is not None:
-        hdr.set_qform(qform, int(qcode))
-
-    sform, scode = ref.header.get_sform(coded=True)
-    if scode is not None:
-        hdr.set_sform(sform, int(scode))
 
     if "_maths" in in_mask:  # Cut the name at first _maths occurrence
         ext = "".join(Path(in_mask).suffixes)
@@ -946,6 +910,6 @@ def _conform_mask(in_mask, in_reference):
 
     out_file = fname_presuffix(in_mask, suffix="_mask", newpath=str(Path()))
     nii.__class__(
-        np.asanyarray(nii.dataobj).astype("int16"), ref.affine, hdr
+        np.asanyarray(nii.dataobj).astype(dtype), nii.affine, hdr
     ).to_filename(out_file)
     return out_file
