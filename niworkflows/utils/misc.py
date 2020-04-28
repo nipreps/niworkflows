@@ -264,7 +264,7 @@ def pass_dummy_scans(algo_dummy_scans, dummy_scans=None):
 
 
 def check_valid_fs_license():
-    """Quickly runs mri_convert to weed out FreeSurfer license issues"""
+    """Run ``mri_convert`` to assess FreeSurfer access to a license."""
     from pathlib import Path
     import subprocess as sp
     from tempfile import TemporaryDirectory
