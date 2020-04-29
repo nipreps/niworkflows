@@ -1,4 +1,4 @@
-"""py.test configuration"""
+"""py.test configuration."""
 import os
 from sys import version_info
 from pathlib import Path
@@ -18,7 +18,8 @@ data_dir = Path(test_data_env) / "BIDS-examples-1-enh-ds054"
 
 
 @pytest.fixture(autouse=True)
-def add_np(doctest_namespace):
+def doctest_namespace_tearup(doctest_namespace):
+    """Set up some objects in the doctests' namespace."""
     doctest_namespace["PY_VERSION"] = version_info
     doctest_namespace["np"] = np
     doctest_namespace["nb"] = nb
@@ -52,4 +53,5 @@ def add_np(doctest_namespace):
 
 @pytest.fixture
 def testdata_dir():
+    """Provide quick access to the data dir within tests."""
     return data_dir
