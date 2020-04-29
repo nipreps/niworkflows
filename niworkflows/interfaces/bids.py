@@ -412,12 +412,10 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             self._metadata[dynamic_input] = inputs.pop(dynamic_input)
 
         super(DerivativesDataSink, self).__init__(**inputs)
-        if self._allowed_entities:
-            add_traits(self.inputs, self._allowed_entities)
-            for k in self._allowed_entities.intersection(list(inputs.keys())):
-                setattr(self.inputs, k, inputs[k])
+        add_traits(self.inputs, self._allowed_entities)
+        for k in self._allowed_entities.intersection(list(inputs.keys())):
+            setattr(self.inputs, k, inputs[k])
 
-        self._results['out_file'] = []
         if out_path_base:
             self.out_path_base = out_path_base
 
@@ -429,6 +427,9 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         base_directory = Path(base_directory).absolute()
         out_path = base_directory / self.out_path_base
         out_path.mkdir(exist_ok=True, parents=True)
+
+        # Ensure we have a list
+        in_file = listify(self.inputs.in_file)
 
         # Read in the dictionary of metadata
         if isdefined(self.inputs.meta_dict):
@@ -442,6 +443,11 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         for drop_entity in listify(self.inputs.dismiss_entities or []):
             out_entities.pop(drop_entity, None)
 
+        # Override extension with that of the input file(s)
+        out_entities["extension"] = [
+            "".join(Path(orig_file).suffixes).lstrip(".") for orig_file in in_file
+        ]
+
         # Override entities with those set as inputs
         for key in self._allowed_entities:
             value = getattr(self.inputs, key)
@@ -452,11 +458,6 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         if out_entities.get("resolution", "") == "native" and out_entities.get("space"):
             out_entities.pop("resolution", None)
 
-        in_file = listify(self.inputs.in_file)
-
-        out_entities["extension"] = [
-            "".join(Path(orig_file).suffixes).lstrip(".") for orig_file in in_file
-        ]
         if len(set(out_entities["extension"])) == 1:
             out_entities["extension"] = out_entities["extension"][0]
 
@@ -468,17 +469,20 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             patterns = [pat.replace("_{suffix", "_".join(('', custom_pat, "{suffix")))
                         for pat in patterns]
 
+        # Prepare SimpleInterface outputs object
+        self._results['out_file'] = []
         self._results['compression'] = []
         self._results['fixed_hdr'] = [False] * len(in_file)
 
         dest_files = build_path(out_entities, path_patterns=patterns)
         if not dest_files:
-            raise RuntimeError(f"Could not build path with entities {out_entities}.")
+            raise ValueError(f"Could not build path with entities {out_entities}.")
 
+        # Make sure the interpolated values is embedded in a list, and check
         dest_files = listify(dest_files)
-
         if len(in_file) != len(dest_files):
-            raise ValueError(f"Did not reconstruct enough patterns <{', '.join(dest_files)}>.")
+            raise ValueError(f"Input files ({len(in_file)}) not matched "
+                             f"by interpolated patterns ({len(dest_files)}).")
 
         for i, (orig_file, dest_file) in enumerate(zip(in_file, dest_files)):
             out_file = out_path / dest_file
@@ -486,15 +490,13 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             self._results['out_file'].append(str(out_file))
             self._results['compression'].append(_copy_any(orig_file, str(out_file)))
 
-            is_nii = out_file.name.endswith(('.nii', '.nii.gz'))
+            is_nifti = out_file.name.endswith(('.nii', '.nii.gz')) \
+                and not out_file.name.lstrip(".gz").endswith('.dtseries.nii')
             data_dtype = self.inputs.data_dtype or DEFAULT_DTYPES[self.inputs.suffix]
-            if is_nii and any((self.inputs.check_hdr, data_dtype)):
+            if is_nifti and any((self.inputs.check_hdr, data_dtype)):
                 # Do not use mmap; if we need to access the data at all, it will be to
                 # rewrite, risking a BusError
                 nii = nb.load(out_file, mmap=False)
-                if not isinstance(nii, (nb.Nifti1Image, nb.Nifti2Image)):
-                    # .dtseries.nii are CIfTI2, therefore skip check
-                    return runtime
 
                 if self.inputs.check_hdr:
                     hdr = nii.header
