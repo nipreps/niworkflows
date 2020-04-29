@@ -272,10 +272,11 @@ class DerivativesDataSink(SimpleInterface):
     >>> tmpdir = Path(tempfile.mkdtemp())
     >>> tmpfile = tmpdir / 'a_temp_file.nii.gz'
     >>> tmpfile.open('w').close()  # "touch" the file
+    >>> t1w_source = bids_collect_data(
+    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w'][0]
     >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)
     >>> dsink.inputs.in_file = str(tmpfile)
-    >>> dsink.inputs.source_file = bids_collect_data(
-    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w'][0]
+    >>> dsink.inputs.source_file = t1w_source
     >>> dsink.inputs.desc = 'denoised'
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
@@ -284,12 +285,32 @@ class DerivativesDataSink(SimpleInterface):
     >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
     ...                             allowed_entities=("custom",))
     >>> dsink.inputs.in_file = str(tmpfile)
-    >>> dsink.inputs.source_file = bids_collect_data(
-    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w'][0]
+    >>> dsink.inputs.source_file = t1w_source
     >>> dsink.inputs.custom = 'noise'
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom-noise_T1w.nii.gz'
+
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
+    ...                             allowed_entities=("custom",))
+    >>> dsink.inputs.in_file = [str(tmpfile), str(tmpfile)]
+    >>> dsink.inputs.source_file = t1w_source
+    >>> dsink.inputs.custom = [1, 2]
+    >>> res = dsink.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    ['.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom-1_T1w.nii.gz',
+     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom-2_T1w.nii.gz']
+
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
+    ...                             allowed_entities=("custom1", "custom2"))
+    >>> dsink.inputs.in_file = [str(tmpfile)] * 2
+    >>> dsink.inputs.source_file = t1w_source
+    >>> dsink.inputs.custom1 = [1, 2]
+    >>> dsink.inputs.custom2 = "b"
+    >>> res = dsink.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    ['.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom1-1_custom2-b_T1w.nii.gz',
+     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom1-2_custom2-b_T1w.nii.gz']
 
     >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
     >>> bids_dir.mkdir(parents=True, exist_ok=True)
@@ -439,16 +460,18 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         if len(set(out_entities["extension"])) == 1:
             out_entities["extension"] = out_entities["extension"][0]
 
-        custom_entities = '_'.join([
-            f"{key}-{out_entities[key]}"
-            for key in set(out_entities.keys()) - set(BIDS_DERIV_ENTITIES)
-            if out_entities[key]
-        ])
+        # Insert custom (non-BIDS) entities from allowed_entities.
+        custom_entities = set(out_entities.keys()) - set(BIDS_DERIV_ENTITIES)
+        patterns = BIDS_DERIV_PATTERNS
+        if custom_entities:
+            custom_pat = "_".join(f"{key}-{{{key}}}" for key in sorted(custom_entities))
+            patterns = [pat.replace("_{suffix", "_".join(('', custom_pat, "{suffix")))
+                        for pat in patterns]
 
         self._results['compression'] = []
         self._results['fixed_hdr'] = [False] * len(in_file)
 
-        dest_files = build_path(out_entities, path_patterns=BIDS_DERIV_PATTERNS)
+        dest_files = build_path(out_entities, path_patterns=patterns)
         if not dest_files:
             raise RuntimeError(f"Could not build path with entities {out_entities}.")
 
@@ -458,10 +481,6 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             raise ValueError(f"Did not reconstruct enough patterns <{', '.join(dest_files)}>.")
 
         for i, (orig_file, dest_file) in enumerate(zip(in_file, dest_files)):
-            if custom_entities:
-                _pre, _post = dest_file.split(f"_{out_entities['suffix']}")
-                dest_file = f"{_pre}_{custom_entities}_{out_entities['suffix']}{_post}"
-
             out_file = out_path / dest_file
             out_file.parent.mkdir(exist_ok=True, parents=True)
             self._results['out_file'].append(str(out_file))
