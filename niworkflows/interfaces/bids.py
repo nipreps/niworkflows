@@ -3,12 +3,15 @@
 """Interfaces for handling BIDS-like neuroimaging structures."""
 
 from collections import defaultdict
-from json import dumps
+from json import dumps, loads
 from pathlib import Path
 from shutil import copytree, rmtree
+from pkg_resources import resource_filename as _pkgres
 
 import nibabel as nb
 import numpy as np
+from bids.layout import parse_file_entities
+from bids.layout.writing import build_path
 
 from nipype import logging
 from nipype.interfaces.base import (
@@ -19,10 +22,15 @@ from nipype.interfaces.base import (
 )
 from nipype.interfaces.io import add_traits
 from templateflow.api import templates as _get_template_list
-from ..utils.bids import BIDS_NAME, _init_layout
+from ..utils.bids import _init_layout
 from ..utils.images import overwrite_header
 from ..utils.misc import splitext as _splitext, _copy_any
 
+_pybids_spec = loads(
+    Path(_pkgres("niworkflows", "data/derivatives.json")).read_text()
+)
+BIDS_DERIV_ENTITIES = tuple({e["name"] for e in _pybids_spec["entities"]})
+BIDS_DERIV_PATTERNS = tuple(_pybids_spec["default_path_patterns"])
 
 STANDARD_SPACES = _get_template_list()
 LOGGER = logging.getLogger('nipype.interface')
@@ -43,8 +51,7 @@ DEFAULT_DTYPES = defaultdict(_none, (
 
 class _BIDSBaseInputSpec(BaseInterfaceInputSpec):
     bids_dir = traits.Either(
-        (None, Directory(exists=True)), usedefault=True,
-        desc='optional bids directory to initialize a new layout')
+        (None, Directory(exists=True)), usedefault=True, desc='optional bids directory')
     bids_validate = traits.Bool(True, usedefault=True, desc='enable BIDS validator')
 
 
@@ -145,35 +152,20 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
     task = covertverbgeneration
     <BLANKLINE>
 
-    >>> from bids import BIDSLayout
-    >>> bids_info = BIDSInfo()
-    >>> bids_info.layout = BIDSLayout(str(datadir / 'ds114'), validate=False)
-    >>> bids_info.inputs.in_file = '''\
-sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz'''
-    >>> res = bids_info.run()
-    >>> res.outputs
-    <BLANKLINE>
-    acquisition = <undefined>
-    reconstruction = <undefined>
-    run = <undefined>
-    session = retest
-    subject = 01
-    suffix = bold
-    task = covertverbgeneration
-    <BLANKLINE>
-
     """
 
     input_spec = _BIDSInfoInputSpec
     output_spec = _BIDSInfoOutputSpec
-    layout = None
 
     def _run_interface(self, runtime):
-        self.layout = self.inputs.bids_dir or self.layout
-        self.layout = _init_layout(self.inputs.in_file,
-                                   self.layout,
-                                   self.inputs.bids_validate)
-        params = self.layout.parse_file_entities(self.inputs.in_file)
+        bids_dir = self.inputs.bids_dir
+        in_file = self.inputs.in_file
+        if bids_dir is not None:
+            try:
+                in_file = str(Path(in_file).relative_to(bids_dir))
+            except ValueError:
+                pass
+        params = parse_file_entities(in_file)
         self._results = {key: params.get(key, Undefined)
                          for key in _BIDSInfoOutputSpec().get().keys()}
         return runtime
@@ -248,17 +240,12 @@ class _DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     check_hdr = traits.Bool(True, usedefault=True, desc='fix headers of NIfTI outputs')
     compress = traits.Bool(desc="force compression (True) or uncompression (False)"
                                 " of the output file (default: same as input)")
-    desc = Str('', usedefault=True, desc='Label for description field')
-    extra_values = traits.List(Str)
     in_file = InputMultiObject(File(exists=True), mandatory=True,
                                desc='the object to be saved')
-    keep_dtype = traits.Bool(False, usedefault=True, desc='keep datatype suffix')
     data_dtype = Str(desc='NumPy datatype to coerce NIfTI data to, or `source` to'
                           'match the input file dtype')
     meta_dict = traits.DictStrAny(desc='an input dictionary containing metadata')
     source_file = File(exists=False, mandatory=True, desc='the input func file')
-    space = Str('', usedefault=True, desc='Label for space field')
-    suffix = Str('', usedefault=True, desc='suffix appended to source_file')
 
 
 class _DerivativesDataSinkOutputSpec(TraitedSpec):
@@ -285,22 +272,33 @@ class DerivativesDataSink(SimpleInterface):
     >>> dsink.inputs.in_file = str(tmpfile)
     >>> dsink.inputs.source_file = bids_collect_data(
     ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w'][0]
-    >>> dsink.inputs.keep_dtype = True
-    >>> dsink.inputs.suffix = 'desc-denoised'
+    >>> dsink.inputs.desc = 'denoised'
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_desc-denoised_T1w.nii.gz'
 
-    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
-    ...                             allowed_entities=['from', 'to'], **{'from': 'orig'})
-    >>> dsink.inputs.in_file = str(tmpfile)
-    >>> dsink.inputs.to = 'native'
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)
+    >>> dsink.inputs.in_file = [str(tmpfile), str(tmpfile), str(tmpfile)]
     >>> dsink.inputs.source_file = bids_collect_data(
     ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w'][0]
-    >>> dsink.inputs.keep_dtype = True
+    >>> dsink.inputs.label = ["GM", "WM", "CSF"]
+    >>> dsink.inputs.suffix = "probseg"
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
-    '.../sub-01_ses-retest_from-orig_to-native_T1w.nii.gz'
+    ['.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_label-GM_probseg.nii.gz',
+     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_label-WM_probseg.nii.gz',
+     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_label-CSF_probseg.nii.gz'
+    ]
+
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
+    ...                             allowed_entities=("custom",))
+    >>> dsink.inputs.in_file = str(tmpfile)
+    >>> dsink.inputs.source_file = bids_collect_data(
+    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w'][0]
+    >>> dsink.inputs.custom = 'noise'
+    >>> res = dsink.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom-noise_T1w.nii.gz'
 
     >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
     >>> bids_dir.mkdir(parents=True, exist_ok=True)
@@ -309,26 +307,24 @@ class DerivativesDataSink(SimpleInterface):
     >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)
     >>> dsink.inputs.in_file = str(tmpfile)
     >>> dsink.inputs.source_file = str(tricky_source)
-    >>> dsink.inputs.keep_dtype = True
     >>> dsink.inputs.desc = 'preproc'
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
-    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-1_\
 desc-preproc_bold.nii.gz'
 
     >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
     >>> bids_dir.mkdir(parents=True, exist_ok=True)
-    >>> tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-01_bold.nii.gz'
+    >>> tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-1_bold.nii.gz'
     >>> tricky_source.open('w').close()
     >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)
     >>> dsink.inputs.in_file = str(tmpfile)
     >>> dsink.inputs.source_file = str(tricky_source)
-    >>> dsink.inputs.keep_dtype = True
     >>> dsink.inputs.desc = 'preproc'
     >>> dsink.inputs.RepetitionTime = 0.75
     >>> res = dsink.run()
     >>> res.outputs.out_meta  # doctest: +ELLIPSIS
-    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-1_\
 desc-preproc_bold.json'
 
     >>> Path(res.outputs.out_meta).read_text().splitlines()[1]
@@ -342,13 +338,13 @@ desc-preproc_bold.json'
     ...                             SkullStripped=True)
     >>> dsink.inputs.in_file = str(tmpfile)
     >>> dsink.inputs.source_file = str(tricky_source)
-    >>> dsink.inputs.keep_dtype = True
     >>> dsink.inputs.desc = 'preproc'
-    >>> dsink.inputs.space = 'MNI152NLin6Asym_res-01'
+    >>> dsink.inputs.space = 'MNI152NLin6Asym'
+    >>> dsink.inputs.resolution = '01'
     >>> dsink.inputs.RepetitionTime = 0.75
     >>> res = dsink.run()
     >>> res.outputs.out_meta  # doctest: +ELLIPSIS
-    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-1_\
 space-MNI152NLin6Asym_res-01_desc-preproc_bold.json'
 
     >>> lines = Path(res.outputs.out_meta).read_text().splitlines()
@@ -366,14 +362,14 @@ space-MNI152NLin6Asym_res-01_desc-preproc_bold.json'
     ...                             SkullStripped=True)
     >>> dsink.inputs.in_file = str(tmpfile)
     >>> dsink.inputs.source_file = str(tricky_source)
-    >>> dsink.inputs.keep_dtype = True
     >>> dsink.inputs.desc = 'preproc'
-    >>> dsink.inputs.space = 'MNI152NLin6Asym_res-native'
+    >>> dsink.inputs.resolution = 'native'
+    >>> dsink.inputs.space = 'MNI152NLin6Asym'
     >>> dsink.inputs.RepetitionTime = 0.75
     >>> dsink.inputs.meta_dict = {'RepetitionTime': 1.75, 'SkullStripped': False, 'Z': 'val'}
     >>> res = dsink.run()
     >>> res.outputs.out_meta  # doctest: +ELLIPSIS
-    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-1_\
 space-MNI152NLin6Asym_desc-preproc_bold.json'
 
     >>> lines = Path(res.outputs.out_meta).read_text().splitlines()
@@ -386,25 +382,39 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
     >>> lines[3]
     '  "Z": "val"'
 
+
+    >>> tmpfile = tmpdir / 'a_temp_file.h5'
+    >>> tmpfile.open('w').close()  # "touch" the file
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
+    ...                             **{'from': 'orig', 'to': 'native', 'suffix': 'xfm'})
+    >>> dsink.inputs.in_file = str(tmpfile)
+    >>> dsink.inputs.source_file = bids_collect_data(
+    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w'][0]
+    >>> res = dsink.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../sub-01_ses-retest_from-orig_to-native_mode-image_xfm.h5'
+
     """
 
     input_spec = _DerivativesDataSinkInputSpec
     output_spec = _DerivativesDataSinkOutputSpec
     out_path_base = "niworkflows"
     _always_run = True
+    _allowed_entities = set(BIDS_DERIV_ENTITIES)
 
     def __init__(self, allowed_entities=None, out_path_base=None, **inputs):
-        self._allowed_entities = allowed_entities or []
+        self._allowed_entities = set(allowed_entities or []).union(self._allowed_entities)
 
         self._metadata = {}
-        self._static_traits = self.input_spec.class_editable_traits() + self._allowed_entities
+        self._static_traits = self.input_spec.class_editable_traits() \
+            + list(self._allowed_entities)
         for dynamic_input in set(inputs) - set(self._static_traits):
             self._metadata[dynamic_input] = inputs.pop(dynamic_input)
 
         super(DerivativesDataSink, self).__init__(**inputs)
         if self._allowed_entities:
             add_traits(self.inputs, self._allowed_entities)
-            for k in set(self._allowed_entities).intersection(list(inputs.keys())):
+            for k in self._allowed_entities.intersection(list(inputs.keys())):
                 setattr(self.inputs, k, inputs[k])
 
         self._results['out_file'] = []
@@ -412,82 +422,73 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             self.out_path_base = out_path_base
 
     def _run_interface(self, runtime):
+        # Ready the output folder
+        base_directory = runtime.cwd
+        if isdefined(self.inputs.base_directory):
+            base_directory = self.inputs.base_directory
+        base_directory = Path(base_directory).absolute()
+        out_path = base_directory / self.out_path_base
+        out_path.mkdir(exist_ok=True, parents=True)
+
+        # Read in the dictionary of metadata
         if isdefined(self.inputs.meta_dict):
             meta = self.inputs.meta_dict
             # inputs passed in construction take priority
             meta.update(self._metadata)
             self._metadata = meta
 
-        src_fname, _ = _splitext(self.inputs.source_file)
-        src_fname, dtype = src_fname.rsplit('_', 1)
-        _, ext = _splitext(self.inputs.in_file[0])
-        if self.inputs.compress is True and not ext.endswith('.gz'):
-            ext += '.gz'
-        elif self.inputs.compress is False and ext.endswith('.gz'):
-            ext = ext[:-3]
+        # Initialize entities with those from the source file.
+        out_entities = parse_file_entities(self.inputs.source_file)
 
-        m = BIDS_NAME.search(src_fname)
-
-        mod = Path(self.inputs.source_file).parent.name
-
-        base_directory = runtime.cwd
-        if isdefined(self.inputs.base_directory):
-            base_directory = self.inputs.base_directory
-
-        base_directory = Path(base_directory).resolve()
-        out_path = base_directory / self.out_path_base / \
-            '{subject_id}'.format(**m.groupdict())
-
-        if m.groupdict().get('session_id') is not None:
-            out_path = out_path / '{session_id}'.format(**m.groupdict())
-
-        out_path = out_path / '{}'.format(mod)
-        out_path.mkdir(exist_ok=True, parents=True)
-        base_fname = str(out_path / src_fname)
-
-        allowed_entities = {}
+        # Override entities with those set as inputs
         for key in self._allowed_entities:
             value = getattr(self.inputs, key)
             if value is not None and isdefined(value):
-                allowed_entities[key] = '_%s-%s' % (key, value)
+                out_entities[key] = value
 
-        formatbase = '{bname}{space}{desc}' + ''.join(
-            [allowed_entities.get(s, '') for s in self._allowed_entities])
+        # Clean up native resolution with space
+        if out_entities.get("resolution", "") == "native" and out_entities.get("space"):
+            out_entities.pop("resolution", None)
 
-        formatstr = formatbase + '{extra}{suffix}{dtype}{ext}'
-        if len(self.inputs.in_file) > 1 and not isdefined(self.inputs.extra_values):
-            formatstr = formatbase + '{suffix}{i:04d}{dtype}{ext}'
+        in_file = self.inputs.in_file
+        if isinstance(in_file, str):
+            in_file = [in_file]
 
-        if self.inputs.space and '_res-native' in self.inputs.space:
-            # strip native tag
-            self.inputs.space = self.inputs.space.split('_')[0]
+        out_entities["extension"] = [
+            "".join(Path(orig_file).suffixes).lstrip(".") for orig_file in in_file
+        ]
+        if len(set(out_entities["extension"])) == 1:
+            out_entities["extension"] = out_entities["extension"][0]
 
-        space = '_space-{}'.format(self.inputs.space) if self.inputs.space else ''
-        desc = '_desc-{}'.format(self.inputs.desc) if self.inputs.desc else ''
-        suffix = '_{}'.format(self.inputs.suffix) if self.inputs.suffix else ''
-        dtype = '' if not self.inputs.keep_dtype else ('_%s' % dtype)
+        custom_entities = '_'.join([
+            f"{key}-{out_entities[key]}"
+            for key in set(out_entities.keys()) - set(BIDS_DERIV_ENTITIES)
+            if out_entities[key]
+        ])
 
         self._results['compression'] = []
-        self._results['fixed_hdr'] = [False] * len(self.inputs.in_file)
+        self._results['fixed_hdr'] = [False] * len(in_file)
 
-        for i, fname in enumerate(self.inputs.in_file):
-            extra = ''
-            if isdefined(self.inputs.extra_values):
-                extra = '_{}'.format(self.inputs.extra_values[i])
-            out_file = formatstr.format(
-                bname=base_fname,
-                space=space,
-                desc=desc,
-                extra=extra,
-                suffix=suffix,
-                i=i,
-                dtype=dtype,
-                ext=ext,
-            )
-            self._results['out_file'].append(out_file)
-            self._results['compression'].append(_copy_any(fname, out_file))
+        dest_files = build_path(out_entities, path_patterns=BIDS_DERIV_PATTERNS)
+        if not dest_files:
+            raise RuntimeError(f"Could not build path with entities {out_entities}.")
+        if isinstance(dest_files, str):
+            dest_files = [dest_files]
 
-            is_nii = out_file.endswith(('.nii', '.nii.gz'))
+        if len(in_file) != len(dest_files):
+            raise ValueError(f"Did not reconstruct enough patterns <{', '.join(dest_files)}>.")
+
+        for i, (orig_file, dest_file) in enumerate(zip(in_file, dest_files)):
+            if custom_entities:
+                _pre, _post = dest_file.split(f"_{out_entities['suffix']}")
+                dest_file = f"{_pre}_{custom_entities}_{out_entities['suffix']}{_post}"
+
+            out_file = out_path / dest_file
+            out_file.parent.mkdir(exist_ok=True, parents=True)
+            self._results['out_file'].append(str(out_file))
+            self._results['compression'].append(_copy_any(orig_file, str(out_file)))
+
+            is_nii = out_file.name.endswith(('.nii', '.nii.gz'))
             data_dtype = self.inputs.data_dtype or DEFAULT_DTYPES[self.inputs.suffix]
             if is_nii and any((self.inputs.check_hdr, data_dtype)):
                 # Do not use mmap; if we need to access the data at all, it will be to
@@ -504,7 +505,10 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                     curr_codes = (int(hdr['qform_code']), int(hdr['sform_code']))
 
                     # Default to mm, use sec if data type is bold
-                    units = (curr_units[0] or 'mm', 'sec' if dtype == '_bold' else None)
+                    units = (
+                        curr_units[0] or 'mm',
+                        'sec' * (out_entities["suffix"] == 'bold') or None
+                    )
                     xcodes = (1, 1)  # Derivative in its original scanner space
                     if self.inputs.space:
                         xcodes = (4, 4) if self.inputs.space in STANDARD_SPACES \
