@@ -3,6 +3,7 @@
 """Handling surfaces."""
 import os
 import re
+from pathlib import Path
 from collections import defaultdict
 
 import numpy as np
@@ -10,10 +11,12 @@ import nibabel as nb
 
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    BaseInterfaceInputSpec, TraitedSpec, File, traits, isdefined,
+    BaseInterfaceInputSpec, TraitedSpec, DynamicTraitedSpec,
     SimpleInterface, CommandLine, CommandLineInputSpec,
-    InputMultiPath, OutputMultiPath,
+    File, traits, isdefined,
+    InputMultiPath, OutputMultiPath, Undefined
 )
+
 
 SECONDARY_ANAT_STRUC = {
     'smoothwm': 'GrayWhite',
@@ -80,6 +83,80 @@ Pipelines/blob/ae69b9a/PostFreeSurfer/scripts/FreeSurfer2CaretConvertAndRegister
             transform_file,
             newpath=runtime.cwd
         )
+        return runtime
+
+
+class _Path2BIDSInputSpec(BaseInterfaceInputSpec):
+    in_file = File(mandatory=True, desc='input GIFTI file')
+
+
+class _Path2BIDSOutputSpec(DynamicTraitedSpec):
+    extension = traits.Str()
+
+
+class Path2BIDS(SimpleInterface):
+    """
+    Extract BIDS entities from paths using a pattern.
+
+    Default pattern is given for Gifti surfaces.
+
+    >>> Path2BIDS(in_file='_fix_surfs0/rh.pial.surf.gii').run().outputs
+    <BLANKLINE>
+    extension = .surf.gii
+    hemi = R
+    suffix = pial
+    <BLANKLINE>
+
+    >>> Path2BIDS(in_file='_fix_surfs0/rh.pial.gii').run().outputs
+    <BLANKLINE>
+    extension = .gii
+    hemi = R
+    suffix = pial
+    <BLANKLINE>
+
+    >>> Path2BIDS(in_file='_fix_surfs0/rh.smoothwm_converted.gii').run().outputs
+    <BLANKLINE>
+    extension = .gii
+    hemi = R
+    suffix = smoothwm
+    <BLANKLINE>
+
+    >>> Path2BIDS(in_file='_fix_surfs0/rh.smoothwm_converted.func.gii').run().outputs
+    <BLANKLINE>
+    extension = .func.gii
+    hemi = R
+    suffix = smoothwm
+    <BLANKLINE>
+
+    """
+
+    input_spec = _Path2BIDSInputSpec
+    output_spec = _Path2BIDSOutputSpec
+    _pattern = re.compile(r"(?P<hemi>[lr])h.(?P<suffix>(wm|smoothwm|pial|midthickness|"
+                          r"inflated|vinflated|sphere|flat))[\w\d_-]*(?P<extprefix>\.\w+)?")
+    _excluded = ("extprefix",)
+
+    def __init__(self, pattern=None, **inputs):
+        """Initialize the interface."""
+        super().__init__(**inputs)
+        if pattern:
+            self._pattern = re.compile(pattern)
+
+    def _outputs(self):
+        outputs = self.output_spec()
+        outputs.trait_set(trait_change_notify=False, **{
+            entity: Undefined
+            for entity in self._pattern.groupindex.keys() if entity not in self._excluded})
+        return outputs
+
+    def _run_interface(self, runtime):
+        in_file = Path(self.inputs.in_file)
+        extension = "".join(in_file.suffixes[-((in_file.suffixes[-1] == ".gz") + 1):])
+        info = self._pattern.match(in_file.name[:-len(extension)]).groupdict()
+        self._results["extension"] = f"{info.pop('extprefix', None) or ''}{extension}"
+        self._results.update(info)
+        if "hemi" in self._results:
+            self._results["hemi"] = self._results["hemi"].upper()
         return runtime
 
 
