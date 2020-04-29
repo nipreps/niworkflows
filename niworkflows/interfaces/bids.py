@@ -12,6 +12,7 @@ import nibabel as nb
 import numpy as np
 from bids.layout import parse_file_entities
 from bids.layout.writing import build_path
+from bids.utils import listify
 
 from nipype import logging
 from nipype.interfaces.base import (
@@ -240,10 +241,13 @@ class _DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     check_hdr = traits.Bool(True, usedefault=True, desc='fix headers of NIfTI outputs')
     compress = traits.Bool(desc="force compression (True) or uncompression (False)"
                                 " of the output file (default: same as input)")
-    in_file = InputMultiObject(File(exists=True), mandatory=True,
-                               desc='the object to be saved')
     data_dtype = Str(desc='NumPy datatype to coerce NIfTI data to, or `source` to'
                           'match the input file dtype')
+    dismiss_entities = InputMultiObject(
+        traits.Either(None, Str), usedefault=True,
+        desc="a list entities that will not be propagated from the source file")
+    in_file = InputMultiObject(File(exists=True), mandatory=True,
+                               desc='the object to be saved')
     meta_dict = traits.DictStrAny(desc='an input dictionary containing metadata')
     source_file = File(exists=False, mandatory=True, desc='the input func file')
 
@@ -261,8 +265,8 @@ class DerivativesDataSink(SimpleInterface):
     """
     Store derivative files.
 
-    Saves the `in_file` into a BIDS-Derivatives folder provided
-    by `base_directory`, given the input reference `source_file`.
+    Saves the ``in_file`` into a BIDS-Derivatives folder provided
+    by ``base_directory``, given the input reference ``source_file``.
 
     >>> import tempfile
     >>> tmpdir = Path(tempfile.mkdtemp())
@@ -276,19 +280,6 @@ class DerivativesDataSink(SimpleInterface):
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_desc-denoised_T1w.nii.gz'
-
-    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)
-    >>> dsink.inputs.in_file = [str(tmpfile), str(tmpfile), str(tmpfile)]
-    >>> dsink.inputs.source_file = bids_collect_data(
-    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w'][0]
-    >>> dsink.inputs.label = ["GM", "WM", "CSF"]
-    >>> dsink.inputs.suffix = "probseg"
-    >>> res = dsink.run()
-    >>> res.outputs.out_file  # doctest: +ELLIPSIS
-    ['.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_label-GM_probseg.nii.gz',
-     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_label-WM_probseg.nii.gz',
-     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_label-CSF_probseg.nii.gz'
-    ]
 
     >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
     ...                             allowed_entities=("custom",))
@@ -382,18 +373,6 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
     >>> lines[3]
     '  "Z": "val"'
 
-
-    >>> tmpfile = tmpdir / 'a_temp_file.h5'
-    >>> tmpfile.open('w').close()  # "touch" the file
-    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
-    ...                             **{'from': 'orig', 'to': 'native', 'suffix': 'xfm'})
-    >>> dsink.inputs.in_file = str(tmpfile)
-    >>> dsink.inputs.source_file = bids_collect_data(
-    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w'][0]
-    >>> res = dsink.run()
-    >>> res.outputs.out_file  # doctest: +ELLIPSIS
-    '.../sub-01_ses-retest_from-orig_to-native_mode-image_xfm.h5'
-
     """
 
     input_spec = _DerivativesDataSinkInputSpec
@@ -439,6 +418,8 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
 
         # Initialize entities with those from the source file.
         out_entities = parse_file_entities(self.inputs.source_file)
+        for drop_entity in listify(self.inputs.dismiss_entities or []):
+            out_entities.pop(drop_entity, None)
 
         # Override entities with those set as inputs
         for key in self._allowed_entities:
@@ -450,9 +431,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         if out_entities.get("resolution", "") == "native" and out_entities.get("space"):
             out_entities.pop("resolution", None)
 
-        in_file = self.inputs.in_file
-        if isinstance(in_file, str):
-            in_file = [in_file]
+        in_file = listify(self.inputs.in_file)
 
         out_entities["extension"] = [
             "".join(Path(orig_file).suffixes).lstrip(".") for orig_file in in_file
@@ -472,8 +451,8 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         dest_files = build_path(out_entities, path_patterns=BIDS_DERIV_PATTERNS)
         if not dest_files:
             raise RuntimeError(f"Could not build path with entities {out_entities}.")
-        if isinstance(dest_files, str):
-            dest_files = [dest_files]
+
+        dest_files = listify(dest_files)
 
         if len(in_file) != len(dest_files):
             raise ValueError(f"Did not reconstruct enough patterns <{', '.join(dest_files)}>.")
@@ -609,10 +588,7 @@ class ReadSidecarJSON(SimpleInterface):
 
     def __init__(self, fields=None, undef_fields=False, **inputs):
         super(ReadSidecarJSON, self).__init__(**inputs)
-        self._fields = fields or []
-        if isinstance(self._fields, str):
-            self._fields = [self._fields]
-
+        self._fields = listify(fields or [])
         self._undef_fields = undef_fields
 
     def _outputs(self):
