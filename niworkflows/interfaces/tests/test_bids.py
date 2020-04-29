@@ -75,6 +75,8 @@ BOLD_PATH = 'ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
     #     {"space": ["MNIa", "MNIb"], "label": ["GM", "WM", "CSF"], "suffix": "probseg"},
     #     [f"sub-100185/anat/sub-100185_space-{s}_label-{l}_probseg.nii.gz"
     #      for s in ("MNIa", "MNIb") for l in ("GM", "WM", "CSF")]),
+    (T1W_PATH, ["anat.html"], {"desc": "conform", "datatype": "figures"},
+        "sub-100185/figures/sub-100185_desc-conform_T1w.html"),
     (BOLD_PATH, ["aroma.csv"], {"suffix": "AROMAnoiseICs", "extension": "h5"}, ValueError),
     (T1W_PATH, ["anat.nii.gz"] * 3, {"desc": "preproc", "space": "MNI"}, ValueError),
 ])
