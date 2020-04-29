@@ -43,4 +43,4 @@ class LiterateWorkflow(pe.Workflow):
         if self.__postdesc__:
             desc += [self.__postdesc__]
 
-        return ''.join(desc)
+        return "".join(desc)

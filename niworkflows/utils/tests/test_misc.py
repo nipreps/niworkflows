@@ -5,11 +5,9 @@ import pytest
 from ..misc import pass_dummy_scans, check_valid_fs_license
 
 
-@pytest.mark.parametrize('algo_dummy_scans,dummy_scans,expected_out', [
-    (2, 1, 1),
-    (2, None, 2),
-    (2, 0, 0),
-])
+@pytest.mark.parametrize(
+    "algo_dummy_scans,dummy_scans,expected_out", [(2, 1, 1), (2, None, 2), (2, 0, 0)]
+)
 def test_pass_dummy_scans(algo_dummy_scans, dummy_scans, expected_out):
     """Check dummy scans passing."""
     skip_vols = pass_dummy_scans(algo_dummy_scans, dummy_scans)
