@@ -71,7 +71,7 @@
     },
     {
       "name": "datatype",
-      "pattern": "[/\\\\]+(func|anat|fmap|dwi|meg|eeg)[/\\\\]+"
+      "pattern": "[/\\\\]+(func|anat|fmap|dwi|meg|eeg|figures)[/\\\\]+"
     },
     {
       "name": "extension",

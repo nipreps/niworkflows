@@ -17,7 +17,7 @@ from nipype.utils.filemanip import copyfile
 
 # Add a new figures spec
 try:
-    add_config_paths(figures=pkgrf('niworkflows', 'reports/figures.json'))
+    add_config_paths(figures=pkgrf('niworkflows', 'data/derivatives.json'))
 except ValueError as e:
     if "Configuration 'figures' already exists" != str(e):
         raise
@@ -262,7 +262,7 @@ class Report:
             self.subject_id = subject_id.lstrip("sub-")
             self.out_filename = f"sub-{self.subject_id}.html"
 
-        self._load_config(Path(config or pkgrf('niworkflows', 'reports/fmriprep.yml')))
+        self._load_config(Path(config or pkgrf('niworkflows', 'reports/default.yml')))
 
     def _load_config(self, config):
         from yaml import safe_load as load

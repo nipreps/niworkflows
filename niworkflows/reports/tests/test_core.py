@@ -194,7 +194,7 @@ def test_generated_reportlets(bids_sessions, ordering):
     out_dir = tempfile.mkdtemp()
     report = Report(Path(out_dir), 'fakeuuid', reportlets_dir=Path(bids_sessions),
                     subject_id='01', packagename='fmriprep')
-    config = Path(pkgrf('niworkflows', 'reports/fmriprep.yml'))
+    config = Path(pkgrf('niworkflows', 'reports/default.yml'))
     settings = load(config.read_text())
     # change settings to only include some missing ordering
     settings['sections'][3]['ordering'] = ordering
