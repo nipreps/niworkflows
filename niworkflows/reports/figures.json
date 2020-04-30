@@ -63,7 +63,7 @@
         },
         {
             "name": "datatype",
-            "pattern": "[/\\\\](func|anat|fmap|dwi|meg)[/\\\\]"
+            "pattern": "[/\\\\](func|anat|fmap|dwi|meg|figures)[/\\\\]"
         },
         {
             "name": "space",
