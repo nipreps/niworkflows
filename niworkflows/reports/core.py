@@ -255,14 +255,16 @@ class Report:
         self.out_dir = Path(out_dir)
         self.out_filename = out_filename
         self.run_uuid = run_uuid
-        self.template_path = None
         self.packagename = packagename
         self.subject_id = subject_id
         if subject_id is not None:
             self.subject_id = subject_id.lstrip("sub-")
             self.out_filename = f"sub-{self.subject_id}.html"
 
+        # Default template from niworkflows
+        self.template_path = Path(pkgrf('niworkflows', 'reports/report.tpl'))
         self._load_config(Path(config or pkgrf('niworkflows', 'reports/default.yml')))
+        assert self.template_path.exists()
 
     def _load_config(self, config):
         from yaml import safe_load as load
@@ -276,11 +278,9 @@ class Report:
         if self.subject_id is not None:
             self.root = self.root / 'sub-{}'.format(self.subject_id)
 
-        # Default template from niworkflows
-        template_path = Path(pkgrf('niworkflows', 'reports/report.tpl'))
         if 'template_path' in settings:
-            template_path = config.parent / settings['template_path']
-        self.template_path = template_path.absolute()
+            self.template_path = config.parent / settings['template_path']
+
         self.index(settings['sections'])
 
     def init_layout(self):
