@@ -1,10 +1,2 @@
-# data
-include niworkflows/data/*.json
-include niworkflows/data/*.txt
-include niworkflows/data/tests/work/*
-
-# misc
-include CHANGES.rst
-include LICENSE
+recursive-exclude niworkflows/ conftest.py
 include versioneer.py
-include niworkflows/_version.py
