@@ -256,8 +256,9 @@ class _DerivativesDataSinkOutputSpec(TraitedSpec):
     out_file = OutputMultiObject(File(exists=True, desc='written file path'))
     out_meta = OutputMultiObject(File(exists=True, desc='written JSON sidecar path'))
     compression = OutputMultiObject(
-        traits.Bool, desc='whether ``in_file`` was compressed/uncompressed '
-                          'or `it was copied directly.')
+        traits.Either(None, traits.Bool),
+        desc='whether ``in_file`` should be compressed (True), uncompressed (False) '
+             'or left unmodified (None).')
     fixed_hdr = traits.List(traits.Bool, desc='whether derivative header was fixed')
 
 
@@ -447,6 +448,17 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         out_entities["extension"] = [
             "".join(Path(orig_file).suffixes).lstrip(".") for orig_file in in_file
         ]
+
+        if isdefined(self.inputs.compress):
+            compress = listify(self.inputs.compress)
+            if len(compress) == 1 and len(in_file) > 1:
+                compress = compress * len(in_file)
+            out_entities["extension"] = [
+                f"{ext.rstrip('.gz')}" if gz is False
+                else f"{ext.rstrip('.gz')}.gz" if gz is True
+                else ext
+                for ext, gz in zip(out_entities["extension"], compress)
+            ]
 
         # Override entities with those set as inputs
         for key in self._allowed_entities:
