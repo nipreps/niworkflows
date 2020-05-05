@@ -446,13 +446,13 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             self._metadata = meta
 
         # Initialize entities with those from the source file.
-        out_entities = parse_file_entities(self.inputs.source_file)
+        out_entities = parse_file_entities(os.path.basename(self.inputs.source_file))
         for drop_entity in listify(self.inputs.dismiss_entities or []):
             out_entities.pop(drop_entity, None)
 
         # Override extension with that of the input file(s)
         out_entities["extension"] = [
-            "".join(Path(orig_file).suffixes).lstrip(".") for orig_file in in_file
+            _splitext(orig_file)[1].lstrip(".") for orig_file in in_file
         ]
 
         compress = listify(self.inputs.compress) or [None]
@@ -480,6 +480,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         custom_entities = set(out_entities.keys()) - set(BIDS_DERIV_ENTITIES)
         patterns = BIDS_DERIV_PATTERNS
         if custom_entities:
+            # Example: f"{key}-{{{key}}}" -> "task-{task}"
             custom_pat = "_".join(f"{key}-{{{key}}}" for key in sorted(custom_entities))
             patterns = [pat.replace("_{suffix", "_".join(('', custom_pat, "{suffix")))
                         for pat in patterns]
