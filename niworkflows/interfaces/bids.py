@@ -30,7 +30,7 @@ from ..utils.misc import splitext as _splitext, _copy_any
 _pybids_spec = loads(
     Path(_pkgres("niworkflows", "data/derivatives.json")).read_text()
 )
-BIDS_DERIV_ENTITIES = tuple({e["name"] for e in _pybids_spec["entities"]})
+BIDS_DERIV_ENTITIES = frozenset({e["name"] for e in _pybids_spec["entities"]})
 BIDS_DERIV_PATTERNS = tuple(_pybids_spec["default_path_patterns"])
 
 STANDARD_SPACES = _get_template_list()
@@ -410,21 +410,23 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
     _allowed_entities = set(BIDS_DERIV_ENTITIES)
 
     def __init__(self, allowed_entities=None, out_path_base=None, **inputs):
+        """Initialize the SimpleInterface and extend inputs with custom entities."""
         self._allowed_entities = set(allowed_entities or []).union(self._allowed_entities)
+        if out_path_base:
+            self.out_path_base = out_path_base
 
         self._metadata = {}
         self._static_traits = self.input_spec.class_editable_traits() \
-            + list(self._allowed_entities)
+            + sorted(self._allowed_entities)
         for dynamic_input in set(inputs) - set(self._static_traits):
             self._metadata[dynamic_input] = inputs.pop(dynamic_input)
 
-        super(DerivativesDataSink, self).__init__(**inputs)
+        # First regular initialization (constructs InputSpec object)
+        super().__init__(**inputs)
         add_traits(self.inputs, self._allowed_entities)
         for k in self._allowed_entities.intersection(list(inputs.keys())):
+            # Add additional input fields (self.inputs is an object)
             setattr(self.inputs, k, inputs[k])
-
-        if out_path_base:
-            self.out_path_base = out_path_base
 
     def _run_interface(self, runtime):
         # Ready the output folder
@@ -446,13 +448,14 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             self._metadata = meta
 
         # Initialize entities with those from the source file.
-        out_entities = parse_file_entities(os.path.basename(self.inputs.source_file))
+        out_entities = parse_file_entities(self.inputs.source_file)
         for drop_entity in listify(self.inputs.dismiss_entities or []):
             out_entities.pop(drop_entity, None)
 
         # Override extension with that of the input file(s)
         out_entities["extension"] = [
-            _splitext(orig_file)[1].lstrip(".") for orig_file in in_file
+            # _splitext does not accept .surf.gii (for instance)
+            "".join(Path(orig_file).suffixes).lstrip(".") for orig_file in in_file
         ]
 
         compress = listify(self.inputs.compress) or [None]
@@ -461,7 +464,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         for i, ext in enumerate(out_entities["extension"]):
             if compress[i] is not None:
                 ext = ext.rstrip(".gz")
-                out_entities["extension"][i] = f"{ext}{'.gz' * bool(compress[i])}"
+                out_entities["extension"][i] = f"{ext}.gz" if compress[i] else ext
 
         # Override entities with those set as inputs
         for key in self._allowed_entities:
@@ -507,7 +510,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             self._results['compression'].append(_copy_any(orig_file, str(out_file)))
 
             is_nifti = out_file.name.endswith(('.nii', '.nii.gz')) \
-                and not out_file.name.lstrip(".gz").endswith('.dtseries.nii')
+                and not out_file.name.endswith(('.dtseries.nii', '.dtseries.nii.gz'))
             data_dtype = self.inputs.data_dtype or DEFAULT_DTYPES[self.inputs.suffix]
             if is_nifti and any((self.inputs.check_hdr, data_dtype)):
                 # Do not use mmap; if we need to access the data at all, it will be to
@@ -523,7 +526,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                     # Default to mm, use sec if data type is bold
                     units = (
                         curr_units[0] or 'mm',
-                        'sec' * (out_entities["suffix"] == 'bold') or None
+                        'sec' if out_entities["suffix"] == 'bold' else None
                     )
                     xcodes = (1, 1)  # Derivative in its original scanner space
                     if self.inputs.space:

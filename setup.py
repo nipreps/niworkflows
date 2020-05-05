@@ -1,14 +1,21 @@
 #!/usr/bin/env python
-"""niworkflows setup script."""
+# -*- coding: utf-8 -*-
+""" niworkflows setup script """
 import sys
 from setuptools import setup
 import versioneer
 
+# Give setuptools a hint to complain if it's too old a version
+# 30.3.0 allows us to put most metadata in setup.cfg
+# 30.4.0 gives us options.packages.find
+# Should match pyproject.toml
+SETUP_REQUIRES = ['setuptools >= 30.4.0']
+# This enables setuptools to install wheel on-the-fly
+SETUP_REQUIRES += ['wheel'] if 'bdist_wheel' in sys.argv else []
+
 if __name__ == '__main__':
-    setupargs = {
-        "version": versioneer.get_version(),
-        "cmdclass": versioneer.get_cmdclass(),
-    }
-    if "bdist_wheel" in sys.argv:
-        setupargs["setup_requires"] = ["setuptools >= 38.3.0", "wheel"]
-    setup(**setupargs)
+    setup(name='niworkflows',
+          version=versioneer.get_version(),
+          cmdclass=versioneer.get_cmdclass(),
+          setup_requires=SETUP_REQUIRES,
+          )
