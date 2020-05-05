@@ -467,7 +467,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 out_entities[key] = value
 
         # Clean up native resolution with space
-        if out_entities.get("resolution", "") == "native" and out_entities.get("space"):
+        if out_entities.get("resolution") == "native" and out_entities.get("space"):
             out_entities.pop("resolution", None)
 
         if len(set(out_entities["extension"])) == 1:
