@@ -23,7 +23,7 @@ from nipype.interfaces.base import (
 )
 from nipype.interfaces.io import add_traits
 from templateflow.api import templates as _get_template_list
-from ..utils.bids import _init_layout
+from ..utils.bids import _init_layout, relative_to_root
 from ..utils.images import overwrite_header
 from ..utils.misc import splitext as _splitext, _copy_any
 
@@ -448,7 +448,9 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             self._metadata = meta
 
         # Initialize entities with those from the source file.
-        out_entities = parse_file_entities(self.inputs.source_file)
+        out_entities = parse_file_entities(
+            str(relative_to_root(self.inputs.source_file))
+        )
         for drop_entity in listify(self.inputs.dismiss_entities or []):
             out_entities.pop(drop_entity, None)
 
