@@ -239,8 +239,10 @@ class _DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     base_directory = traits.Directory(
         desc='Path to the base directory for storing data.')
     check_hdr = traits.Bool(True, usedefault=True, desc='fix headers of NIfTI outputs')
-    compress = traits.Bool(desc="force compression (True) or uncompression (False)"
-                                " of the output file (default: same as input)")
+    compress = InputMultiObject(
+        traits.Either(None, traits.Bool), usedefault=True,
+        desc="whether ``in_file`` should be compressed (True), uncompressed (False) "
+             "or left unmodified (None, default).")
     data_dtype = Str(desc='NumPy datatype to coerce NIfTI data to, or `source` to'
                           'match the input file dtype')
     dismiss_entities = InputMultiObject(
@@ -279,10 +281,13 @@ class DerivativesDataSink(SimpleInterface):
     >>> dsink.inputs.in_file = str(tmpfile)
     >>> dsink.inputs.source_file = t1w_source
     >>> dsink.inputs.desc = 'denoised'
+    >>> dsink.inputs.compress = False
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
-    '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_desc-denoised_T1w.nii.gz'
+    '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_desc-denoised_T1w.nii'
 
+    >>> tmpfile = tmpdir / 'a_temp_file.nii'
+    >>> tmpfile.open('w').close()  # "touch" the file
     >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
     ...                             allowed_entities=("custom",))
     >>> dsink.inputs.in_file = str(tmpfile)
@@ -290,13 +295,14 @@ class DerivativesDataSink(SimpleInterface):
     >>> dsink.inputs.custom = 'noise'
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
-    '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom-noise_T1w.nii.gz'
+    '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom-noise_T1w.nii'
 
     >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,
     ...                             allowed_entities=("custom",))
     >>> dsink.inputs.in_file = [str(tmpfile), str(tmpfile)]
     >>> dsink.inputs.source_file = t1w_source
     >>> dsink.inputs.custom = [1, 2]
+    >>> dsink.inputs.compress = True
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
     ['.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom-1_T1w.nii.gz',
@@ -310,8 +316,8 @@ class DerivativesDataSink(SimpleInterface):
     >>> dsink.inputs.custom2 = "b"
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
-    ['.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom1-1_custom2-b_T1w.nii.gz',
-     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom1-2_custom2-b_T1w.nii.gz']
+    ['.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom1-1_custom2-b_T1w.nii',
+     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom1-2_custom2-b_T1w.nii']
 
     >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
     >>> bids_dir.mkdir(parents=True, exist_ok=True)
@@ -324,7 +330,7 @@ class DerivativesDataSink(SimpleInterface):
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
     '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-1_\
-desc-preproc_bold.nii.gz'
+desc-preproc_bold.nii'
 
     >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
     >>> bids_dir.mkdir(parents=True, exist_ok=True)
@@ -449,16 +455,13 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             "".join(Path(orig_file).suffixes).lstrip(".") for orig_file in in_file
         ]
 
-        if isdefined(self.inputs.compress):
-            compress = listify(self.inputs.compress)
-            if len(compress) == 1 and len(in_file) > 1:
-                compress = compress * len(in_file)
-            out_entities["extension"] = [
-                f"{ext.rstrip('.gz')}" if gz is False
-                else f"{ext.rstrip('.gz')}.gz" if gz is True
-                else ext
-                for ext, gz in zip(out_entities["extension"], compress)
-            ]
+        compress = listify(self.inputs.compress) or [None]
+        if len(compress) == 1:
+            compress = compress * len(in_file)
+        for i, ext in enumerate(out_entities["extension"]):
+            if compress[i] is not None:
+                ext = ext.rstrip(".gz")
+                out_entities["extension"][i] = f"{ext}{'.gz' * bool(compress[i])}"
 
         # Override entities with those set as inputs
         for key in self._allowed_entities:
