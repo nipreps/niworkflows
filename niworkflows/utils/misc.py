@@ -1,8 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Miscellaneous utilities
-"""
+"""Miscellaneous utilities."""
 import os
 import shutil
 
@@ -168,8 +166,11 @@ def _read_txt(path):
 
 
 def splitext(fname):
-    """Splits filename and extension (.gz safe)
+    """
+    Split filename in name and extension (.gz safe).
 
+    Examples
+    --------
     >>> splitext('some/file.nii.gz')
     ('file', '.nii.gz')
     >>> splitext('some/other/file.nii')
@@ -178,6 +179,12 @@ def splitext(fname):
     ('otherext', '.tar.gz')
     >>> splitext('text.txt')
     ('text', '.txt')
+    >>> splitext('some/figure.svg')
+    ('figure', '.svg')
+    >>> splitext('some/figure.svg.gz')
+    ('figure', '.svg.gz')
+    >>> splitext('some/sub-01_bold.func.gii')
+    ('sub-01_bold.func', '.gii')
 
     """
     from pathlib import Path
