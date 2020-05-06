@@ -1,2 +1,1 @@
-recursive-exclude niworkflows/ conftest.py
 include versioneer.py
