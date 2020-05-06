@@ -14,17 +14,6 @@ import warnings
 from bids import BIDSLayout
 from packaging.version import Version
 
-__all__ = ['BIDS_NAME']
-
-BIDS_NAME = re.compile(
-    r'^(.*\/)?'
-    '(?P<subject_id>sub-[a-zA-Z0-9]+)'
-    '(_(?P<session_id>ses-[a-zA-Z0-9]+))?'
-    '(_(?P<task_id>task-[a-zA-Z0-9]+))?'
-    '(_(?P<acq_id>acq-[a-zA-Z0-9]+))?'
-    '(_(?P<rec_id>rec-[a-zA-Z0-9]+))?'
-    '(_(?P<run_id>run-[a-zA-Z0-9]+))?')
-
 
 class BIDSError(ValueError):
     def __init__(self, message, bids_root):
@@ -313,6 +302,46 @@ def group_multiecho(bold_sess):
         action = getattr(ses_uids, 'append' if len(bold) > 2 else 'extend')
         action(bold)
     return ses_uids
+
+
+def relative_to_root(path):
+    """
+    Calculate the BIDS root folder given one file path's.
+
+    Example
+    -------
+    >>> str(relative_to_root(
+    ...     "/sub-03/sourcedata/sub-01/anat/sub-01_T1.nii.gz"
+    ... ))
+    'sub-01/anat/sub-01_T1.nii.gz'
+
+    >>> str(relative_to_root(
+    ...     "/sub-03/anat/sourcedata/sub-01/ses-preop/anat/sub-01_ses-preop_T1.nii.gz"
+    ... ))
+    'sub-01/ses-preop/anat/sub-01_ses-preop_T1.nii.gz'
+
+    >>> str(relative_to_root(
+    ...     "sub-01/anat/sub-01_T1.nii.gz"
+    ... ))
+    'sub-01/anat/sub-01_T1.nii.gz'
+
+    >>> str(relative_to_root("anat/sub-01_T1.nii.gz"))
+    'anat/sub-01_T1.nii.gz'
+
+    """
+    path = Path(path)
+    if path.name.startswith("sub-"):
+        parents = [path.name]
+        for p in path.parents:
+            parents.insert(0, p.name)
+            if p.name.startswith("sub-"):
+                return Path(*parents)
+        return path
+
+    raise ValueError(
+        f"Could not determine the BIDS root of <{path}>. "
+        "Only files under a subject directory are currently supported."
+    )
 
 
 def check_pipeline_version(cvers, data_desc):

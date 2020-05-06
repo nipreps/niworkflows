@@ -23,7 +23,7 @@ def bids_sessions(tmpdir_factory):
     svg_dir.ensure_dir()
 
     pattern = (
-        "sub-{subject}[/ses-{session}]/{datatype<anat|func>}/"
+        "sub-{subject}[/ses-{session}]/{datatype<figures>}/"
         "sub-{subject}[_ses-{session}][_task-{task}][_acq-{acquisition}]"
         "[_ce-{ceagent}][_dir-{direction}][_rec-{reconstruction}]"
         "[_mod-{modality}][_run-{run}][_echo-{echo}][_space-{space}]"
@@ -51,7 +51,7 @@ def bids_sessions(tmpdir_factory):
             'desc': desc,
             'extension': 'svg',
             'suffix': 'bold',
-            'datatype': 'func'
+            'datatype': 'figures'
         }
         bids_path = build_path(entities, pattern)
         file_path = svg_dir / bids_path
@@ -91,14 +91,14 @@ def test_report1():
         os.path.join('data', 'tests', 'work', 'reportlets'))
     out_dir = tempfile.mkdtemp()
 
-    return Report(Path(test_data_path), Path(out_dir), 'fakeiuud',
+    return Report(Path(out_dir), 'fakeuuid', reportlets_dir=Path(test_data_path),
                   subject_id='01', packagename='fmriprep')
 
 
 @pytest.fixture()
 def test_report2(bids_sessions):
     out_dir = tempfile.mkdtemp()
-    return Report(Path(bids_sessions), Path(out_dir), 'fakeiuud',
+    return Report(Path(out_dir), 'fakeuuid', reportlets_dir=Path(bids_sessions),
                   subject_id='01', packagename='fmriprep')
 
 
@@ -192,9 +192,9 @@ def test_process_orderings_large(test_report2, orderings,
 def test_generated_reportlets(bids_sessions, ordering):
     # make independent report
     out_dir = tempfile.mkdtemp()
-    report = Report(Path(bids_sessions), Path(out_dir), 'fakeiuud',
+    report = Report(Path(out_dir), 'fakeuuid', reportlets_dir=Path(bids_sessions),
                     subject_id='01', packagename='fmriprep')
-    config = Path(pkgrf('niworkflows', 'reports/fmriprep.yml'))
+    config = Path(pkgrf('niworkflows', 'reports/default.yml'))
     settings = load(config.read_text())
     # change settings to only include some missing ordering
     settings['sections'][3]['ordering'] = ordering

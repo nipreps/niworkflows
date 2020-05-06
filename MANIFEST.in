@@ -1,15 +1,2 @@
-# data
-include niworkflows/data/*.json
-include niworkflows/data/*.txt
-include niworkflows/data/tests/work/*
-include niworkflows/reports/figures.json
-include niworkflows/reports/fmriprep.yml
-include niworkflows/reports/report.tpl
-
-
-# misc
-include requirements.txt
-include CHANGES.rst
-include LICENSE
+recursive-exclude niworkflows/ conftest.py
 include versioneer.py
-include niworkflows/_version.py

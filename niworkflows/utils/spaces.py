@@ -703,6 +703,34 @@ def format_reference(in_tuple):
     return '_'.join(out)
 
 
+def reference2dict(in_tuple):
+    """
+    Split a spatial reference given as a tuple into a dictionary.
+
+    Examples
+    --------
+    >>> reference2dict(('MNIPediatricAsym:cohort-2', {'res': 2}))
+    {'space': 'MNIPediatricAsym', 'cohort': '2', 'resolution': '2'}
+
+    >>> reference2dict(('MNIPediatricAsym:cohort-2', {'res': 2, 'resolution': 1}))
+    {'space': 'MNIPediatricAsym', 'cohort': '2', 'resolution': '1'}
+
+    >>> reference2dict(('MNIPediatricAsym:cohort-2', {'res': 2, 'den': '91k'}))
+    {'space': 'MNIPediatricAsym', 'cohort': '2', 'resolution': '2', 'density': '91k'}
+
+    """
+    tpl_entities = ("space", "cohort")
+    retval = {
+        tpl_entities[i]: v.split("-")[i]
+        for i, v in enumerate(in_tuple[0].split(':'))
+    }
+    retval.update({
+        "resolution" if k == "res" else "density" if k == "den" else k: f"{v}"
+        for k, v in in_tuple[1].items()
+    })
+    return retval
+
+
 def _expand_entities(entities):
     """
     Generate multiple replacement queries based on all combinations of values.

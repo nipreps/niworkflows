@@ -12,13 +12,12 @@ from itertools import compress
 from collections import defaultdict
 from pkg_resources import resource_filename as pkgrf
 from bids.layout import BIDSLayout, add_config_paths
-
 import jinja2
 from nipype.utils.filemanip import copyfile
 
 # Add a new figures spec
 try:
-    add_config_paths(figures=pkgrf('niworkflows', 'reports/figures.json'))
+    add_config_paths(figures=pkgrf('niworkflows', 'data/nipreps.json'))
 except ValueError as e:
     if "Configuration 'figures' already exists" != str(e):
         raise
@@ -74,31 +73,31 @@ class Reportlet(Element):
     .. doctest::
 
     >>> bl.get(subject='01', desc='reconall') # doctest: +ELLIPSIS
-    [<BIDSFile filename='.../fmriprep/sub-01/anat/sub-01_desc-reconall_T1w.svg'>]
+    [<BIDSFile filename='.../fmriprep/sub-01/figures/sub-01_desc-reconall_T1w.svg'>]
 
     >>> len(bl.get(subject='01', space='.*', regex_search=True))
     2
 
     >>> r = Reportlet(bl, out_figs, config={
-    ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'desc': 'reconall'},
+    ...     'title': 'Some Title', 'bids': {'datatype': 'figures', 'desc': 'reconall'},
     ...     'description': 'Some description'})
     >>> r.name
-    'datatype-anat_desc-reconall'
+    'datatype-figures_desc-reconall'
 
     >>> r.components[0][0].startswith('<img')
     True
 
     >>> r = Reportlet(bl, out_figs, config={
-    ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'desc': 'reconall'},
+    ...     'title': 'Some Title', 'bids': {'datatype': 'figures', 'desc': 'reconall'},
     ...     'description': 'Some description', 'static': False})
     >>> r.name
-    'datatype-anat_desc-reconall'
+    'datatype-figures_desc-reconall'
 
     >>> r.components[0][0].startswith('<object')
     True
 
     >>> r = Reportlet(bl, out_figs, config={
-    ...     'title': 'Some Title', 'bids': {'datatype': 'anat', 'desc': 'summary'},
+    ...     'title': 'Some Title', 'bids': {'datatype': 'figures', 'desc': 'summary'},
     ...     'description': 'Some description'})
 
     >>> r.components[0][0].startswith('<h3')
@@ -109,7 +108,7 @@ class Reportlet(Element):
 
     >>> r = Reportlet(bl, out_figs, config={
     ...     'title': 'Some Title',
-    ...     'bids': {'datatype': 'anat', 'space': '.*', 'regex_search': True},
+    ...     'bids': {'datatype': 'figures', 'space': '.*', 'regex_search': True},
     ...     'caption': 'Some description {space}'})
     >>> sorted(r.components)[0][1]
     'Some description MNI152NLin2009cAsym'
@@ -159,19 +158,15 @@ class Reportlet(Element):
                 if desc_text:
                     desc_text = desc_text.format(**entities)
 
-                entities['extension'] = 'svg'
-                entities['datatype'] = 'figures'
-                linked_svg = layout.build_path(entities, validate=False)
-                if linked_svg is None:
-                    raise ValueError("Could not generate SVG path to copy {src}"
-                                     " to. Entities: {entities}".format(src=src,
-                                                                        entities=entities))
-                out_file = out_dir / linked_svg
-                out_file.parent.mkdir(parents=True, exist_ok=True)
-                # PY35: Coerce to str to pacify os.* functions that don't take Paths until 3.6
-                copyfile(str(src), str(out_file), copy=True, use_hardlink=True)
-                is_static = config.get('static', True)
-                contents = SVG_SNIPPET[is_static].format(linked_svg)
+                try:
+                    html_anchor = src.relative_to(out_dir)
+                except ValueError:
+                    html_anchor = src.relative_to(Path(layout.root).parent)
+                    dst = out_dir / html_anchor
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    copyfile(src, dst, copy=True, use_hardlink=True)
+
+                contents = SVG_SNIPPET[config.get('static', True)].format(html_anchor)
 
                 # Our current implementations of dynamic reportlets do this themselves,
                 # however I'll leave the code here since this is potentially something we
@@ -205,7 +200,7 @@ class SubReport(Element):
         self.isnested = isnested
 
 
-class Report(object):
+class Report:
     """
     The full report object. This object maintains a BIDSLayout to index
     all reportlets.
@@ -226,15 +221,15 @@ class Report(object):
 
     .. doctest::
 
-    >>> robj = Report(testdir / 'work' / 'reportlets', testdir / 'out',
-    ...               'madeoutuuid', subject_id='01', packagename='fmriprep')
+    >>> robj = Report(testdir / 'out', 'madeoutuuid', subject_id='01', packagename='fmriprep',
+    ...               reportlets_dir=testdir / 'work' / 'reportlets')
     >>> robj.layout.get(subject='01', desc='reconall')  # doctest: +ELLIPSIS
-    [<BIDSFile filename='.../anat/sub-01_desc-reconall_T1w.svg'>]
+    [<BIDSFile filename='.../figures/sub-01_desc-reconall_T1w.svg'>]
 
     >>> robj.generate_report()
     0
     >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
-    36540
+    36693
 
     .. testcleanup::
 
@@ -242,10 +237,17 @@ class Report(object):
 
     """
 
-    def __init__(self, reportlets_dir, out_dir, run_uuid, config=None,
-                 subject_id=None, out_filename='report.html',
-                 packagename=None):
-        self.root = reportlets_dir
+    def __init__(
+        self,
+        out_dir,
+        run_uuid,
+        config=None,
+        out_filename='report.html',
+        packagename=None,
+        reportlets_dir=None,
+        subject_id=None,
+    ):
+        self.root = Path(reportlets_dir or out_dir)
 
         # Initialize structuring elements
         self.sections = []
@@ -253,18 +255,16 @@ class Report(object):
         self.out_dir = Path(out_dir)
         self.out_filename = out_filename
         self.run_uuid = run_uuid
-        self.template_path = None
         self.packagename = packagename
         self.subject_id = subject_id
-        if subject_id is not None and subject_id.startswith('sub-'):
-            self.subject_id = self.subject_id[4:]
+        if subject_id is not None:
+            self.subject_id = subject_id.lstrip("sub-")
+            self.out_filename = f"sub-{self.subject_id}.html"
 
-        if self.subject_id is not None:
-            self.out_filename = 'sub-{}.html'.format(self.subject_id)
-
-        if config is None:
-            config = pkgrf('niworkflows', 'reports/fmriprep.yml')
-        self._load_config(Path(config))
+        # Default template from niworkflows
+        self.template_path = Path(pkgrf('niworkflows', 'reports/report.tpl'))
+        self._load_config(Path(config or pkgrf('niworkflows', 'reports/default.yml')))
+        assert self.template_path.exists()
 
     def _load_config(self, config):
         from yaml import safe_load as load
@@ -278,11 +278,9 @@ class Report(object):
         if self.subject_id is not None:
             self.root = self.root / 'sub-{}'.format(self.subject_id)
 
-        # Default template from niworkflows
-        template_path = Path(pkgrf('niworkflows', 'reports/report.tpl'))
         if 'template_path' in settings:
-            template_path = config.parent / settings['template_path']
-        self.template_path = template_path.absolute()
+            self.template_path = config.parent / settings['template_path']
+
         self.index(settings['sections'])
 
     def init_layout(self):
@@ -349,28 +347,26 @@ class Report(object):
         boiler_idx = 0
 
         if (logs_path / 'CITATION.html').exists():
-            text = (logs_path / 'CITATION.html').read_text(encoding='UTF-8')
-            text = '<div class="boiler-html">%s</div>' % re.compile(
-                '<body>(.*?)</body>',
-                re.DOTALL | re.IGNORECASE).findall(text)[0].strip()
-            boilerplate.append((boiler_idx, 'HTML', text))
+            text = re.compile('<body>(.*?)</body>', re.DOTALL | re.IGNORECASE).findall(
+                (logs_path / 'CITATION.html').read_text()
+            )[0].strip()
+            boilerplate.append((boiler_idx, 'HTML', f'<div class="boiler-html">{text}</div>'))
             boiler_idx += 1
 
         if (logs_path / 'CITATION.md').exists():
-            text = '<pre>%s</pre>\n' % (logs_path / 'CITATION.md').read_text(encoding='UTF-8')
-            boilerplate.append((boiler_idx, 'Markdown', text))
+            text = (logs_path / 'CITATION.md').read_text()
+            boilerplate.append((boiler_idx, 'Markdown', f'<pre>{text}</pre>\n'))
             boiler_idx += 1
 
         if (logs_path / 'CITATION.tex').exists():
-            text = (logs_path / 'CITATION.tex').read_text(encoding='UTF-8')
-            text = re.compile(
-                r'\\begin{document}(.*?)\\end{document}',
-                re.DOTALL | re.IGNORECASE).findall(text)[0].strip()
-            text = '<pre>%s</pre>\n' % text
-            text += '<h3>Bibliography</h3>\n'
-            text += '<pre>%s</pre>\n' % Path(
-                pkgrf(self.packagename, 'data/boilerplate.bib')).read_text(encoding='UTF-8')
-            boilerplate.append((boiler_idx, 'LaTeX', text))
+            text = re.compile(r'\\begin{document}(.*?)\\end{document}',
+                              re.DOTALL | re.IGNORECASE).findall(
+                (logs_path / 'CITATION.tex').read_text()
+            )[0].strip()
+            boilerplate.append((boiler_idx, 'LaTeX', f"""<pre>{text}</pre>
+<h3>Bibliography</h3>
+<pre>{Path(pkgrf(self.packagename, 'data/boilerplate.bib')).read_text()}</pre>
+"""))
             boiler_idx += 1
 
         env = jinja2.Environment(
@@ -382,6 +378,7 @@ class Report(object):
                                           boilerplate=boilerplate)
 
         # Write out report
+        self.out_dir.mkdir(parents=True, exist_ok=True)
         (self.out_dir / self.out_filename).write_text(report_render, encoding='UTF-8')
         return len(self.errors)
 
@@ -430,10 +427,16 @@ class Report(object):
         return entities, value_combos
 
 
-def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config=None,
-                packagename=None):
+def run_reports(
+    out_dir,
+    subject_label,
+    run_uuid,
+    config=None,
+    reportlets_dir=None,
+    packagename=None,
+):
     """
-    Runs the reports
+    Run the reports.
 
     .. testsetup::
 
@@ -449,8 +452,8 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config=None,
 
     .. doctest::
 
-    >>> run_reports(testdir / 'work' / 'reportlets', testdir / 'out',
-    ...             '01', 'madeoutuuid', packagename='fmriprep')
+    >>> run_reports(testdir / 'out', '01', 'madeoutuuid', packagename='fmriprep',
+    ...             reportlets_dir=testdir / 'work' / 'reportlets')
     0
 
     .. testcleanup::
@@ -458,20 +461,26 @@ def run_reports(reportlets_dir, out_dir, subject_label, run_uuid, config=None,
     >>> os.chdir(cwd)
 
     """
-    report = Report(reportlets_dir, out_dir, run_uuid, config=config,
-                    subject_id=subject_label, packagename=packagename)
-    return report.generate_report()
+    return Report(out_dir, run_uuid, config=config, subject_id=subject_label,
+                  packagename=packagename, reportlets_dir=reportlets_dir).generate_report()
 
 
-def generate_reports(subject_list, output_dir, work_dir, run_uuid, config=None,
-                     packagename=None):
-    """
-    A wrapper to run_reports on a given ``subject_list``
-    """
-    reportlets_dir = Path(work_dir) / 'reportlets'
+def generate_reports(
+    subject_list,
+    output_dir,
+    run_uuid,
+    config=None,
+    work_dir=None,
+    packagename=None
+):
+    """Execute run_reports on a list of subjects."""
+    reportlets_dir = None
+    if work_dir is not None:
+        reportlets_dir = Path(work_dir) / 'reportlets'
     report_errors = [
-        run_reports(reportlets_dir, output_dir, subject_label, run_uuid,
-                    config, packagename=packagename)
+        run_reports(output_dir, subject_label, run_uuid,
+                    config=config, packagename=packagename,
+                    reportlets_dir=reportlets_dir)
         for subject_label in subject_list
     ]
 
