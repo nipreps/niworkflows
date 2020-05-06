@@ -338,7 +338,7 @@ def relative_to_root(path):
                 return Path(*parents)
         return path
 
-    raise NotImplementedError(
+    raise ValueError(
         f"Could not determine the BIDS root of <{path}>. "
         "Only files under a subject directory are currently supported."
     )
