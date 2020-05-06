@@ -1,12 +1,12 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Interfaces for handling BIDS-like neuroimaging structures."""
-
 from collections import defaultdict
 from json import dumps, loads
 from pathlib import Path
 from shutil import copytree, rmtree
 from pkg_resources import resource_filename as _pkgres
+import re
 
 import nibabel as nb
 import numpy as np
@@ -27,6 +27,7 @@ from ..utils.bids import _init_layout, relative_to_root
 from ..utils.images import overwrite_header
 from ..utils.misc import splitext as _splitext, _copy_any
 
+regz = re.compile(r"\.gz$")
 _pybids_spec = loads(
     Path(_pkgres("niworkflows", "data/nipreps.json")).read_text()
 )
@@ -465,7 +466,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             compress = compress * len(in_file)
         for i, ext in enumerate(out_entities["extension"]):
             if compress[i] is not None:
-                ext = ext.rstrip(".gz")
+                ext = regz.sub("", ext)
                 out_entities["extension"][i] = f"{ext}.gz" if compress[i] else ext
 
         # Override entities with those set as inputs
