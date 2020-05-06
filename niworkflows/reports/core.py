@@ -17,7 +17,7 @@ from nipype.utils.filemanip import copyfile
 
 # Add a new figures spec
 try:
-    add_config_paths(figures=pkgrf('niworkflows', 'data/derivatives.json'))
+    add_config_paths(figures=pkgrf('niworkflows', 'data/nipreps.json'))
 except ValueError as e:
     if "Configuration 'figures' already exists" != str(e):
         raise

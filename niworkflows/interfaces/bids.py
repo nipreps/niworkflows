@@ -28,7 +28,7 @@ from ..utils.images import overwrite_header
 from ..utils.misc import splitext as _splitext, _copy_any
 
 _pybids_spec = loads(
-    Path(_pkgres("niworkflows", "data/derivatives.json")).read_text()
+    Path(_pkgres("niworkflows", "data/nipreps.json")).read_text()
 )
 BIDS_DERIV_ENTITIES = frozenset({e["name"] for e in _pybids_spec["entities"]})
 BIDS_DERIV_PATTERNS = tuple(_pybids_spec["default_path_patterns"])
