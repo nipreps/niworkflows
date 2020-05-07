@@ -79,6 +79,9 @@ BOLD_PATH = 'ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
         "sub-100185/figures/sub-100185_desc-conform_T1w.html"),
     (BOLD_PATH, ["aroma.csv"], {"suffix": "AROMAnoiseICs", "extension": "h5"}, ValueError),
     (T1W_PATH, ["anat.nii.gz"] * 3, {"desc": "preproc", "space": "MNI"}, ValueError),
+    ('sub-07/ses-preop/anat/sub-07_ses-preop_T1w.nii.gz', ["tfm.h5"],
+        {"from": "orig", "to": "target", "suffix": "xfm"},
+        "sub-07/ses-preop/anat/sub-07_ses-preop_from-orig_to-target_mode-image_xfm.h5"),
 ])
 def test_DerivativesDataSink_build_path(
     tmp_path,
