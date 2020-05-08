@@ -1,0 +1,111 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python package
+
+on:
+  push:
+    branches: [ master ]
+    tags: [ '*' ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  if: "!startsWith(github.ref, 'refs/tags/') && !contains(github.event.head_commit.message, '[skip ci]')"
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # python-version: [3.6, 3.7, 3.8]
+        python-version: [3.7]
+        # pip: ["pip==10.0.1", "pip~=18.1"]
+        pip: ["pip~=18.1"]
+        # setuptools: ["setuptools~=38.4.1", "setuptools==34.4.0"]
+        setuptools: ["setuptools~=38.4.1"]
+
+    steps:
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - uses: actions/checkout@v2
+      with:
+        ssh-key: "${{ secrets.NIPREPS_DEPLOY }}"
+    - name: Fetch all tags (for versioneer to work)
+      run: |
+        /usr/bin/git -c protocol.version=2 fetch --tags --prune --unshallow origin
+    - name: Build in confined, updated environment and interpolate version
+      run: |
+        python -m venv /tmp/buildenv
+        source /tmp/buildenv/bin/activate
+        python -m pip install -U setuptools pip wheel twine docutils
+        python setup.py sdist bdist_wheel
+        python -m twine check dist/niworkflows*
+
+        # Interpolate version
+        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          TAG=${GITHUB_REF##*/}
+        fi
+        THISVERSION=$( python get_version.py )
+        THISVERSION=${TAG:-$THISVERSION}
+        echo "Expected VERSION: \"${THISVERSION}\""
+        echo ::set-env name=THISVERSION::"${THISVERSION}"
+    - name: Install in confined environment [sdist]
+      run: |
+        python -m venv /tmp/install_sdist
+        source /tmp/install_sdist/bin/activate
+        python -m pip install "${{ matrix.pip }}" "${{ matrix.setuptools }}"
+        python -m pip install "scikit-image<0.17"
+        python -m pip install dist/niworkflows*.tar.gz
+        INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
+        echo "VERSION: \"${THISVERSION}\""
+        echo "INSTALLED: \"${INSTALLED_VERSION}\""
+        test "${INSTALLED_VERSION}" = "${THISVERSION}"
+
+    - name: Install in confined environment [wheel]
+      run: |
+        python -m venv /tmp/install_wheel
+        source /tmp/install_wheel/bin/activate
+        python -m pip install "${{ matrix.pip }}" "${{ matrix.setuptools }}"
+        python -m pip install "scikit-image<0.17"
+        python -m pip install dist/niworkflows*.whl
+        INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
+        echo "INSTALLED: \"${INSTALLED_VERSION}\""
+        test "${INSTALLED_VERSION}" = "${THISVERSION}"
+
+    - name: Install in confined environment [setup.py - install]
+      run: |
+        python -m venv /tmp/setup_install
+        source /tmp/setup_install/bin/activate
+        python -m pip install "${{ matrix.pip }}" "${{ matrix.setuptools }}"
+        python -m pip install "scikit-image<0.17"
+        python setup.py install
+        INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
+        echo "INSTALLED: \"${INSTALLED_VERSION}\""
+        test "${INSTALLED_VERSION}" = "${THISVERSION}"
+
+    - name: Install in confined environment [setup.py - develop]
+      run: |
+        python -m venv /tmp/setup_develop
+        source /tmp/setup_develop/bin/activate
+        python -m pip install "${{ matrix.pip }}" "${{ matrix.setuptools }}"
+        python -m pip install "scikit-image<0.17"
+        python setup.py develop
+        INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
+        echo "INSTALLED: \"${INSTALLED_VERSION}\""
+        test "${INSTALLED_VERSION}" = "${THISVERSION}"
+
+  flake8:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+
+    steps:
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - run: pip install flake8
+    - run: flake8 niworkflows/
