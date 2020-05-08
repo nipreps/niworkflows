@@ -12,16 +12,23 @@ from ..viz.utils import cuts_from_bbox, compose_view
 
 class _SVGReportCapableInputSpec(reporting.ReportCapableInputSpec):
     out_report = File(
-        'report.svg', usedefault=True, desc='filename for the visual report')
-    compress_report = traits.Enum('auto', True, False, usedefault=True,
-                                  desc="Compress the reportlet using SVGO or"
-                                       "WEBP. 'auto' - compress if relevant "
-                                       "software is installed, True = force,"
-                                       "False - don't attempt to compress")
+        "report.svg", usedefault=True, desc="filename for the visual report"
+    )
+    compress_report = traits.Enum(
+        "auto",
+        True,
+        False,
+        usedefault=True,
+        desc="Compress the reportlet using SVGO or"
+        "WEBP. 'auto' - compress if relevant "
+        "software is installed, True = force,"
+        "False - don't attempt to compress",
+    )
 
 
 class RegistrationRC(reporting.ReportCapableInterface):
     """An abstract mixin to registration nipype interfaces."""
+
     _fixed_image = None
     _moving_image = None
     _fixed_image_mask = None
@@ -32,21 +39,24 @@ class RegistrationRC(reporting.ReportCapableInterface):
     def _generate_report(self):
         """Generates the visual report."""
         from niworkflows.viz.utils import plot_registration
-        NIWORKFLOWS_LOG.info('Generating visual report')
+
+        NIWORKFLOWS_LOG.info("Generating visual report")
 
         fixed_image_nii = load_img(self._fixed_image)
         moving_image_nii = load_img(self._moving_image)
         contour_nii = load_img(self._contour) if self._contour is not None else None
 
         if self._fixed_image_mask:
-            fixed_image_nii = unmask(apply_mask(fixed_image_nii,
-                                                self._fixed_image_mask),
-                                     self._fixed_image_mask)
+            fixed_image_nii = unmask(
+                apply_mask(fixed_image_nii, self._fixed_image_mask),
+                self._fixed_image_mask,
+            )
             # since the moving image is already in the fixed image space we
             # should apply the same mask
-            moving_image_nii = unmask(apply_mask(moving_image_nii,
-                                                 self._fixed_image_mask),
-                                      self._fixed_image_mask)
+            moving_image_nii = unmask(
+                apply_mask(moving_image_nii, self._fixed_image_mask),
+                self._fixed_image_mask,
+            )
             mask_nii = load_img(self._fixed_image_mask)
         else:
             mask_nii = threshold_img(fixed_image_nii, 1e-3)
@@ -59,19 +69,25 @@ class RegistrationRC(reporting.ReportCapableInterface):
 
         # Call composer
         compose_view(
-            plot_registration(fixed_image_nii, 'fixed-image',
-                              estimate_brightness=True,
-                              cuts=cuts,
-                              label=self._fixed_image_label,
-                              contour=contour_nii,
-                              compress=self.inputs.compress_report),
-            plot_registration(moving_image_nii, 'moving-image',
-                              estimate_brightness=True,
-                              cuts=cuts,
-                              label=self._moving_image_label,
-                              contour=contour_nii,
-                              compress=self.inputs.compress_report),
-            out_file=self._out_report
+            plot_registration(
+                fixed_image_nii,
+                "fixed-image",
+                estimate_brightness=True,
+                cuts=cuts,
+                label=self._fixed_image_label,
+                contour=contour_nii,
+                compress=self.inputs.compress_report,
+            ),
+            plot_registration(
+                moving_image_nii,
+                "moving-image",
+                estimate_brightness=True,
+                cuts=cuts,
+                label=self._moving_image_label,
+                contour=contour_nii,
+                compress=self.inputs.compress_report,
+            ),
+            out_file=self._out_report,
         )
 
 
@@ -80,6 +96,7 @@ class SegmentationRC(reporting.ReportCapableInterface):
 
     def _generate_report(self):
         from niworkflows.viz.utils import plot_segs
+
         compose_view(
             plot_segs(
                 image_nii=self._anat_file,
@@ -87,15 +104,16 @@ class SegmentationRC(reporting.ReportCapableInterface):
                 bbox_nii=self._mask_file,
                 out_file=self.inputs.out_report,
                 masked=self._masked,
-                compress=self.inputs.compress_report
+                compress=self.inputs.compress_report,
             ),
             fg_svgs=None,
-            out_file=self._out_report
+            out_file=self._out_report,
         )
 
 
 class SurfaceSegmentationRC(reporting.ReportCapableInterface):
     """An abstract mixin to registration nipype interfaces."""
+
     _anat_file = None
     _mask_file = None
     _contour = None
@@ -103,7 +121,8 @@ class SurfaceSegmentationRC(reporting.ReportCapableInterface):
     def _generate_report(self):
         """Generates the visual report."""
         from niworkflows.viz.utils import plot_registration
-        NIWORKFLOWS_LOG.info('Generating visual report')
+
+        NIWORKFLOWS_LOG.info("Generating visual report")
 
         anat = load_img(self._anat_file)
         contour_nii = load_img(self._contour) if self._contour is not None else None
@@ -122,13 +141,16 @@ class SurfaceSegmentationRC(reporting.ReportCapableInterface):
 
         # Call composer
         compose_view(
-            plot_registration(anat, 'fixed-image',
-                              estimate_brightness=True,
-                              cuts=cuts,
-                              contour=contour_nii,
-                              compress=self.inputs.compress_report),
+            plot_registration(
+                anat,
+                "fixed-image",
+                estimate_brightness=True,
+                cuts=cuts,
+                contour=contour_nii,
+                compress=self.inputs.compress_report,
+            ),
             [],
-            out_file=self._out_report
+            out_file=self._out_report,
         )
 
 
@@ -139,10 +161,13 @@ class ReportingInterface(reporting.ReportCapableInterface):
     A subclass must define an ``input_spec`` and override ``_generate_report``.
 
     """
+
     output_spec = reporting.ReportCapableOutputSpec
 
     def __init__(self, generate_report=True, **kwargs):
-        super(ReportingInterface, self).__init__(generate_report=generate_report, **kwargs)
+        super(ReportingInterface, self).__init__(
+            generate_report=generate_report, **kwargs
+        )
 
     def _run_interface(self, runtime):
         return runtime

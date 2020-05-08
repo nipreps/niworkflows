@@ -9,17 +9,25 @@ from functools import reduce
 from collections import deque, OrderedDict
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    traits, TraitedSpec, BaseInterfaceInputSpec, File, isdefined,
-    SimpleInterface
+    traits,
+    TraitedSpec,
+    BaseInterfaceInputSpec,
+    File,
+    isdefined,
+    SimpleInterface,
 )
 
 
 class _ExpandModelInputSpec(BaseInterfaceInputSpec):
-    confounds_file = File(exists=True, mandatory=True,
-                          desc='TSV containing confound time series for '
-                          'expansion according to the specified formula.')
+    confounds_file = File(
+        exists=True,
+        mandatory=True,
+        desc="TSV containing confound time series for "
+        "expansion according to the specified formula.",
+    )
     model_formula = traits.Str(
-        '(dd1(rps + wm + csf + gsr))^^2 + others', usedefault=True,
+        "(dd1(rps + wm + csf + gsr))^^2 + others",
+        usedefault=True,
         desc="""\
 Formula for generating model expansions. By default, the
 32-parameter expansion will be generated. Note that any expressions
@@ -42,16 +50,18 @@ Examples:
 * (dd1(rps + wm + csf + gsr))^^2 + others : generate all expansion
   terms necessary for a 36-parameter model as above, and
   concatenate those expansion terms to all other regressor columns
-  in the confounds file.""")
-    output_file = File(desc='Output path')
+  in the confounds file.""",
+    )
+    output_file = File(desc="Output path")
 
 
 class _ExpandModelOutputSpec(TraitedSpec):
-    confounds_file = File(exists=True, desc='Output confounds file')
+    confounds_file = File(exists=True, desc="Output confounds file")
 
 
 class ExpandModel(SimpleInterface):
     """Expand a confound model according to a specified formula."""
+
     input_spec = _ExpandModelInputSpec
     output_spec = _ExpandModelOutputSpec
 
@@ -61,60 +71,77 @@ class ExpandModel(SimpleInterface):
         else:
             out_file = fname_presuffix(
                 self.inputs.confounds_file,
-                suffix='_expansion.tsv',
+                suffix="_expansion.tsv",
                 newpath=runtime.cwd,
-                use_ext=False)
+                use_ext=False,
+            )
 
-        confounds_data = pd.read_csv(self.inputs.confounds_file, sep='\t')
+        confounds_data = pd.read_csv(self.inputs.confounds_file, sep="\t")
         _, confounds_data = parse_formula(
             model_formula=self.inputs.model_formula,
             parent_data=confounds_data,
-            unscramble=True
+            unscramble=True,
         )
-        confounds_data.to_csv(out_file, sep='\t', index=False,
-                              na_rep='n/a')
-        self._results['confounds_file'] = out_file
+        confounds_data.to_csv(out_file, sep="\t", index=False, na_rep="n/a")
+        self._results["confounds_file"] = out_file
         return runtime
 
 
 class _SpikeRegressorsInputSpec(BaseInterfaceInputSpec):
     confounds_file = File(
-        exists=True, mandatory=True,
-        desc='TSV containing criterion time series (e.g., framewise '
-        'displacement, DVARS) to be used for creating spike regressors.')
+        exists=True,
+        mandatory=True,
+        desc="TSV containing criterion time series (e.g., framewise "
+        "displacement, DVARS) to be used for creating spike regressors.",
+    )
     fd_thresh = traits.Float(
-        0.5, usedefault=True,
-        desc='Minimum framewise displacement threshold for flagging a frame '
-        'as a spike.')
+        0.5,
+        usedefault=True,
+        desc="Minimum framewise displacement threshold for flagging a frame "
+        "as a spike.",
+    )
     dvars_thresh = traits.Float(
-        1.5, usedefault=True,
-        desc='Minimum standardised DVARS threshold for flagging a frame as '
-        'a spike.')
+        1.5,
+        usedefault=True,
+        desc="Minimum standardised DVARS threshold for flagging a frame as " "a spike.",
+    )
     header_prefix = traits.Str(
-        'motion_outlier', usedefault=True,
-        desc='Prefix for spikes in the output TSV header')
-    lags = traits.List(traits.Int, value=[0], usedefault=True,
-                       desc='Relative indices of lagging frames to flag for '
-                       'each flagged frame')
+        "motion_outlier",
+        usedefault=True,
+        desc="Prefix for spikes in the output TSV header",
+    )
+    lags = traits.List(
+        traits.Int,
+        value=[0],
+        usedefault=True,
+        desc="Relative indices of lagging frames to flag for " "each flagged frame",
+    )
     minimum_contiguous = traits.Either(
-        None, traits.Int, usedefault=True,
-        desc='Minimum number of contiguous volumes required to avoid '
-        'flagging as a spike')
+        None,
+        traits.Int,
+        usedefault=True,
+        desc="Minimum number of contiguous volumes required to avoid "
+        "flagging as a spike",
+    )
     concatenate = traits.Bool(
-        True, usedefault=True,
-        desc='Indicates whether to concatenate spikes to existing confounds '
-        'or return spikes only')
-    output_format = traits.Enum('spikes', 'mask', usedefault=True,
-                                desc='Format of output (spikes or mask)')
-    output_file = File(desc='Output path')
+        True,
+        usedefault=True,
+        desc="Indicates whether to concatenate spikes to existing confounds "
+        "or return spikes only",
+    )
+    output_format = traits.Enum(
+        "spikes", "mask", usedefault=True, desc="Format of output (spikes or mask)"
+    )
+    output_file = File(desc="Output path")
 
 
 class _SpikeRegressorsOutputSpec(TraitedSpec):
-    confounds_file = File(exists=True, desc='Output confounds file')
+    confounds_file = File(exists=True, desc="Output confounds file")
 
 
 class SpikeRegressors(SimpleInterface):
     """Generate spike regressors."""
+
     input_spec = _SpikeRegressorsInputSpec
     output_spec = _SpikeRegressorsOutputSpec
 
@@ -124,16 +151,17 @@ class SpikeRegressors(SimpleInterface):
         else:
             out_file = fname_presuffix(
                 self.inputs.confounds_file,
-                suffix='_desc-motion_outliers.tsv',
+                suffix="_desc-motion_outliers.tsv",
                 newpath=runtime.cwd,
-                use_ext=False)
+                use_ext=False,
+            )
 
         spike_criteria = {
-            'framewise_displacement': ('>', self.inputs.fd_thresh),
-            'std_dvars': ('>', self.inputs.dvars_thresh)
+            "framewise_displacement": (">", self.inputs.fd_thresh),
+            "std_dvars": (">", self.inputs.dvars_thresh),
         }
 
-        confounds_data = pd.read_csv(self.inputs.confounds_file, sep='\t')
+        confounds_data = pd.read_csv(self.inputs.confounds_file, sep="\t")
         confounds_data = spike_regressors(
             data=confounds_data,
             criteria=spike_criteria,
@@ -141,17 +169,22 @@ class SpikeRegressors(SimpleInterface):
             lags=self.inputs.lags,
             minimum_contiguous=self.inputs.minimum_contiguous,
             concatenate=self.inputs.concatenate,
-            output=self.inputs.output_format
+            output=self.inputs.output_format,
         )
-        confounds_data.to_csv(out_file, sep='\t', index=False,
-                              na_rep='n/a')
-        self._results['confounds_file'] = out_file
+        confounds_data.to_csv(out_file, sep="\t", index=False, na_rep="n/a")
+        self._results["confounds_file"] = out_file
         return runtime
 
 
-def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
-                     lags=None, minimum_contiguous=None, concatenate=True,
-                     output='spikes'):
+def spike_regressors(
+    data,
+    criteria=None,
+    header_prefix="motion_outlier",
+    lags=None,
+    minimum_contiguous=None,
+    concatenate=True,
+    output="spikes",
+):
     """
     Add spike regressors to a confound/nuisance matrix.
 
@@ -201,12 +234,14 @@ def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
     mask = {}
     indices = range(data.shape[0])
     lags = lags or [0]
-    criteria = criteria or {'framewise_displacement': ('>', 0.5),
-                            'std_dvars': ('>', 1.5)}
+    criteria = criteria or {
+        "framewise_displacement": (">", 0.5),
+        "std_dvars": (">", 1.5),
+    }
     for metric, (criterion, threshold) in criteria.items():
-        if criterion == '<':
+        if criterion == "<":
             mask[metric] = set(np.where(data[metric] < threshold)[0])
-        elif criterion == '>':
+        elif criterion == ">":
             mask[metric] = set(np.where(data[metric] > threshold)[0])
     mask = reduce((lambda x, y: x | y), mask.values())
 
@@ -216,15 +251,14 @@ def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
     mask = mask.intersection(indices)
     if minimum_contiguous is not None:
         post_final = data.shape[0] + 1
-        epoch_length = np.diff(
-            sorted(mask | set([-1, post_final]))) - 1
+        epoch_length = np.diff(sorted(mask | set([-1, post_final]))) - 1
         epoch_end = sorted(mask | set([post_final]))
         for end, length in zip(epoch_end, epoch_length):
             if length < minimum_contiguous:
                 mask = mask | set(range(end - length, end))
         mask = mask.intersection(indices)
 
-    if output == 'mask':
+    if output == "mask":
         spikes = np.zeros(data.shape[0])
         spikes[list(mask)] = 1
         spikes = pd.DataFrame(data=spikes, columns=[header_prefix])
@@ -232,8 +266,7 @@ def spike_regressors(data, criteria=None, header_prefix='motion_outlier',
         spikes = np.zeros((max(indices) + 1, len(mask)))
         for i, m in enumerate(sorted(mask)):
             spikes[m, i] = 1
-        header = ['{:s}{:02d}'.format(header_prefix, vol)
-                  for vol in range(len(mask))]
+        header = ["{:s}{:02d}".format(header_prefix, vol) for vol in range(len(mask))]
         spikes = pd.DataFrame(data=spikes, columns=header)
     if concatenate:
         return pd.concat((data, spikes), axis=1)
@@ -274,14 +307,13 @@ def temporal_derivatives(order, variables, data):
         variables_deriv[0] = variables
         order = set(order) - set([0])
     for o in order:
-        variables_deriv[o] = ['{}_derivative{}'.format(v, o)
-                              for v in variables]
+        variables_deriv[o] = ["{}_derivative{}".format(v, o) for v in variables]
         data_deriv[o] = np.tile(np.nan, data[variables].shape)
         data_deriv[o][o:, :] = np.diff(data[variables], n=o, axis=0)
     variables_deriv = reduce((lambda x, y: x + y), variables_deriv.values())
-    data_deriv = pd.DataFrame(columns=variables_deriv,
-                              data=np.concatenate([*data_deriv.values()],
-                                                  axis=1))
+    data_deriv = pd.DataFrame(
+        columns=variables_deriv, data=np.concatenate([*data_deriv.values()], axis=1)
+    )
 
     return (variables_deriv, data_deriv)
 
@@ -318,11 +350,12 @@ def exponential_terms(order, variables, data):
         variables_exp[1] = variables
         order = set(order) - set([1])
     for o in order:
-        variables_exp[o] = ['{}_power{}'.format(v, o) for v in variables]
-        data_exp[o] = data[variables]**o
+        variables_exp[o] = ["{}_power{}".format(v, o) for v in variables]
+        data_exp[o] = data[variables] ** o
     variables_exp = reduce((lambda x, y: x + y), variables_exp.values())
-    data_exp = pd.DataFrame(columns=variables_exp,
-                            data=np.concatenate([*data_exp.values()], axis=1))
+    data_exp = pd.DataFrame(
+        columns=variables_exp, data=np.concatenate([*data_exp.values()], axis=1)
+    )
     return (variables_exp, data_exp)
 
 
@@ -330,7 +363,7 @@ def _order_as_range(order):
     """Convert a hyphenated string representing order for derivative or
     exponential terms into a range object that can be passed as input to the
     appropriate expansion function."""
-    order = order.split('-')
+    order = order.split("-")
     order = [int(o) for o in order]
     if len(order) > 1:
         order = range(order[0], (order[-1] + 1))
@@ -341,12 +374,12 @@ def _check_and_expand_exponential(expr, variables, data):
     """Check if the current operation specifies exponential expansion. ^^6
     specifies all powers up to the 6th, ^5-6 the 5th and 6th powers, ^6 the
     6th only."""
-    if re.search(r'\^\^[0-9]+$', expr):
-        order = re.compile(r'\^\^([0-9]+)$').findall(expr)
+    if re.search(r"\^\^[0-9]+$", expr):
+        order = re.compile(r"\^\^([0-9]+)$").findall(expr)
         order = range(1, int(*order) + 1)
         variables, data = exponential_terms(order, variables, data)
-    elif re.search(r'\^[0-9]+[\-]?[0-9]*$', expr):
-        order = re.compile(r'\^([0-9]+[\-]?[0-9]*)').findall(expr)
+    elif re.search(r"\^[0-9]+[\-]?[0-9]*$", expr):
+        order = re.compile(r"\^([0-9]+[\-]?[0-9]*)").findall(expr)
         order = _order_as_range(*order)
         variables, data = exponential_terms(order, variables, data)
     return variables, data
@@ -356,12 +389,12 @@ def _check_and_expand_derivative(expr, variables, data):
     """Check if the current operation specifies a temporal derivative. dd6x
     specifies all derivatives up to the 6th, d5-6x the 5th and 6th, d6x the
     6th only."""
-    if re.search(r'^dd[0-9]+', expr):
-        order = re.compile(r'^dd([0-9]+)').findall(expr)
+    if re.search(r"^dd[0-9]+", expr):
+        order = re.compile(r"^dd([0-9]+)").findall(expr)
         order = range(0, int(*order) + 1)
         (variables, data) = temporal_derivatives(order, variables, data)
-    elif re.search(r'^d[0-9]+[\-]?[0-9]*', expr):
-        order = re.compile(r'^d([0-9]+[\-]?[0-9]*)').findall(expr)
+    elif re.search(r"^d[0-9]+[\-]?[0-9]*", expr):
+        order = re.compile(r"^d([0-9]+[\-]?[0-9]*)").findall(expr)
         order = _order_as_range(*order)
         (variables, data) = temporal_derivatives(order, variables, data)
     return variables, data
@@ -372,11 +405,11 @@ def _check_and_expand_subformula(expression, parent_data, variables, data):
     where appropriate."""
     grouping_depth = 0
     for i, char in enumerate(expression):
-        if char == '(':
+        if char == "(":
             if grouping_depth == 0:
                 formula_delimiter = i + 1
             grouping_depth += 1
-        elif char == ')':
+        elif char == ")":
             grouping_depth -= 1
             if grouping_depth == 0:
                 expr = expression[formula_delimiter:i].strip()
@@ -406,16 +439,11 @@ def parse_expression(expression, parent_data):
     """
     variables = None
     data = None
-    variables, data = _check_and_expand_subformula(expression,
-                                                   parent_data,
-                                                   variables,
-                                                   data)
-    variables, data = _check_and_expand_exponential(expression,
-                                                    variables,
-                                                    data)
-    variables, data = _check_and_expand_derivative(expression,
-                                                   variables,
-                                                   data)
+    variables, data = _check_and_expand_subformula(
+        expression, parent_data, variables, data
+    )
+    variables, data = _check_and_expand_exponential(expression, variables, data)
+    variables, data = _check_and_expand_derivative(expression, variables, data)
     if variables is None:
         expr = expression.strip()
         variables = [expr]
@@ -425,47 +453,53 @@ def parse_expression(expression, parent_data):
 
 def _get_matches_from_data(regex, variables):
     matches = re.compile(regex)
-    matches = ' + '.join([v for v in variables if matches.match(v)])
+    matches = " + ".join([v for v in variables if matches.match(v)])
     return matches
 
 
 def _get_variables_from_formula(model_formula):
-    symbols_to_clear = [' ', r'\(', r'\)', 'dd[0-9]+', r'd[0-9]+[\-]?[0-9]*',
-                        r'\^\^[0-9]+', r'\^[0-9]+[\-]?[0-9]*']
+    symbols_to_clear = [
+        " ",
+        r"\(",
+        r"\)",
+        "dd[0-9]+",
+        r"d[0-9]+[\-]?[0-9]*",
+        r"\^\^[0-9]+",
+        r"\^[0-9]+[\-]?[0-9]*",
+    ]
     for symbol in symbols_to_clear:
-        model_formula = re.sub(symbol, '', model_formula)
-    variables = model_formula.split('+')
+        model_formula = re.sub(symbol, "", model_formula)
+    variables = model_formula.split("+")
     return variables
 
 
 def _expand_shorthand(model_formula, variables):
     """Expand shorthand terms in the model formula."""
-    wm = 'white_matter'
-    gsr = 'global_signal'
-    rps = 'trans_x + trans_y + trans_z + rot_x + rot_y + rot_z'
-    fd = 'framewise_displacement'
-    acc = _get_matches_from_data('a_comp_cor_[0-9]+', variables)
-    tcc = _get_matches_from_data('t_comp_cor_[0-9]+', variables)
-    dv = _get_matches_from_data('^std_dvars$', variables)
-    dvall = _get_matches_from_data('.*dvars', variables)
-    nss = _get_matches_from_data('non_steady_state_outlier[0-9]+',
-                                 variables)
-    spikes = _get_matches_from_data('motion_outlier[0-9]+', variables)
+    wm = "white_matter"
+    gsr = "global_signal"
+    rps = "trans_x + trans_y + trans_z + rot_x + rot_y + rot_z"
+    fd = "framewise_displacement"
+    acc = _get_matches_from_data("a_comp_cor_[0-9]+", variables)
+    tcc = _get_matches_from_data("t_comp_cor_[0-9]+", variables)
+    dv = _get_matches_from_data("^std_dvars$", variables)
+    dvall = _get_matches_from_data(".*dvars", variables)
+    nss = _get_matches_from_data("non_steady_state_outlier[0-9]+", variables)
+    spikes = _get_matches_from_data("motion_outlier[0-9]+", variables)
 
-    model_formula = re.sub('wm', wm, model_formula)
-    model_formula = re.sub('gsr', gsr, model_formula)
-    model_formula = re.sub('rps', rps, model_formula)
-    model_formula = re.sub('fd', fd, model_formula)
-    model_formula = re.sub('acc', acc, model_formula)
-    model_formula = re.sub('tcc', tcc, model_formula)
-    model_formula = re.sub('dv', dv, model_formula)
-    model_formula = re.sub('dvall', dvall, model_formula)
-    model_formula = re.sub('nss', nss, model_formula)
-    model_formula = re.sub('spikes', spikes, model_formula)
+    model_formula = re.sub("wm", wm, model_formula)
+    model_formula = re.sub("gsr", gsr, model_formula)
+    model_formula = re.sub("rps", rps, model_formula)
+    model_formula = re.sub("fd", fd, model_formula)
+    model_formula = re.sub("acc", acc, model_formula)
+    model_formula = re.sub("tcc", tcc, model_formula)
+    model_formula = re.sub("dv", dv, model_formula)
+    model_formula = re.sub("dvall", dvall, model_formula)
+    model_formula = re.sub("nss", nss, model_formula)
+    model_formula = re.sub("spikes", spikes, model_formula)
 
     formula_variables = _get_variables_from_formula(model_formula)
-    others = ' + '.join(set(variables) - set(formula_variables))
-    model_formula = re.sub('others', others, model_formula)
+    others = " + ".join(set(variables) - set(formula_variables))
+    model_formula = re.sub("others", others, model_formula)
     return model_formula
 
 
@@ -474,12 +508,12 @@ def _unscramble_regressor_columns(parent_data, data):
     the same order as the input data with any expansion columns inserted
     immediately after the originals.
     """
-    matches = ['_power[0-9]+', '_derivative[0-9]+']
+    matches = ["_power[0-9]+", "_derivative[0-9]+"]
     var = OrderedDict((c, deque()) for c in parent_data.columns)
     for c in data.columns:
         col = c
         for m in matches:
-            col = re.sub(m, '', col)
+            col = re.sub(m, "", col)
         if col == c:
             var[col].appendleft(c)
         else:
@@ -542,11 +576,11 @@ def parse_formula(model_formula, parent_data, unscramble=False):
     grouping_depth = 0
     model_formula = _expand_shorthand(model_formula, parent_data.columns)
     for i, char in enumerate(model_formula):
-        if char == '(':
+        if char == "(":
             grouping_depth += 1
-        elif char == ')':
+        elif char == ")":
             grouping_depth -= 1
-        elif grouping_depth == 0 and char == '+':
+        elif grouping_depth == 0 and char == "+":
             expression = model_formula[expr_delimiter:i].strip()
             variables[expression] = None
             data[expression] = None
@@ -555,14 +589,14 @@ def parse_formula(model_formula, parent_data, unscramble=False):
     variables[expression] = None
     data[expression] = None
     for expression in list(variables):
-        if expression[0] == '(' and expression[-1] == ')':
-            (variables[expression],
-             data[expression]) = parse_formula(expression[1:-1],
-                                               parent_data)
+        if expression[0] == "(" and expression[-1] == ")":
+            (variables[expression], data[expression]) = parse_formula(
+                expression[1:-1], parent_data
+            )
         else:
-            (variables[expression],
-             data[expression]) = parse_expression(expression,
-                                                  parent_data)
+            (variables[expression], data[expression]) = parse_expression(
+                expression, parent_data
+            )
     variables = list(set(reduce((lambda x, y: x + y), variables.values())))
     data = pd.concat((data.values()), axis=1)
 

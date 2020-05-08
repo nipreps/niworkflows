@@ -11,11 +11,12 @@ from nipype.interfaces.fsl import Info as FSLInfo
 from nipype.interfaces.freesurfer import Info as FreeSurferInfo
 
 filepath = os.path.dirname(os.path.realpath(__file__))
-datadir = os.path.realpath(os.path.join(filepath, 'data'))
+datadir = os.path.realpath(os.path.join(filepath, "data"))
 
-test_data_env = os.getenv('TEST_DATA_HOME',
-                          str(Path.home() / '.cache' / 'stanford-crn'))
-data_dir = Path(test_data_env) / 'ds003_downsampled'
+test_data_env = os.getenv(
+    "TEST_DATA_HOME", str(Path.home() / ".cache" / "stanford-crn")
+)
+data_dir = Path(test_data_env) / "ds003_downsampled"
 
 has_fsl = FSLInfo.version() is not None
 has_freesurfer = FreeSurferInfo.version() is not None
@@ -33,21 +34,22 @@ def _run_interface_mock(objekt, runtime):
 
 @pytest.fixture
 def reference():
-    return str(get_template('MNI152Lin', resolution=2, desc=None, suffix='T1w'))
+    return str(get_template("MNI152Lin", resolution=2, desc=None, suffix="T1w"))
 
 
 @pytest.fixture
 def reference_mask():
-    return str(get_template('MNI152Lin', resolution=2, desc='brain', suffix='mask'))
+    return str(get_template("MNI152Lin", resolution=2, desc="brain", suffix="mask"))
 
 
 @pytest.fixture
 def moving():
-    return str(data_dir / 'sub-01/anat/sub-01_T1w.nii.gz')
+    return str(data_dir / "sub-01/anat/sub-01_T1w.nii.gz")
 
 
 @pytest.fixture
 def nthreads():
     from multiprocessing import cpu_count
+
     # Tests are linear, so don't worry about leaving space for a control thread
-    return min(int(os.getenv('CIRCLE_NPROCS', '8')), cpu_count())
+    return min(int(os.getenv("CIRCLE_NPROCS", "8")), cpu_count())

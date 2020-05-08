@@ -7,11 +7,11 @@ from .__about__ import __version__, __packagename__, __copyright__, __credits__
 
 
 __all__ = [
-    '__version__',
-    '__packagename__',
-    '__copyright__',
-    '__credits__',
-    'NIWORKFLOWS_LOG',
+    "__version__",
+    "__packagename__",
+    "__copyright__",
+    "__credits__",
+    "NIWORKFLOWS_LOG",
 ]
 
 NIWORKFLOWS_LOG = logging.getLogger(__packagename__)
@@ -19,6 +19,7 @@ NIWORKFLOWS_LOG.setLevel(logging.INFO)
 
 try:
     import matplotlib
-    matplotlib.use('Agg')
+
+    matplotlib.use("Agg")
 except ImportError:
     pass

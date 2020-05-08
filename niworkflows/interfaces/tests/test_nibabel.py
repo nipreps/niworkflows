@@ -75,20 +75,23 @@ def test_ApplyMask(tmp_path):
         ApplyMask(in_file=str(in_file4d), in_mask=str(in_mask), threshold=0.4).run()
 
 
-@pytest.mark.parametrize("shape,exp_n", [
-    ((20, 20, 20, 15), 15),
-    ((20, 20, 20), 1),
-    ((20, 20, 20, 1), 1),
-    ((20, 20, 20, 1, 3), 3),
-    ((20, 20, 20, 3, 1), 3),
-    ((20, 20, 20, 1, 3, 3), -1),
-    ((20, 1, 20, 15), 15),
-    ((20, 1, 20), 1),
-    ((20, 1, 20, 1), 1),
-    ((20, 1, 20, 1, 3), 3),
-    ((20, 1, 20, 3, 1), 3),
-    ((20, 1, 20, 1, 3, 3), -1),
-])
+@pytest.mark.parametrize(
+    "shape,exp_n",
+    [
+        ((20, 20, 20, 15), 15),
+        ((20, 20, 20), 1),
+        ((20, 20, 20, 1), 1),
+        ((20, 20, 20, 1, 3), 3),
+        ((20, 20, 20, 3, 1), 3),
+        ((20, 20, 20, 1, 3, 3), -1),
+        ((20, 1, 20, 15), 15),
+        ((20, 1, 20), 1),
+        ((20, 1, 20, 1), 1),
+        ((20, 1, 20, 1, 3), 3),
+        ((20, 1, 20, 3, 1), 3),
+        ((20, 1, 20, 1, 3, 3), -1),
+    ],
+)
 def test_SplitSeries(tmp_path, shape, exp_n):
     """Test 4-to-3 NIfTI split interface."""
     os.chdir(tmp_path)
@@ -99,7 +102,9 @@ def test_SplitSeries(tmp_path, shape, exp_n):
     _interface = SplitSeries(in_file=in_file)
     if exp_n > 0:
         split = _interface.run()
-        n = int(isinstance(split.outputs.out_files, str)) or len(split.outputs.out_files)
+        n = int(isinstance(split.outputs.out_files, str)) or len(
+            split.outputs.out_files
+        )
         assert n == exp_n
     else:
         with pytest.raises(ValueError):

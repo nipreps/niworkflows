@@ -2,13 +2,17 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Interfaces for handling spaces."""
 from nipype.interfaces.base import (
-    traits, TraitedSpec, BaseInterfaceInputSpec, SimpleInterface,
+    traits,
+    TraitedSpec,
+    BaseInterfaceInputSpec,
+    SimpleInterface,
 )
 
 
 class _SpaceDataSourceInputSpec(BaseInterfaceInputSpec):
-    in_tuple = traits.Tuple((traits.Str, traits.Dict),
-                            mandatory=True, desc="a space declaration")
+    in_tuple = traits.Tuple(
+        (traits.Str, traits.Dict), mandatory=True, desc="a space declaration"
+    )
 
 
 class _SpaceDataSourceOutputSpec(TraitedSpec):
@@ -52,6 +56,7 @@ class SpaceDataSource(SimpleInterface):
 
     def _run_interface(self, runtime):
         from ..utils.spaces import format_reference, reference2dict
+
         self._results = reference2dict(self.inputs.in_tuple)
         self._results["uid"] = format_reference(self.inputs.in_tuple)
         return runtime

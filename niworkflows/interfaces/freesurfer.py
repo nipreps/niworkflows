@@ -13,7 +13,13 @@ from nilearn.image import resample_to_img, new_img_like
 
 from nipype.utils.filemanip import copyfile, filename_to_list, fname_presuffix
 from nipype.interfaces.base import (
-    isdefined, InputMultiPath, BaseInterfaceInputSpec, TraitedSpec, File, traits, Directory
+    isdefined,
+    InputMultiPath,
+    BaseInterfaceInputSpec,
+    TraitedSpec,
+    File,
+    traits,
+    Directory,
 )
 from nipype.interfaces import freesurfer as fs
 from nipype.interfaces.base import SimpleInterface
@@ -60,16 +66,20 @@ class StructuralReference(fs.RobustTemplate):
         outputs = super(StructuralReference, self)._list_outputs()
         if self._num_vols() == 1:
             in_file = self.inputs.in_files[0]
-            outputs['out_file'] = in_file
-            if isdefined(outputs['transform_outputs']):
-                transform_file = outputs['transform_outputs'][0]
-                fs.utils.LTAConvert(in_lta='identity.nofile', source_file=in_file,
-                                    target_file=in_file, out_lta=transform_file).run()
+            outputs["out_file"] = in_file
+            if isdefined(outputs["transform_outputs"]):
+                transform_file = outputs["transform_outputs"][0]
+                fs.utils.LTAConvert(
+                    in_lta="identity.nofile",
+                    source_file=in_file,
+                    target_file=in_file,
+                    out_lta=transform_file,
+                ).run()
         return outputs
 
 
 class _MakeMidthicknessInputSpec(fs.utils.MRIsExpandInputSpec):
-    graymid = InputMultiPath(desc='Existing graymid/midthickness file')
+    graymid = InputMultiPath(desc="Existing graymid/midthickness file")
 
 
 class MakeMidthickness(fs.MRIsExpand):
@@ -96,8 +106,8 @@ class MakeMidthickness(fs.MRIsExpand):
         # as input
         source = None
         in_base = Path(self.inputs.in_file).name
-        mt = self._associated_file(in_base, 'midthickness')
-        gm = self._associated_file(in_base, 'graymid')
+        mt = self._associated_file(in_base, "midthickness")
+        gm = self._associated_file(in_base, "graymid")
 
         for surf in self.inputs.graymid:
             if Path(surf).name == mt:
@@ -109,18 +119,18 @@ class MakeMidthickness(fs.MRIsExpand):
         if source is None:
             return cmd
 
-        return "cp {} {}".format(source, self._list_outputs()['out_file'])
+        return "cp {} {}".format(source, self._list_outputs()["out_file"])
 
 
 class _FSInjectBrainExtractedInputSpec(BaseInterfaceInputSpec):
-    subjects_dir = Directory(mandatory=True, desc='FreeSurfer SUBJECTS_DIR')
-    subject_id = traits.Str(mandatory=True, desc='Subject ID')
-    in_brain = File(mandatory=True, exists=True, desc='input file, part of a BIDS tree')
+    subjects_dir = Directory(mandatory=True, desc="FreeSurfer SUBJECTS_DIR")
+    subject_id = traits.Str(mandatory=True, desc="Subject ID")
+    in_brain = File(mandatory=True, exists=True, desc="input file, part of a BIDS tree")
 
 
 class _FSInjectBrainExtractedOutputSpec(TraitedSpec):
-    subjects_dir = Directory(desc='FreeSurfer SUBJECTS_DIR')
-    subject_id = traits.Str(desc='Subject ID')
+    subjects_dir = Directory(desc="FreeSurfer SUBJECTS_DIR")
+    subject_id = traits.Str(desc="Subject ID")
 
 
 class FSInjectBrainExtracted(SimpleInterface):
@@ -130,29 +140,33 @@ class FSInjectBrainExtracted(SimpleInterface):
 
     def _run_interface(self, runtime):
         subjects_dir, subject_id = inject_skullstripped(
-            self.inputs.subjects_dir,
-            self.inputs.subject_id,
-            self.inputs.in_brain)
-        self._results['subjects_dir'] = subjects_dir
-        self._results['subject_id'] = subject_id
+            self.inputs.subjects_dir, self.inputs.subject_id, self.inputs.in_brain
+        )
+        self._results["subjects_dir"] = subjects_dir
+        self._results["subject_id"] = subject_id
         return runtime
 
 
 class _FSDetectInputsInputSpec(BaseInterfaceInputSpec):
-    t1w_list = InputMultiPath(File(exists=True), mandatory=True,
-                              desc='input file, part of a BIDS tree')
-    t2w_list = InputMultiPath(File(exists=True), desc='input file, part of a BIDS tree')
-    flair_list = InputMultiPath(File(exists=True), desc='input file, part of a BIDS tree')
-    hires_enabled = traits.Bool(True, usedefault=True, desc='enable hi-resolution processing')
+    t1w_list = InputMultiPath(
+        File(exists=True), mandatory=True, desc="input file, part of a BIDS tree"
+    )
+    t2w_list = InputMultiPath(File(exists=True), desc="input file, part of a BIDS tree")
+    flair_list = InputMultiPath(
+        File(exists=True), desc="input file, part of a BIDS tree"
+    )
+    hires_enabled = traits.Bool(
+        True, usedefault=True, desc="enable hi-resolution processing"
+    )
 
 
 class _FSDetectInputsOutputSpec(TraitedSpec):
-    t2w = File(desc='reference T2w image')
-    use_t2w = traits.Bool(desc='enable use of T2w downstream computation')
-    flair = File(desc='reference FLAIR image')
-    use_flair = traits.Bool(desc='enable use of FLAIR downstream computation')
-    hires = traits.Bool(desc='enable hi-res processing')
-    mris_inflate = traits.Str(desc='mris_inflate argument')
+    t2w = File(desc="reference T2w image")
+    use_t2w = traits.Bool(desc="enable use of T2w downstream computation")
+    flair = File(desc="reference FLAIR image")
+    use_flair = traits.Bool(desc="enable use of FLAIR downstream computation")
+    hires = traits.Bool(desc="enable hi-res processing")
+    mris_inflate = traits.Str(desc="mris_inflate argument")
 
 
 class FSDetectInputs(SimpleInterface):
@@ -160,22 +174,25 @@ class FSDetectInputs(SimpleInterface):
     output_spec = _FSDetectInputsOutputSpec
 
     def _run_interface(self, runtime):
-        t2w, flair, self._results['hires'], mris_inflate = detect_inputs(
+        t2w, flair, self._results["hires"], mris_inflate = detect_inputs(
             self.inputs.t1w_list,
             t2w_list=self.inputs.t2w_list if isdefined(self.inputs.t2w_list) else None,
-            flair_list=self.inputs.flair_list if isdefined(self.inputs.flair_list) else None,
-            hires_enabled=self.inputs.hires_enabled)
+            flair_list=self.inputs.flair_list
+            if isdefined(self.inputs.flair_list)
+            else None,
+            hires_enabled=self.inputs.hires_enabled,
+        )
 
-        self._results['use_t2w'] = t2w is not None
-        if self._results['use_t2w']:
-            self._results['t2w'] = t2w
+        self._results["use_t2w"] = t2w is not None
+        if self._results["use_t2w"]:
+            self._results["t2w"] = t2w
 
-        self._results['use_flair'] = flair is not None
-        if self._results['use_flair']:
-            self._results['flair'] = flair
+        self._results["use_flair"] = flair is not None
+        if self._results["use_flair"]:
+            self._results["flair"] = flair
 
-        if self._results['hires']:
-            self._results['mris_inflate'] = mris_inflate
+        if self._results["hires"]:
+            self._results["mris_inflate"] = mris_inflate
 
         return runtime
 
@@ -197,7 +214,7 @@ class TruncateLTA(object):
     """
 
     # Use a tuple in case some object produces multiple transforms
-    lta_outputs = ('out_lta_file',)
+    lta_outputs = ("out_lta_file",)
 
     def _post_run_hook(self, runtime):
 
@@ -226,7 +243,8 @@ class PatchedConcatenateLTA(TruncateLTA, ConcatenateLTA):
 
     the fix is now done through mixin with TruncateLTA
     """
-    lta_outputs = ['out_file']
+
+    lta_outputs = ["out_file"]
 
 
 class PatchedLTAConvert(TruncateLTA, LTAConvert):
@@ -234,7 +252,8 @@ class PatchedLTAConvert(TruncateLTA, LTAConvert):
     LTAconvert is producing a lta file refer as out_lta
     truncate filename through mixin TruncateLTA
     """
-    lta_outputs = ('out_lta',)
+
+    lta_outputs = ("out_lta",)
 
 
 class PatchedBBRegisterRPT(TruncateLTA, BBRegisterRPT):
@@ -246,20 +265,25 @@ class PatchedMRICoregRPT(TruncateLTA, MRICoregRPT):
 
 
 class PatchedRobustRegister(TruncateLTA, RobustRegister):
-    lta_outputs = ('out_reg_file', 'half_source_xfm', 'half_targ_xfm')
+    lta_outputs = ("out_reg_file", "half_source_xfm", "half_targ_xfm")
 
 
 class _RefineBrainMaskInputSpec(BaseInterfaceInputSpec):
-    in_anat = File(exists=True, mandatory=True,
-                   desc='input anatomical reference (INU corrected)')
-    in_aseg = File(exists=True, mandatory=True,
-                   desc='input ``aseg`` file, in NifTi format.')
-    in_ants = File(exists=True, mandatory=True,
-                   desc='brain tissue segmentation generated with antsBrainExtraction.sh')
+    in_anat = File(
+        exists=True, mandatory=True, desc="input anatomical reference (INU corrected)"
+    )
+    in_aseg = File(
+        exists=True, mandatory=True, desc="input ``aseg`` file, in NifTi format."
+    )
+    in_ants = File(
+        exists=True,
+        mandatory=True,
+        desc="brain tissue segmentation generated with antsBrainExtraction.sh",
+    )
 
 
 class _RefineBrainMaskOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='new mask')
+    out_file = File(exists=True, desc="new mask")
 
 
 class RefineBrainMask(SimpleInterface):
@@ -274,48 +298,51 @@ class RefineBrainMask(SimpleInterface):
 
     def _run_interface(self, runtime):
 
-        self._results['out_file'] = fname_presuffix(
-            self.inputs.in_anat, suffix='_rbrainmask', newpath=runtime.cwd)
+        self._results["out_file"] = fname_presuffix(
+            self.inputs.in_anat, suffix="_rbrainmask", newpath=runtime.cwd
+        )
 
         anatnii = nb.load(self.inputs.in_anat)
         msknii = nb.Nifti1Image(
-            grow_mask(anatnii.get_fdata(dtype='float32'),
-                      np.asanyarray(
-                          nb.load(self.inputs.in_aseg).dataobj).astype('int16'),
-                      np.asanyarray(
-                          nb.load(self.inputs.in_ants).dataobj).astype('int16')),
+            grow_mask(
+                anatnii.get_fdata(dtype="float32"),
+                np.asanyarray(nb.load(self.inputs.in_aseg).dataobj).astype("int16"),
+                np.asanyarray(nb.load(self.inputs.in_ants).dataobj).astype("int16"),
+            ),
             anatnii.affine,
-            anatnii.header
+            anatnii.header,
         )
         msknii.set_data_dtype(np.uint8)
-        msknii.to_filename(self._results['out_file'])
+        msknii.to_filename(self._results["out_file"])
 
         return runtime
 
 
 class _MedialNaNsInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc='input surface file')
-    subjects_dir = Directory(mandatory=True, desc='FreeSurfer SUBJECTS_DIR')
-    density = traits.Enum('32k', '59k', '164k', desc="Input file density (fsLR only)")
+    in_file = File(exists=True, mandatory=True, desc="input surface file")
+    subjects_dir = Directory(mandatory=True, desc="FreeSurfer SUBJECTS_DIR")
+    density = traits.Enum("32k", "59k", "164k", desc="Input file density (fsLR only)")
 
 
 class _MedialNaNsOutputSpec(TraitedSpec):
-    out_file = File(desc='the output surface file')
+    out_file = File(desc="the output surface file")
 
 
 class MedialNaNs(SimpleInterface):
     """
     The MedialNaNs converts from arbitrary units to rad/s
     """
+
     input_spec = _MedialNaNsInputSpec
     output_spec = _MedialNaNsOutputSpec
 
     def _run_interface(self, runtime):
-        self._results['out_file'] = medial_wall_to_nan(
+        self._results["out_file"] = medial_wall_to_nan(
             self.inputs.in_file,
             self.inputs.subjects_dir,
             self.inputs.density,
-            newpath=runtime.cwd)
+            newpath=runtime.cwd,
+        )
         return runtime
 
 
@@ -354,29 +381,31 @@ def fix_lta_length(lta_file):
     fixed = False
     newfile = []
     for line in lines:
-        if line.startswith('filename = ') and len(line.strip("\n")) >= 255:
+        if line.startswith("filename = ") and len(line.strip("\n")) >= 255:
             fixed = True
-            newfile.append('filename = path_too_long\n')
+            newfile.append("filename = path_too_long\n")
         else:
             newfile.append(line)
 
     if fixed:
-        Path(lta_file).write_text(''.join(newfile))
+        Path(lta_file).write_text("".join(newfile))
     return fixed
 
 
 def inject_skullstripped(subjects_dir, subject_id, skullstripped):
-    mridir = op.join(subjects_dir, subject_id, 'mri')
-    t1 = op.join(mridir, 'T1.mgz')
-    bm_auto = op.join(mridir, 'brainmask.auto.mgz')
-    bm = op.join(mridir, 'brainmask.mgz')
+    mridir = op.join(subjects_dir, subject_id, "mri")
+    t1 = op.join(mridir, "T1.mgz")
+    bm_auto = op.join(mridir, "brainmask.auto.mgz")
+    bm = op.join(mridir, "brainmask.mgz")
 
     if not op.exists(bm_auto):
         img = nb.load(t1)
         mask = nb.load(skullstripped)
         bmask = new_img_like(mask, np.asanyarray(mask.dataobj) > 0)
-        resampled_mask = resample_to_img(bmask, img, 'nearest')
-        masked_image = new_img_like(img, np.asanyarray(img.dataobj) * resampled_mask.dataobj)
+        resampled_mask = resample_to_img(bmask, img, "nearest")
+        masked_image = new_img_like(
+            img, np.asanyarray(img.dataobj) * resampled_mask.dataobj
+        )
         masked_image.to_filename(bm_auto)
 
     if not op.exists(bm):
@@ -404,7 +433,7 @@ def detect_inputs(t1w_list, t2w_list=None, flair_list=None, hires_enabled=True):
         flair = flair_list[0]
 
     # https://surfer.nmr.mgh.harvard.edu/fswiki/SubmillimeterRecon
-    mris_inflate = '-n 50' if hires else None
+    mris_inflate = "-n 50" if hires else None
     return (t2w, flair, hires, mris_inflate)
 
 
@@ -468,11 +497,11 @@ def grow_mask(anat, aseg, ants_segs=None, ww=7, zval=2.0, bw=4):
         window = gm[
             pixel[0] - ww:pixel[0] + ww,
             pixel[1] - ww:pixel[1] + ww,
-            pixel[2] - ww:pixel[2] + ww
+            pixel[2] - ww:pixel[2] + ww,
         ]
         if np.any(window > 0):
             mu = window[window > 0].mean()
-            sigma = max(window[window > 0].std(), 1.e-5)
+            sigma = max(window[window > 0].std(), 1.0e-5)
             zstat = abs(anat[tuple(pixel)] - mu) / sigma
             refined[tuple(pixel)] = int(zstat < zval)
 
@@ -489,18 +518,21 @@ def medial_wall_to_nan(in_file, subjects_dir, den=None, newpath=None):
 
     fn = os.path.basename(in_file)
     target_subject = in_file.split(".")[1]
-    if not target_subject.startswith('fs'):
+    if not target_subject.startswith("fs"):
         return in_file
 
     func = nb.load(in_file)
-    if target_subject.startswith('fsaverage'):
-        cortex = nb.freesurfer.read_label(os.path.join(
-            subjects_dir, target_subject, 'label', '{}.cortex.label'.format(fn[:2])))
+    if target_subject.startswith("fsaverage"):
+        cortex = nb.freesurfer.read_label(
+            os.path.join(
+                subjects_dir, target_subject, "label", "{}.cortex.label".format(fn[:2])
+            )
+        )
         medial = np.delete(np.arange(len(func.darrays[0].data)), cortex)
-    elif target_subject == 'fslr' and den is not None:
+    elif target_subject == "fslr" and den is not None:
         hemi = fn[0].upper()
         label_file = str(
-            tf.get('fsLR', hemi=hemi, desc='nomedialwall', density=den, suffix='dparc')
+            tf.get("fsLR", hemi=hemi, desc="nomedialwall", density=den, suffix="dparc")
         )
         label = nb.load(label_file)
         medial = np.invert(label.darrays[0].data.astype(bool))
@@ -522,6 +554,6 @@ def mri_info(fname, argument):
     cmd_info = "mri_info --%s %s" % (argument, fname)
     proc = sp.Popen(cmd_info, stdout=sp.PIPE, shell=True)
     data = bytearray(proc.stdout.read())
-    mstring = np.fromstring(data.decode("utf-8"), sep='\n')
+    mstring = np.fromstring(data.decode("utf-8"), sep="\n")
     result = np.reshape(mstring, (4, -1))
     return result
