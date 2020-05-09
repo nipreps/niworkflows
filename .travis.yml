@@ -1,6 +1,6 @@
 # vim ft=yaml
+os: linux
 dist: xenial
-sudo: true
 language: python
 
 cache:
@@ -17,25 +17,17 @@ env:
     - CHECK_TYPE="install"
     - INSTALL_TYPE="pip"
     - INSTALL_DEPENDS="pip setuptools"
-  matrix:
+  jobs:
     - CHECK_TYPE="style"
     - CHECK_TYPE="test"
     - INSTALL_TYPE="sdist"
     - INSTALL_TYPE="wheel"
-    - INSTALL_DEPENDS="pip==18.1 setuptools==30.2.1"
-    - INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
+    - INSTALL_DEPENDS="pip==19.0 setuptools==30.2.1"
 
-matrix:
+jobs:
   exclude:
   - python: 3.7
     env: CHECK_TYPE="style"
-  allow_failures:
-  - python: 3.6
-    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
-  - python: 3.7
-    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
-  - python: 3.8
-    env: INSTALL_DEPENDS="pip==10.0.1 setuptools==30.4.0"
 
 before_install:
   - python -m pip install --upgrade pip virtualenv
@@ -78,6 +70,7 @@ before_script:
             tar xvzf - -C $HOME/.cache/stanford-crn
         curl -sSL "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f328f6b83f6901ef94cf70" |
             tar xvzf - -C $HOME/.cache/stanford-crn
+        python -c "import skimage"      # XXX: temporary hack; remove when Pooch 1.1.1 or higher is released
     fi
 
 script:
