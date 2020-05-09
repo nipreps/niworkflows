@@ -39,7 +39,7 @@ before_install:
   - python -m pip --version
   - |
     if [ "$INSTALL_TYPE" == "pip" ]; then
-        PACKAGE="-e ."
+        PACKAGE="."
     elif [ "$INSTALL_TYPE" == "sdist" ]; then
         python setup.py sdist
         PACKAGE="$( ls dist/*.tar.gz )"
