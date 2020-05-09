@@ -356,7 +356,7 @@ jobs:
       - run: pyenv local 3.7.0
       - run:
           name: Install build depends
-          command: python3 -m pip install "setuptools>=30.4.0" "pip>=10.0.1" "twine<2.0" docutils
+          command: python3 -m pip install "setuptools>=40.8.0" "pip>=19" "twine<2.0" docutils
       - run:
           name: Build and check
           command: |
@@ -381,7 +381,7 @@ jobs:
       - run: pyenv local 3.7.0
       - run:
           name: Install build depends
-          command: python3 -m pip install "setuptools>=30.4.0" "pip>=10.0.1" "twine<2.0" docutils
+          command: python3 -m pip install "setuptools>=40.8.0" "pip>=19" "twine<2.0" docutils
       - run:
           name: Build and check
           command: |
