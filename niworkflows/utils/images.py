@@ -179,7 +179,7 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True):
         prefilter=True,
     ).reshape(new_size)
     if clip:
-        resampled = np.clip(resampled, min=data.min(), max=data.max())
+        resampled = np.clip(resampled, a_min=data.min(), a_max=data.max())
 
     # Prepare output x-forms
     sform, scode = hdr.get_sform(coded=True)
