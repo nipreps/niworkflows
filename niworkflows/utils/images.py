@@ -137,6 +137,10 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True):
     if isinstance(in_file, (str, Path)):
         in_file = nb.load(in_file)
 
+    # Prepare output x-forms
+    sform, scode = in_file.get_sform(coded=True)
+    qform, qcode = in_file.get_qform(coded=True)
+
     hdr = in_file.header.copy()
     dtype = hdr.get_data_dtype()
     data = np.asanyarray(in_file.dataobj)
@@ -181,22 +185,20 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True):
     if clip:
         resampled = np.clip(resampled, a_min=data.min(), a_max=data.max())
 
+    # Set new zooms
     hdr.set_zooms(zooms)
-    # Prepare output x-forms
-    sform, scode = hdr.get_sform(coded=True)
-    qform, qcode = hdr.get_qform(coded=True)
 
     # Get the original image's affine
-    affine = in_file.affine
+    affine = in_file.affine.copy()
     # Determine rotations w.r.t. cardinal axis and eccentricity
     rot = affine.dot(np.linalg.inv(card))
     # Apply to the new cardinal, so that the resampling is consistent
     new_affine = rot.dot(new_card)
 
-    if scode != 0:
-        hdr.set_sform(new_affine.dot(np.linalg.inv(affine).dot(sform)), code=int(scode))
     if qcode != 0:
         hdr.set_qform(new_affine.dot(np.linalg.inv(affine).dot(qform)), code=int(qcode))
+    if scode != 0:
+        hdr.set_sform(new_affine.dot(np.linalg.inv(affine).dot(sform)), code=int(scode))
     if (scode, qcode) == (0, 0):
         hdr.set_qform(new_affine, code=1)
         hdr.set_sform(new_affine, code=1)
