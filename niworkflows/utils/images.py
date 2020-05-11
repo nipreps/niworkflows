@@ -181,6 +181,7 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True):
     if clip:
         resampled = np.clip(resampled, a_min=data.min(), a_max=data.max())
 
+    hdr.set_zooms(zooms)
     # Prepare output x-forms
     sform, scode = hdr.get_sform(coded=True)
     qform, qcode = hdr.get_qform(coded=True)
@@ -196,6 +197,9 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True):
         hdr.set_sform(new_affine.dot(np.linalg.inv(affine).dot(sform)), code=int(scode))
     if qcode != 0:
         hdr.set_qform(new_affine.dot(np.linalg.inv(affine).dot(qform)), code=int(qcode))
+    if (scode, qcode) == (0, 0):
+        hdr.set_qform(new_affine, code=1)
+        hdr.set_sform(new_affine, code=1)
 
     # Create a new x-form affine, aligned with cardinal axes, 1mm3 and centered.
     return nb.Nifti1Image(resampled, new_affine, hdr)
