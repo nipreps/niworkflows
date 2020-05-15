@@ -70,7 +70,6 @@ before_script:
             tar xvzf - -C $HOME/.cache/stanford-crn
         curl -sSL "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f328f6b83f6901ef94cf70" |
             tar xvzf - -C $HOME/.cache/stanford-crn
-        python -c "import skimage"      # XXX: temporary hack; remove when Pooch 1.1.1 or higher is released
     fi
 
 script:
