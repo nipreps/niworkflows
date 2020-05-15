@@ -214,3 +214,30 @@ def test_generated_reportlets(bids_sessions, ordering):
         assert reportlets_num == expected_reportlets_num == out_figs
     else:
         assert reportlets_num < expected_reportlets_num == out_figs
+
+
+@pytest.mark.parametrize(
+    "subject_id,out_html", [
+        ('sub-01', 'sub-01.html'),
+        ('sub-sub1', 'sub-sub1.html'),
+        ('01', 'sub-01.html'),
+        ('sub1', 'sub-sub1.html'),
+    ]
+)
+def test_subject_id(tmp_path, subject_id, out_html):
+    reports = tmp_path / 'reports'
+    Path(
+        reports
+        / 'fmriprep'
+        / (subject_id if subject_id.startswith('sub-') else f'sub-{subject_id}')
+    ).mkdir(parents=True)
+
+    report = Report(
+        str(tmp_path),
+        'myuniqueid',
+        reportlets_dir=reports,
+        subject_id=subject_id,
+        packagename='fmriprep',
+    )
+    assert report.subject_id[:4] != 'sub-'
+    assert report.out_filename == out_html
