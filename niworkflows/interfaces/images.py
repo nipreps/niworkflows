@@ -734,7 +734,7 @@ class SignalExtraction(SimpleInterface):
             labelsmap = np.asanyarray(mask_imgs[0].dataobj)
             labels = np.unique(labelsmap)
             labels = labels[labels != 0]
-            masks = [labelsmap == l for l in labels]
+            masks = [labelsmap == label for label in labels]
 
         if len(masks) != len(self.inputs.class_labels):
             raise ValueError("Number of masks must match number of labels")

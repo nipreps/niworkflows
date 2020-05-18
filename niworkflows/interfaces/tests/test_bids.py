@@ -46,7 +46,7 @@ BOLD_PATH = 'ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
     (T1W_PATH, ["anat.nii", "anat.json"], {"desc": "preproc"},
         [f"sub-100185/anat/sub-100185_desc-preproc_T1w.{ext}" for ext in ("nii", "json")]),
     (T1W_PATH, ["anat.nii.gz"] * 3, {"label": ["GM", "WM", "CSF"], "suffix": "probseg"},
-        [f"sub-100185/anat/sub-100185_label-{l}_probseg.nii.gz" for l in ("GM", "WM", "CSF")]),
+        [f"sub-100185/anat/sub-100185_label-{lab}_probseg.nii.gz" for lab in ("GM", "WM", "CSF")]),
 
     # BOLD data
     (BOLD_PATH, ["aroma.csv"], {"suffix": "AROMAnoiseICs"},

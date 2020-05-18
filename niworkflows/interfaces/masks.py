@@ -263,7 +263,7 @@ class ROIsPlot(nrc.ReportingInterface):
             else self.inputs.in_mask
 
         # Remove trait decoration and replace None with []
-        levels = [l for l in self.inputs.levels or []]
+        levels = [level for level in self.inputs.levels or []]
         colors = [c for c in self.inputs.colors or []]
 
         if len(seg_files) == 1:  # in_rois is a segmentation
