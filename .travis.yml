@@ -22,7 +22,7 @@ env:
     - CHECK_TYPE="test"
     - INSTALL_TYPE="sdist"
     - INSTALL_TYPE="wheel"
-    - INSTALL_DEPENDS="pip==19.0 setuptools==40.8.0"
+    - INSTALL_DEPENDS="pip==19.0.2 setuptools==40.8.0"
 
 jobs:
   exclude:

@@ -789,10 +789,10 @@ def _select_labels(in_segm, labels):
     cwd = getcwd()
     nii = nb.load(in_segm)
     label_data = np.asanyarray(nii.dataobj).astype('uint8')
-    for l in labels:
-        newnii = nii.__class__(np.uint8(label_data == l), nii.affine, nii.header)
+    for label in labels:
+        newnii = nii.__class__(np.uint8(label_data == label), nii.affine, nii.header)
         newnii.set_data_dtype('uint8')
-        out_file = fname_presuffix(in_segm, suffix='_class-%02d' % l,
+        out_file = fname_presuffix(in_segm, suffix='_class-%02d' % label,
                                    newpath=cwd)
         newnii.to_filename(out_file)
         out_files.append(out_file)
