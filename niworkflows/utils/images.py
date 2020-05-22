@@ -13,7 +13,7 @@ def unsafe_write_nifti_header_and_data(fname, header, data):
     with Fortran-ordered fire.
     """
     # ImageOpener handles zips transparently
-    with nb.openers.ImageOpener(fname, mode='wb') as fobj:
+    with nb.openers.ImageOpener(fname, mode="wb") as fobj:
         header.write_to(fobj)
         # This function serializes one block at a time to reduce memory usage a bit
         # It assumes Fortran-ordered data.
@@ -66,7 +66,7 @@ def overwrite_header(img, fname):
     header = img.header
     dataobj = img.dataobj
 
-    if getattr(img.dataobj, '_mmap', False):
+    if getattr(img.dataobj, "_mmap", False):
         raise ValueError("Image loaded with `mmap=True`. Aborting unsafe operation.")
 
     set_consumables(header, dataobj)
@@ -83,13 +83,12 @@ def overwrite_header(img, fname):
     ):
         raise ValueError(errmsg("data blocks are not the same size"))
 
-    if img.header['vox_offset'] != ondisk.dataobj.offset:
+    if img.header["vox_offset"] != ondisk.dataobj.offset:
         raise ValueError(errmsg("change in offset from start of file"))
 
-    if (
-        not np.allclose(img.header['scl_slope'], ondisk.dataobj.slope, equal_nan=True)
-        or not np.allclose(img.header['scl_inter'], ondisk.dataobj.inter, equal_nan=True)
-    ):
+    if not np.allclose(
+        img.header["scl_slope"], ondisk.dataobj.slope, equal_nan=True
+    ) or not np.allclose(img.header["scl_inter"], ondisk.dataobj.inter, equal_nan=True):
         raise ValueError(errmsg("change in scale factors"))
 
     data = np.asarray(dataobj.get_unscaled())
@@ -116,13 +115,12 @@ def dseg_label(in_seg, label, newpath=None):
     import numpy as np
     from nipype.utils.filemanip import fname_presuffix
 
-    newpath = Path(newpath or '.')
+    newpath = Path(newpath or ".")
 
     nii = nb.load(in_seg)
     data = np.int16(nii.dataobj) == label
 
-    out_file = fname_presuffix(in_seg, suffix='_mask',
-                               newpath=str(newpath.absolute()))
+    out_file = fname_presuffix(in_seg, suffix="_mask", newpath=str(newpath.absolute()))
     new = nii.__class__(data, nii.affine, nii.header)
     new.set_data_dtype(np.uint8)
     new.to_filename(out_file)

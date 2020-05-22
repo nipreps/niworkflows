@@ -4,9 +4,13 @@
 
 from pathlib import Path
 from nipype.interfaces.base import (
-    TraitedSpec, BaseInterfaceInputSpec, File,
-    SimpleInterface, InputMultiObject,
-    traits, isdefined,
+    TraitedSpec,
+    BaseInterfaceInputSpec,
+    File,
+    SimpleInterface,
+    InputMultiObject,
+    traits,
+    isdefined,
 )
 from nitransforms.manip import TransformChain
 from nitransforms.linear import load as load_affine
@@ -23,10 +27,16 @@ class _ConcatenateXFMsInputSpec(BaseInterfaceInputSpec):
     in_xfms = InputMultiObject(File(exists=True), desc="input transform piles")
     inverse = traits.Bool(False, usedefault=True, desc="generate inverse")
     out_fmt = traits.Enum("itk", "fs", usedefault=True, desc="output format")
-    reference = File(exists=True, desc="reference file (only for writing LTA format, if not "
-                                       "concatenating another LTA).")
-    moving = File(exists=True, desc="moving file (only for writing LTA format, if not "
-                                    "concatenating another LTA).")
+    reference = File(
+        exists=True,
+        desc="reference file (only for writing LTA format, if not "
+        "concatenating another LTA).",
+    )
+    moving = File(
+        exists=True,
+        desc="moving file (only for writing LTA format, if not "
+        "concatenating another LTA).",
+    )
 
 
 class _ConcatenateXFMsOutputSpec(TraitedSpec):
@@ -51,19 +61,19 @@ class ConcatenateXFMs(SimpleInterface):
             out_inv = Path(runtime.cwd) / f"out_inv.{out_ext}"
             self._results["out_inv"] = str(out_inv)
 
-        concatenate_xfms(self.inputs.in_xfms, out_file, out_inv,
-                         reference=reference, moving=moving,
-                         fmt=self.inputs.out_fmt)
+        concatenate_xfms(
+            self.inputs.in_xfms,
+            out_file,
+            out_inv,
+            reference=reference,
+            moving=moving,
+            fmt=self.inputs.out_fmt,
+        )
         return runtime
 
 
 def concatenate_xfms(
-    in_files,
-    out_file,
-    out_inv=None,
-    reference=None,
-    moving=None,
-    fmt="itk"
+    in_files, out_file, out_inv=None, reference=None, moving=None, fmt="itk"
 ):
     """Concatenate linear transforms."""
     xfm = TransformChain(

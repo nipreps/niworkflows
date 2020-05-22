@@ -6,24 +6,24 @@ from itertools import product
 from templateflow import api as _tfapi
 
 NONSTANDARD_REFERENCES = [
-    'T1w',
-    'T2w',
-    'anat',
-    'fsnative',
-    'func',
-    'run',
-    'sbref',
-    'session',
+    "T1w",
+    "T2w",
+    "anat",
+    "fsnative",
+    "func",
+    "run",
+    "sbref",
+    "session",
 ]
 """List of supported nonstandard reference spaces."""
 
 
 FSAVERAGE_DENSITY = {
-    'fsaverage3': '642',
-    'fsaverage4': '2562',
-    'fsaverage5': '10k',
-    'fsaverage6': '41k',
-    'fsaverage': '164k',
+    "fsaverage3": "642",
+    "fsaverage4": "2562",
+    "fsaverage5": "10k",
+    "fsaverage6": "41k",
+    "fsaverage": "164k",
 }
 """A map of legacy fsaverageX names to surface densities."""
 
@@ -117,8 +117,10 @@ class Reference:
 
     space = attr.ib(default=None, type=str)
     """Name designating this space."""
-    spec = attr.ib(factory=dict, validator=attr.validators.optional(
-        attr.validators.instance_of(dict)))
+    spec = attr.ib(
+        factory=dict,
+        validator=attr.validators.optional(attr.validators.instance_of(dict)),
+    )
     """The dictionary of specs."""
     standard = attr.ib(default=False, repr=False, type=bool)
     """Whether this space is standard or not."""
@@ -130,38 +132,40 @@ class Reference:
         if self.spec is None:
             object.__setattr__(self, "spec", {})
 
-        if self.space.startswith('fsaverage'):
+        if self.space.startswith("fsaverage"):
             space = self.space
             object.__setattr__(self, "space", "fsaverage")
 
-            if 'den' not in self.spec or space != "fsaverage":
+            if "den" not in self.spec or space != "fsaverage":
                 spec = self.spec.copy()
-                spec['den'] = FSAVERAGE_DENSITY[space]
+                spec["den"] = FSAVERAGE_DENSITY[space]
                 object.__setattr__(self, "spec", spec)
 
-        if self.space.startswith('fs'):
+        if self.space.startswith("fs"):
             object.__setattr__(self, "dim", 2)
 
         if self.space in self._standard_spaces:
             object.__setattr__(self, "standard", True)
 
-        _cohorts = ["%s" % t
-                    for t in _tfapi.TF_LAYOUT.get_cohorts(template=self.space)]
+        _cohorts = ["%s" % t for t in _tfapi.TF_LAYOUT.get_cohorts(template=self.space)]
         if "cohort" in self.spec:
             if not _cohorts:
                 raise ValueError(
                     'standard space "%s" does not accept a cohort '
-                    'specification.' % self.space)
+                    "specification." % self.space
+                )
 
             if str(self.spec["cohort"]) not in _cohorts:
                 raise ValueError(
                     'standard space "%s" does not contain any cohort '
-                    'named "%s".' % (self.space, self.spec["cohort"]))
+                    'named "%s".' % (self.space, self.spec["cohort"])
+                )
         elif _cohorts:
-            _cohorts = ', '.join(['"cohort-%s"' % c for c in _cohorts])
+            _cohorts = ", ".join(['"cohort-%s"' % c for c in _cohorts])
             raise ValueError(
                 'standard space "%s" is not fully defined.\n'
-                'Set a valid cohort selector from: %s.' % (self.space, _cohorts))
+                "Set a valid cohort selector from: %s." % (self.space, _cohorts)
+            )
 
     @property
     def fullname(self):
@@ -211,13 +215,14 @@ class Reference:
 
     @space.validator
     def _check_name(self, attribute, value):
-        if value.startswith('fsaverage'):
+        if value.startswith("fsaverage"):
             return
         valid = list(self._standard_spaces) + NONSTANDARD_REFERENCES
         if value not in valid:
             raise ValueError(
                 'space identifier "%s" is invalid.\nValid '
-                'identifiers are: %s' % (value, ', '.join(valid)))
+                "identifiers are: %s" % (value, ", ".join(valid))
+            )
 
     def __str__(self):
         """
@@ -229,8 +234,9 @@ class Reference:
         'MNIPediatricAsym:cohort-2:res-1'
 
         """
-        return ':'.join([self.space] + [
-            '-'.join((k, str(v))) for k, v in sorted(self.spec.items())])
+        return ":".join(
+            [self.space] + ["-".join((k, str(v))) for k, v in sorted(self.spec.items())]
+        )
 
     @classmethod
     def from_string(cls, value):
@@ -295,10 +301,10 @@ class Reference:
          Reference(space='MNIPediatricAsym', spec={'cohort': '6', 'res': 'iso1.6mm'})]
 
         """
-        _args = value.split(':')
+        _args = value.split(":")
         spec = defaultdict(list, {})
         for modifier in _args[1:]:
-            mitems = modifier.split('-', 1)
+            mitems = modifier.split("-", 1)
             spec[mitems[0]].append(len(mitems) == 1 or mitems[1])
 
         allspecs = _expand_entities(spec)
@@ -414,7 +420,7 @@ class SpatialReferences:
 
     """
 
-    __slots__ = ('_refs', '_cached')
+    __slots__ = ("_refs", "_cached")
     standard_spaces = tuple(_tfapi.templates())
     """List of supported standard reference spaces."""
 
@@ -434,7 +440,7 @@ class SpatialReferences:
             except IndexError:
                 pass
             except TypeError:
-                space = (None, )
+                space = (None,)
 
             space = space[0]
         return Reference(space, spec)
@@ -460,7 +466,7 @@ class SpatialReferences:
     def __iadd__(self, b):
         """Append a list of transforms to the internal list."""
         if not isinstance(b, (list, tuple)):
-            raise TypeError('Must be a list.')
+            raise TypeError("Must be a list.")
 
         for space in b:
             self.append(space)
@@ -492,8 +498,8 @@ class SpatialReferences:
         Spatial References: MNI152NLin2009cAsym, fsaverage:den-10k
 
         """
-        spaces = ', '.join([str(s) for s in self.references]) or '<none>.'
-        return 'Spatial References: %s' % spaces
+        spaces = ", ".join([str(s) for s in self.references]) or "<none>."
+        return "Spatial References: %s" % spaces
 
     @property
     def references(self):
@@ -603,10 +609,11 @@ class SpatialReferences:
             return [s for s in self.references if s.standard and s.dim in dim]
 
         return [
-            s for s in self.references
+            s
+            for s in self.references
             if s.standard
             and s.dim in dim
-            and (hasspec('res', s.spec) or hasspec('den', s.spec))
+            and (hasspec("res", s.spec) or hasspec("den", s.spec))
         ]
 
     def get_nonstandard(self, full_spec=False, dim=(2, 3)):
@@ -614,10 +621,11 @@ class SpatialReferences:
         if not full_spec:
             return [s.space for s in self.references if not s.standard and s.dim in dim]
         return [
-            s.space for s in self.references
+            s.space
+            for s in self.references
             if not s.standard
             and s.dim in dim
-            and (hasspec('res', s.spec) or hasspec('den', s.spec))
+            and (hasspec("res", s.spec) or hasspec("den", s.spec))
         ]
 
     def get_fs_spaces(self):
@@ -644,9 +652,11 @@ class SpatialReferences:
         ['fsnative', 'fsaverage6']
 
         """
-        return [s.legacyname or s.space
-                for s in self.references
-                if s.legacyname or s.space == "fsnative"]
+        return [
+            s.legacyname or s.space
+            for s in self.references
+            if s.legacyname or s.space == "fsnative"
+        ]
 
 
 class OutputReferencesAction(argparse.Action):
@@ -662,7 +672,7 @@ class OutputReferencesAction(argparse.Action):
             val = val.rstrip(":")
             if (
                 val not in NONSTANDARD_REFERENCES
-                and not val.split(':')[0].startswith('fs')
+                and not val.split(":")[0].startswith("fs")
                 and ":res-" not in val
                 and ":resolution-" not in val
             ):
@@ -696,11 +706,11 @@ def format_reference(in_tuple):
     'MNIPediatricAsym_cohort-2_res-2'
 
     """
-    out = in_tuple[0].split(':')
-    res = in_tuple[1].get('res', None) or in_tuple[1].get('resolution', None)
+    out = in_tuple[0].split(":")
+    res = in_tuple[1].get("res", None) or in_tuple[1].get("resolution", None)
     if res:
-        out.append('-'.join(('res', str(res))))
-    return '_'.join(out)
+        out.append("-".join(("res", str(res))))
+    return "_".join(out)
 
 
 def reference2dict(in_tuple):
@@ -721,13 +731,14 @@ def reference2dict(in_tuple):
     """
     tpl_entities = ("space", "cohort")
     retval = {
-        tpl_entities[i]: v.split("-")[i]
-        for i, v in enumerate(in_tuple[0].split(':'))
+        tpl_entities[i]: v.split("-")[i] for i, v in enumerate(in_tuple[0].split(":"))
     }
-    retval.update({
-        "resolution" if k == "res" else "density" if k == "den" else k: f"{v}"
-        for k, v in in_tuple[1].items()
-    })
+    retval.update(
+        {
+            "resolution" if k == "res" else "density" if k == "den" else k: f"{v}"
+            for k, v in in_tuple[1].items()
+        }
+    )
     return retval
 
 

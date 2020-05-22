@@ -11,13 +11,16 @@ import numpy as np
 from nipype.interfaces.ants.registration import RegistrationOutputSpec
 from nipype.interfaces.ants import AffineInitializer
 from nipype.interfaces.base import (
-    traits, isdefined, BaseInterface, BaseInterfaceInputSpec, File)
+    traits,
+    isdefined,
+    BaseInterface,
+    BaseInterfaceInputSpec,
+    File,
+)
 
 from templateflow.api import get as get_template
 from .. import NIWORKFLOWS_LOG, __version__
-from .fixes import (
-    FixHeaderRegistration as Registration
-)
+from .fixes import FixHeaderRegistration as Registration
 
 
 niworkflows_version = Version(__version__)
@@ -28,51 +31,80 @@ class _RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     package_version = niworkflows_version
 
     # Moving image.
-    moving_image = File(exists=True, mandatory=True, desc='image to apply transformation to')
+    moving_image = File(
+        exists=True, mandatory=True, desc="image to apply transformation to"
+    )
     # Reference image (optional).
-    reference_image = File(exists=True, desc='override the reference image')
+    reference_image = File(exists=True, desc="override the reference image")
     # Moving mask (optional).
-    moving_mask = File(exists=True, desc='moving image mask')
+    moving_mask = File(exists=True, desc="moving image mask")
     # Reference mask (optional).
-    reference_mask = File(exists=True, desc='reference image mask')
+    reference_mask = File(exists=True, desc="reference image mask")
     # Lesion mask (optional).
-    lesion_mask = File(exists=True, desc='lesion mask image')
+    lesion_mask = File(exists=True, desc="lesion mask image")
     # Number of threads to use for ANTs/ITK processes.
-    num_threads = traits.Int(cpu_count(), usedefault=True, nohash=True,
-                             desc="Number of ITK threads to use")
+    num_threads = traits.Int(
+        cpu_count(), usedefault=True, nohash=True, desc="Number of ITK threads to use"
+    )
     # ANTs parameter set to use.
-    flavor = traits.Enum('precise', 'testing', 'fast', usedefault=True,
-                         desc='registration settings parameter set')
+    flavor = traits.Enum(
+        "precise",
+        "testing",
+        "fast",
+        usedefault=True,
+        desc="registration settings parameter set",
+    )
     # Template orientation.
-    orientation = traits.Enum('RAS', 'LAS', mandatory=True, usedefault=True,
-                              desc='modify template orientation (should match input image)')
+    orientation = traits.Enum(
+        "RAS",
+        "LAS",
+        mandatory=True,
+        usedefault=True,
+        desc="modify template orientation (should match input image)",
+    )
     # Modality of the reference image.
-    reference = traits.Enum('T1w', 'T2w', 'boldref', 'PDw', mandatory=True, usedefault=True,
-                            desc='set the reference modality for registration')
+    reference = traits.Enum(
+        "T1w",
+        "T2w",
+        "boldref",
+        "PDw",
+        mandatory=True,
+        usedefault=True,
+        desc="set the reference modality for registration",
+    )
     # T1 or EPI registration?
-    moving = traits.Enum('T1w', 'boldref', usedefault=True, mandatory=True,
-                         desc='registration type')
+    moving = traits.Enum(
+        "T1w", "boldref", usedefault=True, mandatory=True, desc="registration type"
+    )
     # Template to use as the default reference image.
-    template = traits.Str('MNI152NLin2009cAsym', usedefault=True,
-                          desc='define the template to be used')
+    template = traits.Str(
+        "MNI152NLin2009cAsym", usedefault=True, desc="define the template to be used"
+    )
     # Load other settings from file.
-    settings = traits.List(File(exists=True), desc='pass on the list of settings files')
+    settings = traits.List(File(exists=True), desc="pass on the list of settings files")
     # Resolution of the default template.
-    template_spec = traits.DictStrAny(desc='template specifications')
-    template_resolution = traits.Enum(1, 2, desc='(DEPRECATED) template resolution')
+    template_spec = traits.DictStrAny(desc="template specifications")
+    template_resolution = traits.Enum(1, 2, desc="(DEPRECATED) template resolution")
     # Use explicit masking?
-    explicit_masking = traits.Bool(True, usedefault=True,
-                                   desc="""\
+    explicit_masking = traits.Bool(
+        True,
+        usedefault=True,
+        desc="""\
 Set voxels outside the masks to zero thus creating an artificial border
 that can drive the registration. Requires reliable and accurate masks.
 See https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba\
-""")
-    initial_moving_transform = File(exists=True, desc='transform for initialization')
-    float = traits.Bool(False, usedefault=True, desc='use single precision calculations')
+""",
+    )
+    initial_moving_transform = File(exists=True, desc="transform for initialization")
+    float = traits.Bool(
+        False, usedefault=True, desc="use single precision calculations"
+    )
 
 
 class _RobustMNINormalizationOutputSpec(RegistrationOutputSpec):
-    reference_image = File(exists=True, desc='reference image used for registration target')
+    reference_image = File(
+        exists=True, desc="reference image used for registration target"
+    )
 
 
 class RobustMNINormalization(BaseInterface):
@@ -82,19 +114,20 @@ class RobustMNINormalization(BaseInterface):
     Several settings are sequentially tried until some work.
 
     """
+
     input_spec = _RobustMNINormalizationInputSpec
     output_spec = _RobustMNINormalizationOutputSpec
 
     def _list_outputs(self):
         outputs = self.norm._list_outputs()
-        outputs['reference_image'] = self._reference_image
+        outputs["reference_image"] = self._reference_image
         return outputs
 
     def __init__(self, **inputs):
         self.norm = None
         self._reference_image = None
         self.retry = 1
-        self.terminal_output = 'file'
+        self.terminal_output = "file"
         super(RobustMNINormalization, self).__init__(**inputs)
 
     def _get_settings(self):
@@ -105,19 +138,24 @@ class RobustMNINormalization(BaseInterface):
         # If user-defined settings exist...
         if isdefined(self.inputs.settings):
             # Note this in the log and return those settings.
-            NIWORKFLOWS_LOG.info('User-defined settings, overriding defaults')
+            NIWORKFLOWS_LOG.info("User-defined settings, overriding defaults")
             return self.inputs.settings
 
         # Define a prefix for output files based on the modality of the moving image.
-        filestart = '{}-mni_registration_{}_'.format(
-            self.inputs.moving.lower(), self.inputs.flavor)
+        filestart = "{}-mni_registration_{}_".format(
+            self.inputs.moving.lower(), self.inputs.flavor
+        )
 
         # Get a list of settings files that match the flavor.
-        filenames = [i for i in pkgr.resource_listdir('niworkflows', 'data')
-                     if i.startswith(filestart) and i.endswith('.json')]
+        filenames = [
+            i
+            for i in pkgr.resource_listdir("niworkflows", "data")
+            if i.startswith(filestart) and i.endswith(".json")
+        ]
         # Return the settings files.
-        return [pkgr.resource_filename('niworkflows.data', f)
-                for f in sorted(filenames)]
+        return [
+            pkgr.resource_filename("niworkflows.data", f) for f in sorted(filenames)
+        ]
 
     def _run_interface(self, runtime):
         # Get a list of settings files.
@@ -125,27 +163,29 @@ class RobustMNINormalization(BaseInterface):
         ants_args = self._get_ants_args()
 
         if not isdefined(self.inputs.initial_moving_transform):
-            NIWORKFLOWS_LOG.info('Estimating initial transform using AffineInitializer')
+            NIWORKFLOWS_LOG.info("Estimating initial transform using AffineInitializer")
             init = AffineInitializer(
-                fixed_image=ants_args['fixed_image'],
-                moving_image=ants_args['moving_image'],
-                num_threads=self.inputs.num_threads)
+                fixed_image=ants_args["fixed_image"],
+                moving_image=ants_args["moving_image"],
+                num_threads=self.inputs.num_threads,
+            )
             init.resource_monitor = False
-            init.terminal_output = 'allatonce'
+            init.terminal_output = "allatonce"
             init_result = init.run()
             # Save outputs (if available)
-            init_out = _write_outputs(init_result.runtime, '.nipype-init')
+            init_out = _write_outputs(init_result.runtime, ".nipype-init")
             if init_out:
                 NIWORKFLOWS_LOG.info(
-                    'Terminal outputs of initialization saved (%s).',
-                    ', '.join(init_out))
+                    "Terminal outputs of initialization saved (%s).",
+                    ", ".join(init_out),
+                )
 
-            ants_args['initial_moving_transform'] = init_result.outputs.out_file
+            ants_args["initial_moving_transform"] = init_result.outputs.out_file
 
         # For each settings file...
         for ants_settings in settings_files:
 
-            NIWORKFLOWS_LOG.info('Loading settings from file %s.', ants_settings)
+            NIWORKFLOWS_LOG.info("Loading settings from file %s.", ants_settings)
             # Configure an ANTs run based on these settings.
             self.norm = Registration(from_file=ants_settings, **ants_args)
             self.norm.resource_monitor = False
@@ -153,28 +193,30 @@ class RobustMNINormalization(BaseInterface):
 
             cmd = self.norm.cmdline
             # Print the retry number and command line call to the log.
-            NIWORKFLOWS_LOG.info(
-                'Retry #%d, commandline: \n%s', self.retry, cmd)
+            NIWORKFLOWS_LOG.info("Retry #%d, commandline: \n%s", self.retry, cmd)
             self.norm.ignore_exception = True
-            with open('command.txt', 'w') as cmdfile:
+            with open("command.txt", "w") as cmdfile:
                 print(cmd + "\n", file=cmdfile)
 
             # Try running registration.
             interface_result = self.norm.run()
 
             if interface_result.runtime.returncode != 0:
-                NIWORKFLOWS_LOG.warning('Retry #%d failed.', self.retry)
+                NIWORKFLOWS_LOG.warning("Retry #%d failed.", self.retry)
                 # Save outputs (if available)
-                term_out = _write_outputs(interface_result.runtime,
-                                          '.nipype-%04d' % self.retry)
+                term_out = _write_outputs(
+                    interface_result.runtime, ".nipype-%04d" % self.retry
+                )
                 if term_out:
                     NIWORKFLOWS_LOG.warning(
-                        'Log of failed retry saved (%s).', ', '.join(term_out))
+                        "Log of failed retry saved (%s).", ", ".join(term_out)
+                    )
             else:
                 runtime.returncode = 0
                 # Note this in the log.
                 NIWORKFLOWS_LOG.info(
-                    'Successful spatial normalization (retry #%d).', self.retry)
+                    "Successful spatial normalization (retry #%d).", self.retry
+                )
                 # Break out of the retry loop.
                 return runtime
 
@@ -182,15 +224,18 @@ class RobustMNINormalization(BaseInterface):
 
         # If all tries fail, raise an error.
         raise RuntimeError(
-            'Robust spatial normalization failed after %d retries.' % (self.retry - 1))
+            "Robust spatial normalization failed after %d retries." % (self.retry - 1)
+        )
 
     def _get_ants_args(self):
-        args = {'moving_image': self.inputs.moving_image,
-                'num_threads': self.inputs.num_threads,
-                'float': self.inputs.float,
-                'terminal_output': 'file',
-                'write_composite_transform': True,
-                'initial_moving_transform': self.inputs.initial_moving_transform}
+        args = {
+            "moving_image": self.inputs.moving_image,
+            "num_threads": self.inputs.num_threads,
+            "float": self.inputs.float,
+            "terminal_output": "file",
+            "write_composite_transform": True,
+            "initial_moving_transform": self.inputs.initial_moving_transform,
+        }
 
         """
         Moving image handling - The following truth table maps out the intended action
@@ -226,16 +271,17 @@ class RobustMNINormalization(BaseInterface):
             if self.inputs.explicit_masking:
                 # Mask the moving image.
                 # Do not use a moving mask during registration.
-                args['moving_image'] = mask(
+                args["moving_image"] = mask(
                     self.inputs.moving_image,
                     self.inputs.moving_mask,
-                    "moving_masked.nii.gz")
+                    "moving_masked.nii.gz",
+                )
 
             # If explicit masking is disabled...
             else:
                 # Use the moving mask during registration.
                 # Do not mask the moving image.
-                args['moving_image_masks'] = self.inputs.moving_mask
+                args["moving_image_masks"] = self.inputs.moving_mask
 
             # If a lesion mask is also provided...
             if isdefined(self.inputs.lesion_mask):
@@ -243,20 +289,22 @@ class RobustMNINormalization(BaseInterface):
                 # [global mask - lesion mask] (if explicit masking is enabled)
                 # [moving mask - lesion mask] (if explicit masking is disabled)
                 # Use this as the moving mask.
-                args['moving_image_masks'] = create_cfm(
+                args["moving_image_masks"] = create_cfm(
                     self.inputs.moving_mask,
                     lesion_mask=self.inputs.lesion_mask,
-                    global_mask=self.inputs.explicit_masking)
+                    global_mask=self.inputs.explicit_masking,
+                )
 
         # If no moving mask is provided...
         # But a lesion mask *IS* provided...
         elif isdefined(self.inputs.lesion_mask):
             # Create a cost function mask with the form: [global mask - lesion mask]
             # Use this as the moving mask.
-            args['moving_image_masks'] = create_cfm(
+            args["moving_image_masks"] = create_cfm(
                 self.inputs.moving_image,
                 lesion_mask=self.inputs.lesion_mask,
-                global_mask=True)
+                global_mask=True,
+            )
 
         """
         Reference image handling - The following truth table maps out the intended action
@@ -289,7 +337,7 @@ class RobustMNINormalization(BaseInterface):
         # If a reference image is provided...
         if isdefined(self.inputs.reference_image):
             # Use the reference image as the fixed image.
-            args['fixed_image'] = self.inputs.reference_image
+            args["fixed_image"] = self.inputs.reference_image
             self._reference_image = self.inputs.reference_image
 
             # If a reference mask is provided...
@@ -298,91 +346,107 @@ class RobustMNINormalization(BaseInterface):
                 if self.inputs.explicit_masking:
                     # Mask the reference image.
                     # Do not use a fixed mask during registration.
-                    args['fixed_image'] = mask(
+                    args["fixed_image"] = mask(
                         self.inputs.reference_image,
                         self.inputs.reference_mask,
-                        "fixed_masked.nii.gz")
+                        "fixed_masked.nii.gz",
+                    )
 
                     # If a lesion mask is also provided...
                     if isdefined(self.inputs.lesion_mask):
                         # Create a cost function mask with the form: [global mask]
                         # Use this as the fixed mask.
-                        args['fixed_image_masks'] = create_cfm(
+                        args["fixed_image_masks"] = create_cfm(
                             self.inputs.reference_mask,
                             lesion_mask=None,
-                            global_mask=True)
+                            global_mask=True,
+                        )
 
                 # If a reference mask is provided...
                 # But explicit masking is disabled...
                 else:
                     # Use the reference mask as the fixed mask during registration.
                     # Do not mask the fixed image.
-                    args['fixed_image_masks'] = self.inputs.reference_mask
+                    args["fixed_image_masks"] = self.inputs.reference_mask
 
             # If no reference mask is provided...
             # But a lesion mask *IS* provided ...
             elif isdefined(self.inputs.lesion_mask):
                 # Create a cost function mask with the form: [global mask]
                 # Use this as the fixed mask
-                args['fixed_image_masks'] = create_cfm(
-                    self.inputs.reference_image,
-                    lesion_mask=None,
-                    global_mask=True)
+                args["fixed_image_masks"] = create_cfm(
+                    self.inputs.reference_image, lesion_mask=None, global_mask=True
+                )
 
         # If no reference image is provided, fall back to the default template.
         else:
             from ..utils.misc import get_template_specs
+
             # Raise an error if the user specifies an unsupported image orientation.
-            if self.inputs.orientation == 'LAS':
+            if self.inputs.orientation == "LAS":
                 raise NotImplementedError
 
-            template_spec = self.inputs.template_spec if isdefined(
-                self.inputs.template_spec) else {}
+            template_spec = (
+                self.inputs.template_spec
+                if isdefined(self.inputs.template_spec)
+                else {}
+            )
 
-            default_resolution = {
-                'precise': 1, 'fast': 2, 'testing': 2}[self.inputs.flavor]
+            default_resolution = {"precise": 1, "fast": 2, "testing": 2}[
+                self.inputs.flavor
+            ]
 
             # Set the template resolution.
             if isdefined(self.inputs.template_resolution):
-                NIWORKFLOWS_LOG.warning('The use of ``template_resolution`` is deprecated')
-                template_spec['res'] = self.inputs.template_resolution
+                NIWORKFLOWS_LOG.warning(
+                    "The use of ``template_resolution`` is deprecated"
+                )
+                template_spec["res"] = self.inputs.template_resolution
 
-            template_spec['suffix'] = self.inputs.reference
-            template_spec['desc'] = None
+            template_spec["suffix"] = self.inputs.reference
+            template_spec["desc"] = None
             ref_template, template_spec = get_template_specs(
-                self.inputs.template, template_spec=template_spec,
-                default_resolution=default_resolution)
+                self.inputs.template,
+                template_spec=template_spec,
+                default_resolution=default_resolution,
+            )
 
             # Set reference image
             self._reference_image = ref_template
             if not op.isfile(self._reference_image):
-                raise ValueError("""\
+                raise ValueError(
+                    """\
 The registration reference must be an existing file, but path "%s" \
-cannot be found.""" % ref_template)
+cannot be found."""
+                    % ref_template
+                )
 
             # Get the template specified by the user.
-            ref_mask = get_template(self.inputs.template, desc='brain', suffix='mask',
-                                    **template_spec)
+            ref_mask = get_template(
+                self.inputs.template, desc="brain", suffix="mask", **template_spec
+            )
 
             # Default is explicit masking disabled
-            args['fixed_image'] = ref_template
+            args["fixed_image"] = ref_template
             # Use the template mask as the fixed mask.
-            args['fixed_image_masks'] = str(ref_mask)
+            args["fixed_image_masks"] = str(ref_mask)
 
             # Overwrite defaults if explicit masking
             if self.inputs.explicit_masking:
                 # Mask the template image with the template mask.
-                args['fixed_image'] = mask(ref_template, str(ref_mask),
-                                           "fixed_masked.nii.gz")
+                args["fixed_image"] = mask(
+                    ref_template, str(ref_mask), "fixed_masked.nii.gz"
+                )
                 # Do not use a fixed mask during registration.
-                args.pop('fixed_image_masks', None)
+                args.pop("fixed_image_masks", None)
 
                 # If a lesion mask is provided...
                 if isdefined(self.inputs.lesion_mask):
                     # Create a cost function mask with the form: [global mask]
                     # Use this as the fixed mask.
-                    args['fixed_image_masks'] = create_cfm(
-                        str(ref_mask), lesion_mask=None, global_mask=True)
+                    args["fixed_image_masks"] = create_cfm(
+                        str(ref_mask), lesion_mask=None, global_mask=True
+                    )
 
         return args
 
@@ -413,6 +477,7 @@ def mask(in_file, mask_file, new_name):
     """
     import nibabel as nb
     import os
+
     # Load the input image
     in_nii = nb.load(in_file)
     # Load the mask image
@@ -460,20 +525,25 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
     from nipype.utils.filemanip import fname_presuffix
 
     if out_path is None:
-        out_path = fname_presuffix(in_file, suffix='_cfm', newpath=os.getcwd())
+        out_path = fname_presuffix(in_file, suffix="_cfm", newpath=os.getcwd())
     else:
         out_path = os.path.abspath(out_path)
 
     if not global_mask and not lesion_mask:
         NIWORKFLOWS_LOG.warning(
-            'No lesion mask was provided and global_mask not requested, '
-            'therefore the original mask will not be modified.')
+            "No lesion mask was provided and global_mask not requested, "
+            "therefore the original mask will not be modified."
+        )
 
     # Load the input image
     in_img = nb.load(in_file)
 
     # If we want a global mask, create one based on the input image.
-    data = np.ones(in_img.shape, dtype=np.uint8) if global_mask else np.asanyarray(in_img.dataobj)
+    data = (
+        np.ones(in_img.shape, dtype=np.uint8)
+        if global_mask
+        else np.asanyarray(in_img.dataobj)
+    )
     if set(np.unique(data)) - {0, 1}:
         raise ValueError("`global_mask` must be true if `in_file` is not a binary mask")
 
@@ -498,14 +568,14 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
 
 def _write_outputs(runtime, out_fname=None):
     if out_fname is None:
-        out_fname = '.nipype'
+        out_fname = ".nipype"
 
     out_files = []
-    for name in ['stdout', 'stderr', 'merged']:
-        stream = getattr(runtime, name, '')
+    for name in ["stdout", "stderr", "merged"]:
+        stream = getattr(runtime, name, "")
         if stream:
             out_file = op.join(runtime.cwd, name + out_fname)
-            with open(out_file, 'w') as outf:
+            with open(out_file, "w") as outf:
                 print(stream, file=outf)
             out_files.append(out_file)
     return out_files

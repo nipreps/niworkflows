@@ -118,13 +118,15 @@ class SplitSeries(SimpleInterface):
         extra_dims = tuple(dim for dim in img.shape[3:] if dim > 1) or (1,)
         if len(extra_dims) != 1:
             raise ValueError(f"Invalid shape {'x'.join(str(s) for s in img.shape)}")
-        img = img.__class__(img.dataobj.reshape(img.shape[:3] + extra_dims),
-                            img.affine, img.header)
+        img = img.__class__(
+            img.dataobj.reshape(img.shape[:3] + extra_dims), img.affine, img.header
+        )
 
         self._results["out_files"] = []
         for i, img_3d in enumerate(nb.four_to_three(img)):
-            out_file = fname_presuffix(in_file, suffix=f"_idx-{i:03}",
-                                       newpath=runtime.cwd)
+            out_file = fname_presuffix(
+                in_file, suffix=f"_idx-{i:03}", newpath=runtime.cwd
+            )
             img_3d.to_filename(out_file)
             self._results["out_files"].append(out_file)
 
@@ -167,8 +169,9 @@ class MergeSeries(SimpleInterface):
                 )
 
         img_4d = nb.concat_images(nii_list)
-        out_file = fname_presuffix(self.inputs.in_files[0], suffix="_merged",
-                                   newpath=runtime.cwd)
+        out_file = fname_presuffix(
+            self.inputs.in_files[0], suffix="_merged", newpath=runtime.cwd
+        )
         img_4d.to_filename(out_file)
 
         self._results["out_file"] = out_file
