@@ -596,8 +596,19 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                         # load updated NIfTI
                         nii = nb.load(out_file, mmap=False)
                     data_dtype = np.dtype(data_dtype)
-                    if nii.get_data_dtype() != data_dtype:
+                    orig_dtype = nii.get_data_dtype()
+                    if orig_dtype != data_dtype:
+                        LOGGER.warning(
+                            f"Changing {out_file} dtype from {orig_dtype} to {data_dtype}"
+                        )
+                        # coerce dataobj to new data dtype
+                        if np.issubdtype(data_dtype, np.integer):
+                            new_data = np.rint(nii.dataobj).astype(data_dtype)
+                        else:
+                            new_data = data_dtype(nii.dataobj)
+                        # and set header to match
                         nii.set_data_dtype(data_dtype)
+                        nii = nii.__class__(new_data, nii.affine, nii.header)
                         nii.to_filename(out_file)
 
         if len(self._results["out_file"]) == 1:
