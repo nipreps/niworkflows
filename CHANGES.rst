@@ -1,3 +1,10 @@
+1.2.1 (May 26, 2020)
+--------------------
+A bug-fix release in the 1.2.x series. This ensures consistency of datatype (dataobj, header)
+when casting to a new type in DerivativesDataSink.
+
+* FIX: Ensure consistency when changing derivative datatype (#527)
+
 1.2.0 (May 21, 2020)
 ====================
 First release in the 1.2.x series. This release includes a variety of enhancements
