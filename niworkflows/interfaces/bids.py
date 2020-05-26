@@ -602,7 +602,10 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                             f"Changing {out_file} dtype from {orig_dtype} to {data_dtype}"
                         )
                         # coerce dataobj to new data dtype
-                        new_data = np.asanyarray(nii.dataobj, dtype=data_dtype)
+                        if issubclass(data_dtype, np.integer):
+                            new_data = np.rint(nii.dataobj, dtype=data_dtype)
+                        else:
+                            new_data = data_dtype(nii.dataobj)
                         # and set header to match
                         nii.set_data_dtype(data_dtype)
                         nii = nii.__class__(new_data, nii.affine, nii.header)
