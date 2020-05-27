@@ -383,7 +383,7 @@ def init_enhance_and_skullstrip_bold_wf(
         norm.inputs.fixed_image = str(bold_template)
         map_brainmask = pe.Node(
             ApplyTransforms(
-                interpolation="MultiLabel", float=True, input_image=str(brain_mask)
+                interpolation="MultiLabel", input_image=str(brain_mask)
             ),
             name="map_brainmask",
         )
