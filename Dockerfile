@@ -147,13 +147,10 @@ RUN python -c "from matplotlib import font_manager" && \
     sed -i 's/\(backend *: \).*$/\1Agg/g' $( python -c "import matplotlib; print(matplotlib.matplotlib_fname())" )
 
 # Installing dev requirements (packages that are not in pypi)
-WORKDIR /src/
-COPY requirements.txt requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt && \
-    rm -rf $HOME/.cache/pip requirements.txt
-
 # Precaching atlases
-RUN python -c "from templateflow import api as tfapi; \
+RUN pip install --no-cache-dir "templateflow >= 0.6" && \
+    rm -rf $HOME/.cache/pip && \
+    python -c "from templateflow import api as tfapi; \
                tfapi.get(['MNI152Lin', 'MNI152NLin2009cAsym', 'OASIS30ANTs'], suffix='T1w'); \
                tfapi.get(['MNI152Lin', 'MNI152NLin2009cAsym', 'OASIS30ANTs'], desc='brain', suffix='mask'); \
                tfapi.get(['MNI152NLin2009cAsym'], desc='fMRIPrep', suffix='boldref'); \
@@ -161,6 +158,7 @@ RUN python -c "from templateflow import api as tfapi; \
                tfapi.get(['OASIS30ANTs', 'NKI'], resolution=1, label='brain', suffix='probseg'); \
                tfapi.get(['OASIS30ANTs', 'NKI'], resolution=1, desc='BrainCerebellumRegistration', suffix='mask'); "
 
+WORKDIR /src/
 COPY . niworkflows/
 WORKDIR /src/niworkflows/
 RUN pip install --no-cache-dir -e .[all] && \
