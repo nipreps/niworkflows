@@ -1,3 +1,9 @@
+1.2.2 (May 26, 2020)
+--------------------
+A bug-fix release remedying a casting issue in DerivativesDataSink.
+
+* FIX: Non-integer data coercion initialization
+
 1.2.1 (May 26, 2020)
 --------------------
 A bug-fix release in the 1.2.x series. This ensures consistency of datatype (dataobj, header)
