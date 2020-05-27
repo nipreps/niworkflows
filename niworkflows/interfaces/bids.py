@@ -605,7 +605,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                         if np.issubdtype(data_dtype, np.integer):
                             new_data = np.rint(nii.dataobj).astype(data_dtype)
                         else:
-                            new_data = data_dtype(nii.dataobj)
+                            new_data = np.asanyarray(nii.dataobj, dtype=data_dtype)
                         # and set header to match
                         nii.set_data_dtype(data_dtype)
                         nii = nii.__class__(new_data, nii.affine, nii.header)

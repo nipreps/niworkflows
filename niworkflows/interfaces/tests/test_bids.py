@@ -276,7 +276,7 @@ def test_DerivativesDataSink_build_path(
     "space, size, units, xcodes, zipped, fixed, data_dtype",
     [
         ("T1w", (30, 30, 30, 10), ("mm", "sec"), (2, 2), True, [False], None),
-        ("T1w", (30, 30, 30, 10), ("mm", "sec"), (0, 2), True, [True], None),
+        ("T1w", (30, 30, 30, 10), ("mm", "sec"), (0, 2), True, [True], "float64"),
         ("T1w", (30, 30, 30, 10), ("mm", "sec"), (0, 0), True, [True], "<i4"),
         ("T1w", (30, 30, 30, 10), ("mm", None), (2, 2), True, [True], "<f4"),
         ("T1w", (30, 30, 30, 10), (None, None), (0, 2), True, [True], None),
