@@ -160,17 +160,19 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True):
     new_card = nb.affines.from_matvec(np.diag(zooms), card[:3, 3] + offset)
 
     # Calculate the new indexes
-    new_grid = np.array(np.meshgrid(
-        np.arange(new_size[0]),
-        np.arange(new_size[1]),
-        np.arange(new_size[2]),
-        indexing="ij")
+    new_grid = np.array(
+        np.meshgrid(
+            np.arange(new_size[0]),
+            np.arange(new_size[1]),
+            np.arange(new_size[2]),
+            indexing="ij",
+        )
     ).reshape((3, -1))
 
     # Calculate the locations of the new samples, w.r.t. the original grid
-    ijk = np.linalg.inv(card).dot(new_card.dot(
-        np.vstack((new_grid, np.ones((1, new_grid.shape[1]))))
-    ))
+    ijk = np.linalg.inv(card).dot(
+        new_card.dot(np.vstack((new_grid, np.ones((1, new_grid.shape[1])))))
+    )
 
     # Resample data in the new grid
     resampled = map_coordinates(

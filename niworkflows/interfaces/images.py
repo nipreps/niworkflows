@@ -26,13 +26,22 @@ LOGGER = logging.getLogger("nipype.interface")
 
 
 class _RegridToZoomsInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True,
-                   desc="a file whose resolution is to change")
-    zooms = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                         mandatory=True, desc="the new resolution")
+    in_file = File(
+        exists=True, mandatory=True, desc="a file whose resolution is to change"
+    )
+    zooms = traits.Tuple(
+        traits.Float,
+        traits.Float,
+        traits.Float,
+        mandatory=True,
+        desc="the new resolution",
+    )
     order = traits.Int(3, usedefault=True, desc="order of interpolator")
-    clip = traits.Bool(True, usedefault=True,
-                       desc="clip the data array within the original image's range")
+    clip = traits.Bool(
+        True,
+        usedefault=True,
+        desc="clip the data array within the original image's range",
+    )
 
 
 class _RegridToZoomsOutputSpec(TraitedSpec):
@@ -47,8 +56,10 @@ class RegridToZooms(SimpleInterface):
 
     def _run_interface(self, runtime):
         from ..utils.images import resample_by_spacing
+
         self._results["out_file"] = fname_presuffix(
-            self.inputs.in_file, suffix="_regrid", newpath=runtime.cwd)
+            self.inputs.in_file, suffix="_regrid", newpath=runtime.cwd
+        )
         resample_by_spacing(
             self.inputs.in_file,
             self.inputs.zooms,
