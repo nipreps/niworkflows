@@ -330,7 +330,6 @@ def _create_cifti_image(
         BOLD data saved as CIFTI dtseries
     """
     bold_img = nb.load(bold_file)
-    bold_dtype = bold_img.get_data_dtype()
     label_img = nb.load(label_file)
     if label_img.shape != bold_img.shape[:3]:
         warnings.warn("Resampling bold volume to match label dimensions")
@@ -340,14 +339,14 @@ def _create_cifti_image(
     bold_img = _reorient_image(bold_img, orientation="LAS")
     label_img = _reorient_image(label_img, orientation="LAS")
 
-    bold_data = bold_img.get_fdata()
+    bold_data = bold_img.get_fdata(dtype="float32")
     timepoints = bold_img.shape[3]
     label_data = np.asanyarray(label_img.dataobj).astype("int16")
 
     # Create brain models
     idx_offset = 0
     brainmodels = []
-    bm_ts = np.empty((timepoints, 0))
+    bm_ts = np.empty((timepoints, 0), dtype="float32")
 
     for structure, labels in CIFTI_STRUCT_WITH_LABELS.items():
         if labels is None:  # surface model
@@ -355,8 +354,8 @@ def _create_cifti_image(
             # use the corresponding annotation
             hemi = structure.split("_")[-1]
             # currently only supports L/R cortex
-            surf = nb.load(bold_surfs[hemi == "RIGHT"])
-            surf_verts = len(surf.agg_data()[0])
+            surf_ts = nb.load(bold_surfs[hemi == "RIGHT"])
+            surf_verts = len(surf_ts.darrays[0].data)
             if annotation_files[0].endswith(".annot"):
                 annot = nb.freesurfer.read_annot(annotation_files[hemi == "RIGHT"])
                 # remove medial wall
@@ -365,7 +364,7 @@ def _create_cifti_image(
                 annot = nb.load(annotation_files[hemi == "RIGHT"])
                 medial = np.nonzero(annot.darrays[0].data)[0]
             # extract values across volumes
-            ts = np.array([tsarr.data[medial] for tsarr in surf.darrays])
+            ts = np.array([tsarr.data[medial] for tsarr in surf_ts.darrays])
 
             vert_idx = ci.Cifti2VertexIndices(medial)
             bm = ci.Cifti2BrainModel(
@@ -404,7 +403,7 @@ def _create_cifti_image(
                 voxel_indices_ijk=vox,
             )
             idx_offset += len(vox)
-            bm_ts = np.column_stack((bm_ts, ts.T)).astype(bold_dtype)
+            bm_ts = np.column_stack((bm_ts, ts.T))
         # add each brain structure to list
         brainmodels.append(bm)
 
@@ -440,7 +439,8 @@ def _create_cifti_image(
     matrix.append(geometry_map)
     matrix.metadata = ci.Cifti2MetaData(meta)
     hdr = ci.Cifti2Header(matrix)
-    img = ci.Cifti2Image(dataobj=bm_ts, header=hdr, nifti_header=bold_img.header)
+    img = ci.Cifti2Image(dataobj=bm_ts, header=hdr)
+    img.set_data_dtype(bold_img.get_data_dtype())
     img.nifti_header.set_intent("NIFTI_INTENT_CONNECTIVITY_DENSE_SERIES")
 
     out_file = "{}.dtseries.nii".format(split_filename(bold_file)[1])
