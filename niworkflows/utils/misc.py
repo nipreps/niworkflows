@@ -313,8 +313,9 @@ def check_valid_fs_license(lic=None):
 
     if lic is not None:
         import os
-
         os.environ["FS_LICENSE"] = str(Path(lic).absolute())
+        if os.path.isdir(lic):
+            return False
 
     with TemporaryDirectory() as tmpdir:
         nii_file = str(Path(tmpdir) / "test.nii.gz")
@@ -324,15 +325,15 @@ def check_valid_fs_license(lic=None):
         # quick FreeSurfer command
         _cmd = (
             "mri_convert",
-            "--out_type",
-            "mgz",
-            "--input_volume",
             nii_file,
-            "--output_volume",
             out_file,
         )
-        proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.PIPE)
-    return "ERROR: FreeSurfer license file" not in proc.stderr.decode()
+        proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
+
+    if "ERROR:" in proc.stdout.decode():
+        # no license found, or license is invalid
+        return False
+    return True
 
 
 if __name__ == "__main__":
