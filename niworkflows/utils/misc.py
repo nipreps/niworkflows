@@ -302,20 +302,14 @@ def check_valid_fs_license():
     from pathlib import Path
     import subprocess as sp
     from tempfile import TemporaryDirectory
-
-    import nibabel as nb
-    import numpy as np
+    from pkg_resources import resource_filename
 
     with TemporaryDirectory() as tmpdir:
-        nii_file = str(Path(tmpdir) / "test.nii.gz")
-        out_file = str(Path(tmpdir) / "out.mgz")
-        # create test NIfTI
-        nb.Nifti1Image(np.zeros((5, 5, 5)), np.eye(4)).to_filename(nii_file)
         # quick FreeSurfer command
         _cmd = (
             "mri_convert",
-            nii_file,
-            out_file,
+            resource_filename("niworkflows", "data/sentinel.nii.gz"),
+            str(Path(tmpdir) / "out.mgz"),
         )
         proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
     return proc.returncode == 0 and "ERROR:" not in proc.stdout.decode()
