@@ -159,7 +159,7 @@ using a custom methodology of *fMRIPrep*.
         )
 
     gen_ref = pe.Node(
-        EstimateReferenceImage(), name="gen_ref", mem_gb=1
+        EstimateReferenceImage(multiecho=multiecho), name="gen_ref", mem_gb=1
     )  # OE: 128x128x128x50 * 64 / 8 ~ 900MB.
     enhance_and_skullstrip_bold_wf = init_enhance_and_skullstrip_bold_wf(
         brainmask_thresh=brainmask_thresh,
@@ -185,6 +185,10 @@ using a custom methodology of *fMRIPrep*.
         (gen_ref, enhance_and_skullstrip_bold_wf, [
             ("ref_image", "inputnode.in_file"),
         ]),
+        (validate, outputnode, [
+            (("out_file", select_first), "bold_file"),
+            ("out_report", "validation_report"),
+        ]),
         (gen_ref, calc_dummy_scans, [("n_volumes_to_discard", "algo_dummy_scans")]),
         (calc_dummy_scans, outputnode, [("skip_vols_num", "skip_vols")]),
         (gen_ref, outputnode, [
@@ -201,14 +205,10 @@ using a custom methodology of *fMRIPrep*.
     if multiecho:
         workflow.connect([
             (inputnode, validate, [(("bold_file", ensure_list), "in_file")]),
-            (validate, outputnode, [(("out_file", select_first), "bold_file"),
-                                    ("out_report", "validation_report")]),
         ])
     else:
         workflow.connect([
             (inputnode, validate, [("bold_file", "in_file")]),
-            (validate, outputnode, [("out_file", "bold_file"),
-                                    ("out_report", "validation_report")]),
         ])
     # fmt: on
 
