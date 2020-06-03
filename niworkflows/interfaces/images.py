@@ -306,17 +306,23 @@ class Conform(SimpleInterface):
 
         # Set a 0.01mm threshold to performing rescaling
         atol = {"meter": 1e-5, "mm": 0.01, "micron": 10}[xyz_unit]
+        # if 0.01 > difference > 0.001mm, freesurfer won't be able to merge the images
+        atol_fine = {"meter": 1e-6, "mm": 0.001, "micron": 1}[xyz_unit]
 
         # Rescale => change zooms
+        # Fix zooms => set zooms without changing affine
         # Resize => update image dimensions
         rescale = not np.allclose(zooms, target_zooms, atol=atol)
+        fix_zooms = not np.allclose(zooms, target_zooms, atol=atol_fine)
         resize = not np.all(shape == target_shape)
-        if rescale or resize:
+        if rescale or resize or fix_zooms:
             if rescale:
                 scale_factor = target_zooms / zooms
                 target_affine[:3, :3] = reoriented.affine[:3, :3].dot(
                     np.diag(scale_factor)
                 )
+            elif fix_zooms:
+                reoriented.header.set_zooms(target_zooms)
 
             if resize:
                 # The shift is applied after scaling.
