@@ -25,7 +25,7 @@ def test_pass_dummy_scans(algo_dummy_scans, dummy_scans, expected_out):
         (b"ERROR: Systems running GNU glibc version greater than 2.15", 0, False),
     ],
 )
-def test_fs_license_check(tmp_path, stdout, rc, valid):
+def test_fs_license_check(stdout, rc, valid):
     with mock.patch("subprocess.run") as mocked_run:
         mocked_run.return_value.stdout = stdout
         mocked_run.return_value.returncode = rc
