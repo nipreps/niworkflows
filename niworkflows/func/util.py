@@ -29,6 +29,7 @@ DEFAULT_MEMORY_MIN_GB = 0.01
 def init_bold_reference_wf(
     omp_nthreads,
     bold_file=None,
+    brainmask_thresh=0.5,
     pre_mask=False,
     name="bold_reference_wf",
     gen_report=False,
@@ -50,10 +51,16 @@ def init_bold_reference_wf(
 
     Parameters
     ----------
-    bold_file : str
-        BOLD series NIfTI file
     omp_nthreads : int
         Maximum number of threads an individual process may use
+    bold_file : str
+        BOLD series NIfTI file
+    brainmask_thresh: :obj:`float`
+        Lower threshold for the probabilistic brainmask to obtain
+        the final binary mask (default: 0.5).
+    pre_mask : bool
+        Indicates whether the ``pre_mask`` input will be set (and thus, step 1
+        should be skipped).
     name : str
         Name of workflow (default: ``bold_reference_wf``)
     gen_report : bool
@@ -133,7 +140,9 @@ using a custom methodology of *fMRIPrep*.
         EstimateReferenceImage(), name="gen_ref", mem_gb=1
     )  # OE: 128x128x128x50 * 64 / 8 ~ 900MB.
     enhance_and_skullstrip_bold_wf = init_enhance_and_skullstrip_bold_wf(
-        omp_nthreads=omp_nthreads, pre_mask=pre_mask
+        brainmask_thresh=brainmask_thresh,
+        omp_nthreads=omp_nthreads,
+        pre_mask=pre_mask,
     )
 
     calc_dummy_scans = pe.Node(
@@ -188,7 +197,10 @@ using a custom methodology of *fMRIPrep*.
 
 
 def init_enhance_and_skullstrip_bold_wf(
-    name="enhance_and_skullstrip_bold_wf", pre_mask=False, omp_nthreads=1
+    brainmask_thresh=0.5,
+    name="enhance_and_skullstrip_bold_wf",
+    omp_nthreads=1,
+    pre_mask=False,
 ):
     """
     Enhance and run brain extraction on a BOLD EPI image.
@@ -238,13 +250,16 @@ def init_enhance_and_skullstrip_bold_wf(
 
     Parameters
     ----------
+    brainmask_thresh: :obj:`float`
+        Lower threshold for the probabilistic brainmask to obtain
+        the final binary mask (default: 0.5).
     name : str
         Name of workflow (default: ``enhance_and_skullstrip_bold_wf``)
+    omp_nthreads : int
+        number of threads available to parallel nodes
     pre_mask : bool
         Indicates whether the ``pre_mask`` input will be set (and thus, step 1
         should be skipped).
-    omp_nthreads : int
-        number of threads available to parallel nodes
 
     Inputs
     ------
@@ -399,7 +414,7 @@ def init_enhance_and_skullstrip_bold_wf(
             ),
             name="map_brainmask",
         )
-        binarize_mask = pe.Node(Binarize(thresh_low=0.15), name="binarize_mask")
+        binarize_mask = pe.Node(Binarize(thresh_low=brainmask_thresh), name="binarize_mask")
 
         # fmt: off
         workflow.connect([
