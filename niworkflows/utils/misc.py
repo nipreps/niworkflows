@@ -225,7 +225,7 @@ def select_first(in_files):
     'some/file1.nii.gz'
 
     """
-    if isinstance(in_files, list):
+    if isinstance(in_files, (list, tuple)):
         return in_files[0]
     else:
         return in_files
