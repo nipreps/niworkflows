@@ -289,19 +289,14 @@ def pass_dummy_scans(algo_dummy_scans, dummy_scans=None):
     return dummy_scans
 
 
-def check_valid_fs_license(lic=None):
+def check_valid_fs_license():
     """
     Run ``mri_convert`` to assess FreeSurfer access to a license.
-
-    Parameters
-    ----------
-    lic : :obj:`str`, optional
-        Path to FreeSurfer license file
 
     Returns
     -------
     valid : :obj:`bool`
-        FreeSurfer license is valid
+        FreeSurfer successfully executed (valid license)
 
     """
     from pathlib import Path
@@ -310,12 +305,6 @@ def check_valid_fs_license(lic=None):
 
     import nibabel as nb
     import numpy as np
-
-    if lic is not None:
-        import os
-        os.environ["FS_LICENSE"] = str(Path(lic).absolute())
-        if os.path.isdir(lic):
-            return False
 
     with TemporaryDirectory() as tmpdir:
         nii_file = str(Path(tmpdir) / "test.nii.gz")
@@ -329,11 +318,7 @@ def check_valid_fs_license(lic=None):
             out_file,
         )
         proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
-
-    if "ERROR:" in proc.stdout.decode():
-        # no license found, or license is invalid
-        return False
-    return True
+    return proc.returncode == 0 and "ERROR:" not in proc.stdout.decode()
 
 
 if __name__ == "__main__":

@@ -17,27 +17,17 @@ def test_pass_dummy_scans(algo_dummy_scans, dummy_scans, expected_out):
 
 
 @pytest.mark.parametrize(
-    "valid,lic,stdout",
+    "stdout,rc,valid",
     [
-        (True, None, b""),
-        (True, None, b"Successful command"),
-        (False, None, b"ERROR: FreeSurfer license file /made/up/license.txt not found"),
-        (False, "dir", b""),
-        (False, "invalid", b"ERROR: Systems running GNU glibc version greater than 2.15"),
+        (b"Successful command", 0, True),
+        (b"", 0, True),
+        (b"ERROR: FreeSurfer license file /made/up/license.txt not found", 1, False),
+        (b"Failed output", 1, False),
+        (b"ERROR: Systems running GNU glibc version greater than 2.15", 0, False),
     ],
 )
-def test_fs_license_check(tmp_path, valid, lic, stdout):
-    if lic == "dir":
-        # point to a directory as the license
-        lic = tmp_path / "license.txt"
-        lic.mkdir()
-    elif lic == "invalid":
-        # invalid license file
-        lic = tmp_path / "license.txt"
-        lic.write_text("Not a license")
-
+def test_fs_license_check(tmp_path, stdout, rc, valid):
     with mock.patch("subprocess.run") as mocked_run:
         mocked_run.return_value.stdout = stdout
-        assert check_valid_fs_license(lic=lic) is valid
-        if lic is not None:
-            assert os.getenv("FS_LICENSE")
+        mocked_run.return_value.returncode = rc
+        assert check_valid_fs_license() is valid
