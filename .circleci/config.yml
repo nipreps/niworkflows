@@ -301,6 +301,8 @@ jobs:
               -e FMRIPREP_REGRESSION_TARGETS=/tmp/data/fmriprep_bold_mask \
               -e FMRIPREP_REGRESSION_REPORTS=/tmp/masks/reports \
               -e CACHED_WORK_DIRECTORY=/tmp/work -v /tmp/masks/workdir:/tmp/work \
+              -e FS_LICENSE=/etc/fslicense.txt \
+              -v /tmp/fslicense/license.txt:/etc/fslicense.txt:ro \
               niworkflows:latest \
               coverage run -p --rcfile=setup.cfg \
                      -m pytest --junit-xml=/tmp/masks/reports/regression.xml \
