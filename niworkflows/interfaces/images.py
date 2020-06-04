@@ -304,8 +304,8 @@ class Conform(SimpleInterface):
             # Common assumption; if we're wrong, unlikely to be the only thing that breaks
             xyz_unit = "mm"
 
-        # Set a 0.01mm threshold to performing rescaling
-        atol = {"meter": 1e-5, "mm": 0.01, "micron": 10}[xyz_unit]
+        # Set a 0.05mm threshold to performing rescaling
+        atol = {"meter": 5e-5, "mm": 0.05, "micron": 50}[xyz_unit]
         # if 0.01 > difference > 0.001mm, freesurfer won't be able to merge the images
         atol_fine = {"meter": 1e-6, "mm": 0.001, "micron": 1}[xyz_unit]
 
