@@ -214,6 +214,8 @@ jobs:
             docker run -u $( id -u ) -it --rm=false -w /src/niworkflows \
               -e COVERAGE_FILE=/tmp/summaries/.pytest.coverage \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
+              -e FS_LICENSE=/etc/fslicense.txt \
+              -v /tmp/fslicense/license.txt:/etc/fslicense.txt:ro \
               -v ${PWD}:/tmp niworkflows:latest \
               pytest --junit-xml=/tmp/summaries/pytest.xml \
                      --cov niworkflows --cov-report xml:/tmp/summaries/unittests.xml \
