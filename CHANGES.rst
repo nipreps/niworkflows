@@ -1,3 +1,9 @@
+1.2.4 (June 04, 2020)
+=====================
+Bug-fix release improving the FS license checking
+
+  * ENH: Improve FS license checking (#533)
+
 1.2.3 (May 27, 2020)
 ====================
 Bug-fix release addressing some downstream issues in *fMRIPrep*.
