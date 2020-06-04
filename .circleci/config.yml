@@ -214,6 +214,8 @@ jobs:
             docker run -u $( id -u ) -it --rm=false -w /src/niworkflows \
               -e COVERAGE_FILE=/tmp/summaries/.pytest.coverage \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
+              -e FS_LICENSE=/etc/fslicense.txt \
+              -v /tmp/fslicense/license.txt:/etc/fslicense.txt:ro \
               -v ${PWD}:/tmp niworkflows:latest \
               pytest --junit-xml=/tmp/summaries/pytest.xml \
                      --cov niworkflows --cov-report xml:/tmp/summaries/unittests.xml \
@@ -301,8 +303,6 @@ jobs:
               -e FMRIPREP_REGRESSION_TARGETS=/tmp/data/fmriprep_bold_mask \
               -e FMRIPREP_REGRESSION_REPORTS=/tmp/masks/reports \
               -e CACHED_WORK_DIRECTORY=/tmp/work -v /tmp/masks/workdir:/tmp/work \
-              -e FS_LICENSE=/etc/fslicense.txt \
-              -v /tmp/fslicense/license.txt:/etc/fslicense.txt:ro \
               niworkflows:latest \
               coverage run -p --rcfile=setup.cfg \
                      -m pytest --junit-xml=/tmp/masks/reports/regression.xml \
