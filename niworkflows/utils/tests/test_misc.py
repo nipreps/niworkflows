@@ -1,5 +1,6 @@
 """Test misc module."""
 import os
+import shutil
 from unittest import mock
 
 import pytest
@@ -39,6 +40,7 @@ def test_fs_license_check2(monkeypatch):
     assert check_valid_fs_license() is True
 
 
+@pytest.mark.skipif(shutil.which('mri_convert') is None, reason="FreeSurfer not installed")
 def test_fs_license_check3(monkeypatch):
     with monkeypatch.context() as m:
         m.delenv("FS_LICENSE", raising=False)
