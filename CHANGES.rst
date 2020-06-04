@@ -1,3 +1,9 @@
+1.2.5 (June 4, 2020)
+====================
+Bug-fix release that remedies an issue with packaging data
+
+* FIX: Packaging data (#535)
+
 1.2.4 (June 04, 2020)
 =====================
 Bug-fix release improving the FS license checking
