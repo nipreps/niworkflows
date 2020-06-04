@@ -289,50 +289,30 @@ def pass_dummy_scans(algo_dummy_scans, dummy_scans=None):
     return dummy_scans
 
 
-def check_valid_fs_license(lic=None):
+def check_valid_fs_license():
     """
     Run ``mri_convert`` to assess FreeSurfer access to a license.
-
-    Parameters
-    ----------
-    lic : :obj:`str`, optional
-        Path to FreeSurfer license file
 
     Returns
     -------
     valid : :obj:`bool`
-        FreeSurfer license is valid
+        FreeSurfer successfully executed (valid license)
 
     """
     from pathlib import Path
     import subprocess as sp
     from tempfile import TemporaryDirectory
-
-    import nibabel as nb
-    import numpy as np
-
-    if lic is not None:
-        import os
-
-        os.environ["FS_LICENSE"] = str(Path(lic).absolute())
+    from pkg_resources import resource_filename
 
     with TemporaryDirectory() as tmpdir:
-        nii_file = str(Path(tmpdir) / "test.nii.gz")
-        out_file = str(Path(tmpdir) / "out.mgz")
-        # create test NIfTI
-        nb.Nifti1Image(np.zeros((5, 5, 5)), np.eye(4)).to_filename(nii_file)
         # quick FreeSurfer command
         _cmd = (
             "mri_convert",
-            "--out_type",
-            "mgz",
-            "--input_volume",
-            nii_file,
-            "--output_volume",
-            out_file,
+            resource_filename("niworkflows", "data/sentinel.nii.gz"),
+            str(Path(tmpdir) / "out.mgz"),
         )
-        proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.PIPE)
-    return "ERROR: FreeSurfer license file" not in proc.stderr.decode()
+        proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
+    return proc.returncode == 0 and "ERROR:" not in proc.stdout.decode()
 
 
 if __name__ == "__main__":

@@ -1,5 +1,4 @@
 """Test misc module."""
-import os
 from unittest import mock
 
 import pytest
@@ -17,17 +16,17 @@ def test_pass_dummy_scans(algo_dummy_scans, dummy_scans, expected_out):
 
 
 @pytest.mark.parametrize(
-    "valid,lic,stderr",
+    "stdout,rc,valid",
     [
-        (True, None, b""),
-        (False, None, b"ERROR: FreeSurfer license file /made/up/license.txt not found"),
-        (True, None, b"Non-license ERROR"),
-        (True, "custom/license.txt", b""),
+        (b"Successful command", 0, True),
+        (b"", 0, True),
+        (b"ERROR: FreeSurfer license file /made/up/license.txt not found", 1, False),
+        (b"Failed output", 1, False),
+        (b"ERROR: Systems running GNU glibc version greater than 2.15", 0, False),
     ],
 )
-def test_fs_license_check(valid, lic, stderr):
+def test_fs_license_check(stdout, rc, valid):
     with mock.patch("subprocess.run") as mocked_run:
-        mocked_run.return_value.stderr = stderr
-        assert check_valid_fs_license(lic=lic) == valid
-        if lic is not None:
-            assert os.getenv("FS_LICENSE")
+        mocked_run.return_value.stdout = stdout
+        mocked_run.return_value.returncode = rc
+        assert check_valid_fs_license() is valid
