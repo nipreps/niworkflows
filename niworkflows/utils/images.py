@@ -127,7 +127,7 @@ def dseg_label(in_seg, label, newpath=None):
     return out_file
 
 
-def resample_by_spacing(in_file, zooms, order=3, clip=True):
+def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
     """Regrid the input image to match the new zooms."""
     from pathlib import Path
     import numpy as np
@@ -143,7 +143,6 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True):
 
     hdr = in_file.header.copy()
     dtype = hdr.get_data_dtype()
-    data = np.asanyarray(in_file.dataobj)
     zooms = np.array(zooms)
 
     # Calculate the factors to normalize voxel size to the specific zooms
@@ -173,6 +172,13 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True):
     ijk = np.linalg.inv(card).dot(
         new_card.dot(np.vstack((new_grid, np.ones((1, new_grid.shape[1])))))
     )
+
+    if smooth:
+        from scipy.ndimage import gaussian_filter
+        data = gaussian_filter(in_file.get_fdata(),
+                               2 if smooth is True else smooth).astype(dtype)
+    else:
+        data = np.asanyarray(in_file.dataobj)
 
     # Resample data in the new grid
     resampled = map_coordinates(

@@ -18,19 +18,19 @@ from nipype.interfaces.ants import (
     N4BiasFieldCorrection,
     ThresholdImage,
 )
-from nipype.interfaces.ants.utils import AI, ResampleImageBySpacing
+from nipype.interfaces.ants.utils import AI
 
 from ..utils.misc import get_template_specs
 from ..utils.connections import pop_file as _pop
 
 # niworkflows
-from ..interfaces.nibabel import ApplyMask
 from ..interfaces.ants import ImageMath
 from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
     FixHeaderApplyTransforms as ApplyTransforms,
 )
-from ..interfaces.nibabel import Binarize
+from ..interfaces.images import RegridToZooms
+from ..interfaces.nibabel import ApplyMask, Binarize
 
 
 ATROPOS_MODELS = {
@@ -221,15 +221,9 @@ def init_brain_extraction_wf(
         iterfield=["input_image"],
     )
 
-    res_tmpl = pe.Node(
-        ResampleImageBySpacing(out_spacing=(4, 4, 4), apply_smoothing=True),
-        name="res_tmpl",
-    )
-    res_tmpl.inputs.input_image = tpl_target_path
-    res_target = pe.Node(
-        ResampleImageBySpacing(out_spacing=(4, 4, 4), apply_smoothing=True),
-        name="res_target",
-    )
+    res_tmpl = pe.Node(RegridToZooms(in_file=tpl_target_path, zooms=(4, 4, 4), smooth=True),
+                       name="res_tmpl")
+    res_target = pe.Node(RegridToZooms(zooms=(4, 4, 4), smooth=True), name="res_target")
 
     lap_tmpl = pe.Node(ImageMath(operation="Laplacian", op2="1.5 1"), name="lap_tmpl")
     lap_tmpl.inputs.op1 = tpl_target_path
@@ -337,9 +331,9 @@ N4BiasFieldCorrection."""
         (inputnode, norm, [("in_mask", fixed_mask_trait)]),
         (inputnode, map_brainmask, [(("in_files", _pop), "reference_image")]),
         (trunc, inu_n4, [("output_image", "input_image")]),
-        (inu_n4, res_target, [(("output_image", _pop), "input_image")]),
-        (res_tmpl, init_aff, [("output_image", "fixed_image")]),
-        (res_target, init_aff, [("output_image", "moving_image")]),
+        (inu_n4, res_target, [(("output_image", _pop), "in_file")]),
+        (res_tmpl, init_aff, [("out_file", "fixed_image")]),
+        (res_target, init_aff, [("out_file", "moving_image")]),
         (init_aff, norm, [("output_transform", "initial_moving_transform")]),
         (norm, map_brainmask, [
             ("reverse_transforms", "transforms"),
