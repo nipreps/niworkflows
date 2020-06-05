@@ -21,7 +21,7 @@ from ..interfaces.images import ValidateImage, MatchHeader
 from ..interfaces.masks import SimpleShowMaskRPT
 from ..interfaces.registration import EstimateReferenceImage
 from ..interfaces.utils import CopyXForm
-from ..utils.misc import select_first, pass_dummy_scans as _pass_dummy_scans
+from ..utils.misc import pass_dummy_scans as _pass_dummy_scans
 
 
 DEFAULT_MEMORY_MIN_GB = 0.01
@@ -173,9 +173,15 @@ using a custom methodology of *fMRIPrep*.
         run_without_submitting=True,
         mem_gb=DEFAULT_MEMORY_MIN_GB,
     )
+    sel_1st = pe.Node(niu.Select(index=[0]),
+                      name="sel_1st", run_without_submitting=True)
 
     # fmt: off
     workflow.connect([
+        (inputnode, validate, [
+            (("bold_file", ensure_list) if multiecho else "bold_file",
+             "in_file"),
+        ]),
         (inputnode, enhance_and_skullstrip_bold_wf, [
             ("bold_mask", "inputnode.pre_mask"),
         ]),
@@ -185,10 +191,7 @@ using a custom methodology of *fMRIPrep*.
         (gen_ref, enhance_and_skullstrip_bold_wf, [
             ("ref_image", "inputnode.in_file"),
         ]),
-        (validate, outputnode, [
-            (("out_file", select_first), "bold_file"),
-            ("out_report", "validation_report"),
-        ]),
+        (validate, sel_1st, [(("out_file", ensure_list), "inlist")]),
         (gen_ref, calc_dummy_scans, [("n_volumes_to_discard", "algo_dummy_scans")]),
         (calc_dummy_scans, outputnode, [("skip_vols_num", "skip_vols")]),
         (gen_ref, outputnode, [
@@ -200,16 +203,9 @@ using a custom methodology of *fMRIPrep*.
             ("outputnode.mask_file", "bold_mask"),
             ("outputnode.skull_stripped_file", "ref_image_brain"),
         ]),
+        (validate, outputnode, [("out_report", "validation_report")]),
+        (sel_1st, outputnode, [("out", "bold_file")]),
     ])
-
-    if multiecho:
-        workflow.connect([
-            (inputnode, validate, [(("bold_file", ensure_list), "in_file")]),
-        ])
-    else:
-        workflow.connect([
-            (inputnode, validate, [("bold_file", "in_file")]),
-        ])
     # fmt: on
 
     if gen_report:
