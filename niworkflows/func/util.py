@@ -29,7 +29,7 @@ DEFAULT_MEMORY_MIN_GB = 0.01
 def init_bold_reference_wf(
     omp_nthreads,
     bold_file=None,
-    brainmask_thresh=0.5,
+    brainmask_thresh=0.85,
     pre_mask=False,
     name="bold_reference_wf",
     gen_report=False,
@@ -57,7 +57,7 @@ def init_bold_reference_wf(
         BOLD series NIfTI file
     brainmask_thresh: :obj:`float`
         Lower threshold for the probabilistic brainmask to obtain
-        the final binary mask (default: 0.5).
+        the final binary mask (default: 0.85).
     pre_mask : bool
         Indicates whether the ``pre_mask`` input will be set (and thus, step 1
         should be skipped).
