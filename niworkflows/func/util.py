@@ -30,6 +30,7 @@ DEFAULT_MEMORY_MIN_GB = 0.01
 def init_bold_reference_wf(
     omp_nthreads,
     bold_file=None,
+    sbref_files=None,
     brainmask_thresh=0.85,
     pre_mask=False,
     multiecho=False,
@@ -57,6 +58,10 @@ def init_bold_reference_wf(
         Maximum number of threads an individual process may use
     bold_file : :obj:`str`
         BOLD series NIfTI file
+    sbref_files : :obj:`list` or :obj:`bool`
+        Single band (as opposed to multi band) reference NIfTI file.
+        If ``True`` is passed, the workflow is built to accommodate SBRefs,
+        but the input is left undefined (i.e., it is left open for connection)
     brainmask_thresh: :obj:`float`
         Lower threshold for the probabilistic brainmask to obtain
         the final binary mask (default: 0.85).
@@ -109,16 +114,12 @@ def init_bold_reference_wf(
 
     """
     workflow = Workflow(name=name)
-    if multiecho:
-        workflow.__desc__ = """\
+    workflow.__desc__ = f"""\
 First, a reference volume and its skull-stripped version were generated
-from the first echo using a custom methodology of *fMRIPrep*.
+{'from the shortest echo of the BOLD run' * multiecho} using a custom
+methodology of *fMRIPrep*.
 """
-    else:
-        workflow.__desc__ = """\
-First, a reference volume and its skull-stripped version were generated
-using a custom methodology of *fMRIPrep*.
-"""
+
     inputnode = pe.Node(
         niu.IdentityInterface(
             fields=["bold_file", "bold_mask", "dummy_scans", "sbref_file"]
@@ -146,17 +147,12 @@ using a custom methodology of *fMRIPrep*.
     if bold_file is not None:
         inputnode.inputs.bold_file = bold_file
 
-    if multiecho:
-        validate = pe.MapNode(
-            ValidateImage(),
-            name="validate",
-            mem_gb=DEFAULT_MEMORY_MIN_GB,
-            iterfield=["in_file"],
-        )
-    else:
-        validate = pe.Node(
-            ValidateImage(), name="validate", mem_gb=DEFAULT_MEMORY_MIN_GB
-        )
+    val_bold = pe.MapNode(
+        ValidateImage(),
+        name="val_bold",
+        mem_gb=DEFAULT_MEMORY_MIN_GB,
+        iterfield=["in_file"],
+    )
 
     gen_ref = pe.Node(
         EstimateReferenceImage(multiecho=multiecho), name="gen_ref", mem_gb=1
@@ -173,25 +169,23 @@ using a custom methodology of *fMRIPrep*.
         run_without_submitting=True,
         mem_gb=DEFAULT_MEMORY_MIN_GB,
     )
-    sel_1st = pe.Node(niu.Select(index=[0]),
-                      name="sel_1st", run_without_submitting=True)
+    bold_1st = pe.Node(niu.Select(index=[0]),
+                       name="bold_1st", run_without_submitting=True)
+    validate_1st = pe.Node(niu.Select(index=[0]),
+                           name="validate_1st", run_without_submitting=True)
 
     # fmt: off
     workflow.connect([
-        (inputnode, validate, [
-            (("bold_file", ensure_list) if multiecho else "bold_file",
-             "in_file"),
-        ]),
+        (inputnode, val_bold, [(("bold_file", ensure_list), "in_file")]),
         (inputnode, enhance_and_skullstrip_bold_wf, [
             ("bold_mask", "inputnode.pre_mask"),
         ]),
-        (inputnode, gen_ref, [("sbref_file", "sbref_file")]),
         (inputnode, calc_dummy_scans, [("dummy_scans", "dummy_scans")]),
-        (validate, gen_ref, [("out_file", "in_file")]),
+        (val_bold, gen_ref, [("out_file", "in_file")]),
         (gen_ref, enhance_and_skullstrip_bold_wf, [
             ("ref_image", "inputnode.in_file"),
         ]),
-        (validate, sel_1st, [(("out_file", ensure_list), "inlist")]),
+        (val_bold, bold_1st, [(("out_file", ensure_list), "inlist")]),
         (gen_ref, calc_dummy_scans, [("n_volumes_to_discard", "algo_dummy_scans")]),
         (calc_dummy_scans, outputnode, [("skip_vols_num", "skip_vols")]),
         (gen_ref, outputnode, [
@@ -203,10 +197,38 @@ using a custom methodology of *fMRIPrep*.
             ("outputnode.mask_file", "bold_mask"),
             ("outputnode.skull_stripped_file", "ref_image_brain"),
         ]),
-        (validate, outputnode, [("out_report", "validation_report")]),
-        (sel_1st, outputnode, [("out", "bold_file")]),
+        (val_bold, validate_1st, [(("out_report", ensure_list), "inlist")]),
+        (bold_1st, outputnode, [("out", "bold_file")]),
+        (validate_1st, outputnode, [("out", "validation_report")]),
     ])
     # fmt: on
+
+    if sbref_files:
+        nsbrefs = 0
+        if sbref_files is not True:
+            # If not boolean, then it is a list-of or pathlike.
+            inputnode.inputs.sbref_file = sbref_files
+            nsbrefs = 1 if isinstance(sbref_files, str) else len(sbref_files)
+
+        val_sbref = pe.MapNode(
+            ValidateImage(),
+            name="val_sbref",
+            mem_gb=DEFAULT_MEMORY_MIN_GB,
+            iterfield=["in_file"],
+        )
+        # fmt: off
+        workflow.connect([
+            (inputnode, val_sbref, [(("sbref_file", ensure_list), "in_file")]),
+            (val_sbref, gen_ref, [("out_file", "sbref_file")]),
+        ])
+        # fmt: on
+
+        # Edit the boilerplate as the SBRef will be the reference
+        workflow.__desc__ = f"""\
+First, a reference volume and its skull-stripped version were generated
+by aligning and averaging{' the first echo of' * multiecho}
+{nsbrefs or ''} single-band references (SBRefs).
+"""
 
     if gen_report:
         mask_reportlet = pe.Node(SimpleShowMaskRPT(), name="mask_reportlet")
