@@ -8,7 +8,7 @@ import nibabel as nb
 import numpy as np
 from nilearn import image as nli
 from nilearn.image import index_img
-from nipype.utils.filemanip import fname_presuffix, ensure_list
+from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     traits,
     isdefined,
@@ -467,9 +467,7 @@ class EstimateReferenceImage(SimpleInterface):
 
     def _run_interface(self, runtime):
         is_sbref = isdefined(self.inputs.sbref_file)
-        ref_input = ensure_list(
-            self.inputs.sbref_file if is_sbref else self.inputs.in_file
-        )
+        ref_input = self.inputs.sbref_file if is_sbref else self.inputs.in_file
 
         if self.inputs.multiecho:
             if len(ref_input) < 2:

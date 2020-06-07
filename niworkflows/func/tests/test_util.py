@@ -5,9 +5,10 @@ from pathlib import Path
 
 import numpy as np
 from nipype.pipeline import engine as pe
-from nipype.utils.filemanip import fname_presuffix, copyfile, ensure_list
+from nipype.utils.filemanip import fname_presuffix, copyfile
 from nilearn.image import load_img
 
+from ...utils.connections import listify
 from niworkflows.interfaces.masks import ROIsPlot
 
 from ..util import init_bold_reference_wf
@@ -40,7 +41,7 @@ ds001240/sub-26_task-molretrieval_run-02_bold.nii.gz
 ds001240/sub-26_task-rest_bold.nii.gz
 ds001362/sub-01_task-taskname_run-01_bold.nii.gz""".splitlines()
 
-bold_datasets = [ensure_list(d) for d in bold_datasets]
+bold_datasets = [listify(d) for d in bold_datasets]
 
 
 def symmetric_overlap(img1, img2):

@@ -15,7 +15,8 @@ from nipype.interfaces import utility as niu
 from nipype.interfaces.fsl.maths import ApplyMask
 from nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
 
-from ..utils.misc import get_template_specs, select_first as _pop
+from ..utils.misc import get_template_specs
+from ..utils.connections import pop_file as _pop
 
 # niworkflows
 from ..interfaces.ants import (

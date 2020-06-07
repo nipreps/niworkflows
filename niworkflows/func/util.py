@@ -6,7 +6,6 @@ from pkg_resources import resource_filename as pkgr_fn
 
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu, fsl, afni
-from nipype.utils.filemanip import ensure_list
 
 from templateflow.api import get as get_template
 
@@ -21,6 +20,7 @@ from ..interfaces.images import ValidateImage, MatchHeader
 from ..interfaces.masks import SimpleShowMaskRPT
 from ..interfaces.registration import EstimateReferenceImage
 from ..interfaces.utils import CopyXForm
+from ..utils.connections import listify
 from ..utils.misc import pass_dummy_scans as _pass_dummy_scans
 
 
@@ -176,7 +176,7 @@ methodology of *fMRIPrep*.
 
     # fmt: off
     workflow.connect([
-        (inputnode, val_bold, [(("bold_file", ensure_list), "in_file")]),
+        (inputnode, val_bold, [(("bold_file", listify), "in_file")]),
         (inputnode, enhance_and_skullstrip_bold_wf, [
             ("bold_mask", "inputnode.pre_mask"),
         ]),
@@ -185,7 +185,7 @@ methodology of *fMRIPrep*.
         (gen_ref, enhance_and_skullstrip_bold_wf, [
             ("ref_image", "inputnode.in_file"),
         ]),
-        (val_bold, bold_1st, [(("out_file", ensure_list), "inlist")]),
+        (val_bold, bold_1st, [(("out_file", listify), "inlist")]),
         (gen_ref, calc_dummy_scans, [("n_volumes_to_discard", "algo_dummy_scans")]),
         (calc_dummy_scans, outputnode, [("skip_vols_num", "skip_vols")]),
         (gen_ref, outputnode, [
@@ -197,7 +197,7 @@ methodology of *fMRIPrep*.
             ("outputnode.mask_file", "bold_mask"),
             ("outputnode.skull_stripped_file", "ref_image_brain"),
         ]),
-        (val_bold, validate_1st, [(("out_report", ensure_list), "inlist")]),
+        (val_bold, validate_1st, [(("out_report", listify), "inlist")]),
         (bold_1st, outputnode, [("out", "bold_file")]),
         (validate_1st, outputnode, [("out", "validation_report")]),
     ])
@@ -218,7 +218,7 @@ methodology of *fMRIPrep*.
         )
         # fmt: off
         workflow.connect([
-            (inputnode, val_sbref, [(("sbref_file", ensure_list), "in_file")]),
+            (inputnode, val_sbref, [(("sbref_file", listify), "in_file")]),
             (val_sbref, gen_ref, [("out_file", "sbref_file")]),
         ])
         # fmt: on
