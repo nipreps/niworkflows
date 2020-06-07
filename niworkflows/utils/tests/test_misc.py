@@ -47,3 +47,12 @@ def test_fs_license_check3(monkeypatch):
         m.delenv("FS_LICENSE", raising=False)
         m.delenv("FREESURFER_HOME", raising=False)
         assert check_valid_fs_license() is False
+
+
+@pytest.mark.skipif(not os.getenv("FS_LICENSE"), reason="No FS license found")
+def test_fs_license_check4(monkeypatch):
+    """Execute the canary with passed license."""
+    lic = os.getenv("FS_LICENSE")
+    with monkeypatch.context() as m:
+        m.delenv("FS_LICENSE")
+        assert check_valid_fs_license(lic=lic) is True
