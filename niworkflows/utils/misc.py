@@ -307,6 +307,10 @@ def check_valid_fs_license(lic=None):
 
     env = os.environ.copy()
     if lic is not None:
+        import warnings
+        warnings.warn("The license argument has been deprecated. Please set the environment "
+                      "if needed before calling this function without arguments.",
+                      DeprecationWarning)
         env["FS_LICENSE"] = os.path.abspath(lic)
 
     with TemporaryDirectory() as tmpdir:
