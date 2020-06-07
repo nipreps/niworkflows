@@ -289,7 +289,7 @@ def pass_dummy_scans(algo_dummy_scans, dummy_scans=None):
     return dummy_scans
 
 
-def check_valid_fs_license():
+def check_valid_fs_license(lic=None):
     """
     Run ``mri_convert`` to assess FreeSurfer access to a license.
 
@@ -299,10 +299,15 @@ def check_valid_fs_license():
         FreeSurfer successfully executed (valid license)
 
     """
+    import os
     from pathlib import Path
     import subprocess as sp
     from tempfile import TemporaryDirectory
     from pkg_resources import resource_filename
+
+    env = os.environ.copy()
+    if lic is not None:
+        env["FS_LICENSE"] = os.path.abspath(lic)
 
     with TemporaryDirectory() as tmpdir:
         # quick FreeSurfer command
@@ -311,7 +316,7 @@ def check_valid_fs_license():
             resource_filename("niworkflows", "data/sentinel.nii.gz"),
             str(Path(tmpdir) / "out.mgz"),
         )
-        proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
+        proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.STDOUT, env=env)
     return proc.returncode == 0 and "ERROR:" not in proc.stdout.decode()
 
 
