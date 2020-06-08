@@ -299,20 +299,17 @@ def check_valid_fs_license(lic=None):
         FreeSurfer successfully executed (valid license)
 
     """
-    import os
     from pathlib import Path
     import subprocess as sp
     from tempfile import TemporaryDirectory
     from pkg_resources import resource_filename
 
-    env = os.environ.copy()
     if lic is not None:
         import warnings
-        warnings.warn("The license argument has been deprecated and will be removed in 1.3.0. "
-                      "Please set the environment if needed before calling this function "
-                      "without arguments.",
+        warnings.warn("The license argument has been deprecated, has no effect, and will be "
+                      "removed in 1.3.0. Please set the environment if needed before calling "
+                      "this function without arguments.",
                       DeprecationWarning)
-        env["FS_LICENSE"] = os.path.abspath(lic)
 
     with TemporaryDirectory() as tmpdir:
         # quick FreeSurfer command
@@ -321,7 +318,7 @@ def check_valid_fs_license(lic=None):
             resource_filename("niworkflows", "data/sentinel.nii.gz"),
             str(Path(tmpdir) / "out.mgz"),
         )
-        proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.STDOUT, env=env)
+        proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
     return proc.returncode == 0 and "ERROR:" not in proc.stdout.decode()
 
 

@@ -48,11 +48,10 @@ def test_fs_license_check3(monkeypatch):
         assert check_valid_fs_license() is False
 
 
-@pytest.mark.skipif(not os.getenv("FS_LICENSE"), reason="No FS license found")
-def test_fs_license_check4(monkeypatch):
+def test_fs_license_check_deprecated_arg():
     """Execute the canary with passed license."""
-    lic = os.getenv("FS_LICENSE")
-    with monkeypatch.context() as m:
-        m.delenv("FS_LICENSE")
+    with mock.patch("subprocess.run") as mocked_run:
+        mocked_run.return_value.stdout = b""
+        mocked_run.return_value.returncode = 0
         with pytest.deprecated_call():
-            assert check_valid_fs_license(lic=lic) is True
+            check_valid_fs_license(lic="Any non-None value")
