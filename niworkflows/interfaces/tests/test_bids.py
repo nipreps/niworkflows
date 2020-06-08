@@ -193,6 +193,12 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
             {"from": "orig", "to": "target", "suffix": "xfm"},
             "sub-07/ses-preop/anat/sub-07_ses-preop_from-orig_to-target_mode-image_xfm.h5",
         ),
+        (
+            "sub-07/ses-preop/anat/sub-07_ses-preop_run-1_T1w.nii.gz",
+            ["tfm.txt"],
+            {"from": "orig", "to": "T1w", "suffix": "xfm"},
+            "sub-07/ses-preop/anat/sub-07_ses-preop_run-1_from-orig_to-T1w_mode-image_xfm.txt",
+        ),
     ],
 )
 @pytest.mark.parametrize("dismiss_entities", [None, ("run", "session")])
