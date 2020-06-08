@@ -16,6 +16,7 @@ from nipype.interfaces.fsl.maths import ApplyMask
 from nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
 
 from ..utils.misc import get_template_specs
+from ..utils.connections import pop_file as _pop
 
 # niworkflows
 from ..interfaces.ants import (
@@ -895,12 +896,6 @@ def init_n4_only_wf(
         # fmt: on
 
     return wf
-
-
-def _pop(in_files):
-    if isinstance(in_files, (list, tuple)):
-        return in_files[0]
-    return in_files
 
 
 def _select_labels(in_segm, labels):
