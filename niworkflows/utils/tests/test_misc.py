@@ -34,7 +34,8 @@ def test_fs_license_check(stdout, rc, valid):
         assert check_valid_fs_license() is valid
 
 
-@pytest.mark.skipif(not os.getenv("FS_LICENSE"), reason="No FS license found")
+@pytest.mark.skipif(shutil.which('mri_convert') is None, reason="FreeSurfer not installed")
+@pytest.mark.xfail(not os.getenv("FS_LICENSE"), reason="No FS license found")
 def test_fs_license_check2():
     """Execute the canary itself."""
     assert check_valid_fs_license() is True
