@@ -305,31 +305,37 @@ class Conform(SimpleInterface):
             xyz_unit = "mm"
 
         # Set a 0.05mm threshold to performing rescaling
-        atol = {"meter": 1e-5, "mm": 0.01, "micron": 10}[xyz_unit]
+        atol_gross = {"meter": 5e-5, "mm": 0.05, "micron": 50}[xyz_unit]
+        # if 0.01 > difference > 0.001mm, freesurfer won't be able to merge the images
+        atol_fine = {"meter": 1e-6, "mm": 0.001, "micron": 1}[xyz_unit]
 
-        # Rescale => change zooms
-        # Resize => update image dimensions
-        rescale = not np.allclose(zooms, target_zooms, atol=atol)
+        # Update zooms => Modify affine
+        # Rescale => Resample to resized voxels
+        # Resize => Resample to new image dimensions
+        update_zooms = not np.allclose(zooms, target_zooms, atol=atol_fine, rtol=0)
+        rescale = not np.allclose(zooms, target_zooms, atol=atol_gross, rtol=0)
         resize = not np.all(shape == target_shape)
-        if rescale or resize:
-            if rescale:
+        resample = rescale or resize
+        if resample or update_zooms:
+            # Use an affine with the corrected zooms, whether or not we resample
+            if update_zooms:
                 scale_factor = target_zooms / zooms
-                target_affine[:3, :3] = reoriented.affine[:3, :3].dot(
-                    np.diag(scale_factor)
-                )
+                target_affine[:3, :3] = reoriented.affine[:3, :3] @ np.diag(scale_factor)
 
             if resize:
                 # The shift is applied after scaling.
                 # Use a proportional shift to maintain relative position in dataset
                 size_factor = target_span / (zooms * shape)
                 # Use integer shifts to avoid unnecessary interpolation
-                offset = (
-                    reoriented.affine[:3, 3] * size_factor - reoriented.affine[:3, 3]
-                )
+                offset = reoriented.affine[:3, 3] * size_factor - reoriented.affine[:3, 3]
                 target_affine[:3, 3] = reoriented.affine[:3, 3] + offset.astype(int)
 
-            data = nli.resample_img(reoriented, target_affine, target_shape).dataobj
-            conform_xfm = np.linalg.inv(reoriented.affine).dot(target_affine)
+            conform_xfm = np.linalg.inv(reoriented.affine) @ target_affine
+
+            # Create new image
+            data = reoriented.dataobj
+            if resample:
+                data = nli.resample_img(reoriented, target_affine, target_shape).dataobj
             reoriented = reoriented.__class__(data, target_affine, reoriented.header)
 
         # Image may be reoriented, rescaled, and/or resized

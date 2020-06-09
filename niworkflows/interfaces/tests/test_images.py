@@ -180,3 +180,35 @@ def test_IntraModalMerge(tmpdir, shape, mshape):
     merged_data = nb.load(merged).get_fdata(dtype="float32")
     new_mshape = (*mshape[:3], 2 if len(mshape) == 3 else mshape[3] * 2)
     assert merged_data.shape == new_mshape
+
+
+def test_conform_resize(tmpdir):
+    fname = str(tmpdir / "test.nii")
+
+    random_data = np.random.random(size=(5, 5, 5))
+    img = nb.Nifti1Image(random_data, np.eye(4))
+    img.to_filename(fname)
+    conform = pe.Node(im.Conform(), name="conform", base_dir=str(tmpdir))
+    conform.inputs.in_file = fname
+    conform.inputs.target_zooms = (1, 1, 1.5)
+    conform.inputs.target_shape = (5, 5, 5)
+    res = conform.run()
+
+    out_img = nb.load(res.outputs.out_file)
+    assert out_img.header.get_zooms() == conform.inputs.target_zooms
+
+
+def test_conform_set_zooms(tmpdir):
+    fname = str(tmpdir / "test.nii")
+
+    random_data = np.random.random(size=(5, 5, 5))
+    img = nb.Nifti1Image(random_data, np.eye(4))
+    img.to_filename(fname)
+    conform = pe.Node(im.Conform(), name="conform", base_dir=str(tmpdir))
+    conform.inputs.in_file = fname
+    conform.inputs.target_zooms = (1, 1, 1.002)
+    conform.inputs.target_shape = (5, 5, 5)
+    res = conform.run()
+
+    out_img = nb.load(res.outputs.out_file)
+    assert np.allclose(out_img.header.get_zooms(), conform.inputs.target_zooms)
