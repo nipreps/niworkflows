@@ -346,7 +346,7 @@ def _create_cifti_image(
     # Create brain models
     idx_offset = 0
     brainmodels = []
-    bm_ts = np.empty((timepoints, 0))
+    bm_ts = np.empty((timepoints, 0), dtype="float32")
 
     for structure, labels in CIFTI_STRUCT_WITH_LABELS.items():
         if labels is None:  # surface model
@@ -354,8 +354,8 @@ def _create_cifti_image(
             # use the corresponding annotation
             hemi = structure.split("_")[-1]
             # currently only supports L/R cortex
-            surf = nb.load(bold_surfs[hemi == "RIGHT"])
-            surf_verts = len(surf.darrays[0].data)
+            surf_ts = nb.load(bold_surfs[hemi == "RIGHT"])
+            surf_verts = len(surf_ts.darrays[0].data)
             if annotation_files[0].endswith(".annot"):
                 annot = nb.freesurfer.read_annot(annotation_files[hemi == "RIGHT"])
                 # remove medial wall
@@ -364,7 +364,7 @@ def _create_cifti_image(
                 annot = nb.load(annotation_files[hemi == "RIGHT"])
                 medial = np.nonzero(annot.darrays[0].data)[0]
             # extract values across volumes
-            ts = np.array([tsarr.data[medial] for tsarr in surf.darrays])
+            ts = np.array([tsarr.data[medial] for tsarr in surf_ts.darrays])
 
             vert_idx = ci.Cifti2VertexIndices(medial)
             bm = ci.Cifti2BrainModel(
@@ -391,7 +391,7 @@ def _create_cifti_image(
                     else np.concatenate((ts, bold_data[ijk]))
                 )
                 vox += [
-                    [ijk[0][ix], ijk[1][ix], ijk[2][ix]] for ix, row in enumerate(ts)
+                    [ijk[0][idx], ijk[1][idx], ijk[2][idx]] for idx in range(len(ts))
                 ]
 
             vox = ci.Cifti2VoxelIndicesIJK(vox)
@@ -439,7 +439,8 @@ def _create_cifti_image(
     matrix.append(geometry_map)
     matrix.metadata = ci.Cifti2MetaData(meta)
     hdr = ci.Cifti2Header(matrix)
-    img = ci.Cifti2Image(bm_ts, hdr)
+    img = ci.Cifti2Image(dataobj=bm_ts, header=hdr)
+    img.set_data_dtype(bold_img.get_data_dtype())
     img.nifti_header.set_intent("NIFTI_INTENT_CONNECTIVITY_DENSE_SERIES")
 
     out_file = "{}.dtseries.nii".format(split_filename(bold_file)[1])
