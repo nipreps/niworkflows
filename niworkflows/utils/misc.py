@@ -289,7 +289,7 @@ def pass_dummy_scans(algo_dummy_scans, dummy_scans=None):
     return dummy_scans
 
 
-def check_valid_fs_license():
+def check_valid_fs_license(lic=None):
     """
     Run ``mri_convert`` to assess FreeSurfer access to a license.
 
@@ -303,6 +303,13 @@ def check_valid_fs_license():
     import subprocess as sp
     from tempfile import TemporaryDirectory
     from pkg_resources import resource_filename
+
+    if lic is not None:
+        import warnings
+        warnings.warn("The license argument has been deprecated, has no effect, and will be "
+                      "removed in 1.3.0. Please set the environment if needed before calling "
+                      "this function without arguments.",
+                      DeprecationWarning)
 
     with TemporaryDirectory() as tmpdir:
         # quick FreeSurfer command
