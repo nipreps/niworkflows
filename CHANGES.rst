@@ -1,3 +1,13 @@
+1.2.6 (June 09, 2020)
+=====================
+Bug-fix release in the 1.2.x series addressing minor bugs encountered mostly
+within *sMRIPrep*.
+With thanks to Franziskus Liem for contributions.
+
+* FIX: Error conforming T1w images with differing zooms before ``recon-all`` (#534)
+* FIX: Restore and deprecate license argument to ``check_valid_fs_license`` (#538)
+* FIX: Allow anatomical derivatives to have ``run-`` entity (#539)
+
 1.2.5 (June 4, 2020)
 ====================
 Bug-fix release that remedies an issue with packaging data
@@ -8,15 +18,15 @@ Bug-fix release that remedies an issue with packaging data
 =====================
 Bug-fix release improving the FS license checking
 
-  * ENH: Improve FS license checking (#533)
+* ENH: Improve FS license checking (#533)
 
 1.2.3 (May 27, 2020)
 ====================
 Bug-fix release addressing some downstream issues in *fMRIPrep*.
 
-  * FIX: ``MultiLabel`` interpolations should not use ``float=True`` (#530)
-  * FIX: Do not break figure-datatype derivatives by sessions (#529)
-  * MNT: Update comments, minimum versions for setup requirements (#512)
+* FIX: ``MultiLabel`` interpolations should not use ``float=True`` (#530)
+* FIX: Do not break figure-datatype derivatives by sessions (#529)
+* MNT: Update comments, minimum versions for setup requirements (#512)
 
 1.2.2 (May 26, 2020)
 ====================
