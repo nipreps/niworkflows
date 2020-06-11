@@ -253,17 +253,18 @@ def clean_directory(path):
     This function is not guaranteed to work across multiple threads or processes.
 
     """
-    for f in os.scandir(path):  # switch to context manager when py35 dropped
-        if f.is_file() or f.is_symlink():
-            try:
-                os.unlink(f.path)
-            except OSError:
-                return False
-        elif f.is_dir():
-            try:
-                shutil.rmtree(f.path)
-            except OSError:
-                return False
+    with os.scandir(path) as sd:
+        for f in sd:
+            if f.is_file() or f.is_symlink():
+                try:
+                    os.unlink(f.path)
+                except OSError:
+                    return False
+            elif f.is_dir():
+                try:
+                    shutil.rmtree(f.path)
+                except OSError:
+                    return False
     return True
 
 

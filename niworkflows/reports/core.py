@@ -137,9 +137,8 @@ class Reportlet(Element):
         if not config:
             raise RuntimeError("Reportlet must have a config object")
 
-        # PY35: Sorted config dict for consistent behavior
         self.name = config.get(
-            "name", "_".join("%s-%s" % i for i in sorted(config["bids"].items()))
+            "name", "_".join("%s-%s" % i for i in config["bids"].items())
         )
         self.title = config.get("title")
         self.subtitle = config.get("subtitle")
