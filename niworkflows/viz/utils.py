@@ -143,8 +143,6 @@ def extract_svg(display_object, dpi=300, compress="auto"):
 
 def cuts_from_bbox(mask_nii, cuts=3):
     """Find equi-spaced cuts for presenting images."""
-    from nibabel.affines import apply_affine
-
     mask_data = np.asanyarray(mask_nii.dataobj) > 0.0
 
     # First, project the number of masked voxels on each axes
@@ -163,32 +161,28 @@ def cuts_from_bbox(mask_nii, cuts=3):
     # I have manually found that for the axial view requiring 30%
     # of the slice elements to be masked drops almost empty boxes
     # in the mosaic of axial planes (and also addresses #281)
-    ijk_th = [
-        int((mask_data.shape[1] * mask_data.shape[2]) * 0.2),  # sagittal
-        int((mask_data.shape[0] * mask_data.shape[2]) * 0.0),  # coronal
-        int((mask_data.shape[0] * mask_data.shape[1]) * 0.3),  # axial
-    ]
+    ijk_th = np.ceil([
+        (mask_data.shape[1] * mask_data.shape[2]) * 0.2,  # sagittal
+        (mask_data.shape[0] * mask_data.shape[2]) * 0.1,  # coronal
+        (mask_data.shape[0] * mask_data.shape[1]) * 0.3,  # axial
+    ]).astype(int)
 
-    vox_coords = []
+    vox_coords = np.zeros((4, cuts), dtype=np.float32)
+    vox_coords[-1, :] = 1.0
     for ax, (c, th) in enumerate(zip(ijk_counts, ijk_th)):
+        # Start with full plane if mask is seemingly empty
+        smin, smax = (0, mask_data.shape[ax] - 1)
+
         B = np.argwhere(c > th)
+        if not B.size:  # Threshold too high
+            B = np.argwhere(c > 0)
         if B.size:
             smin, smax = B.min(), B.max()
 
-        # Avoid too narrow selections of cuts (very small masks)
-        if not B.size or (th > 0 and (smin + cuts + 1) >= smax):
-            B = np.argwhere(c > 0)
+        vox_coords[ax, :] = np.linspace(smin, smax, num=cuts + 2)[1:-1]
 
-        # Resort to full plane if mask is seemingly empty
-        smin, smax = B.min(), B.max() if B.size else (0, mask_data.shape[ax])
-        inc = (smax - smin) / (cuts + 1)
-        vox_coords.append([smin + (i + 1) * inc for i in range(cuts)])
-
-    ras_coords = []
-    for cross in np.array(vox_coords).T:
-        ras_coords.append(apply_affine(mask_nii.affine, cross).tolist())
-    ras_cuts = [list(coords) for coords in np.transpose(ras_coords)]
-    return {k: v for k, v in zip(["x", "y", "z"], ras_cuts)}
+    ras_coords = mask_nii.affine.dot(vox_coords)[:3, ...]
+    return {k: list(v) for k, v in zip(["x", "y", "z"], np.around(ras_coords, 3))}
 
 
 def _3d_in_file(in_file):
