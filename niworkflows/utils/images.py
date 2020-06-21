@@ -3,14 +3,26 @@ import nibabel as nb
 import numpy as np
 
 
-def as_canonical(img):
-    """Drop rotation w.r.t. cardinal axes of input image."""
+def rotation2canonical(img):
+    """Calculate the rotation w.r.t. cardinal axes of input image."""
     img = nb.as_closest_canonical(img)
-    zooms = list(img.header.get_zooms()[:3])
-    newaff = np.diag(zooms + [1])
-    rot = newaff[:3, :3].dot(np.linalg.inv(img.affine[:3, :3]))
-    newaff[:3, 3] = rot.dot(img.affine[:3, 3])
-    return nb.Nifti1Image(img.dataobj, newaff, img.header)
+    newaff = np.diag(img.header.get_zooms()[:3])
+    r = newaff @ np.linalg.inv(img.affine[:3, :3])
+    if np.allclose(r, np.eye(3)):
+        return None
+    return r
+
+
+def rotate_affine(img, rot=None):
+    """Rewrite the affine of a spatial image."""
+    if rot is None:
+        return img
+
+    img = nb.as_closest_canonical(img)
+    affine = np.eye(4)
+    affine[:3, :3] = rot @ img.affine[:3, :3]
+    affine[:3, 3] = rot @ img.affine[:3, 3]
+    return img.__class__(img.dataobj, affine, img.header)
 
 
 def unsafe_write_nifti_header_and_data(fname, header, data):

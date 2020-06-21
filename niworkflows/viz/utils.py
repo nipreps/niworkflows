@@ -20,7 +20,7 @@ from seaborn import color_palette
 
 from nipype.utils import filemanip
 from .. import NIWORKFLOWS_LOG
-from ..utils.images import as_canonical
+from ..utils.images import rotation2canonical, rotate_affine
 
 
 SVGNS = "http://www.w3.org/2000/svg"
@@ -227,15 +227,17 @@ def plot_segs(
     """
     plot_params = {} if plot_params is None else plot_params
 
-    image_nii = as_canonical(_3d_in_file(image_nii))
-    seg_niis = [as_canonical(_3d_in_file(f)) for f in seg_niis]
+    image_nii = _3d_in_file(image_nii)
+    canonical_r = rotation2canonical(image_nii)
+    image_nii = rotate_affine(image_nii, rot=canonical_r)
+    seg_niis = [rotate_affine(_3d_in_file(f), rot=canonical_r) for f in seg_niis]
     data = image_nii.get_fdata()
 
     plot_params = robust_set_limits(data, plot_params)
 
     bbox_nii = (
         image_nii if bbox_nii is None
-        else as_canonical(_3d_in_file(bbox_nii))
+        else rotate_affine(_3d_in_file(bbox_nii), rot=canonical_r)
     )
 
     if masked:
