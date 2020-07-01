@@ -226,8 +226,7 @@ class BIDSDataGrabber(SimpleInterface):
         super(BIDSDataGrabber, self).__init__(*args, **kwargs)
         if anat_only is not None:
             self._require_funcs = not anat_only
-        if anat_derivatives is not None:
-            self._require_t1w = not anat_derivatives
+        self._require_t1w = anat_derivatives is None
 
     def _run_interface(self, runtime):
         bids_dict = self.inputs.subject_data
