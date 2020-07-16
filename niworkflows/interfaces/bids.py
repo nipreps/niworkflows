@@ -222,9 +222,11 @@ class BIDSDataGrabber(SimpleInterface):
 
     def __init__(self, *args, **kwargs):
         anat_only = kwargs.pop("anat_only")
+        anat_derivatives = kwargs.pop("anat_derivatives", None)
         super(BIDSDataGrabber, self).__init__(*args, **kwargs)
         if anat_only is not None:
             self._require_funcs = not anat_only
+        self._require_t1w = anat_derivatives is None
 
     def _run_interface(self, runtime):
         bids_dict = self.inputs.subject_data
@@ -232,7 +234,7 @@ class BIDSDataGrabber(SimpleInterface):
         self._results["out_dict"] = bids_dict
         self._results.update(bids_dict)
 
-        if not bids_dict["t1w"]:
+        if self._require_t1w and not bids_dict['t1w']:
             raise FileNotFoundError(
                 "No T1w images found for subject sub-{}".format(self.inputs.subject_id)
             )
