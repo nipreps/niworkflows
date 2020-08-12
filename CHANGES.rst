@@ -1,3 +1,9 @@
+1.2.7 (August 12, 2020)
+=======================
+Bug-fix release in the 1.2.x series with a very minor improvement of the reportlets.
+
+  * FIX: Use ``numpy.linspace`` to calculate mosaic plots' cutting planes (#543)
+
 1.2.6 (June 09, 2020)
 =====================
 Bug-fix release in the 1.2.x series addressing minor bugs encountered mostly
