@@ -13,18 +13,20 @@ from warnings import warn
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces.fsl.maths import ApplyMask
-from nipype.interfaces.ants import N4BiasFieldCorrection, Atropos, MultiplyImages
+from nipype.interfaces.ants import (
+    AI,
+    Atropos,
+    ImageMath,
+    MultiplyImages,
+    N4BiasFieldCorrection,
+    ResampleImageBySpacing,
+    ThresholdImage,
+)
 
 from ..utils.misc import get_template_specs
 from ..utils.connections import pop_file as _pop
 
 # niworkflows
-from ..interfaces.ants import (
-    ImageMath,
-    ResampleImageBySpacing,
-    AI,
-    ThresholdImage,
-)
 from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
     FixHeaderApplyTransforms as ApplyTransforms,
