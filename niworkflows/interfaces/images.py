@@ -43,9 +43,9 @@ class _RegridToZoomsInputSpec(BaseInterfaceInputSpec):
         desc="clip the data array within the original image's range",
     )
     smooth = traits.Either(
-        False,
         traits.Bool(),
         traits.Float(),
+        default=False,
         usedefault=True,
         desc="apply gaussian smoothing before resampling"
     )
