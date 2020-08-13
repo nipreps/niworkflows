@@ -12,17 +12,17 @@ from nipype.interfaces.base import (
     TraitedSpec,
     BaseInterfaceInputSpec,
     File,
-    InputMultiPath,
-    OutputMultiPath,
+    InputMultiObject,
+    OutputMultiObject,
     SimpleInterface,
 )
-from nipype.interfaces.ants.resampling import ApplyTransformsInputSpec
+from niworkflows.interfaces.fixes import FixTraitApplyTransformsInputSpec
 
 LOGGER = logging.getLogger("nipype.interface")
 
 
 class _MCFLIRT2ITKInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         File(exists=True), mandatory=True, desc="list of MAT files from MCFLIRT"
     )
     in_reference = File(
@@ -96,8 +96,8 @@ class MCFLIRT2ITK(SimpleInterface):
         return runtime
 
 
-class _MultiApplyTransformsInputSpec(ApplyTransformsInputSpec):
-    input_image = InputMultiPath(
+class _MultiApplyTransformsInputSpec(FixTraitApplyTransformsInputSpec):
+    input_image = InputMultiObject(
         File(exists=True),
         mandatory=True,
         desc="input time-series as a list of volumes after splitting"
@@ -115,7 +115,7 @@ class _MultiApplyTransformsInputSpec(ApplyTransformsInputSpec):
 
 
 class _MultiApplyTransformsOutputSpec(TraitedSpec):
-    out_files = OutputMultiPath(File(), desc="the output ITKTransform file")
+    out_files = OutputMultiObject(File(), desc="the output ITKTransform file")
     log_cmdline = File(desc="a list of command lines used to apply transforms")
 
 
