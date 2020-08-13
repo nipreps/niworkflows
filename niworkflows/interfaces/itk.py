@@ -254,6 +254,10 @@ def _arrange_xfms(transforms, num_files, tmp_folder):
     # Initialize the transforms matrix
     xfms_T = []
     for i, tf_file in enumerate(transforms):
+        if tf_file == "identity":
+            xfms_T.append([tf_file] * num_files)
+            continue
+
         # If it is a deformation field, copy to the tfs_matrix directly
         if guess_type(tf_file)[0] != "text/plain":
             xfms_T.append([tf_file] * num_files)
