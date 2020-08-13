@@ -205,7 +205,6 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
     resampled = map_coordinates(
         data,
         ijk[:3, :],
-        output=hdr.get_data_dtype(),
         order=order,
         mode="constant",
         cval=0,
