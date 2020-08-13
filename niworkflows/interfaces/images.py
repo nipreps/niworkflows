@@ -42,6 +42,13 @@ class _RegridToZoomsInputSpec(BaseInterfaceInputSpec):
         usedefault=True,
         desc="clip the data array within the original image's range",
     )
+    smooth = traits.Either(
+        traits.Bool(),
+        traits.Float(),
+        default=False,
+        usedefault=True,
+        desc="apply gaussian smoothing before resampling"
+    )
 
 
 class _RegridToZoomsOutputSpec(TraitedSpec):
@@ -65,6 +72,7 @@ class RegridToZooms(SimpleInterface):
             self.inputs.zooms,
             order=self.inputs.order,
             clip=self.inputs.clip,
+            smooth=self.inputs.smooth,
         ).to_filename(self._results["out_file"])
         return runtime
 
