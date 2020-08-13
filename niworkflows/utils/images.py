@@ -195,11 +195,16 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
     )
 
     if smooth:
+        from numbers import Integral
         from scipy.ndimage import gaussian_filter
-        data = gaussian_filter(in_file.get_fdata(),
-                               2 if smooth is True else smooth).astype(dtype)
+        if smooth is True:
+            smooth = np.maximum(0, (pre_zooms / zooms - 1) / 2)
+        data = gaussian_filter(in_file.get_fdata(), smooth)
+        if issubclass(dtype, Integral):
+            data = np.round(data)
+        data = data.astype(dtype)
     else:
-        data = np.asanyarray(in_file.dataobj)
+        data = np.asarray(in_file.dataobj, dtype=dtype)
 
     # Resample data in the new grid
     resampled = map_coordinates(
