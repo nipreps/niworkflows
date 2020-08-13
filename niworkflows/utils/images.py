@@ -163,7 +163,6 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
     qform, qcode = in_file.get_qform(coded=True)
 
     hdr = in_file.header.copy()
-    dtype = hdr.get_data_dtype()
     zooms = np.array(zooms)
 
     # Calculate the factors to normalize voxel size to the specific zooms
@@ -195,22 +194,18 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
     )
 
     if smooth:
-        from numbers import Integral
         from scipy.ndimage import gaussian_filter
         if smooth is True:
             smooth = np.maximum(0, (pre_zooms / zooms - 1) / 2)
         data = gaussian_filter(in_file.get_fdata(), smooth)
-        if issubclass(dtype, Integral):
-            data = np.round(data)
-        data = data.astype(dtype)
     else:
-        data = np.asarray(in_file.dataobj, dtype=dtype)
+        data = np.asarray(in_file.dataobj)
 
     # Resample data in the new grid
     resampled = map_coordinates(
         data,
         ijk[:3, :],
-        output=dtype,
+        output=hdr.get_data_dtype(),
         order=order,
         mode="constant",
         cval=0,
