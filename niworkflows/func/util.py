@@ -6,11 +6,11 @@ from pkg_resources import resource_filename as pkgr_fn
 
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu, fsl, afni
+from nipype.interfaces.ants.utils import AI
 
 from templateflow.api import get as get_template
 
 from ..engine.workflows import LiterateWorkflow as Workflow
-from ..interfaces.ants import AI
 from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
     FixHeaderApplyTransforms as ApplyTransforms,
