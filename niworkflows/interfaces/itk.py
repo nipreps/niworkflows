@@ -16,7 +16,7 @@ from nipype.interfaces.base import (
     OutputMultiObject,
     SimpleInterface,
 )
-from niworkflows.interfaces.fixes import FixTraitApplyTransformsInputSpec
+from niworkflows.interfaces.fixes import _FixTraitApplyTransformsInputSpec
 
 LOGGER = logging.getLogger("nipype.interface")
 
@@ -96,7 +96,7 @@ class MCFLIRT2ITK(SimpleInterface):
         return runtime
 
 
-class _MultiApplyTransformsInputSpec(FixTraitApplyTransformsInputSpec):
+class _MultiApplyTransformsInputSpec(_FixTraitApplyTransformsInputSpec):
     input_image = InputMultiObject(
         File(exists=True),
         mandatory=True,

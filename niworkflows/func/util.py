@@ -6,7 +6,6 @@ from pkg_resources import resource_filename as pkgr_fn
 
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu, fsl, afni
-from nipype.interfaces.ants.utils import AI
 
 from templateflow.api import get as get_template
 
@@ -408,6 +407,7 @@ def init_enhance_and_skullstrip_bold_wf(
     apply_mask = pe.Node(fsl.ApplyMask(), name="apply_mask")
 
     if not pre_mask:
+        from nipype.interfaces.ants.utils import AI
         from ..interfaces.nibabel import Binarize
 
         bold_template = get_template(

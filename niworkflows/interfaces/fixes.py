@@ -17,7 +17,7 @@ from .. import __version__
 from .utils import _copyxform
 
 
-class FixTraitApplyTransformsInputSpec(ApplyTransformsInputSpec):
+class _FixTraitApplyTransformsInputSpec(ApplyTransformsInputSpec):
     transforms = InputMultiObject(
         traits.Either(File(exists=True), 'identity'),
         argstr="%s",
@@ -26,13 +26,15 @@ class FixTraitApplyTransformsInputSpec(ApplyTransformsInputSpec):
         "example, the last specified transform will be applied first.",
     )
 
+
 class FixHeaderApplyTransforms(ApplyTransforms):
     """
     A replacement for nipype.interfaces.ants.resampling.ApplyTransforms that
     fixes the resampled image header to match the xform of the reference
     image
     """
-    input_spec = FixTraitApplyTransformsInputSpec
+
+    input_spec = _FixTraitApplyTransformsInputSpec
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         # Run normally
