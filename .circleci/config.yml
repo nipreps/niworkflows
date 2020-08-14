@@ -287,10 +287,10 @@ jobs:
             - regression-v5-{{ .Revision }}
       - restore_cache:
           keys:
-            - masks-workdir-v2-{{ .Branch }}-{{epoch}}
-            - masks-workdir-v2-{{ .Branch }}-
-            - masks-workdir-v2-master-
-            - masks-workdir-v2-
+            - masks-workdir-v3-{{ .Branch }}-{{epoch}}
+            - masks-workdir-v3-{{ .Branch }}-
+            - masks-workdir-v3-master-
+            - masks-workdir-v3-
       - run:
           name: Run regression tests on EPI masks
           no_output_timeout: 2h
@@ -320,7 +320,7 @@ jobs:
       - store_test_results:
           path: /tmp/masks/reports
       - save_cache:
-         key: masks-workdir-v2-{{ .Branch }}-{{ epoch }}
+         key: masks-workdir-v3-{{ .Branch }}-{{ epoch }}
          paths:
             - /tmp/masks/workdir
 
