@@ -33,7 +33,7 @@ from nipype.interfaces.io import add_traits
 from templateflow.api import templates as _get_template_list
 from ..utils.bids import _init_layout, relative_to_root
 from ..utils.images import overwrite_header
-from ..utils.misc import splitext as _splitext, _copy_any
+from ..utils.misc import _copy_any
 
 regz = re.compile(r"\.gz$")
 _pybids_spec = loads(Path(_pkgres("niworkflows", "data/nipreps.json")).read_text())
@@ -653,9 +653,9 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 }
             )
             if self._metadata:
-                sidecar = Path(self._results["out_file"][0]).parent / (
-                    "%s.json" % _splitext(self._results["out_file"][0])[0]
-                )
+                _outfile = Path(self._results["out_file"][0])
+                # accurately replace dual suffix files (.func.gii, .surf.gii)
+                sidecar = _outfile.parent / f"{_outfile.name.split('.', 1)[0]}.json"
                 sidecar.write_text(dumps(self._metadata, sort_keys=True, indent=2))
                 self._results["out_meta"] = str(sidecar)
         return runtime
