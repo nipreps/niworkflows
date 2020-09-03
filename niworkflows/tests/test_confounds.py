@@ -160,6 +160,15 @@ def test_ConfoundsCorrelationPlot():
     """confounds correlation report test"""
     confounds_file = os.path.join(datadir, "confounds_test.tsv")
     cc_rpt = ConfoundsCorrelationPlot(
-        confounds_file=confounds_file, reference_column="a"
+        confounds_file=confounds_file, reference_column="a",
     )
     _smoke_test_report(cc_rpt, "confounds_correlation.svg")
+
+
+def test_ConfoundsCorrelationPlotColumns():
+    """confounds correlation report test"""
+    confounds_file = os.path.join(datadir, "confounds_test.tsv")
+    cc_rpt = ConfoundsCorrelationPlot(
+        confounds_file=confounds_file, reference_column="a", columns=["b", "d", "f"],
+    )
+    _smoke_test_report(cc_rpt, "confounds_correlation_cols.svg")
