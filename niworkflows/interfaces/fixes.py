@@ -4,9 +4,9 @@ import os
 
 import nibabel as nb
 
-from nipype.interfaces.base import traits
+from nipype.interfaces.base import traits, InputMultiObject, File
 from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.ants.resampling import ApplyTransforms
+from nipype.interfaces.ants.resampling import ApplyTransforms, ApplyTransformsInputSpec
 from nipype.interfaces.ants.registration import Registration
 from nipype.interfaces.ants.segmentation import (
     N4BiasFieldCorrection as VanillaN4,
@@ -17,12 +17,24 @@ from .. import __version__
 from .utils import _copyxform
 
 
+class _FixTraitApplyTransformsInputSpec(ApplyTransformsInputSpec):
+    transforms = InputMultiObject(
+        traits.Either(File(exists=True), 'identity'),
+        argstr="%s",
+        mandatory=True,
+        desc="transform files: will be applied in reverse order. For "
+        "example, the last specified transform will be applied first.",
+    )
+
+
 class FixHeaderApplyTransforms(ApplyTransforms):
     """
     A replacement for nipype.interfaces.ants.resampling.ApplyTransforms that
     fixes the resampled image header to match the xform of the reference
     image
     """
+
+    input_spec = _FixTraitApplyTransformsInputSpec
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         # Run normally

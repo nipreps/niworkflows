@@ -1,8 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utilities."""
-import os
-import shutil
 
 
 __all__ = [
@@ -253,17 +251,17 @@ def clean_directory(path):
     This function is not guaranteed to work across multiple threads or processes.
 
     """
-    for f in os.scandir(path):  # switch to context manager when py35 dropped
-        if f.is_file() or f.is_symlink():
-            try:
-                os.unlink(f.path)
-            except OSError:
-                return False
-        elif f.is_dir():
-            try:
-                shutil.rmtree(f.path)
-            except OSError:
-                return False
+    from pathlib import Path
+    import shutil
+
+    try:
+        for f in Path(path).iterdir():
+            if f.is_file() or f.is_symlink():
+                f.unlink()
+            elif f.is_dir():
+                shutil.rmtree(str(f))
+    except OSError:
+        return False
     return True
 
 
@@ -289,7 +287,7 @@ def pass_dummy_scans(algo_dummy_scans, dummy_scans=None):
     return dummy_scans
 
 
-def check_valid_fs_license(lic=None):
+def check_valid_fs_license():
     """
     Run ``mri_convert`` to assess FreeSurfer access to a license.
 
@@ -303,13 +301,6 @@ def check_valid_fs_license(lic=None):
     import subprocess as sp
     from tempfile import TemporaryDirectory
     from pkg_resources import resource_filename
-
-    if lic is not None:
-        import warnings
-        warnings.warn("The license argument has been deprecated, has no effect, and will be "
-                      "removed in 1.3.0. Please set the environment if needed before calling "
-                      "this function without arguments.",
-                      DeprecationWarning)
 
     with TemporaryDirectory() as tmpdir:
         # quick FreeSurfer command

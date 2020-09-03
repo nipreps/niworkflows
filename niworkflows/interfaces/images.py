@@ -25,6 +25,58 @@ from nipype.interfaces import fsl
 LOGGER = logging.getLogger("nipype.interface")
 
 
+class _RegridToZoomsInputSpec(BaseInterfaceInputSpec):
+    in_file = File(
+        exists=True, mandatory=True, desc="a file whose resolution is to change"
+    )
+    zooms = traits.Tuple(
+        traits.Float,
+        traits.Float,
+        traits.Float,
+        mandatory=True,
+        desc="the new resolution",
+    )
+    order = traits.Int(3, usedefault=True, desc="order of interpolator")
+    clip = traits.Bool(
+        True,
+        usedefault=True,
+        desc="clip the data array within the original image's range",
+    )
+    smooth = traits.Either(
+        traits.Bool(),
+        traits.Float(),
+        default=False,
+        usedefault=True,
+        desc="apply gaussian smoothing before resampling"
+    )
+
+
+class _RegridToZoomsOutputSpec(TraitedSpec):
+    out_file = File(exists=True, dec="the regridded file")
+
+
+class RegridToZooms(SimpleInterface):
+    """Change the resolution of an image (regrid)."""
+
+    input_spec = _RegridToZoomsInputSpec
+    output_spec = _RegridToZoomsOutputSpec
+
+    def _run_interface(self, runtime):
+        from ..utils.images import resample_by_spacing
+
+        self._results["out_file"] = fname_presuffix(
+            self.inputs.in_file, suffix="_regrid", newpath=runtime.cwd
+        )
+        resample_by_spacing(
+            self.inputs.in_file,
+            self.inputs.zooms,
+            order=self.inputs.order,
+            clip=self.inputs.clip,
+            smooth=self.inputs.smooth,
+        ).to_filename(self._results["out_file"])
+        return runtime
+
+
 class _IntraModalMergeInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc="input files")
     in_mask = File(exists=True, desc="input mask for grand mean scaling")

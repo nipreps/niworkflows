@@ -222,9 +222,11 @@ class BIDSDataGrabber(SimpleInterface):
 
     def __init__(self, *args, **kwargs):
         anat_only = kwargs.pop("anat_only")
+        anat_derivatives = kwargs.pop("anat_derivatives", None)
         super(BIDSDataGrabber, self).__init__(*args, **kwargs)
         if anat_only is not None:
             self._require_funcs = not anat_only
+        self._require_t1w = anat_derivatives is None
 
     def _run_interface(self, runtime):
         bids_dict = self.inputs.subject_data
@@ -232,7 +234,7 @@ class BIDSDataGrabber(SimpleInterface):
         self._results["out_dict"] = bids_dict
         self._results.update(bids_dict)
 
-        if not bids_dict["t1w"]:
+        if self._require_t1w and not bids_dict['t1w']:
             raise FileNotFoundError(
                 "No T1w images found for subject sub-{}".format(self.inputs.subject_id)
             )
@@ -277,7 +279,8 @@ class _DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         File(exists=True), mandatory=True, desc="the object to be saved"
     )
     meta_dict = traits.DictStrAny(desc="an input dictionary containing metadata")
-    source_file = File(exists=False, mandatory=True, desc="the input func file")
+    source_file = InputMultiObject(
+        File(exists=False), mandatory=True, desc="the source file(s) to extract entities from")
 
 
 class _DerivativesDataSinkOutputSpec(TraitedSpec):
@@ -345,6 +348,32 @@ class DerivativesDataSink(SimpleInterface):
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
     ['.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom1-1_custom2-b_T1w.nii',
      '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom1-2_custom2-b_T1w.nii']
+
+    When multiple source files are passed, only common entities are passed down.
+    For example, if two T1w images from different sessions are used to generate
+    a single image, the session entity is removed automatically.
+
+    >>> bids_dir = tmpdir / 'bidsroot'
+    >>> multi_source = [
+    ...     bids_dir / 'sub-02/ses-A/anat/sub-02_ses-A_T1w.nii.gz',
+    ...     bids_dir / 'sub-02/ses-B/anat/sub-02_ses-B_T1w.nii.gz']
+    >>> for source_file in multi_source:
+    ...     source_file.parent.mkdir(parents=True, exist_ok=True)
+    ...     _ = source_file.write_text("")
+    >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)
+    >>> dsink.inputs.in_file = str(tmpfile)
+    >>> dsink.inputs.source_file = list(map(str, multi_source))
+    >>> dsink.inputs.desc = 'preproc'
+    >>> res = dsink.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../niworkflows/sub-02/anat/sub-02_desc-preproc_T1w.nii'
+
+    If, on the other hand, only one is used, the session is preserved:
+
+    >>> dsink.inputs.source_file = str(multi_source[0])
+    >>> res = dsink.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../niworkflows/sub-02/ses-A/anat/sub-02_ses-A_desc-preproc_T1w.nii'
 
     >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
     >>> bids_dir.mkdir(parents=True, exist_ok=True)
@@ -478,9 +507,12 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             self._metadata = meta
 
         # Initialize entities with those from the source file.
-        out_entities = parse_file_entities(
-            str(relative_to_root(self.inputs.source_file))
-        )
+        in_entities = [
+            parse_file_entities(str(relative_to_root(source_file)))
+            for source_file in self.inputs.source_file
+        ]
+        out_entities = {k: v for k, v in in_entities[0].items()
+                        if all(ent.get(k) == v for ent in in_entities[1:])}
         for drop_entity in listify(self.inputs.dismiss_entities or []):
             out_entities.pop(drop_entity, None)
 

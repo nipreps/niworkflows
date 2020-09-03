@@ -20,6 +20,7 @@ from seaborn import color_palette
 
 from nipype.utils import filemanip
 from .. import NIWORKFLOWS_LOG
+from ..utils.images import rotation2canonical, rotate_affine
 
 
 SVGNS = "http://www.w3.org/2000/svg"
@@ -216,7 +217,10 @@ def plot_segs(
     compress="auto",
     **plot_params
 ):
-    """ plot segmentation as contours over the image (e.g. anatomical).
+    """
+    Generate a static mosaic with ROIs represented by their delimiting contour.
+
+    Plot segmentation as contours over the image (e.g. anatomical).
     seg_niis should be a list of files. mask_nii helps determine the cut
     coordinates. plot_params will be passed on to nilearn plot_* functions. If
     seg_niis is a list of size one, it behaves as if it was plotting the mask.
@@ -224,11 +228,18 @@ def plot_segs(
     plot_params = {} if plot_params is None else plot_params
 
     image_nii = _3d_in_file(image_nii)
+    canonical_r = rotation2canonical(image_nii)
+    image_nii = rotate_affine(image_nii, rot=canonical_r)
+    seg_niis = [rotate_affine(_3d_in_file(f), rot=canonical_r) for f in seg_niis]
     data = image_nii.get_fdata()
 
     plot_params = robust_set_limits(data, plot_params)
 
-    bbox_nii = nb.load(image_nii if bbox_nii is None else bbox_nii)
+    bbox_nii = (
+        image_nii if bbox_nii is None
+        else rotate_affine(_3d_in_file(bbox_nii), rot=canonical_r)
+    )
+
     if masked:
         bbox_nii = nlimage.threshold_img(bbox_nii, 1e-3)
 

@@ -3,6 +3,27 @@ import nibabel as nb
 import numpy as np
 
 
+def rotation2canonical(img):
+    """Calculate the rotation w.r.t. cardinal axes of input image."""
+    img = nb.as_closest_canonical(img)
+    newaff = np.diag(img.header.get_zooms()[:3])
+    r = newaff @ np.linalg.pinv(img.affine[:3, :3])
+    if np.allclose(r, np.eye(3)):
+        return None
+    return r
+
+
+def rotate_affine(img, rot=None):
+    """Rewrite the affine of a spatial image."""
+    if rot is None:
+        return img
+
+    img = nb.as_closest_canonical(img)
+    affine = np.eye(4)
+    affine[:3] = rot @ img.affine[:3]
+    return img.__class__(img.dataobj, affine, img.header)
+
+
 def unsafe_write_nifti_header_and_data(fname, header, data):
     """Write header and data without any consistency checks or data munging
 
@@ -125,3 +146,90 @@ def dseg_label(in_seg, label, newpath=None):
     new.set_data_dtype(np.uint8)
     new.to_filename(out_file)
     return out_file
+
+
+def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
+    """Regrid the input image to match the new zooms."""
+    from pathlib import Path
+    import numpy as np
+    import nibabel as nb
+    from scipy.ndimage import map_coordinates
+
+    if isinstance(in_file, (str, Path)):
+        in_file = nb.load(in_file)
+
+    # Prepare output x-forms
+    sform, scode = in_file.get_sform(coded=True)
+    qform, qcode = in_file.get_qform(coded=True)
+
+    hdr = in_file.header.copy()
+    zooms = np.array(zooms)
+
+    # Calculate the factors to normalize voxel size to the specific zooms
+    pre_zooms = np.array(in_file.header.get_zooms()[:3])
+
+    # Calculate an affine aligned with cardinal axes, for simplicity
+    card = nb.affines.from_matvec(np.diag(pre_zooms))
+    extent = card[:3, :3].dot(np.array(in_file.shape[:3]))
+    card[:3, 3] = -0.5 * extent
+
+    # Cover the FoV with the new grid
+    new_size = np.ceil(extent / zooms).astype(int)
+    offset = (extent - np.diag(zooms).dot(new_size)) * 0.5
+    new_card = nb.affines.from_matvec(np.diag(zooms), card[:3, 3] + offset)
+
+    # Calculate the new indexes
+    new_grid = np.array(
+        np.meshgrid(
+            np.arange(new_size[0]),
+            np.arange(new_size[1]),
+            np.arange(new_size[2]),
+            indexing="ij",
+        )
+    ).reshape((3, -1))
+
+    # Calculate the locations of the new samples, w.r.t. the original grid
+    ijk = np.linalg.inv(card).dot(
+        new_card.dot(np.vstack((new_grid, np.ones((1, new_grid.shape[1])))))
+    )
+
+    if smooth:
+        from scipy.ndimage import gaussian_filter
+        if smooth is True:
+            smooth = np.maximum(0, (pre_zooms / zooms - 1) / 2)
+        data = gaussian_filter(in_file.get_fdata(), smooth)
+    else:
+        data = np.asarray(in_file.dataobj)
+
+    # Resample data in the new grid
+    resampled = map_coordinates(
+        data,
+        ijk[:3, :],
+        order=order,
+        mode="constant",
+        cval=0,
+        prefilter=True,
+    ).reshape(new_size)
+    if clip:
+        resampled = np.clip(resampled, a_min=data.min(), a_max=data.max())
+
+    # Set new zooms
+    hdr.set_zooms(zooms)
+
+    # Get the original image's affine
+    affine = in_file.affine.copy()
+    # Determine rotations w.r.t. cardinal axis and eccentricity
+    rot = affine.dot(np.linalg.inv(card))
+    # Apply to the new cardinal, so that the resampling is consistent
+    new_affine = rot.dot(new_card)
+
+    if qcode != 0:
+        hdr.set_qform(new_affine.dot(np.linalg.inv(affine).dot(qform)), code=int(qcode))
+    if scode != 0:
+        hdr.set_sform(new_affine.dot(np.linalg.inv(affine).dot(sform)), code=int(scode))
+    if (scode, qcode) == (0, 0):
+        hdr.set_qform(new_affine, code=1)
+        hdr.set_sform(new_affine, code=1)
+
+    # Create a new x-form affine, aligned with cardinal axes, 1mm3 and centered.
+    return nb.Nifti1Image(resampled, new_affine, hdr)
