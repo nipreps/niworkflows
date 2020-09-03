@@ -20,6 +20,12 @@ With thanks to Basile Pinsard for contributions.
   * MAINT: Finalize upstreaming of ANTs' interfaces to Nipype (#550)
   * MAINT: Update to Python +3.6 (#541)
 
+1.2.8 (September 03, 2020)
+==========================
+Bug-fix release in the 1.2.x series with a minor improvement of the correlations plot.
+
+* FIX: Improved control over correlations plot (#561)
+
 1.2.7 (August 12, 2020)
 =======================
 Bug-fix release in the 1.2.x series with a very minor improvement of the reportlets.
