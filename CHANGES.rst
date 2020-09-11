@@ -1,9 +1,10 @@
-1.3.0 (TBD)
-===========
-First release in the 1.3.x series. This release includes enhancements and bug-fixes
-towards the release of the first LTS version of fMRIPrep.
-PyBIDS has been revised to use more recent versions, a series of ANTs' interfaces
-have been deemed ready to upstream into Nipype, and several improvements regarding
+1.3.0 (September 11, 2020)
+==========================
+First release in the 1.3.x series.
+This release includes enhancements and bug-fixes towards the release of the first 
+LTS (*long-term support*) version of *fMRIPrep*.
+*PyBIDS* has been revised to use more recent versions, a series of ANTs' interfaces
+have been deemed ready to upstream into *Nipype*, and several improvements regarding
 multi-echo EPI are included.
 With thanks to Basile Pinsard for contributions.
 
@@ -17,6 +18,7 @@ With thanks to Basile Pinsard for contributions.
 * ENH: Allow ``bold_reference_wf`` to accept multiple EPIs/SBRefs (#408)
 * ENH: Numerical stability of EPI brain-masks using probabilistic prior (#485)
 * ENH: Add a pure-Python interface to resample to specific resolutions (#511)
+* MAINT: Upstream all bug-fixes in the 1.2.9 release
 * MAINT: Finalize upstreaming of ANTs' interfaces to Nipype (#550)
 * MAINT: Update to Python +3.6 (#541)
 
