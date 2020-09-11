@@ -967,7 +967,7 @@ def _tsv2json(
             for i in tsv_data.index
         ]
         tsv_data.columns = [
-            re.sub(re_to_camel, camel, less_breakable(i).title(), 0)
+            re.sub(re_to_camel, camel, less_breakable(i).title(), 0).replace("Csf", "CSF")
             for i in tsv_data.columns
         ]
     json_data = tsv_data.to_json(orient="index")
