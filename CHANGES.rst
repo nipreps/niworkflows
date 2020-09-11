@@ -1,3 +1,11 @@
+1.2.9 (September 11, 2020)
+==========================
+Bug-fix release in the 1.2.x series with very minor problems addressed.
+
+* FIX: Reportlets would crash in edge condition (#566)
+* FIX: AROMA metadata ``CsfFraction`` -> ``CSFFraction`` (#563)
+* FIX: Add DWI nonstandard spaces (#565)
+
 1.2.8 (September 03, 2020)
 ==========================
 Bug-fix release in the 1.2.x series with a minor improvement of the correlations plot.
