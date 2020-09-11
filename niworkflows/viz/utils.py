@@ -175,7 +175,7 @@ def cuts_from_bbox(mask_nii, cuts=3):
         smin, smax = (0, mask_data.shape[ax] - 1)
 
         B = np.argwhere(c > th)
-        if not B.size:  # Threshold too high
+        if B.size < cuts:  # Threshold too high
             B = np.argwhere(c > 0)
         if B.size:
             smin, smax = B.min(), B.max()

@@ -7,18 +7,26 @@ have been deemed ready to upstream into Nipype, and several improvements regardi
 multi-echo EPI are included.
 With thanks to Basile Pinsard for contributions.
 
-  * FIX: Patch ``ApplyTransforms`` spec to permit identity in a chain (#554)
-  * FIX: Add dots to extensions in PyBIDS' config file (#548)
-  * FIX: Segmentation plots aligned with cardinal axes (#544)
-  * FIX: Skip T1w file existence check if ``anat_derivatives`` are provided (#545)
-  * FIX: Avoid diverting CIFTI dtype from original BOLD (#532)
-  * ENH: Add ``smooth`` input to ``RegridToZooms`` (#549)
-  * ENH: Enable ``DerivativesDataSink`` to take multiple source files to derive entities (#547)
-  * ENH: Allow ``bold_reference_wf`` to accept multiple EPIs/SBRefs (#408)
-  * ENH: Numerical stability of EPI brain-masks using probabilistic prior (#485)
-  * ENH: Add a pure-Python interface to resample to specific resolutions (#511)
-  * MAINT: Finalize upstreaming of ANTs' interfaces to Nipype (#550)
-  * MAINT: Update to Python +3.6 (#541)
+* FIX: Patch ``ApplyTransforms`` spec to permit identity in a chain (#554)
+* FIX: Add dots to extensions in PyBIDS' config file (#548)
+* FIX: Segmentation plots aligned with cardinal axes (#544)
+* FIX: Skip T1w file existence check if ``anat_derivatives`` are provided (#545)
+* FIX: Avoid diverting CIFTI dtype from original BOLD (#532)
+* ENH: Add ``smooth`` input to ``RegridToZooms`` (#549)
+* ENH: Enable ``DerivativesDataSink`` to take multiple source files to derive entities (#547)
+* ENH: Allow ``bold_reference_wf`` to accept multiple EPIs/SBRefs (#408)
+* ENH: Numerical stability of EPI brain-masks using probabilistic prior (#485)
+* ENH: Add a pure-Python interface to resample to specific resolutions (#511)
+* MAINT: Finalize upstreaming of ANTs' interfaces to Nipype (#550)
+* MAINT: Update to Python +3.6 (#541)
+
+1.2.9 (September 11, 2020)
+==========================
+Bug-fix release in the 1.2.x series with very minor problems addressed.
+
+* FIX: Reportlets would crash in edge condition (#566)
+* FIX: AROMA metadata ``CsfFraction`` -> ``CSFFraction`` (#563)
+* FIX: Add DWI nonstandard spaces (#565)
 
 1.2.8 (September 03, 2020)
 ==========================
