@@ -670,11 +670,9 @@ def init_atropos_wf(
     msk_conform = pe.Node(niu.Function(function=_conform_mask), name="msk_conform")
     merge_tpms = pe.Node(niu.Merge(in_segmentation_model[0]), name="merge_tpms")
 
-    sel_wm = pe.Node(
-        niu.Select(index=in_segmentation_model[-1] - 1),
-        name="sel_wm",
-        run_without_submitting=True,
-    )
+    sel_wm = pe.Node(niu.Select(), name="sel_wm", run_without_submitting=True)
+    if not wm_prior:
+        sel_wm.inputs.index = in_segmentation_model[-1] - 1
 
     copy_xform_wm = pe.Node(CopyXForm(fields=["wm_map"]),
                             name="copy_xform_wm", run_without_submitting=True)
@@ -775,6 +773,16 @@ N4BiasFieldCorrection."""
     # fmt: on
 
     if wm_prior:
+        from nipype.algorithms.metrics import FuzzyOverlap
+
+        def _argmax(in_dice):
+            import numpy as np
+            return np.argmax(in_dice)
+
+        match_wm = pe.Node(niu.Function(function=_matchlen), name="match_wm",
+                           run_without_submitting=True)
+        overlap = pe.Node(FuzzyOverlap(), name="overlap", run_without_submitting=True)
+
         apply_wm_prior = pe.Node(
             MultiplyImages(
                 dimension=3,
@@ -788,6 +796,11 @@ N4BiasFieldCorrection."""
         ])
         wf.connect([
             (inputnode, apply_wm_prior, [("wm_prior", "second_input")]),
+            (inputnode, match_wm, [("wm_prior", "value")]),
+            (atropos, match_wm, [("posteriors", "reference")]),
+            (atropos, overlap, [("posteriors", "in_ref")]),
+            (match_wm, overlap, [("out", "in_tst")]),
+            (overlap, sel_wm, [(("class_fdi", _argmax), "index")]),
             (copy_xform_wm, apply_wm_prior, [("wm_map", "first_input")]),
             (apply_wm_prior, inu_n4_final, [("output_product_image", "weight_image")]),
         ])
@@ -1017,3 +1030,7 @@ def _conform_mask(in_mask, in_reference):
         np.asanyarray(nii.dataobj).astype("int16"), ref.affine, hdr
     ).to_filename(out_file)
     return out_file
+
+
+def _matchlen(value, reference):
+    return [value] * len(reference)
