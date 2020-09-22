@@ -1,3 +1,10 @@
+1.3.1 (September 22, 2020)
+==========================
+Bug-fix release in the 1.3.x series.
+Addresses longstanding issues in the anatomical MRI brain extraction workflow.
+
+* FIX: Revision of ``antsBrainExtraction``, better handling edge cases (#567)
+
 1.3.0 (September 11, 2020)
 ==========================
 First release in the 1.3.x series.
