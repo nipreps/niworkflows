@@ -67,7 +67,7 @@ def init_brain_extraction_wf(
     The workflow follows the following structure:
 
       1. Step 1 performs several clerical tasks (preliminary INU correction,
-         calculating the Laplacian of inputs, affine initialization) and the 
+         calculating the Laplacian of inputs, affine initialization) and the
          core spatial normalization.
       2. Maps the brain mask into target space using the normalization
          calculated in 1.
@@ -216,7 +216,9 @@ def init_brain_extraction_wf(
     )
 
     trunc = pe.MapNode(
-        ImageMath(operation="TruncateImageIntensity", op2="0.01 0.999 256", copy_header=True),
+        ImageMath(
+            operation="TruncateImageIntensity", op2="0.01 0.999 256", copy_header=True
+        ),
         name="truncate_images",
         iterfield=["op1"],
     )
@@ -235,15 +237,19 @@ def init_brain_extraction_wf(
         iterfield=["input_image"],
     )
 
-    res_tmpl = pe.Node(RegridToZooms(in_file=tpl_target_path, zooms=(4, 4, 4), smooth=True),
-                       name="res_tmpl")
+    res_tmpl = pe.Node(
+        RegridToZooms(in_file=tpl_target_path, zooms=(4, 4, 4), smooth=True),
+        name="res_tmpl",
+    )
     res_target = pe.Node(RegridToZooms(zooms=(4, 4, 4), smooth=True), name="res_target")
 
-    lap_tmpl = pe.Node(ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True),
-                       name="lap_tmpl")
+    lap_tmpl = pe.Node(
+        ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True), name="lap_tmpl"
+    )
     lap_tmpl.inputs.op1 = tpl_target_path
     lap_target = pe.Node(
-        ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True), name="lap_target"
+        ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True),
+        name="lap_target",
     )
     mrg_tmpl = pe.Node(niu.Merge(2), name="mrg_tmpl")
     mrg_tmpl.inputs.in1 = tpl_target_path
@@ -287,15 +293,17 @@ def init_brain_extraction_wf(
         fixed_mask_trait += "s"
 
     map_brainmask = pe.Node(
-        ApplyTransforms(interpolation="Gaussian"),
-        name="map_brainmask",
-        mem_gb=1,
+        ApplyTransforms(interpolation="Gaussian"), name="map_brainmask", mem_gb=1,
     )
     map_brainmask.inputs.input_image = str(tpl_mask_path)
 
     thr_brainmask = pe.Node(
         ThresholdImage(
-            dimension=3, th_low=0.5, th_high=1.0, inside_value=1, outside_value=0,
+            dimension=3,
+            th_low=0.5,
+            th_high=1.0,
+            inside_value=1,
+            outside_value=0,
             copy_header=True,
         ),
         name="thr_brainmask",
@@ -358,7 +366,9 @@ N4BiasFieldCorrection."""
     ])
     # fmt: on
 
-    wm_tpm = get_template(in_template, label="WM", suffix="probseg", **common_spec) or None
+    wm_tpm = (
+        get_template(in_template, label="WM", suffix="probseg", **common_spec) or None
+    )
     if wm_tpm:
         map_wmmask = pe.Node(
             ApplyTransforms(interpolation="Gaussian"), name="map_wmmask", mem_gb=1,
@@ -366,7 +376,8 @@ N4BiasFieldCorrection."""
 
         # Add the brain stem if it is found.
         bstem_tpm = (
-            get_template(in_template, label="BS", suffix="probseg", **common_spec) or None
+            get_template(in_template, label="BS", suffix="probseg", **common_spec)
+            or None
         )
         if bstem_tpm:
             full_wm = pe.Node(niu.Function(function=_imsum), name="full_wm")
@@ -395,11 +406,13 @@ N4BiasFieldCorrection."""
 
     if use_laplacian:
         lap_tmpl = pe.Node(
-            ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True), name="lap_tmpl"
+            ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True),
+            name="lap_tmpl",
         )
         lap_tmpl.inputs.op1 = tpl_target_path
         lap_target = pe.Node(
-            ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True), name="lap_target"
+            ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True),
+            name="lap_target",
         )
         mrg_tmpl = pe.Node(niu.Merge(2), name="mrg_tmpl")
         mrg_tmpl.inputs.in1 = tpl_target_path
@@ -559,21 +572,27 @@ def init_atropos_wf(
     out_fields = ["bias_corrected", "bias_image", "out_mask", "out_segm", "out_tpms"]
 
     inputnode = pe.Node(
-        niu.IdentityInterface(fields=["in_files", "in_corrected", "in_mask", "wm_prior"]),
+        niu.IdentityInterface(
+            fields=["in_files", "in_corrected", "in_mask", "wm_prior"]
+        ),
         name="inputnode",
     )
-    outputnode = pe.Node(niu.IdentityInterface(fields=["out_file"] + out_fields),
-                         name="outputnode")
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=["out_file"] + out_fields), name="outputnode"
+    )
 
-    copy_xform = pe.Node(CopyXForm(fields=out_fields),
-                         name="copy_xform", run_without_submitting=True)
+    copy_xform = pe.Node(
+        CopyXForm(fields=out_fields), name="copy_xform", run_without_submitting=True
+    )
 
     # Morphological dilation, radius=2
-    dil_brainmask = pe.Node(ImageMath(operation="MD", op2="2", copy_header=True),
-                            name="dil_brainmask")
+    dil_brainmask = pe.Node(
+        ImageMath(operation="MD", op2="2", copy_header=True), name="dil_brainmask"
+    )
     # Get largest connected component
     get_brainmask = pe.Node(
-        ImageMath(operation="GetLargestComponent", copy_header=True), name="get_brainmask"
+        ImageMath(operation="GetLargestComponent", copy_header=True),
+        name="get_brainmask",
     )
 
     # Run atropos (core node)
@@ -597,10 +616,12 @@ def init_atropos_wf(
 
     # massage outputs
     pad_segm = pe.Node(
-        ImageMath(operation="PadImage", op2=f"{padding}", copy_header=False), name="02_pad_segm"
+        ImageMath(operation="PadImage", op2=f"{padding}", copy_header=False),
+        name="02_pad_segm",
     )
     pad_mask = pe.Node(
-        ImageMath(operation="PadImage", op2=f"{padding}", copy_header=False), name="03_pad_mask"
+        ImageMath(operation="PadImage", op2=f"{padding}", copy_header=False),
+        name="03_pad_mask",
     )
 
     # Split segmentation in binary masks
@@ -702,8 +723,9 @@ def init_atropos_wf(
     if not wm_prior:
         sel_wm.inputs.index = in_segmentation_model[-1] - 1
 
-    copy_xform_wm = pe.Node(CopyXForm(fields=["wm_map"]),
-                            name="copy_xform_wm", run_without_submitting=True)
+    copy_xform_wm = pe.Node(
+        CopyXForm(fields=["wm_map"]), name="copy_xform_wm", run_without_submitting=True
+    )
 
     # Refine INU correction
     inu_n4_final = pe.MapNode(
@@ -805,10 +827,14 @@ N4BiasFieldCorrection."""
 
         def _argmax(in_dice):
             import numpy as np
+
             return np.argmax(in_dice)
 
-        match_wm = pe.Node(niu.Function(function=_matchlen), name="match_wm",
-                           run_without_submitting=True)
+        match_wm = pe.Node(
+            niu.Function(function=_matchlen),
+            name="match_wm",
+            run_without_submitting=True,
+        )
         overlap = pe.Node(FuzzyOverlap(), name="overlap", run_without_submitting=True)
 
         apply_wm_prior = pe.Node(niu.Function(function=_improd), name="apply_wm_prior")
@@ -1062,6 +1088,7 @@ def _matchlen(value, reference):
 
 def _imsum(op1, op2, out_file=None):
     import nibabel as nb
+
     im1 = nb.load(op1)
 
     data = im1.get_fdata() + nb.load(op2).get_fdata()
@@ -1070,6 +1097,7 @@ def _imsum(op1, op2, out_file=None):
 
     if out_file is None:
         from pathlib import Path
+
         out_file = str((Path() / "summap.nii.gz").absolute())
 
     nii.to_filename(out_file)
@@ -1078,6 +1106,7 @@ def _imsum(op1, op2, out_file=None):
 
 def _improd(op1, op2, in_mask, out_file=None):
     import nibabel as nb
+
     im1 = nb.load(op1)
 
     data = im1.get_fdata() * nb.load(op2).get_fdata()
@@ -1090,6 +1119,7 @@ def _improd(op1, op2, in_mask, out_file=None):
 
     if out_file is None:
         from pathlib import Path
+
         out_file = str((Path() / "prodmap.nii.gz").absolute())
 
     nii.to_filename(out_file)
