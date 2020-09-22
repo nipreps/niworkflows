@@ -69,11 +69,11 @@ def init_brain_extraction_wf(
       2. Maps the brain mask into target space using the normalization
          calculated in 1.
       3. Superstep 1b: binarization of the brain mask
-      4. Maps the WM probability map from the template, if such prior exists.
+      4. Maps the WM (white matter) probability map from the template, if such prior exists.
          Combines the BS (brainstem) probability map before mapping if the WM
          and BS are given separately (as it is the case for ``OASIS30ANTs``.)
       5. Run a second N4 INU correction round, using the prior mapped into
-         individual step in step 4.
+         individual step in step 4 if available.
       6. Superstep 6: apply ATROPOS on the INU-corrected result of step 5, and
          massage its outputs
       7. Superstep 7: use results from 4 to refine the brain mask
