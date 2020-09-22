@@ -1082,7 +1082,7 @@ def _imsum(op1, op2, out_file=None):
 
     im1 = nb.load(op1)
 
-    data = im1.get_fdata() + nb.load(op2).get_fdata()
+    data = im1.get_fdata(dtype="float32") + nb.load(op2).get_fdata(dtype="float32")
     data /= data.max()
     nii = nb.Nifti1Image(data, im1.affine, im1.header)
 
@@ -1100,7 +1100,7 @@ def _improd(op1, op2, in_mask, out_file=None):
 
     im1 = nb.load(op1)
 
-    data = im1.get_fdata() * nb.load(op2).get_fdata()
+    data = im1.get_fdata(dtype="float32") * nb.load(op2).get_fdata(dtype="float32")
     mskdata = nb.load(in_mask).get_fdata() > 0
     data[~mskdata] = 0
     data[data < 0] = 0
