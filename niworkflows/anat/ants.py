@@ -271,8 +271,10 @@ def init_brain_extraction_wf(
     try:
         init_aff.inputs.search_grid = (40, (0, 40, 40))
     except ValueError:
-        warn("antsAI's option --search-grid was added in ANTS 2.3.0 "
-             f"({init_aff.interface.version} found.)")
+        warn(
+            "antsAI's option --search-grid was added in ANTS 2.3.0 "
+            f"({init_aff.interface.version} found.)"
+        )
 
     # Set up spatial normalization
     settings_file = (
@@ -291,7 +293,9 @@ def init_brain_extraction_wf(
     norm.inputs.float = use_float
     fixed_mask_trait = "fixed_image_mask"
 
-    if norm.interface.version and parseversion(norm.interface.version) >= Version("2.2.0"):
+    if norm.interface.version and parseversion(norm.interface.version) >= Version(
+        "2.2.0"
+    ):
         fixed_mask_trait += "s"
 
     map_brainmask = pe.Node(
@@ -329,9 +333,11 @@ def init_brain_extraction_wf(
     try:
         inu_n4_final.inputs.rescale_intensities = True
     except ValueError:
-        warn("N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
-             f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
-             UserWarning)
+        warn(
+            "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
+            f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
+            UserWarning,
+        )
 
     # Apply mask
     apply_mask = pe.MapNode(ApplyMask(), iterfield=["in_file"], name="apply_mask")
@@ -743,9 +749,11 @@ def init_atropos_wf(
     try:
         inu_n4_final.inputs.rescale_intensities = True
     except ValueError:
-        warn("N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
-             f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
-             UserWarning)
+        warn(
+            "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
+            f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
+            UserWarning,
+        )
 
     # Apply mask
     apply_mask = pe.MapNode(ApplyMask(), iterfield=["in_file"], name="apply_mask")
@@ -972,9 +980,11 @@ def init_n4_only_wf(
     try:
         inu_n4_final.inputs.rescale_intensities = True
     except ValueError:
-        warn("N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
-             f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
-             UserWarning)
+        warn(
+            "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
+            f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
+            UserWarning,
+        )
 
     # fmt: off
     wf.connect([
