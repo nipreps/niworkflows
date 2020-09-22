@@ -61,20 +61,31 @@ def init_brain_extraction_wf(
     """
     Build a workflow for atlas-based brain extraction on anatomical MRI data.
 
-    A Nipype implementation of the official ANTs' ``antsBrainExtraction.sh``
-    workflow (only for 3D images).
+    This is a Nipype implementation of atlas-based brain extraction inspired by
+    the official ANTs' ``antsBrainExtraction.sh`` workflow (only for 3D images).
 
-    The official workflow is built as follows (and this implementation
-    follows the same organization):
+    The workflow follows the following structure:
 
-      1. Step 1 performs several clerical tasks (adding padding, calculating
-         the Laplacian of inputs, affine initialization) and the core
-         spatial normalization.
+      1. Step 1 performs several clerical tasks (preliminary INU correction,
+         calculating the Laplacian of inputs, affine initialization) and the 
+         core spatial normalization.
       2. Maps the brain mask into target space using the normalization
          calculated in 1.
-      3. Superstep 1b: smart binarization of the brain mask
-      4. Superstep 6: apply ATROPOS and massage its outputs
-      5. Superstep 7: use results from 4 to refine the brain mask
+      3. Superstep 1b: binarization of the brain mask
+      4. Maps the WM probability map from the template, if such prior exists.
+         Combines the BS (brainstem) probability map before mapping if the WM
+         and BS are given separately (as it is the case for ``OASIS30ANTs``.)
+      5. Run a second N4 INU correction round, using the prior mapped into
+         individual step in step 4.
+      6. Superstep 6: apply ATROPOS on the INU-corrected result of step 5, and
+         massage its outputs
+      7. Superstep 7: use results from 4 to refine the brain mask
+      8. If exist, use priors from step 4, calculate the overlap of the posteriors
+         estimated in step 4 to select that overlapping the most with the WM+BS
+         prior from the template. Combine that posterior with the refined brain
+         mask and pass it on to the next step.
+      9. Apply a final N4 using the refined brain mask (or the map calculated in
+         step 8 if priors were found) as weights map for the algorithm.
 
     Workflow Graph
         .. workflow::
@@ -466,9 +477,11 @@ def init_atropos_wf(
     """
     Create an ANTs' ATROPOS workflow for brain tissue segmentation.
 
-    Implements supersteps 6 and 7 of ``antsBrainExtraction.sh``,
+    Re-interprets supersteps 6 and 7 of ``antsBrainExtraction.sh``,
     which refine the mask previously computed with the spatial
     normalization to the template.
+    The workflow also executes steps 8 and 9 of the brain extraction
+    workflow.
 
     Workflow Graph
         .. workflow::
