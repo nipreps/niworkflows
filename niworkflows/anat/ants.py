@@ -6,7 +6,6 @@
 from collections import OrderedDict
 from multiprocessing import cpu_count
 from pkg_resources import resource_filename as pkgr_fn
-from packaging.version import parse as parseversion, Version
 from warnings import warn
 
 # nipype
@@ -39,8 +38,6 @@ ATROPOS_MODELS = {
     "T2w": OrderedDict([("nclasses", 3), ("csf", 3), ("gm", 2), ("wm", 1)]),
     "FLAIR": OrderedDict([("nclasses", 3), ("csf", 1), ("gm", 3), ("wm", 2)]),
 }
-
-_ants_version = Registration().version
 
 
 def init_brain_extraction_wf(
@@ -169,6 +166,7 @@ def init_brain_extraction_wf(
         Output :abbr:`TPMs (tissue probability maps)` by ATROPOS
 
     """
+    from packaging.version import parse as parseversion, Version
     from templateflow.api import get as get_template
 
     wf = pe.Workflow(name)
@@ -270,8 +268,11 @@ def init_brain_extraction_wf(
     )
 
     # Tolerate missing ANTs at construction time
-    if _ants_version and parseversion(_ants_version) >= Version("2.3.0"):
+    try:
         init_aff.inputs.search_grid = (40, (0, 40, 40))
+    except ValueError:
+        warn("antsAI's option --search-grid was added in ANTS 2.3.0 "
+             f"({init_aff.interface.version} found.)")
 
     # Set up spatial normalization
     settings_file = (
@@ -289,7 +290,8 @@ def init_brain_extraction_wf(
     )
     norm.inputs.float = use_float
     fixed_mask_trait = "fixed_image_mask"
-    if _ants_version and parseversion(_ants_version) >= Version("2.2.0"):
+
+    if norm.interface.version and parseversion(norm.interface.version) >= Version("2.2.0"):
         fixed_mask_trait += "s"
 
     map_brainmask = pe.Node(
@@ -324,17 +326,12 @@ def init_brain_extraction_wf(
         name="inu_n4_final",
         iterfield=["input_image"],
     )
-    if _ants_version and parseversion(_ants_version) >= Version("2.1.0"):
+    try:
         inu_n4_final.inputs.rescale_intensities = True
-    else:
-        warn(
-            """\
-Found ANTs version %s, which is too old. Please consider upgrading to 2.1.0 or \
-greater so that the --rescale-intensities option is available with \
-N4BiasFieldCorrection."""
-            % _ants_version,
-            DeprecationWarning,
-        )
+    except ValueError:
+        warn("N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
+             f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
+             UserWarning)
 
     # Apply mask
     apply_mask = pe.MapNode(ApplyMask(), iterfield=["in_file"], name="apply_mask")
@@ -742,17 +739,13 @@ def init_atropos_wf(
         name="inu_n4_final",
         iterfield=["input_image"],
     )
-    if _ants_version and parseversion(_ants_version) >= Version("2.1.0"):
+
+    try:
         inu_n4_final.inputs.rescale_intensities = True
-    else:
-        warn(
-            """\
-Found ANTs version %s, which is too old. Please consider upgrading to 2.1.0 or \
-greater so that the --rescale-intensities option is available with \
-N4BiasFieldCorrection."""
-            % _ants_version,
-            DeprecationWarning,
-        )
+    except ValueError:
+        warn("N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
+             f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
+             UserWarning)
 
     # Apply mask
     apply_mask = pe.MapNode(ApplyMask(), iterfield=["in_file"], name="apply_mask")
@@ -979,11 +972,9 @@ def init_n4_only_wf(
     try:
         inu_n4_final.inputs.rescale_intensities = True
     except ValueError:
-        warn(
-            "The installed ANTs version too old. Please consider upgrading to "
-            "2.1.0 or greater.",
-            DeprecationWarning,
-        )
+        warn("N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
+             f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
+             UserWarning)
 
     # fmt: off
     wf.connect([
