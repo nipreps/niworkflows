@@ -6,20 +6,17 @@
 from collections import OrderedDict
 from multiprocessing import cpu_count
 from pkg_resources import resource_filename as pkgr_fn
-from packaging.version import parse as parseversion, Version
 from warnings import warn
 
 # nipype
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
-from nipype.interfaces.fsl.maths import ApplyMask
 from nipype.interfaces.ants import (
     AI,
     Atropos,
     ImageMath,
     MultiplyImages,
     N4BiasFieldCorrection,
-    ResampleImageBySpacing,
     ThresholdImage,
 )
 
@@ -31,8 +28,9 @@ from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
     FixHeaderApplyTransforms as ApplyTransforms,
 )
+from ..interfaces.images import RegridToZooms
+from ..interfaces.nibabel import ApplyMask
 from ..interfaces.utils import CopyXForm
-from ..interfaces.nibabel import Binarize
 
 
 ATROPOS_MODELS = {
@@ -60,20 +58,31 @@ def init_brain_extraction_wf(
     """
     Build a workflow for atlas-based brain extraction on anatomical MRI data.
 
-    A Nipype implementation of the official ANTs' ``antsBrainExtraction.sh``
-    workflow (only for 3D images).
+    This is a Nipype implementation of atlas-based brain extraction inspired by
+    the official ANTs' ``antsBrainExtraction.sh`` workflow (only for 3D images).
 
-    The official workflow is built as follows (and this implementation
-    follows the same organization):
+    The workflow follows the following structure:
 
-      1. Step 1 performs several clerical tasks (adding padding, calculating
-         the Laplacian of inputs, affine initialization) and the core
-         spatial normalization.
+      1. Step 1 performs several clerical tasks (preliminary INU correction,
+         calculating the Laplacian of inputs, affine initialization) and the
+         core spatial normalization.
       2. Maps the brain mask into target space using the normalization
          calculated in 1.
-      3. Superstep 1b: smart binarization of the brain mask
-      4. Superstep 6: apply ATROPOS and massage its outputs
-      5. Superstep 7: use results from 4 to refine the brain mask
+      3. Superstep 1b: binarization of the brain mask
+      4. Maps the WM (white matter) probability map from the template, if such prior exists.
+         Combines the BS (brainstem) probability map before mapping if the WM
+         and BS are given separately (as it is the case for ``OASIS30ANTs``.)
+      5. Run a second N4 INU correction round, using the prior mapped into
+         individual step in step 4 if available.
+      6. Superstep 6: apply ATROPOS on the INU-corrected result of step 5, and
+         massage its outputs
+      7. Superstep 7: use results from 4 to refine the brain mask
+      8. If exist, use priors from step 4, calculate the overlap of the posteriors
+         estimated in step 4 to select that overlapping the most with the WM+BS
+         prior from the template. Combine that posterior with the refined brain
+         mask and pass it on to the next step.
+      9. Apply a final N4 using the refined brain mask (or the map calculated in
+         step 8 if priors were found) as weights map for the algorithm.
 
     Workflow Graph
         .. workflow::
@@ -157,6 +166,7 @@ def init_brain_extraction_wf(
         Output :abbr:`TPMs (tissue probability maps)` by ATROPOS
 
     """
+    from packaging.version import parse as parseversion, Version
     from templateflow.api import get as get_template
 
     wf = pe.Workflow(name)
@@ -203,14 +213,10 @@ def init_brain_extraction_wf(
         name="outputnode",
     )
 
-    copy_xform = pe.Node(
-        CopyXForm(fields=["out_file", "out_mask", "bias_corrected", "bias_image"]),
-        name="copy_xform",
-        run_without_submitting=True,
-    )
-
     trunc = pe.MapNode(
-        ImageMath(operation="TruncateImageIntensity", op2="0.01 0.999 256"),
+        ImageMath(
+            operation="TruncateImageIntensity", op2="0.01 0.999 256", copy_header=True
+        ),
         name="truncate_images",
         iterfield=["op1"],
     )
@@ -230,19 +236,18 @@ def init_brain_extraction_wf(
     )
 
     res_tmpl = pe.Node(
-        ResampleImageBySpacing(out_spacing=(4, 4, 4), apply_smoothing=True),
+        RegridToZooms(in_file=tpl_target_path, zooms=(4, 4, 4), smooth=True),
         name="res_tmpl",
     )
-    res_tmpl.inputs.input_image = tpl_target_path
-    res_target = pe.Node(
-        ResampleImageBySpacing(out_spacing=(4, 4, 4), apply_smoothing=True),
-        name="res_target",
-    )
+    res_target = pe.Node(RegridToZooms(zooms=(4, 4, 4), smooth=True), name="res_target")
 
-    lap_tmpl = pe.Node(ImageMath(operation="Laplacian", op2="1.5 1"), name="lap_tmpl")
+    lap_tmpl = pe.Node(
+        ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True), name="lap_tmpl"
+    )
     lap_tmpl.inputs.op1 = tpl_target_path
     lap_target = pe.Node(
-        ImageMath(operation="Laplacian", op2="1.5 1"), name="lap_target"
+        ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True),
+        name="lap_target",
     )
     mrg_tmpl = pe.Node(niu.Merge(2), name="mrg_tmpl")
     mrg_tmpl.inputs.in1 = tpl_target_path
@@ -263,9 +268,13 @@ def init_brain_extraction_wf(
     )
 
     # Tolerate missing ANTs at construction time
-    _ants_version = Registration().version
-    if _ants_version and parseversion(_ants_version) >= Version("2.3.0"):
+    try:
         init_aff.inputs.search_grid = (40, (0, 40, 40))
+    except ValueError:
+        warn(
+            "antsAI's option --search-grid was added in ANTS 2.3.0 "
+            f"({init_aff.interface.version} found.)"
+        )
 
     # Set up spatial normalization
     settings_file = (
@@ -283,28 +292,27 @@ def init_brain_extraction_wf(
     )
     norm.inputs.float = use_float
     fixed_mask_trait = "fixed_image_mask"
-    if _ants_version and parseversion(_ants_version) >= Version("2.2.0"):
+
+    if norm.interface.version and parseversion(norm.interface.version) >= Version(
+        "2.2.0"
+    ):
         fixed_mask_trait += "s"
 
     map_brainmask = pe.Node(
-        ApplyTransforms(interpolation="Gaussian", float=True),
-        name="map_brainmask",
-        mem_gb=1,
+        ApplyTransforms(interpolation="Gaussian"), name="map_brainmask", mem_gb=1,
     )
     map_brainmask.inputs.input_image = str(tpl_mask_path)
 
     thr_brainmask = pe.Node(
         ThresholdImage(
-            dimension=3, th_low=0.5, th_high=1.0, inside_value=1, outside_value=0
+            dimension=3,
+            th_low=0.5,
+            th_high=1.0,
+            inside_value=1,
+            outside_value=0,
+            copy_header=True,
         ),
         name="thr_brainmask",
-    )
-
-    # Morphological dilation, radius=2
-    dil_brainmask = pe.Node(ImageMath(operation="MD", op2="2"), name="dil_brainmask")
-    # Get largest connected component
-    get_brainmask = pe.Node(
-        ImageMath(operation="GetLargestComponent"), name="get_brainmask"
     )
 
     # Refine INU correction
@@ -322,16 +330,13 @@ def init_brain_extraction_wf(
         name="inu_n4_final",
         iterfield=["input_image"],
     )
-    if _ants_version and parseversion(_ants_version) >= Version("2.1.0"):
+    try:
         inu_n4_final.inputs.rescale_intensities = True
-    else:
+    except ValueError:
         warn(
-            """\
-Found ANTs version %s, which is too old. Please consider upgrading to 2.1.0 or \
-greater so that the --rescale-intensities option is available with \
-N4BiasFieldCorrection."""
-            % _ants_version,
-            DeprecationWarning,
+            "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
+            f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
+            UserWarning,
         )
 
     # Apply mask
@@ -340,47 +345,77 @@ N4BiasFieldCorrection."""
     # fmt: off
     wf.connect([
         (inputnode, trunc, [("in_files", "op1")]),
-        (inputnode, copy_xform, [(("in_files", _pop), "hdr_file")]),
         (inputnode, inu_n4_final, [("in_files", "input_image")]),
         (inputnode, init_aff, [("in_mask", "fixed_image_mask")]),
         (inputnode, norm, [("in_mask", fixed_mask_trait)]),
         (inputnode, map_brainmask, [(("in_files", _pop), "reference_image")]),
         (trunc, inu_n4, [("output_image", "input_image")]),
-        (inu_n4, res_target, [(("output_image", _pop), "input_image")]),
-        (res_tmpl, init_aff, [("output_image", "fixed_image")]),
-        (res_target, init_aff, [("output_image", "moving_image")]),
+        (inu_n4, res_target, [(("output_image", _pop), "in_file")]),
+        (res_tmpl, init_aff, [("out_file", "fixed_image")]),
+        (res_target, init_aff, [("out_file", "moving_image")]),
         (init_aff, norm, [("output_transform", "initial_moving_transform")]),
         (norm, map_brainmask, [
             ("reverse_transforms", "transforms"),
             ("reverse_invert_flags", "invert_transform_flags"),
         ]),
         (map_brainmask, thr_brainmask, [("output_image", "input_image")]),
-        (thr_brainmask, dil_brainmask, [("output_image", "op1")]),
-        (dil_brainmask, get_brainmask, [("output_image", "op1")]),
+        (map_brainmask, inu_n4_final, [("output_image", "weight_image")]),
         (inu_n4_final, apply_mask, [("output_image", "in_file")]),
-        (get_brainmask, apply_mask, [("output_image", "mask_file")]),
-        (get_brainmask, copy_xform, [("output_image", "out_mask")]),
-        (apply_mask, copy_xform, [("out_file", "out_file")]),
-        (inu_n4_final, copy_xform, [
-            ("output_image", "bias_corrected"),
-            ("bias_image", "bias_image"),
-        ]),
-        (copy_xform, outputnode, [
-            ("out_file", "out_file"),
-            ("out_mask", "out_mask"),
-            ("bias_corrected", "bias_corrected"),
-            ("bias_image", "bias_image"),
-        ]),
+        (thr_brainmask, apply_mask, [("output_image", "in_mask")]),
+        (thr_brainmask, outputnode, [("output_image", "out_mask")]),
+        (inu_n4_final, outputnode, [("output_image", "bias_corrected"),
+                                    ("bias_image", "bias_image")]),
+        (apply_mask, outputnode, [("out_file", "out_file")]),
     ])
     # fmt: on
 
+    wm_tpm = (
+        get_template(in_template, label="WM", suffix="probseg", **common_spec) or None
+    )
+    if wm_tpm:
+        map_wmmask = pe.Node(
+            ApplyTransforms(interpolation="Gaussian"), name="map_wmmask", mem_gb=1,
+        )
+
+        # Add the brain stem if it is found.
+        bstem_tpm = (
+            get_template(in_template, label="BS", suffix="probseg", **common_spec)
+            or None
+        )
+        if bstem_tpm:
+            full_wm = pe.Node(niu.Function(function=_imsum), name="full_wm")
+            full_wm.inputs.op1 = str(wm_tpm)
+            full_wm.inputs.op2 = str(bstem_tpm)
+            # fmt: off
+            wf.connect([
+                (full_wm, map_wmmask, [("out", "input_image")])
+            ])
+            # fmt: on
+        else:
+            map_wmmask.inputs.input_image = str(wm_tpm)
+        # fmt: off
+        wf.disconnect([
+            (map_brainmask, inu_n4_final, [("output_image", "weight_image")]),
+        ])
+        wf.connect([
+            (inputnode, map_wmmask, [(("in_files", _pop), "reference_image")]),
+            (norm, map_wmmask, [
+                ("reverse_transforms", "transforms"),
+                ("reverse_invert_flags", "invert_transform_flags"),
+            ]),
+            (map_wmmask, inu_n4_final, [("output_image", "weight_image")]),
+        ])
+        # fmt: on
+
     if use_laplacian:
         lap_tmpl = pe.Node(
-            ImageMath(operation="Laplacian", op2="1.5 1"), name="lap_tmpl"
+            ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True),
+            name="lap_tmpl",
         )
         lap_tmpl.inputs.op1 = tpl_target_path
         lap_target = pe.Node(
-            ImageMath(operation="Laplacian", op2="1.5 1"), name="lap_target"
+            ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True),
+            name="lap_target",
         )
         mrg_tmpl = pe.Node(niu.Merge(2), name="mrg_tmpl")
         mrg_tmpl.inputs.in1 = tpl_target_path
@@ -411,34 +446,37 @@ N4BiasFieldCorrection."""
             omp_nthreads=omp_nthreads,
             mem_gb=mem_gb,
             in_segmentation_model=atropos_model,
-        )
-        sel_wm = pe.Node(
-            niu.Select(index=atropos_model[-1] - 1),
-            name="sel_wm",
-            run_without_submitting=True,
+            bspline_fitting_distance=bspline_fitting_distance,
+            wm_prior=bool(wm_tpm),
         )
 
         # fmt: off
         wf.disconnect([
-            (get_brainmask, apply_mask, [("output_image", "mask_file")]),
-            (copy_xform, outputnode, [("out_mask", "out_mask")]),
+            (thr_brainmask, outputnode, [("output_image", "out_mask")]),
+            (inu_n4_final, outputnode, [("output_image", "bias_corrected"),
+                                        ("bias_image", "bias_image")]),
+            (apply_mask, outputnode, [("out_file", "out_file")]),
         ])
         wf.connect([
-            (inu_n4, atropos_wf, [("output_image", "inputnode.in_files")]),
+            (inputnode, atropos_wf, [("in_files", "inputnode.in_files")]),
+            (inu_n4_final, atropos_wf, [("output_image", "inputnode.in_corrected")]),
             (thr_brainmask, atropos_wf, [("output_image", "inputnode.in_mask")]),
-            (get_brainmask, atropos_wf, [
-                ("output_image", "inputnode.in_mask_dilated"),
-            ]),
-            (atropos_wf, sel_wm, [("outputnode.out_tpms", "inlist")]),
-            (sel_wm, inu_n4_final, [("out", "weight_image")]),
-            (atropos_wf, apply_mask, [("outputnode.out_mask", "mask_file")]),
             (atropos_wf, outputnode, [
+                ("outputnode.out_file", "out_file"),
+                ("outputnode.bias_corrected", "bias_corrected"),
+                ("outputnode.bias_image", "bias_image"),
                 ("outputnode.out_mask", "out_mask"),
                 ("outputnode.out_segm", "out_segm"),
                 ("outputnode.out_tpms", "out_tpms"),
             ]),
         ])
         # fmt: on
+        if wm_tpm:
+            # fmt: off
+            wf.connect([
+                (map_wmmask, atropos_wf, [("output_image", "inputnode.wm_prior")]),
+            ])
+            # fmt: on
     return wf
 
 
@@ -449,13 +487,17 @@ def init_atropos_wf(
     mem_gb=3.0,
     padding=10,
     in_segmentation_model=tuple(ATROPOS_MODELS["T1w"].values()),
+    bspline_fitting_distance=200,
+    wm_prior=False,
 ):
     """
     Create an ANTs' ATROPOS workflow for brain tissue segmentation.
 
-    Implements supersteps 6 and 7 of ``antsBrainExtraction.sh``,
+    Re-interprets supersteps 6 and 7 of ``antsBrainExtraction.sh``,
     which refine the mask previously computed with the spatial
     normalization to the template.
+    The workflow also executes steps 8 and 9 of the brain extraction
+    workflow.
 
     Workflow Graph
         .. workflow::
@@ -467,6 +509,8 @@ def init_atropos_wf(
 
     Parameters
     ----------
+    name : str, optional
+        Workflow name (default: "atropos_wf").
     use_random_seed : bool
         Whether ATROPOS should generate a random seed based on the
         system's clock
@@ -491,18 +535,32 @@ def init_atropos_wf(
         ``(3,3,2,1)`` for T2 with K=3, CSF=3, GM=2, WM=1,
         ``(3,1,3,2)`` for FLAIR with K=3, CSF=1 GM=3, WM=2,
         ``(4,4,2,3)`` uses K=4, CSF=4, GM=2, WM=3.
-    name : str, optional
-        Workflow name (default: "atropos_wf").
+    bspline_fitting_distance : float
+        The size of the b-spline mesh grid elements, in mm (default: 200)
+    wm_prior : :obj:`bool`
+        Whether the WM posterior obtained with ATROPOS should be regularized with a prior
+        map (typically, mapped from the template). When ``wm_prior`` is ``True`` the input
+        field ``wm_prior`` of the input node must be connected.
 
     Inputs
     ------
     in_files : list
+        The original anatomical images passed in to the brain-extraction workflow.
+    in_corrected : list
         :abbr:`INU (intensity non-uniformity)`-corrected files.
     in_mask : str
         Brain mask calculated previously.
+    wm_prior : :obj:`str`
+        Path to the WM prior probability map, aligned with the individual data.
 
     Outputs
     -------
+    out_file : :obj:`str`
+        Path of the corrected and brain-extracted result, using the ATROPOS refinement.
+    bias_corrected : :obj:`str`
+        Path of the corrected and result, using the ATROPOS refinement.
+    bias_image : :obj:`str`
+        Path of the estimated INU bias field, using the ATROPOS refinement.
     out_mask : str
         Refined brain mask
     out_segm : str
@@ -514,32 +572,44 @@ def init_atropos_wf(
     """
     wf = pe.Workflow(name)
 
+    out_fields = ["bias_corrected", "bias_image", "out_mask", "out_segm", "out_tpms"]
+
     inputnode = pe.Node(
-        niu.IdentityInterface(fields=["in_files", "in_mask", "in_mask_dilated"]),
+        niu.IdentityInterface(
+            fields=["in_files", "in_corrected", "in_mask", "wm_prior"]
+        ),
         name="inputnode",
     )
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=["out_mask", "out_segm", "out_tpms"]),
-        name="outputnode",
+        niu.IdentityInterface(fields=["out_file"] + out_fields), name="outputnode"
     )
 
     copy_xform = pe.Node(
-        CopyXForm(fields=["out_mask", "out_segm", "out_tpms"]),
-        name="copy_xform",
-        run_without_submitting=True,
+        CopyXForm(fields=out_fields), name="copy_xform", run_without_submitting=True
+    )
+
+    # Morphological dilation, radius=2
+    dil_brainmask = pe.Node(
+        ImageMath(operation="MD", op2="2", copy_header=True), name="dil_brainmask"
+    )
+    # Get largest connected component
+    get_brainmask = pe.Node(
+        ImageMath(operation="GetLargestComponent", copy_header=True),
+        name="get_brainmask",
     )
 
     # Run atropos (core node)
     atropos = pe.Node(
         Atropos(
+            convergence_threshold=0.0,
             dimension=3,
             initialization="KMeans",
-            number_of_tissue_classes=in_segmentation_model[0],
-            n_iterations=3,
-            convergence_threshold=0.0,
+            likelihood_model="Gaussian",
             mrf_radius=[1, 1, 1],
             mrf_smoothing_factor=0.1,
-            likelihood_model="Gaussian",
+            n_iterations=3,
+            number_of_tissue_classes=in_segmentation_model[0],
+            save_posteriors=True,
             use_random_seed=use_random_seed,
         ),
         name="01_atropos",
@@ -549,10 +619,12 @@ def init_atropos_wf(
 
     # massage outputs
     pad_segm = pe.Node(
-        ImageMath(operation="PadImage", op2="%d" % padding), name="02_pad_segm"
+        ImageMath(operation="PadImage", op2=f"{padding}", copy_header=False),
+        name="02_pad_segm",
     )
     pad_mask = pe.Node(
-        ImageMath(operation="PadImage", op2="%d" % padding), name="03_pad_mask"
+        ImageMath(operation="PadImage", op2=f"{padding}", copy_header=False),
+        name="03_pad_mask",
     )
 
     # Split segmentation in binary masks
@@ -649,15 +721,54 @@ def init_atropos_wf(
 
     msk_conform = pe.Node(niu.Function(function=_conform_mask), name="msk_conform")
     merge_tpms = pe.Node(niu.Merge(in_segmentation_model[0]), name="merge_tpms")
+
+    sel_wm = pe.Node(niu.Select(), name="sel_wm", run_without_submitting=True)
+    if not wm_prior:
+        sel_wm.inputs.index = in_segmentation_model[-1] - 1
+
+    copy_xform_wm = pe.Node(
+        CopyXForm(fields=["wm_map"]), name="copy_xform_wm", run_without_submitting=True
+    )
+
+    # Refine INU correction
+    inu_n4_final = pe.MapNode(
+        N4BiasFieldCorrection(
+            dimension=3,
+            save_bias=True,
+            copy_header=True,
+            n_iterations=[50] * 5,
+            convergence_threshold=1e-7,
+            shrink_factor=4,
+            bspline_fitting_distance=bspline_fitting_distance,
+        ),
+        n_procs=omp_nthreads,
+        name="inu_n4_final",
+        iterfield=["input_image"],
+    )
+
+    try:
+        inu_n4_final.inputs.rescale_intensities = True
+    except ValueError:
+        warn(
+            "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
+            f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
+            UserWarning,
+        )
+
+    # Apply mask
+    apply_mask = pe.MapNode(ApplyMask(), iterfield=["in_file"], name="apply_mask")
+
     # fmt: off
     wf.connect([
+        (inputnode, dil_brainmask, [("in_mask", "op1")]),
         (inputnode, copy_xform, [(("in_files", _pop), "hdr_file")]),
+        (inputnode, copy_xform_wm, [(("in_files", _pop), "hdr_file")]),
         (inputnode, pad_mask, [("in_mask", "op1")]),
-        (inputnode, atropos, [
-            ("in_files", "intensity_images"),
-            ("in_mask_dilated", "mask_image"),
-        ]),
+        (inputnode, atropos, [("in_corrected", "intensity_images")]),
+        (inputnode, inu_n4_final, [("in_files", "input_image")]),
         (inputnode, msk_conform, [(("in_files", _pop), "in_reference")]),
+        (dil_brainmask, get_brainmask, [("output_image", "op1")]),
+        (get_brainmask, atropos, [("output_image", "mask_image")]),
         (atropos, pad_segm, [("classified_image", "op1")]),
         (pad_segm, sel_labels, [("output_image", "in_segm")]),
         (sel_labels, get_wm, [("out_wm", "op1")]),
@@ -694,13 +805,57 @@ def init_atropos_wf(
         (msk_conform, copy_xform, [("out", "out_mask")]),
         (depad_segm, copy_xform, [("output_image", "out_segm")]),
         (merge_tpms, copy_xform, [("out", "out_tpms")]),
+        (atropos, sel_wm, [("posteriors", "inlist")]),
+        (sel_wm, copy_xform_wm, [("out", "wm_map")]),
+        (copy_xform_wm, inu_n4_final, [("wm_map", "weight_image")]),
+        (inu_n4_final, copy_xform, [("output_image", "bias_corrected"),
+                                    ("bias_image", "bias_image")]),
+        (copy_xform, apply_mask, [("bias_corrected", "in_file"),
+                                  ("out_mask", "in_mask")]),
+        (apply_mask, outputnode, [("out_file", "out_file")]),
         (copy_xform, outputnode, [
+            ("bias_corrected", "bias_corrected"),
+            ("bias_image", "bias_image"),
             ("out_mask", "out_mask"),
             ("out_segm", "out_segm"),
             ("out_tpms", "out_tpms"),
         ]),
     ])
     # fmt: on
+
+    if wm_prior:
+        from nipype.algorithms.metrics import FuzzyOverlap
+
+        def _argmax(in_dice):
+            import numpy as np
+
+            return np.argmax(in_dice)
+
+        match_wm = pe.Node(
+            niu.Function(function=_matchlen),
+            name="match_wm",
+            run_without_submitting=True,
+        )
+        overlap = pe.Node(FuzzyOverlap(), name="overlap", run_without_submitting=True)
+
+        apply_wm_prior = pe.Node(niu.Function(function=_improd), name="apply_wm_prior")
+
+        # fmt: off
+        wf.disconnect([
+            (copy_xform_wm, inu_n4_final, [("wm_map", "weight_image")]),
+        ])
+        wf.connect([
+            (inputnode, apply_wm_prior, [("in_mask", "in_mask"),
+                                         ("wm_prior", "op2")]),
+            (inputnode, match_wm, [("wm_prior", "value")]),
+            (atropos, match_wm, [("posteriors", "reference")]),
+            (atropos, overlap, [("posteriors", "in_ref")]),
+            (match_wm, overlap, [("out", "in_tst")]),
+            (overlap, sel_wm, [(("class_fdi", _argmax), "index")]),
+            (copy_xform_wm, apply_wm_prior, [("wm_map", "op1")]),
+            (apply_wm_prior, inu_n4_final, [("out", "weight_image")]),
+        ])
+        # fmt: on
     return wf
 
 
@@ -780,6 +935,8 @@ def init_n4_only_wf(
         Output :abbr:`TPMs (tissue probability maps)` by ATROPOS
 
     """
+    from ..interfaces.nibabel import Binarize
+
     wf = pe.Workflow(name)
 
     inputnode = pe.Node(
@@ -824,9 +981,9 @@ def init_n4_only_wf(
         inu_n4_final.inputs.rescale_intensities = True
     except ValueError:
         warn(
-            "The installed ANTs version too old. Please consider upgrading to "
-            "2.1.0 or greater.",
-            DeprecationWarning,
+            "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
+            f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
+            UserWarning,
         )
 
     # fmt: off
@@ -834,22 +991,14 @@ def init_n4_only_wf(
         (inputnode, inu_n4_final, [("in_files", "input_image")]),
         (inputnode, thr_brainmask, [(("in_files", _pop), "in_file")]),
         (thr_brainmask, outputnode, [("out_mask", "out_mask")]),
-        (inu_n4_final, outputnode, [("output_image", "out_file")]),
-        (inu_n4_final, outputnode, [("output_image", "bias_corrected")]),
-        (inu_n4_final, outputnode, [("bias_image", "bias_image")]),
+        (inu_n4_final, outputnode, [("output_image", "out_file"),
+                                    ("output_image", "bias_corrected"),
+                                    ("bias_image", "bias_image")]),
     ])
     # fmt: on
 
     # If atropos refine, do in4 twice
     if atropos_refine:
-        # Morphological dilation, radius=2
-        dil_brainmask = pe.Node(
-            ImageMath(operation="MD", op2="2"), name="dil_brainmask"
-        )
-        # Get largest connected component
-        get_brainmask = pe.Node(
-            ImageMath(operation="GetLargestComponent"), name="get_brainmask"
-        )
         atropos_model = atropos_model or list(ATROPOS_MODELS[bids_suffix].values())
         atropos_wf = init_atropos_wf(
             use_random_seed=atropos_use_random_seed,
@@ -857,40 +1006,21 @@ def init_n4_only_wf(
             mem_gb=mem_gb,
             in_segmentation_model=atropos_model,
         )
-        sel_wm = pe.Node(
-            niu.Select(index=atropos_model[-1] - 1),
-            name="sel_wm",
-            run_without_submitting=True,
-        )
-
-        inu_n4 = pe.MapNode(
-            N4BiasFieldCorrection(
-                dimension=3,
-                save_bias=False,
-                copy_header=True,
-                n_iterations=[50] * 4,
-                convergence_threshold=1e-7,
-                shrink_factor=4,
-                bspline_fitting_distance=200,
-            ),
-            n_procs=omp_nthreads,
-            name="inu_n4",
-            iterfield=["input_image"],
-        )
 
         # fmt: off
+        wf.disconnect([
+            (inu_n4_final, outputnode, [("output_image", "out_file"),
+                                        ("output_image", "bias_corrected"),
+                                        ("bias_image", "bias_image")]),
+        ])
         wf.connect([
-            (inputnode, inu_n4, [("in_files", "input_image")]),
-            (inu_n4, atropos_wf, [("output_image", "inputnode.in_files")]),
+            (inputnode, atropos_wf, [("in_files", "inputnode.in_files")]),
+            (inu_n4_final, atropos_wf, [("output_image", "inputnode.in_corrected")]),
             (thr_brainmask, atropos_wf, [("out_mask", "inputnode.in_mask")]),
-            (thr_brainmask, dil_brainmask, [("out_mask", "op1")]),
-            (dil_brainmask, get_brainmask, [("output_image", "op1")]),
-            (get_brainmask, atropos_wf, [
-                ("output_image", "inputnode.in_mask_dilated"),
-            ]),
-            (atropos_wf, sel_wm, [("outputnode.out_tpms", "inlist")]),
-            (sel_wm, inu_n4_final, [("out", "weight_image")]),
             (atropos_wf, outputnode, [
+                ("outputnode.out_file", "out_file"),
+                ("outputnode.bias_corrected", "bias_corrected"),
+                ("outputnode.bias_image", "bias_image"),
                 ("outputnode.out_segm", "out_segm"),
                 ("outputnode.out_tpms", "out_tpms"),
             ]),
@@ -950,4 +1080,48 @@ def _conform_mask(in_mask, in_reference):
     nii.__class__(
         np.asanyarray(nii.dataobj).astype("int16"), ref.affine, hdr
     ).to_filename(out_file)
+    return out_file
+
+
+def _matchlen(value, reference):
+    return [value] * len(reference)
+
+
+def _imsum(op1, op2, out_file=None):
+    import nibabel as nb
+
+    im1 = nb.load(op1)
+
+    data = im1.get_fdata(dtype="float32") + nb.load(op2).get_fdata(dtype="float32")
+    data /= data.max()
+    nii = nb.Nifti1Image(data, im1.affine, im1.header)
+
+    if out_file is None:
+        from pathlib import Path
+
+        out_file = str((Path() / "summap.nii.gz").absolute())
+
+    nii.to_filename(out_file)
+    return out_file
+
+
+def _improd(op1, op2, in_mask, out_file=None):
+    import nibabel as nb
+
+    im1 = nb.load(op1)
+
+    data = im1.get_fdata(dtype="float32") * nb.load(op2).get_fdata(dtype="float32")
+    mskdata = nb.load(in_mask).get_fdata() > 0
+    data[~mskdata] = 0
+    data[data < 0] = 0
+    data /= data.max()
+    data = 0.5 * (data + mskdata)
+    nii = nb.Nifti1Image(data, im1.affine, im1.header)
+
+    if out_file is None:
+        from pathlib import Path
+
+        out_file = str((Path() / "prodmap.nii.gz").absolute())
+
+    nii.to_filename(out_file)
     return out_file
