@@ -5,6 +5,7 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import nilearn as nl
 from .. import images as im
 from pathlib import Path
+from pkg_resources import resource_filename
 
 import pytest
 
@@ -180,6 +181,30 @@ def test_IntraModalMerge(tmpdir, shape, mshape):
     merged_data = nb.load(merged).get_fdata(dtype="float32")
     new_mshape = (*mshape[:3], 2 if len(mshape) == 3 else mshape[3] * 2)
     assert merged_data.shape == new_mshape
+
+
+def test_mismatched_xforms(tmpdir):
+    hdr = resource_filename("niworkflows", "tests/data/sub-19_task-ONSflavourtask_run-01_bold.hdr")
+    with open(hdr, "rb") as fobj:
+        header = nb.Nifti1Header.from_fileobj(fobj)
+
+    # Basic assumptions: valid, but differing xforms
+    qform, qcode = header.get_qform(coded=True)
+    sform, scode = header.get_sform(coded=True)
+    assert qcode == scode == 1
+    assert not np.allclose(qform, sform)
+
+    # Make an image from the header
+    img = nb.Nifti1Image(np.zeros(header.get_data_shape(), dtype=header.get_data_dtype()),
+                         affine=None, header=header)
+    img.to_filename(tmpdir / "orig.nii.gz")
+
+    res = im.ValidateImage(in_file=str(tmpdir / "orig.nii.gz")).run()
+
+    # With valid sform, the resulting qform and sform should match the original sform
+    validated = nb.load(res.outputs.out_file)
+    assert np.allclose(validated.get_qform(), sform)
+    assert np.allclose(validated.get_sform(), sform)
 
 
 def test_conform_resize(tmpdir):
