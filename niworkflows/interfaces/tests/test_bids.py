@@ -502,6 +502,53 @@ def test_DerivativesDataSink_values(tmp_path, dtype):
     assert sha1(out_file.read_bytes()).hexdigest() == checksum
 
 
+@pytest.mark.parametrize(
+    "source_file",
+    [
+        BOLD_PATH,
+        [BOLD_PATH],
+        [BOLD_PATH, "ds054/sub-100185/func/sub-100185_task-machinegame_run-02_bold.nii.gz"]
+    ]
+)
+@pytest.mark.parametrize("source_dtype", ["<i4", "<f4"])
+@pytest.mark.parametrize("in_dtype", ["<i4", "<f4"])
+def test_DerivativesDataSink_data_dtype_source(
+    tmp_path, source_file, source_dtype, in_dtype
+):
+
+    def make_empty_nii_with_dtype(path, dtype):
+        size = (30, 30, 30, 10)
+
+        hdr = nb.Nifti1Header()
+        hdr.set_qform(np.eye(4), code=0)
+        hdr.set_sform(np.eye(4), code=2)
+        hdr.set_data_dtype(dtype)
+        nb.Nifti1Image(np.zeros(size, dtype=dtype), np.eye(4), hdr).to_filename(in_file)
+
+    in_file = str(tmp_path / "in.nii")
+    make_empty_nii_with_dtype(in_file, in_dtype)
+
+    if isinstance(source_file, str):
+        source_file = str(tmp_path / source_file)
+        make_empty_nii_with_dtype(source_file, source_dtype)
+
+    elif isinstance(source_file, list):
+        source_file = [str(tmp_path / s) for s in source_file]
+        for s in source_file:
+            make_empty_nii_with_dtype(s, source_dtype)
+
+    dds = bintfs.DerivativesDataSink(
+        base_directory=str(tmp_path),
+        data_dtype="source",
+        desc="preproc",
+        source_file=source_file,
+        in_file=in_file,
+    ).run()
+
+    nii = nb.load(dds.outputs.out_file)
+    assert nii.get_data_dtype() == np.dtype(source_dtype)
+
+
 @pytest.mark.parametrize("field", ["RepetitionTime", "UndefinedField"])
 def test_ReadSidecarJSON_connection(testdata_dir, field):
     """
