@@ -516,14 +516,16 @@ def test_DerivativesDataSink_data_dtype_source(
     tmp_path, source_file, source_dtype, in_dtype
 ):
 
-    def make_empty_nii_with_dtype(path, dtype):
+    def make_empty_nii_with_dtype(fname, dtype):
+        Path(fname).parent.mkdir(exist_ok=True, parents=True)
+
         size = (30, 30, 30, 10)
 
         hdr = nb.Nifti1Header()
         hdr.set_qform(np.eye(4), code=0)
         hdr.set_sform(np.eye(4), code=2)
         hdr.set_data_dtype(dtype)
-        nb.Nifti1Image(np.zeros(size, dtype=dtype), np.eye(4), hdr).to_filename(in_file)
+        nb.Nifti1Image(np.zeros(size, dtype=dtype), np.eye(4), hdr).to_filename(fname)
 
     in_file = str(tmp_path / "in.nii")
     make_empty_nii_with_dtype(in_file, in_dtype)
