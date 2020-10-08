@@ -616,7 +616,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
 
                 if data_dtype == "source":  # match source dtype
                     try:
-                        data_dtype = self.inputs.source_file[0].get_data_dtype()
+                        data_dtype = nb.load(self.inputs.source_file[0]).get_data_dtype()
                     except Exception:
                         LOGGER.warning(
                             f"Could not get data type of file {self.inputs.source_file[0]}"
