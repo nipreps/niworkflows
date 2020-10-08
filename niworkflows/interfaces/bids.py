@@ -620,7 +620,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                         data_dtype = self.inputs.source_file[0].get_data_dtype()
                     except Exception:
                         LOGGER.warning(
-                            f"Could not get data type of file {self.inputs.source_file}"
+                            f"Could not get data type of file {self.inputs.source_file[0]}"
                         )
                         data_dtype = None
 
