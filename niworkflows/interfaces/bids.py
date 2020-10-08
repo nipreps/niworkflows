@@ -2,7 +2,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Interfaces for handling BIDS-like neuroimaging structures."""
 from collections import defaultdict
-from collections.abc import Sequence
 from json import dumps, loads
 from pathlib import Path
 from shutil import copytree, rmtree
