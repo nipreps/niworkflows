@@ -382,6 +382,51 @@ def test_DerivativesDataSink_t1w(tmp_path, space, size, units, xcodes, fixed):
     assert nii.header.get_xyzt_units() == ("mm", "unknown")
 
 
+@pytest.mark.parametrize(
+    "source_file",
+    [
+        BOLD_PATH,
+        [BOLD_PATH],
+        [BOLD_PATH, "ds054/sub-100185/func/sub-100185_task-machinegame_run-02_bold.nii.gz"]
+    ]
+)
+@pytest.mark.parametrize("source_dtype", ["<i4", "<f4"])
+@pytest.mark.parametrize("in_dtype", ["<i4", "<f4"])
+def test_DerivativesDataSink_data_dtype_source(
+    tmp_path, source_file, source_dtype, in_dtype
+):
+
+    def make_empty_nii_with_dtype(fname, dtype):
+        Path(fname).parent.mkdir(exist_ok=True, parents=True)
+
+        size = (2, 3, 4, 5)
+
+        nb.Nifti1Image(np.zeros(size, dtype=dtype), np.eye(4)).to_filename(fname)
+
+    in_file = str(tmp_path / "in.nii")
+    make_empty_nii_with_dtype(in_file, in_dtype)
+
+    if isinstance(source_file, str):
+        source_file = str(tmp_path / source_file)
+        make_empty_nii_with_dtype(source_file, source_dtype)
+
+    elif isinstance(source_file, list):
+        source_file = [str(tmp_path / s) for s in source_file]
+        for s in source_file:
+            make_empty_nii_with_dtype(s, source_dtype)
+
+    dds = bintfs.DerivativesDataSink(
+        base_directory=str(tmp_path),
+        data_dtype="source",
+        desc="preproc",
+        source_file=source_file,
+        in_file=in_file,
+    ).run()
+
+    nii = nb.load(dds.outputs.out_file)
+    assert nii.get_data_dtype() == np.dtype(source_dtype)
+
+
 @pytest.mark.parametrize("field", ["RepetitionTime", "UndefinedField"])
 def test_ReadSidecarJSON_connection(testdata_dir, field):
     """
