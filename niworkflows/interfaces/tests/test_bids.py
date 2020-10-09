@@ -521,11 +521,7 @@ def test_DerivativesDataSink_data_dtype_source(
 
         size = (30, 30, 30, 10)
 
-        hdr = nb.Nifti1Header()
-        hdr.set_qform(np.eye(4), code=0)
-        hdr.set_sform(np.eye(4), code=2)
-        hdr.set_data_dtype(dtype)
-        nb.Nifti1Image(np.zeros(size, dtype=dtype), np.eye(4), hdr).to_filename(fname)
+        nb.Nifti1Image(np.zeros(size, dtype=dtype), np.eye(4)).to_filename(fname)
 
     in_file = str(tmp_path / "in.nii")
     make_empty_nii_with_dtype(in_file, in_dtype)
