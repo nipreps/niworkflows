@@ -519,7 +519,7 @@ def test_DerivativesDataSink_data_dtype_source(
     def make_empty_nii_with_dtype(fname, dtype):
         Path(fname).parent.mkdir(exist_ok=True, parents=True)
 
-        size = (30, 30, 30, 10)
+        size = (2, 3, 4, 5)
 
         nb.Nifti1Image(np.zeros(size, dtype=dtype), np.eye(4)).to_filename(fname)
 
