@@ -1,3 +1,10 @@
+1.3.2 (November 5, 2020)
+========================
+Bug-fix release in the 1.3.x series.
+
+* FIX: Cordon off .dtseries.json contents (#578)
+* ENH: Add units to qform overwrite report (#577)
+
 1.3.1 (September 22, 2020)
 ==========================
 Bug-fix release in the 1.3.x series.

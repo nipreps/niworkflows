@@ -1,6 +1,7 @@
 """Tests on BIDS compliance."""
 import os
 from pathlib import Path
+import json
 
 import numpy as np
 import nibabel as nb
@@ -276,6 +277,46 @@ def test_DerivativesDataSink_build_path(
 
     for out, exp in zip(output, expectation):
         assert Path(out).relative_to(tmp_path) == Path(base) / exp
+
+
+def test_DerivativesDataSink_dtseries_json_hack(tmp_path):
+    cifti_fname = str(tmp_path / "test.dtseries.nii")
+
+    axes = (nb.cifti2.SeriesAxis(start=0, step=2, size=20),
+            nb.cifti2.BrainModelAxis.from_mask(np.ones((5, 5, 5))))
+    hdr = nb.cifti2.cifti2_axes.to_header(axes)
+    cifti = nb.Cifti2Image(np.zeros(hdr.matrix.get_data_shape(), dtype=np.float32),
+                           header=hdr)
+    cifti.nifti_header.set_intent("ConnDenseSeries")
+    cifti.to_filename(cifti_fname)
+
+    source_file = tmp_path / "bids" / "sub-01" / "func" / "sub-01_task-rest_bold.nii.gz"
+    source_file.parent.mkdir(parents=True)
+    source_file.touch()
+
+    dds = bintfs.DerivativesDataSink(
+        in_file=cifti_fname,
+        base_directory=str(tmp_path),
+        source_file=str(source_file),
+        compress=False,
+        out_path_base="",
+        space="fsLR",
+        grayordinates="91k",
+        RepetitionTime=2.0,
+    )
+
+    res = dds.run()
+
+    out_path = Path(res.outputs.out_file)
+
+    assert out_path.name == "sub-01_task-rest_space-fsLR_bold.dtseries.nii"
+    old_sidecar = out_path.with_name("sub-01_task-rest_space-fsLR_bold.dtseries.json")
+    new_sidecar = out_path.with_name("sub-01_task-rest_space-fsLR_bold.json")
+
+    assert old_sidecar.exists()
+    assert "grayordinates" in json.loads(old_sidecar.read_text())
+    assert new_sidecar.exists()
+    assert "RepetitionTime" in json.loads(new_sidecar.read_text())
 
 
 @pytest.mark.parametrize(
