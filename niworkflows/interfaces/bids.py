@@ -653,9 +653,21 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 }
             )
             if self._metadata:
-                sidecar = Path(self._results["out_file"][0]).parent / (
-                    "%s.json" % _splitext(self._results["out_file"][0])[0]
-                )
+                out_file = Path(self._results["out_file"][0])
+                # 1.3.x hack
+                # For dtseries, we have been generating weird non-BIDS JSON files.
+                # We can safely keep producing them to avoid breaking derivatives, but
+                # only the existing keys should keep going into them.
+                if out_file.name.endswith(".dtseries.nii"):
+                    legacy_metadata = {}
+                    for key in ("grayordinates", "space", "surface", "surface_density", "volume"):
+                        if key in self._metadata:
+                            legacy_metadata[key] = self._metadata.pop(key)
+                    if legacy_metadata:
+                        sidecar = out_file.parent / f"{_splitext(str(out_file))[0]}.json"
+                        sidecar.write_text(dumps(legacy_metadata, sort_keys=True, indent=2))
+                # The future: the extension is the first . and everything after
+                sidecar = out_file.parent / f"{out_file.name.split('.', 1)[0]}.json"
                 sidecar.write_text(dumps(self._metadata, sort_keys=True, indent=2))
                 self._results["out_meta"] = str(sidecar)
         return runtime
