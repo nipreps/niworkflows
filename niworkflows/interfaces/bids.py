@@ -658,7 +658,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 # For dtseries, we have been generating weird non-BIDS JSON files.
                 # We can safely keep producing them to avoid breaking derivatives, but
                 # only the existing keys should keep going into them.
-                if out_file.endswith(".dtseries.nii"):
+                if out_file.name.endswith(".dtseries.nii"):
                     legacy_metadata = {}
                     for key in ("grayordinates", "space", "surface", "surface_density", "volume"):
                         if key in self._metadata:
