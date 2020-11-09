@@ -32,7 +32,7 @@ version: 2
 jobs:
   build:
     machine:
-      image: circleci/classic:201808-01
+      image: ubuntu-1604:202007-01
     working_directory: /tmp/src/niworkflows
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
@@ -114,7 +114,7 @@ jobs:
   get_data:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201808-01
+      image: ubuntu-1604:202007-01
     working_directory: /home/circleci/data
     steps:
       - restore_cache:
@@ -162,7 +162,7 @@ jobs:
   get_regression_data:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201808-01
+      image: ubuntu-1604:202007-01
     working_directory: /home/circleci/data
     steps:
       - restore_cache:
@@ -197,7 +197,7 @@ jobs:
 
   test_pytest:
     machine:
-      image: circleci/classic:201808-01
+      image: ubuntu-1604:202007-01
     working_directory: /tmp/tests
     steps:
       - attach_workspace:
@@ -295,7 +295,7 @@ jobs:
 
   test_masks:
     machine:
-      image: circleci/classic:201808-01
+      image: ubuntu-1604:202007-01
     working_directory: /tmp/masks
     steps:
       - attach_workspace:
@@ -400,7 +400,7 @@ jobs:
 
   test_package:
     machine:
-      image: circleci/classic:201808-01
+      image: ubuntu-1604:202007-01
     working_directory: /tmp/src/niworkflows
     steps:
       - checkout
@@ -425,7 +425,7 @@ jobs:
 
   deploy_pypi:
     machine:
-      image: circleci/classic:201808-01
+      image: ubuntu-1604:202007-01
     working_directory: /tmp/src/niworkflows
     steps:
       - checkout
@@ -455,7 +455,7 @@ jobs:
 
   deploy_docker:
     machine:
-      image: circleci/classic:201808-01
+      image: ubuntu-1604:202007-01
     working_directory: /tmp/src/
     steps:
       - restore_cache:
