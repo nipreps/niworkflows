@@ -533,7 +533,7 @@ jobs:
           name: Install niworkflows
           command: |
             python -m pip install --no-cache-dir codecov
-            python -m pip install --no-cache-dir -e .[all]
+            python -m pip install --no-cache-dir .[all]
       - run:
           name: Build only this commit with coverage collection
           command: |
