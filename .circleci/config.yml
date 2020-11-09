@@ -399,59 +399,57 @@ jobs:
             python -m codecov --file coverage.xml --flags masks -e CIRCLE_JOB
 
   test_package:
-    machine:
-      image: ubuntu-1604:202007-01
+    docker:
+      - image: circleci/python:3.8.5
     working_directory: /tmp/src/niworkflows
     steps:
       - checkout
-      - run: pyenv local 3.7.0
       - run:
           name: Install build depends
-          command: python3 -m pip install "setuptools>=40.8.0" "pip>=19" "twine<2.0" docutils
+          command: python -m pip install "setuptools>=40.8.0" "pip>=19" "twine<2.0" docutils
       - run:
           name: Build and check
           command: |
-            python3 setup.py sdist
-            python3 -m twine check dist/*
+            python setup.py sdist
+            python -m twine check dist/*
       - run:
           name: Validate version
           command: |
-            THISVERSION=$( python3 get_version.py )
-            python3 -m pip install dist/*.tar.gz
+            THISVERSION=$( python get_version.py )
+            python -m pip install dist/*.tar.gz
             mkdir empty
             cd empty
-            INSTALLED=$( python3 -c 'import niworkflows; print(niworkflows.__version__)' )
+            INSTALLED=$( python -c 'import niworkflows; print(niworkflows.__version__)' )
             test "${CIRCLE_TAG:-$THISVERSION}" == "$INSTALLED"
 
   deploy_pypi:
-    machine:
-      image: ubuntu-1604:202007-01
+    docker:
+      - image: circleci/python:3.8.5
     working_directory: /tmp/src/niworkflows
     steps:
       - checkout
-      - run: pyenv local 3.7.0
       - run:
           name: Install build depends
-          command: python3 -m pip install "setuptools>=40.8.0" "pip>=19" "twine<2.0" docutils
+          command: python -m pip install "setuptools>=40.8.0" "pip>=19" "twine<2.0" docutils
       - run:
           name: Build and check
           command: |
-            python3 setup.py check -r -s
-            python3 setup.py sdist
-            python3 -m twine check dist/*
+            python setup.py check -r -s
+            python setup.py sdist
+            python -m twine check dist/*
       - run:
           name: Validate version
           command: |
             THISVERSION=$( python3 get_version.py )
-            python3 -m pip install dist/*.tar.gz
+            python -m pip install dist/*.tar.gz
             mkdir empty
             cd empty
-            INSTALLED=$( python3 -c 'import niworkflows; print(niworkflows.__version__)' )
+            INSTALLED=$( python -c 'import niworkflows; print(niworkflows.__version__)' )
             test "${CIRCLE_TAG:-$THISVERSION}" == "$INSTALLED"
       - run:
           name: Upload to PyPi
           command: |
-            python3 -m twine upload dist/*
+            python -m twine upload dist/*
 
   deploy_docker:
     machine:
@@ -503,7 +501,7 @@ jobs:
 
   build_docs:
     docker:
-      - image: python:3.7.4
+      - image: circleci/python:3.8.5
     environment:
       - FSLOUTPUTTYPE: NIFTI
       - SUBJECTS_DIR: /tmp/subjects
@@ -522,10 +520,10 @@ jobs:
           command: mkdir -p $SUBJECTS_DIR
       - run:
           name: Install Graphviz
-          command: apt update && apt -y install graphviz
+          command: sudo apt update && sudo apt -y install graphviz
       - run:
           name: Install deps
-          command: pip install --no-cache-dir -r docs/requirements.txt
+          command: python -m pip install --no-cache-dir -r docs/requirements.txt
       - run:
           name: Build only this commit
           command: make -C docs SPHINXOPTS="-W" BUILDDIR="_build/no_version_html" html
@@ -534,8 +532,8 @@ jobs:
       - run:
           name: Install niworkflows
           command: |
-            pip install --no-cache-dir codecov
-            pip install --no-cache-dir -e .[all]
+            python -m pip install --no-cache-dir codecov
+            python -m pip install --no-cache-dir -e .[all]
       - run:
           name: Build only this commit with coverage collection
           command: |
@@ -548,7 +546,7 @@ jobs:
       - run:
           name: Uninstall NiWorkflows
           command: |
-            pip uninstall -y niworkflows
+            python -m pip uninstall -y niworkflows
       - run:
           name: Generate Versioned Docs
           command: |
