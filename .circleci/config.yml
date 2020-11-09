@@ -46,10 +46,25 @@ jobs:
             - build-v1-
           paths:
             - /tmp/docker
-
+            - /tmp/images
       - run:
-          name: Set-up a Docker registry
+          name: Docker authentication
           command: |
+            if [[ -n $DOCKER_PASS ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            fi
+      - run:
+          name: Set up Docker registry
+          command: |
+            if [[ -f /tmp/images/registry.tar.gz ]]; then
+              echo "Loading saved registry image"
+              docker load < /tmp/images/registry.tar.gz
+            else
+              echo "Pulling registry image from DockerHub"
+              docker pull registry:2
+              mkdir -p /tmp/images
+              docker save registry:2 | gzip > /tmp/images/registry.tar.gz
+            fi
             docker run -d -p 5000:5000 --restart=always --name=registry \
                 -v /tmp/docker:/var/lib/registry registry:2
       - run:
@@ -94,6 +109,7 @@ jobs:
           key: build-v1-{{ .Branch }}-{{ epoch }}
           paths:
             - /tmp/docker
+            - /tmp/images
 
   get_data:
     machine:
@@ -198,10 +214,26 @@ jobs:
             - build-v1-master-
             - build-v1-
       - run:
-          name: Set-up a Docker registry & pull
+          name: Docker authentication
           command: |
+            if [[ -n $DOCKER_PASS ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            fi
+      - run:
+          name: Set up Docker registry
+          command: |
+            if [[ -f /tmp/images/registry.tar.gz ]]; then
+              echo "Loading saved registry image"
+              docker load < /tmp/images/registry.tar.gz
+            else
+              echo "Pulling registry image from DockerHub"
+              docker pull registry:2
+            fi
             docker run -d -p 5000:5000 --restart=always --name=registry \
                 -v /tmp/docker:/var/lib/registry registry:2
+      - run:
+          name: Pull images to registry
+          command: |
             docker pull localhost:5000/niworkflows
             docker tag localhost:5000/niworkflows niworkflows:latest
       - run:
@@ -275,10 +307,28 @@ jobs:
             - build-v1-master-
             - build-v1-
       - run:
-          name: Set-up a Docker registry & pull
+          name: Docker authentication
           command: |
+            if [[ -n $DOCKER_PASS ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            fi
+      - run:
+          name: Set up Docker registry
+          command: |
+            if [[ -f /tmp/images/registry.tar.gz ]]; then
+              echo "Loading saved registry image"
+              docker load < /tmp/images/registry.tar.gz
+            else
+              echo "Pulling registry image from DockerHub"
+              docker pull registry:2
+              mkdir -p /tmp/images
+              docker save registry:2 | gzip > /tmp/images/registry.tar.gz
+            fi
             docker run -d -p 5000:5000 --restart=always --name=registry \
                 -v /tmp/docker:/var/lib/registry registry:2
+      - run:
+          name: Pull images to registry
+          command: |
             docker pull localhost:5000/niworkflows
             docker tag localhost:5000/niworkflows niworkflows:latest
 
@@ -416,9 +466,23 @@ jobs:
             - build-v1-
           paths:
             - /tmp/docker
+            - /tmp/images
       - run:
-          name: Set-up a Docker registry
+          name: Docker authentication
           command: |
+            if [[ -n $DOCKER_PASS ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            fi
+      - run:
+          name: Set up Docker registry
+          command: |
+            if [[ -f /tmp/images/registry.tar.gz ]]; then
+              echo "Loading saved registry image"
+              docker load < /tmp/images/registry.tar.gz
+            else
+              echo "Pulling registry image from DockerHub"
+              docker pull registry:2
+            fi
             docker run -d -p 5000:5000 --restart=always --name=registry \
                 -v /tmp/docker:/var/lib/registry registry:2
       - run:
