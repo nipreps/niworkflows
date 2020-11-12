@@ -84,7 +84,7 @@ class _RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
     settings = traits.List(File(exists=True), desc="pass on the list of settings files")
     # Resolution of the default template.
     template_spec = traits.DictStrAny(desc="template specifications")
-    template_resolution = traits.Enum(1, 2, desc="(DEPRECATED) template resolution")
+    template_resolution = traits.Enum(1, 2, None, desc="(DEPRECATED) template resolution")
     # Use explicit masking?
     explicit_masking = traits.Bool(
         True,
