@@ -1,8 +1,38 @@
+1.4.0 (TBD)
+===========
+First release in the 1.4.x series.
+This release includes enhancements and bug-fixes towards the release of the first
+beta version of *dMRIPrep*.
+It also contains new features that are necessary for the API overhaul that has
+happened within the new *SDCFlows 2.x* series.
+Finally other *NiPreps* will also have a first release with specific support for
+them: *NiRodents* and *NiBabies* (and their corresponding *fMRIPrep* extensions).
+
+.. admonition:: *NiWorkflows* has been relicensed!
+
+    As of the first release candidate of the 1.4 series, the license has changed
+    from BSD 3-clause to the Apache License 2.0.
+    Amongst several terms that are changing, the following two premises are relevant
+    if you derive code from the new series:
+
+    * *You must give any other recipients of the Work or Derivative Works a copy
+      of this License*; and
+    * *You must cause any modified files to carry prominent notices stating that
+      You changed the files*.
+
+A list of prominent changes follows:
+
+* FIX: Allow omission of ``<res>`` for template normalization (#582)
+* FIX: Include ``_T2starw`` ``_MTw`` and ``_TSE``-suffixes in ``build_path`` options (#584)
+* FIX: ``DerivativesDataSink`` warning when it has multiple source files (#573)
+* ENH: Upstream *fMRIPrep*'s ``init_bbreg_wf`` to integrate it in *dMRIPrep* (#586)
+* MAINT: CircleCI housekeeping (#580)
+
 1.3.2 (November 5, 2020)
 ========================
 Bug-fix release in the 1.3.x series.
 
-* FIX: Cordon off .dtseries.json contents (#578)
+* FIX: Cordon off ``.dtseries.json`` contents (#578)
 * ENH: Add units to qform overwrite report (#577)
 
 1.3.1 (September 22, 2020)
