@@ -7,10 +7,6 @@ from pathlib import Path
 import nibabel as nb
 import numpy as np
 
-from skimage import morphology as sim
-from scipy.ndimage.morphology import binary_fill_holes
-from nilearn.image import resample_to_img, new_img_like
-
 from nipype.utils.filemanip import copyfile, filename_to_list, fname_presuffix
 from nipype.interfaces.base import (
     isdefined,
@@ -393,6 +389,8 @@ def fix_lta_length(lta_file):
 
 
 def inject_skullstripped(subjects_dir, subject_id, skullstripped):
+    from nilearn.image import resample_to_img, new_img_like
+
     mridir = op.join(subjects_dir, subject_id, "mri")
     t1 = op.join(mridir, "T1.mgz")
     bm_auto = op.join(mridir, "brainmask.auto.mgz")
@@ -454,6 +452,9 @@ def refine_aseg(aseg, ball_size=4):
          cerebral brain is segmented out).
 
     """
+    from skimage import morphology as sim
+    from scipy.ndimage.morphology import binary_fill_holes
+
     # Read aseg data
     bmask = aseg.copy()
     bmask[bmask > 0] = 1
@@ -476,6 +477,8 @@ def grow_mask(anat, aseg, ants_segs=None, ww=7, zval=2.0, bw=4):
     https://github.com/nipy/mindboggle/blob/master/mindboggle/guts/segment.py#L1660
 
     """
+    from skimage import morphology as sim
+
     selem = sim.ball(bw)
 
     if ants_segs is None:
