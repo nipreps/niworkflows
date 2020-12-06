@@ -30,6 +30,7 @@ jobs:
       with:
         ssh-key: "${{ secrets.NIPREPS_DEPLOY }}"
     - name: Fetch all tags (for versioneer to work)
+      if: "!startsWith(github.ref, 'refs/tags/')"
       run: |
         /usr/bin/git -c protocol.version=2 fetch --tags --prune --unshallow origin
     - name: Build in confined, updated environment and interpolate version
