@@ -13,7 +13,9 @@ import versioneer
 # To install, 30.4.0 is enough, but if we're building an sdist, require 40.8.0
 # This imposes a stricter rule on the maintainer than the user
 # Keep the installation version synchronized with pyproject.toml
-SETUP_REQUIRES = ['setuptools >= %s' % ("40.8.0" if "sdist" in sys.argv else "30.4.0")]
+#
+# 12/05/2020 - Bumped to setuptools 38.4.1
+SETUP_REQUIRES = ['setuptools >= %s' % ("40.8.0" if "sdist" in sys.argv else "38.4.1")]
 
 # This enables setuptools to install wheel on-the-fly
 SETUP_REQUIRES += ['wheel'] if 'bdist_wheel' in sys.argv else []
