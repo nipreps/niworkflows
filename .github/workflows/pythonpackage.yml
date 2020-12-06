@@ -48,6 +48,7 @@ jobs:
         THISVERSION=${TAG:-$THISVERSION}
         echo "Expected VERSION: \"${THISVERSION}\""
         echo "THISVERSION=${THISVERSION}" >> ${GITHUB_ENV}
+
     - name: Install in confined environment [sdist]
       run: |
         python -m venv /tmp/install_sdist
