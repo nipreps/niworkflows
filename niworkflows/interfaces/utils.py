@@ -284,7 +284,7 @@ def _gen_reference(
 
         # Get mask into reference space
         masknii = nli.resample_img(
-            fixed_image, target_affine=new_affine, interpolation="nearest"
+            masknii, target_affine=new_affine, interpolation="nearest"
         )
         res_shape = np.array(masknii.shape[:3])
 
