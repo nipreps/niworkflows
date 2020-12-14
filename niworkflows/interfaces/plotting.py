@@ -62,7 +62,7 @@ class FMRISummary(SimpleInterface):
         fig = fMRIPlot(
             self.inputs.in_func,
             mask_file=self.inputs.in_mask if isdefined(self.inputs.in_mask) else None,
-            seg_file=self.inputs.in_segm if isdefined(self.inputs.seg_file) else None,
+            seg_file=self.inputs.in_segm if isdefined(self.inputs.in_segm) else None,
             spikes_files=[self.inputs.in_spikes_bg],
             tr=self.inputs.tr,
             data=dataframe[["outliers", "DVARS", "FD"]],
