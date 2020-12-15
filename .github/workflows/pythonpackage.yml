@@ -23,16 +23,13 @@ jobs:
         
     steps:
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
     - uses: actions/checkout@v2
       with:
         ssh-key: "${{ secrets.NIPREPS_DEPLOY }}"
-    - name: Fetch all tags (for versioneer to work)
-      if: "!startsWith(github.ref, 'refs/tags/')"
-      run: |
-        /usr/bin/git -c protocol.version=2 fetch --tags --prune --unshallow origin
+        fetch-depth: 0
     - name: Build in confined, updated environment and interpolate version
       run: |
         python -m venv /tmp/buildenv
