@@ -16,23 +16,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
-        pip: ["pip~=18.1"]
-        # pip: ["pip==10.0.1", "pip~=18.1"]
-        setuptools: ["setuptools==38.4.1", "setuptools"]
+        python-version: [3.7, 3.8, 3.9]
         
     steps:
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
     - uses: actions/checkout@v2
       with:
         ssh-key: "${{ secrets.NIPREPS_DEPLOY }}"
-    - name: Fetch all tags (for versioneer to work)
-      if: "!startsWith(github.ref, 'refs/tags/')"
-      run: |
-        /usr/bin/git -c protocol.version=2 fetch --tags --prune --unshallow origin
+        fetch-depth: 0
     - name: Build in confined, updated environment and interpolate version
       run: |
         python -m venv /tmp/buildenv
@@ -54,7 +48,7 @@ jobs:
       run: |
         python -m venv /tmp/install_sdist
         source /tmp/install_sdist/bin/activate
-        python -m pip install "${{ matrix.pip }}" "${{ matrix.setuptools }}"
+        python -m pip install --upgrade pip wheel
         python -m pip install dist/niworkflows*.tar.gz
         INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
         echo "VERSION: \"${THISVERSION}\""
@@ -65,32 +59,29 @@ jobs:
       run: |
         python -m venv /tmp/install_wheel
         source /tmp/install_wheel/bin/activate
-        python -m pip install "${{ matrix.pip }}" "${{ matrix.setuptools }}"
+        python -m pip install --upgrade pip wheel
         python -m pip install dist/niworkflows*.whl
         INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
         echo "INSTALLED: \"${INSTALLED_VERSION}\""
         test "${INSTALLED_VERSION}" = "${THISVERSION}"
 
-    - name: Install in confined environment [setup.py - install]
+    - name: Install in confined environment [pip install .]
       run: |
         python -m venv /tmp/setup_install
         source /tmp/setup_install/bin/activate
-        python -m pip install "${{ matrix.pip }}" "${{ matrix.setuptools }}"
-        python -m pip install numpy scipy "Cython >= 0.28.5" # sklearn needs this
-        python -m pip install scikit-learn  # otherwise it attempts to build it
-        python setup.py install
+        python -m pip install --upgrade pip wheel
+        python -m pip install .
         INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
         echo "INSTALLED: \"${INSTALLED_VERSION}\""
         test "${INSTALLED_VERSION}" = "${THISVERSION}"
 
-    - name: Install in confined environment [setup.py - develop]
+    - name: Install in confined environment [pip install -e .]
       run: |
         python -m venv /tmp/setup_develop
         source /tmp/setup_develop/bin/activate
-        python -m pip install "${{ matrix.pip }}" "${{ matrix.setuptools }}"
-        python -m pip install numpy scipy "Cython >= 0.28.5" # sklearn needs this
-        python -m pip install scikit-learn  # otherwise it attempts to build it
-        python setup.py develop
+        python -m pip install pip
+        python -m pip install --upgrade pip wheel
+        python -m pip install -e .
         INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
         echo "INSTALLED: \"${INSTALLED_VERSION}\""
         test "${INSTALLED_VERSION}" = "${THISVERSION}"
