@@ -1,3 +1,7 @@
+1.4.0 (December 17, 2020)
+=========================
+
+
 1.4.0 (TBD)
 ===========
 First release in the 1.4.x series.
@@ -22,10 +26,14 @@ them: *NiRodents* and *NiBabies* (and their corresponding *fMRIPrep* extensions)
 
 A list of prominent changes follows:
 
+* FIX: Check for ``in_segm`` input, not ``seg_file`` (typo) (#592)
+* FIX: Use the mask to calculate FOV rather than the fixed image in ``GenerateSamplingReference`` (#583)
 * FIX: Allow omission of ``<res>`` for template normalization (#582)
 * FIX: Include ``_T2starw`` ``_MTw`` and ``_TSE``-suffixes in ``build_path`` options (#584)
 * FIX: ``DerivativesDataSink`` warning when it has multiple source files (#573)
+* ENH: Revise some patterns of the ``BIDSLayout`` config to aid *SDCFlows*' new API (#585)
 * ENH: Upstream *fMRIPrep*'s ``init_bbreg_wf`` to integrate it in *dMRIPrep* (#586)
+* MAINT: Drop Python 3.6, test ``setuptools`` builds, ``pip`` installations, and revise Docker pinned versions (#593)
 * MAINT: CircleCI housekeeping (#580)
 
 1.3.2 (November 5, 2020)
