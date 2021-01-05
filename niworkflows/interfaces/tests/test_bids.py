@@ -1,6 +1,7 @@
 """Tests on BIDS compliance."""
 import os
 from pathlib import Path
+import json
 
 import numpy as np
 import nibabel as nb
@@ -278,6 +279,46 @@ def test_DerivativesDataSink_build_path(
         assert Path(out).relative_to(tmp_path) == Path(base) / exp
 
 
+def test_DerivativesDataSink_dtseries_json_hack(tmp_path):
+    cifti_fname = str(tmp_path / "test.dtseries.nii")
+
+    axes = (nb.cifti2.SeriesAxis(start=0, step=2, size=20),
+            nb.cifti2.BrainModelAxis.from_mask(np.ones((5, 5, 5))))
+    hdr = nb.cifti2.cifti2_axes.to_header(axes)
+    cifti = nb.Cifti2Image(np.zeros(hdr.matrix.get_data_shape(), dtype=np.float32),
+                           header=hdr)
+    cifti.nifti_header.set_intent("ConnDenseSeries")
+    cifti.to_filename(cifti_fname)
+
+    source_file = tmp_path / "bids" / "sub-01" / "func" / "sub-01_task-rest_bold.nii.gz"
+    source_file.parent.mkdir(parents=True)
+    source_file.touch()
+
+    dds = bintfs.DerivativesDataSink(
+        in_file=cifti_fname,
+        base_directory=str(tmp_path),
+        source_file=str(source_file),
+        compress=False,
+        out_path_base="",
+        space="fsLR",
+        grayordinates="91k",
+        RepetitionTime=2.0,
+    )
+
+    res = dds.run()
+
+    out_path = Path(res.outputs.out_file)
+
+    assert out_path.name == "sub-01_task-rest_space-fsLR_bold.dtseries.nii"
+    old_sidecar = out_path.with_name("sub-01_task-rest_space-fsLR_bold.dtseries.json")
+    new_sidecar = out_path.with_name("sub-01_task-rest_space-fsLR_bold.json")
+
+    assert old_sidecar.exists()
+    assert "grayordinates" in json.loads(old_sidecar.read_text())
+    assert new_sidecar.exists()
+    assert "RepetitionTime" in json.loads(new_sidecar.read_text())
+
+
 @pytest.mark.parametrize(
     "space, size, units, xcodes, zipped, fixed, data_dtype",
     [
@@ -380,6 +421,51 @@ def test_DerivativesDataSink_t1w(tmp_path, space, size, units, xcodes, fixed):
     assert int(nii.header["qform_code"]) == XFORM_CODES[space]
     assert int(nii.header["sform_code"]) == XFORM_CODES[space]
     assert nii.header.get_xyzt_units() == ("mm", "unknown")
+
+
+@pytest.mark.parametrize(
+    "source_file",
+    [
+        BOLD_PATH,
+        [BOLD_PATH],
+        [BOLD_PATH, "ds054/sub-100185/func/sub-100185_task-machinegame_run-02_bold.nii.gz"]
+    ]
+)
+@pytest.mark.parametrize("source_dtype", ["<i4", "<f4"])
+@pytest.mark.parametrize("in_dtype", ["<i4", "<f4"])
+def test_DerivativesDataSink_data_dtype_source(
+    tmp_path, source_file, source_dtype, in_dtype
+):
+
+    def make_empty_nii_with_dtype(fname, dtype):
+        Path(fname).parent.mkdir(exist_ok=True, parents=True)
+
+        size = (2, 3, 4, 5)
+
+        nb.Nifti1Image(np.zeros(size, dtype=dtype), np.eye(4)).to_filename(fname)
+
+    in_file = str(tmp_path / "in.nii")
+    make_empty_nii_with_dtype(in_file, in_dtype)
+
+    if isinstance(source_file, str):
+        source_file = str(tmp_path / source_file)
+        make_empty_nii_with_dtype(source_file, source_dtype)
+
+    elif isinstance(source_file, list):
+        source_file = [str(tmp_path / s) for s in source_file]
+        for s in source_file:
+            make_empty_nii_with_dtype(s, source_dtype)
+
+    dds = bintfs.DerivativesDataSink(
+        base_directory=str(tmp_path),
+        data_dtype="source",
+        desc="preproc",
+        source_file=source_file,
+        in_file=in_file,
+    ).run()
+
+    nii = nb.load(dds.outputs.out_file)
+    assert nii.get_data_dtype() == np.dtype(source_dtype)
 
 
 @pytest.mark.parametrize("field", ["RepetitionTime", "UndefinedField"])

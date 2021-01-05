@@ -5,9 +5,9 @@ NeuroImaging workflows (NiWorkflows): robust processing tools for MRI data
   :target: https://circleci.com/gh/nipreps/niworkflows/tree/master
   :alt: CI status
 
-.. image:: https://travis-ci.org/nipreps/niworkflows.svg?branch=master
-  :target: https://travis-ci.org/nipreps/niworkflows
-  :alt: CI status
+.. image:: https://github.com/nipreps/niworkflows/workflows/Python%20package/badge.svg
+  :target: https://github.com/nipreps/niworkflows/actions
+  :alt: GitHub Actions
 
 .. image:: https://codecov.io/gh/nipreps/niworkflows/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/nipreps/niworkflows

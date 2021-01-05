@@ -13,7 +13,7 @@ __version__ = get_versions()["version"]
 del get_versions
 
 __packagename__ = "niworkflows"
-__copyright__ = "Copyright {}, Center for Reproducible Neuroscience, Stanford University".format(
+__copyright__ = "Copyright {}, The NiPreps Developers".format(
     datetime.now().year
 )
 __credits__ = [

@@ -284,7 +284,7 @@ def _gen_reference(
 
         # Get mask into reference space
         masknii = nli.resample_img(
-            fixed_image, target_affine=new_affine, interpolation="nearest"
+            masknii, target_affine=new_affine, interpolation="nearest"
         )
         res_shape = np.array(masknii.shape[:3])
 
@@ -967,7 +967,7 @@ def _tsv2json(
             for i in tsv_data.index
         ]
         tsv_data.columns = [
-            re.sub(re_to_camel, camel, less_breakable(i).title(), 0)
+            re.sub(re_to_camel, camel, less_breakable(i).title(), 0).replace("Csf", "CSF")
             for i in tsv_data.columns
         ]
     json_data = tsv_data.to_json(orient="index")

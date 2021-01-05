@@ -62,7 +62,7 @@ class FMRISummary(SimpleInterface):
         fig = fMRIPlot(
             self.inputs.in_func,
             mask_file=self.inputs.in_mask if isdefined(self.inputs.in_mask) else None,
-            seg_file=self.inputs.in_segm if isdefined(self.inputs.seg_file) else None,
+            seg_file=self.inputs.in_segm if isdefined(self.inputs.in_segm) else None,
             spikes_files=[self.inputs.in_spikes_bg],
             tr=self.inputs.tr,
             data=dataframe[["outliers", "DVARS", "FD"]],
@@ -140,8 +140,12 @@ class _ConfoundsCorrelationPlotInputSpec(BaseInterfaceInputSpec):
         "which all correlation magnitudes "
         "should be ranked and plotted",
     )
+    columns = traits.List(
+        traits.Str,
+        desc="Filter out all regressors not found in this list."
+    )
     max_dim = traits.Int(
-        70,
+        20,
         usedefault=True,
         desc="Maximum number of regressors to include in "
         "plot. Regressors with highest magnitude of "
@@ -172,8 +176,9 @@ class ConfoundsCorrelationPlot(SimpleInterface):
             self._results["out_file"] = self.inputs.out_file
         confounds_correlation_plot(
             confounds_file=self.inputs.confounds_file,
+            columns=self.inputs.columns if isdefined(self.inputs.columns) else None,
+            max_dim=self.inputs.max_dim,
             output_file=self._results["out_file"],
             reference=self.inputs.reference_column,
-            max_dim=self.inputs.max_dim,
         )
         return runtime

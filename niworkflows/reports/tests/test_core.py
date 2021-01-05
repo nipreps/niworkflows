@@ -27,7 +27,7 @@ def bids_sessions(tmpdir_factory):
         "sub-{subject}[_ses-{session}][_task-{task}][_acq-{acquisition}]"
         "[_ce-{ceagent}][_dir-{direction}][_rec-{reconstruction}]"
         "[_mod-{modality}][_run-{run}][_echo-{echo}][_space-{space}]"
-        "[_desc-{desc}]_{suffix<dseg|T1w|bold>}.{extension<svg>}"
+        "[_desc-{desc}]_{suffix<dseg|T1w|bold>}{extension<.svg>}"
     )
     subjects = ["01"]
     tasks = ["t1", "t2", "t3"]
@@ -49,7 +49,7 @@ def bids_sessions(tmpdir_factory):
             "ceagent": ce,
             "run": run,
             "desc": desc,
-            "extension": "svg",
+            "extension": ".svg",
             "suffix": "bold",
             "datatype": "figures",
         }
@@ -219,7 +219,7 @@ def test_generated_reportlets(bids_sessions, ordering):
     settings["sections"][3]["ordering"] = ordering
     report.index(settings["sections"])
     # expected number of reportlets
-    expected_reportlets_num = len(report.layout.get(extension="svg"))
+    expected_reportlets_num = len(report.layout.get(extension=".svg"))
     # bids_session uses these entities
     needed_entities = ["session", "task", "ceagent", "run"]
     # the last section is the most recently run

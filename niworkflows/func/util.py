@@ -10,7 +10,6 @@ from nipype.interfaces import utility as niu, fsl, afni
 from templateflow.api import get as get_template
 
 from ..engine.workflows import LiterateWorkflow as Workflow
-from ..interfaces.ants import AI
 from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
     FixHeaderApplyTransforms as ApplyTransforms,
@@ -408,6 +407,7 @@ def init_enhance_and_skullstrip_bold_wf(
     apply_mask = pe.Node(fsl.ApplyMask(), name="apply_mask")
 
     if not pre_mask:
+        from nipype.interfaces.ants.utils import AI
         from ..interfaces.nibabel import Binarize
 
         bold_template = get_template(

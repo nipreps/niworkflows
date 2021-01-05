@@ -3,6 +3,27 @@ import nibabel as nb
 import numpy as np
 
 
+def rotation2canonical(img):
+    """Calculate the rotation w.r.t. cardinal axes of input image."""
+    img = nb.as_closest_canonical(img)
+    newaff = np.diag(img.header.get_zooms()[:3])
+    r = newaff @ np.linalg.pinv(img.affine[:3, :3])
+    if np.allclose(r, np.eye(3)):
+        return None
+    return r
+
+
+def rotate_affine(img, rot=None):
+    """Rewrite the affine of a spatial image."""
+    if rot is None:
+        return img
+
+    img = nb.as_closest_canonical(img)
+    affine = np.eye(4)
+    affine[:3] = rot @ img.affine[:3]
+    return img.__class__(img.dataobj, affine, img.header)
+
+
 def unsafe_write_nifti_header_and_data(fname, header, data):
     """Write header and data without any consistency checks or data munging
 
@@ -127,7 +148,7 @@ def dseg_label(in_seg, label, newpath=None):
     return out_file
 
 
-def resample_by_spacing(in_file, zooms, order=3, clip=True):
+def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
     """Regrid the input image to match the new zooms."""
     from pathlib import Path
     import numpy as np
@@ -142,8 +163,6 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True):
     qform, qcode = in_file.get_qform(coded=True)
 
     hdr = in_file.header.copy()
-    dtype = hdr.get_data_dtype()
-    data = np.asanyarray(in_file.dataobj)
     zooms = np.array(zooms)
 
     # Calculate the factors to normalize voxel size to the specific zooms
@@ -174,11 +193,18 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True):
         new_card.dot(np.vstack((new_grid, np.ones((1, new_grid.shape[1])))))
     )
 
+    if smooth:
+        from scipy.ndimage import gaussian_filter
+        if smooth is True:
+            smooth = np.maximum(0, (pre_zooms / zooms - 1) / 2)
+        data = gaussian_filter(in_file.get_fdata(), smooth)
+    else:
+        data = np.asarray(in_file.dataobj)
+
     # Resample data in the new grid
     resampled = map_coordinates(
         data,
         ijk[:3, :],
-        output=dtype,
         order=order,
         mode="constant",
         cval=0,

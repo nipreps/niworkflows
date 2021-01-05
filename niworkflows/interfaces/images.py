@@ -42,6 +42,13 @@ class _RegridToZoomsInputSpec(BaseInterfaceInputSpec):
         usedefault=True,
         desc="clip the data array within the original image's range",
     )
+    smooth = traits.Either(
+        traits.Bool(),
+        traits.Float(),
+        default=False,
+        usedefault=True,
+        desc="apply gaussian smoothing before resampling"
+    )
 
 
 class _RegridToZoomsOutputSpec(TraitedSpec):
@@ -65,6 +72,7 @@ class RegridToZooms(SimpleInterface):
             self.inputs.zooms,
             order=self.inputs.order,
             clip=self.inputs.clip,
+            smooth=self.inputs.smooth,
         ).to_filename(self._results["out_file"])
         return runtime
 
@@ -521,19 +529,21 @@ class ValidateImage(SimpleInterface):
                 diff = np.linalg.inv(qform) @ new_qform
                 trans, rot, _, _ = transforms3d.affines.decompose44(diff)
                 angle = transforms3d.axangles.mat2axangle(rot)[1]
+                xyz_unit = img.header.get_xyzt_units()[0]
+                if xyz_unit == "unknown":
+                    xyz_unit = "mm"
+
                 total_trans = np.sqrt(
                     np.sum(trans * trans)
                 )  # Add angle and total_trans to report
                 warning_txt = "Note on orientation: qform matrix overwritten"
-                description = """\
+                description = f"""\
     <p class="elem-desc">
     The qform has been copied from sform.
-    The difference in angle is {angle:.02g}.
-    The difference in translation is {total_trans:.02g}.
+    The difference in angle is {angle:.02g} radians.
+    The difference in translation is {total_trans:.02g}{xyz_unit}.
     </p>
-    """.format(
-                    angle=angle, total_trans=total_trans
-                )
+    """
             elif qform_code > 0:
                 # qform code indicates the qform is supposed to be valid. Use more stridency.
                 warning_txt = "WARNING - Invalid qform information"

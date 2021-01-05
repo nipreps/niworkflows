@@ -903,40 +903,55 @@ def compcor_variance_plot(
 
 
 def confounds_correlation_plot(
-    confounds_file, output_file=None, figure=None, reference="global_signal", max_dim=70
+    confounds_file,
+    columns=None,
+    figure=None,
+    max_dim=20,
+    output_file=None,
+    reference="global_signal",
 ):
     """
+    Generate a bar plot with the correlation of confounds.
+
     Parameters
     ----------
-    confounds_file: str
+    confounds_file: :obj:`str`
         File containing all confound regressors to be included in the
         correlation plot.
-    output_file: str or None
-        Path where the output figure should be saved. If this is not defined,
-        then the plotting axes will be returned instead of the saved figure
-        path.
     figure: figure or None
         Existing figure on which to plot.
-    reference: str
-        `confounds_correlation_plot` prepares a bar plot of the correlations
-        of each confound regressor with a reference column. By default, this
-        is the global signal (so that collinearities with the global signal
-        can readily be assessed).
-    max_dim: int
+    columns: :obj:`list` or :obj:`None`.
+        Select a list of columns from the dataset.
+    max_dim: :obj:`int`
         The maximum number of regressors to be included in the output plot.
         Reductions (e.g., CompCor) of high-dimensional data can yield so many
         regressors that the correlation structure becomes obfuscated. This
-        criterion selects the `max_dim` regressors that have the largest
-        correlation magnitude with `reference` for inclusion in the plot.
+        criterion selects the ``max_dim`` regressors that have the largest
+        correlation magnitude with ``reference`` for inclusion in the plot.
+    output_file: :obj:`str` or :obj:`None`
+        Path where the output figure should be saved. If this is not defined,
+        then the plotting axes will be returned instead of the saved figure
+        path.
+    reference: :obj:`str`
+        ``confounds_correlation_plot`` prepares a bar plot of the correlations
+        of each confound regressor with a reference column. By default, this
+        is the global signal (so that collinearities with the global signal
+        can readily be assessed).
 
     Returns
     -------
     axes and gridspec
-        Plotting axes and gridspec. Returned only if `output_file` is None.
-    output_file: str
+        Plotting axes and gridspec. Returned only if ``output_file`` is ``None``.
+    output_file: :obj:`str`
         The file where the figure is saved.
     """
     confounds_data = pd.read_table(confounds_file)
+
+    if columns:
+        columns = set(columns)  # Drop duplicates
+        columns.add(reference)  # Make sure the reference is included
+        confounds_data = confounds_data[[el for el in columns]]
+
     confounds_data = confounds_data.loc[
         :, np.logical_not(np.isclose(confounds_data.var(skipna=True), 0))
     ]

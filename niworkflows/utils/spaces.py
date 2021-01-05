@@ -14,6 +14,8 @@ NONSTANDARD_REFERENCES = [
     "run",
     "sbref",
     "session",
+    "individual",
+    "dwi",
 ]
 """List of supported nonstandard reference spaces."""
 
