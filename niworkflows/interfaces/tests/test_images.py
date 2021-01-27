@@ -212,3 +212,29 @@ def test_conform_set_zooms(tmpdir):
 
     out_img = nb.load(res.outputs.out_file)
     assert np.allclose(out_img.header.get_zooms(), conform.inputs.target_zooms)
+
+
+@pytest.mark.parametrize("shape", [
+    (10, 10, 10),
+    (10, 10, 10, 1),
+    (10, 10, 10, 10),
+])
+def test_RobustAverage(tmpdir, shape):
+    """Exercise the various types of inputs."""
+    tmpdir.chdir()
+
+    data = np.ones(shape, dtype="float32")
+    t_list = [True]
+    if len(shape) == 4 and shape[-1] > 1:
+        data *= np.linspace(0.6, 1.0, num=10)[::-1]
+        t_list = np.zeros(shape[3], dtype=bool)
+        t_list[:3] = True
+
+    fname = str(tmpdir.join("file1.nii.gz"))
+    nb.Nifti1Image(data, np.eye(4), None).to_filename(fname)
+
+    avg = im.RobustAverage(in_file=fname, t_list=list(t_list)).run()
+    out_file = nb.load(avg.outputs.out_file)
+
+    assert out_file.shape == (10, 10, 10)
+    assert np.allclose(out_file.get_fdata(), 1.0)
