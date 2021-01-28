@@ -23,7 +23,7 @@ from nipype.interfaces.base import (
     SimpleInterface,
 )
 from nipype.interfaces.mixins import reporting
-from .report import base as nrb
+from .reportlets import base as nrb
 
 
 LOGGER = logging.getLogger("nipype.interface")
