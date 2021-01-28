@@ -465,7 +465,7 @@ def _reorient_image(img, *, target_img=None, orientation=None):
         desired orientation, if no target image is provided
 
     .. testsetup::
-    >>> img = nb.load(Path(test_data) / 'testRobustMNINormalizationRPTMovingWarpedImage.nii.gz')
+    >>> img = nb.load(Path(test_data) / 'testSpatialNormalizationRPTMovingWarpedImage.nii.gz')
     >>> las_img = img.as_reoriented([[0, -1], [1, 1], [2, 1]])
 
     Examples
