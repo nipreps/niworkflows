@@ -18,10 +18,10 @@ from nipype.interfaces import fsl, ants
 
 from ... import NIWORKFLOWS_LOG
 from . import base as nrb
-from ..mni import (
-    _RobustMNINormalizationInputSpec,
-    _RobustMNINormalizationOutputSpec,
-    RobustMNINormalization,
+from ..norm import (
+    _SpatialNormalizationInputSpec,
+    _SpatialNormalizationOutputSpec,
+    SpatialNormalization,
 )
 from ..fixes import (
     FixHeaderApplyTransforms as ApplyTransforms,
@@ -29,21 +29,21 @@ from ..fixes import (
 )
 
 
-class _RobustMNINormalizationInputSpecRPT(
-    nrb._SVGReportCapableInputSpec, _RobustMNINormalizationInputSpec
+class _SpatialNormalizationInputSpecRPT(
+    nrb._SVGReportCapableInputSpec, _SpatialNormalizationInputSpec
 ):
     pass
 
 
-class _RobustMNINormalizationOutputSpecRPT(
-    reporting.ReportCapableOutputSpec, _RobustMNINormalizationOutputSpec
+class _SpatialNormalizationOutputSpecRPT(
+    reporting.ReportCapableOutputSpec, _SpatialNormalizationOutputSpec
 ):
     pass
 
 
-class RobustMNINormalizationRPT(nrb.RegistrationRC, RobustMNINormalization):
-    input_spec = _RobustMNINormalizationInputSpecRPT
-    output_spec = _RobustMNINormalizationOutputSpecRPT
+class SpatialNormalizationRPT(nrb.RegistrationRC, SpatialNormalization):
+    input_spec = _SpatialNormalizationInputSpecRPT
+    output_spec = _SpatialNormalizationOutputSpecRPT
 
     def _post_run_hook(self, runtime):
         # We need to dig into the internal ants.Registration interface
@@ -60,7 +60,7 @@ class RobustMNINormalizationRPT(nrb.RegistrationRC, RobustMNINormalization):
             self._moving_image,
         )
 
-        return super(RobustMNINormalizationRPT, self)._post_run_hook(runtime)
+        return super(SpatialNormalizationRPT, self)._post_run_hook(runtime)
 
 
 class _ANTSRegistrationInputSpecRPT(

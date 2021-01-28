@@ -11,7 +11,7 @@ from tempfile import TemporaryDirectory
 from nipype.pipeline import engine as pe
 from niworkflows.interfaces.reportlets.registration import (
     FLIRTRPT,
-    RobustMNINormalizationRPT,
+    SpatialNormalizationRPT,
     ANTSRegistrationRPT,
     BBRegisterRPT,
     MRICoregRPT,
@@ -126,57 +126,57 @@ def test_BBRegisterRPT(monkeypatch, moving):
     _smoke_test_report(bbregister_rpt, "testBBRegister.svg")
 
 
-def test_RobustMNINormalizationRPT(monkeypatch, moving):
-    """ the RobustMNINormalizationRPT report capable test """
+def test_SpatialNormalizationRPT(monkeypatch, moving):
+    """ the SpatialNormalizationRPT report capable test """
 
     def _agg(objekt, runtime):
         outputs = objekt.output_spec()
         outputs.warped_image = os.path.join(
-            datadir, "testRobustMNINormalizationRPTMovingWarpedImage.nii.gz"
+            datadir, "testSpatialNormalizationRPTMovingWarpedImage.nii.gz"
         )
         outputs.out_report = os.path.join(runtime.cwd, objekt.inputs.out_report)
         return outputs
 
     # Patch the _run_interface method
     monkeypatch.setattr(
-        RobustMNINormalizationRPT, "_run_interface", _run_interface_mock
+        SpatialNormalizationRPT, "_run_interface", _run_interface_mock
     )
-    monkeypatch.setattr(RobustMNINormalizationRPT, "aggregate_outputs", _agg)
+    monkeypatch.setattr(SpatialNormalizationRPT, "aggregate_outputs", _agg)
 
-    ants_rpt = RobustMNINormalizationRPT(
+    ants_rpt = SpatialNormalizationRPT(
         generate_report=True, moving_image=moving, flavor="testing"
     )
-    _smoke_test_report(ants_rpt, "testRobustMNINormalizationRPT.svg")
+    _smoke_test_report(ants_rpt, "testSpatialNormalizationRPT.svg")
 
 
-def test_RobustMNINormalizationRPT_masked(monkeypatch, moving, reference_mask):
-    """ the RobustMNINormalizationRPT report capable test with masking """
+def test_SpatialNormalizationRPT_masked(monkeypatch, moving, reference_mask):
+    """ the SpatialNormalizationRPT report capable test with masking """
 
     def _agg(objekt, runtime):
         outputs = objekt.output_spec()
         outputs.warped_image = os.path.join(
-            datadir, "testRobustMNINormalizationRPTMovingWarpedImage.nii.gz"
+            datadir, "testSpatialNormalizationRPTMovingWarpedImage.nii.gz"
         )
         outputs.out_report = os.path.join(runtime.cwd, objekt.inputs.out_report)
         return outputs
 
     # Patch the _run_interface method
     monkeypatch.setattr(
-        RobustMNINormalizationRPT, "_run_interface", _run_interface_mock
+        SpatialNormalizationRPT, "_run_interface", _run_interface_mock
     )
-    monkeypatch.setattr(RobustMNINormalizationRPT, "aggregate_outputs", _agg)
+    monkeypatch.setattr(SpatialNormalizationRPT, "aggregate_outputs", _agg)
 
-    ants_rpt = RobustMNINormalizationRPT(
+    ants_rpt = SpatialNormalizationRPT(
         generate_report=True,
         moving_image=moving,
         reference_mask=reference_mask,
         flavor="testing",
     )
-    _smoke_test_report(ants_rpt, "testRobustMNINormalizationRPT_masked.svg")
+    _smoke_test_report(ants_rpt, "testSpatialNormalizationRPT_masked.svg")
 
 
 def test_ANTSRegistrationRPT(monkeypatch, reference, moving):
-    """ the RobustMNINormalizationRPT report capable test """
+    """ the SpatialNormalizationRPT report capable test """
     import pkg_resources as pkgr
 
     def _agg(objekt, runtime):

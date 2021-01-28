@@ -26,7 +26,7 @@ from .fixes import FixHeaderRegistration as Registration
 niworkflows_version = Version(__version__)
 
 
-class _RobustMNINormalizationInputSpec(BaseInterfaceInputSpec):
+class _SpatialNormalizationInputSpec(BaseInterfaceInputSpec):
     # Enable deprecation
     package_version = niworkflows_version
 
@@ -101,13 +101,13 @@ See https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba\
     )
 
 
-class _RobustMNINormalizationOutputSpec(RegistrationOutputSpec):
+class _SpatialNormalizationOutputSpec(RegistrationOutputSpec):
     reference_image = File(
         exists=True, desc="reference image used for registration target"
     )
 
 
-class RobustMNINormalization(BaseInterface):
+class SpatialNormalization(BaseInterface):
     """
     An interface to robustly run T1-to-MNI spatial normalization.
 
@@ -115,8 +115,8 @@ class RobustMNINormalization(BaseInterface):
 
     """
 
-    input_spec = _RobustMNINormalizationInputSpec
-    output_spec = _RobustMNINormalizationOutputSpec
+    input_spec = _SpatialNormalizationInputSpec
+    output_spec = _SpatialNormalizationOutputSpec
 
     def _list_outputs(self):
         outputs = self.norm._list_outputs()
@@ -128,7 +128,7 @@ class RobustMNINormalization(BaseInterface):
         self._reference_image = None
         self.retry = 1
         self.terminal_output = "file"
-        super(RobustMNINormalization, self).__init__(**inputs)
+        super(SpatialNormalization, self).__init__(**inputs)
 
     def _get_settings(self):
         """
