@@ -233,3 +233,39 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
 
     # Create a new x-form affine, aligned with cardinal axes, 1mm3 and centered.
     return nb.Nifti1Image(resampled, new_affine, hdr)
+
+
+def demean(in_file, in_mask, only_mask=False, newpath=None):
+    """Demean ``in_file`` within the mask defined by ``in_mask``."""
+    import os
+    import numpy as np
+    import nibabel as nb
+    from nipype.utils.filemanip import fname_presuffix
+
+    out_file = fname_presuffix(in_file, suffix="_demeaned", newpath=os.getcwd())
+    nii = nb.load(in_file)
+    msk = np.asanyarray(nb.load(in_mask).dataobj)
+    data = nii.get_fdata()
+    if only_mask:
+        data[msk > 0] -= np.median(data[msk > 0])
+    else:
+        data -= np.median(data[msk > 0])
+    nb.Nifti1Image(data, nii.affine, nii.header).to_filename(out_file)
+    return out_file
+
+
+def nii_ones_like(in_file, value, dtype, newpath=None):
+    """Create a NIfTI file filled with ``value``, matching properties of ``in_file``."""
+    import os
+    import numpy as np
+    import nibabel as nb
+
+    nii = nb.load(in_file)
+    data = np.ones(nii.shape, dtype=float) * value
+
+    out_file = os.path.join(newpath or os.getcwd(), "filled.nii.gz")
+    nii = nb.Nifti1Image(data, nii.affine, nii.header)
+    nii.set_data_dtype(dtype)
+    nii.to_filename(out_file)
+
+    return out_file

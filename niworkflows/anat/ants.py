@@ -28,8 +28,7 @@ from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
     FixHeaderApplyTransforms as ApplyTransforms,
 )
-from ..interfaces.images import RegridToZooms
-from ..interfaces.nibabel import ApplyMask
+from ..interfaces.nibabel import ApplyMask, RegridToZooms
 from ..interfaces.utils import CopyXForm
 
 
