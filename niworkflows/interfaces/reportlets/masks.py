@@ -15,7 +15,6 @@ from nipype.interfaces.base import (
 )
 from nipype.interfaces.mixins import reporting
 from nipype.algorithms import confounds
-from seaborn import color_palette
 from ... import NIWORKFLOWS_LOG
 from . import base as nrb
 
@@ -221,6 +220,7 @@ class ROIsPlot(nrb.ReportingInterface):
     input_spec = _ROIsPlotInputSpecRPT
 
     def _generate_report(self):
+        from seaborn import color_palette
         from niworkflows.viz.utils import plot_segs, compose_view
 
         seg_files = self.inputs.in_rois

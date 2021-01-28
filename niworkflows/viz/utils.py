@@ -16,7 +16,6 @@ import nibabel as nb
 from nilearn import image as nlimage
 from nilearn.plotting import plot_anat
 from svgutils.transform import fromstring, SVGFigure, GroupElement
-from seaborn import color_palette
 
 from nipype.utils import filemanip
 from .. import NIWORKFLOWS_LOG
@@ -268,6 +267,8 @@ def _plot_anat_with_contours(image, segs=None, compress="auto", **plot_params):
     levels = plot_params.pop("levels", None) or []
     missing = nsegs - len(colors)
     if missing > 0:  # missing may be negative
+        from seaborn import color_palette
+
         colors = colors + color_palette("husl", missing)
 
     colors = [[c] if not isinstance(c, list) else c for c in colors]
