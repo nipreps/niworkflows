@@ -15,7 +15,6 @@ import nibabel as nb
 
 from nilearn import image as nlimage
 from nilearn.plotting import plot_anat
-from svgutils.transform import fromstring, SVGFigure, GroupElement
 
 from nipype.utils import filemanip
 from .. import NIWORKFLOWS_LOG
@@ -224,6 +223,8 @@ def plot_segs(
     coordinates. plot_params will be passed on to nilearn plot_* functions. If
     seg_niis is a list of size one, it behaves as if it was plotting the mask.
     """
+    from svgutils.transform import fromstring
+
     plot_params = {} if plot_params is None else plot_params
 
     image_nii = _3d_in_file(image_nii)
@@ -308,6 +309,8 @@ def plot_registration(
     Plots the foreground and background views
     Default order is: axial, coronal, sagittal
     """
+    from svgutils.transform import fromstring
+
     plot_params = {} if plot_params is None else plot_params
 
     # Use default MNI cuts if none defined
@@ -364,6 +367,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file="report.svg"):
 
 
 def _compose_view(bg_svgs, fg_svgs, ref=0):
+    from svgutils.transform import SVGFigure, GroupElement
 
     if fg_svgs is None:
         fg_svgs = []
