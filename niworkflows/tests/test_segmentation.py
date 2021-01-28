@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 """ Segmentation tests """
-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import os
 from shutil import copy
 from tempfile import TemporaryDirectory
@@ -10,8 +7,8 @@ import pytest
 from templateflow.api import get as get_template
 
 from nipype.pipeline import engine as pe
-from niworkflows.interfaces.reportlets.segmentation import FASTRPT, ReconAllRPT
-from niworkflows.interfaces.reportlets.masks import (
+from ..interfaces.reportlets.segmentation import FASTRPT, ReconAllRPT
+from ..interfaces.reportlets.masks import (
     BETRPT,
     BrainExtractionRPT,
     SimpleShowMaskRPT,

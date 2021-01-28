@@ -9,7 +9,7 @@ from nipype.utils.filemanip import fname_presuffix, copyfile
 from nilearn.image import load_img
 
 from ...utils.connections import listify
-from niworkflows.interfaces.reportlets.masks import ROIsPlot
+from ...interfaces.reportlets.masks import ROIsPlot
 
 from ..util import init_bold_reference_wf
 

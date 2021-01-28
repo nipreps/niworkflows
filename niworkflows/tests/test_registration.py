@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 """ Registration tests """
-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import os
 from shutil import copy
 import pytest
 from tempfile import TemporaryDirectory
 
 from nipype.pipeline import engine as pe
-from niworkflows.interfaces.reportlets.registration import (
+from ..interfaces.reportlets.registration import (
     FLIRTRPT,
     SpatialNormalizationRPT,
     ANTSRegistrationRPT,
