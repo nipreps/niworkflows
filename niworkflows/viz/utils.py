@@ -134,7 +134,7 @@ def extract_svg(display_object, dpi=300, compress="auto"):
     start_idx = image_svg.find(start_tag)
     end_tag = "</svg>"
     end_idx = image_svg.rfind(end_tag)
-    if start_idx is -1 or end_idx is -1:
+    if start_idx == -1 or end_idx == -1:
         NIWORKFLOWS_LOG.info("svg tags not found in extract_svg")
     # rfind gives the start index of the substr. We want this substr
     # included in our return value so we add its length to the index.
