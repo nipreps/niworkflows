@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Image tools interfaces."""
 import os
+from functools import partial
 import numpy as np
 import nibabel as nb
 import nilearn.image as nli
@@ -20,7 +21,7 @@ from nipype.interfaces.base import (
     OutputMultiPath,
     isdefined,
 )
-from nipype.interfaces import fsl
+
 
 LOGGER = logging.getLogger("nipype.interface")
 
@@ -47,7 +48,7 @@ class _RegridToZoomsInputSpec(BaseInterfaceInputSpec):
         traits.Float(),
         default=False,
         usedefault=True,
-        desc="apply gaussian smoothing before resampling"
+        desc="apply gaussian smoothing before resampling",
     )
 
 
@@ -144,7 +145,9 @@ class IntraModalMerge(SimpleInterface):
             return runtime
 
         if run_hmc:
-            mcflirt = fsl.MCFLIRT(
+            from nipype.interfaces.fsl import MCFLIRT
+
+            mcflirt = MCFLIRT(
                 cost="normcorr",
                 save_mats=True,
                 save_plots=True,
@@ -185,6 +188,134 @@ class IntraModalMerge(SimpleInterface):
             self._results["out_avg"]
         )
 
+        return runtime
+
+
+class _RobustAverageInputSpec(BaseInterfaceInputSpec):
+    in_file = File(
+        exists=True, mandatory=True, desc="A 4D file to average through the last axis"
+    )
+    t_mask = traits.List(traits.Bool, desc="List of selected timepoints to be averaged")
+    mc_method = traits.Enum(
+        None,
+        "AFNI",
+        "FSL",
+        usedefault=True,
+        desc="Which software to use to perform motion correction",
+    )
+    nonnegative = traits.Bool(
+        True, usedefault=True, desc="whether the output should be clipped below zero"
+    )
+
+
+class _RobustAverageOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="the averaged image")
+    out_volumes = File(exists=True, desc="the volumes selected that have been averaged")
+    out_drift = traits.List(
+        traits.Float, desc="the ratio to the grand mean or global signal drift"
+    )
+    out_hmc = OutputMultiPath(File(exists=True), desc="head-motion correction matrices")
+
+
+class RobustAverage(SimpleInterface):
+    """Robustly estimate an average of the input."""
+
+    input_spec = _RobustAverageInputSpec
+    output_spec = _RobustAverageOutputSpec
+
+    def _run_interface(self, runtime):
+        img = nb.load(self.inputs.in_file)
+
+        # If reference is 3D, return it directly
+        if img.dataobj.ndim == 3:
+            self._results["out_file"] = self.inputs.in_file
+            self._results["out_volumes"] = self.inputs.in_file
+            self._results["out_drift"] = [1.0]
+            return runtime
+
+        fname = partial(fname_presuffix, self.inputs.in_file, newpath=runtime.cwd)
+
+        # Slicing may induce inconsistencies with shape-dependent values in extensions.
+        # For now, remove all. If this turns out to be a mistake, we can select extensions
+        # that don't break pipeline stages.
+        img.header.extensions.clear()
+        img = nb.squeeze_image(img)
+
+        # If reference was 4D, but single-volume - write out squeezed and return.
+        if img.dataobj.ndim == 3:
+            self._results["out_file"] = fname(suffix="_squeezed")
+            img.to_filename(self._results["out_file"])
+            self._results["out_volumes"] = self.inputs.in_file
+            self._results["out_drift"] = [1.0]
+            return runtime
+
+        img_len = img.shape[3]
+        t_mask = (
+            self.inputs.t_mask if isdefined(self.inputs.t_mask) else [True] * img_len
+        )
+
+        if len(t_mask) != img_len:
+            raise ValueError(
+                f"Image length ({img_len} timepoints) unmatched by mask ({len(t_mask)})"
+            )
+
+        n_volumes = np.sum(t_mask)
+        if n_volumes < 1:
+            raise ValueError("At least one volume should be selected for slicing")
+
+        self._results["out_file"] = fname(suffix="_average")
+        self._results["out_volumes"] = fname(suffix="_sliced")
+
+        sliced = nb.concat_images(
+            i for i, t in zip(nb.four_to_three(img), t_mask) if t
+        )
+        sliced.to_filename(self._results["out_volumes"])
+
+        if n_volumes == 1:
+            nb.squeeze_image(sliced).to_filename(self._results["out_file"])
+            self._results["out_drift"] = [1.0]
+            return runtime
+
+        if self.inputs.mc_method == "AFNI":
+            from nipype.interfaces.afni import Volreg
+
+            res = Volreg(
+                in_file=self._results["out_volumes"],
+                args="-Fourier -twopass",
+                oned_matrix_save="afni-oned-matrix.xfm",
+                zpad=4,
+                outputtype="NIFTI_GZ",
+            ).run()
+            self._results["out_hmc"] = res.outputs.oned_matrix_save
+
+        elif self.inputs.mc_method == "FSL":
+            from nipype.interfaces.fsl import MCFLIRT
+
+            res = MCFLIRT(
+                in_file=self._results["out_volumes"],
+                ref_vol=0,
+                interpolation="sinc",
+            ).run()
+            self._results["out_hmc"] = res.outputs.mat_file
+
+        if self.inputs.mc_method:
+            sliced = nb.load(res.outputs.out_file)
+
+        data = np.asanyarray(sliced.dataobj)
+        gs_drift = np.median(data, axis=(0, 1, 2))
+        gs_drift /= gs_drift[0]
+        self._results["out_drift"] = [float(i) for i in gs_drift]
+
+        data /= gs_drift[np.newaxis, np.newaxis, np.newaxis, ...]
+        data = np.clip(
+            data,
+            a_min=0.0 if self.inputs.nonnegative else data.min(),
+            a_max=data.max(),
+        )
+
+        sliced.__class__(
+            np.median(data, axis=3), sliced.affine, sliced.header
+        ).to_filename(self._results["out_file"])
         return runtime
 
 
@@ -372,14 +503,18 @@ class Conform(SimpleInterface):
             # Use an affine with the corrected zooms, whether or not we resample
             if update_zooms:
                 scale_factor = target_zooms / zooms
-                target_affine[:3, :3] = reoriented.affine[:3, :3] @ np.diag(scale_factor)
+                target_affine[:3, :3] = reoriented.affine[:3, :3] @ np.diag(
+                    scale_factor
+                )
 
             if resize:
                 # The shift is applied after scaling.
                 # Use a proportional shift to maintain relative position in dataset
                 size_factor = target_span / (zooms * shape)
                 # Use integer shifts to avoid unnecessary interpolation
-                offset = reoriented.affine[:3, 3] * size_factor - reoriented.affine[:3, 3]
+                offset = (
+                    reoriented.affine[:3, 3] * size_factor - reoriented.affine[:3, 3]
+                )
                 target_affine[:3, 3] = reoriented.affine[:3, 3] + offset.astype(int)
 
             conform_xfm = np.linalg.inv(reoriented.affine) @ target_affine
