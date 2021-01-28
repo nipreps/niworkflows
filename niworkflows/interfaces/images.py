@@ -212,7 +212,7 @@ class _RobustAverageOutputSpec(TraitedSpec):
     out_drift = traits.List(
         traits.Float, desc="the ratio to the grand mean or global signal drift"
     )
-    out_hmc = OutputMultiPath(File(exists=True), desc="head-motion correction matrices")
+    out_hmc = OutputMultiObject(File(exists=True), desc="head-motion correction matrices")
 
 
 class RobustAverage(SimpleInterface):
