@@ -16,7 +16,7 @@ from nipype.interfaces.base import (
     OutputMultiObject,
     SimpleInterface,
 )
-from ..fixes import _FixTraitApplyTransformsInputSpec
+from .fixes import _FixTraitApplyTransformsInputSpec
 
 LOGGER = logging.getLogger("nipype.interface")
 

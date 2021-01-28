@@ -4,8 +4,6 @@
 import os
 from distutils.version import LooseVersion
 
-from nilearn import image as nli
-from nilearn.image import index_img
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     traits,
@@ -136,6 +134,8 @@ class ApplyTOPUPRPT(nrb.RegistrationRC, fsl.ApplyTOPUP):
     output_spec = _ApplyTOPUPOutputSpecRPT
 
     def _post_run_hook(self, runtime):
+        from nilearn.image import index_img
+
         self._fixed_image_label = "after"
         self._moving_image_label = "before"
         self._fixed_image = index_img(
@@ -360,6 +360,8 @@ class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
     input_spec = _ResampleBeforeAfterInputSpecRPT
 
     def _post_run_hook(self, runtime):
+        from nilearn import image as nli
+
         self._fixed_image = self.inputs.after
         self._moving_image = self.inputs.before
         if self.inputs.base == "before":
