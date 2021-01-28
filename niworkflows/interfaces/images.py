@@ -259,7 +259,7 @@ class RobustAverage(SimpleInterface):
                 f"Image length ({img_len} timepoints) unmatched by mask ({len(t_mask)})"
             )
 
-        n_volumes = np.sum(self.inputs.t_mask)
+        n_volumes = np.sum(t_mask)
         if n_volumes < 1:
             raise ValueError("At least one volume should be selected for slicing")
 
@@ -267,7 +267,7 @@ class RobustAverage(SimpleInterface):
         self._results["out_volumes"] = fname(suffix="_sliced")
 
         sliced = nb.concat_images(
-            i for i, t in zip(nb.four_to_three(img), self.inputs.t_mask) if t
+            i for i, t in zip(nb.four_to_three(img), t_mask) if t
         )
         sliced.to_filename(self._results["out_volumes"])
 
