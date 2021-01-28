@@ -16,21 +16,21 @@ from nipype.interfaces.mixins import reporting
 from nipype.interfaces import freesurfer as fs
 from nipype.interfaces import fsl, ants
 
-from .. import NIWORKFLOWS_LOG
-from . import report_base as nrc
-from .mni import (
+from ... import NIWORKFLOWS_LOG
+from . import base as nrb
+from ..mni import (
     _RobustMNINormalizationInputSpec,
     _RobustMNINormalizationOutputSpec,
     RobustMNINormalization,
 )
-from .fixes import (
+from ..fixes import (
     FixHeaderApplyTransforms as ApplyTransforms,
     FixHeaderRegistration as Registration,
 )
 
 
 class _RobustMNINormalizationInputSpecRPT(
-    nrc._SVGReportCapableInputSpec, _RobustMNINormalizationInputSpec
+    nrb._SVGReportCapableInputSpec, _RobustMNINormalizationInputSpec
 ):
     pass
 
@@ -41,7 +41,7 @@ class _RobustMNINormalizationOutputSpecRPT(
     pass
 
 
-class RobustMNINormalizationRPT(nrc.RegistrationRC, RobustMNINormalization):
+class RobustMNINormalizationRPT(nrb.RegistrationRC, RobustMNINormalization):
     input_spec = _RobustMNINormalizationInputSpecRPT
     output_spec = _RobustMNINormalizationOutputSpecRPT
 
@@ -64,7 +64,7 @@ class RobustMNINormalizationRPT(nrc.RegistrationRC, RobustMNINormalization):
 
 
 class _ANTSRegistrationInputSpecRPT(
-    nrc._SVGReportCapableInputSpec, ants.registration.RegistrationInputSpec
+    nrb._SVGReportCapableInputSpec, ants.registration.RegistrationInputSpec
 ):
     pass
 
@@ -75,7 +75,7 @@ class _ANTSRegistrationOutputSpecRPT(
     pass
 
 
-class ANTSRegistrationRPT(nrc.RegistrationRC, Registration):
+class ANTSRegistrationRPT(nrb.RegistrationRC, Registration):
     input_spec = _ANTSRegistrationInputSpecRPT
     output_spec = _ANTSRegistrationOutputSpecRPT
 
@@ -92,7 +92,7 @@ class ANTSRegistrationRPT(nrc.RegistrationRC, Registration):
 
 
 class _ANTSApplyTransformsInputSpecRPT(
-    nrc._SVGReportCapableInputSpec, ants.resampling.ApplyTransformsInputSpec
+    nrb._SVGReportCapableInputSpec, ants.resampling.ApplyTransformsInputSpec
 ):
     pass
 
@@ -103,7 +103,7 @@ class _ANTSApplyTransformsOutputSpecRPT(
     pass
 
 
-class ANTSApplyTransformsRPT(nrc.RegistrationRC, ApplyTransforms):
+class ANTSApplyTransformsRPT(nrb.RegistrationRC, ApplyTransforms):
     input_spec = _ANTSApplyTransformsInputSpecRPT
     output_spec = _ANTSApplyTransformsOutputSpecRPT
 
@@ -120,7 +120,7 @@ class ANTSApplyTransformsRPT(nrc.RegistrationRC, ApplyTransforms):
 
 
 class _ApplyTOPUPInputSpecRPT(
-    nrc._SVGReportCapableInputSpec, fsl.epi.ApplyTOPUPInputSpec
+    nrb._SVGReportCapableInputSpec, fsl.epi.ApplyTOPUPInputSpec
 ):
     wm_seg = File(argstr="-wmseg %s", desc="reference white matter segmentation mask")
 
@@ -131,7 +131,7 @@ class _ApplyTOPUPOutputSpecRPT(
     pass
 
 
-class ApplyTOPUPRPT(nrc.RegistrationRC, fsl.ApplyTOPUP):
+class ApplyTOPUPRPT(nrb.RegistrationRC, fsl.ApplyTOPUP):
     input_spec = _ApplyTOPUPInputSpecRPT
     output_spec = _ApplyTOPUPOutputSpecRPT
 
@@ -152,7 +152,7 @@ class ApplyTOPUPRPT(nrc.RegistrationRC, fsl.ApplyTOPUP):
         return super(ApplyTOPUPRPT, self)._post_run_hook(runtime)
 
 
-class _FUGUEInputSpecRPT(nrc._SVGReportCapableInputSpec, fsl.preprocess.FUGUEInputSpec):
+class _FUGUEInputSpecRPT(nrb._SVGReportCapableInputSpec, fsl.preprocess.FUGUEInputSpec):
     wm_seg = File(argstr="-wmseg %s", desc="reference white matter segmentation mask")
 
 
@@ -162,7 +162,7 @@ class _FUGUEOutputSpecRPT(
     pass
 
 
-class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
+class FUGUERPT(nrb.RegistrationRC, fsl.FUGUE):
     input_spec = _FUGUEInputSpecRPT
     output_spec = _FUGUEOutputSpecRPT
 
@@ -181,7 +181,7 @@ class FUGUERPT(nrc.RegistrationRC, fsl.FUGUE):
         return super(FUGUERPT, self)._post_run_hook(runtime)
 
 
-class _FLIRTInputSpecRPT(nrc._SVGReportCapableInputSpec, fsl.preprocess.FLIRTInputSpec):
+class _FLIRTInputSpecRPT(nrb._SVGReportCapableInputSpec, fsl.preprocess.FLIRTInputSpec):
     pass
 
 
@@ -191,7 +191,7 @@ class _FLIRTOutputSpecRPT(
     pass
 
 
-class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
+class FLIRTRPT(nrb.RegistrationRC, fsl.FLIRT):
     input_spec = _FLIRTInputSpecRPT
     output_spec = _FLIRTOutputSpecRPT
 
@@ -209,7 +209,7 @@ class FLIRTRPT(nrc.RegistrationRC, fsl.FLIRT):
 
 
 class _ApplyXFMInputSpecRPT(
-    nrc._SVGReportCapableInputSpec, fsl.preprocess.ApplyXFMInputSpec
+    nrb._SVGReportCapableInputSpec, fsl.preprocess.ApplyXFMInputSpec
 ):
     pass
 
@@ -225,7 +225,7 @@ else:
     _BBRegisterInputSpec = fs.preprocess.BBRegisterInputSpec6
 
 
-class _BBRegisterInputSpecRPT(nrc._SVGReportCapableInputSpec, _BBRegisterInputSpec):
+class _BBRegisterInputSpecRPT(nrb._SVGReportCapableInputSpec, _BBRegisterInputSpec):
     # Adds default=True, usedefault=True
     out_lta_file = traits.Either(
         traits.Bool,
@@ -244,7 +244,7 @@ class _BBRegisterOutputSpecRPT(
     pass
 
 
-class BBRegisterRPT(nrc.RegistrationRC, fs.BBRegister):
+class BBRegisterRPT(nrb.RegistrationRC, fs.BBRegister):
     input_spec = _BBRegisterInputSpecRPT
     output_spec = _BBRegisterOutputSpecRPT
 
@@ -275,7 +275,7 @@ class BBRegisterRPT(nrc.RegistrationRC, fs.BBRegister):
 
 
 class _MRICoregInputSpecRPT(
-    nrc._SVGReportCapableInputSpec, fs.registration.MRICoregInputSpec
+    nrb._SVGReportCapableInputSpec, fs.registration.MRICoregInputSpec
 ):
     pass
 
@@ -286,7 +286,7 @@ class _MRICoregOutputSpecRPT(
     pass
 
 
-class MRICoregRPT(nrc.RegistrationRC, fs.MRICoreg):
+class MRICoregRPT(nrb.RegistrationRC, fs.MRICoreg):
     input_spec = _MRICoregInputSpecRPT
     output_spec = _MRICoregOutputSpecRPT
 
@@ -325,7 +325,7 @@ class MRICoregRPT(nrc.RegistrationRC, fs.MRICoreg):
         return super(MRICoregRPT, self)._post_run_hook(runtime)
 
 
-class _SimpleBeforeAfterInputSpecRPT(nrc._SVGReportCapableInputSpec):
+class _SimpleBeforeAfterInputSpecRPT(nrb._SVGReportCapableInputSpec):
     before = File(exists=True, mandatory=True, desc="file before")
     after = File(exists=True, mandatory=True, desc="file after")
     wm_seg = File(desc="reference white matter segmentation mask")
@@ -333,7 +333,7 @@ class _SimpleBeforeAfterInputSpecRPT(nrc._SVGReportCapableInputSpec):
     after_label = traits.Str("after", usedefault=True)
 
 
-class SimpleBeforeAfterRPT(nrc.RegistrationRC, nrc.ReportingInterface):
+class SimpleBeforeAfterRPT(nrb.RegistrationRC, nrb.ReportingInterface):
     input_spec = _SimpleBeforeAfterInputSpecRPT
 
     def _post_run_hook(self, runtime):

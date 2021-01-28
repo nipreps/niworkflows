@@ -16,11 +16,11 @@ from nipype.interfaces.base import (
 from nipype.interfaces.mixins import reporting
 from nipype.algorithms import confounds
 from seaborn import color_palette
-from .. import NIWORKFLOWS_LOG
-from . import report_base as nrc
+from ... import NIWORKFLOWS_LOG
+from . import base as nrb
 
 
-class _BETInputSpecRPT(nrc._SVGReportCapableInputSpec, fsl.preprocess.BETInputSpec):
+class _BETInputSpecRPT(nrb._SVGReportCapableInputSpec, fsl.preprocess.BETInputSpec):
     pass
 
 
@@ -30,7 +30,7 @@ class _BETOutputSpecRPT(
     pass
 
 
-class BETRPT(nrc.SegmentationRC, fsl.BET):
+class BETRPT(nrb.SegmentationRC, fsl.BET):
     input_spec = _BETInputSpecRPT
     output_spec = _BETOutputSpecRPT
 
@@ -41,8 +41,8 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
         return super(BETRPT, self)._run_interface(runtime)
 
     def _post_run_hook(self, runtime):
-        """ generates a report showing slices from each axis of an arbitrary
-        volume of in_file, with the resulting binary brain mask overlaid """
+        """generates a report showing slices from each axis of an arbitrary
+        volume of in_file, with the resulting binary brain mask overlaid"""
 
         self._anat_file = self.inputs.in_file
         self._mask_file = self.aggregate_outputs(runtime=runtime).mask_file
@@ -59,7 +59,7 @@ class BETRPT(nrc.SegmentationRC, fsl.BET):
 
 
 class _BrainExtractionInputSpecRPT(
-    nrc._SVGReportCapableInputSpec, ants.segmentation.BrainExtractionInputSpec
+    nrb._SVGReportCapableInputSpec, ants.segmentation.BrainExtractionInputSpec
 ):
     pass
 
@@ -70,7 +70,7 @@ class _BrainExtractionOutputSpecRPT(
     pass
 
 
-class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
+class BrainExtractionRPT(nrb.SegmentationRC, ants.segmentation.BrainExtraction):
     input_spec = _BrainExtractionInputSpecRPT
     output_spec = _BrainExtractionOutputSpecRPT
 
@@ -101,7 +101,7 @@ class BrainExtractionRPT(nrc.SegmentationRC, ants.segmentation.BrainExtraction):
         return super(BrainExtractionRPT, self)._post_run_hook(runtime)
 
 
-class _ACompCorInputSpecRPT(nrc._SVGReportCapableInputSpec, confounds.CompCorInputSpec):
+class _ACompCorInputSpecRPT(nrb._SVGReportCapableInputSpec, confounds.CompCorInputSpec):
     pass
 
 
@@ -111,7 +111,7 @@ class _ACompCorOutputSpecRPT(
     pass
 
 
-class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
+class ACompCorRPT(nrb.SegmentationRC, confounds.ACompCor):
     input_spec = _ACompCorInputSpecRPT
     output_spec = _ACompCorOutputSpecRPT
 
@@ -138,7 +138,7 @@ class ACompCorRPT(nrc.SegmentationRC, confounds.ACompCor):
 
 
 class _TCompCorInputSpecRPT(
-    nrc._SVGReportCapableInputSpec, confounds.TCompCorInputSpec
+    nrb._SVGReportCapableInputSpec, confounds.TCompCorInputSpec
 ):
     pass
 
@@ -149,7 +149,7 @@ class _TCompCorOutputSpecRPT(
     pass
 
 
-class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
+class TCompCorRPT(nrb.SegmentationRC, confounds.TCompCor):
     input_spec = _TCompCorInputSpecRPT
     output_spec = _TCompCorOutputSpecRPT
 
@@ -179,12 +179,12 @@ class TCompCorRPT(nrc.SegmentationRC, confounds.TCompCor):
         return super(TCompCorRPT, self)._post_run_hook(runtime)
 
 
-class _SimpleShowMaskInputSpec(nrc._SVGReportCapableInputSpec):
+class _SimpleShowMaskInputSpec(nrb._SVGReportCapableInputSpec):
     background_file = File(exists=True, mandatory=True, desc="file before")
     mask_file = File(exists=True, mandatory=True, desc="file before")
 
 
-class SimpleShowMaskRPT(nrc.SegmentationRC, nrc.ReportingInterface):
+class SimpleShowMaskRPT(nrb.SegmentationRC, nrb.ReportingInterface):
     input_spec = _SimpleShowMaskInputSpec
 
     def _post_run_hook(self, runtime):
@@ -196,7 +196,7 @@ class SimpleShowMaskRPT(nrc.SegmentationRC, nrc.ReportingInterface):
         return super(SimpleShowMaskRPT, self)._post_run_hook(runtime)
 
 
-class _ROIsPlotInputSpecRPT(nrc._SVGReportCapableInputSpec):
+class _ROIsPlotInputSpecRPT(nrb._SVGReportCapableInputSpec):
     in_file = File(
         exists=True, mandatory=True, desc="the volume where ROIs are defined"
     )
@@ -217,7 +217,7 @@ class _ROIsPlotInputSpecRPT(nrc._SVGReportCapableInputSpec):
     mask_color = Str("r", usedefault=True, desc="color for mask")
 
 
-class ROIsPlot(nrc.ReportingInterface):
+class ROIsPlot(nrb.ReportingInterface):
     input_spec = _ROIsPlotInputSpecRPT
 
     def _generate_report(self):

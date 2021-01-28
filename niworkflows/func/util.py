@@ -16,7 +16,7 @@ from ..interfaces.fixes import (
     FixN4BiasFieldCorrection as N4BiasFieldCorrection,
 )
 from ..interfaces.images import ValidateImage, MatchHeader
-from ..interfaces.masks import SimpleShowMaskRPT
+from ..interfaces.reportlets.masks import SimpleShowMaskRPT
 from ..interfaces.utils import CopyXForm
 from ..utils.connections import listify
 from ..utils.misc import pass_dummy_scans as _pass_dummy_scans

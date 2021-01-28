@@ -17,8 +17,8 @@ from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
     SimpleInterface,
     File,
-    InputMultiPath,
-    OutputMultiPath,
+    InputMultiObject,
+    OutputMultiObject,
     isdefined,
 )
 
@@ -79,7 +79,7 @@ class RegridToZooms(SimpleInterface):
 
 
 class _IntraModalMergeInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiPath(File(exists=True), mandatory=True, desc="input files")
+    in_files = InputMultiObject(File(exists=True), mandatory=True, desc="input files")
     in_mask = File(exists=True, desc="input mask for grand mean scaling")
     hmc = traits.Bool(True, usedefault=True)
     zero_based_avg = traits.Bool(True, usedefault=True)
@@ -90,8 +90,8 @@ class _IntraModalMergeInputSpec(BaseInterfaceInputSpec):
 class _IntraModalMergeOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="merged image")
     out_avg = File(exists=True, desc="average image")
-    out_mats = OutputMultiPath(File(exists=True), desc="output matrices")
-    out_movpar = OutputMultiPath(File(exists=True), desc="output movement parameters")
+    out_mats = OutputMultiObject(File(exists=True), desc="output matrices")
+    out_movpar = OutputMultiObject(File(exists=True), desc="output movement parameters")
 
 
 class IntraModalMerge(SimpleInterface):
@@ -334,7 +334,7 @@ DISCARD_TEMPLATE = """\t\t\t\t<li><abbr title="{path}">{basename}</abbr></li>"""
 
 
 class _TemplateDimensionsInputSpec(BaseInterfaceInputSpec):
-    t1w_list = InputMultiPath(
+    t1w_list = InputMultiObject(
         File(exists=True), mandatory=True, desc="input T1w images"
     )
     max_scale = traits.Float(
@@ -343,7 +343,7 @@ class _TemplateDimensionsInputSpec(BaseInterfaceInputSpec):
 
 
 class _TemplateDimensionsOutputSpec(TraitedSpec):
-    t1w_valid_list = OutputMultiPath(exists=True, desc="valid T1w images")
+    t1w_valid_list = OutputMultiObject(exists=True, desc="valid T1w images")
     target_zooms = traits.Tuple(
         traits.Float, traits.Float, traits.Float, desc="Target zoom information"
     )
@@ -817,7 +817,7 @@ def normalize_xform(img):
 
 class _SignalExtractionInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="4-D fMRI nii file")
-    label_files = InputMultiPath(
+    label_files = InputMultiObject(
         File(exists=True),
         mandatory=True,
         desc="a 3D label image, with 0 denoting "

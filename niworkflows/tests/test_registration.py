@@ -9,7 +9,7 @@ import pytest
 from tempfile import TemporaryDirectory
 
 from nipype.pipeline import engine as pe
-from niworkflows.interfaces.registration import (
+from niworkflows.interfaces.reportlets.registration import (
     FLIRTRPT,
     RobustMNINormalizationRPT,
     ANTSRegistrationRPT,

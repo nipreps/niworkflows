@@ -21,7 +21,7 @@ from nipype.interfaces import freesurfer as fs
 from nipype.interfaces.base import SimpleInterface
 from nipype.interfaces.freesurfer.preprocess import ConcatenateLTA, RobustRegister
 from nipype.interfaces.freesurfer.utils import LTAConvert
-from .registration import BBRegisterRPT, MRICoregRPT
+from .reportlets.registration import BBRegisterRPT, MRICoregRPT
 
 
 class StructuralReference(fs.RobustTemplate):

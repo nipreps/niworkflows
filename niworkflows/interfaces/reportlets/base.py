@@ -6,8 +6,8 @@ from nilearn.image import threshold_img, load_img
 
 from nipype.interfaces.base import File, traits
 from nipype.interfaces.mixins import reporting
-from .. import NIWORKFLOWS_LOG
-from ..viz.utils import cuts_from_bbox, compose_view
+from ... import NIWORKFLOWS_LOG
+from ...viz.utils import cuts_from_bbox, compose_view
 
 
 class _SVGReportCapableInputSpec(reporting.ReportCapableInputSpec):

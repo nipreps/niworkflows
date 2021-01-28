@@ -6,11 +6,11 @@ import os
 from nipype.interfaces.base import File, isdefined
 from nipype.interfaces import fsl, freesurfer
 from nipype.interfaces.mixins import reporting
-from . import report_base as nrc
-from .. import NIWORKFLOWS_LOG
+from ... import NIWORKFLOWS_LOG
+from . import base as nrb
 
 
-class _FASTInputSpecRPT(nrc._SVGReportCapableInputSpec, fsl.preprocess.FASTInputSpec):
+class _FASTInputSpecRPT(nrb._SVGReportCapableInputSpec, fsl.preprocess.FASTInputSpec):
     pass
 
 
@@ -20,7 +20,7 @@ class _FASTOutputSpecRPT(
     pass
 
 
-class FASTRPT(nrc.SegmentationRC, fsl.FAST):
+class FASTRPT(nrb.SegmentationRC, fsl.FAST):
     input_spec = _FASTInputSpecRPT
     output_spec = _FASTOutputSpecRPT
 
@@ -31,9 +31,9 @@ class FASTRPT(nrc.SegmentationRC, fsl.FAST):
         return super(FASTRPT, self)._run_interface(runtime)
 
     def _post_run_hook(self, runtime):
-        """ generates a report showing nine slices, three per axis, of an
+        """generates a report showing nine slices, three per axis, of an
         arbitrary volume of `in_files`, with the resulting segmentation
-        overlaid """
+        overlaid"""
         self._anat_file = self.inputs.in_files[0]
         outputs = self.aggregate_outputs(runtime=runtime)
         self._mask_file = outputs.tissue_class_map
@@ -54,7 +54,7 @@ class FASTRPT(nrc.SegmentationRC, fsl.FAST):
 
 
 class _ReconAllInputSpecRPT(
-    nrc._SVGReportCapableInputSpec, freesurfer.preprocess.ReconAllInputSpec
+    nrb._SVGReportCapableInputSpec, freesurfer.preprocess.ReconAllInputSpec
 ):
     pass
 
@@ -65,14 +65,14 @@ class _ReconAllOutputSpecRPT(
     pass
 
 
-class ReconAllRPT(nrc.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):
+class ReconAllRPT(nrb.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):
     input_spec = _ReconAllInputSpecRPT
     output_spec = _ReconAllOutputSpecRPT
 
     def _post_run_hook(self, runtime):
-        """ generates a report showing nine slices, three per axis, of an
+        """generates a report showing nine slices, three per axis, of an
         arbitrary volume of `in_files`, with the resulting segmentation
-        overlaid """
+        overlaid"""
         outputs = self.aggregate_outputs(runtime=runtime)
         self._anat_file = os.path.join(
             outputs.subjects_dir, outputs.subject_id, "mri", "brain.mgz"
@@ -89,7 +89,7 @@ class ReconAllRPT(nrc.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):
         return super(ReconAllRPT, self)._post_run_hook(runtime)
 
 
-class _MELODICInputSpecRPT(nrc._SVGReportCapableInputSpec, fsl.model.MELODICInputSpec):
+class _MELODICInputSpecRPT(nrb._SVGReportCapableInputSpec, fsl.model.MELODICInputSpec):
     out_report = File(
         "melodic_reportlet.svg",
         usedefault=True,
@@ -172,7 +172,7 @@ class MELODICRPT(fsl.MELODIC):
 
 
 class _ICA_AROMAInputSpecRPT(
-    nrc._SVGReportCapableInputSpec, fsl.aroma.ICA_AROMAInputSpec
+    nrb._SVGReportCapableInputSpec, fsl.aroma.ICA_AROMAInputSpec
 ):
     out_report = File(
         "ica_aroma_reportlet.svg",

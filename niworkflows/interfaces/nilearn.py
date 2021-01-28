@@ -23,7 +23,7 @@ from nipype.interfaces.base import (
     SimpleInterface,
 )
 from nipype.interfaces.mixins import reporting
-from . import report_base as nrc
+from .report import base as nrb
 
 
 LOGGER = logging.getLogger("nipype.interface")
@@ -167,7 +167,7 @@ class Merge(SimpleInterface):
         return runtime
 
 
-class _ComputeEPIMaskInputSpec(nrc._SVGReportCapableInputSpec, BaseInterfaceInputSpec):
+class _ComputeEPIMaskInputSpec(nrb._SVGReportCapableInputSpec, BaseInterfaceInputSpec):
     in_file = File(exists=True, desc="3D or 4D EPI file")
     dilation = traits.Int(desc="binary dilation on the nilearn output")
 
@@ -176,7 +176,7 @@ class _ComputeEPIMaskOutputSpec(reporting.ReportCapableOutputSpec):
     mask_file = File(exists=True, desc="Binary brain mask")
 
 
-class ComputeEPIMask(nrc.SegmentationRC):
+class ComputeEPIMask(nrb.SegmentationRC):
     input_spec = _ComputeEPIMaskInputSpec
     output_spec = _ComputeEPIMaskOutputSpec
 
