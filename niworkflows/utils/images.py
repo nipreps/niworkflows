@@ -46,6 +46,34 @@ def set_consumables(header, dataobj):
     header.set_data_offset(dataobj.offset)
 
 
+def _copyxform(ref_image, out_image, message=None):
+    # Read in reference and output
+    # Use mmap=False because we will be overwriting the output image
+    resampled = nb.load(out_image, mmap=False)
+    orig = nb.load(ref_image)
+
+    if not np.allclose(orig.affine, resampled.affine):
+        from nipype import logging
+
+        logging.getLogger("nipype.interface").debug(
+            "Affines of input and reference images do not match, "
+            "FMRIPREP will set the reference image headers. "
+            "Please, check that the x-form matrices of the input dataset"
+            "are correct and manually verify the alignment of results."
+        )
+
+    # Copy xform infos
+    qform, qform_code = orig.header.get_qform(coded=True)
+    sform, sform_code = orig.header.get_sform(coded=True)
+    header = resampled.header.copy()
+    header.set_qform(qform, int(qform_code))
+    header.set_sform(sform, int(sform_code))
+    header["descrip"] = "xform matrices modified by %s." % (message or "(unknown)")
+
+    newimg = resampled.__class__(resampled.dataobj, orig.affine, header)
+    newimg.to_filename(out_image)
+
+
 def overwrite_header(img, fname):
     """Rewrite file with only changes to the header
 

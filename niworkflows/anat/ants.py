@@ -29,7 +29,7 @@ from ..interfaces.fixes import (
     FixHeaderApplyTransforms as ApplyTransforms,
 )
 from ..interfaces.nibabel import ApplyMask, RegridToZooms
-from ..interfaces.utils import CopyXForm
+from ..interfaces.header import CopyXForm
 
 
 ATROPOS_MODELS = {
