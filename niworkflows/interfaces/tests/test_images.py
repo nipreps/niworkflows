@@ -224,16 +224,16 @@ def test_RobustAverage(tmpdir, shape):
     tmpdir.chdir()
 
     data = np.ones(shape, dtype="float32")
-    t_list = [True]
+    t_mask = [True]
     if len(shape) == 4 and shape[-1] > 1:
         data *= np.linspace(0.6, 1.0, num=10)[::-1]
-        t_list = np.zeros(shape[3], dtype=bool)
-        t_list[:3] = True
+        t_mask = np.zeros(shape[3], dtype=bool)
+        t_mask[:3] = True
 
     fname = str(tmpdir.join("file1.nii.gz"))
     nb.Nifti1Image(data, np.eye(4), None).to_filename(fname)
 
-    avg = im.RobustAverage(in_file=fname, t_list=list(t_list)).run()
+    avg = im.RobustAverage(in_file=fname, t_mask=list(t_mask)).run()
     out_file = nb.load(avg.outputs.out_file)
 
     assert out_file.shape == (10, 10, 10)

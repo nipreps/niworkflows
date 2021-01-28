@@ -10,7 +10,6 @@ from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
     SimpleInterface,
     File,
-    isdefined,
 )
 
 LOGGER = logging.getLogger("nipype.interface")
@@ -18,9 +17,6 @@ LOGGER = logging.getLogger("nipype.interface")
 
 class _NonsteadyStatesDetectorInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="BOLD fMRI timeseries")
-    n_dummy_scans = traits.Int(
-        desc="override detection and just return a mask with n_dummy_scans masked in the beginning"
-    )
     n_volumes = traits.Range(
         value=50,
         low=10,
@@ -34,6 +30,7 @@ class _NonsteadyStatesDetectorOutputSpec(TraitedSpec):
     t_mask = traits.List(
         traits.Bool, desc="list of nonsteady-states (True) and stable (False) volumes"
     )
+    n_dummy = traits.Int(desc="number of volumes identified as nonsteady states")
 
 
 class NonsteadyStatesDetector(SimpleInterface):
@@ -51,11 +48,7 @@ class NonsteadyStatesDetector(SimpleInterface):
 
         if ntotal == 1:
             self._results["t_mask"] = [True]
-            return runtime
-
-        if isdefined(self.inputs.n_dummy_scans):
-            ndummy = min(ntotal, self.inputs.n_dummy_scans)
-            self._results["t_mask"][:ndummy] = [True] * ndummy
+            self._results["n_dummy"] = 1
             return runtime
 
         from nipype.algorithms.confounds import is_outlier
@@ -64,4 +57,6 @@ class NonsteadyStatesDetector(SimpleInterface):
             np.asanyarray(img.dataobj[..., : self.inputs.n_volumes]), axis=(0, 1, 2)
         )
         self._results["t_mask"] = [bool(i) for i in is_outlier(global_signal)]
+        self._results["n_dummy"] = int(np.sum(self._results["t_mask"]))
+
         return runtime

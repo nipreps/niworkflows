@@ -48,7 +48,7 @@ class _RegridToZoomsInputSpec(BaseInterfaceInputSpec):
         traits.Float(),
         default=False,
         usedefault=True,
-        desc="apply gaussian smoothing before resampling"
+        desc="apply gaussian smoothing before resampling",
     )
 
 
@@ -192,10 +192,10 @@ class IntraModalMerge(SimpleInterface):
 
 
 class _RobustAverageInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True,
-                   desc="A 4D file to average through the last axis")
-    t_list = traits.List(traits.Bool,
-                         desc="List of selected timepoints to be averaged")
+    in_file = File(
+        exists=True, mandatory=True, desc="A 4D file to average through the last axis"
+    )
+    t_mask = traits.List(traits.Bool, desc="List of selected timepoints to be averaged")
     mc_method = traits.Enum(
         None,
         "AFNI",
@@ -203,8 +203,9 @@ class _RobustAverageInputSpec(BaseInterfaceInputSpec):
         usedefault=True,
         desc="Which software to use to perform motion correction",
     )
-    nonnegative = traits.Bool(True, usedefault=True,
-                              desc="whether the output should be clipped below zero")
+    nonnegative = traits.Bool(
+        True, usedefault=True, desc="whether the output should be clipped below zero"
+    )
 
 
 class _RobustAverageOutputSpec(TraitedSpec):
@@ -248,13 +249,17 @@ class RobustAverage(SimpleInterface):
             self._results["out_drift"] = [1.0]
             return runtime
 
-        if len(self.inputs.t_list) != img.shape[3]:
+        img_len = img.shape[3]
+        t_mask = (
+            self.inputs.t_mask if isdefined(self.inputs.t_mask) else [True] * img_len
+        )
+
+        if len(t_mask) != img_len:
             raise ValueError(
-                f"Image has {img.shape[3]} timepoints, and the timepoints list "
-                f"only {self.inputs.t_list}"
+                f"Image length ({img_len} timepoints) unmatched by mask ({len(t_mask)})"
             )
 
-        n_volumes = np.sum(self.inputs.t_list)
+        n_volumes = np.sum(self.inputs.t_mask)
         if n_volumes < 1:
             raise ValueError("At least one volume should be selected for slicing")
 
@@ -262,7 +267,7 @@ class RobustAverage(SimpleInterface):
         self._results["out_volumes"] = fname(suffix="_sliced")
 
         sliced = nb.concat_images(
-            i for i, t in zip(nb.four_to_three(img), self.inputs.t_list) if t
+            i for i, t in zip(nb.four_to_three(img), self.inputs.t_mask) if t
         )
         sliced.to_filename(self._results["out_volumes"])
 
@@ -498,14 +503,18 @@ class Conform(SimpleInterface):
             # Use an affine with the corrected zooms, whether or not we resample
             if update_zooms:
                 scale_factor = target_zooms / zooms
-                target_affine[:3, :3] = reoriented.affine[:3, :3] @ np.diag(scale_factor)
+                target_affine[:3, :3] = reoriented.affine[:3, :3] @ np.diag(
+                    scale_factor
+                )
 
             if resize:
                 # The shift is applied after scaling.
                 # Use a proportional shift to maintain relative position in dataset
                 size_factor = target_span / (zooms * shape)
                 # Use integer shifts to avoid unnecessary interpolation
-                offset = reoriented.affine[:3, 3] * size_factor - reoriented.affine[:3, 3]
+                offset = (
+                    reoriented.affine[:3, 3] * size_factor - reoriented.affine[:3, 3]
+                )
                 target_affine[:3, 3] = reoriented.affine[:3, 3] + offset.astype(int)
 
             conform_xfm = np.linalg.inv(reoriented.affine) @ target_affine

@@ -17,7 +17,6 @@ from ..interfaces.fixes import (
 )
 from ..interfaces.images import ValidateImage, MatchHeader
 from ..interfaces.masks import SimpleShowMaskRPT
-from ..interfaces.registration import EstimateReferenceImage
 from ..interfaces.utils import CopyXForm
 from ..utils.connections import listify
 from ..utils.misc import pass_dummy_scans as _pass_dummy_scans
@@ -42,6 +41,15 @@ def init_bold_reference_wf(
     The raw reference image is the target of :abbr:`HMC (head motion correction)`, and a
     contrast-enhanced reference is the subject of distortion correction, as well as
     boundary-based registration to T1w and template spaces.
+
+    LIMITATION: If one wants to extract the reference from several SBRefs
+    with several echoes each, the first echo should be selected elsewhere
+    and run this interface in ``multiecho = False`` mode. In other words,
+    SBRef inputs are assumed to be single-echo.
+
+    LIMITATION: If a list of SBRefs is provided, each can be 3D or 4D, but they
+    are assumed to be sampled in the exact same 3D-grid and have the same orientation
+    information in their headers so that they can directly be merged into a 4D volume.
 
     Workflow Graph
         .. workflow::
@@ -112,6 +120,10 @@ def init_bold_reference_wf(
         * :py:func:`~niworkflows.func.util.init_enhance_and_skullstrip_wf`
 
     """
+    from ..utils.connections import pop_file as _pop
+    from ..interfaces.bold import NonsteadyStatesDetector
+    from ..interfaces.images import RobustAverage
+
     workflow = Workflow(name=name)
     workflow.__desc__ = f"""\
 First, a reference volume and its skull-stripped version were generated
@@ -153,9 +165,9 @@ methodology of *fMRIPrep*.
         iterfield=["in_file"],
     )
 
-    gen_ref = pe.Node(
-        EstimateReferenceImage(multiecho=multiecho), name="gen_ref", mem_gb=1
-    )  # OE: 128x128x128x50 * 64 / 8 ~ 900MB.
+    get_dummy = pe.Node(NonsteadyStatesDetector(), name="get_dummy")
+    gen_avg = pe.Node(RobustAverage(), name="gen_avg", mem_gb=1)
+
     enhance_and_skullstrip_bold_wf = init_enhance_and_skullstrip_bold_wf(
         brainmask_thresh=brainmask_thresh,
         omp_nthreads=omp_nthreads,
@@ -168,66 +180,27 @@ methodology of *fMRIPrep*.
         run_without_submitting=True,
         mem_gb=DEFAULT_MEMORY_MIN_GB,
     )
-    bold_1st = pe.Node(niu.Select(index=[0]),
-                       name="bold_1st", run_without_submitting=True)
-    validate_1st = pe.Node(niu.Select(index=[0]),
-                           name="validate_1st", run_without_submitting=True)
 
     # fmt: off
     workflow.connect([
         (inputnode, val_bold, [(("bold_file", listify), "in_file")]),
-        (inputnode, enhance_and_skullstrip_bold_wf, [
-            ("bold_mask", "inputnode.pre_mask"),
-        ]),
+        (inputnode, get_dummy, [(("bold_file", _pop), "in_file")]),
+        (inputnode, enhance_and_skullstrip_bold_wf, [("bold_mask", "inputnode.pre_mask")]),
         (inputnode, calc_dummy_scans, [("dummy_scans", "dummy_scans")]),
-        (val_bold, gen_ref, [("out_file", "in_file")]),
-        (gen_ref, enhance_and_skullstrip_bold_wf, [
-            ("ref_image", "inputnode.in_file"),
-        ]),
-        (val_bold, bold_1st, [(("out_file", listify), "inlist")]),
-        (gen_ref, calc_dummy_scans, [("n_volumes_to_discard", "algo_dummy_scans")]),
+        (gen_avg, enhance_and_skullstrip_bold_wf, [("out_file", "inputnode.in_file")]),
+        (get_dummy, calc_dummy_scans, [("n_dummy", "algo_dummy_scans")]),
         (calc_dummy_scans, outputnode, [("skip_vols_num", "skip_vols")]),
-        (gen_ref, outputnode, [
-            ("ref_image", "raw_ref_image"),
-            ("n_volumes_to_discard", "algo_dummy_scans"),
-        ]),
+        (gen_avg, outputnode, [("out_file", "raw_ref_image")]),
+        (get_dummy, outputnode, [("n_dummy", "algo_dummy_scans")]),
+        (val_bold, outputnode, [(("out_file", _pop), "bold_file"),
+                                (("out_report", _pop), "validation_report")]),
         (enhance_and_skullstrip_bold_wf, outputnode, [
             ("outputnode.bias_corrected_file", "ref_image"),
             ("outputnode.mask_file", "bold_mask"),
             ("outputnode.skull_stripped_file", "ref_image_brain"),
         ]),
-        (val_bold, validate_1st, [(("out_report", listify), "inlist")]),
-        (bold_1st, outputnode, [("out", "bold_file")]),
-        (validate_1st, outputnode, [("out", "validation_report")]),
     ])
     # fmt: on
-
-    if sbref_files:
-        nsbrefs = 0
-        if sbref_files is not True:
-            # If not boolean, then it is a list-of or pathlike.
-            inputnode.inputs.sbref_file = sbref_files
-            nsbrefs = 1 if isinstance(sbref_files, str) else len(sbref_files)
-
-        val_sbref = pe.MapNode(
-            ValidateImage(),
-            name="val_sbref",
-            mem_gb=DEFAULT_MEMORY_MIN_GB,
-            iterfield=["in_file"],
-        )
-        # fmt: off
-        workflow.connect([
-            (inputnode, val_sbref, [(("sbref_file", listify), "in_file")]),
-            (val_sbref, gen_ref, [("out_file", "sbref_file")]),
-        ])
-        # fmt: on
-
-        # Edit the boilerplate as the SBRef will be the reference
-        workflow.__desc__ = f"""\
-First, a reference volume and its skull-stripped version were generated
-by aligning and averaging{' the first echo of' * multiecho}
-{nsbrefs or ''} single-band references (SBRefs).
-"""
 
     if gen_report:
         mask_reportlet = pe.Node(SimpleShowMaskRPT(), name="mask_reportlet")
@@ -239,6 +212,45 @@ by aligning and averaging{' the first echo of' * multiecho}
             ]),
         ])
         # fmt: on
+
+    if not sbref_files:
+        # fmt: off
+        workflow.connect([
+            (val_bold, gen_avg, [(("out_file", _pop), "in_file")]),  # pop first echo of ME-EPI
+            (get_dummy, gen_avg, [("t_mask", "t_mask")]),
+        ])
+        # fmt: on
+        return workflow
+
+    from ..interfaces.nibabel import MergeSeries
+
+    nsbrefs = 0
+    if sbref_files is not True:
+        # If not boolean, then it is a list-of or pathlike.
+        inputnode.inputs.sbref_file = sbref_files
+        nsbrefs = 1 if isinstance(sbref_files, str) else len(sbref_files)
+
+    val_sbref = pe.MapNode(
+        ValidateImage(),
+        name="val_sbref",
+        mem_gb=DEFAULT_MEMORY_MIN_GB,
+        iterfield=["in_file"],
+    )
+    merge_sbrefs = pe.Node(MergeSeries(), name="merge_sbrefs")
+
+    # fmt: off
+    workflow.connect([
+        (inputnode, val_sbref, [(("sbref_file", listify), "in_file")]),
+        (val_sbref, merge_sbrefs, [("out_file", "in_files")]),
+        (merge_sbrefs, gen_avg, [("out_file", "sbref_file")]),
+    ])
+    # fmt: on
+
+    # Edit the boilerplate as the SBRef will be the reference
+    workflow.__desc__ = f"""\
+First, a reference volume and its skull-stripped version were generated
+by aligning and averaging {nsbrefs or ''} single-band references (SBRefs).
+"""
 
     return workflow
 
