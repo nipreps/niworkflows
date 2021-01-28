@@ -1,10 +1,11 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Utilities based on nilearn."""
+import os
 import nibabel as nb
 import numpy as np
 from skimage import morphology as sim
-from scipy.ndimage.morphology import binary_fill_holes
+from scipy.ndimage.morphology import binary_fill_holes, binary_dilation
 
 from nilearn import __version__ as NILEARN_VERSION
 from nilearn.masking import compute_epi_mask
@@ -21,9 +22,12 @@ from nipype.interfaces.base import (
     InputMultiPath,
     SimpleInterface,
 )
+from nipype.interfaces.mixins import reporting
+from . import report_base as nrc
+
 
 LOGGER = logging.getLogger("nipype.interface")
-__all__ = ["NILEARN_VERSION", "MaskEPI", "Merge"]
+__all__ = ["NILEARN_VERSION", "MaskEPI", "Merge", "ComputeEPIMask"]
 
 
 class _MaskEPIInputSpec(BaseInterfaceInputSpec):
@@ -161,6 +165,77 @@ class Merge(SimpleInterface):
         new_nii.to_filename(self._results["out_file"])
 
         return runtime
+
+
+class _ComputeEPIMaskInputSpec(nrc._SVGReportCapableInputSpec, BaseInterfaceInputSpec):
+    in_file = File(exists=True, desc="3D or 4D EPI file")
+    dilation = traits.Int(desc="binary dilation on the nilearn output")
+
+
+class _ComputeEPIMaskOutputSpec(reporting.ReportCapableOutputSpec):
+    mask_file = File(exists=True, desc="Binary brain mask")
+
+
+class ComputeEPIMask(nrc.SegmentationRC):
+    input_spec = _ComputeEPIMaskInputSpec
+    output_spec = _ComputeEPIMaskOutputSpec
+
+    def _run_interface(self, runtime):
+        orig_file_nii = nb.load(self.inputs.in_file)
+        in_file_data = orig_file_nii.get_fdata()
+
+        # pad the data to avoid the mask estimation running into edge effects
+        in_file_data_padded = np.pad(
+            in_file_data, (1, 1), "constant", constant_values=(0, 0)
+        )
+
+        padded_nii = nb.Nifti1Image(
+            in_file_data_padded, orig_file_nii.affine, orig_file_nii.header
+        )
+
+        mask_nii = compute_epi_mask(padded_nii, exclude_zeros=True)
+
+        mask_data = np.asanyarray(mask_nii.dataobj).astype(np.uint8)
+        if isdefined(self.inputs.dilation):
+            mask_data = binary_dilation(mask_data).astype(np.uint8)
+
+        # reverse image padding
+        mask_data = mask_data[1:-1, 1:-1, 1:-1]
+
+        # exclude zero and NaN voxels
+        mask_data[in_file_data == 0] = 0
+        mask_data[np.isnan(in_file_data)] = 0
+
+        better_mask = nb.Nifti1Image(
+            mask_data, orig_file_nii.affine, orig_file_nii.header
+        )
+        better_mask.set_data_dtype(np.uint8)
+        better_mask.to_filename("mask_file.nii.gz")
+
+        self._mask_file = os.path.join(runtime.cwd, "mask_file.nii.gz")
+
+        runtime.returncode = 0
+        return super(ComputeEPIMask, self)._run_interface(runtime)
+
+    def _list_outputs(self):
+        outputs = super(ComputeEPIMask, self)._list_outputs()
+        outputs["mask_file"] = self._mask_file
+        return outputs
+
+    def _post_run_hook(self, runtime):
+        """Prepare report generation post-hook."""
+        self._anat_file = self.inputs.in_file
+        self._mask_file = self.aggregate_outputs(runtime=runtime).mask_file
+        self._seg_files = [self._mask_file]
+        self._masked = True
+
+        LOGGER.info(
+            'Generating report for nilearn.compute_epi_mask. file "%s", and mask file "%s"',
+            self._anat_file,
+            self._mask_file,
+        )
+
+        return super(ComputeEPIMask, self)._post_run_hook(runtime)
 
 
 def _enhance_t2_contrast(in_file, newpath=None, offset=0.5):
