@@ -34,16 +34,16 @@ release = __version__
 # -- General configuration ---------------------------------------------------
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.doctest",
-    "sphinx.ext.intersphinx",
     "sphinx.ext.coverage",
-    "sphinx.ext.mathjax",
-    "sphinx.ext.ifconfig",
-    "sphinx.ext.viewcode",
+    "sphinx.ext.doctest",
     "sphinx.ext.githubpages",
-    "nipype.sphinxext.plot_workflow",
+    "sphinx.ext.ifconfig",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.viewcode",
     "sphinxcontrib.apidoc",
-    "sphinxcontrib.napoleon",
+    "nipype.sphinxext.apidoc",
+    "nipype.sphinxext.plot_workflow",
 ]
 
 autodoc_mock_imports = [
@@ -67,6 +67,9 @@ napoleon_use_param = False
 napoleon_custom_sections = [
     ("Inputs", "Parameters"),
     ("Outputs", "Parameters"),
+    ("Attributes", "Parameters"),
+    ("Mandatory Inputs", "Parameters"),
+    ("Optional Inputs", "Parameters"),
 ]
 
 # Add any paths that contain templates here, relative to this directory.
