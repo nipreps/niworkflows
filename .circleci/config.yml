@@ -363,7 +363,7 @@ jobs:
               -v /tmp/templateflow:/templateflow \
               -v /tmp/data/epi-references:/data -v /tmp/masks/reports:/tmp/masks/reports \
               -e COVERAGE_FILE=/tmp/masks/reports/.coverage \
-              -e TEMPLATEFLOW_HOME=/templateflow \
+              -e TEMPLATEFLOW_HOME=/templateflow -e TEMPLATEFLOW_AUTOUPDATE=off \
               -e FMRIPREP_REGRESSION_SOURCE=/data \
               -e FMRIPREP_REGRESSION_REPORTS=/tmp/masks/reports \
               -e CACHED_WORK_DIRECTORY=/tmp/work -v /tmp/masks/workdir:/tmp/work \
