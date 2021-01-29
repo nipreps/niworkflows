@@ -172,18 +172,13 @@ jobs:
             - env-v1-master-
             - env-v1-
       - run:
-          name: Setup git-annex & DataLad
+          name: Setup git-annex, DataLad & TemplateFlow
           command: |
             conda install -y -c anaconda -c conda-forge git-annex datalad
             python -m pip install --no-cache-dir -U datalad-osf
             git config --global user.name 'NiPreps Bot'
             git config --global user.email 'nipreps@gmail.com'
-      - run:
-          name: Setup TemplateFlow
-          command: |
             python -m pip install --no-cache-dir -U templateflow
-            python -c "from templateflow import api as tfapi; \
-                       tfapi.get('MNI152NLin2009cAsym', resolution=1, label='brain', suffix='probseg'); "
       - save_cache:
           key: env-v1-{{ .Branch }}-{{ .BuildNum }}
           paths:
@@ -191,11 +186,16 @@ jobs:
 
       - restore_cache:
           keys:
-            - data-masks-v1-{{ .Branch }}-{{ .Revision }}-
-            - data-masks-v1-{{ .Branch }}-
-            - data-masks-v1-master-
-            - data-masks-v1-
-            - data-masks-
+            - mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-
+            - mask-regressions-v0-{{ .Branch }}-
+            - mask-regressions-v0-master-
+            - mask-regressions-v0-
+            - mask-regressions-
+      - run:
+          name: Setup TemplateFlow
+          command: |
+            python -c "from templateflow import api as tfapi; \
+                       tfapi.get('MNI152NLin2009cAsym', resolution=1, label='brain', suffix='probseg'); "
       - run:
           name: Install epi-references
           command: |
@@ -203,7 +203,7 @@ jobs:
             datalad update -r --merge -d epi-references/
             datalad get -J 2 -r -d epi-references/ epi-references/*
       - save_cache:
-          key: data-masks-v1-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+          key: mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
           paths:
             - /tmp/templateflow
             - /tmp/data/epi-references
@@ -313,6 +313,12 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
+          
+      - restore_cache:
+          keys:
+            - mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-
+            - mask-regressions-v0-{{ .Branch }}-
+
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ epoch }}
@@ -344,11 +350,6 @@ jobs:
           command: |
             docker pull localhost:5000/niworkflows
             docker tag localhost:5000/niworkflows niworkflows:latest
-
-      - restore_cache:
-          keys:
-            - data-masks-v1-{{ .Branch }}-{{ .Revision }}-
-            - data-masks-v1-{{ .Branch }}-
       - restore_cache:
           keys:
             - masks-workdir-v3-{{ .Branch }}-{{epoch}}
