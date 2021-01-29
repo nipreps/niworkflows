@@ -2,46 +2,57 @@
 import pytest
 import os
 from pathlib import Path
+from shutil import which
 
 import numpy as np
 from nipype.pipeline import engine as pe
 from nipype.utils.filemanip import fname_presuffix, copyfile
 from nilearn.image import load_img
 
-from ...utils.connections import listify
-from niworkflows.interfaces.masks import ROIsPlot
+from ...interfaces.reportlets.masks import ROIsPlot
 
 from ..util import init_bold_reference_wf
 
-# Multi-echo datasets
-bold_datasets = ["""\
-ds000210/sub-06_task-rest_run-01_echo-1_bold.nii.gz
-ds000210/sub-06_task-rest_run-01_echo-2_bold.nii.gz
-ds000210/sub-06_task-rest_run-01_echo-3_bold.nii.gz\
-""".splitlines(), """\
-ds000216/sub-03_task-rest_echo-1_bold.nii.gz
-ds000216/sub-03_task-rest_echo-2_bold.nii.gz
-ds000216/sub-03_task-rest_echo-3_bold.nii.gz
-ds000216/sub-03_task-rest_echo-4_bold.nii.gz""".splitlines()]
+datapath = os.getenv("FMRIPREP_REGRESSION_SOURCE")
+parameters = []
 
-# Single-echo datasets
-bold_datasets += """\
-ds000116/sub-12_task-visualoddballwithbuttonresponsetotargetstimuli_run-02_bold.nii.gz
-ds000133/sub-06_ses-post_task-rest_run-01_bold.nii.gz
-ds000140/sub-32_task-heatpainwithregulationandratings_run-02_bold.nii.gz
-ds000157/sub-23_task-passiveimageviewing_bold.nii.gz
-ds000237/sub-03_task-MemorySpan_acq-multiband_run-01_bold.nii.gz
-ds000237/sub-06_task-MemorySpan_acq-multiband_run-01_bold.nii.gz
-ds001240/sub-26_task-localizerimagination_bold.nii.gz
-ds001240/sub-26_task-localizerviewing_bold.nii.gz
-ds001240/sub-26_task-molencoding_run-01_bold.nii.gz
-ds001240/sub-26_task-molencoding_run-02_bold.nii.gz
-ds001240/sub-26_task-molretrieval_run-01_bold.nii.gz
-ds001240/sub-26_task-molretrieval_run-02_bold.nii.gz
-ds001240/sub-26_task-rest_bold.nii.gz
-ds001362/sub-01_task-taskname_run-01_bold.nii.gz""".splitlines()
+if datapath:
+    datapath = Path(datapath)
+    bold_datasets = []
 
-bold_datasets = [listify(d) for d in bold_datasets]
+    for ds in datapath.glob("ds*/"):
+        paths = [
+            str(p.relative_to(datapath))
+            for p in ds.glob("*_bold.nii.gz")
+            if p.exists()
+        ]
+        bold_datasets += sorted([
+            [p] for p in paths if "echo-" not in p
+        ])
+        meecho = sorted([
+            p for p in paths if "echo-" in p
+        ])
+        if meecho:
+            bold_datasets.append(meecho)
+
+    exp_masks = []
+    for path in bold_datasets:
+        path = path[0]
+        exp_masks.append(
+            str((
+                datapath / "derivatives"
+                / path.replace("_echo-1", "").replace("_bold.nii", "_bold_mask.nii")
+            ).absolute())
+        )
+
+    bold_datasets = [
+        [
+            str((datapath / p).absolute()) for p in ds
+        ]
+        for ds in bold_datasets
+    ]
+
+    parameters = zip(bold_datasets, exp_masks)
 
 
 def symmetric_overlap(img1, img2):
@@ -55,30 +66,13 @@ def symmetric_overlap(img1, img2):
 
 
 @pytest.mark.skipif(
-    not os.getenv("FMRIPREP_REGRESSION_SOURCE")
-    or not os.getenv("FMRIPREP_REGRESSION_TARGETS"),
-    reason="FMRIPREP_REGRESSION_{SOURCE,TARGETS} env vars not set",
+    not datapath,
+    reason="FMRIPREP_REGRESSION_SOURCE env var not set, or no data is available",
 )
-@pytest.mark.parametrize(
-    "input_fname,expected_fname",
-    [
-        (
-            [os.path.join(os.getenv("FMRIPREP_REGRESSION_SOURCE", ""), bf)
-             for bf in base_fname],
-            fname_presuffix(
-                base_fname[0].replace("_echo-1", ""),
-                suffix="_mask",
-                use_ext=True,
-                newpath=os.path.join(
-                    os.getenv("FMRIPREP_REGRESSION_TARGETS", ""),
-                    os.path.dirname(base_fname[0]),
-                ),
-            ),
-        )
-        for base_fname in bold_datasets
-    ],
-)
+@pytest.mark.skipif(not which("antsAI"), reason="antsAI executable not found")
+@pytest.mark.parametrize("input_fname,expected_fname", parameters)
 def test_masking(input_fname, expected_fname):
+    """Check for regressions in masking."""
     basename = Path(input_fname[0]).name
     dsname = Path(expected_fname).parent.name
 
