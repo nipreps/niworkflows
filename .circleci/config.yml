@@ -160,40 +160,52 @@ jobs:
             - /tmp/data
 
   get_regression_data:
-    machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: ubuntu-1604:202007-01
-    working_directory: /home/circleci/data
+    docker:
+      - image: continuumio/miniconda3:4.9.2-alpine
+    working_directory: /tmp/data
+    environment:
+      - TEMPLATEFLOW_HOME: /tmp/templateflow
     steps:
       - restore_cache:
           keys:
-            - regression-v5-{{ .Revision }}
-            - regression-v5-
+            - env-v1-{{ .Branch }}-
+            - env-v1-master-
+            - env-v1-
       - run:
-          name: Get truncated BOLD series
+          name: Setup git-annex & DataLad
           command: |
-            mkdir -p /tmp/data
-            if [[ ! -d /tmp/data/fmriprep_bold_truncated ]]; then
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O fmriprep_bold_truncated.tar.gz "https://osf.io/286yr/download"
-              tar xvzf fmriprep_bold_truncated.tar.gz -C /tmp/data/
-            else
-              echo "Truncated BOLD series were cached"
-            fi
+            conda install -y -c anaconda -c conda-forge git-annex datalad
+            python -m pip install --no-cache-dir -U datalad-osf
+            git config --global user.name 'NiPreps Bot'
+            git config --global user.email 'nipreps@gmail.com'
       - run:
-          name: Get pre-computed masks
+          name: Setup TemplateFlow
           command: |
-            if [[ ! -d /tmp/data/fmriprep_bold_mask ]]; then
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O fmriprep_bold_mask.tar.gz "https://osf.io/s4f7b/download"
-              tar xvzf fmriprep_bold_mask.tar.gz -C /tmp/data/
-            else
-              echo "Pre-computed masks were cached"
-            fi
+            python -m pip install --no-cache-dir -U templateflow
+            python -c "from templateflow import api as tfapi; \
+                       tfapi.get('MNI152NLin2009cAsym', resolution=1, label='brain', suffix='probseg'); "
       - save_cache:
-         key: regression-v5-{{ .Revision }}-{{ epoch }}
-         paths:
-            - /tmp/data
+          key: env-v1-{{ .Branch }}-{{ .BuildNum }}
+          paths:
+            - /tmp/templateflow
+            - /opt/conda
+
+      - restore_cache:
+          keys:
+            - data-masks-v0-{{ .Branch }}-{{ .Revision }}-
+            - data-masks-v0-{{ .Branch }}-
+            - data-masks-v0-master-
+            - data-masks-v0-
+      - run:
+          name: Install epi-references
+          command: |
+            datalad install -r https://github.com/nipreps-data/epi-references.git
+            datalad update -r --merge -d epi-references/
+            datalad get -J 2 -r -d epi-references/ epi-references/*
+      - save_cache:
+          key: data-masks-v0-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+          paths:
+            - /tmp/data/epi-references
 
   test_pytest:
     machine:
@@ -334,7 +346,8 @@ jobs:
 
       - restore_cache:
           keys:
-            - regression-v5-{{ .Revision }}
+            - data-masks-v0-{{ .Branch }}-{{ .Revision }}-
+            - data-masks-v0-{{ .Branch }}-
       - restore_cache:
           keys:
             - masks-workdir-v4-{{ .Branch }}-{{epoch}}
@@ -347,10 +360,11 @@ jobs:
           command: |
             mkdir -p /tmp/masks/{reports,workdir} && \
             docker run -ti -u $(id -u) -w /src/niworkflows \
+              -v /tmp/templateflow:/templateflow \
+              -v /tmp/data/epi-references:/data -v /tmp/masks/reports:/tmp/masks/reports \
               -e COVERAGE_FILE=/tmp/masks/reports/.coverage \
-              -v /tmp/data:/tmp/data -v /tmp/masks/reports:/tmp/masks/reports \
-              -e FMRIPREP_REGRESSION_SOURCE=/tmp/data/fmriprep_bold_truncated \
-              -e FMRIPREP_REGRESSION_TARGETS=/tmp/data/fmriprep_bold_mask \
+              -e TEMPLATEFLOW_HOME=/templateflow \
+              -e FMRIPREP_REGRESSION_SOURCE=/data \
               -e FMRIPREP_REGRESSION_REPORTS=/tmp/masks/reports \
               -e CACHED_WORK_DIRECTORY=/tmp/work -v /tmp/masks/workdir:/tmp/work \
               niworkflows:latest \
