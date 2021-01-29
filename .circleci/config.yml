@@ -187,15 +187,15 @@ jobs:
       - save_cache:
           key: env-v1-{{ .Branch }}-{{ .BuildNum }}
           paths:
-            - /tmp/templateflow
             - /opt/conda
 
       - restore_cache:
           keys:
-            - data-masks-v0-{{ .Branch }}-{{ .Revision }}-
-            - data-masks-v0-{{ .Branch }}-
-            - data-masks-v0-master-
-            - data-masks-v0-
+            - data-masks-v1-{{ .Branch }}-{{ .Revision }}-
+            - data-masks-v1-{{ .Branch }}-
+            - data-masks-v1-master-
+            - data-masks-v1-
+            - data-masks-
       - run:
           name: Install epi-references
           command: |
@@ -203,8 +203,9 @@ jobs:
             datalad update -r --merge -d epi-references/
             datalad get -J 2 -r -d epi-references/ epi-references/*
       - save_cache:
-          key: data-masks-v0-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+          key: data-masks-v1-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
           paths:
+            - /tmp/templateflow
             - /tmp/data/epi-references
 
   test_pytest:
@@ -346,8 +347,8 @@ jobs:
 
       - restore_cache:
           keys:
-            - data-masks-v0-{{ .Branch }}-{{ .Revision }}-
-            - data-masks-v0-{{ .Branch }}-
+            - data-masks-v1-{{ .Branch }}-{{ .Revision }}-
+            - data-masks-v1-{{ .Branch }}-
       - restore_cache:
           keys:
             - masks-workdir-v4-{{ .Branch }}-{{epoch}}
