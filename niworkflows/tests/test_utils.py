@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 from templateflow.api import get as get_template
-from niworkflows.interfaces.masks import SimpleShowMaskRPT
+from niworkflows.interfaces.reportlets.masks import SimpleShowMaskRPT
 from nipype.pipeline import engine as pe
 
 import pytest

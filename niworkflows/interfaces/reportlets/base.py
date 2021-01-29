@@ -1,13 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """class mixin and utilities for enabling reports for nipype interfaces."""
-from nilearn.masking import apply_mask, unmask
-from nilearn.image import threshold_img, load_img
-
 from nipype.interfaces.base import File, traits
 from nipype.interfaces.mixins import reporting
-from .. import NIWORKFLOWS_LOG
-from ..viz.utils import cuts_from_bbox, compose_view
+from ... import NIWORKFLOWS_LOG
+from ...viz.utils import cuts_from_bbox, compose_view
 
 
 class _SVGReportCapableInputSpec(reporting.ReportCapableInputSpec):
@@ -37,7 +34,9 @@ class RegistrationRC(reporting.ReportCapableInterface):
     _contour = None
 
     def _generate_report(self):
-        """Generates the visual report."""
+        """Generate the visual report."""
+        from nilearn.image import threshold_img, load_img
+        from nilearn.masking import apply_mask, unmask
         from niworkflows.viz.utils import plot_registration
 
         NIWORKFLOWS_LOG.info("Generating visual report")
@@ -119,7 +118,9 @@ class SurfaceSegmentationRC(reporting.ReportCapableInterface):
     _contour = None
 
     def _generate_report(self):
-        """Generates the visual report."""
+        """Generate the visual report."""
+        from nilearn.image import threshold_img, load_img
+        from nilearn.masking import apply_mask, unmask
         from niworkflows.viz.utils import plot_registration
 
         NIWORKFLOWS_LOG.info("Generating visual report")

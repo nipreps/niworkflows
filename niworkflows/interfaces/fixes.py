@@ -14,7 +14,7 @@ from nipype.interfaces.ants.segmentation import (
 )
 
 from .. import __version__
-from .utils import _copyxform
+from ..utils.images import _copyxform
 
 
 class _FixTraitApplyTransformsInputSpec(ApplyTransformsInputSpec):

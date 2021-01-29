@@ -523,30 +523,37 @@ jobs:
           command: sudo apt update && sudo apt -y install graphviz
       - run:
           name: Install deps
-          command: python -m pip install --no-cache-dir -r docs/requirements.txt
+          command: |
+            python -m pip install --no-cache-dir -U "pip>=20.3"
+            python -m pip install --no-cache-dir -r docs/requirements.txt
       - run:
           name: Build only this commit
           command: make -C docs SPHINXOPTS="-W" BUILDDIR="_build/no_version_html" html
       - store_artifacts:
           path: ./docs/_build/no_version_html
       - run:
-          name: Install niworkflows
+          name: Find undocumented Python objects
           command: |
-            python -m pip install --no-cache-dir codecov
-            python -m pip install --no-cache-dir .[all]
-      - run:
-          name: Build only this commit with coverage collection
-          command: |
-            make -C docs/ clean
-            export COVERAGE_FILE=/tmp/.coverage
-            coverage run --source=niworkflows $( which sphinx-build ) \
-                -b html -W -d docs/_build/no_version_doctrees ./docs/ docs/_build/no_version_html
-            coverage xml -o /tmp/documentation.xml
-            python -m codecov --file /tmp/documentation.xml --flags documentation -e CIRCLE_JOB
-      - run:
-          name: Uninstall NiWorkflows
-          command: |
-            python -m pip uninstall -y niworkflows
+            make -C docs docs-coverage
+            cat docs/_build/coverage/python.txt
+      - store_artifacts:
+          path: ./docs/_build/coverage
+
+      # - run:
+      #     name: Install niworkflows
+      #     command: |
+      #       python -m pip install --no-cache-dir codecov
+      #       python -m pip install --no-cache-dir .[all]
+      # - run:
+      #     name: Build only this commit with coverage collection
+      #     command: |
+      #       make -C docs/ clean
+      #       export COVERAGE_FILE=/tmp/.coverage
+      #       coverage run --source=niworkflows $( which sphinx-build ) \
+      #           -b html -W -d docs/_build/no_version_doctrees ./docs/ docs/_build/no_version_html
+      #       coverage xml -o /tmp/documentation.xml
+      #       python -m codecov --file /tmp/documentation.xml --flags documentation -e CIRCLE_JOB
+
       - run:
           name: Generate Versioned Docs
           command: |
@@ -557,6 +564,7 @@ jobs:
               echo "Not a tag or master branch - skipping versioned docs."
               circleci step halt
             else
+              python -m pip uninstall -y niworkflows
               make -C docs/ clean
               make -f ./docs/Makefile versioned CURBRANCH=${CIRCLE_TAG:-$CIRCLE_BRANCH}
             fi

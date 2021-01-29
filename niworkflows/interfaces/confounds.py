@@ -1,13 +1,14 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Select terms for a confound model, and compute any requisite expansions."""
-
+import os
 import re
 import numpy as np
 import pandas as pd
 from functools import reduce
 from collections import deque, OrderedDict
 from nipype.utils.filemanip import fname_presuffix
+from nipype.utils.misc import normalize_mc_params
 from nipype.interfaces.base import (
     traits,
     TraitedSpec,
@@ -16,6 +17,33 @@ from nipype.interfaces.base import (
     isdefined,
     SimpleInterface,
 )
+
+
+class _NormalizeMotionParamsInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True, desc="the input parameters file")
+    format = traits.Enum(
+        "FSL", "AFNI", "FSFAST", "NIPY", usedefault=True, desc="output format"
+    )
+
+
+class _NormalizeMotionParamsOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="written file path")
+
+
+class NormalizeMotionParams(SimpleInterface):
+    """Convert input motion parameters into the designated convention."""
+
+    input_spec = _NormalizeMotionParamsInputSpec
+    output_spec = _NormalizeMotionParamsOutputSpec
+
+    def _run_interface(self, runtime):
+        mpars = np.loadtxt(self.inputs.in_file)  # mpars is N_t x 6
+        mpars = np.apply_along_axis(
+            func1d=normalize_mc_params, axis=1, arr=mpars, source=self.inputs.format
+        )
+        self._results["out_file"] = os.path.join(runtime.cwd, "motion_params.txt")
+        np.savetxt(self._results["out_file"], mpars)
+        return runtime
 
 
 class _ExpandModelInputSpec(BaseInterfaceInputSpec):
@@ -32,25 +60,26 @@ class _ExpandModelInputSpec(BaseInterfaceInputSpec):
 Formula for generating model expansions. By default, the
 32-parameter expansion will be generated. Note that any expressions
 to be expanded *must* be in parentheses, even if they include only
-a single variable (e.g., (x)^2, not x^2).
+a single variable (e.g., ``(x)^2``, not ``x^2``). Examples:
 
-Examples:
-* rps + wm + csf + gsr : 9-parameter model. rps denotes realignment
-  parameters, wm denotes mean white matter signal, csf denotes mean
-  cerebrospinal fluid signal, and gsr denotes mean global signal.
-* (dd1(rps + wm + csf + gsr))^^2 : 36-parameter expansion.
-  rps + wm + csf + gsr denotes that realignment parameters and mean
-  WM, CSF, and global signals should be included. dd1 denotes that
+* ``rps + wm + csf + gsr`` : 9-parameter model. ``rps`` denotes realignment
+  parameters, ``wm`` denotes mean white matter signal, ``csf`` denotes mean
+  cerebrospinal fluid signal, and ``gsr`` denotes mean global signal.
+* ``(dd1(rps + wm + csf + gsr))^^2`` : 36-parameter expansion.
+  ``rps + wm + csf + gsr`` denotes that realignment parameters and mean
+  WM, CSF, and global signals should be included. ``dd1`` denotes that
   these signals should be augmented with their first temporal
-  derivatives. ^^2 denotes that the original signals and temporal
+  derivatives. ``^^2`` denotes that the original signals and temporal
   derivatives should be augmented with quadratic expansions.
-* (dd1(rps))^^2 : 24-parameter expansion. rps denotes that
-  realignment parameters should be included. dd1 and ^^2 denote
+* ``(dd1(rps))^^2`` : 24-parameter expansion. ``rps`` denotes that
+  realignment parameters should be included. ``dd1`` and ``^^2`` denote
   temporal derivative and quadratic expansions as above.
-* (dd1(rps + wm + csf + gsr))^^2 + others : generate all expansion
+* ``(dd1(rps + wm + csf + gsr))^^2 + others`` : generate all expansion
   terms necessary for a 36-parameter model as above, and
   concatenate those expansion terms to all other regressor columns
-  in the confounds file.""",
+  in the confounds file.
+
+""",
     )
     output_file = File(desc="Output path")
 
@@ -190,45 +219,46 @@ def spike_regressors(
 
     Parameters
     ----------
-    data: pandas DataFrame object
+    data : :obj:`~pandas.DataFrame`
         A tabulation of observations from which spike regressors should be
         estimated.
-    criteria: dict{str: ('>' or '<', float)}
+    criteria : :obj:`dict` of (:obj:`str`, ``'>'`` or ``'<'`` or :obj:`float`)
         Criteria for generating a spike regressor. If, for a given frame, the
         value of the variable corresponding to the key exceeds the threshold
         indicated by the value, then a spike regressor is created for that
-        frame. By default, the strategy from Power 2014 is implemented: any
+        frame. By default, the strategy from [Power2014]_ is implemented: any
         frames with FD greater than 0.5 or standardised DV greater than 1.5
         are flagged for censoring.
-    header_prefix: str
+    header_prefix : :obj:`str`
         The prefix used to indicate spike regressors in the output data table.
-    lags: list(int)
+    lags: :obj:`list` of :obj:`int`
         A list indicating the frames to be censored relative to each flag.
-        For instance, [0] censors the flagged frame, while [0, 1] censors
+        For instance, ``[0]`` censors the flagged frame, while ``[0, 1]`` censors
         both the flagged frame and the following frame.
-    minimum_contiguous: int or None
+    minimum_contiguous : :obj:`int` or :obj:`None`
         The minimum number of contiguous frames that must be unflagged for
         spike regression. If any series of contiguous unflagged frames is
         shorter than the specified minimum, then all of those frames will
         additionally have spike regressors implemented.
-    concatenate: bool
+    concatenate : :obj:`bool`
         Indicates whether the returned object should include only spikes
         (if false) or all input time series and spikes (if true, default).
-    output: str
+    output : :obj:`str`
         Indicates whether the output should be formatted as spike regressors
         ('spikes', a separate column for each outlier) or as a temporal mask
         ('mask', a single output column indicating the locations of outliers).
 
     Returns
     -------
-    data: pandas DataFrame object
+    data : :obj:`~pandas.DataFrame`
         The input DataFrame with a column for each spike regressor.
 
     References
     ----------
-    Power JD, Mitra A, Laumann TO, Snyder AZ, Schlaggar BL, Petersen SE (2014)
+    .. [Power2014] Power JD, et al. (2014)
         Methods to detect, characterize, and remove motion artifact in resting
-        state fMRI. NeuroImage.
+        state fMRI. NeuroImage. doi:`10.1016/j.neuroimage.2013.08.048
+        <https://doi.org/10.1016/j.neuroimage.2013.08.048>`__.
 
     """
     mask = {}
@@ -280,22 +310,22 @@ def temporal_derivatives(order, variables, data):
 
     Parameters
     ----------
-    order: range or list(int)
-        A list of temporal derivative terms to include. For instance, [1, 2]
+    order : :obj:`list` of :obj:`int`
+        A list of temporal derivative terms to include. For instance, ``[1, 2]``
         indicates that the first and second derivative terms should be added.
-        To retain the original terms, 0 *must* be included in the list.
-    variables: list(str)
+        To retain the original terms, ``0`` *must* be included in the list.
+    variables : :obj:`list` of :obj:`str`
         List of variables for which temporal derivative terms should be
         computed.
-    data: pandas DataFrame object
+    data : :obj:`~pandas.DataFrame`
         Table of values of all observations of all variables.
 
     Returns
     -------
-    variables_deriv: list
+    variables_deriv : :obj:`list`
         A list of variables to include in the final data frame after adding
         the specified derivative terms.
-    data_deriv: pandas DataFrame object
+    data_deriv : :obj:`~pandas.DataFrame`
         Table of values of all observations of all variables, including any
         specified derivative terms.
 
@@ -324,21 +354,21 @@ def exponential_terms(order, variables, data):
 
     Parameters
     ----------
-    order: range or list(int)
-        A list of exponential terms to include. For instance, [1, 2]
+    order : :obj:`list` of :obj:`int`
+        A list of exponential terms to include. For instance, ``[1, 2]``
         indicates that the first and second exponential terms should be added.
-        To retain the original terms, 1 *must* be included in the list.
-    variables: list(str)
+        To retain the original terms, ``1`` *must* be included in the list.
+    variables : :obj:`list` of :obj:`str`
         List of variables for which exponential terms should be computed.
-    data: pandas DataFrame object
+    data : :obj:`~pandas.DataFrame`
         Table of values of all observations of all variables.
 
     Returns
     -------
-    variables_exp: list
+    variables_exp : :obj:`list`
         A list of variables to include in the final data frame after adding
         the specified exponential terms.
-    data_exp: pandas DataFrame object
+    data_exp : :obj:`~pandas.DataFrame`
         Table of values of all observations of all variables, including any
         specified exponential terms.
 
@@ -423,17 +453,17 @@ def parse_expression(expression, parent_data):
 
     Parameters
     ----------
-    expression: str
+    expression : :obj:`str`
         Formula expression: either a single variable or a variable group
         paired with an operation (exponentiation or differentiation).
-    parent_data: pandas DataFrame
+    parent_data : :obj:`~pandas.DataFrame`
         The source data for the model expansion.
 
     Returns
     -------
-    variables: list
+    variables : :obj:`list`
         A list of variables in the provided formula expression.
-    data: pandas DataFrame
+    data: :obj:`~pandas.DataFrame`
         A tabulation of all terms in the provided formula expression.
 
     """
@@ -531,12 +561,31 @@ def parse_formula(model_formula, parent_data, unscramble=False):
 
     Parameters
     ----------
-    model_formula: str
+    model_formula : :obj:`str`
         Expression for the model formula, e.g.
-        '(a + b)^^2 + dd1(c + (d + e)^3) + f'
+        ``(a + b)^^2 + dd1(c + (d + e)^3) + f``
         Note that any expressions to be expanded *must* be in parentheses,
-        even if they include only a single variable (e.g., (x)^2, not x^2).
-    parent_data: pandas DataFrame
+        even if they include only a single variable
+        (e.g., ``(x)^2``, not ``x^2``).
+        Temporal derivative options:
+
+            * ``d6(variable)`` for the 6th temporal derivative
+            * ``dd6(variable)`` for all temporal derivatives up to the 6th
+            * ``d4-6(variable)`` for the 4th through 6th temporal derivatives
+            * ``0`` must be included in the temporal derivative range for the
+              original term to be returned when temporal derivatives are computed.
+
+        Exponential options:
+
+            * ``(variable)^6`` for the 6th power
+            * ``(variable)^^6`` for all powers up to the 6th
+            * ``(variable)^4-6`` for the 4th through 6th powers
+            * ``1`` must be included in the powers range for the original term to be
+              returned when exponential terms are computed.
+
+        Temporal derivatives and exponential terms are computed for all terms
+        in the grouping symbols that they adjoin.
+    parent_data : :obj:`~pandas.DataFrame`
         A tabulation of all values usable in the model formula. Each additive
         term in `model_formula` should correspond either to a variable in this
         data frame or to instructions for operating on a variable (for
@@ -544,30 +593,11 @@ def parse_formula(model_formula, parent_data, unscramble=False):
 
     Returns
     -------
-    variables: list(str)
+    variables : :obj:`list` of :obj:`str`
         A list of variables included in the model parsed from the provided
         formula.
-    data: pandas DataFrame
+    data : :obj:`~pandas.DataFrame`
         All values in the complete model.
-
-    Options
-    -------
-    Temporal derivative options:
-    * d6(variable) for the 6th temporal derivative
-    * dd6(variable) for all temporal derivatives up to the 6th
-    * d4-6(variable) for the 4th through 6th temporal derivatives
-    * 0 must be included in the temporal derivative range for the original
-      term to be returned when temporal derivatives are computed.
-
-    Exponential options:
-    * (variable)^6 for the 6th power
-    * (variable)^^6 for all powers up to the 6th
-    * (variable)^4-6 for the 4th through 6th powers
-    * 1 must be included in the powers range for the original term to be
-      returned when exponential terms are computed.
-
-    Temporal derivatives and exponential terms are computed for all terms
-    in the grouping symbols that they adjoin.
 
     """
     variables = {}

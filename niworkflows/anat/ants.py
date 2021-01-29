@@ -28,9 +28,8 @@ from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
     FixHeaderApplyTransforms as ApplyTransforms,
 )
-from ..interfaces.images import RegridToZooms
-from ..interfaces.nibabel import ApplyMask
-from ..interfaces.utils import CopyXForm
+from ..interfaces.nibabel import ApplyMask, RegridToZooms
+from ..interfaces.header import CopyXForm
 
 
 ATROPOS_MODELS = {

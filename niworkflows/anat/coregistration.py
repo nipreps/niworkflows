@@ -148,7 +148,7 @@ Co-registration was configured with {dof} degrees of freedom{reason}.
     # fmt:on
 
     if debug is True:
-        from ..interfaces.images import RegridToZooms
+        from ..interfaces.nibabel import RegridToZooms
 
         downsample = pe.Node(
             RegridToZooms(zooms=(4.0, 4.0, 4.0), smooth=True), name="downsample"

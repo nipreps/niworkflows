@@ -15,8 +15,6 @@ import nibabel as nb
 
 from nilearn import image as nlimage
 from nilearn.plotting import plot_anat
-from svgutils.transform import fromstring, SVGFigure, GroupElement
-from seaborn import color_palette
 
 from nipype.utils import filemanip
 from .. import NIWORKFLOWS_LOG
@@ -134,7 +132,7 @@ def extract_svg(display_object, dpi=300, compress="auto"):
     start_idx = image_svg.find(start_tag)
     end_tag = "</svg>"
     end_idx = image_svg.rfind(end_tag)
-    if start_idx is -1 or end_idx is -1:
+    if start_idx == -1 or end_idx == -1:
         NIWORKFLOWS_LOG.info("svg tags not found in extract_svg")
     # rfind gives the start index of the substr. We want this substr
     # included in our return value so we add its length to the index.
@@ -225,6 +223,8 @@ def plot_segs(
     coordinates. plot_params will be passed on to nilearn plot_* functions. If
     seg_niis is a list of size one, it behaves as if it was plotting the mask.
     """
+    from svgutils.transform import fromstring
+
     plot_params = {} if plot_params is None else plot_params
 
     image_nii = _3d_in_file(image_nii)
@@ -268,6 +268,8 @@ def _plot_anat_with_contours(image, segs=None, compress="auto", **plot_params):
     levels = plot_params.pop("levels", None) or []
     missing = nsegs - len(colors)
     if missing > 0:  # missing may be negative
+        from seaborn import color_palette
+
         colors = colors + color_palette("husl", missing)
 
     colors = [[c] if not isinstance(c, list) else c for c in colors]
@@ -307,6 +309,8 @@ def plot_registration(
     Plots the foreground and background views
     Default order is: axial, coronal, sagittal
     """
+    from svgutils.transform import fromstring
+
     plot_params = {} if plot_params is None else plot_params
 
     # Use default MNI cuts if none defined
@@ -363,6 +367,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file="report.svg"):
 
 
 def _compose_view(bg_svgs, fg_svgs, ref=0):
+    from svgutils.transform import SVGFigure, GroupElement
 
     if fg_svgs is None:
         fg_svgs = []

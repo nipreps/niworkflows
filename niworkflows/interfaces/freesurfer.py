@@ -21,7 +21,7 @@ from nipype.interfaces import freesurfer as fs
 from nipype.interfaces.base import SimpleInterface
 from nipype.interfaces.freesurfer.preprocess import ConcatenateLTA, RobustRegister
 from nipype.interfaces.freesurfer.utils import LTAConvert
-from .registration import BBRegisterRPT, MRICoregRPT
+from .reportlets.registration import BBRegisterRPT, MRICoregRPT
 
 
 class StructuralReference(fs.RobustTemplate):
@@ -234,7 +234,7 @@ class PatchedConcatenateLTA(TruncateLTA, ConcatenateLTA):
     in FreeSurfer, that was
     `fixed here <https://github.com/freesurfer/freesurfer/pull/180>`__.
 
-    The original FMRIPREP's issue is found
+    The original fMRIPrep's issue is found
     `here <https://github.com/nipreps/fmriprep/issues/768>`__.
 
     the fix is now done through mixin with TruncateLTA
@@ -325,9 +325,7 @@ class _MedialNaNsOutputSpec(TraitedSpec):
 
 
 class MedialNaNs(SimpleInterface):
-    """
-    The MedialNaNs converts from arbitrary units to rad/s
-    """
+    """Convert values on medial wall to NaNs."""
 
     input_spec = _MedialNaNsInputSpec
     output_spec = _MedialNaNsOutputSpec
@@ -351,6 +349,7 @@ def fix_lta_length(lta_file):
     Examples
     --------
     No changes are made to a valid transform file:
+
     >>> valid_transform = Path(test_data) / 'valid_transform.lta'
     >>> orig_contents = valid_transform.read_text()
     >>> fix_lta_length(valid_transform)
@@ -359,6 +358,7 @@ def fix_lta_length(lta_file):
     True
 
     Invalid transform files are files with > 255 characters in any line:
+
     >>> invalid_transform = Path(test_data) / 'long_path_transform.lta'
     >>> orig_contents = invalid_transform.read_text()
     >>> any(len(line) > 255 for line in orig_contents.splitlines(keepends=True))

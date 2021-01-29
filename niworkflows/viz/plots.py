@@ -17,8 +17,6 @@ from nilearn.signal import clean
 from nilearn._utils import check_niimg_4d
 from nilearn._utils.niimg import _safe_get_data
 
-import seaborn as sns
-from seaborn import color_palette
 
 DINA4_LANDSCAPE = (11.69, 8.27)
 
@@ -83,6 +81,8 @@ class fMRIPlot:
 
     def plot(self, figure=None):
         """Main plotter"""
+        import seaborn as sns
+
         sns.set_style("whitegrid")
         sns.set_context("paper", font_scale=0.8)
 
@@ -106,6 +106,8 @@ class fMRIPlot:
             grid_id += 1
 
         if self.confounds:
+            from seaborn import color_palette
+
             palette = color_palette("husl", nconfounds)
 
         for i, (name, kwargs) in enumerate(self.confounds.items()):
@@ -582,6 +584,7 @@ def confoundplot(
     cutoff=None,
     ylims=None,
 ):
+    import seaborn as sns
 
     # Define TR and number of frames
     notr = False
@@ -945,6 +948,8 @@ def confounds_correlation_plot(
     output_file: :obj:`str`
         The file where the figure is saved.
     """
+    import seaborn as sns
+
     confounds_data = pd.read_table(confounds_file)
 
     if columns:

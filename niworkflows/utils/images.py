@@ -46,6 +46,34 @@ def set_consumables(header, dataobj):
     header.set_data_offset(dataobj.offset)
 
 
+def _copyxform(ref_image, out_image, message=None):
+    # Read in reference and output
+    # Use mmap=False because we will be overwriting the output image
+    resampled = nb.load(out_image, mmap=False)
+    orig = nb.load(ref_image)
+
+    if not np.allclose(orig.affine, resampled.affine):
+        from nipype import logging
+
+        logging.getLogger("nipype.interface").debug(
+            "Affines of input and reference images do not match, "
+            "FMRIPREP will set the reference image headers. "
+            "Please, check that the x-form matrices of the input dataset"
+            "are correct and manually verify the alignment of results."
+        )
+
+    # Copy xform infos
+    qform, qform_code = orig.header.get_qform(coded=True)
+    sform, sform_code = orig.header.get_sform(coded=True)
+    header = resampled.header.copy()
+    header.set_qform(qform, int(qform_code))
+    header.set_sform(sform, int(sform_code))
+    header["descrip"] = "xform matrices modified by %s." % (message or "(unknown)")
+
+    newimg = resampled.__class__(resampled.dataobj, orig.affine, header)
+    newimg.to_filename(out_image)
+
+
 def overwrite_header(img, fname):
     """Rewrite file with only changes to the header
 
@@ -233,3 +261,39 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
 
     # Create a new x-form affine, aligned with cardinal axes, 1mm3 and centered.
     return nb.Nifti1Image(resampled, new_affine, hdr)
+
+
+def demean(in_file, in_mask, only_mask=False, newpath=None):
+    """Demean ``in_file`` within the mask defined by ``in_mask``."""
+    import os
+    import numpy as np
+    import nibabel as nb
+    from nipype.utils.filemanip import fname_presuffix
+
+    out_file = fname_presuffix(in_file, suffix="_demeaned", newpath=os.getcwd())
+    nii = nb.load(in_file)
+    msk = np.asanyarray(nb.load(in_mask).dataobj)
+    data = nii.get_fdata()
+    if only_mask:
+        data[msk > 0] -= np.median(data[msk > 0])
+    else:
+        data -= np.median(data[msk > 0])
+    nb.Nifti1Image(data, nii.affine, nii.header).to_filename(out_file)
+    return out_file
+
+
+def nii_ones_like(in_file, value, dtype, newpath=None):
+    """Create a NIfTI file filled with ``value``, matching properties of ``in_file``."""
+    import os
+    import numpy as np
+    import nibabel as nb
+
+    nii = nb.load(in_file)
+    data = np.ones(nii.shape, dtype=float) * value
+
+    out_file = os.path.join(newpath or os.getcwd(), "filled.nii.gz")
+    nii = nb.Nifti1Image(data, nii.affine, nii.header)
+    nii.set_data_dtype(dtype)
+    nii.to_filename(out_file)
+
+    return out_file

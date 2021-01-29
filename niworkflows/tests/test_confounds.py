@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 """ Utilities tests """
-
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import os
 from shutil import copy
 import numpy as np

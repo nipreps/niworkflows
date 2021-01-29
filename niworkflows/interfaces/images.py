@@ -6,8 +6,6 @@ from functools import partial
 import numpy as np
 import nibabel as nb
 import nilearn.image as nli
-from textwrap import indent
-import transforms3d
 
 from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
@@ -17,8 +15,8 @@ from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
     SimpleInterface,
     File,
-    InputMultiPath,
-    OutputMultiPath,
+    InputMultiObject,
+    OutputMultiObject,
     isdefined,
 )
 
@@ -79,7 +77,7 @@ class RegridToZooms(SimpleInterface):
 
 
 class _IntraModalMergeInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiPath(File(exists=True), mandatory=True, desc="input files")
+    in_files = InputMultiObject(File(exists=True), mandatory=True, desc="input files")
     in_mask = File(exists=True, desc="input mask for grand mean scaling")
     hmc = traits.Bool(True, usedefault=True)
     zero_based_avg = traits.Bool(True, usedefault=True)
@@ -90,8 +88,8 @@ class _IntraModalMergeInputSpec(BaseInterfaceInputSpec):
 class _IntraModalMergeOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="merged image")
     out_avg = File(exists=True, desc="average image")
-    out_mats = OutputMultiPath(File(exists=True), desc="output matrices")
-    out_movpar = OutputMultiPath(File(exists=True), desc="output movement parameters")
+    out_mats = OutputMultiObject(File(exists=True), desc="output matrices")
+    out_movpar = OutputMultiObject(File(exists=True), desc="output movement parameters")
 
 
 class IntraModalMerge(SimpleInterface):
@@ -214,7 +212,7 @@ class _RobustAverageOutputSpec(TraitedSpec):
     out_drift = traits.List(
         traits.Float, desc="the ratio to the grand mean or global signal drift"
     )
-    out_hmc = OutputMultiPath(File(exists=True), desc="head-motion correction matrices")
+    out_hmc = OutputMultiObject(File(exists=True), desc="head-motion correction matrices")
 
 
 class RobustAverage(SimpleInterface):
@@ -334,7 +332,7 @@ DISCARD_TEMPLATE = """\t\t\t\t<li><abbr title="{path}">{basename}</abbr></li>"""
 
 
 class _TemplateDimensionsInputSpec(BaseInterfaceInputSpec):
-    t1w_list = InputMultiPath(
+    t1w_list = InputMultiObject(
         File(exists=True), mandatory=True, desc="input T1w images"
     )
     max_scale = traits.Float(
@@ -343,7 +341,7 @@ class _TemplateDimensionsInputSpec(BaseInterfaceInputSpec):
 
 
 class _TemplateDimensionsOutputSpec(TraitedSpec):
-    t1w_valid_list = OutputMultiPath(exists=True, desc="valid T1w images")
+    t1w_valid_list = OutputMultiObject(exists=True, desc="valid T1w images")
     target_zooms = traits.Tuple(
         traits.Float, traits.Float, traits.Float, desc="Target zoom information"
     )
@@ -449,6 +447,7 @@ class Conform(SimpleInterface):
     Conform a series of T1w images to enable merging.
 
     Performs two basic functions:
+
     #. Orient to RAS (left-right, posterior-anterior, inferior-superior)
     #. Resample to target zooms (voxel sizes) and shape (number of voxels)
 
@@ -547,279 +546,6 @@ class Conform(SimpleInterface):
         return runtime
 
 
-class _ValidateImageInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="input image")
-
-
-class _ValidateImageOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="validated image")
-    out_report = File(exists=True, desc="HTML segment containing warning")
-
-
-class ValidateImage(SimpleInterface):
-    """
-    Check the correctness of x-form headers (matrix and code).
-
-    This interface implements the `following logic
-    <https://github.com/nipreps/fmriprep/issues/873#issuecomment-349394544>`_:
-
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | valid quaternions | `qform_code > 0` | `sform_code > 0` | `qform == sform` \
-| actions                                        |
-    +===================+==================+==================+==================\
-+================================================+
-    | True              | True             | True             | True             \
-| None                                           |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | True              | True             | False            | *                \
-| sform, scode <- qform, qcode                   |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | *                 | *                | True             | False            \
-| qform, qcode <- sform, scode                   |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | *                 | False            | True             | *                \
-| qform, qcode <- sform, scode                   |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | *                 | False            | False            | *                \
-| sform, qform <- best affine; scode, qcode <- 1 |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | False             | *                | False            | *                \
-| sform, qform <- best affine; scode, qcode <- 1 |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-
-    """
-
-    input_spec = _ValidateImageInputSpec
-    output_spec = _ValidateImageOutputSpec
-
-    def _run_interface(self, runtime):
-        img = nb.load(self.inputs.in_file)
-        out_report = os.path.join(runtime.cwd, "report.html")
-
-        # Retrieve xform codes
-        sform_code = int(img.header._structarr["sform_code"])
-        qform_code = int(img.header._structarr["qform_code"])
-
-        # Check qform is valid
-        valid_qform = False
-        try:
-            qform = img.get_qform()
-            valid_qform = True
-        except ValueError:
-            pass
-
-        sform = img.get_sform()
-        if np.linalg.det(sform) == 0:
-            valid_sform = False
-        else:
-            RZS = sform[:3, :3]
-            zooms = np.sqrt(np.sum(RZS * RZS, axis=0))
-            valid_sform = np.allclose(zooms, img.header.get_zooms()[:3])
-
-        # Matching affines
-        matching_affines = valid_qform and np.allclose(qform, sform)
-
-        # Both match, qform valid (implicit with match), codes okay -> do nothing, empty report
-        if matching_affines and qform_code > 0 and sform_code > 0:
-            self._results["out_file"] = self.inputs.in_file
-            open(out_report, "w").close()
-            self._results["out_report"] = out_report
-            return runtime
-
-        # A new file will be written
-        out_fname = fname_presuffix(
-            self.inputs.in_file, suffix="_valid", newpath=runtime.cwd
-        )
-        self._results["out_file"] = out_fname
-
-        # Row 2:
-        if valid_qform and qform_code > 0 and (sform_code == 0 or not valid_sform):
-            img.set_sform(qform, qform_code)
-            warning_txt = "Note on orientation: sform matrix set"
-            description = """\
-<p class="elem-desc">The sform has been copied from qform.</p>
-"""
-        # Rows 3-4:
-        # Note: if qform is not valid, matching_affines is False
-        elif (valid_sform and sform_code > 0) and (
-            not matching_affines or qform_code == 0
-        ):
-            img.set_qform(sform, sform_code)
-            new_qform = img.get_qform()
-            if valid_qform:
-                # False alarm - the difference is due to precision loss of qform
-                if np.allclose(new_qform, qform) and qform_code > 0:
-                    self._results["out_file"] = self.inputs.in_file
-                    open(out_report, "w").close()
-                    self._results["out_report"] = out_report
-                    return runtime
-                # Replacing an existing, valid qform. Report magnitude of change.
-                diff = np.linalg.inv(qform) @ new_qform
-                trans, rot, _, _ = transforms3d.affines.decompose44(diff)
-                angle = transforms3d.axangles.mat2axangle(rot)[1]
-                xyz_unit = img.header.get_xyzt_units()[0]
-                if xyz_unit == "unknown":
-                    xyz_unit = "mm"
-
-                total_trans = np.sqrt(
-                    np.sum(trans * trans)
-                )  # Add angle and total_trans to report
-                warning_txt = "Note on orientation: qform matrix overwritten"
-                description = f"""\
-    <p class="elem-desc">
-    The qform has been copied from sform.
-    The difference in angle is {angle:.02g} radians.
-    The difference in translation is {total_trans:.02g}{xyz_unit}.
-    </p>
-    """
-            elif qform_code > 0:
-                # qform code indicates the qform is supposed to be valid. Use more stridency.
-                warning_txt = "WARNING - Invalid qform information"
-                description = """\
-<p class="elem-desc">
-    The qform matrix found in the file header is invalid.
-    The qform has been copied from sform.
-    Checking the original qform information from the data produced
-    by the scanner is advised.
-</p>
-"""
-            else:  # qform_code == 0
-                # qform is not expected to be valids. Simple note.
-                warning_txt = "Note on orientation: qform matrix overwritten"
-                description = (
-                    '<p class="elem-desc">The qform has been copied from sform.</p>'
-                )
-        # Rows 5-6:
-        else:
-            affine = img.header.get_base_affine()
-            img.set_sform(affine, nb.nifti1.xform_codes["scanner"])
-            img.set_qform(affine, nb.nifti1.xform_codes["scanner"])
-            warning_txt = "WARNING - Missing orientation information"
-            description = """\
-<p class="elem-desc">
-    FMRIPREP could not retrieve orientation information from the image header.
-    The qform and sform matrices have been set to a default, LAS-oriented affine.
-    Analyses of this dataset MAY BE INVALID.
-</p>
-"""
-        snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (warning_txt, description)
-        # Store new file and report
-        img.to_filename(out_fname)
-        with open(out_report, "w") as fobj:
-            fobj.write(indent(snippet, "\t" * 3))
-
-        self._results["out_report"] = out_report
-        return runtime
-
-
-class _DemeanImageInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="image to be demeaned")
-    in_mask = File(
-        exists=True, mandatory=True, desc="mask where median will be calculated"
-    )
-    only_mask = traits.Bool(False, usedefault=True, desc="demean only within mask")
-
-
-class _DemeanImageOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="demeaned image")
-
-
-class DemeanImage(SimpleInterface):
-    input_spec = _DemeanImageInputSpec
-    output_spec = _DemeanImageOutputSpec
-
-    def _run_interface(self, runtime):
-        self._results["out_file"] = demean(
-            self.inputs.in_file,
-            self.inputs.in_mask,
-            only_mask=self.inputs.only_mask,
-            newpath=runtime.cwd,
-        )
-        return runtime
-
-
-class _FilledImageLikeInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="image to be demeaned")
-    fill_value = traits.Float(1.0, usedefault=True, desc="value to fill")
-    dtype = traits.Enum(
-        "float32", "uint8", usedefault=True, desc="force output data type"
-    )
-
-
-class _FilledImageLikeOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="demeaned image")
-
-
-class FilledImageLike(SimpleInterface):
-    input_spec = _FilledImageLikeInputSpec
-    output_spec = _FilledImageLikeOutputSpec
-
-    def _run_interface(self, runtime):
-        self._results["out_file"] = nii_ones_like(
-            self.inputs.in_file,
-            self.inputs.fill_value,
-            self.inputs.dtype,
-            newpath=runtime.cwd,
-        )
-        return runtime
-
-
-class _MatchHeaderInputSpec(BaseInterfaceInputSpec):
-    reference = File(
-        exists=True, mandatory=True, desc="NIfTI file with reference header"
-    )
-    in_file = File(
-        exists=True, mandatory=True, desc="NIfTI file which header will be checked"
-    )
-
-
-class _MatchHeaderOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="NIfTI file with fixed header")
-
-
-class MatchHeader(SimpleInterface):
-    input_spec = _MatchHeaderInputSpec
-    output_spec = _MatchHeaderOutputSpec
-
-    def _run_interface(self, runtime):
-        refhdr = nb.load(self.inputs.reference).header.copy()
-        imgnii = nb.load(self.inputs.in_file)
-        imghdr = imgnii.header.copy()
-
-        imghdr["dim_info"] = refhdr["dim_info"]  # dim_info is lost sometimes
-
-        # Set qform
-        qform = refhdr.get_qform()
-        qcode = int(refhdr["qform_code"])
-        if not np.allclose(qform, imghdr.get_qform()):
-            LOGGER.warning("q-forms of reference and mask are substantially different")
-        imghdr.set_qform(qform, qcode)
-
-        # Set sform
-        sform = refhdr.get_sform()
-        scode = int(refhdr["sform_code"])
-        if not np.allclose(sform, imghdr.get_sform()):
-            LOGGER.warning("s-forms of reference and mask are substantially different")
-        imghdr.set_sform(sform, scode)
-
-        out_file = fname_presuffix(
-            self.inputs.in_file, suffix="_hdr", newpath=runtime.cwd
-        )
-
-        imgnii.__class__(imgnii.dataobj, imghdr.get_best_affine(), imghdr).to_filename(
-            out_file
-        )
-        self._results["out_file"] = out_file
-        return runtime
-
-
 def reorient(in_file, newpath=None):
     """Reorient Nifti files to RAS."""
     out_file = fname_presuffix(in_file, suffix="_ras", newpath=newpath)
@@ -867,45 +593,9 @@ def normalize_xform(img):
     return new_img
 
 
-def demean(in_file, in_mask, only_mask=False, newpath=None):
-    """Demean ``in_file`` within the mask defined by ``in_mask``."""
-    import os
-    import numpy as np
-    import nibabel as nb
-    from nipype.utils.filemanip import fname_presuffix
-
-    out_file = fname_presuffix(in_file, suffix="_demeaned", newpath=os.getcwd())
-    nii = nb.load(in_file)
-    msk = np.asanyarray(nb.load(in_mask).dataobj)
-    data = nii.get_fdata()
-    if only_mask:
-        data[msk > 0] -= np.median(data[msk > 0])
-    else:
-        data -= np.median(data[msk > 0])
-    nb.Nifti1Image(data, nii.affine, nii.header).to_filename(out_file)
-    return out_file
-
-
-def nii_ones_like(in_file, value, dtype, newpath=None):
-    """Create a NIfTI file filled with ``value``, matching properties of ``in_file``."""
-    import os
-    import numpy as np
-    import nibabel as nb
-
-    nii = nb.load(in_file)
-    data = np.ones(nii.shape, dtype=float) * value
-
-    out_file = os.path.join(newpath or os.getcwd(), "filled.nii.gz")
-    nii = nb.Nifti1Image(data, nii.affine, nii.header)
-    nii.set_data_dtype(dtype)
-    nii.to_filename(out_file)
-
-    return out_file
-
-
 class _SignalExtractionInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="4-D fMRI nii file")
-    label_files = InputMultiPath(
+    label_files = InputMultiObject(
         File(exists=True),
         mandatory=True,
         desc="a 3D label image, with 0 denoting "
