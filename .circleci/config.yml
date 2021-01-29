@@ -195,7 +195,9 @@ jobs:
           name: Setup TemplateFlow
           command: |
             python -c "from templateflow import api as tfapi; \
-                       tfapi.get('MNI152NLin2009cAsym', resolution=1, label='brain', suffix='probseg'); "
+                       tfapi.get('MNI152NLin2009cAsym', resolution=1, label='brain', suffix='probseg'); \
+                       tfapi.get('MNI152NLin2009cAsym', resolution=2, desc='fMRIPrep', suffix='boldref'); \
+                       tfapi.get('MNI152NLin2009cAsym', resolution=2, desc='brain', suffix='mask'); "
       - run:
           name: Install epi-references
           command: |
@@ -313,7 +315,7 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
-          
+
       - restore_cache:
           keys:
             - mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-
