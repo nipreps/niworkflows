@@ -56,7 +56,9 @@ class NonsteadyStatesDetector(SimpleInterface):
         global_signal = np.mean(
             np.asanyarray(img.dataobj[..., : self.inputs.n_volumes]), axis=(0, 1, 2)
         )
-        self._results["t_mask"] = [bool(i) for i in is_outlier(global_signal)]
-        self._results["n_dummy"] = int(np.sum(self._results["t_mask"]))
+
+        n_discard = is_outlier(global_signal)
+        self._results["t_mask"][:n_discard] = [True] * n_discard
+        self._results["n_dummy"] = n_discard
 
         return runtime
