@@ -54,6 +54,14 @@ if datapath:
 
     parameters = zip(bold_datasets, exp_masks)
 
+    if not bold_datasets:
+        raise RuntimeError(
+            f"Data folder <{datapath}> was provided, but no images were found. "
+            "Folder contents:\n{}".format(
+                '\n'.join([str(p) for p in datapath.glob('ds*/*.nii.gz')])
+            )
+        )
+
 
 def symmetric_overlap(img1, img2):
     mask1 = load_img(img1).get_fdata() > 0
