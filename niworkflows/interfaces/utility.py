@@ -219,13 +219,8 @@ class _AddTSVHeaderOutputSpec(TraitedSpec):
 class AddTSVHeader(SimpleInterface):
     r"""Add a header row to a TSV file
 
-    .. testsetup::
-
-    >>> cwd = os.getcwd()
-    >>> os.chdir(tmpdir)
-
-    .. doctest::
-
+    Examples
+    --------
     An example TSV:
 
     >>> np.savetxt('data.tsv', np.arange(30).reshape((6, 5)), delimiter='\t')
@@ -243,10 +238,6 @@ class AddTSVHeader(SimpleInterface):
 
     >>> np.all(df.values == np.arange(30).reshape((6, 5)))
     True
-
-    .. testcleanup::
-
-    >>> os.chdir(cwd)
 
     """
     input_spec = _AddTSVHeaderInputSpec
@@ -286,13 +277,8 @@ class _JoinTSVColumnsOutputSpec(TraitedSpec):
 class JoinTSVColumns(SimpleInterface):
     r"""Add a header row to a TSV file
 
-    .. testsetup::
-
-    >>> cwd = os.getcwd()
-    >>> os.chdir(tmpdir)
-
-    .. doctest::
-
+    Examples
+    --------
     An example TSV:
 
     >>> data = np.arange(30).reshape((6, 5))
@@ -312,7 +298,6 @@ class JoinTSVColumns(SimpleInterface):
 
     >>> np.all(df.values.astype(int) == data)
     True
-
 
     Adding column names:
 
@@ -344,10 +329,6 @@ class JoinTSVColumns(SimpleInterface):
 
     >>> np.all(df.values == np.hstack((data[:, 3:], data[:, :3])))
     True
-
-    .. testcleanup::
-
-    >>> os.chdir(cwd)
 
     """
     input_spec = _JoinTSVColumnsInputSpec

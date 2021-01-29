@@ -202,11 +202,11 @@ class GiftiNameSource(SimpleInterface):
 
     .. testsetup::
 
-    >>> open('lh.pial.gii', 'w').close()
-    >>> open('rh.fsaverage.gii', 'w').close()
+       >>> open('lh.pial.gii', 'w').close()
+       >>> open('rh.fsaverage.gii', 'w').close()
 
-    .. doctest::
-
+    Examples
+    --------
     >>> surf_namer = GiftiNameSource()
     >>> surf_namer.inputs.pattern = r'(?P<LR>[lr])h.(?P<surf>\w+).gii'
     >>> surf_namer.inputs.template = r'{surf}.{LR}.surf'

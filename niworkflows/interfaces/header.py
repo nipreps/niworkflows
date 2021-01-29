@@ -32,7 +32,11 @@ class _CopyXFormInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 class CopyXForm(SimpleInterface):
     """
-    Copy the x-form matrices from `hdr_file` to `out_file`.
+    Copy the *x-form* orientation headers from ``hdr_file`` to an arbitrary set of images.
+
+    Target images that will get their x-form headers replaced should be prescribed
+    using the ``fields`` argument at interface instantiation.
+
     """
 
     input_spec = _CopyXFormInputSpec
@@ -134,38 +138,47 @@ class ValidateImage(SimpleInterface):
     Check the correctness of x-form headers (matrix and code).
 
     This interface implements the `following logic
-    <https://github.com/nipreps/fmriprep/issues/873#issuecomment-349394544>`_:
+    <https://github.com/nipreps/fmriprep/issues/873#issuecomment-349394544>`__:
 
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | valid quaternions | `qform_code > 0` | `sform_code > 0` | `qform == sform` \
-| actions                                        |
-    +===================+==================+==================+==================\
-+================================================+
-    | True              | True             | True             | True             \
-| None                                           |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | True              | True             | False            | *                \
-| sform, scode <- qform, qcode                   |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | *                 | *                | True             | False            \
-| qform, qcode <- sform, scode                   |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | *                 | False            | True             | *                \
-| qform, qcode <- sform, scode                   |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | *                 | False            | False            | *                \
-| sform, qform <- best affine; scode, qcode <- 1 |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | False             | *                | False            | *                \
-| sform, qform <- best affine; scode, qcode <- 1 |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
+    .. list-table:: ``ValidateImage`` truth table
+       :widths: 15 15 15 15 40
+       :header-rows: 1
+
+       * - valid quaternions
+         - ``qform_code`` > 0
+         - ``sform_code`` > 0
+         - ``qform == sform``
+         - actions
+       * - ``True``
+         - ``True``
+         - ``True``
+         - ``True``
+         - None
+       * - ``True``
+         - ``True``
+         - ``False``
+         - \\*
+         - sform, scode <- qform, qcode
+       * - \\*
+         - \\*
+         - ``True``
+         - ``False``
+         - qform, qcode <- sform, scode
+       * - \\*
+         - ``False``
+         - ``True``
+         - \\*
+         - qform, qcode <- sform, scode
+       * - \\*
+         - ``False``
+         - ``False``
+         - \\*
+         - sform, qform <- best affine; scode, qcode <- 1
+       * - ``False``
+         - \\*
+         - ``False``
+         - \\*
+         - sform, qform <- best affine; scode, qcode <- 1
 
     """
 
@@ -365,36 +378,48 @@ class SanitizeImage(SimpleInterface):
     if present.
     This interface implements the `following logic
     <https://github.com/nipreps/fmriprep/issues/873#issuecomment-349394544>`_:
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | valid quaternions | `qform_code > 0` | `sform_code > 0` | `qform == sform` \
-| actions                                        |
-    +===================+==================+==================+==================\
-+================================================+
-    | True              | True             | True             | True             \
-| None                                           |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | True              | True             | False            | *                \
-| sform, scode <- qform, qcode                   |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | *                 | True             | *                | False            \
-| sform, scode <- qform, qcode                   |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | *                 | False            | True             | *                \
-| qform, qcode <- sform, scode                   |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | *                 | False            | False            | *                \
-| sform, qform <- best affine; scode, qcode <- 1 |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
-    | False             | *                | False            | *                \
-| sform, qform <- best affine; scode, qcode <- 1 |
-    +-------------------+------------------+------------------+------------------\
-+------------------------------------------------+
+
+
+    .. list-table:: ``SanitizeImage`` truth table
+       :widths: 15 15 15 15 40
+       :header-rows: 1
+
+       * - valid quaternions
+         - ``qform_code`` > 0
+         - ``sform_code`` > 0
+         - ``qform == sform``
+         - actions
+       * - ``True``
+         - ``True``
+         - ``True``
+         - ``True``
+         - None
+       * - ``True``
+         - ``True``
+         - ``False``
+         - \\*
+         - sform, scode <- qform, qcode
+       * - \\*
+         - ``True``
+         - \\*
+         - ``False``
+         - sform, scode <- qform, qcode
+       * - \\*
+         - ``False``
+         - ``True``
+         - \\*
+         - qform, qcode <- sform, scode
+       * - \\*
+         - ``False``
+         - ``False``
+         - \\*
+         - sform, qform <- best affine; scode, qcode <- 1
+       * - ``False``
+         - \\*
+         - ``False``
+         - \\*
+         - sform, qform <- best affine; scode, qcode <- 1
+
     """
 
     input_spec = _SanitizeImageInputSpec

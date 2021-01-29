@@ -447,6 +447,7 @@ class Conform(SimpleInterface):
     Conform a series of T1w images to enable merging.
 
     Performs two basic functions:
+
     #. Orient to RAS (left-right, posterior-anterior, inferior-superior)
     #. Resample to target zooms (voxel sizes) and shape (number of voxels)
 
