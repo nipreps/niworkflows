@@ -53,6 +53,9 @@ clean:
 	rm -rf $(BUILDDIR)/*
 	rm -rf reference/*
 
+docs-coverage:
+	PYTHONPATH=$(PYTHONPATH) $(SPHINXBUILD) -b coverage $(ALLSPHINXOPTS) $(BUILDDIR)/coverage
+
 html:
 	PYTHONPATH=$(PYTHONPATH) $(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
