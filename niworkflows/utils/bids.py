@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Helpers for handling BIDS-like neuroimaging structures
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-"""
+"""Helpers for handling BIDS-like neuroimaging structures."""
 from pathlib import Path
 import json
 import re
@@ -43,20 +38,26 @@ def collect_participants(
     designated with the participant_label argument exist in that folder.
     Returns the list of participants to be finally processed.
     Requesting all subjects in a BIDS directory root:
+
+    Examples
+    --------
     >>> collect_participants(str(datadir / 'ds114'), bids_validate=False)
     ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
 
     Requesting two subjects, given their IDs:
+
     >>> collect_participants(str(datadir / 'ds114'), participant_label=['02', '04'],
     ...                      bids_validate=False)
     ['02', '04']
 
     Requesting two subjects, given their IDs (works with 'sub-' prefixes):
+
     >>> collect_participants(str(datadir / 'ds114'), participant_label=['sub-02', 'sub-04'],
     ...                      bids_validate=False)
     ['02', '04']
 
     Requesting two subjects, but one does not exist:
+
     >>> collect_participants(str(datadir / 'ds114'), participant_label=['02', '14'],
     ...                      bids_validate=False)
     ['02']
@@ -66,6 +67,7 @@ def collect_participants(
     Traceback (most recent call last):
     BIDSError:
     ...
+
     """
 
     if isinstance(bids_dir, BIDSLayout):
@@ -131,6 +133,9 @@ def collect_data(
 ):
     """
     Uses pybids to retrieve the input data for a given participant
+
+    Examples
+    --------
     >>> bids_root, _ = collect_data(str(datadir / 'ds054'), '100185',
     ...                             bids_validate=False)
     >>> bids_root['fmap']  # doctest: +ELLIPSIS
@@ -159,6 +164,7 @@ def collect_data(
     ...                             bids_validate=False, bids_filters={'t1w':{'run': 1}})
     >>> bids_root['t1w']  # doctest: +ELLIPSIS
     ['.../ds051/sub-01/anat/sub-01_run-01_T1w.nii.gz']
+
     """
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
@@ -204,15 +210,16 @@ def collect_data(
 
 
 def get_metadata_for_nifti(in_file, bids_dir=None, validate=True):
-    """Fetch metadata for a given nifti file
+    """
+    Fetch metadata for a given NIfTI file.
 
+    Examples
+    --------
     >>> metadata = get_metadata_for_nifti(
     ...     datadir / 'ds054' / 'sub-100185' / 'fmap' / 'sub-100185_phasediff.nii.gz',
     ...     validate=False)
     >>> metadata['Manufacturer']
     'SIEMENS'
-
-    >>>
 
     """
     return _init_layout(in_file, bids_dir, validate).get_metadata(str(in_file))
@@ -238,9 +245,12 @@ def _init_layout(in_file=None, bids_dir=None, validate=True):
 
 def group_multiecho(bold_sess):
     """
-    Multiplexes multi-echo EPIs into arrays. Dual-echo is a special
-    case of multi-echo, which is treated as single-echo data.
+    Multiplex multi-echo EPIs into arrays.
 
+    Dual-echo is a special case of multi-echo, which is treated as single-echo data.
+
+    Examples
+    --------
     >>> bold_sess = ["sub-01_task-rest_echo-1_run-01_bold.nii.gz",
     ...              "sub-01_task-rest_echo-2_run-01_bold.nii.gz",
     ...              "sub-01_task-rest_echo-1_run-02_bold.nii.gz",
@@ -286,8 +296,7 @@ def group_multiecho(bold_sess):
       'sub-01_task-beh_echo-3_run-02_bold.nii.gz'],
       'sub-01_task-beh_run-03_bold.nii.gz']
 
-    Some tests from https://neurostars.org/t/fmriprep-from\
--singularity-unboundlocalerror/3299/7
+    Some tests from https://neurostars.org/t/fmriprep-from-singularity-unboundlocalerror/3299/7
 
     >>> bold_sess = ['sub-01_task-AudLoc_echo-1_bold.nii',
     ...              'sub-01_task-AudLoc_echo-2_bold.nii',
@@ -308,7 +317,6 @@ def group_multiecho(bold_sess):
     [False, False, False, False, False, False, True]
     >>> len(groups[-1])
     3
-
 
     """
     from itertools import groupby
@@ -332,8 +340,8 @@ def relative_to_root(path):
     """
     Calculate the BIDS root folder given one file path's.
 
-    Example
-    -------
+    Examples
+    --------
     >>> str(relative_to_root(
     ...     "/sub-03/sourcedata/sub-01/anat/sub-01_T1.nii.gz"
     ... ))
@@ -370,7 +378,7 @@ def relative_to_root(path):
 
 def check_pipeline_version(cvers, data_desc):
     """
-    Searches for existing BIDS pipeline output and compares against current pipeline version.
+    Search for existing BIDS pipeline output and compares against current pipeline version.
 
     .. testsetup::
 
@@ -383,8 +391,8 @@ def check_pipeline_version(cvers, data_desc):
     ----------
     cvers : :obj:`str`
         Current pipeline version
-    data_desc : :obj:`str` or :class:`os.Pathlike`
-        Path to pipeline output's dataset_description.json
+    data_desc : :obj:`str` or :obj:`os.PathLike`
+        Path to pipeline output's ``dataset_description.json``
 
     Examples
     --------
