@@ -22,16 +22,10 @@ if datapath:
 
     for ds in datapath.glob("ds*/"):
         paths = [
-            str(p.relative_to(datapath))
-            for p in ds.glob("*_bold.nii.gz")
-            if p.exists()
+            str(p.relative_to(datapath)) for p in ds.glob("*_bold.nii.gz") if p.exists()
         ]
-        bold_datasets += sorted([
-            [p] for p in paths if "echo-" not in p
-        ])
-        meecho = sorted([
-            p for p in paths if "echo-" in p
-        ])
+        bold_datasets += sorted([[p] for p in paths if "echo-" not in p])
+        meecho = sorted([p for p in paths if "echo-" in p])
         if meecho:
             bold_datasets.append(meecho)
 
@@ -39,17 +33,17 @@ if datapath:
     for path in bold_datasets:
         path = path[0]
         exp_masks.append(
-            str((
-                datapath / "derivatives"
-                / path.replace("_echo-1", "").replace("_bold.nii", "_bold_mask.nii")
-            ).absolute())
+            str(
+                (
+                    datapath
+                    / "derivatives"
+                    / path.replace("_echo-1", "").replace("_bold.nii", "_bold_mask.nii")
+                ).absolute()
+            )
         )
 
     bold_datasets = [
-        [
-            str((datapath / p).absolute()) for p in ds
-        ]
-        for ds in bold_datasets
+        [str((datapath / p).absolute()) for p in ds] for ds in bold_datasets
     ]
 
     parameters = zip(bold_datasets, exp_masks)
@@ -58,7 +52,7 @@ if datapath:
         raise RuntimeError(
             f"Data folder <{datapath}> was provided, but no images were found. "
             "Folder contents:\n{}".format(
-                '\n'.join([str(p) for p in datapath.glob('ds*/*.nii.gz')])
+                "\n".join([str(p) for p in datapath.glob("ds*/*.nii.gz")])
             )
         )
 
@@ -92,17 +86,21 @@ def test_masking(input_fname, expected_fname):
     newpath.mkdir(parents=True, exist_ok=True)
 
     # Nipype config (logs and execution)
-    ncfg.update_config({
-        "execution": {
-            "crashdump_dir": str(newpath),
+    ncfg.update_config(
+        {
+            "execution": {
+                "crashdump_dir": str(newpath),
+            }
         }
-    })
+    )
 
     name = basename.rstrip("_bold.nii.gz").replace("-", "_")
-    bold_reference_wf = init_bold_reference_wf(omp_nthreads=1, name=name,
-                                               multiecho=len(input_fname) > 1)
-    bold_reference_wf.inputs.inputnode.bold_file = input_fname[0] if len(input_fname) == 1 \
-        else input_fname
+    bold_reference_wf = init_bold_reference_wf(
+        omp_nthreads=1, name=name, multiecho=len(input_fname) > 1
+    )
+    bold_reference_wf.inputs.inputnode.bold_file = (
+        input_fname[0] if len(input_fname) == 1 else input_fname
+    )
     base_dir = os.getenv("CACHED_WORK_DIRECTORY")
     if base_dir:
         base_dir = Path(base_dir) / dsname
