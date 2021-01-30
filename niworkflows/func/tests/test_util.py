@@ -81,12 +81,22 @@ def symmetric_overlap(img1, img2):
 @pytest.mark.parametrize("input_fname,expected_fname", parameters)
 def test_masking(input_fname, expected_fname):
     """Check for regressions in masking."""
+    from nipype import config as ncfg
+
     basename = Path(input_fname[0]).name
     dsname = Path(expected_fname).parent.name
 
     # Reconstruct base_fname from above
     reports_dir = Path(os.getenv("FMRIPREP_REGRESSION_REPORTS", ""))
     newpath = reports_dir / dsname
+    newpath.mkdir(parents=True, exist_ok=True)
+
+    # Nipype config (logs and execution)
+    ncfg.update_config({
+        "execution": {
+            "crashdump_dir": str(newpath),
+        }
+    })
 
     name = basename.rstrip("_bold.nii.gz").replace("-", "_")
     bold_reference_wf = init_bold_reference_wf(omp_nthreads=1, name=name,
@@ -102,7 +112,6 @@ def test_masking(input_fname, expected_fname):
     out_fname = fname_presuffix(
         Path(expected_fname).name, suffix=".svg", use_ext=False, newpath=str(newpath)
     )
-    newpath.mkdir(parents=True, exist_ok=True)
 
     mask_diff_plot = pe.Node(
         ROIsPlot(colors=["limegreen"], levels=[0.5]), name="mask_diff_plot"
