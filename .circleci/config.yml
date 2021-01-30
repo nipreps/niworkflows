@@ -95,7 +95,8 @@ jobs:
               docker build --rm --cache-from=niworkflows:latest \
                 -t niworkflows:latest \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-                --build-arg VCS_REF=`git rev-parse --short HEAD` . \
+                --build-arg VCS_REF=`git rev-parse --short HEAD` \
+                --build-arg VERSION=`python3 get_version.py` . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
             docker tag niworkflows:latest localhost:5000/niworkflows
@@ -160,40 +161,55 @@ jobs:
             - /tmp/data
 
   get_regression_data:
-    machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: ubuntu-1604:202007-01
-    working_directory: /home/circleci/data
+    docker:
+      - image: continuumio/miniconda3:4.9.2-alpine
+    working_directory: /tmp/data
+    environment:
+      - TEMPLATEFLOW_HOME: /tmp/templateflow
     steps:
       - restore_cache:
           keys:
-            - regression-v5-{{ .Revision }}
-            - regression-v5-
+            - env-v1-{{ .Branch }}-
+            - env-v1-master-
+            - env-v1-
       - run:
-          name: Get truncated BOLD series
+          name: Setup git-annex, DataLad & TemplateFlow
           command: |
-            mkdir -p /tmp/data
-            if [[ ! -d /tmp/data/fmriprep_bold_truncated ]]; then
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O fmriprep_bold_truncated.tar.gz "https://osf.io/286yr/download"
-              tar xvzf fmriprep_bold_truncated.tar.gz -C /tmp/data/
-            else
-              echo "Truncated BOLD series were cached"
-            fi
-      - run:
-          name: Get pre-computed masks
-          command: |
-            if [[ ! -d /tmp/data/fmriprep_bold_mask ]]; then
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O fmriprep_bold_mask.tar.gz "https://osf.io/s4f7b/download"
-              tar xvzf fmriprep_bold_mask.tar.gz -C /tmp/data/
-            else
-              echo "Pre-computed masks were cached"
-            fi
+            conda install -y -c anaconda -c conda-forge git-annex datalad
+            python -m pip install --no-cache-dir -U datalad-osf
+            git config --global user.name 'NiPreps Bot'
+            git config --global user.email 'nipreps@gmail.com'
+            python -m pip install --no-cache-dir -U templateflow
       - save_cache:
-         key: regression-v5-{{ .Revision }}-{{ epoch }}
-         paths:
-            - /tmp/data
+          key: env-v1-{{ .Branch }}-{{ .BuildNum }}
+          paths:
+            - /opt/conda
+
+      - restore_cache:
+          keys:
+            - mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-
+            - mask-regressions-v0-{{ .Branch }}-
+            - mask-regressions-v0-master-
+            - mask-regressions-v0-
+            - mask-regressions-
+      - run:
+          name: Setup TemplateFlow
+          command: |
+            python -c "from templateflow import api as tfapi; \
+                       tfapi.get('MNI152NLin2009cAsym', resolution=1, label='brain', suffix='probseg'); \
+                       tfapi.get('MNI152NLin2009cAsym', resolution=2, desc='fMRIPrep', suffix='boldref'); \
+                       tfapi.get('MNI152NLin2009cAsym', resolution=2, desc='brain', suffix='mask'); "
+      - run:
+          name: Install epi-references
+          command: |
+            datalad install -r https://github.com/nipreps-data/epi-references.git
+            datalad update -r --merge -d epi-references/
+            datalad get -J 2 -r -d epi-references/ epi-references/*
+      - save_cache:
+          key: mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+          paths:
+            - /tmp/templateflow
+            - /tmp/data/epi-references
 
   test_pytest:
     machine:
@@ -300,6 +316,12 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
+
+      - restore_cache:
+          keys:
+            - mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-
+            - mask-regressions-v0-{{ .Branch }}-
+
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ epoch }}
@@ -331,10 +353,6 @@ jobs:
           command: |
             docker pull localhost:5000/niworkflows
             docker tag localhost:5000/niworkflows niworkflows:latest
-
-      - restore_cache:
-          keys:
-            - regression-v5-{{ .Revision }}
       - restore_cache:
           keys:
             - masks-workdir-v4-{{ .Branch }}-{{epoch}}
@@ -347,10 +365,11 @@ jobs:
           command: |
             mkdir -p /tmp/masks/{reports,workdir} && \
             docker run -ti -u $(id -u) -w /src/niworkflows \
+              -v /tmp/templateflow:/templateflow \
+              -v /tmp/data/epi-references:/data -v /tmp/masks/reports:/tmp/masks/reports \
               -e COVERAGE_FILE=/tmp/masks/reports/.coverage \
-              -v /tmp/data:/tmp/data -v /tmp/masks/reports:/tmp/masks/reports \
-              -e FMRIPREP_REGRESSION_SOURCE=/tmp/data/fmriprep_bold_truncated \
-              -e FMRIPREP_REGRESSION_TARGETS=/tmp/data/fmriprep_bold_mask \
+              -e TEMPLATEFLOW_HOME=/templateflow -e TEMPLATEFLOW_AUTOUPDATE=off \
+              -e FMRIPREP_REGRESSION_SOURCE=/data \
               -e FMRIPREP_REGRESSION_REPORTS=/tmp/masks/reports \
               -e CACHED_WORK_DIRECTORY=/tmp/work -v /tmp/masks/workdir:/tmp/work \
               niworkflows:latest \
