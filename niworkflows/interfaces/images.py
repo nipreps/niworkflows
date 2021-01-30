@@ -195,9 +195,9 @@ class _RobustAverageInputSpec(BaseInterfaceInputSpec):
     )
     t_mask = traits.List(traits.Bool, desc="List of selected timepoints to be averaged")
     mc_method = traits.Enum(
-        None,
         "AFNI",
         "FSL",
+        None,
         usedefault=True,
         desc="Which software to use to perform motion correction",
     )
@@ -257,7 +257,7 @@ class RobustAverage(SimpleInterface):
                 f"Image length ({img_len} timepoints) unmatched by mask ({len(t_mask)})"
             )
 
-        n_volumes = np.sum(t_mask)
+        n_volumes = sum(t_mask)
         if n_volumes < 1:
             raise ValueError("At least one volume should be selected for slicing")
 
@@ -267,7 +267,28 @@ class RobustAverage(SimpleInterface):
         sliced = nb.concat_images(
             i for i, t in zip(nb.four_to_three(img), t_mask) if t
         )
-        sliced.to_filename(self._results["out_volumes"])
+
+        data = sliced.get_fdata(dtype="float32")
+        # Data can come with outliers showing very high numbers - preemptively prune
+        data = np.clip(
+            data,
+            a_min=0.0 if self.inputs.nonnegative else np.percentile(data, 0.2),
+            a_max=np.percentile(data, 99.8),
+        )
+
+        gs_drift = np.mean(data, axis=(0, 1, 2))
+        gs_drift /= gs_drift.max()
+        self._results["out_drift"] = [float(i) for i in gs_drift]
+
+        data /= gs_drift
+        data = np.clip(
+            data,
+            a_min=0.0 if self.inputs.nonnegative else data.min(),
+            a_max=data.max(),
+        )
+        sliced.__class__(data, sliced.affine, sliced.header).to_filename(
+            self._results["out_volumes"]
+        )
 
         if n_volumes == 1:
             nb.squeeze_image(sliced).to_filename(self._results["out_file"])
@@ -280,11 +301,10 @@ class RobustAverage(SimpleInterface):
             res = Volreg(
                 in_file=self._results["out_volumes"],
                 args="-Fourier -twopass",
-                oned_matrix_save="afni-oned-matrix.xfm",
                 zpad=4,
                 outputtype="NIFTI_GZ",
             ).run()
-            self._results["out_hmc"] = res.outputs.oned_matrix_save
+            # self._results["out_hmc"] = res.outputs.oned_matrix_save
 
         elif self.inputs.mc_method == "FSL":
             from nipype.interfaces.fsl import MCFLIRT
@@ -297,14 +317,8 @@ class RobustAverage(SimpleInterface):
             self._results["out_hmc"] = res.outputs.mat_file
 
         if self.inputs.mc_method:
-            sliced = nb.load(res.outputs.out_file)
+            data = nb.load(res.outputs.out_file).get_fdata(dtype="float32")
 
-        data = np.asanyarray(sliced.dataobj)
-        gs_drift = np.median(data, axis=(0, 1, 2))
-        gs_drift /= gs_drift[0]
-        self._results["out_drift"] = [float(i) for i in gs_drift]
-
-        data /= gs_drift[np.newaxis, np.newaxis, np.newaxis, ...]
         data = np.clip(
             data,
             a_min=0.0 if self.inputs.nonnegative else data.min(),
