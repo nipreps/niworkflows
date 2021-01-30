@@ -355,10 +355,10 @@ jobs:
             docker tag localhost:5000/niworkflows niworkflows:latest
       - restore_cache:
           keys:
-            - masks-workdir-v4-{{ .Branch }}-{{epoch}}
-            - masks-workdir-v4-{{ .Branch }}-
-            - masks-workdir-v4-master-
-            - masks-workdir-v4-
+            - masks-workdir-v5-{{ .Branch }}-{{epoch}}
+            - masks-workdir-v5-{{ .Branch }}-
+            - masks-workdir-v5-master-
+            - masks-workdir-v5-
       - run:
           name: Run regression tests on EPI masks
           no_output_timeout: 2h
@@ -389,7 +389,7 @@ jobs:
       - store_test_results:
           path: /tmp/masks/reports
       - save_cache:
-         key: masks-workdir-v4-{{ .Branch }}-{{ epoch }}
+         key: masks-workdir-v5-{{ .Branch }}-{{ epoch }}
          paths:
             - /tmp/masks/workdir
 
