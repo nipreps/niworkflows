@@ -146,22 +146,12 @@ ENV MKL_NUM_THREADS=1 \
 RUN python -c "from matplotlib import font_manager" && \
     sed -i 's/\(backend *: \).*$/\1Agg/g' $( python -c "import matplotlib; print(matplotlib.matplotlib_fname())" )
 
-# Installing dev requirements (packages that are not in pypi)
-# Precaching atlases
-RUN pip install --no-cache-dir "templateflow >= 0.6" && \
-    rm -rf $HOME/.cache/pip && \
-    python -c "from templateflow import api as tfapi; \
-               tfapi.get(['MNI152Lin', 'MNI152NLin2009cAsym', 'OASIS30ANTs'], suffix='T1w'); \
-               tfapi.get(['MNI152Lin', 'MNI152NLin2009cAsym', 'OASIS30ANTs'], desc='brain', suffix='mask'); \
-               tfapi.get(['MNI152NLin2009cAsym'], desc='fMRIPrep', suffix='boldref'); \
-               tfapi.get('OASIS30ANTs', resolution=1, desc='4', suffix='dseg'); \
-               tfapi.get(['OASIS30ANTs', 'NKI'], resolution=1, label='brain', suffix='probseg'); \
-               tfapi.get(['OASIS30ANTs', 'NKI'], resolution=1, desc='BrainCerebellumRegistration', suffix='mask'); "
-
-WORKDIR /src/
-COPY . niworkflows/
 WORKDIR /src/niworkflows/
-RUN pip install --no-cache-dir -e .[all] && \
+COPY . /src/niworkflows/
+ARG VERSION
+RUN echo "${VERSION}" > /src/niworkflows/niworkflows/VERSION && \
+    echo "include niworkflows/VERSION" >> /src/niworkflows/MANIFEST.in && \
+    pip install --no-cache-dir -e .[all] && \
     rm -rf $HOME/.cache/pip
 
 COPY docker/files/nipype.cfg /home/niworkflows/.nipype/nipype.cfg

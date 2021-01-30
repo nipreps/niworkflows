@@ -9,6 +9,7 @@ __pycache__
 build/
 dist/
 docs/
+examples/
 niworkflows.egg-info/
 pip-wheel-metadata/
 src/
@@ -36,5 +37,6 @@ circle.yml
 codecov.yml
 
 # other
+Makefile
 .zenodo.json
 

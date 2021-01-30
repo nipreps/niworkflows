@@ -95,7 +95,8 @@ jobs:
               docker build --rm --cache-from=niworkflows:latest \
                 -t niworkflows:latest \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-                --build-arg VCS_REF=`git rev-parse --short HEAD` . \
+                --build-arg VCS_REF=`git rev-parse --short HEAD` \
+                --build-arg VERSION=`python3 get_version.py` . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
             docker tag niworkflows:latest localhost:5000/niworkflows
