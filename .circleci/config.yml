@@ -161,26 +161,31 @@ jobs:
             else
               echo "BIDS stub was cached"
             fi
+      - save_cache:
+         key: data-v3-{{ .Branch }}-{{ epoch }}
+         paths:
+            - /tmp/data/ds000003
+            - /tmp/data/BIDS-examples-1-enh-ds054
       - run:
           name: Store FreeSurfer license file
           command: |
             mkdir -p /tmp/fslicense
             cd /tmp/fslicense
             echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IGxpY2Vuc2UudHh0Cg==" | base64 -d | sh
+
+      - checkout:
+          path: /tmp/src/niworkflows
+
       - persist_to_workspace:
           root: /tmp
           paths:
             - fslicense
-
-      - save_cache:
-         key: data-v3-{{ .Branch }}-{{ epoch }}
-         paths:
-            - /tmp/data/ds000003
-            - /tmp/data/BIDS-examples-1-enh-ds054
+            - src/
 
       - run:
           name: Check if regression data must be downloaded
           command: |
+            cd /tmp/src/niworkflows
             set +e
             test_masks="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[test[ _]?masks?\]' )$( echo $CIRCLE_BRANCH | grep -i -E '^masks?/' )"
             set -e
@@ -223,8 +228,6 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
-      - checkout:
-          path: /tmp/src/niworkflows
       - run:
           name: Get codecov
           command: python -m pip install codecov
@@ -329,6 +332,19 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
+
+      - run:
+          name: Check if regression data must be downloaded
+          command: |
+            cd /tmp/src/niworkflows
+            set +e
+            test_masks="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[test[ _]?masks?\]' )$( echo $CIRCLE_BRANCH | grep -i -E '^masks?/' )"
+            set -e
+            if [[ "x${CIRCLE_TAG}" = "x" && "${CIRCLE_BRANCH}" != "master" && "x${test_masks}" = "x" ]]; then
+              echo "Not a tag or master branch, not a ``masks?/`` branch, no ``[test_masks]`` label in commit message"
+              echo "Skipping download of test data for mask regressions."
+              circleci step halt
+            fi
 
       - restore_cache:
           keys:
@@ -655,10 +671,6 @@ workflows:
             - build
             - get_data
           filters:
-            branches:
-              only:
-                - /master/
-                - /masks?\/.*/
             tags:
               ignore: /.*/
 
