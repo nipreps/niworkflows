@@ -113,26 +113,43 @@ jobs:
             - /tmp/images
 
   get_data:
-    machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: ubuntu-1604:202007-01
-    working_directory: /home/circleci/data
+    docker:
+      - image: continuumio/miniconda3:4.9.2-alpine
+    working_directory: /tmp/data
+    environment:
+      - TEMPLATEFLOW_HOME: /tmp/templateflow
     steps:
       - restore_cache:
           keys:
-            - data-v1-{{ epoch }}
-            - data-v1-
+            - env-v1-{{ .Branch }}-
+            - env-v1-master-
+            - env-v1-
+      - run:
+          name: Setup git-annex, DataLad & TemplateFlow
+          command: |
+            conda install -y -c anaconda -c conda-forge git-annex datalad wget
+            python -m pip install --no-cache-dir -U datalad-osf
+            git config --global user.name 'NiPreps Bot'
+            git config --global user.email 'nipreps@gmail.com'
+            python -m pip install --no-cache-dir -U templateflow
+      - save_cache:
+          key: env-v1-{{ .Branch }}-{{ .BuildNum }}
+          paths:
+            - /opt/conda
+
+      - restore_cache:
+          keys:
+            - data-v3-{{ .Branch }}-{{ epoch }}
+            - data-v3-{{ .Branch }}-
+            - data-v3-master-
+            - data-v3-
       - run:
           name: Get test data from ds000003
           command: |
-            mkdir -p /tmp/data
-            if [[ ! -d /tmp/data/ds003_downsampled ]]; then
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O ds003_downsampled.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f328f6b83f6901ef94cf70"
-              tar xvzf ds003_downsampled.tar.gz -C /tmp/data/
-            else
-              echo "Dataset ds000003 was cached"
-            fi
+            datalad install -r https://github.com/nipreps-data/ds000003.git
+            datalad update -r --merge -d ds000003/
+            datalad get -J 2 -r -d ds000003/ ds000003/*
+
       - run:
           name: Get BIDS test data stub
           command: |
@@ -153,37 +170,25 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - data
             - fslicense
-      - save_cache:
-         key: data-v1-{{ epoch }}
-         paths:
-            - /tmp/data
 
-  get_regression_data:
-    docker:
-      - image: continuumio/miniconda3:4.9.2-alpine
-    working_directory: /tmp/data
-    environment:
-      - TEMPLATEFLOW_HOME: /tmp/templateflow
-    steps:
-      - restore_cache:
-          keys:
-            - env-v1-{{ .Branch }}-
-            - env-v1-master-
-            - env-v1-
-      - run:
-          name: Setup git-annex, DataLad & TemplateFlow
-          command: |
-            conda install -y -c anaconda -c conda-forge git-annex datalad
-            python -m pip install --no-cache-dir -U datalad-osf
-            git config --global user.name 'NiPreps Bot'
-            git config --global user.email 'nipreps@gmail.com'
-            python -m pip install --no-cache-dir -U templateflow
       - save_cache:
-          key: env-v1-{{ .Branch }}-{{ .BuildNum }}
-          paths:
-            - /opt/conda
+         key: data-v3-{{ .Branch }}-{{ epoch }}
+         paths:
+            - /tmp/data/ds000003
+            - /tmp/data/BIDS-examples-1-enh-ds054
+
+      - run:
+          name: Check if regression data must be downloaded
+          command: |
+            set +e
+            test_masks="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[test[ _]?masks?\]' )$( echo $CIRCLE_BRANCH | grep -i -E '^masks?/' )"
+            set -e
+            if [[ "x${CIRCLE_TAG}" = "x" && "${CIRCLE_BRANCH}" != "master" && "x${test_masks}" = "x" ]]; then
+              echo "Not a tag or master branch, not a ``masks?/`` branch, no ``[test_masks]`` label in commit message"
+              echo "Skipping download of test data for mask regressions."
+              circleci step halt
+            fi
 
       - restore_cache:
           keys:
@@ -248,10 +253,18 @@ jobs:
             docker run -d -p 5000:5000 --restart=always --name=registry \
                 -v /tmp/docker:/var/lib/registry registry:2
       - run:
-          name: Pull images to registry
+          name: Pull images from registry
           command: |
             docker pull localhost:5000/niworkflows
             docker tag localhost:5000/niworkflows niworkflows:latest
+
+      - restore_cache:
+          keys:
+            - data-v3-{{ .Branch }}-{{ epoch }}
+            - data-v3-{{ .Branch }}-
+            - data-v3-master-
+            - data-v3-
+
       - run:
           name: Run unit tests
           no_output_timeout: 2h
@@ -614,20 +627,8 @@ workflows:
               only: /.*/
       - get_data:
           filters:
-            branches:
-              ignore:
-                - /masks?\/.*/
             tags:
               only: /.*/
-
-      - get_regression_data:
-          filters:
-            branches:
-              only:
-                - /master/
-                - /masks?\/.*/
-            tags:
-              ignore: /.*/
 
       - test_package:
           filters:
@@ -652,7 +653,7 @@ workflows:
       - test_masks:
           requires:
             - build
-            - get_regression_data
+            - get_data
           filters:
             branches:
               only:

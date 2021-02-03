@@ -14,9 +14,9 @@ filepath = os.path.dirname(os.path.realpath(__file__))
 datadir = os.path.realpath(os.path.join(filepath, "data"))
 
 test_data_env = os.getenv(
-    "TEST_DATA_HOME", str(Path.home() / ".cache" / "stanford-crn")
+    "TEST_DATA_HOME", str(Path.home() / ".cache" / "nipreps-data")
 )
-data_dir = Path(test_data_env) / "ds003_downsampled"
+data_dir = Path(test_data_env) / "ds000003"
 
 has_fsl = FSLInfo.version() is not None
 has_freesurfer = FreeSurferInfo.version() is not None
