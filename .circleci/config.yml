@@ -113,54 +113,6 @@ jobs:
             - /tmp/images
 
   get_data:
-    machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: ubuntu-1604:202007-01
-    working_directory: /home/circleci/data
-    steps:
-      - restore_cache:
-          keys:
-            - data-v1-{{ epoch }}
-            - data-v1-
-      - run:
-          name: Get test data from ds000003
-          command: |
-            mkdir -p /tmp/data
-            if [[ ! -d /tmp/data/ds003_downsampled ]]; then
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O ds003_downsampled.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f328f6b83f6901ef94cf70"
-              tar xvzf ds003_downsampled.tar.gz -C /tmp/data/
-            else
-              echo "Dataset ds000003 was cached"
-            fi
-      - run:
-          name: Get BIDS test data stub
-          command: |
-            mkdir -p /tmp/data
-            if [[ ! -d /tmp/data/BIDS-examples-1-enh-ds054 ]]; then
-              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
-                -O BIDS-examples-1-enh-ds054.zip "http://github.com/chrisfilo/BIDS-examples-1/archive/enh/ds054.zip"
-              unzip BIDS-examples-1-enh-ds054.zip -d /tmp/data/
-            else
-              echo "BIDS stub was cached"
-            fi
-      - run:
-          name: Store FreeSurfer license file
-          command: |
-            mkdir -p /tmp/fslicense
-            cd /tmp/fslicense
-            echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IGxpY2Vuc2UudHh0Cg==" | base64 -d | sh
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - data
-            - fslicense
-      - save_cache:
-         key: data-v1-{{ epoch }}
-         paths:
-            - /tmp/data
-
-  get_regression_data:
     docker:
       - image: continuumio/miniconda3:4.9.2-alpine
     working_directory: /tmp/data
@@ -175,7 +127,7 @@ jobs:
       - run:
           name: Setup git-annex, DataLad & TemplateFlow
           command: |
-            conda install -y -c anaconda -c conda-forge git-annex datalad
+            conda install -y -c anaconda -c conda-forge git-annex datalad wget
             python -m pip install --no-cache-dir -U datalad-osf
             git config --global user.name 'NiPreps Bot'
             git config --global user.email 'nipreps@gmail.com'
@@ -184,6 +136,66 @@ jobs:
           key: env-v1-{{ .Branch }}-{{ .BuildNum }}
           paths:
             - /opt/conda
+
+      - restore_cache:
+          keys:
+            - data-v3-{{ .Branch }}-{{ epoch }}
+            - data-v3-{{ .Branch }}-
+            - data-v3-master-
+            - data-v3-
+      - run:
+          name: Get test data from ds000003
+          command: |
+            if [[ ! -d ds000003 ]]; then
+              datalad install -r https://github.com/nipreps-data/ds000003.git
+            fi
+            datalad update -r --merge -d ds000003/
+            datalad get -J 2 -r -d ds000003/ ds000003/*
+
+      - run:
+          name: Get BIDS test data stub
+          command: |
+            mkdir -p /tmp/data
+            if [[ ! -d /tmp/data/BIDS-examples-1-enh-ds054 ]]; then
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O BIDS-examples-1-enh-ds054.zip "http://github.com/chrisfilo/BIDS-examples-1/archive/enh/ds054.zip"
+              unzip BIDS-examples-1-enh-ds054.zip -d /tmp/data/
+            else
+              echo "BIDS stub was cached"
+            fi
+      - save_cache:
+         key: data-v3-{{ .Branch }}-{{ epoch }}
+         paths:
+            - /tmp/data/ds000003
+            - /tmp/data/BIDS-examples-1-enh-ds054
+      - run:
+          name: Store FreeSurfer license file
+          command: |
+            mkdir -p /tmp/fslicense
+            cd /tmp/fslicense
+            echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IGxpY2Vuc2UudHh0Cg==" | base64 -d | sh
+
+      - checkout:
+          path: /tmp/src/niworkflows
+
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - fslicense
+            - src/
+
+      - run:
+          name: Check if regression data must be downloaded
+          command: |
+            cd /tmp/src/niworkflows
+            set +e
+            test_masks="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[test[ _]?masks?\]' )$( echo $CIRCLE_BRANCH | grep -i -E '^masks?/' )"
+            set -e
+            if [[ "x${CIRCLE_TAG}" = "x" && "${CIRCLE_BRANCH}" != "master" && "x${test_masks}" = "x" ]]; then
+              echo "Not a tag or master branch, not a ``masks?/`` branch, no ``[test_masks]`` label in commit message"
+              echo "Skipping download of test data for mask regressions."
+              circleci step halt
+            fi
 
       - restore_cache:
           keys:
@@ -202,7 +214,9 @@ jobs:
       - run:
           name: Install epi-references
           command: |
-            datalad install -r https://github.com/nipreps-data/epi-references.git
+            if [[ ! -d epi-references ]]; then
+              datalad install -r https://github.com/nipreps-data/epi-references.git
+            fi
             datalad update -r --merge -d epi-references/
             datalad get -J 2 -r -d epi-references/ epi-references/*
       - save_cache:
@@ -218,8 +232,6 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
-      - checkout:
-          path: /tmp/src/niworkflows
       - run:
           name: Get codecov
           command: python -m pip install codecov
@@ -248,10 +260,18 @@ jobs:
             docker run -d -p 5000:5000 --restart=always --name=registry \
                 -v /tmp/docker:/var/lib/registry registry:2
       - run:
-          name: Pull images to registry
+          name: Pull images from registry
           command: |
             docker pull localhost:5000/niworkflows
             docker tag localhost:5000/niworkflows niworkflows:latest
+
+      - restore_cache:
+          keys:
+            - data-v3-{{ .Branch }}-{{ epoch }}
+            - data-v3-{{ .Branch }}-
+            - data-v3-master-
+            - data-v3-
+
       - run:
           name: Run unit tests
           no_output_timeout: 2h
@@ -316,6 +336,19 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
+
+      - run:
+          name: Determine whether regression tests (masks) must be executed
+          command: |
+            cd /tmp/src/niworkflows
+            set +e
+            test_masks="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[test[ _]?masks?\]' )$( echo $CIRCLE_BRANCH | grep -i -E '^masks?/' )"
+            set -e
+            if [[ "x${CIRCLE_TAG}" = "x" && "${CIRCLE_BRANCH}" != "master" && "x${test_masks}" = "x" ]]; then
+              echo "Not a tag or master branch, not a ``masks?/`` branch, no ``[test_masks]`` label in commit message"
+              echo "Skipping download of test data for mask regressions."
+              circleci step halt
+            fi
 
       - restore_cache:
           keys:
@@ -404,8 +437,6 @@ jobs:
               -e COVERAGE_FILE=/tmp/masks/reports/.coverage \
               -v /tmp/masks/reports:/tmp/masks/reports \
               niworkflows:latest coverage xml -o coverage.xml
-      - checkout:
-          path: /tmp/src/niworkflows
       - run:
           name: Get codecov
           command: python -m pip install codecov
@@ -614,20 +645,8 @@ workflows:
               only: /.*/
       - get_data:
           filters:
-            branches:
-              ignore:
-                - /masks?\/.*/
             tags:
               only: /.*/
-
-      - get_regression_data:
-          filters:
-            branches:
-              only:
-                - /master/
-                - /masks?\/.*/
-            tags:
-              ignore: /.*/
 
       - test_package:
           filters:
@@ -652,12 +671,8 @@ workflows:
       - test_masks:
           requires:
             - build
-            - get_regression_data
+            - get_data
           filters:
-            branches:
-              only:
-                - /master/
-                - /masks?\/.*/
             tags:
               ignore: /.*/
 
