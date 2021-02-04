@@ -176,6 +176,7 @@ jobs:
          key: data-v3-{{ .Branch }}-{{ epoch }}
          paths:
             - /tmp/data/ds000003
+            - /tmp/data/ds000030
             - /tmp/data/BIDS-examples-1-enh-ds054
       - run:
           name: Store FreeSurfer license file
