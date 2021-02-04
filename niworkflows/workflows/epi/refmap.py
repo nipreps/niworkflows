@@ -52,7 +52,8 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
         FixN4BiasFieldCorrection as N4BiasFieldCorrection,
     )
     from ...interfaces.freesurfer import StructuralReference
-    from ...interfaces.images import ValidateImage, RobustAverage
+    from ...interfaces.header import ValidateImage
+    from ...interfaces.images import RobustAverage
     from ...interfaces.nibabel import IntensityClip
 
     wf = Workflow(name=name)
@@ -70,7 +71,7 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
         NonsteadyStatesDetector(), name="select_volumes", iterfield=["in_file"]
     )
     run_avgs = pe.MapNode(
-        RobustAverage(), name="run_avgs", mem_gb=1, iterfield=["in_file"]
+        RobustAverage(), name="run_avgs", mem_gb=1, iterfield=["in_file", "t_mask"]
     )
 
     clip_avgs = pe.MapNode(IntensityClip(), name="clip_avgs", iterfield=["in_file"])
@@ -86,6 +87,7 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
         ),
         n_procs=omp_nthreads,
         name="n4_avgs",
+        iterfield=["input_image"],
     )
 
     epi_merge = pe.Node(
