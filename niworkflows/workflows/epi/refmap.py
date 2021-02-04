@@ -106,6 +106,8 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
 
     tonii = pe.Node(niu.Function(function=_tonii), name="tonii")
 
+    clipper_final = pe.Node(IntensityClip(p_max=100.0), name="clipper_final")
+
     def _set_threads(in_list, maximum):
         return min(len(in_list), maximum)
 
@@ -123,7 +125,8 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
             (("out_file", _set_threads, omp_nthreads), "num_threads"),
         ]),
         (epi_merge, tonii, [("out_file", "in_file")]),
-        (tonii, outputnode, [("out", "epiref")]),
+        (tonii, clipper_final, [("out", "in_file")]),
+        (clipper_final, outputnode, [("out_file", "epiref")]),
         (epi_merge, outputnode, [("transform_outputs", "xfms")]),
         (n4_avgs, outputnode, [("output_image", "volumes")]),
 
