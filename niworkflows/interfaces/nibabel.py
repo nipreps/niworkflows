@@ -347,6 +347,42 @@ class GenerateSamplingReference(SimpleInterface):
         return runtime
 
 
+class _IntensityClipInputSpec(BaseInterfaceInputSpec):
+    in_file = File(
+        exists=True, mandatory=True, desc="file which intensity will be clipped"
+    )
+    p_min = traits.Float(35.0, usedefault=True, desc="percentile for the lower bound")
+    p_max = traits.Float(99.98, usedefault=True, desc="percentile for the upper bound")
+    nonnegative = traits.Bool(
+        True, usedefault=True, desc="whether input intensities must be positive"
+    )
+    dtype = traits.Enum(
+        "int16", "float32", "uint8", usedefault=True, desc="output datatype"
+    )
+
+
+class _IntensityClipOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="file after clipping")
+
+
+class IntensityClip(SimpleInterface):
+    """Clip the intensity range as prescribed by the percentiles."""
+
+    input_spec = _IntensityClipInputSpec
+    output_spec = _IntensityClipOutputSpec
+
+    def _run_interface(self, runtime):
+        self._results["out_file"] = _advanced_clip(
+            self.inputs.in_file,
+            p_min=self.inputs.p_min,
+            p_max=self.inputs.p_max,
+            nonnegative=self.inputs.nonnegative,
+            dtype=self.inputs.dtype,
+            newpath=runtime.cwd,
+        )
+        return runtime
+
+
 def _gen_reference(
     fixed_image,
     moving_image,
@@ -433,3 +469,41 @@ def _gen_reference(
     )
     resampled.to_filename(out_file)
     return out_file
+
+
+def _advanced_clip(
+    in_file, p_min=35, p_max=99.98, nonnegative=True, dtype="int16", newpath=None
+):
+    from pathlib import Path
+    import nibabel as nb
+    import numpy as np
+    from scipy import ndimage
+    from skimage.morphology import ball
+
+    out_file = (Path(newpath or "") / "clipped.nii.gz").absolute()
+
+    # Load data
+    img = nb.load(in_file)
+    data = img.get_fdata(dtype="float32")
+
+    # Calculate stats on denoised version, to preempt outliers from biasing
+    denoised = ndimage.median_filter(data, footprint=ball(3))
+
+    # Clip and cast
+    a_min = np.percentile(denoised[denoised > 0], p_min)
+    a_max = np.percentile(denoised[denoised > 0], p_max)
+    if nonnegative:
+        a_min = max(a_min, 0.0)
+
+    data = np.clip(data, a_min=a_min, a_max=a_max)
+    data -= data.min()
+    data /= data.max()
+
+    if dtype in ("uint8", "int16"):
+        data = np.round(255 * data).astype(dtype)
+
+    hdr = img.header.copy()
+    hdr.set_data_dtype(dtype)
+    img.__class__(data, img.affine, hdr).to_filename(out_file)
+
+    return str(out_file)
