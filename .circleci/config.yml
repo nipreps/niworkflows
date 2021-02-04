@@ -153,6 +153,15 @@ jobs:
             datalad get -J 2 -r -d ds000003/ ds000003/*
 
       - run:
+          name: Get test data from ds000030
+          command: |
+            if [[ ! -d ds000030 ]]; then
+              datalad install -r https://github.com/nipreps-data/ds000030.git
+            fi
+            datalad update -r --merge -d ds000030/
+            datalad get -J 2 -r -d ds000030/ ds000030/sub-10228/func/*
+
+      - run:
           name: Get BIDS test data stub
           command: |
             mkdir -p /tmp/data
