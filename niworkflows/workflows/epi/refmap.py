@@ -104,6 +104,11 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
         name="epi_merge",
     )
 
+    tonii = pe.Node(niu.Function(function=_tonii), name="tonii")
+
+    def _set_threads(in_list, maximum):
+        return min(len(in_list), maximum)
+
     # fmt:off
     wf.connect([
         (inputnode, validate_nii, [(("in_files", listify), "in_file")]),
@@ -113,12 +118,28 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
         (run_avgs, clip_avgs, [("out_file", "in_file")]),
         (clip_avgs, n4_avgs, [("out_file", "input_image")]),
         (n4_avgs, clipper_post, [("output_image", "in_file")]),
-        (clipper_post, epi_merge, [("out_file", "in_files")]),
-        (epi_merge, outputnode, [("out_file", "epiref"),
-                                 ("transform_outputs", "xfms")]),
+        (clipper_post, epi_merge, [
+            ("out_file", "in_files"),
+            (("out_file", _set_threads, omp_nthreads), "num_threads"),
+        ]),
+        (epi_merge, tonii, [("out_file", "in_file")]),
+        (tonii, outputnode, [("out", "epiref")]),
+        (epi_merge, outputnode, [("transform_outputs", "xfms")]),
         (n4_avgs, outputnode, [("output_image", "volumes")]),
 
     ])
     # fmt:on
 
     return wf
+
+
+def _tonii(in_file):
+    if in_file.endswith((".nii", ".nii.gz")):
+        return in_file
+
+    import nibabel as nb
+    from pathlib import Path
+    out_file = Path() / Path(in_file).name.replace(".mgz", ".nii.gz")
+    img = nb.load(in_file)
+    nb.Nifti1Image(img.dataobj, img.affine, None).to_filename(out_file)
+    return str(out_file.absolute())

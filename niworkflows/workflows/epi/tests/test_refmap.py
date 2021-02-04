@@ -3,7 +3,7 @@ import os
 from ..refmap import init_epi_reference_wf
 
 
-def test_brainmasker(tmpdir, ds000030_dir, workdir, outdir):
+def test_reference(tmpdir, ds000030_dir, workdir, outdir):
     """Exercise the EPI reference workflow."""
     tmpdir.chdir()
 
