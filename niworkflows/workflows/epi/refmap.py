@@ -11,18 +11,28 @@ from ...engine.workflows import LiterateWorkflow as Workflow
 DEFAULT_MEMORY_MIN_GB = 0.01
 
 
-def init_func_reference_wf(omp_nthreads, name="func_reference_wf"):
+def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
     """
+    Build a workflow that generates a reference map from a set of EPI images.
 
+    .. danger ::
+
+        All input files MUST have the same shimming configuration.
+        At the very least, make sure all input EPI images are acquired within the
+        same session, and have the same PE direction and total readout time.
+
+    Parameters
+    ----------
+    omp_nthreads : :obj:`int`
+        Maximum number of threads an individual process may use
+    name : :obj:`str`
+        Name of workflow (default: ``epi_reference_wf``)
 
     Inputs
     ------
     in_files : :obj:`list` of :obj:`str`
         List of paths of the input EPI images from which reference volumes will be
         selected, aligned and averaged.
-        IMPORTANT: All input files MUST have the same shimming configuration.
-        At the very least, make sure all input EPI images are acquired within the
-        same session, and have the same PE direction and total readout time.
 
     Outputs
     -------
