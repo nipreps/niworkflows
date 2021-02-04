@@ -45,12 +45,10 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
     <https://github.com/nipreps/niworkflows/issues/601>`__.
 
     """
+    from nipype.interfaces.ants import N4BiasFieldCorrection
     from ...utils.connections import listify
 
     from ...interfaces.bold import NonsteadyStatesDetector
-    from ...interfaces.fixes import (
-        FixN4BiasFieldCorrection as N4BiasFieldCorrection,
-    )
     from ...interfaces.freesurfer import StructuralReference
     from ...interfaces.header import ValidateImage
     from ...interfaces.images import RobustAverage
@@ -89,6 +87,9 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
         name="n4_avgs",
         iterfield=["input_image"],
     )
+    clipper_post = pe.MapNode(
+        IntensityClip(p_max=100.0), name="clipper_post", iterfield=["in_file"]
+    )
 
     epi_merge = pe.Node(
         StructuralReference(
@@ -111,7 +112,8 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
         (select_volumes, run_avgs, [("t_mask", "t_mask")]),
         (run_avgs, clip_avgs, [("out_file", "in_file")]),
         (clip_avgs, n4_avgs, [("out_file", "input_image")]),
-        (n4_avgs, epi_merge, [("output_image", "in_files")]),
+        (n4_avgs, clipper_post, [("output_image", "in_file")]),
+        (clipper_post, epi_merge, [("out_file", "in_files")]),
         (epi_merge, outputnode, [("out_file", "epiref"),
                                  ("transform_outputs", "xfms")]),
         (n4_avgs, outputnode, [("output_image", "volumes")]),
@@ -120,32 +122,3 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
     # fmt:on
 
     return wf
-
-
-def _max_snr(in_files, ddof=0):
-    """
-    Quick and dirty assessment of a list of images' signal-to-noise ratio.
-    This is largely inpired by scipy's deprecated ``signaltonoise`` function.
-    https://github.com/scipy/scipy/issues/9097#issuecomment-409413907
-    """
-    import nibabel as nb
-    import numpy as np
-
-    m_snr = None
-    filename = None
-
-    for fl in in_files:
-        data = nb.load(fl).get_fdata()
-        snr = np.where(sd == 0, 0, data.mean() / data.std(ddof=ddof))
-        if m_snr is None or snr > m_snr:
-            m_snr = snr
-            filename = fl
-
-    if filename is None:
-        raise RuntimeError("Could not calculate SNR.")
-
-    # save location and remove future reference target from list
-    file_idx = in_files.index(filename)
-    in_files.remove(filename)
-
-    return filename, in_files, file_idx
