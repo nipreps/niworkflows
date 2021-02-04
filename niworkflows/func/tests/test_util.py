@@ -10,8 +10,9 @@ from nipype.utils.filemanip import fname_presuffix, copyfile
 from nilearn.image import load_img
 
 from ...interfaces.reportlets.masks import ROIsPlot
+from ...workflows.epi.refmap import init_epi_reference_wf
 
-from ..util import init_bold_reference_wf
+from ..util import init_enhance_and_skullstrip_bold_wf
 
 datapath = os.getenv("FMRIPREP_REGRESSION_SOURCE")
 parameters = []
@@ -94,18 +95,18 @@ def test_masking(input_fname, expected_fname):
         }
     )
 
-    name = basename.rstrip("_bold.nii.gz").replace("-", "_")
-    bold_reference_wf = init_bold_reference_wf(
-        omp_nthreads=1, name=name, multiecho=len(input_fname) > 1
-    )
-    bold_reference_wf.inputs.inputnode.bold_file = (
-        input_fname[0] if len(input_fname) == 1 else input_fname
-    )
+    wf = pe.Workflow(name=basename.replace("_bold.nii.gz", "").replace("-", "_"))
     base_dir = os.getenv("CACHED_WORK_DIRECTORY")
     if base_dir:
         base_dir = Path(base_dir) / dsname
         base_dir.mkdir(parents=True, exist_ok=True)
-        bold_reference_wf.base_dir = str(base_dir)
+        wf.base_dir = str(base_dir)
+
+    epi_reference_wf = init_epi_reference_wf(omp_nthreads=os.cpu_count())
+    epi_reference_wf.inputs.inputnode.in_files = (
+        input_fname[0] if len(input_fname) == 1 else input_fname
+    )
+    enhance_and_skullstrip_bold_wf = init_enhance_and_skullstrip_bold_wf()
 
     out_fname = fname_presuffix(
         Path(expected_fname).name, suffix=".svg", use_ext=False, newpath=str(newpath)
@@ -118,17 +119,18 @@ def test_masking(input_fname, expected_fname):
     mask_diff_plot.inputs.in_mask = expected_fname
     mask_diff_plot.inputs.out_report = out_fname
 
-    outputnode = bold_reference_wf.get_node("outputnode")
-    bold_reference_wf.connect(
-        [
-            (
-                outputnode,
-                mask_diff_plot,
-                [("ref_image", "in_file"), ("bold_mask", "in_rois")],
-            )
-        ]
-    )
-    res = bold_reference_wf.run(plugin="MultiProc")
+    # fmt:off
+    wf.connect([
+        (epi_reference_wf, enhance_and_skullstrip_bold_wf, [
+            ("outputnode.epiref", "inputnode.in_file")
+        ]),
+        (enhance_and_skullstrip_bold_wf, mask_diff_plot, [
+            ("outputnode.bias_corrected_file", "in_file"),
+            ("outputnode.mask_file", "in_rois"),
+        ]),
+    ])
+
+    res = wf.run(plugin="MultiProc")
 
     combine_masks = [node for node in res.nodes if node.name.endswith("combine_masks")][
         0

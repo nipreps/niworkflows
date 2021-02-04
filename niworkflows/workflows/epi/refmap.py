@@ -36,7 +36,7 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
 
     Outputs
     -------
-    out_epiref : :obj:`str`
+    epiref : :obj:`str`
         Path of the generated EPI reference file.
 
     See Also
@@ -55,6 +55,9 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
     from ...interfaces.nibabel import IntensityClip
 
     wf = Workflow(name=name)
+    wf.__desc__ = f"""\
+First, a reference volume using a custom methodology of *fMRIPrep*.
+"""
     inputnode = pe.Node(niu.IdentityInterface(fields=["in_files"]), name="inputnode")
     outputnode = pe.Node(
         niu.IdentityInterface(fields=["epiref", "xfms", "volumes"]), name="outputnode"
