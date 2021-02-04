@@ -6,80 +6,108 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 
 from ...engine.workflows import LiterateWorkflow as Workflow
-from ...interfaces.fixes import (
-    FixHeaderRegistration as Registration,
-    FixHeaderApplyTransforms as ApplyTransforms,
-    FixN4BiasFieldCorrection as N4BiasFieldCorrection,
-)
-from ...interfaces.images import ValidateImage, EstimateReferenceImage
 
 
 DEFAULT_MEMORY_MIN_GB = 0.01
 
 
-def init_func_reference_wf(bold_files, omp_nthreads, multiecho=False, name='func_reference_wf'):
+def init_func_reference_wf(omp_nthreads, name="func_reference_wf"):
     """
-    IN: list of bold files with matching PE/readout.
-    OUT: reference images
+
+
+    Inputs
+    ------
+    in_files : :obj:`list` of :obj:`str`
+        List of paths of the input EPI images from which reference volumes will be
+        selected, aligned and averaged.
+        IMPORTANT: All input files MUST have the same shimming configuration.
+        At the very least, make sure all input EPI images are acquired within the
+        same session, and have the same PE direction and total readout time.
+
+    Outputs
+    -------
+    out_epiref : :obj:`str`
+        Path of the generated EPI reference file.
+
+    See Also
+    --------
+    Discussion and original flowchart at `nipreps/niworkflows#601
+    <https://github.com/nipreps/niworkflows/issues/601>`__.
+
     """
+    from ...utils.connections import listify
+
+    from ...interfaces.bold import NonsteadyStatesDetector
+    from ...interfaces.fixes import (
+        FixN4BiasFieldCorrection as N4BiasFieldCorrection,
+    )
+    from ...interfaces.freesurfer import StructuralReference
+    from ...interfaces.images import ValidateImage, RobustAverage
+    from ...interfaces.nibabel import IntensityClip
 
     wf = Workflow(name=name)
-    inputnode = pe.Node(
-        niu.IdentityInterface(fields=['t1w_preproc', 't1w_mask']), name='inputnode',
-    )
+    inputnode = pe.Node(niu.IdentityInterface(fields=["in_files"]), name="inputnode")
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=['bold_masked', 'reference_images']), name='outputnode',
+        niu.IdentityInterface(fields=["epiref", "xfms", "volumes"]), name="outputnode"
     )
 
-    val_img = pe.MapNode(ValidateImage(), name='val_img', iterfield=['in_file'])
-
-    est_ref = pe.MapNode(
-        EstimateReferenceImage(multiecho=multiecho),
-        name='est_ref',
-        iterfield=['in_file']
+    validate_nii = pe.MapNode(
+        ValidateImage(), name="validate_nii", iterfield=["in_file"]
     )
 
-    n4_ref = pe.MapNode(
-        N4BiasFieldCorrection(dimension=3, copy_header=True),
-        name='n4_ref',
-        iterfield=['in_file'],
+    # TODO: allow b=0 selection for DWI datasets instead
+    select_volumes = pe.MapNode(
+        NonsteadyStatesDetector(), name="select_volumes", iterfield=["in_file"]
+    )
+    run_avgs = pe.MapNode(
+        RobustAverage(), name="run_avgs", mem_gb=1, iterfield=["in_file"]
+    )
+
+    clip_avgs = pe.MapNode(IntensityClip(), name="clip_avgs", iterfield=["in_file"])
+
+    # de-gradient the fields ("bias/illumination artifact")
+    n4_avgs = pe.MapNode(
+        N4BiasFieldCorrection(
+            dimension=3,
+            copy_header=True,
+            n_iterations=[50] * 5,
+            convergence_threshold=1e-7,
+            shrink_factor=4,
+        ),
         n_procs=omp_nthreads,
+        name="n4_avgs",
     )
 
-    if len(bold_files) > 1:
-        # inspect all BOLD references and get the one with the highest SNR
-        get_best_snr = pe.Node(
-            niu.Function(function=_max_snr, output_names=["reference", "out_files", "fidx"]),
-            name='get_best_snr',
-        )
+    epi_merge = pe.Node(
+        StructuralReference(
+            auto_detect_sensitivity=True,
+            initial_timepoint=1,  # For deterministic behavior
+            intensity_scaling=True,  # 7-DOF (rigid + intensity)
+            subsample_threshold=200,
+            fixed_timepoint=True,
+            no_iteration=True,
+            transform_outputs=True,
+        ),
+        name="epi_merge",
+    )
 
-        # register other reference images to best SNR
-        norm_ref = pe.MapNode(
-            Registration(),
-            name='norm_ref',
-            iterfield=['in_file'],
-            n_procs=omp_nthreads
-        )
-        apply_ref = pe.MapNode(
-            ApplyTransforms(),
-            name='apply_ref',
-            iterfield=['transforms', 'invert_transform_flags']
-        )
+    # fmt:off
+    wf.connect([
+        (inputnode, validate_nii, [(("in_files", listify), "in_file")]),
+        (validate_nii, select_volumes, [("out_file", "in_file")]),
+        (validate_nii, run_avgs, [("out_file", "in_file")]),
+        (select_volumes, run_avgs, [("t_mask", "t_mask")]),
+        (run_avgs, clip_avgs, [("out_file", "in_file")]),
+        (clip_avgs, n4_avgs, [("out_file", "input_image")]),
+        (n4_avgs, epi_merge, [("output_image", "in_files")]),
+        (epi_merge, outputnode, [("out_file", "epiref"),
+                                 ("transform_outputs", "xfms")]),
+        (n4_avgs, outputnode, [("output_image", "volumes")]),
 
-        # fmt:off
-        wf.connect([
-            (get_best_snr, norm_ref, [("out_files", "in_file")]),
-            (get_best_snr, )
-            (norm_ref, apply_ref, [
-                ("reverse_transforms", "transforms"),
-                ("reverse_invert_flags", "invert_transform_flags")]),
-        ])
-        # fmt:on
+    ])
+    # fmt:on
 
-        # TODO: register with t1w mask + output
-    else:
-        # sole bold file
-        pass
+    return wf
 
 
 def _max_snr(in_files, ddof=0):
