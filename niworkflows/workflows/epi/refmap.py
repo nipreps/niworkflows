@@ -29,10 +29,10 @@ def init_epi_reference_wf(
     a list of fieldmapping :abbr:`EPIs (echo-planar images)`, a list of
     :abbr:`BOLD (blood-oxygen level-dependent)` images, or a list of
     :abbr:`DWI (diffusion-weighted imaging)` datasets.
-    Please note that these different modalities should be mixed together in any
+    Please note that these different modalities should not be mixed together in any
     case for this particular workflow.
 
-    For BOLD datasets, the workflow may be set-up to execute an algorithm that determines
+    For BOLD datasets, the workflow may be set up to execute an algorithm that determines
     the nonsteady states in the beginning of the timeseries (also called *dummy scans*),
     and uses those for generating a reference of the particular run, since the nonsteady
     states are known to yield better T1 contrast (and hence perhaps better signal for
@@ -42,7 +42,7 @@ def init_epi_reference_wf(
     This global signal drift is typically interesting for DWIs: because *b=0*
     volumes are typically scattered throughout the scan, this drift can be
     fit an exponential decay to model the signal drop caused by the increasing
-    temperature of the device (this is heavily related to BOLD *nonsteady states*
+    temperature of the device (this is closely related to BOLD *nonsteady states*
     described above, as these are just the few initial instants when the exponential
     decay is much faster).
 
@@ -73,17 +73,17 @@ def init_epi_reference_wf(
 
     Outputs
     -------
-    epiref : :obj:`str`
+    epi_ref_file : :obj:`str`
         Path of the generated EPI reference file.
-    xfms : :obj:`list` of :obj:`str`
+    xfm_files : :obj:`list` of :obj:`str`
         List of rigid-body transforms in LTA format to resample from
-        the reference volume of each run into the ``epiref`` reference.
-    volumes : :obj:`list` of :obj:`str`
+        the reference volume of each run into the ``epi_ref_file`` reference.
+    per_run_ref_files : :obj:`list` of :obj:`str`
         List of paths to the reference volume generated per input run.
-    gs_drift : :obj:`list` of :obj:`list` of :obj:`float`
+    drift_factors : :obj:`list` of :obj:`list` of :obj:`float`
         A list of global signal drift factors for the set of volumes selected
         for averaging, per run.
-    n_dummy : :obj:`list` of :obj:`int`
+    n_dummy_scans : :obj:`list` of :obj:`int`
         Number of nonsteady states at the beginning of each run (only BOLD with
         ``auto_bold_nss=True``)
 
@@ -109,8 +109,13 @@ def init_epi_reference_wf(
     )
     outputnode = pe.Node(
         niu.IdentityInterface(
-            fields=["epiref", "xfms", "volumes", "gs_drift"]
-            + ["n_dummy"] * auto_bold_nss
+            fields=[
+                "epi_ref_file",
+                "xfm_files",
+                "per_run_ref_files",
+                "drift_factors",
+                "n_dummy",
+            ]
         ),
         name="outputnode",
     )
@@ -119,8 +124,8 @@ def init_epi_reference_wf(
         ValidateImage(), name="validate_nii", iterfield=["in_file"]
     )
 
-    run_avgs = pe.MapNode(
-        RobustAverage(), name="run_avgs", mem_gb=1, iterfield=["in_file", "t_mask"]
+    per_run_avgs = pe.MapNode(
+        RobustAverage(), name="per_run_avgs", mem_gb=1, iterfield=["in_file", "t_mask"]
     )
 
     clip_avgs = pe.MapNode(IntensityClip(), name="clip_avgs", iterfield=["in_file"])
@@ -138,9 +143,9 @@ def init_epi_reference_wf(
         name="n4_avgs",
         iterfield=["input_image"],
     )
-    clipper_post = pe.MapNode(
+    clip_bg_noise = pe.MapNode(
         IntensityClip(p_min=2.0, p_max=100.0),
-        name="clipper_post",
+        name="clip_bg_noise",
         iterfield=["in_file"],
     )
 
@@ -165,20 +170,20 @@ def init_epi_reference_wf(
     # fmt:off
     wf.connect([
         (inputnode, validate_nii, [(("in_files", listify), "in_file")]),
-        (validate_nii, run_avgs, [("out_file", "in_file")]),
-        (run_avgs, clip_avgs, [("out_file", "in_file")]),
+        (validate_nii, per_run_avgs, [("out_file", "in_file")]),
+        (per_run_avgs, clip_avgs, [("out_file", "in_file")]),
         (clip_avgs, n4_avgs, [("out_file", "input_image")]),
-        (n4_avgs, clipper_post, [("output_image", "in_file")]),
-        (clipper_post, epi_merge, [
+        (n4_avgs, clip_bg_noise, [("output_image", "in_file")]),
+        (clip_bg_noise, epi_merge, [
             ("out_file", "in_files"),
             (("out_file", _set_threads, omp_nthreads), "num_threads"),
         ]),
         (epi_merge, post_merge, [("out_file", "in_file"),
                                  ("transform_outputs", "in_xfms")]),
-        (post_merge, outputnode, [("out", "epiref")]),
-        (epi_merge, outputnode, [("transform_outputs", "xfms")]),
-        (run_avgs, outputnode, [("out_drift", "gs_drift")]),
-        (n4_avgs, outputnode, [("output_image", "volumes")]),
+        (post_merge, outputnode, [("out", "epi_ref_file")]),
+        (epi_merge, outputnode, [("transform_outputs", "xfm_files")]),
+        (per_run_avgs, outputnode, [("out_drift", "drift_factors")]),
+        (n4_avgs, outputnode, [("output_image", "per_run_ref_files")]),
 
     ])
     # fmt:on
@@ -190,17 +195,30 @@ def init_epi_reference_wf(
         # fmt:off
         wf.connect([
             (validate_nii, select_volumes, [("out_file", "in_file")]),
-            (select_volumes, run_avgs, [("t_mask", "t_mask")]),
+            (select_volumes, per_run_avgs, [("t_mask", "t_mask")]),
             (select_volumes, outputnode, [("n_dummy", "n_dummy")])
         ])
         # fmt:on
     else:
-        wf.connect(inputnode, "t_masks", run_avgs, "t_mask")
+        wf.connect(inputnode, "t_masks", per_run_avgs, "t_mask")
 
     return wf
 
 
 def _post_merge(in_file, in_xfms):
+    """
+    Massage output from ``SpatialReference``.
+
+    If the previous ``SpatialReference`` node by-passed the execution of
+    ``mri_robust_template`` (hence, there was only one input file), the
+    single-file is forwarded to the output.
+
+    Otherwise (``mri_robust_template`` was indeed executed), the output
+    is converted from mgz to NIfTI and the datatype of the reference
+    normalized to int16, with an intensity range of 0-255 (ideal for
+    ANTs registrations)
+
+    """
     from niworkflows.utils.connections import listify
 
     in_xfms = listify(in_xfms)

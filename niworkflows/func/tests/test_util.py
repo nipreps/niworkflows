@@ -136,7 +136,7 @@ def test_masking(input_fname, expected_fname):
     # fmt:off
     wf.connect([
         (epi_reference_wf, enhance_and_skullstrip_bold_wf, [
-            ("outputnode.epiref", "inputnode.in_file")
+            ("outputnode.epi_ref_file", "inputnode.in_file")
         ]),
         (enhance_and_skullstrip_bold_wf, mask_diff_plot, [
             ("outputnode.bias_corrected_file", "in_file"),
