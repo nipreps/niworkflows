@@ -14,6 +14,9 @@ from .utils.bids import collect_data
 test_data_env = os.getenv(
     "TEST_DATA_HOME", str(Path.home() / ".cache" / "stanford-crn")
 )
+test_output_dir = os.getenv("TEST_OUTPUT_DIR")
+test_workdir = os.getenv("TEST_WORK_DIR")
+
 data_dir = Path(test_data_env) / "BIDS-examples-1-enh-ds054"
 
 
@@ -53,3 +56,18 @@ def add_np(doctest_namespace):
 @pytest.fixture
 def testdata_dir():
     return data_dir
+
+
+@pytest.fixture
+def ds000030_dir():
+    return Path(test_data_env) / "ds000030"
+
+
+@pytest.fixture
+def workdir():
+    return None if test_workdir is None else Path(test_workdir)
+
+
+@pytest.fixture
+def outdir():
+    return None if test_output_dir is None else Path(test_output_dir)

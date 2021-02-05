@@ -415,6 +415,7 @@ jobs:
               -e FMRIPREP_REGRESSION_SOURCE=/data \
               -e FMRIPREP_REGRESSION_REPORTS=/tmp/masks/reports \
               -e CACHED_WORK_DIRECTORY=/tmp/work -v /tmp/masks/workdir:/tmp/work \
+              -v /tmp/fslicense/license.txt:/opt/freesurfer/license.txt:ro \
               niworkflows:latest \
               coverage run -p --rcfile=setup.cfg \
                      -m pytest --junit-xml=/tmp/masks/reports/regression.xml \

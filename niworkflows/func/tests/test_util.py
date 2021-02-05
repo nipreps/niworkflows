@@ -10,8 +10,9 @@ from nipype.utils.filemanip import fname_presuffix, copyfile
 from nilearn.image import load_img
 
 from ...interfaces.reportlets.masks import ROIsPlot
+from ...workflows.epi.refmap import init_epi_reference_wf
 
-from ..util import init_bold_reference_wf
+from ..util import init_enhance_and_skullstrip_bold_wf
 
 datapath = os.getenv("FMRIPREP_REGRESSION_SOURCE")
 parameters = []
@@ -21,13 +22,26 @@ if datapath:
     bold_datasets = []
 
     for ds in datapath.glob("ds*/"):
-        paths = [
-            str(p.relative_to(datapath)) for p in ds.glob("*_bold.nii.gz") if p.exists()
-        ]
-        bold_datasets += sorted([[p] for p in paths if "echo-" not in p])
-        meecho = sorted([p for p in paths if "echo-" in p])
-        if meecho:
-            bold_datasets.append(meecho)
+        paths = [p for p in ds.glob("*_bold.nii.gz") if p.exists()]
+        subjects = set([p.name.replace("sub-", "").split("_")[0] for p in paths])
+
+        for sub in subjects:
+            subject_data = [p for p in paths if p.name.startswith(f"sub-{sub}")]
+            se_epi = sorted(
+                [
+                    str(p.relative_to(datapath))
+                    for p in subject_data
+                    if "echo-" not in p.name
+                ]
+            )
+            if se_epi:
+                bold_datasets.append(se_epi)
+
+            meecho = sorted(
+                [str(p.relative_to(datapath)) for p in paths if "echo-" in p.name]
+            )
+            if meecho:
+                bold_datasets.append([meecho[0]])
 
     exp_masks = []
     for path in bold_datasets:
@@ -94,18 +108,19 @@ def test_masking(input_fname, expected_fname):
         }
     )
 
-    name = basename.rstrip("_bold.nii.gz").replace("-", "_")
-    bold_reference_wf = init_bold_reference_wf(
-        omp_nthreads=1, name=name, multiecho=len(input_fname) > 1
-    )
-    bold_reference_wf.inputs.inputnode.bold_file = (
-        input_fname[0] if len(input_fname) == 1 else input_fname
-    )
+    wf = pe.Workflow(name=basename.replace("_bold.nii.gz", "").replace("-", "_"))
     base_dir = os.getenv("CACHED_WORK_DIRECTORY")
     if base_dir:
         base_dir = Path(base_dir) / dsname
         base_dir.mkdir(parents=True, exist_ok=True)
-        bold_reference_wf.base_dir = str(base_dir)
+        wf.base_dir = str(base_dir)
+
+    epi_reference_wf = init_epi_reference_wf(
+        omp_nthreads=os.cpu_count(), auto_bold_nss=True
+    )
+    epi_reference_wf.inputs.inputnode.in_files = input_fname
+
+    enhance_and_skullstrip_bold_wf = init_enhance_and_skullstrip_bold_wf()
 
     out_fname = fname_presuffix(
         Path(expected_fname).name, suffix=".svg", use_ext=False, newpath=str(newpath)
@@ -118,17 +133,18 @@ def test_masking(input_fname, expected_fname):
     mask_diff_plot.inputs.in_mask = expected_fname
     mask_diff_plot.inputs.out_report = out_fname
 
-    outputnode = bold_reference_wf.get_node("outputnode")
-    bold_reference_wf.connect(
-        [
-            (
-                outputnode,
-                mask_diff_plot,
-                [("ref_image", "in_file"), ("bold_mask", "in_rois")],
-            )
-        ]
-    )
-    res = bold_reference_wf.run(plugin="MultiProc")
+    # fmt:off
+    wf.connect([
+        (epi_reference_wf, enhance_and_skullstrip_bold_wf, [
+            ("outputnode.epi_ref_file", "inputnode.in_file")
+        ]),
+        (enhance_and_skullstrip_bold_wf, mask_diff_plot, [
+            ("outputnode.bias_corrected_file", "in_file"),
+            ("outputnode.mask_file", "in_rois"),
+        ]),
+    ])
+
+    res = wf.run(plugin="MultiProc")
 
     combine_masks = [node for node in res.nodes if node.name.endswith("combine_masks")][
         0
