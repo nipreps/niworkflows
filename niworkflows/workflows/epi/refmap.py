@@ -55,9 +55,7 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
     from ...interfaces.nibabel import IntensityClip
 
     wf = Workflow(name=name)
-    wf.__desc__ = f"""\
-First, a reference volume using a custom methodology of *fMRIPrep*.
-"""
+
     inputnode = pe.Node(niu.IdentityInterface(fields=["in_files"]), name="inputnode")
     outputnode = pe.Node(
         niu.IdentityInterface(fields=["epiref", "xfms", "volumes"]), name="outputnode"
@@ -91,7 +89,9 @@ First, a reference volume using a custom methodology of *fMRIPrep*.
         iterfield=["input_image"],
     )
     clipper_post = pe.MapNode(
-        IntensityClip(p_max=100.0), name="clipper_post", iterfield=["in_file"]
+        IntensityClip(p_min=2.0, p_max=100.0),
+        name="clipper_post",
+        iterfield=["in_file"],
     )
 
     epi_merge = pe.Node(
@@ -107,9 +107,7 @@ First, a reference volume using a custom methodology of *fMRIPrep*.
         name="epi_merge",
     )
 
-    tonii = pe.Node(niu.Function(function=_tonii), name="tonii")
-
-    clipper_final = pe.Node(IntensityClip(p_max=100.0), name="clipper_final")
+    post_merge = pe.Node(niu.Function(function=_post_merge), name="post_merge")
 
     def _set_threads(in_list, maximum):
         return min(len(in_list), maximum)
@@ -127,9 +125,9 @@ First, a reference volume using a custom methodology of *fMRIPrep*.
             ("out_file", "in_files"),
             (("out_file", _set_threads, omp_nthreads), "num_threads"),
         ]),
-        (epi_merge, tonii, [("out_file", "in_file")]),
-        (tonii, clipper_final, [("out", "in_file")]),
-        (clipper_final, outputnode, [("out_file", "epiref")]),
+        (epi_merge, post_merge, [("out_file", "in_file"),
+                                 ("transform_outputs", "in_xfms")]),
+        (post_merge, outputnode, [("out", "epiref")]),
         (epi_merge, outputnode, [("transform_outputs", "xfms")]),
         (n4_avgs, outputnode, [("output_image", "volumes")]),
 
@@ -139,13 +137,21 @@ First, a reference volume using a custom methodology of *fMRIPrep*.
     return wf
 
 
-def _tonii(in_file):
-    if in_file.endswith((".nii", ".nii.gz")):
+def _post_merge(in_file, in_xfms):
+    from niworkflows.utils.connections import listify
+
+    in_xfms = listify(in_xfms)
+    if len(in_xfms) == 1 and in_file.endswith((".nii", ".nii.gz")):
         return in_file
 
-    import nibabel as nb
+    if len(in_xfms) == 1:
+        raise RuntimeError("Output format and number of transforms do not match")
+
     from pathlib import Path
+    import nibabel as nb
+    from niworkflows.interfaces.nibabel import _advanced_clip
+
     out_file = Path() / Path(in_file).name.replace(".mgz", ".nii.gz")
     img = nb.load(in_file)
     nb.Nifti1Image(img.dataobj, img.affine, None).to_filename(out_file)
-    return str(out_file.absolute())
+    return _advanced_clip(out_file, p_min=0.0, p_max=100.0)
