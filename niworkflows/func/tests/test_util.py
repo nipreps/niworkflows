@@ -115,7 +115,9 @@ def test_masking(input_fname, expected_fname):
         base_dir.mkdir(parents=True, exist_ok=True)
         wf.base_dir = str(base_dir)
 
-    epi_reference_wf = init_epi_reference_wf(omp_nthreads=os.cpu_count())
+    epi_reference_wf = init_epi_reference_wf(
+        omp_nthreads=os.cpu_count(), auto_bold_nss=True
+    )
     epi_reference_wf.inputs.inputnode.in_files = input_fname
 
     enhance_and_skullstrip_bold_wf = init_enhance_and_skullstrip_bold_wf()

@@ -7,7 +7,7 @@ def test_reference(tmpdir, ds000030_dir, workdir, outdir):
     """Exercise the EPI reference workflow."""
     tmpdir.chdir()
 
-    wf = init_epi_reference_wf(omp_nthreads=os.cpu_count())
+    wf = init_epi_reference_wf(omp_nthreads=os.cpu_count(), auto_bold_nss=True)
     if workdir:
         wf.base_dir = str(workdir)
 

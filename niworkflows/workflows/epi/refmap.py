@@ -11,7 +11,11 @@ from ...engine.workflows import LiterateWorkflow as Workflow
 DEFAULT_MEMORY_MIN_GB = 0.01
 
 
-def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
+def init_epi_reference_wf(
+    omp_nthreads,
+    auto_bold_nss=False,
+    name="epi_reference_wf",
+):
     """
     Build a workflow that generates a reference map from a set of EPI images.
 
@@ -21,12 +25,45 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
         At the very least, make sure all input EPI images are acquired within the
         same session, and have the same PE direction and total readout time.
 
+    Inputs to this workflow might be a list of :abbr:`SBRefs (single-band references)`,
+    a list of fieldmapping :abbr:`EPIs (echo-planar images)`, a list of
+    :abbr:`BOLD (blood-oxygen level-dependent)` images, or a list of
+    :abbr:`DWI (diffusion-weighted imaging)` datasets.
+    Please note that these different modalities should be mixed together in any
+    case for this particular workflow.
+
+    For BOLD datasets, the workflow may be set-up to execute an algorithm that determines
+    the nonsteady states in the beginning of the timeseries (also called *dummy scans*),
+    and uses those for generating a reference of the particular run, since the nonsteady
+    states are known to yield better T1 contrast (and hence perhaps better signal for
+    image registration).
+
+    Relatedly, the workflow also provides a global signal drift estimation per run.
+    This global signal drift is typically interesting for DWIs: because *b=0*
+    volumes are typically scattered throughout the scan, this drift can be
+    fit an exponential decay to model the signal drop caused by the increasing
+    temperature of the device (this is heavily related to BOLD *nonsteady states*
+    described above, as these are just the few initial instants when the exponential
+    decay is much faster).
+
+    Workflow Graph
+        .. workflow::
+            :graph2use: orig
+            :simple_form: yes
+
+            from niworkflows.workflows.epi.refmap import init_epi_reference_wf
+            wf = init_epi_reference_wf(omp_nthreads=1)
+
     Parameters
     ----------
     omp_nthreads : :obj:`int`
         Maximum number of threads an individual process may use
     name : :obj:`str`
         Name of workflow (default: ``epi_reference_wf``)
+    auto_bold_nss : :obj:`bool`
+        If ``True``, determines nonsteady states in the beginning of the timeseries
+        and selects them for the averaging of each run.
+        IMPORTANT: this option applies only to BOLD EPIs.
 
     Inputs
     ------
@@ -38,6 +75,17 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
     -------
     epiref : :obj:`str`
         Path of the generated EPI reference file.
+    xfms : :obj:`list` of :obj:`str`
+        List of rigid-body transforms in LTA format to resample from
+        the reference volume of each run into the ``epiref`` reference.
+    volumes : :obj:`list` of :obj:`str`
+        List of paths to the reference volume generated per input run.
+    gs_drift : :obj:`list` of :obj:`list` of :obj:`float`
+        A list of global signal drift factors for the set of volumes selected
+        for averaging, per run.
+    n_dummy : :obj:`list` of :obj:`int`
+        Number of nonsteady states at the beginning of each run (only BOLD with
+        ``auto_bold_nss=True``)
 
     See Also
     --------
@@ -56,19 +104,21 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
 
     wf = Workflow(name=name)
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=["in_files"]), name="inputnode")
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=["in_files", "t_masks"]), name="inputnode"
+    )
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=["epiref", "xfms", "volumes"]), name="outputnode"
+        niu.IdentityInterface(
+            fields=["epiref", "xfms", "volumes", "gs_drift"]
+            + ["n_dummy"] * auto_bold_nss
+        ),
+        name="outputnode",
     )
 
     validate_nii = pe.MapNode(
         ValidateImage(), name="validate_nii", iterfield=["in_file"]
     )
 
-    # TODO: allow b=0 selection for DWI datasets instead
-    select_volumes = pe.MapNode(
-        NonsteadyStatesDetector(), name="select_volumes", iterfield=["in_file"]
-    )
     run_avgs = pe.MapNode(
         RobustAverage(), name="run_avgs", mem_gb=1, iterfield=["in_file", "t_mask"]
     )
@@ -115,9 +165,7 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
     # fmt:off
     wf.connect([
         (inputnode, validate_nii, [(("in_files", listify), "in_file")]),
-        (validate_nii, select_volumes, [("out_file", "in_file")]),
         (validate_nii, run_avgs, [("out_file", "in_file")]),
-        (select_volumes, run_avgs, [("t_mask", "t_mask")]),
         (run_avgs, clip_avgs, [("out_file", "in_file")]),
         (clip_avgs, n4_avgs, [("out_file", "input_image")]),
         (n4_avgs, clipper_post, [("output_image", "in_file")]),
@@ -129,10 +177,25 @@ def init_epi_reference_wf(omp_nthreads, name="epi_reference_wf"):
                                  ("transform_outputs", "in_xfms")]),
         (post_merge, outputnode, [("out", "epiref")]),
         (epi_merge, outputnode, [("transform_outputs", "xfms")]),
+        (run_avgs, outputnode, [("out_drift", "gs_drift")]),
         (n4_avgs, outputnode, [("output_image", "volumes")]),
 
     ])
     # fmt:on
+
+    if auto_bold_nss:
+        select_volumes = pe.MapNode(
+            NonsteadyStatesDetector(), name="select_volumes", iterfield=["in_file"]
+        )
+        # fmt:off
+        wf.connect([
+            (validate_nii, select_volumes, [("out_file", "in_file")]),
+            (select_volumes, run_avgs, [("t_mask", "t_mask")]),
+            (select_volumes, outputnode, [("n_dummy", "n_dummy")])
+        ])
+        # fmt:on
+    else:
+        wf.connect(inputnode, "t_masks", run_avgs, "t_mask")
 
     return wf
 
