@@ -345,7 +345,7 @@ def _carpet(
     ax1.set_xticks(xticks)
     ax1.set_xlabel("time (frame #)" if notr else "time (s)")
     labels = tr * (np.array(xticks))
-    ax1.set_xticklabels(["%.02f" % t for t in labels.tolist()], fontsize=5)
+    ax1.set_xticklabels(["%.02f" % t for t in labels.tolist()])
 
     # Remove and redefine spines
     for side in ["top", "right"]:
