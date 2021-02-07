@@ -360,6 +360,8 @@ def _carpet(
     ax1.spines["bottom"].set_visible(False)
     ax1.spines["left"].set_color("none")
     ax1.spines["left"].set_visible(False)
+    if title:
+        ax1.set_title(title)
 
     ax2 = None
     if legend:
