@@ -266,6 +266,7 @@ def plot_carpet(
         nslices=nslices,
         tr=tr,
         subplot=subplot,
+        legend=legend,
         title=title,
         output_file=output_file,
     )
