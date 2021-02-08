@@ -343,10 +343,15 @@ def _carpet(
     # Set 10 frame markers in X axis
     interval = max((int(data.shape[-1] + 1) // 10, int(data.shape[-1] + 1) // 5, 1))
     xticks = list(range(0, data.shape[-1])[::interval])
+    if notr:
+        xlabel = "time (frame #)"
+        xticklabels = [round(xtick) for xtick in xticks]
+    else:
+        xlabel = "time (s)"
+        xticklabels = ["%.02f" % (tr * xtick) for xtick in xticks]
     ax1.set_xticks(xticks)
-    ax1.set_xlabel("time (frame #)" if notr else "time (s)")
-    labels = tr * (np.array(xticks))
-    ax1.set_xticklabels(["%.02f" % t for t in labels.tolist()])
+    ax1.set_xlabel(xlabel)
+    ax1.set_xticklabels(xticklabels)
 
     # Remove and redefine spines
     for side in ["top", "right"]:
