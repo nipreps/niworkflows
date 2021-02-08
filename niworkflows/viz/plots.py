@@ -159,7 +159,7 @@ def plot_carpet(
             Detrend and standardize the data prior to plotting.
         nskip : int, optional
             Number of volumes at the beginning of the scan marked as nonsteady state.
-            Not used.
+            Only used by volumetric NIfTI.
         size : tuple, optional
             Size of figure.
         subplot : matplotlib Subplot, optional
@@ -226,6 +226,7 @@ def plot_carpet(
     else:  # Volumetric NIfTI
         img_nii = check_niimg_4d(img, dtype="auto",)
         func_data = _safe_get_data(img_nii, ensure_finite=True)
+        func_data = func_data[..., nskip:]
         ntsteps = func_data.shape[-1]
         data = func_data[atlaslabels > 0].reshape(-1, ntsteps)
         oseg = atlaslabels[atlaslabels > 0].reshape(-1)
