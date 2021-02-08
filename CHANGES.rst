@@ -5,6 +5,8 @@ This release includes enhancements and bug-fixes towards the release of the firs
 beta version of *dMRIPrep*.
 It also contains new features that are necessary for the API overhaul that has
 happened within the new *SDCFlows 2.x* series.
+The new series include a cross-cutting (modalities, species) workflow to generate
+EPI references.
 Finally other *NiPreps* will also have a first release with specific support for
 them: *NiRodents* and *NiBabies* (and their corresponding *fMRIPrep* extensions).
 
@@ -22,11 +24,69 @@ them: *NiRodents* and *NiBabies* (and their corresponding *fMRIPrep* extensions)
 
 A list of prominent changes follows:
 
+* FIX: Address issues with ``RobustAverage`` global signal measurement (#607)
+* FIX: ``NonsteadyStatesDetector`` wrongly using Nipype's ``is_outlier`` (#605)
+* FIX: Change in *svgutils*' API on 0.3.2 breaks reportlets (#599)
+* FIX: Check for ``in_segm`` input, not ``seg_file`` (typo) (#592)
+* FIX: Use the mask to calculate FOV rather than the fixed image in ``GenerateSamplingReference`` (#583)
 * FIX: Allow omission of ``<res>`` for template normalization (#582)
 * FIX: Include ``_T2starw`` ``_MTw`` and ``_TSE``-suffixes in ``build_path`` options (#584)
 * FIX: ``DerivativesDataSink`` warning when it has multiple source files (#573)
+* ENH: Add an inversion operation to ``IntensityClip`` (#616)
+* ENH: Cross-cutting (modalities, species) workflow to generate EPI references (#610)
+* ENH: Add a ``RobustAverage`` interface and split volume selection (#602)
+* ENH: Revise some patterns of the ``BIDSLayout`` config to aid *SDCFlows* new API (#585)
 * ENH: Upstream *fMRIPrep*'s ``init_bbreg_wf`` to integrate it in *dMRIPrep* (#586)
+* MAINT: Add DS030 dataset, with clipped (55 timepoints) BOLD data (#609)
+* MAINT: Migrate ``ds003_downsampled`` to ``nipreps-data`` (#608)
+* MAINT: Move mask-regressions test-data to datalad + nipreps-data (#606)
+* MAINT: Refactor structure of interfaces (#603)
+* MAINT: Drop Python 3.6, test setuptools builds, pip installations, and revise Docker pinned versions (#593)
 * MAINT: CircleCI housekeeping (#580)
+
+.. caution::
+
+    The ``niworkflows.interfaces`` submodule has been refactored.
+    To migrate from previous series, please modify the following imports:
+
+    * ``images.MatchHeader`` -> ``header.MatchHeader``
+    * ``images.ValidateImage`` -> ``header.ValidateImage``
+    * ``images.Demean`` -> ``nibabel.Demean``
+    * ``images.FilledImageLike`` -> ``nibabel.FilledImageLike``
+    * ``images.RegridToZooms`` -> ``nibabel.RegridToZooms``
+    * ``masks.ROIsPlot`` -> ``reportlets.masks.ROIsPlot``
+    * ``masks.ComputeEPIMask`` -> ``nilearn.ComputeEPIMask``
+    * ``mni.RobustMNINormalization`` -> ``norm.SpatialNormalization``
+    * New ``niworkflows.interfaces.reportlets`` submodule
+
+      * ``report_base`` -> ``reportlets.base``
+      * ``masks`` -> ``reportlets.masks``
+      * ``registration`` -> ``reportlets.registration``
+      * ``segmentation`` -> ``reportlets.segmentation``
+
+    * ``utils.GenerateSamplingReference`` -> ``nibabel.GenerateSamplingReference``
+    * ``utils.CopyXForm`` -> ``header.CopyXForm``
+    * ``utils.NormalizeMotionParams`` -> ``confounds.NormalizeMotionParams``
+    * ``utils.AddTPMs`` -> ``probmaps.AddTPMs``
+    * ``utils.TPM2ROI`` -> ``probmaps.TPM2ROI``
+    * ``utils.AddTSVHeader`` -> ``utility.AddTSVHeader``
+    * ``utils.JoinTSVColumns`` -> ``utility.JoinTSVColumns``
+    * ``utils.DictMerge`` -> ``utility.DictMerge``
+    * ``utils.TSV2JSON`` -> ``utility.TSV2JSON``
+
+    Beware that interface aliases at the top ``niworkflows.interfaces`` level have
+    been removed:
+
+    * ``ExpandModel``, ``SpikeRegressors`` from ``confounds``
+    * ``BET`` -> ``reportlets.masks.BETRPT``
+    * ``FAST`` -> ``reportlets.segmentation.FASTRPT``
+    * ``FLIRT``, ``ApplyXFM``, ``RobustMNINormalization``, ``Registration``,
+      ``ApplyTransforms``, ``SimpleBeforeAfter`` now under ``reportlets.registration``
+      as ``FLIRTRPT``, ``ApplyXFMRPT``, ``RobustMNINormalizationRPT``, ``ANTSRegistrationRPT``,
+      ``ANTSApplyTransformsRPT``, ``SimpleBeforeAfterRPT``.
+    * ``CopyXForm``, ``CopyHeader``, ``SanitizeImage`` now under ``header``
+    * ``NormalizeMotionParams`` now under ``confounds``.
+    * ``FMRISummary``, ``CompCorVariancePlot``, ``ConfoundsCorrelationPlot`` from ``plotting``
 
 1.3.2 (November 5, 2020)
 ========================
