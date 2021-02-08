@@ -359,6 +359,7 @@ class _IntensityClipInputSpec(BaseInterfaceInputSpec):
     dtype = traits.Enum(
         "int16", "float32", "uint8", usedefault=True, desc="output datatype"
     )
+    invert = traits.Bool(False, usedefault=True, desc="finalize by inverting contrast")
 
 
 class _IntensityClipOutputSpec(TraitedSpec):
@@ -378,6 +379,7 @@ class IntensityClip(SimpleInterface):
             p_max=self.inputs.p_max,
             nonnegative=self.inputs.nonnegative,
             dtype=self.inputs.dtype,
+            invert=self.inputs.invert,
             newpath=runtime.cwd,
         )
         return runtime
@@ -472,7 +474,7 @@ def _gen_reference(
 
 
 def _advanced_clip(
-    in_file, p_min=35, p_max=99.98, nonnegative=True, dtype="int16", newpath=None
+    in_file, p_min=35, p_max=99.98, nonnegative=True, dtype="int16", invert=False, newpath=None,
 ):
     """
     Remove outliers at both ends of the intensity distribution and fit into a given dtype.
@@ -516,6 +518,9 @@ def _advanced_clip(
     data = np.clip(data, a_min=a_min, a_max=a_max)
     data -= data.min()
     data /= data.max()
+
+    if invert:
+        data = 1.0 - data
 
     if dtype in ("uint8", "int16"):
         data = np.round(255 * data).astype(dtype)
