@@ -150,8 +150,8 @@ def plot_carpet(
     Parameters
     ----------
 
-        func : string
-            Path to NIfTI or CIFTI BOLD image
+        func : string or nibabel-image object
+            Path to NIfTI or CIFTI BOLD image, or a nibabel-image object 
         atlaslabels: ndarray, optional
             A 3D array of integer labels from an atlas, resampled into ``img`` space.
             Required if ``func`` is a NIfTI image.
@@ -183,7 +183,7 @@ def plot_carpet(
     epinii = None
     segnii = None
     nslices = None
-    img = nb.load(func)
+    img = nb.load(func) if isinstance(func, str) else func
 
     if isinstance(img, nb.Cifti2Image):
         assert (
