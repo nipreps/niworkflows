@@ -398,7 +398,7 @@ def _compose_view(bg_svgs, fg_svgs, ref=0):
 
     yoffset = 0
     for i, r in enumerate(roots):
-        r.moveto(0, yoffset, scale=scales[i])
+        r.moveto(0, yoffset, scale_x=scales[i])
         if i == (nsvgs - 1):
             yoffset = 0
         else:
@@ -413,8 +413,8 @@ def _compose_view(bg_svgs, fg_svgs, ref=0):
     else:
         newroots = roots
     fig.append(newroots)
-    fig.root.attrib.pop("width")
-    fig.root.attrib.pop("height")
+    fig.root.attrib.pop("width", None)
+    fig.root.attrib.pop("height", None)
     fig.root.set("preserveAspectRatio", "xMidYMid meet")
 
     with TemporaryDirectory() as tmpdirname:
