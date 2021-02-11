@@ -408,8 +408,8 @@ def _compose_view(bg_svgs, fg_svgs, ref=0):
     else:
         newroots = roots
     fig.append(newroots)
-    fig.root.attrib.pop("width")
-    fig.root.attrib.pop("height")
+    fig.root.attrib.pop("width", None)
+    fig.root.attrib.pop("height", None)
     fig.root.set("preserveAspectRatio", "xMidYMid meet")
 
     with TemporaryDirectory() as tmpdirname:
