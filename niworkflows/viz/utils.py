@@ -367,6 +367,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file="report.svg"):
 
 
 def _compose_view(bg_svgs, fg_svgs, ref=0):
+    from svgutils.compose import Unit
     from svgutils.transform import SVGFigure, GroupElement
 
     if fg_svgs is None:
@@ -394,7 +395,7 @@ def _compose_view(bg_svgs, fg_svgs, ref=0):
 
     # Compose the views panel: total size is the width of
     # any element (used the first here) and the sum of heights
-    fig = SVGFigure(width, heights[:nsvgs].sum())
+    fig = SVGFigure(Unit(f"{width}px"), Unit(f"{heights[:nsvgs].sum()}px"))
 
     yoffset = 0
     for i, r in enumerate(roots):
