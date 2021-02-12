@@ -367,6 +367,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file="report.svg"):
 
 
 def _compose_view(bg_svgs, fg_svgs, ref=0):
+    from svgutils.compose import Unit
     from svgutils.transform import SVGFigure, GroupElement
 
     if fg_svgs is None:
@@ -394,11 +395,11 @@ def _compose_view(bg_svgs, fg_svgs, ref=0):
 
     # Compose the views panel: total size is the width of
     # any element (used the first here) and the sum of heights
-    fig = SVGFigure(width, heights[:nsvgs].sum())
+    fig = SVGFigure(Unit(f"{width}px"), Unit(f"{heights[:nsvgs].sum()}px"))
 
     yoffset = 0
     for i, r in enumerate(roots):
-        r.moveto(0, yoffset, scale=scales[i])
+        r.moveto(0, yoffset, scale_x=scales[i])
         if i == (nsvgs - 1):
             yoffset = 0
         else:
@@ -413,8 +414,8 @@ def _compose_view(bg_svgs, fg_svgs, ref=0):
     else:
         newroots = roots
     fig.append(newroots)
-    fig.root.attrib.pop("width")
-    fig.root.attrib.pop("height")
+    fig.root.attrib.pop("width", None)
+    fig.root.attrib.pop("height", None)
     fig.root.set("preserveAspectRatio", "xMidYMid meet")
 
     with TemporaryDirectory() as tmpdirname:
