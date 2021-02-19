@@ -369,7 +369,7 @@ class GenerateSamplingReference(SimpleInterface):
 
 class _IntensityClipInputSpec(BaseInterfaceInputSpec):
     in_file = File(
-        exists=True, mandatory=True, desc="file which intensity will be clipped"
+        exists=True, mandatory=True, desc="3D file which intensity will be clipped"
     )
     p_min = traits.Float(35.0, usedefault=True, desc="percentile for the lower bound")
     p_max = traits.Float(99.98, usedefault=True, desc="percentile for the upper bound")
@@ -519,7 +519,8 @@ def _advanced_clip(
     out_file = (Path(newpath or "") / "clipped.nii.gz").absolute()
 
     # Load data
-    img = nb.load(in_file)
+    img = nb.squeeze_image(nb.load(in_file))
+    assert len(img.shape) == 3, "Not a 3D image"
     data = img.get_fdata(dtype="float32")
 
     # Calculate stats on denoised version, to preempt outliers from biasing
