@@ -18,7 +18,7 @@ docs_deploy: &docs
     - run:
         name: Install and configure dependencies
         command: |
-          npm install -g --silent gh-pages@2.0.1
+          npm install -g --silent gh-pages@3.0.0
           git config user.email "nipreps@gmail.com"
           git config user.name "Documentation Push"
     - add_ssh_keys:
@@ -26,7 +26,7 @@ docs_deploy: &docs
           - "c8:a8:55:7d:1e:08:92:c2:86:29:7b:b4:4b:88:24:51"
     - run:
         name: Deploy docs to gh-pages branch
-        command: gh-pages --dotfiles --message "doc(update) [skip ci]" --dist docs/_build/html
+        command: gh-pages --no-history --dotfiles --message "doc(update) [skip ci]" --dist docs/_build/html
 
 version: 2
 jobs:
