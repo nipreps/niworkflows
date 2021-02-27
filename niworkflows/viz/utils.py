@@ -399,7 +399,7 @@ def _compose_view(bg_svgs, fg_svgs, ref=0):
 
     yoffset = 0
     for i, r in enumerate(roots):
-        r.moveto(0, yoffset, scale_x=scales[i])
+        r.moveto(0, yoffset, scale=scales[i])
         if i == (nsvgs - 1):
             yoffset = 0
         else:
