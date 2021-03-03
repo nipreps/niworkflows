@@ -24,6 +24,7 @@ them: *NiRodents* and *NiBabies* (and their corresponding *fMRIPrep* extensions)
 
 A list of prominent changes follows:
 
+* FIX: Update svgutils after breaking API changes (#620)
 * FIX: Address issues with ``RobustAverage`` global signal measurement (#607)
 * FIX: ``NonsteadyStatesDetector`` wrongly using Nipype's ``is_outlier`` (#605)
 * FIX: Change in *svgutils*' API on 0.3.2 breaks reportlets (#599)
@@ -37,6 +38,7 @@ A list of prominent changes follows:
 * ENH: Add a ``RobustAverage`` interface and split volume selection (#602)
 * ENH: Revise some patterns of the ``BIDSLayout`` config to aid *SDCFlows* new API (#585)
 * ENH: Upstream *fMRIPrep*'s ``init_bbreg_wf`` to integrate it in *dMRIPrep* (#586)
+* MAINT: Drop gh-pages history, reducing repository size (#622)
 * MAINT: Add DS030 dataset, with clipped (55 timepoints) BOLD data (#609)
 * MAINT: Migrate ``ds003_downsampled`` to ``nipreps-data`` (#608)
 * MAINT: Move mask-regressions test-data to datalad + nipreps-data (#606)
