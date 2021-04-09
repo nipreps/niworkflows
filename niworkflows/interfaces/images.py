@@ -191,7 +191,9 @@ class IntraModalMerge(SimpleInterface):
 
 class _RobustAverageInputSpec(BaseInterfaceInputSpec):
     in_file = File(
-        exists=True, mandatory=True, desc="A 4D file to average through the last axis"
+        exists=True,
+        mandatory=True,
+        desc="Either a 3D reference or 4D file to average through the last axis"
     )
     t_mask = traits.List(traits.Bool, desc="List of selected timepoints to be averaged")
     mc_method = traits.Enum(
