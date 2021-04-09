@@ -241,7 +241,7 @@ methodology of *fMRIPrep*.
     workflow.connect([
         (inputnode, val_sbref, [(("sbref_file", listify), "in_file")]),
         (val_sbref, merge_sbrefs, [("out_file", "in_files")]),
-        (merge_sbrefs, gen_avg, [("out_file", "sbref_file")]),
+        (merge_sbrefs, gen_avg, [("out_file", "in_file")]),
     ])
     # fmt: on
 
