@@ -100,7 +100,7 @@ WORKDIR /home/niworkflows
 ENV HOME="/home/niworkflows"
 
 # Installing SVGO
-RUN npm install -g svgo~2
+RUN npm install -g svgo@^2
 
 # Installing WEBP tools
 RUN curl -sSLO "http://downloads.webmproject.org/releases/webp/libwebp-0.5.2-linux-x86-64.tar.gz" && \
