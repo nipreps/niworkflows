@@ -484,11 +484,14 @@ class EstimateReferenceImage(SimpleInterface):
         # Build the nibabel spatial image we will work with
         ref_im = []
         for im_i in ref_input:
+            max_new_volumes = 50 - len(ref_im)
+            if max_new_volumes <= 0:
+                break
             nib_i = nb.squeeze_image(nb.load(im_i))
             if nib_i.dataobj.ndim == 3:
                 ref_im.append(nib_i)
             elif nib_i.dataobj.ndim == 4:
-                ref_im += nb.four_to_three(nib_i)
+                ref_im += nb.four_to_three(nib_i.slicer[..., :max_new_volumes])
         ref_im = nb.squeeze_image(nb.concat_images(ref_im))
 
         # Volumes to discard only makes sense with BOLD inputs.
