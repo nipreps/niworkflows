@@ -484,7 +484,7 @@ class EstimateReferenceImage(SimpleInterface):
         # Build the nibabel spatial image we will work with
         ref_im = []
         for im_i in ref_input:
-            max_new_volumes = 40 - len(ref_im)
+            max_new_volumes = 50 - len(ref_im)
             if max_new_volumes <= 0:
                 break
             nib_i = nb.squeeze_image(nb.load(im_i))

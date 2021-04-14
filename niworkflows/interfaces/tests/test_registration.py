@@ -6,7 +6,7 @@ from nipype.interfaces import afni
 from niworkflows.interfaces.registration import EstimateReferenceImage
 
 
-@pytest.mark.parametrize("n_vols", (1, 2, 40, 41))
+@pytest.mark.parametrize("n_vols", (1, 2, 50, 51))
 @pytest.mark.skipif(afni.Info.version() is None, reason="Realignment requires 3dvolreg")
 def test_EstimateReferenceImage_truncation(tmp_path, n_vols):
     # Smoke test to ensure that logic for limiting loaded volumes is followed
