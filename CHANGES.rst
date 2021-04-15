@@ -1,3 +1,15 @@
+1.3.3 (April 15, 2021)
+======================
+Bug-fix release in the 1.3.x series.
+
+* FIX: Limit memory usage in EstimateReferenceImage (#629)
+* FIX: Check for ``in_segm`` input, not ``seg_file`` (#592)
+* FIX: Use the mask to calculate FOV rather than the fixed image in ``GenerateSamplingReference`` (#583)
+* FIX: Allow omission of <res> for template normalization (#582)
+* MAINT: Pin svgutils to 0.3.1 (#596)
+* MAINT: Migrate from Travis -> GH Actions (#589)
+* CI: CircleCI housekeeping (#580)
+
 1.3.2 (November 5, 2020)
 ========================
 Bug-fix release in the 1.3.x series.
