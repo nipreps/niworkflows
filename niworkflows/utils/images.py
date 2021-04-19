@@ -324,3 +324,19 @@ def nii_ones_like(in_file, value, dtype, newpath=None):
     nii.to_filename(out_file)
 
     return out_file
+
+def _bspline_grid(in_file):
+    """Estimate B-Spline fitting distance grid using the number of slices of ``in_file``."""
+    import nibabel as nb
+    import numpy as np
+
+    img = nb.load(in_file)
+    slices = img.header.get_data_shape()
+    # find ratio of slices in each dimension wrt dimension with most slices
+    ratio = [s / slices[np.argmax(slices)] for s in slices]
+    # find common factor for the dimensions with the most and least slices
+    ratio_factor = ratio[np.argmax(ratio)] / ratio[np.argmin(ratio)]
+    # convert ratio to integers
+    mesh_res = [f"{round(i * ratio_factor)}" for i in ratio]
+    # return string for command line call
+    return f"-b [{'x'.join(mesh_res)}]"
