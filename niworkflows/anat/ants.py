@@ -508,6 +508,7 @@ def init_atropos_wf(
     in_segmentation_model=tuple(ATROPOS_MODELS["T1w"].values()),
     bspline_fitting_distance=200,
     wm_prior=False,
+    rodent=False,
 ):
     """
     Create an ANTs' ATROPOS workflow for brain tissue segmentation.
@@ -755,10 +756,8 @@ def init_atropos_wf(
             dimension=3,
             save_bias=True,
             copy_header=True,
-            n_iterations=[50] * 5,
             convergence_threshold=1e-7,
             shrink_factor=4,
-            bspline_fitting_distance=bspline_fitting_distance,
         ),
         n_procs=omp_nthreads,
         name="inu_n4_final",
@@ -875,6 +874,26 @@ def init_atropos_wf(
             (apply_wm_prior, inu_n4_final, [("out", "weight_image")]),
         ])
         # fmt: on
+    
+    # rodent-specific N4 settings
+    if rodent:
+        from ..utils.images import _bspline_grid
+        # fewer iterations of N4
+        inu_n4_final.inputs.n_iterations=[50] * 4
+
+        # set INU bspline grid based on voxel size
+        bspline_grid = pe.MapNode(niu.Function(function=_bspline_grid), name="bspline_grid")
+        
+        # fmt:off
+        wf.connect([
+            (inputnode, bspline_grid, [("in_files", "in_file")]),
+            (bspline_grid, inu_n4_final, [("out", "args")])
+        ])
+        # fmt:on
+    else:
+        inu_n4_final.inputs.n_iterations=[50] * 5
+        inu_n4_final.inputs.bspline_fitting_distance=bspline_fitting_distance
+
     return wf
 
 
@@ -883,6 +902,7 @@ def init_n4_only_wf(
     atropos_refine=True,
     atropos_use_random_seed=True,
     bids_suffix="T1w",
+    rodent=False,
     mem_gb=3.0,
     name="n4_only_wf",
     omp_nthreads=None,
@@ -1045,6 +1065,24 @@ def init_n4_only_wf(
             ]),
         ])
         # fmt: on
+    
+    # rodent-specific N4 settings
+    if rodent:
+        from ..utils.images import _bspline_grid
+        # fewer iterations of N4
+        inu_n4_final.inputs.n_iterations=[50] * 4
+
+        # set INU bspline grid based on voxel size
+        bspline_grid = pe.MapNode(niu.Function(function=_bspline_grid), name="bspline_grid")
+        
+        # fmt:off
+        wf.connect([
+            (inputnode, bspline_grid, [("in_files", "in_file")]),
+            (bspline_grid, inu_n4_final, [("out", "args")])
+        ])
+        # fmt:on
+    else:
+        inu_n4_final.inputs.n_iterations=[50] * 5
 
     return wf
 

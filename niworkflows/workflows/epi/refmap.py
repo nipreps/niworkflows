@@ -34,6 +34,7 @@ DEFAULT_MEMORY_MIN_GB = 0.01
 def init_epi_reference_wf(
     omp_nthreads,
     auto_bold_nss=False,
+    rodent=False,
     name="epi_reference_wf",
 ):
     """
@@ -84,6 +85,9 @@ def init_epi_reference_wf(
         If ``True``, determines nonsteady states in the beginning of the timeseries
         and selects them for the averaging of each run.
         IMPORTANT: this option applies only to BOLD EPIs.
+    rodent : :obj:`bool`
+        If ``True``, determines whether to calculate B-spline fitting distance from
+        voxel sizes and feeds them into N4BiasFieldCorrection.
 
     Inputs
     ------
@@ -158,7 +162,6 @@ def init_epi_reference_wf(
         N4BiasFieldCorrection(
             dimension=3,
             copy_header=True,
-            n_iterations=[50] * 5,
             convergence_threshold=1e-7,
             shrink_factor=4,
         ),
@@ -166,6 +169,7 @@ def init_epi_reference_wf(
         name="n4_avgs",
         iterfield=["input_image"],
     )
+
     clip_bg_noise = pe.MapNode(
         IntensityClip(p_min=2.0, p_max=100.0),
         name="clip_bg_noise",
@@ -224,6 +228,24 @@ def init_epi_reference_wf(
         # fmt:on
     else:
         wf.connect(inputnode, "t_masks", per_run_avgs, "t_mask")
+
+    # rodent-specific N4 settings
+    if rodent:
+        from ...utils.images import _bspline_grid
+        # fewer iterations of N4
+        n4_avgs.inputs.n_iterations=[50] * 4
+
+        # set INU bspline grid based on voxel size
+        bspline_grid = pe.Node(niu.Function(function=_bspline_grid), name="bspline_grid")
+        
+        # fmt:off
+        wf.connect([
+            (validate_nii, bspline_grid, [("out_file", "in_file")]),
+            (bspline_grid, n4_avgs, [("out", "args")])
+        ])
+        # fmt:on
+    else:
+        n4_avgs.inputs.n_iterations=[50] * 5
 
     return wf
 
