@@ -325,6 +325,7 @@ def nii_ones_like(in_file, value, dtype, newpath=None):
 
     return out_file
 
+
 def _bspline_grid(in_file):
     """Estimate B-Spline fitting distance grid using the number of slices of ``in_file``."""
     import nibabel as nb

@@ -233,11 +233,11 @@ def init_epi_reference_wf(
     if rodent:
         from ...utils.images import _bspline_grid
         # fewer iterations of N4
-        n4_avgs.inputs.n_iterations=[50] * 4
+        n4_avgs.inputs.n_iterations = [50] * 4
 
         # set INU bspline grid based on voxel size
         bspline_grid = pe.Node(niu.Function(function=_bspline_grid), name="bspline_grid")
-        
+
         # fmt:off
         wf.connect([
             (validate_nii, bspline_grid, [("out_file", "in_file")]),
@@ -245,7 +245,7 @@ def init_epi_reference_wf(
         ])
         # fmt:on
     else:
-        n4_avgs.inputs.n_iterations=[50] * 5
+        n4_avgs.inputs.n_iterations = [50] * 5
 
     return wf
 

@@ -874,16 +874,16 @@ def init_atropos_wf(
             (apply_wm_prior, inu_n4_final, [("out", "weight_image")]),
         ])
         # fmt: on
-    
+
     # rodent-specific N4 settings
     if rodent:
         from ..utils.images import _bspline_grid
         # fewer iterations of N4
-        inu_n4_final.inputs.n_iterations=[50] * 4
+        inu_n4_final.inputs.n_iterations = [50] * 4
 
         # set INU bspline grid based on voxel size
         bspline_grid = pe.MapNode(niu.Function(function=_bspline_grid), name="bspline_grid")
-        
+
         # fmt:off
         wf.connect([
             (inputnode, bspline_grid, [("in_files", "in_file")]),
@@ -891,8 +891,8 @@ def init_atropos_wf(
         ])
         # fmt:on
     else:
-        inu_n4_final.inputs.n_iterations=[50] * 5
-        inu_n4_final.inputs.bspline_fitting_distance=bspline_fitting_distance
+        inu_n4_final.inputs.n_iterations = [50] * 5
+        inu_n4_final.inputs.bspline_fitting_distance = bspline_fitting_distance
 
     return wf
 
@@ -1065,16 +1065,16 @@ def init_n4_only_wf(
             ]),
         ])
         # fmt: on
-    
+
     # rodent-specific N4 settings
     if rodent:
         from ..utils.images import _bspline_grid
         # fewer iterations of N4
-        inu_n4_final.inputs.n_iterations=[50] * 4
+        inu_n4_final.inputs.n_iterations = [50] * 4
 
         # set INU bspline grid based on voxel size
         bspline_grid = pe.MapNode(niu.Function(function=_bspline_grid), name="bspline_grid")
-        
+
         # fmt:off
         wf.connect([
             (inputnode, bspline_grid, [("in_files", "in_file")]),
@@ -1082,7 +1082,7 @@ def init_n4_only_wf(
         ])
         # fmt:on
     else:
-        inu_n4_final.inputs.n_iterations=[50] * 5
+        inu_n4_final.inputs.n_iterations = [50] * 5
 
     return wf
 
