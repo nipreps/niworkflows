@@ -330,14 +330,14 @@ def _bspline_grid(in_file):
     """Estimate B-Spline fitting distance grid using the number of slices of ``in_file``."""
     import nibabel as nb
     import numpy as np
+    import math
 
     img = nb.load(in_file)
-    slices = img.header.get_data_shape()
-    # find ratio of slices in each dimension wrt dimension with most slices
-    ratio = [s / slices[np.argmax(slices)] for s in slices]
-    # find common factor for the dimensions with the most and least slices
-    ratio_factor = ratio[np.argmax(ratio)] / ratio[np.argmin(ratio)]
+    zooms = img.header.get_zooms()[:3]
+    # find extent of each dimension wrt voxel sizes
+    extent = (np.array(img.shape[:3]) - 1) * zooms
     # convert ratio to integers
-    mesh_res = [f"{round(i * ratio_factor)}" for i in ratio]
+    retval = [f"{math.ceil(i / extent[np.argmin(extent)])}" for i in extent]
     # return string for command line call
-    return f"-b [{'x'.join(mesh_res)}]"
+    return f"-b [{'x'.join(retval)}]"
+
