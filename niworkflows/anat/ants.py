@@ -487,6 +487,8 @@ def init_atropos_wf(
     padding=10,
     in_segmentation_model=tuple(ATROPOS_MODELS["T1w"].values()),
     bspline_fitting_distance=200,
+    use_bspline_grid=False,
+    min_n4_iter=False,
     wm_prior=False,
 ):
     """
@@ -536,6 +538,12 @@ def init_atropos_wf(
         ``(4,4,2,3)`` uses K=4, CSF=4, GM=2, WM=3.
     bspline_fitting_distance : float
         The size of the b-spline mesh grid elements, in mm (default: 200)
+    use_bspline_grid : :obj:`bool`
+        If true, defines the number of b-spline mesh grid elements in each dimension rather
+        than using the isotropic distance given in ``bspline_fitting_distance``.
+    min_n4_iter : :obj:`bool`
+        If ``True``, reduces the number of b-spline iterations from 5 to 4. This use-case
+        is intended for rodents and other non-human/non-adult cases.
     wm_prior : :obj:`bool`
         Whether the WM posterior obtained with ATROPOS should be regularized with a prior
         map (typically, mapped from the template). When ``wm_prior`` is ``True`` the input
@@ -735,15 +743,14 @@ def init_atropos_wf(
             dimension=3,
             save_bias=True,
             copy_header=True,
-            n_iterations=[50] * 5,
             convergence_threshold=1e-7,
             shrink_factor=4,
-            bspline_fitting_distance=bspline_fitting_distance,
         ),
         n_procs=omp_nthreads,
         name="inu_n4_final",
         iterfield=["input_image"],
     )
+    inu_n4_final.inputs.n_iterations = [50] * (5 - min_n4_iter)
 
     try:
         inu_n4_final.inputs.rescale_intensities = True
@@ -855,6 +862,22 @@ def init_atropos_wf(
             (apply_wm_prior, inu_n4_final, [("out", "weight_image")]),
         ])
         # fmt: on
+
+    if use_bspline_grid:
+        # set INU bspline grid based on image shape
+        from ..utils.images import _bspline_grid
+        bspline_grid = pe.MapNode(niu.Function(function=_bspline_grid), name="bspline_grid")
+
+        # fmt:off
+        wf.connect([
+            (inputnode, bspline_grid, [("in_files", "in_file")]),
+            (bspline_grid, inu_n4_final, [("out", "args")])
+        ])
+        # fmt:on
+    else:
+        # set INU bspline grid based on isotropic distance
+        inu_n4_final.inputs.bspline_fitting_distance = bspline_fitting_distance
+
     return wf
 
 
@@ -863,6 +886,8 @@ def init_n4_only_wf(
     atropos_refine=True,
     atropos_use_random_seed=True,
     bids_suffix="T1w",
+    use_bspline_grid=False,
+    min_n4_iter=False,
     mem_gb=3.0,
     name="n4_only_wf",
     omp_nthreads=None,
@@ -903,6 +928,11 @@ def init_n4_only_wf(
     atropos_model : tuple or None
         Allows to specify a particular segmentation model, overwriting
         the defaults based on ``bids_suffix``
+    use_bspline_grid : :obj:`bool`
+        If true, defines the number of b-spline mesh grid elements in each dimension.
+    min_n4_iter : :obj:`bool`
+        If ``True``, reduces the number of b-spline iterations from 5 to 4. This use-case
+        is intended for rodents and other non-human/non-adult cases.
     name : str, optional
         Workflow name (default: ``'n4_only_wf'``).
 
@@ -965,15 +995,14 @@ def init_n4_only_wf(
             dimension=3,
             save_bias=True,
             copy_header=True,
-            n_iterations=[50] * 5,
             convergence_threshold=1e-7,
             shrink_factor=4,
-            bspline_fitting_distance=200,
         ),
         n_procs=omp_nthreads,
         name="inu_n4_final",
         iterfield=["input_image"],
     )
+    inu_n4_final.inputs.n_iterations = [50] * (5 - min_n4_iter)
 
     # Check ANTs version
     try:
@@ -1025,6 +1054,21 @@ def init_n4_only_wf(
             ]),
         ])
         # fmt: on
+
+    if use_bspline_grid:
+        # set INU bspline grid based on voxel size
+        from ..utils.images import _bspline_grid
+        bspline_grid = pe.MapNode(niu.Function(function=_bspline_grid), name="bspline_grid")
+
+        # fmt:off
+        wf.connect([
+            (inputnode, bspline_grid, [("in_files", "in_file")]),
+            (bspline_grid, inu_n4_final, [("out", "args")])
+        ])
+        # fmt:on
+    else:
+        # set INU bspline grid based on isotropic distance
+        inu_n4_final.inputs.bspline_fitting_distance = 200
 
     return wf
 
