@@ -1,0 +1,25 @@
+strict digraph  {
+"inputnode (utility)";
+"fssource (io)";
+"save_midthickness (io)";
+"fsnative_2_t1_xfm (freesurfer)";
+"midthickness (freesurfer)";
+"surface_list (utility)";
+"fix_surfs (surf)";
+"outputnode (utility)";
+"fs_2_gii (freesurfer)";
+"inputnode (utility)" -> "fssource (io)";
+"inputnode (utility)" -> "save_midthickness (io)";
+"inputnode (utility)" -> "fsnative_2_t1_xfm (freesurfer)";
+"fssource (io)" -> "fsnative_2_t1_xfm (freesurfer)";
+"fssource (io)" -> "midthickness (freesurfer)";
+"fssource (io)" -> "surface_list (utility)";
+"save_midthickness (io)" -> "surface_list (utility)";
+"fsnative_2_t1_xfm (freesurfer)" -> "fix_surfs (surf)";
+"fsnative_2_t1_xfm (freesurfer)" -> "outputnode (utility)";
+"midthickness (freesurfer)" -> "save_midthickness (io)";
+"surface_list (utility)" -> "fs_2_gii (freesurfer)";
+"fix_surfs (surf)" -> "outputnode (utility)";
+"fs_2_gii (freesurfer)" -> "fix_surfs (surf)";
+"fs_2_gii (freesurfer)" -> "outputnode (utility)";
+}

@@ -1,0 +1,674 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>niworkflows.interfaces.reportlets.registration &mdash; niworkflows 1.4.0rc5+17.g5792f74b documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/banner.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> niworkflows
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">Library API (application program interface)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">What’s new?</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">niworkflows</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>niworkflows.interfaces.reportlets.registration</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+
+
+
+
+
+<h1>Source code for niworkflows.interfaces.reportlets.registration</h1><div class="highlight"><pre>
+<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="sd">&quot;&quot;&quot;ReportCapableInterfaces for registration tools.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">distutils.version</span> <span class="kn">import</span> <span class="n">LooseVersion</span>
+
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">traits</span><span class="p">,</span>
+    <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">File</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.mixins</span> <span class="kn">import</span> <span class="n">reporting</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">freesurfer</span> <span class="k">as</span> <span class="n">fs</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span><span class="p">,</span> <span class="n">ants</span>
+
+<span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">NIWORKFLOWS_LOG</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">base</span> <span class="k">as</span> <span class="n">nrb</span>
+<span class="kn">from</span> <span class="nn">..norm</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_SpatialNormalizationInputSpec</span><span class="p">,</span>
+    <span class="n">_SpatialNormalizationOutputSpec</span><span class="p">,</span>
+    <span class="n">SpatialNormalization</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..fixes</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FixHeaderApplyTransforms</span> <span class="k">as</span> <span class="n">ApplyTransforms</span><span class="p">,</span>
+    <span class="n">FixHeaderRegistration</span> <span class="k">as</span> <span class="n">Registration</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_SpatialNormalizationInputSpecRPT</span><span class="p">(</span>
+    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">_SpatialNormalizationInputSpec</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">_SpatialNormalizationOutputSpecRPT</span><span class="p">(</span>
+    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">_SpatialNormalizationOutputSpec</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="SpatialNormalizationRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.SpatialNormalizationRPT">[docs]</a><span class="k">class</span> <span class="nc">SpatialNormalizationRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">SpatialNormalization</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_SpatialNormalizationInputSpecRPT</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_SpatialNormalizationOutputSpecRPT</span>
+
+    <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="c1"># We need to dig into the internal ants.Registration interface</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ants_args</span><span class="p">()[</span><span class="s2">&quot;fixed_image&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># get first item if list</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ants_args</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fixed_image_mask&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ants_args</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fixed_image_mask&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">warped_image</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Report - setting fixed (</span><span class="si">%s</span><span class="s2">) and moving (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">SpatialNormalizationRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">_ANTSRegistrationInputSpecRPT</span><span class="p">(</span>
+    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">ants</span><span class="o">.</span><span class="n">registration</span><span class="o">.</span><span class="n">RegistrationInputSpec</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">_ANTSRegistrationOutputSpecRPT</span><span class="p">(</span>
+    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">ants</span><span class="o">.</span><span class="n">registration</span><span class="o">.</span><span class="n">RegistrationOutputSpec</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="ANTSRegistrationRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ANTSRegistrationRPT">[docs]</a><span class="k">class</span> <span class="nc">ANTSRegistrationRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">Registration</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_ANTSRegistrationInputSpecRPT</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_ANTSRegistrationOutputSpecRPT</span>
+
+    <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fixed_image</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">warped_image</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Report - setting fixed (</span><span class="si">%s</span><span class="s2">) and moving (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ANTSRegistrationRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">_ANTSApplyTransformsInputSpecRPT</span><span class="p">(</span>
+    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">ants</span><span class="o">.</span><span class="n">resampling</span><span class="o">.</span><span class="n">ApplyTransformsInputSpec</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">_ANTSApplyTransformsOutputSpecRPT</span><span class="p">(</span>
+    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">ants</span><span class="o">.</span><span class="n">resampling</span><span class="o">.</span><span class="n">ApplyTransformsOutputSpec</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="ANTSApplyTransformsRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ANTSApplyTransformsRPT">[docs]</a><span class="k">class</span> <span class="nc">ANTSApplyTransformsRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">ApplyTransforms</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_ANTSApplyTransformsInputSpecRPT</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_ANTSApplyTransformsOutputSpecRPT</span>
+
+    <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_image</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">output_image</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Report - setting fixed (</span><span class="si">%s</span><span class="s2">) and moving (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ANTSApplyTransformsRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">_ApplyTOPUPInputSpecRPT</span><span class="p">(</span>
+    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">epi</span><span class="o">.</span><span class="n">ApplyTOPUPInputSpec</span>
+<span class="p">):</span>
+    <span class="n">wm_seg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-wmseg </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference white matter segmentation mask&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_ApplyTOPUPOutputSpecRPT</span><span class="p">(</span>
+    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">epi</span><span class="o">.</span><span class="n">ApplyTOPUPOutputSpec</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="ApplyTOPUPRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ApplyTOPUPRPT">[docs]</a><span class="k">class</span> <span class="nc">ApplyTOPUPRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">ApplyTOPUP</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_ApplyTOPUPInputSpecRPT</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_ApplyTOPUPOutputSpecRPT</span>
+
+    <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">index_img</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image_label</span> <span class="o">=</span> <span class="s2">&quot;after&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image_label</span> <span class="o">=</span> <span class="s2">&quot;before&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="n">index_img</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">out_corrected</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="n">index_img</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Report - setting corrected (</span><span class="si">%s</span><span class="s2">) and warped (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ApplyTOPUPRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">_FUGUEInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">FUGUEInputSpec</span><span class="p">):</span>
+    <span class="n">wm_seg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-wmseg </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference white matter segmentation mask&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_FUGUEOutputSpecRPT</span><span class="p">(</span>
+    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">FUGUEOutputSpec</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="FUGUERPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.FUGUERPT">[docs]</a><span class="k">class</span> <span class="nc">FUGUERPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FUGUE</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_FUGUEInputSpecRPT</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FUGUEOutputSpecRPT</span>
+
+    <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image_label</span> <span class="o">=</span> <span class="s2">&quot;after&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image_label</span> <span class="o">=</span> <span class="s2">&quot;before&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">unwarped_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Report - setting corrected (</span><span class="si">%s</span><span class="s2">) and warped (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FUGUERPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">_FLIRTInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">FLIRTInputSpec</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">_FLIRTOutputSpecRPT</span><span class="p">(</span>
+    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">FLIRTOutputSpec</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="FLIRTRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.FLIRTRPT">[docs]</a><span class="k">class</span> <span class="nc">FLIRTRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FLIRT</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_FLIRTInputSpecRPT</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FLIRTOutputSpecRPT</span>
+
+    <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">out_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Report - setting fixed (</span><span class="si">%s</span><span class="s2">) and moving (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FLIRTRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">_ApplyXFMInputSpecRPT</span><span class="p">(</span>
+    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">ApplyXFMInputSpec</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="ApplyXFMRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ApplyXFMRPT">[docs]</a><span class="k">class</span> <span class="nc">ApplyXFMRPT</span><span class="p">(</span><span class="n">FLIRTRPT</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">ApplyXFM</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_ApplyXFMInputSpecRPT</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FLIRTOutputSpecRPT</span></div>
+
+
+<span class="k">if</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s2">&quot;0.0.0&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">fs</span><span class="o">.</span><span class="n">Info</span><span class="o">.</span><span class="n">looseversion</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s2">&quot;6.0.0&quot;</span><span class="p">):</span>
+    <span class="n">_BBRegisterInputSpec</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">BBRegisterInputSpec</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">_BBRegisterInputSpec</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">BBRegisterInputSpec6</span>
+
+
+<span class="k">class</span> <span class="nc">_BBRegisterInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">_BBRegisterInputSpec</span><span class="p">):</span>
+    <span class="c1"># Adds default=True, usedefault=True</span>
+    <span class="n">out_lta_file</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Either</span><span class="p">(</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">,</span>
+        <span class="n">File</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;--lta </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">min_ver</span><span class="o">=</span><span class="s2">&quot;5.2.0&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;write the transformation matrix in LTA format&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_BBRegisterOutputSpecRPT</span><span class="p">(</span>
+    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fs</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">BBRegisterOutputSpec</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="BBRegisterRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.BBRegisterRPT">[docs]</a><span class="k">class</span> <span class="nc">BBRegisterRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fs</span><span class="o">.</span><span class="n">BBRegister</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_BBRegisterInputSpecRPT</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_BBRegisterOutputSpecRPT</span>
+
+    <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span>
+        <span class="n">mri_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">,</span> <span class="s2">&quot;mri&quot;</span><span class="p">)</span>
+        <span class="n">target_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mri_dir</span><span class="p">,</span> <span class="s2">&quot;brainmask.mgz&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Apply transform for simplicity</span>
+        <span class="n">mri_vol2vol</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">ApplyVolTransform</span><span class="p">(</span>
+            <span class="n">source_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span><span class="p">,</span>
+            <span class="n">target_file</span><span class="o">=</span><span class="n">target_file</span><span class="p">,</span>
+            <span class="n">lta_file</span><span class="o">=</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_lta_file</span><span class="p">,</span>
+            <span class="n">interp</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">mri_vol2vol</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="n">target_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">transformed_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mri_dir</span><span class="p">,</span> <span class="s2">&quot;ribbon.mgz&quot;</span><span class="p">)</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Report - setting fixed (</span><span class="si">%s</span><span class="s2">) and moving (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">BBRegisterRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">_MRICoregInputSpecRPT</span><span class="p">(</span>
+    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fs</span><span class="o">.</span><span class="n">registration</span><span class="o">.</span><span class="n">MRICoregInputSpec</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">_MRICoregOutputSpecRPT</span><span class="p">(</span>
+    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fs</span><span class="o">.</span><span class="n">registration</span><span class="o">.</span><span class="n">MRICoregOutputSpec</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="MRICoregRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.MRICoregRPT">[docs]</a><span class="k">class</span> <span class="nc">MRICoregRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fs</span><span class="o">.</span><span class="n">MRICoreg</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_MRICoregInputSpecRPT</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_MRICoregOutputSpecRPT</span>
+
+    <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span>
+        <span class="n">mri_dir</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">):</span>
+            <span class="n">mri_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">,</span> <span class="s2">&quot;mri&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_file</span><span class="p">):</span>
+            <span class="n">target_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_file</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">target_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mri_dir</span><span class="p">,</span> <span class="s2">&quot;brainmask.mgz&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Apply transform for simplicity</span>
+        <span class="n">mri_vol2vol</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">ApplyVolTransform</span><span class="p">(</span>
+            <span class="n">source_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span><span class="p">,</span>
+            <span class="n">target_file</span><span class="o">=</span><span class="n">target_file</span><span class="p">,</span>
+            <span class="n">lta_file</span><span class="o">=</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_lta_file</span><span class="p">,</span>
+            <span class="n">interp</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">mri_vol2vol</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="n">target_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">transformed_file</span>
+        <span class="k">if</span> <span class="n">mri_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mri_dir</span><span class="p">,</span> <span class="s2">&quot;ribbon.mgz&quot;</span><span class="p">)</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Report - setting fixed (</span><span class="si">%s</span><span class="s2">) and moving (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">MRICoregRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">_SimpleBeforeAfterInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">):</span>
+    <span class="n">before</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;file before&quot;</span><span class="p">)</span>
+    <span class="n">after</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;file after&quot;</span><span class="p">)</span>
+    <span class="n">wm_seg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference white matter segmentation mask&quot;</span><span class="p">)</span>
+    <span class="n">before_label</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="s2">&quot;before&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">after_label</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="s2">&quot;after&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SimpleBeforeAfterRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.SimpleBeforeAfterRPT">[docs]</a><span class="k">class</span> <span class="nc">SimpleBeforeAfterRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">nrb</span><span class="o">.</span><span class="n">ReportingInterface</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_SimpleBeforeAfterInputSpecRPT</span>
+
+    <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; there is not inner interface to run &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">after_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">before_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">after</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">before</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Report - setting before (</span><span class="si">%s</span><span class="s2">) and after (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">SimpleBeforeAfterRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">_ResampleBeforeAfterInputSpecRPT</span><span class="p">(</span><span class="n">_SimpleBeforeAfterInputSpecRPT</span><span class="p">):</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s2">&quot;before&quot;</span><span class="p">,</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ResampleBeforeAfterRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ResampleBeforeAfterRPT">[docs]</a><span class="k">class</span> <span class="nc">ResampleBeforeAfterRPT</span><span class="p">(</span><span class="n">SimpleBeforeAfterRPT</span><span class="p">):</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_ResampleBeforeAfterInputSpecRPT</span>
+
+    <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">nilearn</span> <span class="kn">import</span> <span class="n">image</span> <span class="k">as</span> <span class="n">nli</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">after</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">before</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base</span> <span class="o">==</span> <span class="s2">&quot;before&quot;</span><span class="p">:</span>
+            <span class="n">resampled_after</span> <span class="o">=</span> <span class="n">nli</span><span class="o">.</span><span class="n">resample_to_img</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">)</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_resampled&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
+            <span class="p">)</span>
+            <span class="n">resampled_after</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="n">fname</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">resampled_before</span> <span class="o">=</span> <span class="n">nli</span><span class="o">.</span><span class="n">resample_to_img</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span>
+            <span class="p">)</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_resampled&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
+            <span class="p">)</span>
+            <span class="n">resampled_before</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="n">fname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Report - setting before (</span><span class="si">%s</span><span class="s2">) and after (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">runtime</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ResampleBeforeAfterRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Successfully created report (</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">runtime</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright Copyright 2021, The NiPreps Developers.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: master
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../../../1.0.0/index.html">1.0.0</a></dd>
+            <dd><a href="../../../../1.0.0rc1/index.html">1.0.0rc1</a></dd>
+            <dd><a href="../../../../1.0.0rc2/index.html">1.0.0rc2</a></dd>
+            <dd><a href="../../../../1.0.1/index.html">1.0.1</a></dd>
+            <dd><a href="../../../../1.0.2/index.html">1.0.2</a></dd>
+            <dd><a href="../../../../1.0.3/index.html">1.0.3</a></dd>
+            <dd><a href="../../../../1.0.4/index.html">1.0.4</a></dd>
+            <dd><a href="../../../../1.1.0/index.html">1.1.0</a></dd>
+            <dd><a href="../../../../1.1.1/index.html">1.1.1</a></dd>
+            <dd><a href="../../../../1.1.10/index.html">1.1.10</a></dd>
+            <dd><a href="../../../../1.1.11/index.html">1.1.11</a></dd>
+            <dd><a href="../../../../1.1.12/index.html">1.1.12</a></dd>
+            <dd><a href="../../../../1.1.2/index.html">1.1.2</a></dd>
+            <dd><a href="../../../../1.1.3/index.html">1.1.3</a></dd>
+            <dd><a href="../../../../1.1.4/index.html">1.1.4</a></dd>
+            <dd><a href="../../../../1.1.5/index.html">1.1.5</a></dd>
+            <dd><a href="../../../../1.1.6/index.html">1.1.6</a></dd>
+            <dd><a href="../../../../1.1.7/index.html">1.1.7</a></dd>
+            <dd><a href="../../../../1.1.8/index.html">1.1.8</a></dd>
+            <dd><a href="../../../../1.1.9/index.html">1.1.9</a></dd>
+            <dd><a href="../../../../1.2.0/index.html">1.2.0</a></dd>
+            <dd><a href="../../../../1.2.0rc1/index.html">1.2.0rc1</a></dd>
+            <dd><a href="../../../../1.2.0rc2/index.html">1.2.0rc2</a></dd>
+            <dd><a href="../../../../1.2.0rc3/index.html">1.2.0rc3</a></dd>
+            <dd><a href="../../../../1.2.0rc4/index.html">1.2.0rc4</a></dd>
+            <dd><a href="../../../../1.2.0rc5/index.html">1.2.0rc5</a></dd>
+            <dd><a href="../../../../1.2.1/index.html">1.2.1</a></dd>
+            <dd><a href="../../../../1.2.2/index.html">1.2.2</a></dd>
+            <dd><a href="../../../../1.2.3/index.html">1.2.3</a></dd>
+            <dd><a href="../../../../1.2.4/index.html">1.2.4</a></dd>
+            <dd><a href="../../../../1.2.5/index.html">1.2.5</a></dd>
+            <dd><a href="../../../../1.2.6/index.html">1.2.6</a></dd>
+            <dd><a href="../../../../1.2.7/index.html">1.2.7</a></dd>
+            <dd><a href="../../../../1.2.8/index.html">1.2.8</a></dd>
+            <dd><a href="../../../../1.2.9/index.html">1.2.9</a></dd>
+            <dd><a href="../../../../1.3.0/index.html">1.3.0</a></dd>
+            <dd><a href="../../../../1.3.0rc1/index.html">1.3.0rc1</a></dd>
+            <dd><a href="../../../../1.3.0rc2/index.html">1.3.0rc2</a></dd>
+            <dd><a href="../../../../1.3.0rc3/index.html">1.3.0rc3</a></dd>
+            <dd><a href="../../../../1.3.1/index.html">1.3.1</a></dd>
+            <dd><a href="../../../../1.3.2/index.html">1.3.2</a></dd>
+            <dd><a href="../../../../1.3.3/index.html">1.3.3</a></dd>
+            <dd><a href="../../../../1.4.0rc0/index.html">1.4.0rc0</a></dd>
+            <dd><a href="../../../../1.4.0rc1/index.html">1.4.0rc1</a></dd>
+            <dd><a href="../../../../1.4.0rc2/index.html">1.4.0rc2</a></dd>
+            <dd><a href="../../../../1.4.0rc3/index.html">1.4.0rc3</a></dd>
+            <dd><a href="../../../../1.4.0rc4/index.html">1.4.0rc4</a></dd>
+            <dd><a href="../../../../1.4.0rc5/index.html">1.4.0rc5</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../../../maint_1.0.x/index.html">maint/1.0.x</a></dd>
+            <dd><a href="../../../../maint_1.1.x/index.html">maint/1.1.x</a></dd>
+            <dd><a href="../../../../maint_1.2.x/index.html">maint/1.2.x</a></dd>
+            <dd><a href="../../../../maint_1.3.x/index.html">maint/1.3.x</a></dd>
+            <dd><a href="../../../../master/_modules/niworkflows/interfaces/reportlets/registration.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+digraph structs {
+node [shape=record];
+AFNISkullStripWorkflowinputnode [label="{IN}|{ inputnode | utility |  }|{OUT|<outinfile> in_file}"];
+AFNISkullStripWorkflowinu_n4 [label="{IN|<ininputimage> input_image}|{ inu_n4 | fixes |  }|{OUT|<outbiasimage> bias_image|<outoutputimage> output_image}"];
+AFNISkullStripWorkflowskullstrip [label="{IN|<ininfile> in_file}|{ skullstrip | afni |  }|{OUT|<outoutfile> out_file}"];
+AFNISkullStripWorkflowsstrip_orig_vol [label="{IN|<ininfilea> in_file_a|<ininfileb> in_file_b}|{ sstrip_orig_vol | afni |  }|{OUT|<outoutfile> out_file}"];
+AFNISkullStripWorkflowbinarize [label="{IN|<ininfile> in_file}|{ binarize | nibabel |  }|{OUT|<outoutmask> out_mask}"];
+AFNISkullStripWorkflowoutputnode [label="{IN|<inbiascorrected> bias_corrected|<inbiasimage> bias_image|<inoutfile> out_file|<inoutmask> out_mask}|{ outputnode | utility |  }|{OUT}"];
+AFNISkullStripWorkflowbinarize:outoutmask:e -> AFNISkullStripWorkflowoutputnode:inoutmask:w;
+AFNISkullStripWorkflowinputnode:outinfile:e -> AFNISkullStripWorkflowinu_n4:ininputimage:w;
+AFNISkullStripWorkflowinputnode:outinfile:e -> AFNISkullStripWorkflowsstrip_orig_vol:ininfilea:w;
+AFNISkullStripWorkflowinu_n4:outbiasimage:e -> AFNISkullStripWorkflowoutputnode:inbiasimage:w;
+AFNISkullStripWorkflowinu_n4:outoutputimage:e -> AFNISkullStripWorkflowoutputnode:inbiascorrected:w;
+AFNISkullStripWorkflowinu_n4:outoutputimage:e -> AFNISkullStripWorkflowskullstrip:ininfile:w;
+AFNISkullStripWorkflowskullstrip:outoutfile:e -> AFNISkullStripWorkflowsstrip_orig_vol:ininfileb:w;
+AFNISkullStripWorkflowsstrip_orig_vol:outoutfile:e -> AFNISkullStripWorkflowbinarize:ininfile:w;
+AFNISkullStripWorkflowsstrip_orig_vol:outoutfile:e -> AFNISkullStripWorkflowoutputnode:inoutfile:w;
+}

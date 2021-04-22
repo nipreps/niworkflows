@@ -1,0 +1,23 @@
+strict digraph  {
+"inputnode (utility)";
+"validate_nii (header)";
+"per_run_avgs (images)";
+"clip_avgs (nibabel)";
+"outputnode (utility)";
+"n4_avgs (ants)";
+"clip_bg_noise (nibabel)";
+"epi_merge (freesurfer)";
+"post_merge (utility)";
+"inputnode (utility)" -> "validate_nii (header)";
+"inputnode (utility)" -> "per_run_avgs (images)";
+"validate_nii (header)" -> "per_run_avgs (images)";
+"per_run_avgs (images)" -> "clip_avgs (nibabel)";
+"per_run_avgs (images)" -> "outputnode (utility)";
+"clip_avgs (nibabel)" -> "n4_avgs (ants)";
+"n4_avgs (ants)" -> "clip_bg_noise (nibabel)";
+"n4_avgs (ants)" -> "outputnode (utility)";
+"clip_bg_noise (nibabel)" -> "epi_merge (freesurfer)";
+"epi_merge (freesurfer)" -> "post_merge (utility)";
+"epi_merge (freesurfer)" -> "outputnode (utility)";
+"post_merge (utility)" -> "outputnode (utility)";
+}

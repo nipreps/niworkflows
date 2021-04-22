@@ -1,0 +1,7 @@
+niworkflows.interfaces.space module
+===================================
+
+.. automodule:: niworkflows.interfaces.space
+   :members:
+   :undoc-members:
+   :show-inheritance:

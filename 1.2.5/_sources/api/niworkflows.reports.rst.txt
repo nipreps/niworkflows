@@ -1,0 +1,15 @@
+niworkflows.reports package
+===========================
+
+.. automodule:: niworkflows.reports
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   niworkflows.reports.core

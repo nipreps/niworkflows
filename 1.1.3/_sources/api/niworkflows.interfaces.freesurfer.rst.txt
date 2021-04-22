@@ -1,0 +1,7 @@
+niworkflows.interfaces.freesurfer module
+========================================
+
+.. automodule:: niworkflows.interfaces.freesurfer
+   :members:
+   :undoc-members:
+   :show-inheritance:

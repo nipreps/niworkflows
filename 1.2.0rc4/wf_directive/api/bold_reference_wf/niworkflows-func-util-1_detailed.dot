@@ -1,0 +1,26 @@
+digraph structs {
+node [shape=record];
+bold_reference_wfinputnode [label="{IN}|{ inputnode | utility |  }|{OUT|<outboldfile> bold_file|<outboldmask> bold_mask|<outdummyscans> dummy_scans}"];
+bold_reference_wfget_dummy [label="{IN|<ininfile> in_file}|{ get_dummy | bold |  }|{OUT|<outndummy> n_dummy|<outtmask> t_mask}"];
+bold_reference_wfcalc_dummy_scans [label="{IN|<inalgodummyscans> algo_dummy_scans|<indummyscans> dummy_scans}|{ calc_dummy_scans | utility |  }|{OUT|<outskipvolsnum> skip_vols_num}"];
+bold_reference_wfval_bold [label="{IN|<ininfile> in_file}|{ val_bold | header |  }|{OUT|<outoutfile> out_file|<outoutreport> out_report}"];
+bold_reference_wfgen_avg [label="{IN|<ininfile> in_file|<intmask> t_mask}|{ gen_avg | images |  }|{OUT|<outoutfile> out_file}"];
+bold_reference_wfenhance_and_skullstrip_bold_wf [label="{IN|<ininputnodeinfile> inputnode.in_file|<ininputnodepremask> inputnode.pre_mask}|{ enhance_and_skullstrip_bold_wf |  |  }|{OUT|<outoutputnodebiascorrectedfile> outputnode.bias_corrected_file|<outoutputnodemaskfile> outputnode.mask_file|<outoutputnodeskullstrippedfile> outputnode.skull_stripped_file}"];
+bold_reference_wfoutputnode [label="{IN|<inalgodummyscans> algo_dummy_scans|<inboldfile> bold_file|<inboldmask> bold_mask|<inrawrefimage> raw_ref_image|<inrefimage> ref_image|<inrefimagebrain> ref_image_brain|<inskipvols> skip_vols|<invalidationreport> validation_report}|{ outputnode | utility |  }|{OUT}"];
+bold_reference_wfcalc_dummy_scans:outskipvolsnum:e -> bold_reference_wfoutputnode:inskipvols:w;
+bold_reference_wfenhance_and_skullstrip_bold_wf:outoutputnodebiascorrectedfile:e -> bold_reference_wfoutputnode:inrefimage:w;
+bold_reference_wfenhance_and_skullstrip_bold_wf:outoutputnodemaskfile:e -> bold_reference_wfoutputnode:inboldmask:w;
+bold_reference_wfenhance_and_skullstrip_bold_wf:outoutputnodeskullstrippedfile:e -> bold_reference_wfoutputnode:inrefimagebrain:w;
+bold_reference_wfgen_avg:outoutfile:e -> bold_reference_wfenhance_and_skullstrip_bold_wf:ininputnodeinfile:w;
+bold_reference_wfgen_avg:outoutfile:e -> bold_reference_wfoutputnode:inrawrefimage:w;
+bold_reference_wfget_dummy:outndummy:e -> bold_reference_wfcalc_dummy_scans:inalgodummyscans:w;
+bold_reference_wfget_dummy:outndummy:e -> bold_reference_wfoutputnode:inalgodummyscans:w;
+bold_reference_wfget_dummy:outtmask:e -> bold_reference_wfgen_avg:intmask:w;
+bold_reference_wfinputnode:outboldfile:e -> bold_reference_wfget_dummy:ininfile:w;
+bold_reference_wfinputnode:outboldfile:e -> bold_reference_wfval_bold:ininfile:w;
+bold_reference_wfinputnode:outboldmask:e -> bold_reference_wfenhance_and_skullstrip_bold_wf:ininputnodepremask:w;
+bold_reference_wfinputnode:outdummyscans:e -> bold_reference_wfcalc_dummy_scans:indummyscans:w;
+bold_reference_wfval_bold:outoutfile:e -> bold_reference_wfgen_avg:ininfile:w;
+bold_reference_wfval_bold:outoutfile:e -> bold_reference_wfoutputnode:inboldfile:w;
+bold_reference_wfval_bold:outoutreport:e -> bold_reference_wfoutputnode:invalidationreport:w;
+}

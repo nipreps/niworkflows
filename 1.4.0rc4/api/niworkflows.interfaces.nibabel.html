@@ -1,0 +1,547 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>niworkflows.interfaces.nibabel module &mdash; niworkflows 1.4.0rc5+17.g5792f74b documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="niworkflows.interfaces.nilearn module" href="niworkflows.interfaces.nilearn.html" />
+    <link rel="prev" title="niworkflows.interfaces.itk module" href="niworkflows.interfaces.itk.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> niworkflows
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.anat.html">niworkflows.anat package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.cli.html">niworkflows.cli package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.func.html">niworkflows.func package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="niworkflows.interfaces.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.bids.html">niworkflows.interfaces.bids module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.bold.html">niworkflows.interfaces.bold module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.confounds.html">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.header.html">niworkflows.interfaces.header module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.images.html">niworkflows.interfaces.images module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.itk.html">niworkflows.interfaces.itk module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">niworkflows.interfaces.nibabel module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.nilearn.html">niworkflows.interfaces.nilearn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.nitransforms.html">niworkflows.interfaces.nitransforms module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.norm.html">niworkflows.interfaces.norm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.patches.html">niworkflows.interfaces.patches module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.plotting.html">niworkflows.interfaces.plotting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.probmaps.html">niworkflows.interfaces.probmaps module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.viz.html">niworkflows.viz package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.workflows.html">niworkflows.workflows package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new?</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">niworkflows</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
+        
+          <li><a href="niworkflows.interfaces.html">niworkflows.interfaces package</a> &raquo;</li>
+        
+      <li>niworkflows.interfaces.nibabel module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/niworkflows.interfaces.nibabel.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../../master/api/niworkflows.interfaces.nibabel.html"><b>Warning:</b> This document is for an old version of niworkflows. The main version is master.</a></p>
+<div class="section" id="module-niworkflows.interfaces.nibabel">
+<span id="niworkflows-interfaces-nibabel-module"></span><h1>niworkflows.interfaces.nibabel module<a class="headerlink" href="#module-niworkflows.interfaces.nibabel" title="Permalink to this headline">¶</a></h1>
+<p>Nibabel-based interfaces.</p>
+<dl class="py class">
+<dt id="niworkflows.interfaces.nibabel.ApplyMask">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.nibabel.</span></code><code class="sig-name descname"><span class="pre">ApplyMask</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/nibabel.html#ApplyMask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.nibabel.ApplyMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Mask the input given a mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – An image.</p></li>
+<li><p><strong>in_mask</strong> (<em>a pathlike object or string representing an existing file</em>) – A mask.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs</dt>
+<dd class="field-even"><p><strong>threshold</strong> (<em>a float</em>) – A threshold to the mask, if it is nonbinary.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">0.5</span></code>)</p>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Masked file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.nibabel.Binarize">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.nibabel.</span></code><code class="sig-name descname"><span class="pre">Binarize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/nibabel.html#Binarize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.nibabel.Binarize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Binarizes the input image applying the given thresholds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Input image.</p></li>
+<li><p><strong>thresh_low</strong> (<em>a float</em>) – Non-inclusive lower threshold.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Outputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Masked file.</p></li>
+<li><p><strong>out_mask</strong> (<em>a pathlike object or string representing an existing file</em>) – Output mask.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.nibabel.DemeanImage">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.nibabel.</span></code><code class="sig-name descname"><span class="pre">DemeanImage</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/nibabel.html#DemeanImage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.nibabel.DemeanImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Image to be demeaned.</p></li>
+<li><p><strong>in_mask</strong> (<em>a pathlike object or string representing an existing file</em>) – Mask where median will be calculated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs</dt>
+<dd class="field-even"><p><strong>only_mask</strong> (<em>a boolean</em>) – Demean only within mask.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Demeaned image.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.nibabel.FilledImageLike">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.nibabel.</span></code><code class="sig-name descname"><span class="pre">FilledImageLike</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/nibabel.html#FilledImageLike"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.nibabel.FilledImageLike" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Image to be demeaned.</p>
+</dd>
+<dt class="field-even">Optional Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>dtype</strong> (<em>‘float32’ or ‘uint8’</em>) – Force output data type.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">float32</span></code>)</p></li>
+<li><p><strong>fill_value</strong> (<em>a float</em>) – Value to fill.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">1.0</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Demeaned image.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.nibabel.GenerateSamplingReference">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.nibabel.</span></code><code class="sig-name descname"><span class="pre">GenerateSamplingReference</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/nibabel.html#GenerateSamplingReference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.nibabel.GenerateSamplingReference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Generates a reference grid for resampling one image keeping original resolution,
+but moving data to a different space (e.g. MNI).</p>
+<p>If the <cite>fov_mask</cite> optional input is provided, then the abbr:<cite>FoV (field-of-view)</cite>
+is cropped to a bounding box containing the brain mask plus an offest of two
+voxels along all dimensions. The <cite>fov_mask</cite> should be to the brain mask calculated
+from the T1w, and should not contain the brain stem. The mask is resampled into
+target space, and then the bounding box is calculated. Finally, the FoV is adjusted
+to that bounding box.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fixed_image</strong> (<em>a pathlike object or string representing an existing file</em>) – The reference file, defines the FoV.</p></li>
+<li><p><strong>moving_image</strong> (<em>a pathlike object or string representing an existing file</em>) – The pixel size reference.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fov_mask</strong> (<em>a pathlike object or string representing an existing file or None</em>) – Mask to clip field of view (in fixed_image space).
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><strong>keep_native</strong> (<em>a boolean</em>) – Calculate a grid with native resolution covering the volume extent given by fixed_image, fast forward fixed_image otherwise.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>xform_code</strong> (<em>None or 2 or 4</em>) – Force xform code.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – One file with all inputs flattened.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.nibabel.IntensityClip">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.nibabel.</span></code><code class="sig-name descname"><span class="pre">IntensityClip</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/nibabel.html#IntensityClip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.nibabel.IntensityClip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Clip the intensity range as prescribed by the percentiles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – File which intensity will be clipped.</p>
+</dd>
+<dt class="field-even">Optional Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>dtype</strong> (<em>‘int16’ or ‘float32’ or ‘uint8’</em>) – Output datatype.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">int16</span></code>)</p></li>
+<li><p><strong>invert</strong> (<em>a boolean</em>) – Finalize by inverting contrast.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
+<li><p><strong>nonnegative</strong> (<em>a boolean</em>) – Whether input intensities must be positive.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>p_max</strong> (<em>a float</em>) – Percentile for the upper bound.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">99.98</span></code>)</p></li>
+<li><p><strong>p_min</strong> (<em>a float</em>) – Percentile for the lower bound.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">35.0</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – File after clipping.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.nibabel.MergeSeries">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.nibabel.</span></code><code class="sig-name descname"><span class="pre">MergeSeries</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/nibabel.html#MergeSeries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.nibabel.MergeSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Merge a series of 3D volumes along the last dimension into a single 4D image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Optional Inputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>allow_4D</strong> (<em>a boolean</em>) – Whether 4D images are allowed to be concatenated.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>in_files</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Outputs</dt>
+<dd class="field-even"><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Output 4d image.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.nibabel.RegridToZooms">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.nibabel.</span></code><code class="sig-name descname"><span class="pre">RegridToZooms</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/nibabel.html#RegridToZooms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.nibabel.RegridToZooms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Change the resolution of an image (regrid).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – A file whose resolution is to change.</p></li>
+<li><p><strong>zooms</strong> (<em>a tuple of the form: (a float, a float, a float)</em>) – The new resolution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>clip</strong> (<em>a boolean</em>) – Clip the data array within the original image’s range.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>order</strong> (<em>an integer</em>) – Order of interpolator.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">3</span></code>)</p></li>
+<li><p><strong>smooth</strong> (<em>a boolean or a float</em>) – Apply gaussian smoothing before resampling.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.nibabel.SplitSeries">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.nibabel.</span></code><code class="sig-name descname"><span class="pre">SplitSeries</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/nibabel.html#SplitSeries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.nibabel.SplitSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Split a 4D dataset along the last dimension into a series of 3D volumes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Input 4d image.</p>
+</dd>
+<dt class="field-even">Outputs</dt>
+<dd class="field-even"><p><strong>out_files</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Output list of 3d images.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="niworkflows.interfaces.nilearn.html" class="btn btn-neutral float-right" title="niworkflows.interfaces.nilearn module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="niworkflows.interfaces.itk.html" class="btn btn-neutral float-left" title="niworkflows.interfaces.itk module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright Copyright 2021, The NiPreps Developers.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.4.0rc4
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../1.0.0/api/niworkflows.interfaces.nibabel.html">1.0.0</a></dd>
+            <dd><a href="../../1.0.0rc1/api/niworkflows.interfaces.nibabel.html">1.0.0rc1</a></dd>
+            <dd><a href="../../1.0.0rc2/api/niworkflows.interfaces.nibabel.html">1.0.0rc2</a></dd>
+            <dd><a href="../../1.0.1/api/niworkflows.interfaces.nibabel.html">1.0.1</a></dd>
+            <dd><a href="../../1.0.2/api/niworkflows.interfaces.nibabel.html">1.0.2</a></dd>
+            <dd><a href="../../1.0.3/api/niworkflows.interfaces.nibabel.html">1.0.3</a></dd>
+            <dd><a href="../../1.0.4/api/niworkflows.interfaces.nibabel.html">1.0.4</a></dd>
+            <dd><a href="../../1.1.0/api/niworkflows.interfaces.nibabel.html">1.1.0</a></dd>
+            <dd><a href="../../1.1.1/api/niworkflows.interfaces.nibabel.html">1.1.1</a></dd>
+            <dd><a href="../../1.1.10/api/niworkflows.interfaces.nibabel.html">1.1.10</a></dd>
+            <dd><a href="../../1.1.11/api/niworkflows.interfaces.nibabel.html">1.1.11</a></dd>
+            <dd><a href="../../1.1.12/api/niworkflows.interfaces.nibabel.html">1.1.12</a></dd>
+            <dd><a href="../../1.1.2/api/niworkflows.interfaces.nibabel.html">1.1.2</a></dd>
+            <dd><a href="../../1.1.3/api/niworkflows.interfaces.nibabel.html">1.1.3</a></dd>
+            <dd><a href="../../1.1.4/api/niworkflows.interfaces.nibabel.html">1.1.4</a></dd>
+            <dd><a href="../../1.1.5/api/niworkflows.interfaces.nibabel.html">1.1.5</a></dd>
+            <dd><a href="../../1.1.6/api/niworkflows.interfaces.nibabel.html">1.1.6</a></dd>
+            <dd><a href="../../1.1.7/api/niworkflows.interfaces.nibabel.html">1.1.7</a></dd>
+            <dd><a href="../../1.1.8/api/niworkflows.interfaces.nibabel.html">1.1.8</a></dd>
+            <dd><a href="../../1.1.9/api/niworkflows.interfaces.nibabel.html">1.1.9</a></dd>
+            <dd><a href="../../1.2.0/api/niworkflows.interfaces.nibabel.html">1.2.0</a></dd>
+            <dd><a href="../../1.2.0rc1/api/niworkflows.interfaces.nibabel.html">1.2.0rc1</a></dd>
+            <dd><a href="../../1.2.0rc2/api/niworkflows.interfaces.nibabel.html">1.2.0rc2</a></dd>
+            <dd><a href="../../1.2.0rc3/api/niworkflows.interfaces.nibabel.html">1.2.0rc3</a></dd>
+            <dd><a href="../../1.2.0rc4/api/niworkflows.interfaces.nibabel.html">1.2.0rc4</a></dd>
+            <dd><a href="../../1.2.0rc5/api/niworkflows.interfaces.nibabel.html">1.2.0rc5</a></dd>
+            <dd><a href="../../1.2.1/api/niworkflows.interfaces.nibabel.html">1.2.1</a></dd>
+            <dd><a href="../../1.2.2/api/niworkflows.interfaces.nibabel.html">1.2.2</a></dd>
+            <dd><a href="../../1.2.3/api/niworkflows.interfaces.nibabel.html">1.2.3</a></dd>
+            <dd><a href="../../1.2.4/api/niworkflows.interfaces.nibabel.html">1.2.4</a></dd>
+            <dd><a href="../../1.2.5/api/niworkflows.interfaces.nibabel.html">1.2.5</a></dd>
+            <dd><a href="../../1.2.6/api/niworkflows.interfaces.nibabel.html">1.2.6</a></dd>
+            <dd><a href="../../1.2.7/api/niworkflows.interfaces.nibabel.html">1.2.7</a></dd>
+            <dd><a href="../../1.2.8/api/niworkflows.interfaces.nibabel.html">1.2.8</a></dd>
+            <dd><a href="../../1.2.9/api/niworkflows.interfaces.nibabel.html">1.2.9</a></dd>
+            <dd><a href="../../1.3.0/api/niworkflows.interfaces.nibabel.html">1.3.0</a></dd>
+            <dd><a href="../../1.3.0rc1/api/niworkflows.interfaces.nibabel.html">1.3.0rc1</a></dd>
+            <dd><a href="../../1.3.0rc2/api/niworkflows.interfaces.nibabel.html">1.3.0rc2</a></dd>
+            <dd><a href="../../1.3.0rc3/api/niworkflows.interfaces.nibabel.html">1.3.0rc3</a></dd>
+            <dd><a href="../../1.3.1/api/niworkflows.interfaces.nibabel.html">1.3.1</a></dd>
+            <dd><a href="../../1.3.2/api/niworkflows.interfaces.nibabel.html">1.3.2</a></dd>
+            <dd><a href="../../1.3.3/api/niworkflows.interfaces.nibabel.html">1.3.3</a></dd>
+            <dd><a href="../../1.4.0rc0/api/niworkflows.interfaces.nibabel.html">1.4.0rc0</a></dd>
+            <dd><a href="../../1.4.0rc1/api/niworkflows.interfaces.nibabel.html">1.4.0rc1</a></dd>
+            <dd><a href="../../1.4.0rc2/api/niworkflows.interfaces.nibabel.html">1.4.0rc2</a></dd>
+            <dd><a href="../../1.4.0rc3/api/niworkflows.interfaces.nibabel.html">1.4.0rc3</a></dd>
+            <dd><a href="niworkflows.interfaces.nibabel.html">1.4.0rc4</a></dd>
+            <dd><a href="../../1.4.0rc5/api/niworkflows.interfaces.nibabel.html">1.4.0rc5</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../maint_1.0.x/api/niworkflows.interfaces.nibabel.html">maint/1.0.x</a></dd>
+            <dd><a href="../../maint_1.1.x/api/niworkflows.interfaces.nibabel.html">maint/1.1.x</a></dd>
+            <dd><a href="../../maint_1.2.x/api/niworkflows.interfaces.nibabel.html">maint/1.2.x</a></dd>
+            <dd><a href="../../maint_1.3.x/api/niworkflows.interfaces.nibabel.html">maint/1.3.x</a></dd>
+            <dd><a href="../../master/api/niworkflows.interfaces.nibabel.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+niworkflows.interfaces.segmentation module
+==========================================
+
+.. automodule:: niworkflows.interfaces.segmentation
+   :members:
+   :undoc-members:
+   :show-inheritance:

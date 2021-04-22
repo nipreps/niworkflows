@@ -1,0 +1,26 @@
+digraph structs {
+node [shape=record];
+epi_reference_wfinputnode [label="{IN}|{ inputnode | utility |  }|{OUT|<outinfiles> in_files|<outtmasks> t_masks}"];
+epi_reference_wfvalidate_nii [label="{IN|<ininfile> in_file}|{ validate_nii | header |  }|{OUT|<outoutfile> out_file}"];
+epi_reference_wfper_run_avgs [label="{IN|<ininfile> in_file|<intmask> t_mask}|{ per_run_avgs | images |  }|{OUT|<outoutdrift> out_drift|<outoutfile> out_file}"];
+epi_reference_wfclip_avgs [label="{IN|<ininfile> in_file}|{ clip_avgs | nibabel |  }|{OUT|<outoutfile> out_file}"];
+epi_reference_wfn4_avgs [label="{IN|<ininputimage> input_image}|{ n4_avgs | ants |  }|{OUT|<outoutputimage> output_image}"];
+epi_reference_wfclip_bg_noise [label="{IN|<ininfile> in_file}|{ clip_bg_noise | nibabel |  }|{OUT|<outoutfile> out_file}"];
+epi_reference_wfepi_merge [label="{IN|<ininfiles> in_files|<innumthreads> num_threads}|{ epi_merge | freesurfer |  }|{OUT|<outoutfile> out_file|<outtransformoutputs> transform_outputs}"];
+epi_reference_wfpost_merge [label="{IN|<ininfile> in_file|<ininxfms> in_xfms}|{ post_merge | utility |  }|{OUT|<outout> out}"];
+epi_reference_wfoutputnode [label="{IN|<indriftfactors> drift_factors|<inepireffile> epi_ref_file|<inperrunreffiles> per_run_ref_files|<inxfmfiles> xfm_files}|{ outputnode | utility |  }|{OUT}"];
+epi_reference_wfclip_avgs:outoutfile:e -> epi_reference_wfn4_avgs:ininputimage:w;
+epi_reference_wfclip_bg_noise:outoutfile:e -> epi_reference_wfepi_merge:ininfiles:w;
+epi_reference_wfclip_bg_noise:outoutfile:e -> epi_reference_wfepi_merge:innumthreads:w;
+epi_reference_wfepi_merge:outoutfile:e -> epi_reference_wfpost_merge:ininfile:w;
+epi_reference_wfepi_merge:outtransformoutputs:e -> epi_reference_wfoutputnode:inxfmfiles:w;
+epi_reference_wfepi_merge:outtransformoutputs:e -> epi_reference_wfpost_merge:ininxfms:w;
+epi_reference_wfinputnode:outinfiles:e -> epi_reference_wfvalidate_nii:ininfile:w;
+epi_reference_wfinputnode:outtmasks:e -> epi_reference_wfper_run_avgs:intmask:w;
+epi_reference_wfn4_avgs:outoutputimage:e -> epi_reference_wfclip_bg_noise:ininfile:w;
+epi_reference_wfn4_avgs:outoutputimage:e -> epi_reference_wfoutputnode:inperrunreffiles:w;
+epi_reference_wfper_run_avgs:outoutdrift:e -> epi_reference_wfoutputnode:indriftfactors:w;
+epi_reference_wfper_run_avgs:outoutfile:e -> epi_reference_wfclip_avgs:ininfile:w;
+epi_reference_wfpost_merge:outout:e -> epi_reference_wfoutputnode:inepireffile:w;
+epi_reference_wfvalidate_nii:outoutfile:e -> epi_reference_wfper_run_avgs:ininfile:w;
+}

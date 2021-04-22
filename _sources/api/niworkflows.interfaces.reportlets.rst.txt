@@ -1,0 +1,18 @@
+niworkflows.interfaces.reportlets package
+=========================================
+
+.. automodule:: niworkflows.interfaces.reportlets
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   niworkflows.interfaces.reportlets.base
+   niworkflows.interfaces.reportlets.masks
+   niworkflows.interfaces.reportlets.registration
+   niworkflows.interfaces.reportlets.segmentation

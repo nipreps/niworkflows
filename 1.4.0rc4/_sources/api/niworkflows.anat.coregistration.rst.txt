@@ -1,0 +1,7 @@
+niworkflows.anat.coregistration module
+======================================
+
+.. automodule:: niworkflows.anat.coregistration
+   :members:
+   :undoc-members:
+   :show-inheritance:

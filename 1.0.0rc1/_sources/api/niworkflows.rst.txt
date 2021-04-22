@@ -1,0 +1,23 @@
+niworkflows package
+===================
+
+.. automodule:: niworkflows
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   niworkflows.anat
+   niworkflows.common
+   niworkflows.dwi
+   niworkflows.engine
+   niworkflows.func
+   niworkflows.interfaces
+   niworkflows.reports
+   niworkflows.utils
+   niworkflows.viz

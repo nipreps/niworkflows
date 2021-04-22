@@ -1,0 +1,7 @@
+niworkflows.interfaces.header module
+====================================
+
+.. automodule:: niworkflows.interfaces.header
+   :members:
+   :undoc-members:
+   :show-inheritance:

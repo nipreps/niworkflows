@@ -1,0 +1,16 @@
+strict digraph  {
+"inputnode (utility)";
+"sstrip_orig_vol (afni)";
+"inu_n4 (fixes)";
+"outputnode (utility)";
+"binarize (nibabel)";
+"skullstrip (afni)";
+"inputnode (utility)" -> "sstrip_orig_vol (afni)";
+"inputnode (utility)" -> "inu_n4 (fixes)";
+"sstrip_orig_vol (afni)" -> "outputnode (utility)";
+"sstrip_orig_vol (afni)" -> "binarize (nibabel)";
+"inu_n4 (fixes)" -> "skullstrip (afni)";
+"inu_n4 (fixes)" -> "outputnode (utility)";
+"binarize (nibabel)" -> "outputnode (utility)";
+"skullstrip (afni)" -> "sstrip_orig_vol (afni)";
+}

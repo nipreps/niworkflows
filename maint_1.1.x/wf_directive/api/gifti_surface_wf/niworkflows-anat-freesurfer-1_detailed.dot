@@ -1,0 +1,29 @@
+digraph structs {
+node [shape=record];
+gifti_surface_wfinputnode [label="{IN}|{ inputnode | utility |  }|{OUT|<outint1w> in_t1w|<outsubjectid> subject_id}"];
+gifti_surface_wffssource [label="{IN|<insubjectid> subject_id}|{ fssource | io |  }|{OUT|<outgraymid> graymid|<outinflated> inflated|<outorig> orig|<outpial> pial|<outsmoothwm> smoothwm}"];
+gifti_surface_wfmidthickness [label="{IN|<ingraymid> graymid|<ininfile> in_file}|{ midthickness | freesurfer |  }|{OUT|<outoutfile> out_file}"];
+gifti_surface_wfsave_midthickness [label="{IN|<incontainer> container|<insurfgraymid> surf.@graymid}|{ save_midthickness | io |  }|{OUT|<outoutfile> out_file}"];
+gifti_surface_wfsurface_list [label="{IN|<inin1> in1|<inin2> in2|<inin3> in3|<inin4> in4}|{ surface_list | utility |  }|{OUT|<outout> out}"];
+gifti_surface_wffs_2_gii [label="{IN|<ininfile> in_file}|{ fs_2_gii | freesurfer |  }|{OUT|<outconverted> converted}"];
+gifti_surface_wffsnative_2_t1_xfm [label="{IN|<insourcefile> source_file|<intargetfile> target_file}|{ fsnative_2_t1_xfm | freesurfer |  }|{OUT|<outoutregfile> out_reg_file}"];
+gifti_surface_wffix_surfs [label="{IN|<ininfile> in_file|<intransformfile> transform_file}|{ fix_surfs | surf |  }|{OUT|<outoutfile> out_file}"];
+gifti_surface_wfoutputnode [label="{IN|<infsnativetot1wxfm> fsnative_to_t1w_xfm|<insurfnorm> surf_norm|<insurfaces> surfaces}|{ outputnode | utility |  }|{OUT}"];
+gifti_surface_wffix_surfs:outoutfile:e -> gifti_surface_wfoutputnode:insurfnorm:w;
+gifti_surface_wffs_2_gii:outconverted:e -> gifti_surface_wffix_surfs:ininfile:w;
+gifti_surface_wffs_2_gii:outconverted:e -> gifti_surface_wfoutputnode:insurfaces:w;
+gifti_surface_wffsnative_2_t1_xfm:outoutregfile:e -> gifti_surface_wffix_surfs:intransformfile:w;
+gifti_surface_wffsnative_2_t1_xfm:outoutregfile:e -> gifti_surface_wfoutputnode:infsnativetot1wxfm:w;
+gifti_surface_wffssource:outgraymid:e -> gifti_surface_wfmidthickness:ingraymid:w;
+gifti_surface_wffssource:outinflated:e -> gifti_surface_wfsurface_list:inin3:w;
+gifti_surface_wffssource:outorig:e -> gifti_surface_wffsnative_2_t1_xfm:insourcefile:w;
+gifti_surface_wffssource:outpial:e -> gifti_surface_wfsurface_list:inin2:w;
+gifti_surface_wffssource:outsmoothwm:e -> gifti_surface_wfmidthickness:ininfile:w;
+gifti_surface_wffssource:outsmoothwm:e -> gifti_surface_wfsurface_list:inin1:w;
+gifti_surface_wfinputnode:outint1w:e -> gifti_surface_wffsnative_2_t1_xfm:intargetfile:w;
+gifti_surface_wfinputnode:outsubjectid:e -> gifti_surface_wffssource:insubjectid:w;
+gifti_surface_wfinputnode:outsubjectid:e -> gifti_surface_wfsave_midthickness:incontainer:w;
+gifti_surface_wfmidthickness:outoutfile:e -> gifti_surface_wfsave_midthickness:insurfgraymid:w;
+gifti_surface_wfsave_midthickness:outoutfile:e -> gifti_surface_wfsurface_list:inin4:w;
+gifti_surface_wfsurface_list:outout:e -> gifti_surface_wffs_2_gii:ininfile:w;
+}

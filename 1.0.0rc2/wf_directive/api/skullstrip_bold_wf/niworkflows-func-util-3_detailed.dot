@@ -1,0 +1,21 @@
+digraph structs {
+node [shape=record];
+skullstrip_bold_wfinputnode [label="{IN}|{ inputnode | utility |  }|{OUT|<outinfile> in_file}"];
+skullstrip_bold_wfskullstrip_first_pass [label="{IN|<ininfile> in_file}|{ skullstrip_first_pass | fsl |  }|{OUT|<outmaskfile> mask_file|<outoutfile> out_file}"];
+skullstrip_bold_wfskullstrip_second_pass [label="{IN|<ininfile> in_file}|{ skullstrip_second_pass | afni |  }|{OUT|<outoutfile> out_file}"];
+skullstrip_bold_wfcombine_masks [label="{IN|<ininfile> in_file|<inoperandfile> operand_file}|{ combine_masks | fsl |  }|{OUT|<outoutfile> out_file}"];
+skullstrip_bold_wfmask_reportlet [label="{IN|<inbackgroundfile> background_file|<inmaskfile> mask_file}|{ mask_reportlet | reportlets |  }|{OUT|<outoutreport> out_report}"];
+skullstrip_bold_wfapply_mask [label="{IN|<ininfile> in_file|<inmaskfile> mask_file}|{ apply_mask | fsl |  }|{OUT|<outoutfile> out_file}"];
+skullstrip_bold_wfoutputnode [label="{IN|<inmaskfile> mask_file|<inoutreport> out_report|<inskullstrippedfile> skull_stripped_file}|{ outputnode | utility |  }|{OUT}"];
+skullstrip_bold_wfapply_mask:outoutfile:e -> skullstrip_bold_wfoutputnode:inskullstrippedfile:w;
+skullstrip_bold_wfcombine_masks:outoutfile:e -> skullstrip_bold_wfapply_mask:inmaskfile:w;
+skullstrip_bold_wfcombine_masks:outoutfile:e -> skullstrip_bold_wfmask_reportlet:inmaskfile:w;
+skullstrip_bold_wfcombine_masks:outoutfile:e -> skullstrip_bold_wfoutputnode:inmaskfile:w;
+skullstrip_bold_wfinputnode:outinfile:e -> skullstrip_bold_wfapply_mask:ininfile:w;
+skullstrip_bold_wfinputnode:outinfile:e -> skullstrip_bold_wfmask_reportlet:inbackgroundfile:w;
+skullstrip_bold_wfinputnode:outinfile:e -> skullstrip_bold_wfskullstrip_first_pass:ininfile:w;
+skullstrip_bold_wfmask_reportlet:outoutreport:e -> skullstrip_bold_wfoutputnode:inoutreport:w;
+skullstrip_bold_wfskullstrip_first_pass:outmaskfile:e -> skullstrip_bold_wfcombine_masks:ininfile:w;
+skullstrip_bold_wfskullstrip_first_pass:outoutfile:e -> skullstrip_bold_wfskullstrip_second_pass:ininfile:w;
+skullstrip_bold_wfskullstrip_second_pass:outoutfile:e -> skullstrip_bold_wfcombine_masks:inoperandfile:w;
+}

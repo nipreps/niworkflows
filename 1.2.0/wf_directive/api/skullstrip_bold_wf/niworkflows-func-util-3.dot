@@ -1,0 +1,20 @@
+strict digraph  {
+"inputnode (utility)";
+"skullstrip_first_pass (fsl)";
+"apply_mask (fsl)";
+"mask_reportlet (reportlets)";
+"skullstrip_second_pass (afni)";
+"combine_masks (fsl)";
+"outputnode (utility)";
+"inputnode (utility)" -> "skullstrip_first_pass (fsl)";
+"inputnode (utility)" -> "apply_mask (fsl)";
+"inputnode (utility)" -> "mask_reportlet (reportlets)";
+"skullstrip_first_pass (fsl)" -> "skullstrip_second_pass (afni)";
+"skullstrip_first_pass (fsl)" -> "combine_masks (fsl)";
+"apply_mask (fsl)" -> "outputnode (utility)";
+"mask_reportlet (reportlets)" -> "outputnode (utility)";
+"skullstrip_second_pass (afni)" -> "combine_masks (fsl)";
+"combine_masks (fsl)" -> "outputnode (utility)";
+"combine_masks (fsl)" -> "apply_mask (fsl)";
+"combine_masks (fsl)" -> "mask_reportlet (reportlets)";
+}

@@ -1,0 +1,7 @@
+niworkflows.anat.freesurfer module
+==================================
+
+.. automodule:: niworkflows.anat.freesurfer
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,485 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>niworkflows.interfaces.probmaps &mdash; niworkflows 1.4.0rc5+17.g5792f74b documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/banner.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> niworkflows
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Library API (application program interface)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">What’s new?</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">niworkflows</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>niworkflows.interfaces.probmaps</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+
+
+
+
+
+<h1>Source code for niworkflows.interfaces.probmaps</h1><div class="highlight"><pre>
+<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="sd">&quot;&quot;&quot;Utilities.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+
+<span class="kn">import</span> <span class="nn">scipy.ndimage</span> <span class="k">as</span> <span class="nn">nd</span>
+<span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">traits</span><span class="p">,</span>
+    <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">File</span><span class="p">,</span>
+    <span class="n">InputMultiPath</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
+    <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
+    <span class="n">SimpleInterface</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;nipype.interface&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_TPM2ROIInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_tpm</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
+        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Tissue probability map file in T1 space&quot;</span>
+    <span class="p">)</span>
+    <span class="n">in_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
+        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Binary mask of skull-stripped T1w image&quot;</span>
+    <span class="p">)</span>
+    <span class="n">mask_erode_mm</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
+        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mask_erode_prop&quot;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;erode input mask (kernel width in mm)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">erode_mm</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
+        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;erode_prop&quot;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;erode output mask (kernel width in mm)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">mask_erode_prop</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
+        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mask_erode_mm&quot;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;erode input mask (target volume ratio)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">erode_prop</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
+        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;erode_mm&quot;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;erode output mask (target volume ratio)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">prob_thresh</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
+        <span class="mf">0.95</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;threshold for the tissue probability maps&quot;</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_TPM2ROIOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">roi_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output ROI file&quot;</span><span class="p">)</span>
+    <span class="n">eroded_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;resulting eroded mask&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TPM2ROI"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.probmaps.html#niworkflows.interfaces.probmaps.TPM2ROI">[docs]</a><span class="k">class</span> <span class="nc">TPM2ROI</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert tissue probability maps (TPMs) into ROIs.</span>
+
+<span class="sd">    This interface follows the following logic:</span>
+
+<span class="sd">    #. Erode ``in_mask`` by ``mask_erode_mm`` and apply to ``in_tpm``</span>
+<span class="sd">    #. Threshold masked TPM at ``prob_thresh``</span>
+<span class="sd">    #. Erode resulting mask by ``erode_mm``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_TPM2ROIInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_TPM2ROIOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">mask_erode_mm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_erode_mm</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isdefined</span><span class="p">(</span><span class="n">mask_erode_mm</span><span class="p">):</span>
+            <span class="n">mask_erode_mm</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">erode_mm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">erode_mm</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isdefined</span><span class="p">(</span><span class="n">erode_mm</span><span class="p">):</span>
+            <span class="n">erode_mm</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">mask_erode_prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_erode_prop</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isdefined</span><span class="p">(</span><span class="n">mask_erode_prop</span><span class="p">):</span>
+            <span class="n">mask_erode_prop</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">erode_prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">erode_prop</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isdefined</span><span class="p">(</span><span class="n">erode_prop</span><span class="p">):</span>
+            <span class="n">erode_prop</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">roi_file</span><span class="p">,</span> <span class="n">eroded_mask</span> <span class="o">=</span> <span class="n">_tpm2roi</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_tpm</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_mask</span><span class="p">,</span>
+            <span class="n">mask_erode_mm</span><span class="p">,</span>
+            <span class="n">erode_mm</span><span class="p">,</span>
+            <span class="n">mask_erode_prop</span><span class="p">,</span>
+            <span class="n">erode_prop</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">prob_thresh</span><span class="p">,</span>
+            <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;roi_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">roi_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;eroded_mask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eroded_mask</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_AddTPMsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_files</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span>
+        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input list of ROIs&quot;</span>
+    <span class="p">)</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;select specific maps&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_AddTPMsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;union of binarized input files&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="AddTPMs"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.probmaps.html#niworkflows.interfaces.probmaps.AddTPMs">[docs]</a><span class="k">class</span> <span class="nc">AddTPMs</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the union of several :abbr:`TPMs (tissue-probability maps)`.&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_AddTPMsInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_AddTPMsOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">in_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span>
+
+        <span class="n">indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">in_files</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">indices</span><span class="p">):</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">indices</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">runtime</span>
+
+        <span class="n">first_fname</span> <span class="o">=</span> <span class="n">in_files</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_fname</span>
+            <span class="k">return</span> <span class="n">runtime</span>
+
+        <span class="n">im</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">concat_images</span><span class="p">([</span><span class="n">in_files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">])</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">first_fname</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_tpmsum&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
+        <span class="n">newnii</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">im</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">im</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">newnii</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="c1"># Set visualization thresholds</span>
+        <span class="n">newnii</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;cal_max&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">newnii</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;cal_min&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">newnii</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
+
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">def</span> <span class="nf">_tpm2roi</span><span class="p">(</span>
+    <span class="n">in_tpm</span><span class="p">,</span>
+    <span class="n">in_mask</span><span class="p">,</span>
+    <span class="n">mask_erosion_mm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">erosion_mm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mask_erosion_prop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">erosion_prop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">pthres</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+    <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a mask from a tissue probability map</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tpm_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_tpm</span><span class="p">)</span>
+    <span class="n">roi_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">tpm_img</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">pthres</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+
+    <span class="n">eroded_mask_file</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">erode_in</span> <span class="o">=</span> <span class="p">(</span><span class="n">mask_erosion_mm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">mask_erosion_mm</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="n">mask_erosion_prop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">mask_erosion_prop</span> <span class="o">&lt;</span> <span class="mi">1</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">erode_in</span><span class="p">:</span>
+        <span class="n">eroded_mask_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">in_mask</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_eroded&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">)</span>
+        <span class="n">mask_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_mask</span><span class="p">)</span>
+        <span class="n">mask_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">mask_img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask_erosion_mm</span><span class="p">:</span>
+            <span class="n">iter_n</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">mask_erosion_mm</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">mask_img</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">())),</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">mask_data</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">binary_erosion</span><span class="p">(</span><span class="n">mask_data</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="n">iter_n</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">orig_vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask_data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">orig_vol</span> <span class="o">&gt;</span> <span class="n">mask_erosion_prop</span><span class="p">:</span>
+                <span class="n">mask_data</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">binary_erosion</span><span class="p">(</span><span class="n">mask_data</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Store mask</span>
+        <span class="n">eroded</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span><span class="n">mask_data</span><span class="p">,</span> <span class="n">mask_img</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">mask_img</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">eroded</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="n">eroded</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">eroded_mask_file</span><span class="p">)</span>
+
+        <span class="c1"># Mask TPM data (no effect if not eroded)</span>
+        <span class="n">roi_mask</span><span class="p">[</span><span class="o">~</span><span class="n">mask_data</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># shrinking</span>
+    <span class="n">erode_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">erosion_mm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">erosion_mm</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="n">erosion_prop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">erosion_prop</span> <span class="o">&lt;</span> <span class="mi">1</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">erode_out</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">erosion_mm</span><span class="p">:</span>
+            <span class="n">iter_n</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">erosion_mm</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">tpm_img</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">())),</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">iter_n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">erosion_mm</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">tpm_img</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">()))</span>
+            <span class="n">roi_mask</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">binary_erosion</span><span class="p">(</span><span class="n">roi_mask</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="n">iter_n</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">orig_vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">roi_mask</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">roi_mask</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">orig_vol</span> <span class="o">&gt;</span> <span class="n">erosion_prop</span><span class="p">:</span>
+                <span class="n">roi_mask</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">binary_erosion</span><span class="p">(</span><span class="n">roi_mask</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Create image to resample</span>
+    <span class="n">roi_fname</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">in_tpm</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_roi&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">)</span>
+    <span class="n">roi_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span><span class="n">roi_mask</span><span class="p">,</span> <span class="n">tpm_img</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">tpm_img</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+    <span class="n">roi_img</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="n">roi_img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">roi_fname</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">roi_fname</span><span class="p">,</span> <span class="n">eroded_mask_file</span> <span class="ow">or</span> <span class="n">in_mask</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright Copyright 2021, The NiPreps Developers.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: master
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../../../1.0.0/index.html">1.0.0</a></dd>
+            <dd><a href="../../../../1.0.0rc1/index.html">1.0.0rc1</a></dd>
+            <dd><a href="../../../../1.0.0rc2/index.html">1.0.0rc2</a></dd>
+            <dd><a href="../../../../1.0.1/index.html">1.0.1</a></dd>
+            <dd><a href="../../../../1.0.2/index.html">1.0.2</a></dd>
+            <dd><a href="../../../../1.0.3/index.html">1.0.3</a></dd>
+            <dd><a href="../../../../1.0.4/index.html">1.0.4</a></dd>
+            <dd><a href="../../../../1.1.0/index.html">1.1.0</a></dd>
+            <dd><a href="../../../../1.1.1/index.html">1.1.1</a></dd>
+            <dd><a href="../../../../1.1.10/index.html">1.1.10</a></dd>
+            <dd><a href="../../../../1.1.11/index.html">1.1.11</a></dd>
+            <dd><a href="../../../../1.1.12/index.html">1.1.12</a></dd>
+            <dd><a href="../../../../1.1.2/index.html">1.1.2</a></dd>
+            <dd><a href="../../../../1.1.3/index.html">1.1.3</a></dd>
+            <dd><a href="../../../../1.1.4/index.html">1.1.4</a></dd>
+            <dd><a href="../../../../1.1.5/index.html">1.1.5</a></dd>
+            <dd><a href="../../../../1.1.6/index.html">1.1.6</a></dd>
+            <dd><a href="../../../../1.1.7/index.html">1.1.7</a></dd>
+            <dd><a href="../../../../1.1.8/index.html">1.1.8</a></dd>
+            <dd><a href="../../../../1.1.9/index.html">1.1.9</a></dd>
+            <dd><a href="../../../../1.2.0/index.html">1.2.0</a></dd>
+            <dd><a href="../../../../1.2.0rc1/index.html">1.2.0rc1</a></dd>
+            <dd><a href="../../../../1.2.0rc2/index.html">1.2.0rc2</a></dd>
+            <dd><a href="../../../../1.2.0rc3/index.html">1.2.0rc3</a></dd>
+            <dd><a href="../../../../1.2.0rc4/index.html">1.2.0rc4</a></dd>
+            <dd><a href="../../../../1.2.0rc5/index.html">1.2.0rc5</a></dd>
+            <dd><a href="../../../../1.2.1/index.html">1.2.1</a></dd>
+            <dd><a href="../../../../1.2.2/index.html">1.2.2</a></dd>
+            <dd><a href="../../../../1.2.3/index.html">1.2.3</a></dd>
+            <dd><a href="../../../../1.2.4/index.html">1.2.4</a></dd>
+            <dd><a href="../../../../1.2.5/index.html">1.2.5</a></dd>
+            <dd><a href="../../../../1.2.6/index.html">1.2.6</a></dd>
+            <dd><a href="../../../../1.2.7/index.html">1.2.7</a></dd>
+            <dd><a href="../../../../1.2.8/index.html">1.2.8</a></dd>
+            <dd><a href="../../../../1.2.9/index.html">1.2.9</a></dd>
+            <dd><a href="../../../../1.3.0/index.html">1.3.0</a></dd>
+            <dd><a href="../../../../1.3.0rc1/index.html">1.3.0rc1</a></dd>
+            <dd><a href="../../../../1.3.0rc2/index.html">1.3.0rc2</a></dd>
+            <dd><a href="../../../../1.3.0rc3/index.html">1.3.0rc3</a></dd>
+            <dd><a href="../../../../1.3.1/index.html">1.3.1</a></dd>
+            <dd><a href="../../../../1.3.2/index.html">1.3.2</a></dd>
+            <dd><a href="../../../../1.3.3/index.html">1.3.3</a></dd>
+            <dd><a href="../../../../1.4.0rc0/index.html">1.4.0rc0</a></dd>
+            <dd><a href="../../../../1.4.0rc1/index.html">1.4.0rc1</a></dd>
+            <dd><a href="../../../../1.4.0rc2/index.html">1.4.0rc2</a></dd>
+            <dd><a href="../../../../1.4.0rc3/index.html">1.4.0rc3</a></dd>
+            <dd><a href="../../../../1.4.0rc4/index.html">1.4.0rc4</a></dd>
+            <dd><a href="../../../../1.4.0rc5/index.html">1.4.0rc5</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../../../maint_1.0.x/index.html">maint/1.0.x</a></dd>
+            <dd><a href="../../../../maint_1.1.x/index.html">maint/1.1.x</a></dd>
+            <dd><a href="../../../../maint_1.2.x/index.html">maint/1.2.x</a></dd>
+            <dd><a href="../../../../maint_1.3.x/index.html">maint/1.3.x</a></dd>
+            <dd><a href="probmaps.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

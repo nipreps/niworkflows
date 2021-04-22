@@ -1,0 +1,33 @@
+strict digraph  {
+"inputnode (utility)";
+"merge_ltas (utility)";
+"mri_coreg (freesurfer)";
+"bbregister (freesurfer)";
+"concat_xfm (nitransforms)";
+"outputnode (utility)";
+"transforms (utility)";
+"reports (utility)";
+"lta_ras2ras (freesurfer)";
+"select_transform (utility)";
+"compare_transforms (utility)";
+"select_report (utility)";
+"inputnode (utility)" -> "merge_ltas (utility)";
+"inputnode (utility)" -> "mri_coreg (freesurfer)";
+"inputnode (utility)" -> "bbregister (freesurfer)";
+"merge_ltas (utility)" -> "concat_xfm (nitransforms)";
+"mri_coreg (freesurfer)" -> "bbregister (freesurfer)";
+"mri_coreg (freesurfer)" -> "transforms (utility)";
+"mri_coreg (freesurfer)" -> "reports (utility)";
+"bbregister (freesurfer)" -> "transforms (utility)";
+"bbregister (freesurfer)" -> "reports (utility)";
+"concat_xfm (nitransforms)" -> "outputnode (utility)";
+"transforms (utility)" -> "lta_ras2ras (freesurfer)";
+"transforms (utility)" -> "select_transform (utility)";
+"reports (utility)" -> "select_report (utility)";
+"lta_ras2ras (freesurfer)" -> "compare_transforms (utility)";
+"select_transform (utility)" -> "merge_ltas (utility)";
+"compare_transforms (utility)" -> "outputnode (utility)";
+"compare_transforms (utility)" -> "select_transform (utility)";
+"compare_transforms (utility)" -> "select_report (utility)";
+"select_report (utility)" -> "outputnode (utility)";
+}

@@ -1,0 +1,7 @@
+niworkflows.interfaces.nilearn module
+=====================================
+
+.. automodule:: niworkflows.interfaces.nilearn
+   :members:
+   :undoc-members:
+   :show-inheritance:

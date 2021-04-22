@@ -1,0 +1,518 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>niworkflows.workflows.epi.refmap &mdash; niworkflows 1.4.0rc5+17.g5792f74b documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/banner.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> niworkflows
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">Library API (application program interface)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">What’s new?</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">niworkflows</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>niworkflows.workflows.epi.refmap</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+
+
+
+
+
+<h1>Source code for niworkflows.workflows.epi.refmap</h1><div class="highlight"><pre>
+<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="sd">&quot;&quot;&quot;Workflow for the generation of EPI (echo-planar imaging) references.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">nipype.pipeline</span> <span class="kn">import</span> <span class="n">engine</span> <span class="k">as</span> <span class="n">pe</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">utility</span> <span class="k">as</span> <span class="n">niu</span>
+
+<span class="kn">from</span> <span class="nn">...engine.workflows</span> <span class="kn">import</span> <span class="n">LiterateWorkflow</span> <span class="k">as</span> <span class="n">Workflow</span>
+
+
+<span class="n">DEFAULT_MEMORY_MIN_GB</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+
+<div class="viewcode-block" id="init_epi_reference_wf"><a class="viewcode-back" href="../../../../api/niworkflows.workflows.epi.refmap.html#niworkflows.workflows.epi.refmap.init_epi_reference_wf">[docs]</a><span class="k">def</span> <span class="nf">init_epi_reference_wf</span><span class="p">(</span>
+    <span class="n">omp_nthreads</span><span class="p">,</span>
+    <span class="n">auto_bold_nss</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;epi_reference_wf&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build a workflow that generates a reference map from a set of EPI images.</span>
+
+<span class="sd">    .. danger ::</span>
+
+<span class="sd">        All input files MUST have the same shimming configuration.</span>
+<span class="sd">        At the very least, make sure all input EPI images are acquired within the</span>
+<span class="sd">        same session, and have the same PE direction and total readout time.</span>
+
+<span class="sd">    Inputs to this workflow might be a list of :abbr:`SBRefs (single-band references)`,</span>
+<span class="sd">    a list of fieldmapping :abbr:`EPIs (echo-planar images)`, a list of</span>
+<span class="sd">    :abbr:`BOLD (blood-oxygen level-dependent)` images, or a list of</span>
+<span class="sd">    :abbr:`DWI (diffusion-weighted imaging)` datasets.</span>
+<span class="sd">    Please note that these different modalities should not be mixed together in any</span>
+<span class="sd">    case for this particular workflow.</span>
+
+<span class="sd">    For BOLD datasets, the workflow may be set up to execute an algorithm that determines</span>
+<span class="sd">    the nonsteady states in the beginning of the timeseries (also called *dummy scans*),</span>
+<span class="sd">    and uses those for generating a reference of the particular run, since the nonsteady</span>
+<span class="sd">    states are known to yield better T1 contrast (and hence perhaps better signal for</span>
+<span class="sd">    image registration).</span>
+
+<span class="sd">    Relatedly, the workflow also provides a global signal drift estimation per run.</span>
+<span class="sd">    This global signal drift is typically interesting for DWIs: because *b=0*</span>
+<span class="sd">    volumes are typically scattered throughout the scan, this drift can be</span>
+<span class="sd">    fit an exponential decay to model the signal drop caused by the increasing</span>
+<span class="sd">    temperature of the device (this is closely related to BOLD *nonsteady states*</span>
+<span class="sd">    described above, as these are just the few initial instants when the exponential</span>
+<span class="sd">    decay is much faster).</span>
+
+<span class="sd">    Workflow Graph</span>
+<span class="sd">        .. workflow::</span>
+<span class="sd">            :graph2use: orig</span>
+<span class="sd">            :simple_form: yes</span>
+
+<span class="sd">            from niworkflows.workflows.epi.refmap import init_epi_reference_wf</span>
+<span class="sd">            wf = init_epi_reference_wf(omp_nthreads=1)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    omp_nthreads : :obj:`int`</span>
+<span class="sd">        Maximum number of threads an individual process may use</span>
+<span class="sd">    name : :obj:`str`</span>
+<span class="sd">        Name of workflow (default: ``epi_reference_wf``)</span>
+<span class="sd">    auto_bold_nss : :obj:`bool`</span>
+<span class="sd">        If ``True``, determines nonsteady states in the beginning of the timeseries</span>
+<span class="sd">        and selects them for the averaging of each run.</span>
+<span class="sd">        IMPORTANT: this option applies only to BOLD EPIs.</span>
+
+<span class="sd">    Inputs</span>
+<span class="sd">    ------</span>
+<span class="sd">    in_files : :obj:`list` of :obj:`str`</span>
+<span class="sd">        List of paths of the input EPI images from which reference volumes will be</span>
+<span class="sd">        selected, aligned and averaged.</span>
+
+<span class="sd">    Outputs</span>
+<span class="sd">    -------</span>
+<span class="sd">    epi_ref_file : :obj:`str`</span>
+<span class="sd">        Path of the generated EPI reference file.</span>
+<span class="sd">    xfm_files : :obj:`list` of :obj:`str`</span>
+<span class="sd">        List of rigid-body transforms in LTA format to resample from</span>
+<span class="sd">        the reference volume of each run into the ``epi_ref_file`` reference.</span>
+<span class="sd">    per_run_ref_files : :obj:`list` of :obj:`str`</span>
+<span class="sd">        List of paths to the reference volume generated per input run.</span>
+<span class="sd">    drift_factors : :obj:`list` of :obj:`list` of :obj:`float`</span>
+<span class="sd">        A list of global signal drift factors for the set of volumes selected</span>
+<span class="sd">        for averaging, per run.</span>
+<span class="sd">    n_dummy_scans : :obj:`list` of :obj:`int`</span>
+<span class="sd">        Number of nonsteady states at the beginning of each run (only BOLD with</span>
+<span class="sd">        ``auto_bold_nss=True``)</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    Discussion and original flowchart at `nipreps/niworkflows#601</span>
+<span class="sd">    &lt;https://github.com/nipreps/niworkflows/issues/601&gt;`__.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">nipype.interfaces.ants</span> <span class="kn">import</span> <span class="n">N4BiasFieldCorrection</span>
+    <span class="kn">from</span> <span class="nn">...utils.connections</span> <span class="kn">import</span> <span class="n">listify</span>
+
+    <span class="kn">from</span> <span class="nn">...interfaces.bold</span> <span class="kn">import</span> <span class="n">NonsteadyStatesDetector</span>
+    <span class="kn">from</span> <span class="nn">...interfaces.freesurfer</span> <span class="kn">import</span> <span class="n">StructuralReference</span>
+    <span class="kn">from</span> <span class="nn">...interfaces.header</span> <span class="kn">import</span> <span class="n">ValidateImage</span>
+    <span class="kn">from</span> <span class="nn">...interfaces.images</span> <span class="kn">import</span> <span class="n">RobustAverage</span>
+    <span class="kn">from</span> <span class="nn">...interfaces.nibabel</span> <span class="kn">import</span> <span class="n">IntensityClip</span>
+
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">inputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_files&quot;</span><span class="p">,</span> <span class="s2">&quot;t_masks&quot;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;inputnode&quot;</span>
+    <span class="p">)</span>
+    <span class="n">outputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span>
+            <span class="n">fields</span><span class="o">=</span><span class="p">[</span>
+                <span class="s2">&quot;epi_ref_file&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;xfm_files&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;per_run_ref_files&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;drift_factors&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;n_dummy&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;outputnode&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">validate_nii</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">ValidateImage</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;validate_nii&quot;</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">per_run_avgs</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">RobustAverage</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;per_run_avgs&quot;</span><span class="p">,</span> <span class="n">mem_gb</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">,</span> <span class="s2">&quot;t_mask&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">clip_avgs</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">IntensityClip</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;clip_avgs&quot;</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">])</span>
+
+    <span class="c1"># de-gradient the fields (&quot;bias/illumination artifact&quot;)</span>
+    <span class="n">n4_avgs</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">N4BiasFieldCorrection</span><span class="p">(</span>
+            <span class="n">dimension</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">copy_header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">n_iterations</span><span class="o">=</span><span class="p">[</span><span class="mi">50</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="n">convergence_threshold</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span>
+            <span class="n">shrink_factor</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">n_procs</span><span class="o">=</span><span class="n">omp_nthreads</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;n4_avgs&quot;</span><span class="p">,</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;input_image&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">clip_bg_noise</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">IntensityClip</span><span class="p">(</span><span class="n">p_min</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="mf">100.0</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;clip_bg_noise&quot;</span><span class="p">,</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">epi_merge</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">StructuralReference</span><span class="p">(</span>
+            <span class="n">auto_detect_sensitivity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">initial_timepoint</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># For deterministic behavior</span>
+            <span class="n">intensity_scaling</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># 7-DOF (rigid + intensity)</span>
+            <span class="n">subsample_threshold</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+            <span class="n">fixed_timepoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">no_iteration</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">transform_outputs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;epi_merge&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">post_merge</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="n">_post_merge</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;post_merge&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_threads</span><span class="p">(</span><span class="n">in_list</span><span class="p">,</span> <span class="n">maximum</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">in_list</span><span class="p">),</span> <span class="n">maximum</span><span class="p">)</span>
+
+    <span class="c1"># fmt:off</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">validate_nii</span><span class="p">,</span> <span class="p">[((</span><span class="s2">&quot;in_files&quot;</span><span class="p">,</span> <span class="n">listify</span><span class="p">),</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">validate_nii</span><span class="p">,</span> <span class="n">per_run_avgs</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">per_run_avgs</span><span class="p">,</span> <span class="n">clip_avgs</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">clip_avgs</span><span class="p">,</span> <span class="n">n4_avgs</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;input_image&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">n4_avgs</span><span class="p">,</span> <span class="n">clip_bg_noise</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;output_image&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">clip_bg_noise</span><span class="p">,</span> <span class="n">epi_merge</span><span class="p">,</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_files&quot;</span><span class="p">),</span>
+            <span class="p">((</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="n">_set_threads</span><span class="p">,</span> <span class="n">omp_nthreads</span><span class="p">),</span> <span class="s2">&quot;num_threads&quot;</span><span class="p">),</span>
+        <span class="p">]),</span>
+        <span class="p">(</span><span class="n">epi_merge</span><span class="p">,</span> <span class="n">post_merge</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">),</span>
+                                 <span class="p">(</span><span class="s2">&quot;transform_outputs&quot;</span><span class="p">,</span> <span class="s2">&quot;in_xfms&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">post_merge</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;epi_ref_file&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">epi_merge</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;transform_outputs&quot;</span><span class="p">,</span> <span class="s2">&quot;xfm_files&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">per_run_avgs</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_drift&quot;</span><span class="p">,</span> <span class="s2">&quot;drift_factors&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">n4_avgs</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;output_image&quot;</span><span class="p">,</span> <span class="s2">&quot;per_run_ref_files&quot;</span><span class="p">)]),</span>
+
+    <span class="p">])</span>
+    <span class="c1"># fmt:on</span>
+
+    <span class="k">if</span> <span class="n">auto_bold_nss</span><span class="p">:</span>
+        <span class="n">select_volumes</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+            <span class="n">NonsteadyStatesDetector</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;select_volumes&quot;</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="c1"># fmt:off</span>
+        <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+            <span class="p">(</span><span class="n">validate_nii</span><span class="p">,</span> <span class="n">select_volumes</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">select_volumes</span><span class="p">,</span> <span class="n">per_run_avgs</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;t_mask&quot;</span><span class="p">,</span> <span class="s2">&quot;t_mask&quot;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">select_volumes</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;n_dummy&quot;</span><span class="p">,</span> <span class="s2">&quot;n_dummy&quot;</span><span class="p">)])</span>
+        <span class="p">])</span>
+        <span class="c1"># fmt:on</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s2">&quot;t_masks&quot;</span><span class="p">,</span> <span class="n">per_run_avgs</span><span class="p">,</span> <span class="s2">&quot;t_mask&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">wf</span></div>
+
+
+<span class="k">def</span> <span class="nf">_post_merge</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">in_xfms</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Massage output from ``SpatialReference``.</span>
+
+<span class="sd">    If the previous ``SpatialReference`` node by-passed the execution of</span>
+<span class="sd">    ``mri_robust_template`` (hence, there was only one input file), the</span>
+<span class="sd">    single-file is forwarded to the output.</span>
+
+<span class="sd">    Otherwise (``mri_robust_template`` was indeed executed), the output</span>
+<span class="sd">    is converted from mgz to NIfTI and the datatype of the reference</span>
+<span class="sd">    normalized to int16, with an intensity range of 0-255 (ideal for</span>
+<span class="sd">    ANTs registrations)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">niworkflows.utils.connections</span> <span class="kn">import</span> <span class="n">listify</span>
+
+    <span class="n">in_xfms</span> <span class="o">=</span> <span class="n">listify</span><span class="p">(</span><span class="n">in_xfms</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_xfms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">in_file</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;.nii&quot;</span><span class="p">,</span> <span class="s2">&quot;.nii.gz&quot;</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">in_file</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_xfms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Output format and number of transforms do not match&quot;</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+    <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+    <span class="kn">from</span> <span class="nn">niworkflows.interfaces.nibabel</span> <span class="kn">import</span> <span class="n">_advanced_clip</span>
+
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">()</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.mgz&quot;</span><span class="p">,</span> <span class="s2">&quot;.nii.gz&quot;</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+    <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">,</span> <span class="n">img</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_advanced_clip</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">p_min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="mf">100.0</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright Copyright 2021, The NiPreps Developers.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: master
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../../../../1.0.0/index.html">1.0.0</a></dd>
+            <dd><a href="../../../../../1.0.0rc1/index.html">1.0.0rc1</a></dd>
+            <dd><a href="../../../../../1.0.0rc2/index.html">1.0.0rc2</a></dd>
+            <dd><a href="../../../../../1.0.1/index.html">1.0.1</a></dd>
+            <dd><a href="../../../../../1.0.2/index.html">1.0.2</a></dd>
+            <dd><a href="../../../../../1.0.3/index.html">1.0.3</a></dd>
+            <dd><a href="../../../../../1.0.4/index.html">1.0.4</a></dd>
+            <dd><a href="../../../../../1.1.0/index.html">1.1.0</a></dd>
+            <dd><a href="../../../../../1.1.1/index.html">1.1.1</a></dd>
+            <dd><a href="../../../../../1.1.10/index.html">1.1.10</a></dd>
+            <dd><a href="../../../../../1.1.11/index.html">1.1.11</a></dd>
+            <dd><a href="../../../../../1.1.12/index.html">1.1.12</a></dd>
+            <dd><a href="../../../../../1.1.2/index.html">1.1.2</a></dd>
+            <dd><a href="../../../../../1.1.3/index.html">1.1.3</a></dd>
+            <dd><a href="../../../../../1.1.4/index.html">1.1.4</a></dd>
+            <dd><a href="../../../../../1.1.5/index.html">1.1.5</a></dd>
+            <dd><a href="../../../../../1.1.6/index.html">1.1.6</a></dd>
+            <dd><a href="../../../../../1.1.7/index.html">1.1.7</a></dd>
+            <dd><a href="../../../../../1.1.8/index.html">1.1.8</a></dd>
+            <dd><a href="../../../../../1.1.9/index.html">1.1.9</a></dd>
+            <dd><a href="../../../../../1.2.0/index.html">1.2.0</a></dd>
+            <dd><a href="../../../../../1.2.0rc1/index.html">1.2.0rc1</a></dd>
+            <dd><a href="../../../../../1.2.0rc2/index.html">1.2.0rc2</a></dd>
+            <dd><a href="../../../../../1.2.0rc3/index.html">1.2.0rc3</a></dd>
+            <dd><a href="../../../../../1.2.0rc4/index.html">1.2.0rc4</a></dd>
+            <dd><a href="../../../../../1.2.0rc5/index.html">1.2.0rc5</a></dd>
+            <dd><a href="../../../../../1.2.1/index.html">1.2.1</a></dd>
+            <dd><a href="../../../../../1.2.2/index.html">1.2.2</a></dd>
+            <dd><a href="../../../../../1.2.3/index.html">1.2.3</a></dd>
+            <dd><a href="../../../../../1.2.4/index.html">1.2.4</a></dd>
+            <dd><a href="../../../../../1.2.5/index.html">1.2.5</a></dd>
+            <dd><a href="../../../../../1.2.6/index.html">1.2.6</a></dd>
+            <dd><a href="../../../../../1.2.7/index.html">1.2.7</a></dd>
+            <dd><a href="../../../../../1.2.8/index.html">1.2.8</a></dd>
+            <dd><a href="../../../../../1.2.9/index.html">1.2.9</a></dd>
+            <dd><a href="../../../../../1.3.0/index.html">1.3.0</a></dd>
+            <dd><a href="../../../../../1.3.0rc1/index.html">1.3.0rc1</a></dd>
+            <dd><a href="../../../../../1.3.0rc2/index.html">1.3.0rc2</a></dd>
+            <dd><a href="../../../../../1.3.0rc3/index.html">1.3.0rc3</a></dd>
+            <dd><a href="../../../../../1.3.1/index.html">1.3.1</a></dd>
+            <dd><a href="../../../../../1.3.2/index.html">1.3.2</a></dd>
+            <dd><a href="../../../../../1.3.3/index.html">1.3.3</a></dd>
+            <dd><a href="../../../../../1.4.0rc0/index.html">1.4.0rc0</a></dd>
+            <dd><a href="../../../../../1.4.0rc1/index.html">1.4.0rc1</a></dd>
+            <dd><a href="../../../../../1.4.0rc2/index.html">1.4.0rc2</a></dd>
+            <dd><a href="../../../../../1.4.0rc3/index.html">1.4.0rc3</a></dd>
+            <dd><a href="../../../../../1.4.0rc4/index.html">1.4.0rc4</a></dd>
+            <dd><a href="../../../../../1.4.0rc5/index.html">1.4.0rc5</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../../../../maint_1.0.x/index.html">maint/1.0.x</a></dd>
+            <dd><a href="../../../../../maint_1.1.x/index.html">maint/1.1.x</a></dd>
+            <dd><a href="../../../../../maint_1.2.x/index.html">maint/1.2.x</a></dd>
+            <dd><a href="../../../../../maint_1.3.x/index.html">maint/1.3.x</a></dd>
+            <dd><a href="refmap.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+niworkflows.viz package
+=======================
+
+.. automodule:: niworkflows.viz
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   niworkflows.viz.plots
+   niworkflows.viz.utils

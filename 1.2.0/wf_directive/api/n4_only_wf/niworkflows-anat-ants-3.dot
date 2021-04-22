@@ -1,0 +1,14 @@
+strict digraph  {
+"inputnode (utility)";
+"inu_n4_final (ants)";
+"binarize (nibabel)";
+atropos_wf;
+"outputnode (utility)";
+"inputnode (utility)" -> "inu_n4_final (ants)";
+"inputnode (utility)" -> "binarize (nibabel)";
+"inputnode (utility)" -> atropos_wf;
+"inu_n4_final (ants)" -> atropos_wf;
+"binarize (nibabel)" -> "outputnode (utility)";
+"binarize (nibabel)" -> atropos_wf;
+atropos_wf -> "outputnode (utility)";
+}

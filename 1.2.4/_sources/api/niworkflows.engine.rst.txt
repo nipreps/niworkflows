@@ -1,0 +1,15 @@
+niworkflows.engine package
+==========================
+
+.. automodule:: niworkflows.engine
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   niworkflows.engine.workflows

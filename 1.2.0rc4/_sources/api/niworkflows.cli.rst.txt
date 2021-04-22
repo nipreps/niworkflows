@@ -1,0 +1,15 @@
+niworkflows.cli package
+=======================
+
+.. automodule:: niworkflows.cli
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   niworkflows.cli.boldref

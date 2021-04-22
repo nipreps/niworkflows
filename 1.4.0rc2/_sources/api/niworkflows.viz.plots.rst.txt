@@ -1,0 +1,7 @@
+niworkflows.viz.plots module
+============================
+
+.. automodule:: niworkflows.viz.plots
+   :members:
+   :undoc-members:
+   :show-inheritance:

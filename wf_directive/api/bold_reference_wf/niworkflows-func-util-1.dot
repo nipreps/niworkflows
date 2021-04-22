@@ -1,0 +1,22 @@
+strict digraph  {
+"inputnode (utility)";
+"val_bold (header)";
+"get_dummy (bold)";
+enhance_and_skullstrip_bold_wf;
+"calc_dummy_scans (utility)";
+"outputnode (utility)";
+"gen_avg (images)";
+"inputnode (utility)" -> "val_bold (header)";
+"inputnode (utility)" -> "get_dummy (bold)";
+"inputnode (utility)" -> enhance_and_skullstrip_bold_wf;
+"inputnode (utility)" -> "calc_dummy_scans (utility)";
+"val_bold (header)" -> "outputnode (utility)";
+"val_bold (header)" -> "gen_avg (images)";
+"get_dummy (bold)" -> "calc_dummy_scans (utility)";
+"get_dummy (bold)" -> "outputnode (utility)";
+"get_dummy (bold)" -> "gen_avg (images)";
+enhance_and_skullstrip_bold_wf -> "outputnode (utility)";
+"calc_dummy_scans (utility)" -> "outputnode (utility)";
+"gen_avg (images)" -> enhance_and_skullstrip_bold_wf;
+"gen_avg (images)" -> "outputnode (utility)";
+}

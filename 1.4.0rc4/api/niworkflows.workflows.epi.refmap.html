@@ -1,0 +1,386 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>niworkflows.workflows.epi.refmap module &mdash; niworkflows 1.4.0rc5+17.g5792f74b documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="What’s new?" href="../changelog.html" />
+    <link rel="prev" title="niworkflows.workflows.epi package" href="niworkflows.workflows.epi.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> niworkflows
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.anat.html">niworkflows.anat package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.cli.html">niworkflows.cli package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.func.html">niworkflows.func package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.viz.html">niworkflows.viz package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="niworkflows.workflows.html">niworkflows.workflows package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="niworkflows.workflows.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="niworkflows.workflows.epi.html">niworkflows.workflows.epi package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new?</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">niworkflows</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
+        
+          <li><a href="niworkflows.workflows.html">niworkflows.workflows package</a> &raquo;</li>
+        
+          <li><a href="niworkflows.workflows.epi.html">niworkflows.workflows.epi package</a> &raquo;</li>
+        
+      <li>niworkflows.workflows.epi.refmap module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/niworkflows.workflows.epi.refmap.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../../master/api/niworkflows.workflows.epi.refmap.html"><b>Warning:</b> This document is for an old version of niworkflows. The main version is master.</a></p>
+<div class="section" id="module-niworkflows.workflows.epi.refmap">
+<span id="niworkflows-workflows-epi-refmap-module"></span><h1>niworkflows.workflows.epi.refmap module<a class="headerlink" href="#module-niworkflows.workflows.epi.refmap" title="Permalink to this headline">¶</a></h1>
+<p>Workflow for the generation of EPI (echo-planar imaging) references.</p>
+<dl class="py function">
+<dt id="niworkflows.workflows.epi.refmap.init_epi_reference_wf">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.workflows.epi.refmap.</span></code><code class="sig-name descname"><span class="pre">init_epi_reference_wf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omp_nthreads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_bold_nss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'epi_reference_wf'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/workflows/epi/refmap.html#init_epi_reference_wf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.workflows.epi.refmap.init_epi_reference_wf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a workflow that generates a reference map from a set of EPI images.</p>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>All input files MUST have the same shimming configuration.
+At the very least, make sure all input EPI images are acquired within the
+same session, and have the same PE direction and total readout time.</p>
+</div>
+<p>Inputs to this workflow might be a list of <abbr title="single-band references">SBRefs</abbr>,
+a list of fieldmapping <abbr title="echo-planar images">EPIs</abbr>, a list of
+<abbr title="blood-oxygen level-dependent">BOLD</abbr> images, or a list of
+<abbr title="diffusion-weighted imaging">DWI</abbr> datasets.
+Please note that these different modalities should not be mixed together in any
+case for this particular workflow.</p>
+<p>For BOLD datasets, the workflow may be set up to execute an algorithm that determines
+the nonsteady states in the beginning of the timeseries (also called <em>dummy scans</em>),
+and uses those for generating a reference of the particular run, since the nonsteady
+states are known to yield better T1 contrast (and hence perhaps better signal for
+image registration).</p>
+<p>Relatedly, the workflow also provides a global signal drift estimation per run.
+This global signal drift is typically interesting for DWIs: because <em>b=0</em>
+volumes are typically scattered throughout the scan, this drift can be
+fit an exponential decay to model the signal drop caused by the increasing
+temperature of the device (this is closely related to BOLD <em>nonsteady states</em>
+described above, as these are just the few initial instants when the exponential
+decay is much faster).</p>
+<dl>
+<dt>Workflow Graph</dt><dd><div class="figure align-default">
+<img alt="../_images/niworkflows-workflows-epi-refmap-1.png" src="../_images/niworkflows-workflows-epi-refmap-1.png" />
+</div>
+<p>(<a class="reference external" href="../api/niworkflows-workflows-epi-refmap-1.py">Source code</a>, <a class="reference external" href="../api/niworkflows-workflows-epi-refmap-1.png">png</a>, <a class="reference external" href="../api/niworkflows-workflows-epi-refmap-1.svg">svg</a>, <a class="reference external" href="../api/niworkflows-workflows-epi-refmap-1.pdf">pdf</a>)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>omp_nthreads</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – Maximum number of threads an individual process may use</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Name of workflow (default: <code class="docutils literal notranslate"><span class="pre">epi_reference_wf</span></code>)</p></li>
+<li><p><strong>auto_bold_nss</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, determines nonsteady states in the beginning of the timeseries
+and selects them for the averaging of each run.
+IMPORTANT: this option applies only to BOLD EPIs.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Inputs</dt>
+<dd class="field-even"><p><strong>in_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – List of paths of the input EPI images from which reference volumes will be
+selected, aligned and averaged.</p>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epi_ref_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Path of the generated EPI reference file.</p></li>
+<li><p><strong>xfm_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – List of rigid-body transforms in LTA format to resample from
+the reference volume of each run into the <code class="docutils literal notranslate"><span class="pre">epi_ref_file</span></code> reference.</p></li>
+<li><p><strong>per_run_ref_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – List of paths to the reference volume generated per input run.</p></li>
+<li><p><strong>drift_factors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>) – A list of global signal drift factors for the set of volumes selected
+for averaging, per run.</p></li>
+<li><p><strong>n_dummy_scans</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – Number of nonsteady states at the beginning of each run (only BOLD with
+<code class="docutils literal notranslate"><span class="pre">auto_bold_nss=True</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Discussion and original flowchart at <a class="reference external" href="https://github.com/nipreps/niworkflows/issues/601">nipreps/niworkflows#601</a>.</p>
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../changelog.html" class="btn btn-neutral float-right" title="What’s new?" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="niworkflows.workflows.epi.html" class="btn btn-neutral float-left" title="niworkflows.workflows.epi package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright Copyright 2021, The NiPreps Developers.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.4.0rc4
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../1.0.0/index.html">1.0.0</a></dd>
+            <dd><a href="../../1.0.0rc1/index.html">1.0.0rc1</a></dd>
+            <dd><a href="../../1.0.0rc2/index.html">1.0.0rc2</a></dd>
+            <dd><a href="../../1.0.1/index.html">1.0.1</a></dd>
+            <dd><a href="../../1.0.2/index.html">1.0.2</a></dd>
+            <dd><a href="../../1.0.3/index.html">1.0.3</a></dd>
+            <dd><a href="../../1.0.4/index.html">1.0.4</a></dd>
+            <dd><a href="../../1.1.0/index.html">1.1.0</a></dd>
+            <dd><a href="../../1.1.1/index.html">1.1.1</a></dd>
+            <dd><a href="../../1.1.10/index.html">1.1.10</a></dd>
+            <dd><a href="../../1.1.11/index.html">1.1.11</a></dd>
+            <dd><a href="../../1.1.12/index.html">1.1.12</a></dd>
+            <dd><a href="../../1.1.2/index.html">1.1.2</a></dd>
+            <dd><a href="../../1.1.3/index.html">1.1.3</a></dd>
+            <dd><a href="../../1.1.4/index.html">1.1.4</a></dd>
+            <dd><a href="../../1.1.5/index.html">1.1.5</a></dd>
+            <dd><a href="../../1.1.6/index.html">1.1.6</a></dd>
+            <dd><a href="../../1.1.7/index.html">1.1.7</a></dd>
+            <dd><a href="../../1.1.8/index.html">1.1.8</a></dd>
+            <dd><a href="../../1.1.9/index.html">1.1.9</a></dd>
+            <dd><a href="../../1.2.0/index.html">1.2.0</a></dd>
+            <dd><a href="../../1.2.0rc1/index.html">1.2.0rc1</a></dd>
+            <dd><a href="../../1.2.0rc2/index.html">1.2.0rc2</a></dd>
+            <dd><a href="../../1.2.0rc3/index.html">1.2.0rc3</a></dd>
+            <dd><a href="../../1.2.0rc4/index.html">1.2.0rc4</a></dd>
+            <dd><a href="../../1.2.0rc5/index.html">1.2.0rc5</a></dd>
+            <dd><a href="../../1.2.1/index.html">1.2.1</a></dd>
+            <dd><a href="../../1.2.2/index.html">1.2.2</a></dd>
+            <dd><a href="../../1.2.3/index.html">1.2.3</a></dd>
+            <dd><a href="../../1.2.4/index.html">1.2.4</a></dd>
+            <dd><a href="../../1.2.5/index.html">1.2.5</a></dd>
+            <dd><a href="../../1.2.6/index.html">1.2.6</a></dd>
+            <dd><a href="../../1.2.7/index.html">1.2.7</a></dd>
+            <dd><a href="../../1.2.8/index.html">1.2.8</a></dd>
+            <dd><a href="../../1.2.9/index.html">1.2.9</a></dd>
+            <dd><a href="../../1.3.0/index.html">1.3.0</a></dd>
+            <dd><a href="../../1.3.0rc1/index.html">1.3.0rc1</a></dd>
+            <dd><a href="../../1.3.0rc2/index.html">1.3.0rc2</a></dd>
+            <dd><a href="../../1.3.0rc3/index.html">1.3.0rc3</a></dd>
+            <dd><a href="../../1.3.1/index.html">1.3.1</a></dd>
+            <dd><a href="../../1.3.2/index.html">1.3.2</a></dd>
+            <dd><a href="../../1.3.3/index.html">1.3.3</a></dd>
+            <dd><a href="../../1.4.0rc0/index.html">1.4.0rc0</a></dd>
+            <dd><a href="../../1.4.0rc1/index.html">1.4.0rc1</a></dd>
+            <dd><a href="../../1.4.0rc2/index.html">1.4.0rc2</a></dd>
+            <dd><a href="../../1.4.0rc3/index.html">1.4.0rc3</a></dd>
+            <dd><a href="niworkflows.workflows.epi.refmap.html">1.4.0rc4</a></dd>
+            <dd><a href="../../1.4.0rc5/api/niworkflows.workflows.epi.refmap.html">1.4.0rc5</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../maint_1.0.x/index.html">maint/1.0.x</a></dd>
+            <dd><a href="../../maint_1.1.x/index.html">maint/1.1.x</a></dd>
+            <dd><a href="../../maint_1.2.x/index.html">maint/1.2.x</a></dd>
+            <dd><a href="../../maint_1.3.x/index.html">maint/1.3.x</a></dd>
+            <dd><a href="../../master/api/niworkflows.workflows.epi.refmap.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

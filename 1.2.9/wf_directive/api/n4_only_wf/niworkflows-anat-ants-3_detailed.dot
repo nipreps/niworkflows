@@ -1,0 +1,19 @@
+digraph structs {
+node [shape=record];
+n4_only_wfinputnode [label="{IN}|{ inputnode | utility |  }|{OUT|<outinfiles> in_files}"];
+n4_only_wfbinarize [label="{IN|<ininfile> in_file}|{ binarize | nibabel |  }|{OUT|<outoutmask> out_mask}"];
+n4_only_wfinu_n4_final [label="{IN|<ininputimage> input_image}|{ inu_n4_final | ants |  }|{OUT|<outoutputimage> output_image}"];
+n4_only_wfatropos_wf [label="{IN|<ininputnodeincorrected> inputnode.in_corrected|<ininputnodeinfiles> inputnode.in_files|<ininputnodeinmask> inputnode.in_mask}|{ atropos_wf |  |  }|{OUT|<outoutputnodebiascorrected> outputnode.bias_corrected|<outoutputnodebiasimage> outputnode.bias_image|<outoutputnodeoutfile> outputnode.out_file|<outoutputnodeoutsegm> outputnode.out_segm|<outoutputnodeouttpms> outputnode.out_tpms}"];
+n4_only_wfoutputnode [label="{IN|<inbiascorrected> bias_corrected|<inbiasimage> bias_image|<inoutfile> out_file|<inoutmask> out_mask|<inoutsegm> out_segm|<inouttpms> out_tpms}|{ outputnode | utility |  }|{OUT}"];
+n4_only_wfatropos_wf:outoutputnodebiascorrected:e -> n4_only_wfoutputnode:inbiascorrected:w;
+n4_only_wfatropos_wf:outoutputnodebiasimage:e -> n4_only_wfoutputnode:inbiasimage:w;
+n4_only_wfatropos_wf:outoutputnodeoutfile:e -> n4_only_wfoutputnode:inoutfile:w;
+n4_only_wfatropos_wf:outoutputnodeoutsegm:e -> n4_only_wfoutputnode:inoutsegm:w;
+n4_only_wfatropos_wf:outoutputnodeouttpms:e -> n4_only_wfoutputnode:inouttpms:w;
+n4_only_wfbinarize:outoutmask:e -> n4_only_wfatropos_wf:ininputnodeinmask:w;
+n4_only_wfbinarize:outoutmask:e -> n4_only_wfoutputnode:inoutmask:w;
+n4_only_wfinputnode:outinfiles:e -> n4_only_wfatropos_wf:ininputnodeinfiles:w;
+n4_only_wfinputnode:outinfiles:e -> n4_only_wfbinarize:ininfile:w;
+n4_only_wfinputnode:outinfiles:e -> n4_only_wfinu_n4_final:ininputimage:w;
+n4_only_wfinu_n4_final:outoutputimage:e -> n4_only_wfatropos_wf:ininputnodeincorrected:w;
+}

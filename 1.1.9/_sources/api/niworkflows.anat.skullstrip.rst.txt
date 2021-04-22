@@ -1,0 +1,7 @@
+niworkflows.anat.skullstrip module
+==================================
+
+.. automodule:: niworkflows.anat.skullstrip
+   :members:
+   :undoc-members:
+   :show-inheritance:
