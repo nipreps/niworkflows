@@ -106,6 +106,8 @@ def init_epi_reference_wf(
     n_dummy_scans : :obj:`list` of :obj:`int`
         Number of nonsteady states at the beginning of each run (only BOLD with
         ``auto_bold_nss=True``)
+    validate_report : :obj:`str`
+        HTML reportlet(s) indicating whether the input files had a valid affine
 
     See Also
     --------
@@ -135,6 +137,7 @@ def init_epi_reference_wf(
                 "per_run_ref_files",
                 "drift_factors",
                 "n_dummy",
+                "validation_report",
             ]
         ),
         name="outputnode",
@@ -204,7 +207,7 @@ def init_epi_reference_wf(
         (epi_merge, outputnode, [("transform_outputs", "xfm_files")]),
         (per_run_avgs, outputnode, [("out_drift", "drift_factors")]),
         (n4_avgs, outputnode, [("output_image", "per_run_ref_files")]),
-
+        (validate_nii, outputnode, [("out_report", "validation_report")]),
     ])
     # fmt:on
 
