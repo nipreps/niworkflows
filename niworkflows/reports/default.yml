@@ -28,7 +28,7 @@ sections:
     subtitle: Surface reconstruction
 
 - name: <em>B<sub>0</sub></em> field mapping
-  ordering: session,acquisition,run,fmapid
+  ordering: session,acquisition,reconstruction,direction,run,fmapid
   reportlets:
   - bids: {datatype: figures, desc: mapped, suffix: fieldmap}
     caption: Inhomogeneities of the <em>B<sub>0</sub></em> field introduce (oftentimes severe) spatial distortions
