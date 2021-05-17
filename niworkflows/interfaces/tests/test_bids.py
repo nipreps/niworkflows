@@ -490,6 +490,38 @@ def test_DerivativesDataSink_data_dtype_source(
     assert nii.get_data_dtype() == np.dtype(source_dtype)
 
 
+def test_DerivativesDataSink_fmapid(tmp_path):
+    """Ascertain #637 is not regressing."""
+    source_file = [
+        (tmp_path / s)
+        for s in [
+            "sub-36/fmap/sub-36_dir-1_run-1_epi.nii.gz",
+            "sub-36/fmap/sub-36_dir-1_run-2_epi.nii.gz",
+            "sub-36/fmap/sub-36_dir-2_run-1_epi.nii.gz",
+            "sub-36/fmap/sub-36_dir-2_run-2_epi.nii.gz",
+        ]
+    ]
+    for fname in source_file:
+        fname.parent.mkdir(exist_ok=True, parents=True)
+        fname.write_text("")
+
+    in_file = tmp_path / "report.svg"
+    in_file.write_text("")
+
+    dds = bintfs.DerivativesDataSink(
+        base_directory=str(tmp_path),
+        datatype="figures",
+        suffix="fieldmap",
+        desc="pepolar",
+        dismiss_entities=("fmap",),
+        allowed_entities=("fmapid",),
+        fmapid="auto00000",
+        source_file=[str(s.absolute()) for s in source_file],
+        in_file=str(in_file),
+    ).run()
+    assert dds.outputs.out_file.endswith("sub-36_fmapid-auto00000_desc-pepolar_fieldmap.svg")
+
+
 @pytest.mark.parametrize("field", ["RepetitionTime", "UndefinedField"])
 def test_ReadSidecarJSON_connection(testdata_dir, field):
     """
