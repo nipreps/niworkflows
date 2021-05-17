@@ -24,6 +24,19 @@ them: *NiRodents* and *NiBabies* (and their corresponding *fMRIPrep* extensions)
 
 A list of prominent changes follows:
 
+1.4.0rc6 (May 17, 2021)
+-----------------------
+* FIX: ``DerivativesDataSink`` dismissing entity writing reportlet (#638)
+* FIX: Limit memory usage in ``EstimateReferenceImage`` (#629)
+* FIX: Purge removed ``--disable`` flag from *svgo* call (#626)
+* FIX: Readd ``sbref_file`` input to reference volume interface (#624)
+* ENH: Update visual report specification with fieldmaps (#634)
+* ENH: Expose the output of the ``ValidateImage`` node as an output in EPI reference workflow (#636)
+* DOC: Ensure copyright notice in all headers' comment (#635)
+* MAINT: Pin *svgutils* to previous versions (#596)
+
+Prior 1.4.0rc6
+--------------
 * FIX: Update svgutils after breaking API changes (#620)
 * FIX: Address issues with ``RobustAverage`` global signal measurement (#607)
 * FIX: ``NonsteadyStatesDetector`` wrongly using Nipype's ``is_outlier`` (#605)
@@ -94,13 +107,13 @@ A list of prominent changes follows:
 ======================
 Bug-fix release in the 1.3.x series.
 
-* FIX: Limit memory usage in EstimateReferenceImage (#629)
+* FIX: Limit memory usage in ``EstimateReferenceImage`` (#629)
 * FIX: Check for ``in_segm`` input, not ``seg_file`` (#592)
 * FIX: Use the mask to calculate FOV rather than the fixed image in ``GenerateSamplingReference`` (#583)
-* FIX: Allow omission of <res> for template normalization (#582)
-* MAINT: Pin svgutils to 0.3.1 (#596)
+* FIX: Allow omission of ``<res>`` for template normalization (#582)
+* MAINT: Pin *svgutils* to 0.3.1 (#596)
 * MAINT: Migrate from Travis -> GH Actions (#589)
-* CI: CircleCI housekeeping (#580)
+* MAINT: CircleCI housekeeping (#580)
 
 1.3.2 (November 5, 2020)
 ========================
