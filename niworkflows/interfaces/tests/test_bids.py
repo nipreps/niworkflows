@@ -98,7 +98,8 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
                 f"sub-100185/anat/sub-100185_desc-{s}_dseg.nii"
                 for s in ("aseg", "aparcaseg")
             ],
-            ["a235cdf59f9bf077ba30bf2523a56508e3a5aabb", "a235cdf59f9bf077ba30bf2523a56508e3a5aabb"],
+            ["a235cdf59f9bf077ba30bf2523a56508e3a5aabb",
+             "a235cdf59f9bf077ba30bf2523a56508e3a5aabb"],
         ),
         (
             T1W_PATH,
@@ -108,7 +109,8 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
                 f"sub-100185/anat/sub-100185_desc-preproc_T1w.{ext}"
                 for ext in ("nii", "json")
             ],
-            ["25c107d4a3e6f98e48aa752c5bbd88ab8e8d069f", "da39a3ee5e6b4b0d3255bfef95601890afd80709"],
+            ["25c107d4a3e6f98e48aa752c5bbd88ab8e8d069f",
+             "da39a3ee5e6b4b0d3255bfef95601890afd80709"],
         ),
         (
             T1W_PATH,
