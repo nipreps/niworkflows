@@ -32,7 +32,7 @@ from nipype.interfaces.base import (
 from nipype.interfaces.io import add_traits
 from templateflow.api import templates as _get_template_list
 from ..utils.bids import _init_layout, relative_to_root
-from ..utils.images import overwrite_header
+from ..utils.images import set_consumables, unsafe_write_nifti_header_and_data
 from ..utils.misc import splitext as _splitext, _copy_any
 
 regz = re.compile(r"\.gz$")
@@ -576,7 +576,11 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             out_file = out_path / dest_file
             out_file.parent.mkdir(exist_ok=True, parents=True)
             self._results["out_file"].append(str(out_file))
-            self._results["compression"].append(_copy_any(orig_file, str(out_file)))
+            self._results["compression"].append(str(dest_file).endswith(".gz"))
+
+            # Set data and header iff changes need to be made. If these are
+            # still None when it's time to write, just copy.
+            new_data, new_header = None, None
 
             is_nifti = out_file.name.endswith(
                 (".nii", ".nii.gz")
@@ -585,7 +589,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             if is_nifti and any((self.inputs.check_hdr, data_dtype)):
                 # Do not use mmap; if we need to access the data at all, it will be to
                 # rewrite, risking a BusError
-                nii = nb.load(out_file, mmap=False)
+                nii = nb.load(orig_file, mmap=False)
 
                 if self.inputs.check_hdr:
                     hdr = nii.header
@@ -607,12 +611,10 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
 
                     if curr_codes != xcodes or curr_units != units:
                         self._results["fixed_hdr"][i] = True
-                        hdr.set_qform(nii.affine, xcodes[0])
-                        hdr.set_sform(nii.affine, xcodes[1])
-                        hdr.set_xyzt_units(*units)
-
-                        # Rewrite file with new header
-                        overwrite_header(nii, out_file)
+                        new_header = hdr.copy()
+                        new_header.set_qform(nii.affine, xcodes[0])
+                        new_header.set_sform(nii.affine, xcodes[1])
+                        new_header.set_xyzt_units(*units)
 
                 if data_dtype == "source":  # match source dtype
                     try:
@@ -624,9 +626,6 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                         data_dtype = None
 
                 if data_dtype:
-                    if self.inputs.check_hdr:
-                        # load updated NIfTI
-                        nii = nb.load(out_file, mmap=False)
                     data_dtype = np.dtype(data_dtype)
                     orig_dtype = nii.get_data_dtype()
                     if orig_dtype != data_dtype:
@@ -639,9 +638,24 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                         else:
                             new_data = np.asanyarray(nii.dataobj, dtype=data_dtype)
                         # and set header to match
-                        nii.set_data_dtype(data_dtype)
-                        nii = nii.__class__(new_data, nii.affine, nii.header)
-                        nii.to_filename(out_file)
+                        if new_header is None:
+                            new_header = nii.header.copy()
+                        new_header.set_data_dtype(data_dtype)
+                del nii
+
+            if new_data is new_header is None:
+                _copy_any(orig_file, str(out_file))
+            else:
+                orig_img = nb.load(orig_file)
+                if new_data is None:
+                    set_consumables(new_header, orig_img.dataobj)
+                    new_data = orig_img.dataobj.get_unscaled()
+                unsafe_write_nifti_header_and_data(
+                    fname=out_file,
+                    header=new_header,
+                    data=new_data
+                )
+                del orig_img
 
         if len(self._results["out_file"]) == 1:
             meta_fields = self.inputs.copyable_trait_names()
