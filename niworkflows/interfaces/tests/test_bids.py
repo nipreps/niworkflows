@@ -454,6 +454,52 @@ def test_DerivativesDataSink_t1w(tmp_path, space, size, units, xcodes, fixed):
     assert nii.header.get_xyzt_units() == ("mm", "unknown")
 
 
+@pytest.mark.parametrize("dtype", ("i2", "u2", "f4"))
+def test_DerivativesDataSink_values(tmp_path, dtype):
+    # We use static checksums above, which ensures we don't break things, but
+    # pins the tests to specific values.
+    # Here we use random values, check that the values are preserved, and then
+    # the checksums are unchanged across two runs.
+    fname = str(tmp_path / "source.nii.gz")
+    rng = np.random.default_rng()
+    hdr = nb.Nifti1Header()
+    hdr.set_qform(np.eye(4), code=1)
+    hdr.set_sform(np.eye(4), code=1)
+    nb.Nifti1Image(rng.uniform(500, 2000, (5, 5, 5)), np.eye(4), hdr).to_filename(fname)
+
+    orig_data = np.asanyarray(nb.load(fname).dataobj)
+    expected = np.rint(orig_data) if dtype[0] in "iu" else orig_data
+
+    dds = bintfs.DerivativesDataSink(
+        base_directory=str(tmp_path),
+        keep_dtype=True,
+        data_dtype=dtype,
+        desc="preproc",
+        source_file=T1W_PATH,
+        in_file=fname,
+    ).run()
+
+    out_file = Path(dds.outputs.out_file)
+
+    nii = nb.load(out_file)
+    assert np.allclose(nii.dataobj, expected)
+
+    checksum = sha1(out_file.read_bytes()).hexdigest()
+    out_file.unlink()
+
+    # Rerun to ensure determinism with non-zero data
+    dds = bintfs.DerivativesDataSink(
+        base_directory=str(tmp_path),
+        keep_dtype=True,
+        data_dtype=dtype,
+        desc="preproc",
+        source_file=T1W_PATH,
+        in_file=fname,
+    ).run()
+
+    assert sha1(out_file.read_bytes()).hexdigest() == checksum
+
+
 @pytest.mark.parametrize("field", ["RepetitionTime", "UndefinedField"])
 def test_ReadSidecarJSON_connection(testdata_dir, field):
     """
