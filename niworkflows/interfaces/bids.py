@@ -587,9 +587,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             ) and not out_file.name.endswith((".dtseries.nii", ".dtseries.nii.gz"))
             data_dtype = self.inputs.data_dtype or DEFAULT_DTYPES[self.inputs.suffix]
             if is_nifti and any((self.inputs.check_hdr, data_dtype)):
-                # Do not use mmap; if we need to access the data at all, it will be to
-                # rewrite, risking a BusError
-                nii = nb.load(orig_file, mmap=False)
+                nii = nb.load(orig_file)
 
                 if self.inputs.check_hdr:
                     hdr = nii.header
