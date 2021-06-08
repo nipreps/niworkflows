@@ -24,6 +24,7 @@
 import os
 from pathlib import Path
 import json
+from hashlib import sha1
 
 import numpy as np
 import nibabel as nb
@@ -46,61 +47,70 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
 
 @pytest.mark.parametrize("out_path_base", [None, "fmriprep"])
 @pytest.mark.parametrize(
-    "source,input_files,entities,expectation",
+    "source,input_files,entities,expectation,checksum",
     [
         (
             T1W_PATH,
             ["anat.nii.gz"],
             {"desc": "preproc"},
             "sub-100185/anat/sub-100185_desc-preproc_T1w.nii.gz",
+            "7c047921def32da260df4a985019b9f5231659fa",
         ),
         (
             T1W_PATH,
             ["anat.nii.gz"],
             {"desc": "preproc", "space": "MNI"},
             "sub-100185/anat/sub-100185_space-MNI_desc-preproc_T1w.nii.gz",
+            "b22399f50ce454049d5d074457a92ab13e7fdf8c",
         ),
         (
             T1W_PATH,
             ["anat.nii.gz"],
             {"desc": "preproc", "space": "MNI", "resolution": "native"},
             "sub-100185/anat/sub-100185_space-MNI_desc-preproc_T1w.nii.gz",
+            "b22399f50ce454049d5d074457a92ab13e7fdf8c",
         ),
         (
             T1W_PATH,
             ["anat.nii.gz"],
             {"desc": "preproc", "space": "MNI", "resolution": "high"},
             "sub-100185/anat/sub-100185_space-MNI_res-high_desc-preproc_T1w.nii.gz",
+            "b22399f50ce454049d5d074457a92ab13e7fdf8c",
         ),
         (
             T1W_PATH,
             ["tfm.txt"],
             {"from": "fsnative", "to": "T1w", "suffix": "xfm"},
             "sub-100185/anat/sub-100185_from-fsnative_to-T1w_mode-image_xfm.txt",
+            "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
             T1W_PATH,
             ["tfm.h5"],
             {"from": "MNI152NLin2009cAsym", "to": "T1w", "suffix": "xfm"},
             "sub-100185/anat/sub-100185_from-MNI152NLin2009cAsym_to-T1w_mode-image_xfm.h5",
+            "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
             T1W_PATH,
             ["anat.nii.gz"],
             {"desc": "brain", "suffix": "mask"},
             "sub-100185/anat/sub-100185_desc-brain_mask.nii.gz",
+            "d425f0096b6b6d1252973e48b31d760c0b1bdc11",
         ),
         (
             T1W_PATH,
             ["anat.nii.gz"],
             {"desc": "brain", "suffix": "mask", "space": "MNI"},
             "sub-100185/anat/sub-100185_space-MNI_desc-brain_mask.nii.gz",
+            "a2a6efa16eb23173d0ee64779de879711bc74643",
         ),
         (
             T1W_PATH,
             ["anat.surf.gii"],
             {"suffix": "pial", "hemi": "L"},
             "sub-100185/anat/sub-100185_hemi-L_pial.surf.gii",
+            "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
             T1W_PATH,
@@ -110,6 +120,8 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
                 f"sub-100185/anat/sub-100185_desc-{s}_dseg.nii"
                 for s in ("aseg", "aparcaseg")
             ],
+            ["a235cdf59f9bf077ba30bf2523a56508e3a5aabb",
+             "a235cdf59f9bf077ba30bf2523a56508e3a5aabb"],
         ),
         (
             T1W_PATH,
@@ -119,6 +131,8 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
                 f"sub-100185/anat/sub-100185_desc-preproc_T1w.{ext}"
                 for ext in ("nii", "json")
             ],
+            ["25c107d4a3e6f98e48aa752c5bbd88ab8e8d069f",
+             "da39a3ee5e6b4b0d3255bfef95601890afd80709"],
         ),
         (
             T1W_PATH,
@@ -128,6 +142,7 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
                 f"sub-100185/anat/sub-100185_label-{lab}_probseg.nii.gz"
                 for lab in ("GM", "WM", "CSF")
             ],
+            ["7c047921def32da260df4a985019b9f5231659fa"] * 3,
         ),
         # BOLD data
         (
@@ -135,18 +150,21 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
             ["aroma.csv"],
             {"suffix": "AROMAnoiseICs"},
             "sub-100185/func/sub-100185_task-machinegame_run-1_AROMAnoiseICs.csv",
+            "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
             BOLD_PATH,
             ["confounds.tsv"],
             {"suffix": "regressors", "desc": "confounds"},
             "sub-100185/func/sub-100185_task-machinegame_run-1_desc-confounds_regressors.tsv",
+            "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
             BOLD_PATH,
             ["mixing.tsv"],
             {"suffix": "mixing", "desc": "MELODIC"},
             "sub-100185/func/sub-100185_task-machinegame_run-1_desc-MELODIC_mixing.tsv",
+            "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
             BOLD_PATH,
@@ -154,6 +172,7 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
             {"space": "fsaverage", "density": "10k", "hemi": "L"},
             "sub-100185/func/sub-100185_task-machinegame_run-1_"
             "space-fsaverage_den-10k_hemi-L_bold.func.gii",
+            "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
             BOLD_PATH,
@@ -161,30 +180,35 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
             {"space": "fsLR", "density": "91k"},
             "sub-100185/func/sub-100185_task-machinegame_run-1_"
             "space-fsLR_den-91k_bold.dtseries.nii",
+            "53d9b486d08fec5a952f68fcbcddb38a72818d4c",
         ),
         (
             BOLD_PATH,
             ["ref.nii"],
             {"space": "MNI", "suffix": "boldref"},
             "sub-100185/func/sub-100185_task-machinegame_run-1_space-MNI_boldref.nii",
+            "53d9b486d08fec5a952f68fcbcddb38a72818d4c",
         ),
         (
             BOLD_PATH,
             ["dseg.nii"],
             {"space": "MNI", "suffix": "dseg", "desc": "aseg"},
             "sub-100185/func/sub-100185_task-machinegame_run-1_space-MNI_desc-aseg_dseg.nii",
+            "6d2cae7f56c246d7934e2e21e7b472ecc63a4257",
         ),
         (
             BOLD_PATH,
             ["mask.nii"],
             {"space": "MNI", "suffix": "mask", "desc": "brain"},
             "sub-100185/func/sub-100185_task-machinegame_run-1_space-MNI_desc-brain_mask.nii",
+            "c365991854931181a1444d6803f5289448e7e266",
         ),
         (
             BOLD_PATH,
             ["bold.nii"],
             {"space": "MNI", "desc": "preproc"},
             "sub-100185/func/sub-100185_task-machinegame_run-1_space-MNI_desc-preproc_bold.nii",
+            "aa1eed935e6a8dcca646b0c78ee57218e30e2974",
         ),
         # Nondeterministic order - do we really need this to work, or we can stay safe with
         # MapNodes?
@@ -197,30 +221,35 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
             ["anat.html"],
             {"desc": "conform", "datatype": "figures"},
             "sub-100185/figures/sub-100185_desc-conform_T1w.html",
+            "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
             BOLD_PATH,
             ["aroma.csv"],
             {"suffix": "AROMAnoiseICs", "extension": "h5"},
             ValueError,
+            None,
         ),
         (
             T1W_PATH,
             ["anat.nii.gz"] * 3,
             {"desc": "preproc", "space": "MNI"},
             ValueError,
+            None,
         ),
         (
             "sub-07/ses-preop/anat/sub-07_ses-preop_T1w.nii.gz",
             ["tfm.h5"],
             {"from": "orig", "to": "target", "suffix": "xfm"},
             "sub-07/ses-preop/anat/sub-07_ses-preop_from-orig_to-target_mode-image_xfm.h5",
+            "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
             "sub-07/ses-preop/anat/sub-07_ses-preop_run-1_T1w.nii.gz",
             ["tfm.txt"],
             {"from": "orig", "to": "T1w", "suffix": "xfm"},
             "sub-07/ses-preop/anat/sub-07_ses-preop_run-1_from-orig_to-T1w_mode-image_xfm.txt",
+            "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
     ],
 )
@@ -232,6 +261,7 @@ def test_DerivativesDataSink_build_path(
     input_files,
     entities,
     expectation,
+    checksum,
     dismiss_entities,
 ):
     """Check a few common derivatives generated by NiPreps."""
@@ -296,9 +326,12 @@ def test_DerivativesDataSink_build_path(
     output = dds.run().outputs.out_file
     if isinstance(output, str):
         output = [output]
+        checksum = [checksum]
 
     for out, exp in zip(output, expectation):
         assert Path(out).relative_to(tmp_path) == Path(base) / exp
+    for out, chksum in zip(output, checksum):
+        assert sha1(Path(out).read_bytes()).hexdigest() == chksum
 
 
 def test_DerivativesDataSink_dtseries_json_hack(tmp_path):
@@ -520,6 +553,52 @@ def test_DerivativesDataSink_fmapid(tmp_path):
         in_file=str(in_file),
     ).run()
     assert dds.outputs.out_file.endswith("sub-36_fmapid-auto00000_desc-pepolar_fieldmap.svg")
+
+
+@pytest.mark.parametrize("dtype", ("i2", "u2", "f4"))
+def test_DerivativesDataSink_values(tmp_path, dtype):
+    # We use static checksums above, which ensures we don't break things, but
+    # pins the tests to specific values.
+    # Here we use random values, check that the values are preserved, and then
+    # the checksums are unchanged across two runs.
+    fname = str(tmp_path / "source.nii.gz")
+    rng = np.random.default_rng()
+    hdr = nb.Nifti1Header()
+    hdr.set_qform(np.eye(4), code=1)
+    hdr.set_sform(np.eye(4), code=1)
+    nb.Nifti1Image(rng.uniform(500, 2000, (5, 5, 5)), np.eye(4), hdr).to_filename(fname)
+
+    orig_data = np.asanyarray(nb.load(fname).dataobj)
+    expected = np.rint(orig_data) if dtype[0] in "iu" else orig_data
+
+    dds = bintfs.DerivativesDataSink(
+        base_directory=str(tmp_path),
+        keep_dtype=True,
+        data_dtype=dtype,
+        desc="preproc",
+        source_file=T1W_PATH,
+        in_file=fname,
+    ).run()
+
+    out_file = Path(dds.outputs.out_file)
+
+    nii = nb.load(out_file)
+    assert np.allclose(nii.dataobj, expected)
+
+    checksum = sha1(out_file.read_bytes()).hexdigest()
+    out_file.unlink()
+
+    # Rerun to ensure determinism with non-zero data
+    dds = bintfs.DerivativesDataSink(
+        base_directory=str(tmp_path),
+        keep_dtype=True,
+        data_dtype=dtype,
+        desc="preproc",
+        source_file=T1W_PATH,
+        in_file=fname,
+    ).run()
+
+    assert sha1(out_file.read_bytes()).hexdigest() == checksum
 
 
 @pytest.mark.parametrize("field", ["RepetitionTime", "UndefinedField"])

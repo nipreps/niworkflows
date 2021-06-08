@@ -103,6 +103,12 @@ Prior 1.4.0rc6
     * ``NormalizeMotionParams`` now under ``confounds``.
     * ``FMRISummary``, ``CompCorVariancePlot``, ``ConfoundsCorrelationPlot`` from ``plotting``
 
+1.3.4 (June 8, 2021)
+====================
+Bug-fix release in the 1.3.x series.
+
+* RF: Write derivatives once, using deterministic gzip settings
+
 1.3.3 (April 15, 2021)
 ======================
 Bug-fix release in the 1.3.x series.
