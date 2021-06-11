@@ -367,7 +367,7 @@ def plot_registration(
             display.add_contours(white, colors="b", **kwargs)
             display.add_contours(pial, colors="r", **kwargs)
         elif contour is not None:
-            display.add_contours(contour, colors="b", levels=[0.5], linewidths=0.5)
+            display.add_contours(contour, colors="r", levels=[0.5], linewidths=0.5)
 
         svg = extract_svg(display, compress=compress)
         display.close()
