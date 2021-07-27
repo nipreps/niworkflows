@@ -237,12 +237,13 @@ def init_epi_reference_wf(
     n4_avgs.inputs.n_iterations = [50] * n4_iter
     if adaptive_bspline_grid:
         from ...utils.images import _bspline_grid
+        from ...utils.connections import pop_file as _pop
         # set INU bspline grid based on voxel size
         bspline_grid = pe.Node(niu.Function(function=_bspline_grid), name="bspline_grid")
 
         # fmt:off
         wf.connect([
-            (validate_nii, bspline_grid, [("out_file", "in_file")]),
+            (clip_avgs, bspline_grid, [(("out_file", _pop), "in_file")]),
             (bspline_grid, n4_avgs, [("out", "args")])
         ])
         # fmt:on
