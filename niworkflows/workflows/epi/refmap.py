@@ -34,8 +34,8 @@ DEFAULT_MEMORY_MIN_GB = 0.01
 def init_epi_reference_wf(
     omp_nthreads,
     auto_bold_nss=False,
-    use_bspline_grid=False,
-    min_n4_iter=False,
+    adaptive_bspline_grid=False,
+    n4_iter=5,
     name="epi_reference_wf",
 ):
     """
@@ -86,12 +86,12 @@ def init_epi_reference_wf(
         If ``True``, determines nonsteady states in the beginning of the timeseries
         and selects them for the averaging of each run.
         IMPORTANT: this option applies only to BOLD EPIs.
-    use_bspline_grid : :obj:`bool`
+    adaptive_bspline_grid : :obj:`bool`
         If ``True``, determines the number of b-spline grid elements from data shape
         and feeds them into N4BiasFieldCorrection, rather than setting an isotropic distance.
-    min_n4_iter : :obj:`bool`
-        If ``True``, reduces the number of b-spline iterations from 5 to 4. This use-case
-        is intended for rodents and other non-human/non-adult cases.
+    n4_iter : :obj:`int`
+        The number of b-spline iterations (default: 5). Fewer (e.g. 4) are recommended
+        for rodents and other non-human/non-adult cases.
 
     Inputs
     ------
@@ -234,8 +234,8 @@ def init_epi_reference_wf(
         wf.connect(inputnode, "t_masks", per_run_avgs, "t_mask")
 
     # rodent-specific N4 settings
-    n4_avgs.inputs.n_iterations = [50] * (5 - min_n4_iter)
-    if use_bspline_grid:
+    n4_avgs.inputs.n_iterations = [50] * n4_iter
+    if adaptive_bspline_grid:
         from ...utils.images import _bspline_grid
         # set INU bspline grid based on voxel size
         bspline_grid = pe.Node(niu.Function(function=_bspline_grid), name="bspline_grid")
