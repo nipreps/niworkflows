@@ -955,7 +955,7 @@ def _tsv2json(
 
     drop_columns = drop_columns or []
     additional_metadata = additional_metadata or {}
-    tsv_data = pd.read_csv(in_tsv, "\t")
+    tsv_data = pd.read_csv(in_tsv, sep="\t")
     for k, v in additional_metadata.items():
         tsv_data[k] = [v] * len(tsv_data.index)
     for col in drop_columns:
