@@ -183,12 +183,12 @@ class FSDetectInputs(SimpleInterface):
             hires_enabled=self.inputs.hires_enabled,
         )
 
-        self._results["use_t2w"] = t2w is not None
-        if self._results["use_t2w"]:
+        if t2w is not None:
+            self._results["use_t2w"] = True
             self._results["t2w"] = t2w
 
-        self._results["use_flair"] = flair is not None
-        if self._results["use_flair"]:
+        elif flair is not None:
+            self._results["use_flair"] = True
             self._results["flair"] = flair
 
         if self._results["hires"]:
