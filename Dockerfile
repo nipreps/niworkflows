@@ -123,7 +123,7 @@ RUN conda install -y python=3.7.1 \
                      mkl-service \
                      numpy=1.19 \
                      scipy=1.5 \
-                     scikit-learn=0.19 \
+                     'scikit-learn>=0.21' \
                      matplotlib=2.2.2 \
                      pandas=0.23.4 \
                      libxml2=2.9.8 \
