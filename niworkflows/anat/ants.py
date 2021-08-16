@@ -559,10 +559,10 @@ def init_atropos_wf(
     bspline_fitting_distance : float
         The size of the b-spline mesh grid elements, in mm (default: 200)
     adaptive_bspline_grid : :obj:`bool`
-        If true, defines the number of b-spline mesh grid elements in each dimension rather
+        If true, defines the number of B-Spline mesh grid elements in each dimension rather
         than using the isotropic distance given in ``bspline_fitting_distance``.
     n4_iter : :obj:`int`
-        The number of b-spline iterations (default: 5). Fewer (e.g. 4) are recommended
+        The number of B-Spline fitting iterations (default: 5). Fewer (e.g. 4) are recommended
         for rodents and other non-human/non-adult cases.
     wm_prior : :obj:`bool`
         Whether the WM posterior obtained with ATROPOS should be regularized with a prior

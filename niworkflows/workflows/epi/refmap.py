@@ -87,10 +87,10 @@ def init_epi_reference_wf(
         and selects them for the averaging of each run.
         IMPORTANT: this option applies only to BOLD EPIs.
     adaptive_bspline_grid : :obj:`bool`
-        If ``True``, determines the number of b-spline grid elements from data shape
+        If ``True``, determines the number of B-Spline grid elements from data shape
         and feeds them into N4BiasFieldCorrection, rather than setting an isotropic distance.
     n4_iter : :obj:`int`
-        The number of b-spline iterations (default: 5). Fewer (e.g. 4) are recommended
+        The number of B-Spline fitting iterations (default: 5). Fewer (e.g. 4) are recommended
         for rodents and other non-human/non-adult cases.
 
     Inputs

@@ -327,9 +327,13 @@ def nii_ones_like(in_file, value, dtype, newpath=None):
 
 
 def _bspline_grid(in_file):
-    """Estimate B-Spline fitting distance grid using the number of slices of ``in_file``.
+    """
+    Estimate B-Spline fitting distance grid using the number of slices of ``in_file``.
+
     Using slice number to determine grid sparsity is inspired by the conversation found at
-    https://itk.org/pipermail/community/2014-February/005036.html"""
+    https://itk.org/pipermail/community/2014-February/005036.html
+    
+    """
     import nibabel as nb
     import numpy as np
     import math
