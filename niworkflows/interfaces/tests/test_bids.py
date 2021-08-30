@@ -308,6 +308,13 @@ def test_DerivativesDataSink_build_path(
 
     for out, exp in zip(output, expectation):
         assert Path(out).relative_to(tmp_path) == Path(base) / exp
+        # Regression - some images were given nan scale factors
+        if out.endswith(".nii") or out.endswith(".nii.gz"):
+            img = nb.load(out)
+            with nb.openers.ImageOpener(out) as fobj:
+                hdr = img.header.from_fileobj(fobj)
+            assert not np.isnan(hdr["scl_slope"])
+            assert not np.isnan(hdr["scl_inter"])
     for out, chksum in zip(output, checksum):
         assert sha1(Path(out).read_bytes()).hexdigest() == chksum
 
