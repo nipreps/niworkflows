@@ -74,14 +74,14 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
             ["anat.nii.gz"],
             {"desc": "brain", "suffix": "mask"},
             "sub-100185/anat/sub-100185_desc-brain_mask.nii.gz",
-            "d425f0096b6b6d1252973e48b31d760c0b1bdc11",
+            "7af86a1f6806a41078e4d2699d680dbe2b9f6ae2",
         ),
         (
             T1W_PATH,
             ["anat.nii.gz"],
             {"desc": "brain", "suffix": "mask", "space": "MNI"},
             "sub-100185/anat/sub-100185_space-MNI_desc-brain_mask.nii.gz",
-            "a2a6efa16eb23173d0ee64779de879711bc74643",
+            "1591f90e0da2a624c972784dda6a01b5572add15",
         ),
         (
             T1W_PATH,
@@ -98,8 +98,8 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
                 f"sub-100185/anat/sub-100185_desc-{s}_dseg.nii"
                 for s in ("aseg", "aparcaseg")
             ],
-            ["a235cdf59f9bf077ba30bf2523a56508e3a5aabb",
-             "a235cdf59f9bf077ba30bf2523a56508e3a5aabb"],
+            ["5543a788bf3383d7a2fc41f5cff4e0bbb8f5f282",
+             "5543a788bf3383d7a2fc41f5cff4e0bbb8f5f282"],
         ),
         (
             T1W_PATH,
@@ -172,14 +172,14 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
             ["dseg.nii"],
             {"space": "MNI", "suffix": "dseg", "desc": "aseg"},
             "sub-100185/func/sub-100185_task-machinegame_run-1_space-MNI_desc-aseg_dseg.nii",
-            "6d2cae7f56c246d7934e2e21e7b472ecc63a4257",
+            "ddadc9be8224eebe0177a65bf87300f275e17e96",
         ),
         (
             BOLD_PATH,
             ["mask.nii"],
             {"space": "MNI", "suffix": "mask", "desc": "brain"},
             "sub-100185/func/sub-100185_task-machinegame_run-1_space-MNI_desc-brain_mask.nii",
-            "c365991854931181a1444d6803f5289448e7e266",
+            "f97a1877508139b42ea9fc476bdba367b001ab00",
         ),
         (
             BOLD_PATH,
