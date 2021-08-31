@@ -351,6 +351,9 @@ class _SimpleBeforeAfterInputSpecRPT(nrb._SVGReportCapableInputSpec):
     wm_seg = File(desc="reference white matter segmentation mask")
     before_label = traits.Str("before", usedefault=True)
     after_label = traits.Str("after", usedefault=True)
+    rotate_to_canonical = traits.Bool(
+        False, usedefault=True, desc="rotate image(s) to cardinal axes"
+    )
 
 
 class SimpleBeforeAfterRPT(nrb.RegistrationRC, nrb.ReportingInterface):
@@ -363,6 +366,7 @@ class SimpleBeforeAfterRPT(nrb.RegistrationRC, nrb.ReportingInterface):
         self._fixed_image = self.inputs.after
         self._moving_image = self.inputs.before
         self._contour = self.inputs.wm_seg if isdefined(self.inputs.wm_seg) else None
+        self._rotate_to_canonical = self.inputs.rotate_to_canonical
         NIWORKFLOWS_LOG.info(
             "Report - setting before (%s) and after (%s) images",
             self._fixed_image,

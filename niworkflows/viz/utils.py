@@ -324,6 +324,7 @@ def plot_registration(
     label=None,
     contour=None,
     compress="auto",
+    rotate_to_canonical=False,
 ):
     """
     Plots the foreground and background views
@@ -350,6 +351,15 @@ def plot_registration(
         contour_data = contour.get_fdata() % 39
         white = nlimage.new_img_like(contour, contour_data == 2)
         pial = nlimage.new_img_like(contour, contour_data >= 2)
+
+    if rotate_to_canonical:
+        canonical_r = rotation2canonical(anat_nii)
+        anat_nii = rotate_affine(anat_nii, rot=canonical_r)
+        if ribbon:
+            white = rotate_affine(white, rot=canonical_r)
+            pial = rotate_affine(pial, rot=canonical_r)
+        if contour:
+            contour = rotate_affine(contour, rot=canonical_r)
 
     # Plot each cut axis
     for i, mode in enumerate(list(order)):

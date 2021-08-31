@@ -52,6 +52,7 @@ class RegistrationRC(reporting.ReportCapableInterface):
     _fixed_image_label = "fixed"
     _moving_image_label = "moving"
     _contour = None
+    _rotate_to_canonical = False
 
     def _generate_report(self):
         """Generate the visual report."""
@@ -96,6 +97,7 @@ class RegistrationRC(reporting.ReportCapableInterface):
                 label=self._fixed_image_label,
                 contour=contour_nii,
                 compress=self.inputs.compress_report,
+                rotate_to_canonical=self._rotate_to_canonical,
             ),
             plot_registration(
                 moving_image_nii,
@@ -105,6 +107,7 @@ class RegistrationRC(reporting.ReportCapableInterface):
                 label=self._moving_image_label,
                 contour=contour_nii,
                 compress=self.inputs.compress_report,
+                rotate_to_canonical=self._rotate_to_canonical,
             ),
             out_file=self._out_report,
         )
