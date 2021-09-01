@@ -668,6 +668,10 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 if new_data is None:
                     set_consumables(new_header, orig_img.dataobj)
                     new_data = orig_img.dataobj.get_unscaled()
+                else:
+                    # Without this, we would be writing nans
+                    # This is our punishment for hacking around nibabel defaults
+                    new_header.set_slope_inter(slope=1., inter=0.)
                 unsafe_write_nifti_header_and_data(
                     fname=out_file,
                     header=new_header,
