@@ -27,6 +27,7 @@ import nibabel as nb
 from .. import viz
 from .conftest import datadir
 from pathlib import Path
+from niworkflows.viz.plots import _logical_subtract
 
 
 def test_carpetplot():

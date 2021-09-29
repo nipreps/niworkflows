@@ -37,6 +37,11 @@ from nilearn.signal import clean
 from nilearn._utils import check_niimg_4d
 from nilearn._utils.niimg import _safe_get_data
 
+from scipy import ndimage as ndi
+from IPython.core.debugger import set_trace
+
+from niworkflows.niworkflows.interfaces.surf import get_crown_cifti
+
 
 DINA4_LANDSCAPE = (11.69, 8.27)
 
@@ -143,7 +148,8 @@ class fMRIPlot:
             grid_id += 1
 
         plot_carpet(
-            self.func_file, atlaslabels=self.seg_data, subplot=grid[-1], tr=self.tr
+            self.func_file, atlaslabels=self.seg_data, brainmask=self.mask_data,\
+                 subplot=grid[-1], tr=self.tr
         )
         # spikesplot_cb([0.7, 0.78, 0.2, 0.008])
         return figure
@@ -151,10 +157,11 @@ class fMRIPlot:
 
 def plot_carpet(
     func,
-    atlaslabels=None,
+    atlaslabels,
+    brainmask,
     detrend=True,
     nskip=0,
-    size=(950, 800),
+    size=(1500, 800),
     subplot=None,
     title=None,
     output_file=None,
@@ -174,7 +181,8 @@ def plot_carpet(
             Path to NIfTI or CIFTI BOLD image
         atlaslabels: ndarray, optional
             A 3D array of integer labels from an atlas, resampled into ``img`` space.
-            Required if ``func`` is a NIfTI image.
+        brainmask: ndarray, optional
+            A 3D binary array, resampled into ``img`` space.
         detrend : boolean, optional
             Detrend and standardize the data prior to plotting.
         nskip : int, optional
@@ -212,6 +220,9 @@ def plot_carpet(
 
         data = img.get_fdata().T
         matrix = img.header.matrix
+
+        dilated_brainmask,_ = get_dilated_brainmask(atlaslabels,brainmask)
+        crown_surf = get_crown_cifti(dilated_brainmask)
         struct_map = {
             "LEFT_CORTEX": 1,
             "RIGHT_CORTEX": 2,
@@ -228,6 +239,7 @@ def plot_carpet(
                 lidx = 3
             index_final = bm.index_offset + bm.index_count
             seg[bm.index_offset:index_final] = lidx
+            set_trace()
         assert len(seg[seg < 1]) == 0, "Unassigned labels"
 
         # Decimate data
@@ -244,28 +256,49 @@ def plot_carpet(
         legend = False
 
     else:  # Volumetric NIfTI
+        #Load data
         img_nii = check_niimg_4d(img, dtype="auto",)
         func_data = _safe_get_data(img_nii, ensure_finite=True)
         ntsteps = func_data.shape[-1]
-        data = func_data[atlaslabels > 0].reshape(-1, ntsteps)
-        oseg = atlaslabels[atlaslabels > 0].reshape(-1)
 
-        # Map segmentation
+        crown_mask, func_seg_mask = get_dilated_brainmask(atlaslabels,brainmask)
+        #Remove the brain from the crown mask
+        crown_mask[func_seg_mask] = False
+
+        ## Incorporate the crown in the carpetplot
+        # Map segmentation to brain areas
+        default_lut = False #boolean is the default look up table being used
         if lut is None:
-            lut = np.zeros((256,), dtype="int")
+            default_lut = True
+            lut = np.zeros((261,), dtype="int")
             lut[1:11] = 1
             lut[255] = 2
             lut[30:99] = 3
             lut[100:201] = 4
+
+        if (lut<0).any() :
+            raise ValueError("The look up table should not contain negative values.")
+
         # Apply lookup table
-        seg = lut[oseg.astype(int)]
+        seg = lut[atlaslabels.astype(int)]
+        assert (seg[crown_mask] ==0).all(), "There is an overlap between the crown and the anatomical atlas."
+        seg[crown_mask] = seg.max()+1
+
+        if (seg==0).all():
+            raise ValueError("The segmented brain atlas is zero everywhere")
+
+        data = func_data[seg > 0].reshape(-1, ntsteps)
+        seg = seg[seg > 0].reshape(-1)
 
         # Decimate data
         data, seg = _decimate_data(data, seg, size)
         # Order following segmentation labels
         order = np.argsort(seg)[::-1]
         # Set colormap
-        cmap = ListedColormap(cm.get_cmap("tab10").colors[:4][::-1])
+        cmap = ListedColormap(cm.get_cmap("tab10").colors[:len(np.unique(seg))][::-1])
+        assert len(cmap.colors) == len(
+            np.unique(seg)
+        ), "Mismatch between expected # of structures and colors"
 
         if legend:
             epiavg = func_data.mean(3)
@@ -281,6 +314,7 @@ def plot_carpet(
         seg,
         order,
         cmap,
+        legend=legend,
         epinii=epinii,
         segnii=segnii,
         nslices=nslices,
@@ -288,8 +322,8 @@ def plot_carpet(
         subplot=subplot,
         title=title,
         output_file=output_file,
+        default_lut = default_lut
     )
-
 
 def _carpet(
     data,
@@ -305,6 +339,7 @@ def _carpet(
     epinii=None,
     segnii=None,
     nslices=None,
+    default_lut=False
 ):
     """Common carpetplot building code for volumetric / CIFTI plots"""
     notr = False
@@ -353,6 +388,14 @@ def _carpet(
         vmin=v[0],
         vmax=v[1],
     )
+
+    if default_lut:
+        
+        #Plot lines to separate compartments in carpet plot
+        crown_boundary = np.where(seg[order]==5)[0][-1]-1
+        wm_boundary = np.where(seg[order]==1)[0][0]+1
+        ax1.axhline(y=crown_boundary,color=cmap.colors[-1],linewidth=3)
+        ax1.axhline(y=wm_boundary,color=cmap.colors[0],linewidth=3)
 
     ax1.grid(False)
     ax1.set_yticks([])
@@ -1084,3 +1127,43 @@ def _decimate_data(data, seg, size):
     if t_dec:
         data = data[:, ::t_dec]
     return data, seg
+
+def get_dilated_brainmask(atlaslabels,brainmask,connectivity=3,iterations=2):
+    """Obtain the brain mask dilated
+    Parameters
+    ----------
+    atlaslabels: ndarray
+        A 3D array of integer labels from an atlas, resampled into ``img`` space.
+    brainmask: ndarray
+        A 3D binary array, resampled into ``img`` space.
+    connectivity: int, optional
+        `connectivity` determines which elements of the output array belong
+         to the structure, i.e., are considered as neighbors of the central
+         element. Elements up to a squared distance of `connectivity` from
+         the center are considered neighbors. `connectivity` may range from 1
+         (no diagonal elements are neighbors) to 3 (all elements are
+         neighbors).
+    iterations : int, optional
+        'iterations' determines how many voxels the brain mask is inflated by
+    """
+    #Binarize the anatomical mask
+    seg_mask = (atlaslabels !=0 ).astype("uint8")
+    assert seg_mask.shape == atlaslabels.shape, "The shape of the segmentation atlas has not been conserved in the convertion."
+    assert np.array_equal(seg_mask, seg_mask.astype(bool)), "The segmentation mask is not binary."
+
+    #Union of functionally and anatomically extracted masks
+    func_seg_mask = (seg_mask + brainmask) > 0
+
+    if func_seg_mask.ndim != 3:
+        raise Exception('The brain mask should be a 3D array')
+
+    #Dilate mask by 2 voxels in each 3D direction
+    if not(connectivity in {1,2,3}):
+        raise ValueError('The connectivity parameter must be either 1,2 or 3')
+    if iterations == 0:
+        raise ValueError('The iterations parameter need to be different from 0 to inflate the brain mask')
+
+    cube = ndi.generate_binary_structure(rank=3, connectivity=connectivity)
+    dilated_brainmask = ndi.binary_dilation(func_seg_mask, cube, iterations=iterations)
+
+    return dilated_brainmask, func_seg_mask
