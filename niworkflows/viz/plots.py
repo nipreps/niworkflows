@@ -29,6 +29,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import gridspec as mgs
 import matplotlib.cm as cm
+import matplotlib.patches as mpatches
 from matplotlib.colors import ListedColormap, Normalize
 from matplotlib.colorbar import ColorbarBase
 
@@ -40,7 +41,7 @@ from nilearn._utils.niimg import _safe_get_data
 from scipy import ndimage as ndi
 from IPython.core.debugger import set_trace
 
-from niworkflows.niworkflows.interfaces.surf import get_crown_cifti
+from niworkflows.interfaces.surf import get_crown_cifti
 
 
 DINA4_LANDSCAPE = (11.69, 8.27)
@@ -378,6 +379,15 @@ def _carpet(
     ax0.spines["bottom"].set_color("none")
     ax0.spines["bottom"].set_visible(False)
 
+
+    if default_lut:
+        crown = mpatches.Patch(color=cmap.colors[4], label='Crown')
+        cortGM = mpatches.Patch(color=cmap.colors[3], label='Cortical GM')
+        subcortGM = mpatches.Patch(color=cmap.colors[2], label='Subcortical GM')
+        cerebellum = mpatches.Patch(color=cmap.colors[1], label='Cerebellum')
+        wm_csf = mpatches.Patch(color=cmap.colors[0], label='WM & CSF')
+        plt.legend(handles=[crown,cortGM,subcortGM,cerebellum,wm_csf])
+
     # Carpet plot
     ax1 = plt.subplot(gs[1])
     ax1.imshow(
@@ -394,8 +404,8 @@ def _carpet(
         #Plot lines to separate compartments in carpet plot
         crown_boundary = np.where(seg[order]==5)[0][-1]-1
         wm_boundary = np.where(seg[order]==1)[0][0]+1
-        ax1.axhline(y=crown_boundary,color=cmap.colors[-1],linewidth=3)
-        ax1.axhline(y=wm_boundary,color=cmap.colors[0],linewidth=3)
+        ax1.axhline(y=crown_boundary,color=cmap.colors[-1],linewidth=2)
+        ax1.axhline(y=wm_boundary,color=cmap.colors[0],linewidth=2)
 
     ax1.grid(False)
     ax1.set_yticks([])
