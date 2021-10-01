@@ -39,7 +39,6 @@ from nilearn._utils import check_niimg_4d
 from nilearn._utils.niimg import _safe_get_data
 
 from scipy import ndimage as ndi
-from IPython.core.debugger import set_trace
 
 from niworkflows.interfaces.surf import get_crown_cifti
 
