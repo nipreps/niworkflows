@@ -1157,8 +1157,6 @@ def get_dilated_brainmask(atlaslabels,brainmask,connectivity=3,iterations=2):
     """
     #Binarize the anatomical mask
     seg_mask = (atlaslabels !=0 ).astype("uint8")
-    assert seg_mask.shape == atlaslabels.shape, "The shape of the segmentation atlas has not been conserved in the convertion."
-    assert np.array_equal(seg_mask, seg_mask.astype(bool)), "The segmentation mask is not binary."
 
     #Union of functionally and anatomically extracted masks
     func_seg_mask = (seg_mask + brainmask) > 0
