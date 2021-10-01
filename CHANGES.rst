@@ -1,3 +1,13 @@
+1.3.5 (October 01, 2021)
+========================
+Bug-fix release in the 1.3.x series
+
+  * FIX: Set slope and intercept to 1/0 if not otherwise provided (#649)
+  * FIX: DerivativesDataSink warning when it has multiple source files [backport #573] (#647)
+  * FIX: `FSDetectInputs` mutually exclusive options for `ReconAll` (#646)
+  * MNT: Update some version pinning and correct for *pandas* warning about keyword arguments (#645)
+  * CI: Use datalad-managed test data [BACKPORT] (#653)
+
 1.3.4 (June 8, 2021)
 ====================
 Bug-fix release in the 1.3.x series.
