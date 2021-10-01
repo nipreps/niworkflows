@@ -734,5 +734,4 @@ def get_crown_cifti(dilated_brainmask):
     dilated_brainmask : ndarray
         A 3D binary array.
     """
-    crown_surf = None
-    return crown_surf
+    raise NotImplementedError
