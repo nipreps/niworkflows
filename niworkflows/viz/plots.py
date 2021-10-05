@@ -239,8 +239,7 @@ def plot_carpet(
                 lidx = 3
             index_final = bm.index_offset + bm.index_count
             seg[bm.index_offset:index_final] = lidx
-            set_trace()
-        assert len(seg[seg < 1]) == 0, "Unassigned labels"
+         assert len(seg[seg < 1]) == 0, "Unassigned labels"
 
         # Decimate data
         data, seg = _decimate_data(data, seg, size)
