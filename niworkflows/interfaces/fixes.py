@@ -27,7 +27,10 @@ import nibabel as nb
 from nipype.interfaces.base import traits, InputMultiObject, File
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.ants.resampling import ApplyTransforms, ApplyTransformsInputSpec
-from nipype.interfaces.ants.registration import Registration
+from nipype.interfaces.ants.registration import (
+    Registration,
+    RegistrationInputSpec as _RegistrationInputSpec,
+)
 from nipype.interfaces.ants.segmentation import (
     N4BiasFieldCorrection as VanillaN4,
     N4BiasFieldCorrectionOutputSpec as VanillaN4OutputSpec,
@@ -70,12 +73,30 @@ class FixHeaderApplyTransforms(ApplyTransforms):
         return runtime
 
 
+class _FixHeaderRegistrationInputSpec(_RegistrationInputSpec):
+    restrict_deformation = traits.List(
+        traits.List(traits.Range(low=0.0, high=1.0)),
+        desc=(
+            "This option allows the user to restrict the optimization of "
+            "the displacement field, translation, rigid or affine transform "
+            "on a per-component basis. For example, if one wants to limit "
+            "the deformation or rotation of 3-D volume to the  first two "
+            "dimensions, this is possible by specifying a weight vector of "
+            "'1x1x0' for a deformation field or '1x1x0x1x1x0' for a rigid "
+            "transformation.  Low-dimensional restriction only works if "
+            "there are no preceding transformations."
+        ),
+    )
+
+
 class FixHeaderRegistration(Registration):
     """
     A replacement for nipype.interfaces.ants.registration.Registration that
     fixes the resampled image header to match the xform of the reference
     image
     """
+
+    input_spec = _FixHeaderRegistrationInputSpec
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         # Run normally
