@@ -38,6 +38,8 @@ from nilearn.signal import clean
 from nilearn._utils import check_niimg_4d
 from nilearn._utils.niimg import _safe_get_data
 
+from skimage.morphology import ball
+
 from scipy import ndimage as ndi
 
 from niworkflows.interfaces.surf import get_crown_cifti
@@ -239,7 +241,7 @@ def plot_carpet(
                 lidx = 3
             index_final = bm.index_offset + bm.index_count
             seg[bm.index_offset:index_final] = lidx
-         assert len(seg[seg < 1]) == 0, "Unassigned labels"
+        assert len(seg[seg < 1]) == 0, "Unassigned labels"
 
         # Decimate data
         data, seg = _decimate_data(data, seg, size)
@@ -1136,7 +1138,7 @@ def _decimate_data(data, seg, size):
         data = data[:, ::t_dec]
     return data, seg
 
-def get_dilated_brainmask(atlaslabels,brainmask,connectivity=3,iterations=2):
+def get_dilated_brainmask(atlaslabels,brainmask,radius=2):
     """Obtain the brain mask dilated
     Parameters
     ----------
@@ -1144,15 +1146,8 @@ def get_dilated_brainmask(atlaslabels,brainmask,connectivity=3,iterations=2):
         A 3D array of integer labels from an atlas, resampled into ``img`` space.
     brainmask: ndarray
         A 3D binary array, resampled into ``img`` space.
-    connectivity: int, optional
-        `connectivity` determines which elements of the output array belong
-         to the structure, i.e., are considered as neighbors of the central
-         element. Elements up to a squared distance of `connectivity` from
-         the center are considered neighbors. `connectivity` may range from 1
-         (no diagonal elements are neighbors) to 3 (all elements are
-         neighbors).
-    iterations : int, optional
-        'iterations' determines how many voxels the brain mask is inflated by
+    radius: int, optional
+        The radius of the ball-shaped footprint for dilation of the mask.
     """
     #Binarize the anatomical mask
     seg_mask = (atlaslabels !=0 ).astype("uint8")
@@ -1163,13 +1158,6 @@ def get_dilated_brainmask(atlaslabels,brainmask,connectivity=3,iterations=2):
     if func_seg_mask.ndim != 3:
         raise Exception('The brain mask should be a 3D array')
 
-    #Dilate mask by 2 voxels in each 3D direction
-    if not(connectivity in {1,2,3}):
-        raise ValueError('The connectivity parameter must be either 1,2 or 3')
-    if iterations == 0:
-        raise ValueError('The iterations parameter need to be different from 0 to inflate the brain mask')
-
-    cube = ndi.generate_binary_structure(rank=3, connectivity=connectivity)
-    dilated_brainmask = ndi.binary_dilation(func_seg_mask, cube, iterations=iterations)
+    dilated_brainmask = ndi.binary_dilation(func_seg_mask, ball(radius))
 
     return dilated_brainmask, func_seg_mask
