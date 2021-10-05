@@ -150,8 +150,8 @@ class fMRIPlot:
             grid_id += 1
 
         plot_carpet(
-            self.func_file, atlaslabels=self.seg_data, brainmask=self.mask_data,\
-                 subplot=grid[-1], tr=self.tr
+            self.func_file, atlaslabels=self.seg_data, brainmask=self.mask_data,
+            subplot=grid[-1], tr=self.tr
         )
         # spikesplot_cb([0.7, 0.78, 0.2, 0.008])
         return figure
@@ -223,7 +223,7 @@ def plot_carpet(
         data = img.get_fdata().T
         matrix = img.header.matrix
 
-        dilated_brainmask,_ = get_dilated_brainmask(atlaslabels,brainmask)
+        dilated_brainmask, _ = get_dilated_brainmask(atlaslabels, brainmask)
         crown_surf = get_crown_cifti(dilated_brainmask)
         struct_map = {
             "LEFT_CORTEX": 1,
@@ -257,18 +257,19 @@ def plot_carpet(
         legend = False
 
     else:  # Volumetric NIfTI
-        #Load data
+        # Load data
         img_nii = check_niimg_4d(img, dtype="auto",)
         func_data = _safe_get_data(img_nii, ensure_finite=True)
         ntsteps = func_data.shape[-1]
 
-        crown_mask, func_seg_mask = get_dilated_brainmask(atlaslabels,brainmask)
-        #Remove the brain from the crown mask
+        crown_mask, func_seg_mask = get_dilated_brainmask(atlaslabels, brainmask)
+        # Remove the brain from the crown mask
         crown_mask[func_seg_mask] = False
 
-        ## Incorporate the crown in the carpetplot
+        # Incorporate the crown in the carpetplot
         # Map segmentation to brain areas
-        default_lut = False #boolean is the default look up table being used
+        # Boolean defining whether the default look up table is being used
+        default_lut = False
         if lut is None:
             default_lut = True
             lut = np.zeros((261,), dtype="int")
@@ -277,15 +278,16 @@ def plot_carpet(
             lut[30:99] = 3
             lut[100:201] = 4
 
-        if (lut<0).any() :
+        if (lut < 0).any():
             raise ValueError("The look up table should not contain negative values.")
 
         # Apply lookup table
         seg = lut[atlaslabels.astype(int)]
-        assert (seg[crown_mask] ==0).all(), "There is an overlap between the crown and the anatomical atlas."
-        seg[crown_mask] = seg.max()+1
+        assert (seg[crown_mask] == 0).all(), \
+            "There is an overlap between the crown and the anatomical atlas."
+        seg[crown_mask] = seg.max() + 1
 
-        if (seg==0).all():
+        if (seg == 0).all():
             raise ValueError("The segmented brain atlas is zero everywhere")
 
         data = func_data[seg > 0].reshape(-1, ntsteps)
@@ -323,8 +325,9 @@ def plot_carpet(
         subplot=subplot,
         title=title,
         output_file=output_file,
-        default_lut = default_lut
+        default_lut=default_lut
     )
+
 
 def _carpet(
     data,
@@ -379,14 +382,13 @@ def _carpet(
     ax0.spines["bottom"].set_color("none")
     ax0.spines["bottom"].set_visible(False)
 
-
     if default_lut:
         crown = mpatches.Patch(color=cmap.colors[4], label='Crown')
         cortGM = mpatches.Patch(color=cmap.colors[3], label='Cortical GM')
         subcortGM = mpatches.Patch(color=cmap.colors[2], label='Subcortical GM')
         cerebellum = mpatches.Patch(color=cmap.colors[1], label='Cerebellum')
         wm_csf = mpatches.Patch(color=cmap.colors[0], label='WM & CSF')
-        plt.legend(handles=[crown,cortGM,subcortGM,cerebellum,wm_csf])
+        plt.legend(handles=[crown, cortGM, subcortGM, cerebellum, wm_csf])
 
     # Carpet plot
     ax1 = plt.subplot(gs[1])
@@ -400,12 +402,12 @@ def _carpet(
     )
 
     if default_lut:
-        
-        #Plot lines to separate compartments in carpet plot
-        crown_boundary = np.where(seg[order]==5)[0][-1]-1
-        wm_boundary = np.where(seg[order]==1)[0][0]+1
-        ax1.axhline(y=crown_boundary,color=cmap.colors[-1],linewidth=2)
-        ax1.axhline(y=wm_boundary,color=cmap.colors[0],linewidth=2)
+
+        # Plot lines to separate compartments in carpet plot
+        crown_boundary = np.where(seg[order] == 5)[0][-1] - 1
+        wm_boundary = np.where(seg[order] == 1)[0][0] + 1
+        ax1.axhline(y=crown_boundary, color=cmap.colors[-1], linewidth=2)
+        ax1.axhline(y=wm_boundary, color=cmap.colors[0], linewidth=2)
 
     ax1.grid(False)
     ax1.set_yticks([])
@@ -1138,7 +1140,8 @@ def _decimate_data(data, seg, size):
         data = data[:, ::t_dec]
     return data, seg
 
-def get_dilated_brainmask(atlaslabels,brainmask,radius=2):
+
+def get_dilated_brainmask(atlaslabels, brainmask, radius=2):
     """Obtain the brain mask dilated
     Parameters
     ----------
@@ -1149,10 +1152,10 @@ def get_dilated_brainmask(atlaslabels,brainmask,radius=2):
     radius: int, optional
         The radius of the ball-shaped footprint for dilation of the mask.
     """
-    #Binarize the anatomical mask
-    seg_mask = (atlaslabels !=0 ).astype("uint8")
+    # Binarize the anatomical mask
+    seg_mask = (atlaslabels != 0).astype("uint8")
 
-    #Union of functionally and anatomically extracted masks
+    # Union of functionally and anatomically extracted masks
     func_seg_mask = (seg_mask + brainmask) > 0
 
     if func_seg_mask.ndim != 3:

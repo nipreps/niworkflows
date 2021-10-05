@@ -726,6 +726,7 @@ def get_gii_meta(in_file):
     gii = load(in_file)
     return gii.darrays[0].meta.metadata
 
+
 def get_crown_cifti(dilated_brainmask):
     """Extract the surface from the dilated brain mask
 
