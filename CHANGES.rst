@@ -1,3 +1,11 @@
+1.4.1 (October 07, 2021)
+========================
+Bug-fix release in the 1.4.x series.
+
+This depends on the latest nitransforms, enabling downstream tools to upgrade.
+
+  * FIX: Patch ``ants.Registration`` interface temporarily (#654)
+
 1.4.0 (September 1, 2021)
 =========================
 First release in the 1.4.x series.
