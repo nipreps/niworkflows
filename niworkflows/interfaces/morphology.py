@@ -1,0 +1,81 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+#
+# Copyright 2021 The NiPreps Developers <nipreps@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# We support and encourage derived works from this project, please read
+# about our expectations at
+#
+#     https://www.nipreps.org/community/licensing/
+#
+""" Handling brain mask"""
+
+from scipy import ndimage as ndi
+from skimage.morphology import ball
+
+from nipype.interfaces.base import (
+    traits, TraitedSpec, BaseInterfaceInputSpec, File, Directory, isdefined,
+    SimpleInterface, InputMultiObject, OutputMultiObject
+)
+
+class _DilatedBrainMaskInputSpec(BaseInterfaceInputSpec):
+    in_atlaslabels = File(exists=True, mandatory=True, position=0, desc="Integer labels from an atlas.") #type should be nd.array ????
+    in_brainmask = File(exists=True, mandatory=True, position=1, desc="Brain mask.")
+    radius = traits.Int(default_value = 2, mandatory=False,
+                              desc="Radius of dilation")
+                              
+
+class _DilatedBrainMaskOutputSpec(TraitedSpec):
+    out_masks = File(exists=False, desc="Dilated brain mask")
+
+
+class DilatedBrainMask(SimpleInterface):
+    """Dilate brain mask for computing the crown mask."""
+
+    input_spec = _DilatedBrainMaskInputSpec
+    output_spec = _DilatedBrainMaskOutputSpec
+
+    def _run_interface(self, runtime):
+        self._results["out_masks"] = get_dilated_brainmask(
+            self.inputs.in_atlaslabels,
+            self.inputs.is_brainmask,
+            self.inputs.radius,
+        )
+        return runtime
+
+
+def get_dilated_brainmask(atlaslabels, brainmask, radius=2):
+    """Obtain the brain mask dilated
+    Parameters
+    ----------
+    atlaslabels: ndarray
+        A 3D array of integer labels from an atlas, resampled into ``img`` space.
+    brainmask: ndarray
+        A 3D binary array, resampled into ``img`` space.
+    radius: int, optional
+        The radius of the ball-shaped footprint for dilation of the mask.
+    """
+    # Binarize the anatomical mask
+    seg_mask = (atlaslabels != 0).astype("uint8")
+
+    # Union of functionally and anatomically extracted masks
+    func_seg_mask = (seg_mask + brainmask) > 0
+
+    if func_seg_mask.ndim != 3:
+        raise Exception('The brain mask should be a 3D array')
+
+    dilated_brainmask = ndi.binary_dilation(func_seg_mask, ball(radius))
+
+    return dilated_brainmask, func_seg_mask

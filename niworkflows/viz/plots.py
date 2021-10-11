@@ -38,11 +38,12 @@ from nilearn.signal import clean
 from nilearn._utils import check_niimg_4d
 from nilearn._utils.niimg import _safe_get_data
 
-from skimage.morphology import ball
-
-from scipy import ndimage as ndi
+from scipy.cluster.hierarchy import linkage, dendrogram
 
 from niworkflows.interfaces.surf import get_crown_cifti
+from niworkflows.interfaces.morphology import get_dilated_brainmask
+
+from IPython.core.debugger import set_trace
 
 
 DINA4_LANDSCAPE = (11.69, 8.27)
@@ -1139,28 +1140,3 @@ def _decimate_data(data, seg, size):
     if t_dec:
         data = data[:, ::t_dec]
     return data, seg
-
-
-def get_dilated_brainmask(atlaslabels, brainmask, radius=2):
-    """Obtain the brain mask dilated
-    Parameters
-    ----------
-    atlaslabels: ndarray
-        A 3D array of integer labels from an atlas, resampled into ``img`` space.
-    brainmask: ndarray
-        A 3D binary array, resampled into ``img`` space.
-    radius: int, optional
-        The radius of the ball-shaped footprint for dilation of the mask.
-    """
-    # Binarize the anatomical mask
-    seg_mask = (atlaslabels != 0).astype("uint8")
-
-    # Union of functionally and anatomically extracted masks
-    func_seg_mask = (seg_mask + brainmask) > 0
-
-    if func_seg_mask.ndim != 3:
-        raise Exception('The brain mask should be a 3D array')
-
-    dilated_brainmask = ndi.binary_dilation(func_seg_mask, ball(radius))
-
-    return dilated_brainmask, func_seg_mask
