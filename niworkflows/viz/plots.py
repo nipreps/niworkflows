@@ -295,8 +295,23 @@ def plot_carpet(
 
         # Decimate data
         data, seg = _decimate_data(data, seg, size)
-        # Order following segmentation labels
-        order = np.argsort(seg)[::-1]
+
+	# Order following segmentation labels
+        order_label = np.argsort(seg)[::-1]
+        data = data[order_label]
+        seg = seg[order_label]
+
+	# Apply clustering to reorder the rows
+        order = np.zeros(len(seg),dtype=np.int16)
+        region_lim = 0
+        for i in reversed(np.unique(seg)):
+            nreg = np.count_nonzero(seg==i)
+            carpet_region = data[seg==i]
+            order_cluster = linkage(carpet_region, method='average', metric='euclidean', optimal_ordering=True)
+            dn = dendrogram(order_cluster)
+            order[region_lim : region_lim + nreg] = np.asarray(dn['leaves']) + region_lim
+            region_lim += nreg
+
         # Set colormap
         cmap = ListedColormap(cm.get_cmap("tab10").colors[:len(np.unique(seg))][::-1])
         assert len(cmap.colors) == len(
