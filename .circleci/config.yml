@@ -76,13 +76,13 @@ jobs:
             set -e
             if [[ "$success" = "0" ]]; then
                 echo "Pulling from local registry"
-                docker tag localhost:5000/ubuntu ubuntu:xenial-20191010
+                docker tag localhost:5000/ubuntu ubuntu:focal-20210416
                 docker pull localhost:5000/niworkflows
                 docker tag localhost:5000/niworkflows niworkflows:latest
             else
                 echo "Pulling from Docker Hub"
-                docker pull ubuntu:xenial-20191010
-                docker tag ubuntu:xenial-20191010 localhost:5000/ubuntu
+                docker pull ubuntu:focal-20210416
+                docker tag ubuntu:focal-20210416 localhost:5000/ubuntu
                 docker push localhost:5000/ubuntu
             fi
 
