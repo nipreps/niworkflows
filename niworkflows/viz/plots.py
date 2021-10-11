@@ -43,7 +43,7 @@ from skimage.morphology import ball
 from scipy import ndimage as ndi
 
 from niworkflows.interfaces.surf import get_crown_cifti
-
+from scipy.cluster.hierarchy import dendrogram, linkage
 
 DINA4_LANDSCAPE = (11.69, 8.27)
 
