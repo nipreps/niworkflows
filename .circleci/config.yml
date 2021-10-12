@@ -28,11 +28,16 @@ docs_deploy: &docs
         name: Deploy docs to gh-pages branch
         command: gh-pages --no-history --dotfiles --message "doc(update) [skip ci]" --dist docs/_build/html
 
-version: 2
+version: 2.1
+orbs:
+  docker: circleci/docker@1.6.0
+
 jobs:
   build:
     machine:
-      image: ubuntu-1604:202007-01
+      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
+      # upgrade Docker version
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/src/niworkflows
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
@@ -40,7 +45,8 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
             - build-v1-master-
             - build-v1-
@@ -50,8 +56,8 @@ jobs:
       - run:
           name: Docker authentication
           command: |
-            if [[ -n $DOCKER_PASS ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            if [[ -n $DOCKER_PAT ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
             fi
       - run:
           name: Set up Docker registry
@@ -107,7 +113,7 @@ jobs:
             docker exec -it registry /bin/registry garbage-collect --delete-untagged \
                 /etc/docker/registry/config.yml
       - save_cache:
-          key: build-v1-{{ .Branch }}-{{ epoch }}
+          key: build-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/docker
             - /tmp/images
@@ -237,7 +243,7 @@ jobs:
 
   test_pytest:
     machine:
-      image: ubuntu-1604:202007-01
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/tests
     steps:
       - attach_workspace:
@@ -247,15 +253,16 @@ jobs:
           command: python -m pip install codecov
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
             - build-v1-master-
             - build-v1-
       - run:
           name: Docker authentication
           command: |
-            if [[ -n $DOCKER_PASS ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            if [[ -n $DOCKER_PAT ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
             fi
       - run:
           name: Set up Docker registry
@@ -287,9 +294,7 @@ jobs:
           no_output_timeout: 2h
           command: |
             mkdir -p $PWD/artifacts $PWD/summaries
-            sudo setfacl -d -m group:ubuntu:rwx $PWD
-            sudo setfacl -m group:ubuntu:rwx $PWD
-            docker run -u $( id -u ) -it --rm=false -w /src/niworkflows \
+            docker run -u $( id -u ):$( id -g ) -it --rm -w /src/niworkflows \
               -e COVERAGE_FILE=/tmp/summaries/.pytest.coverage \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
               -e FS_LICENSE=/etc/fslicense.txt \
@@ -312,7 +317,7 @@ jobs:
           name: Run reportlet tests
           no_output_timeout: 2h
           command: |
-            docker run -u $( id -u ) -it --rm=false -w /src/niworkflows \
+            docker run -u $( id -u ):$( id -g ) -it --rm -w /src/niworkflows \
               -e COVERAGE_FILE=/tmp/summaries/.reportlets.coverage \
               -e SAVE_CIRCLE_ARTIFACTS="/tmp/artifacts/" \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
@@ -341,7 +346,7 @@ jobs:
 
   test_masks:
     machine:
-      image: ubuntu-1604:202007-01
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/masks
     steps:
       - attach_workspace:
@@ -367,15 +372,16 @@ jobs:
 
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
             - build-v1-master-
             - build-v1-
       - run:
           name: Docker authentication
           command: |
-            if [[ -n $DOCKER_PASS ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            if [[ -n $DOCKER_PAT ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
             fi
       - run:
           name: Set up Docker registry
@@ -514,12 +520,13 @@ jobs:
 
   deploy_docker:
     machine:
-      image: ubuntu-1604:202007-01
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/src/
     steps:
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
             - build-v1-master-
             - build-v1-
@@ -529,8 +536,8 @@ jobs:
       - run:
           name: Docker authentication
           command: |
-            if [[ -n $DOCKER_PASS ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            if [[ -n $DOCKER_PAT ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
             fi
       - run:
           name: Set up Docker registry
@@ -553,12 +560,9 @@ jobs:
           name: Deploy to Docker Hub
           no_output_timeout: 40m
           command: |
-            if [[ -n "$DOCKER_PASS" ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker push nipreps/niworkflows:latest
-              docker tag nipreps/niworkflows nipreps/niworkflows:$CIRCLE_TAG
-              docker push nipreps/niworkflows:$CIRCLE_TAG
-            fi
+            docker push nipreps/niworkflows:latest
+            docker tag nipreps/niworkflows nipreps/niworkflows:$CIRCLE_TAG
+            docker push nipreps/niworkflows:$CIRCLE_TAG
 
   build_docs:
     docker:
