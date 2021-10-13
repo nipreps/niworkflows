@@ -57,7 +57,7 @@ docs-coverage:
 	PYTHONPATH=$(PYTHONPATH) $(SPHINXBUILD) -b coverage $(ALLSPHINXOPTS) $(BUILDDIR)/coverage
 
 html:
-	PYTHONPATH=$(PYTHONPATH) $(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	PYTHONPATH=$(PYTHONPATH) $(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/$(CURBRANCH)
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
