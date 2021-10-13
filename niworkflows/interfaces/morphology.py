@@ -22,37 +22,49 @@
 #
 """ Handling brain mask"""
 
-from scipy import ndimage as ndi
-from skimage.morphology import ball
-
 from nipype.interfaces.base import (
-    traits, TraitedSpec, BaseInterfaceInputSpec, File, Directory, isdefined,
-    SimpleInterface, InputMultiObject, OutputMultiObject
+    traits, TraitedSpec, BaseInterfaceInputSpec, File, SimpleInterface
 )
 
-class _DilatedBrainMaskInputSpec(BaseInterfaceInputSpec):
-    in_atlaslabels = File(exists=True, mandatory=True, position=0, desc="Integer labels from an atlas.") #type should be nd.array ????
+class _CrownMaskInputSpec(BaseInterfaceInputSpec):
+    in_segm = File(exists=True, mandatory=True, position=0, desc="Atlas from segmentation.")
     in_brainmask = File(exists=True, mandatory=True, position=1, desc="Brain mask.")
-    radius = traits.Int(default_value = 2, mandatory=False,
-                              desc="Radius of dilation")
+    radius = traits.Int(default_value = 2, mandatory=False, desc="Radius of dilation")
                               
 
-class _DilatedBrainMaskOutputSpec(TraitedSpec):
-    out_masks = File(exists=False, desc="Dilated brain mask")
+class _CrownMaskOutputSpec(TraitedSpec):
+    out_masks = File(exists=False, desc="Crown mask")
 
 
-class DilatedBrainMask(SimpleInterface):
+class CrownMask(SimpleInterface):
     """Dilate brain mask for computing the crown mask."""
 
-    input_spec = _DilatedBrainMaskInputSpec
-    output_spec = _DilatedBrainMaskOutputSpec
+    input_spec = _CrownMaskInputSpec
+    output_spec = _CrownMaskOutputSpec
 
     def _run_interface(self, runtime):
-        self._results["out_masks"] = get_dilated_brainmask(
-            self.inputs.in_atlaslabels,
-            self.inputs.is_brainmask,
-            self.inputs.radius,
+        import nibabel as nb
+        import numpy as np
+        from pathlib import Path
+
+        #Open files
+        segm_img = nb.load(self.inputs.in_segm)
+        brainmask_img = nb.load(self.inputs.in_brainmask)
+
+        segm = segm_img.get_fdata(dtype=np.int64)
+        brainmask = brainmask_img.get_fdata(dtype=np.int8)
+
+        crown_mask, func_seg_mask = get_dilated_brainmask(
+            atlaslabels=segm,
+            brainmask=brainmask,
+            radius=self.inputs.radius,
         )
+        # Remove the brain from the crown mask
+        crown_mask[func_seg_mask] = False
+        crown_file = str(Path("crown_mask.nii.gz").absolute())
+        nb.Nifti1Image(crown_mask, brainmask_img.affine, brainmask.header).to_filename(crown_file)
+        self._results["out_mask"] = crown_file
+
         return runtime
 
 
@@ -67,6 +79,9 @@ def get_dilated_brainmask(atlaslabels, brainmask, radius=2):
     radius: int, optional
         The radius of the ball-shaped footprint for dilation of the mask.
     """
+    from scipy import ndimage as ndi
+    from skimage.morphology import ball
+
     # Binarize the anatomical mask
     seg_mask = (atlaslabels != 0).astype("uint8")
 
