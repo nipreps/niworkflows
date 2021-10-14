@@ -555,7 +555,9 @@ jobs:
             python -m pip install --no-cache-dir -r docs/requirements.txt
       - run:
           name: Build only this commit
-          command: make -C docs SPHINXOPTS="-W" BUILDDIR="$HOME/docs" CURBRANCH=${CIRCLE_TAG:-CIRCLE_BRANCH} html
+          command: |
+            BRANCH=$( echo $CIRCLE_BRANCH | sed 's+/+_+g' )
+            make -C docs SPHINXOPTS="-W" BUILDDIR="$HOME/docs" CURBRANCH=${CIRCLE_TAG:-$BRANCH} html
       - store_artifacts:
           path: ~/docs
 
