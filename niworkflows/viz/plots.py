@@ -43,8 +43,6 @@ from scipy.cluster.hierarchy import linkage, dendrogram
 from niworkflows.interfaces.surf import get_crown_cifti
 from niworkflows.interfaces.morphology import get_dilated_brainmask
 
-from IPython.core.debugger import set_trace
-
 
 DINA4_LANDSCAPE = (11.69, 8.27)
 
