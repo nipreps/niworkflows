@@ -15,10 +15,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install GraphViz
-      run: |
-        sudo apt-get update -y
-        sudo apt-get install -y graphviz
 
     - name: Determine current branch/tag name
       run: |
@@ -36,7 +32,15 @@ jobs:
         echo "Building branch/tag ${CURBRANCH:-<unkwown>}, from git ref <$GITHUB_REF>"
         echo "CURBRANCH=${CURBRANCH}" >> ${GITHUB_ENV}
 
-    - uses: ammaraskar/sphinx-action@master
-      with:
-        docs-folder: "."
-        build-command: make -C docs/ PYTHONPATH="${GITHUB_WORKSPACE}" SPHINXOPTS="-W" BUILDDIR="$HOME/docs" CURBRANCH="${CURBRANCH:-html}" html
+    - name: Install GraphViz
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y graphviz
+
+    - name: Install dependencies
+      run: |
+        pip install -r docs/requirements.txt
+
+    - name: Build docs
+      run: |
+          make -C docs/ SPHINXOPTS="-W" BUILDDIR="$HOME/docs" CURBRANCH="${CURBRANCH:-html}" html
