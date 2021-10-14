@@ -15,6 +15,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install GraphViz
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y graphviz
+
     - name: Determine current branch/tag name
       run: |
         if [[ "$GITHUB_REF" == refs/tags/* ]]; then
@@ -22,13 +27,17 @@ jobs:
         elif [[ "$GITHUB_REF" == refs/heads/* ]]; then
           CURBRANCH=${GITHUB_REF##*/}
         fi
+
+        if [ "$CURBRANCH" == "" ] && [[ "$GITHUB_BASE_REF" == refs/heads/* ]]; then
+          CURBRANCH=${GITHUB_BASE_REF##*/}
+        fi
+
         # Remove forward slashes
         CURBRANCH=$( echo $CURBRANCH | sed 's+/+_+g' )
+        echo "Building branch/tag ${CURBRANCH:-<unkwown>}, from git ref <$GITHUB_REF>"
         echo "CURBRANCH=${CURBRANCH}" >> ${GITHUB_ENV}
-        echo "Building branch/tag ${CURBRANCH:-<unkwown>}"
 
     - uses: ammaraskar/sphinx-action@master
       with:
         docs-folder: "docs/"
-        pre-build-command: apt-get update -y && apt-get install -y graphviz
         build-command: make -C docs/ SPHINXOPTS="-W" BUILDDIR="$HOME/docs" CURBRANCH="${CURBRANCH:-html}" html
