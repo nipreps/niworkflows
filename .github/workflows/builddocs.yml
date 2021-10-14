@@ -3,10 +3,13 @@ name: Build docs
 
 on:
   push:
-    branches: [ '*' ]
+    branches: [ 'doc/*', 'docs/*' ]
     tags: [ '*' ]
   pull_request:
     branches: [ master, 'maint/*' ]
+
+  create:
+    tags: [ '*' ]
 
 jobs:
   build:
@@ -44,3 +47,36 @@ jobs:
     - name: Build docs
       run: |
           make -C docs/ SPHINXOPTS="-W" BUILDDIR="$HOME/docs" CURBRANCH="${CURBRANCH:-html}" html
+
+    - name: Push created tag to gh-pages
+      if: github.event_name == 'create'
+      run: |
+          MAJOR_MINOR=${CURBRANCH%.*}
+          if [[ "${MAJOR_MINOR" == "" ]]; then
+              echo "Could not identify release series"
+              exit 1
+          fi
+          git checkout gh-pages
+          git pull
+          git rm -r ${MAJOR_MINOR}/
+          # It is fundamental that the directory does not exist at all.
+          rm -rf ${MAJOR_MINOR}
+          cp -r $HOME/docs/$CURBRANCH $PWD/${MAJOR_MINOR}
+          git commit -am "rel(${CURBRANCH}): Update docs of ${MAJOR_MINOR} series" || true
+          git push
+
+    - name: Push merge commit into master to gh-pages
+      if: github.event.pull_request.merged == true
+      run: |
+          if [[ "${CURBRANCH" != "master" ]]; then
+              echo "$CURBRANCH is not the default development branch"
+              exit 1
+          fi
+          git checkout gh-pages
+          git pull
+          git rm -r master/
+          # It is fundamental that the directory does not exist at all.
+          rm -rf master
+          cp -r $HOME/docs/$CURBRANCH $PWD/master
+          git commit -am "docs(master): Update docs of development line" || true
+          git push
