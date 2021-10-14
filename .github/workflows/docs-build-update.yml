@@ -16,7 +16,7 @@ jobs:
         ssh-key: "${{ secrets.NIPREPS_DEPLOY }}"
         fetch-depth: 0
 
-    - name: Determine current branch/tag name
+    - name: Determine current branch/tag name & set-up git author
       run: |
         if [[ "$GITHUB_REF" == refs/tags/* ]]; then
           CURBRANCH=${GITHUB_REF##*/}
@@ -32,6 +32,9 @@ jobs:
         echo "Building branch/tag ${CURBRANCH:-<unkwown>}, from git ref <$GITHUB_REF>"
         echo "CURBRANCH=${CURBRANCH}" >> ${GITHUB_ENV}
 
+        # Pacify git if we were to commit something
+        git config user.email "nipreps@gmail.com"
+        git config user.email "NiPreps Bot"
     - name: Install GraphViz
       run: |
         sudo apt-get update -y
@@ -58,7 +61,10 @@ jobs:
         # It is fundamental that the directory does not exist at all.
         rm -rf ${MAJOR_MINOR}
         cp -r $HOME/docs/$CURBRANCH $PWD/${MAJOR_MINOR}
-        git commit -am "rel(${CURBRANCH}): Update docs of ${MAJOR_MINOR} series" || true
+        git add ${MAJOR_MINOR}
+        python -c "from pathlib import Path; import json; f=Path('versions.json'); d=json.loads(f.read_text()); d['tags'].append(\"${MAJOR_MINOR}\"); d['tags'] = list(sorted(set(d['tags']))); f.write_text(json.dumps(d), indent=2); print('Updated versions.json')"
+        git add versions.json
+        git commit -m "rel(${CURBRANCH}): Update docs of ${MAJOR_MINOR} series" || true
         git push
 
     - name: Push "master" docs to gh-pages after a PR is merged
