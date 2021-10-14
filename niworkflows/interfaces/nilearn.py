@@ -24,12 +24,6 @@
 import os
 import nibabel as nb
 import numpy as np
-from skimage import morphology as sim
-from scipy.ndimage.morphology import binary_fill_holes, binary_dilation
-
-from nilearn import __version__ as NILEARN_VERSION
-from nilearn.masking import compute_epi_mask
-from nilearn.image import concat_imgs
 
 from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
@@ -45,6 +39,10 @@ from nipype.interfaces.base import (
 from nipype.interfaces.mixins import reporting
 from .reportlets import base as nrb
 
+try:
+    from nilearn import __version__ as NILEARN_VERSION
+except ImportError:
+    NILEARN_VERSION = "unknown"
 
 LOGGER = logging.getLogger("nipype.interface")
 __all__ = ["NILEARN_VERSION", "MaskEPI", "Merge", "ComputeEPIMask"]
@@ -85,6 +83,9 @@ class MaskEPI(SimpleInterface):
     output_spec = _MaskEPIOutputSpec
 
     def _run_interface(self, runtime):
+        from skimage import morphology as sim
+        from scipy.ndimage.morphology import binary_fill_holes
+        from nilearn.masking import compute_epi_mask
 
         in_files = self.inputs.in_files
 
@@ -166,6 +167,8 @@ class Merge(SimpleInterface):
     output_spec = _MergeOutputSpec
 
     def _run_interface(self, runtime):
+        from nilearn.image import concat_imgs
+
         ext = ".nii.gz" if self.inputs.compress else ".nii"
         self._results["out_file"] = fname_presuffix(
             self.inputs.in_files[0],
@@ -201,6 +204,9 @@ class ComputeEPIMask(nrb.SegmentationRC):
     output_spec = _ComputeEPIMaskOutputSpec
 
     def _run_interface(self, runtime):
+        from scipy.ndimage.morphology import binary_dilation
+        from nilearn.masking import compute_epi_mask
+
         orig_file_nii = nb.load(self.inputs.in_file)
         in_file_data = orig_file_nii.get_fdata()
 

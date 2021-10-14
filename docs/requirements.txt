@@ -1,6 +1,8 @@
 furo ~= 2021.10.09
 matplotlib >= 2.2.0
+nibabel
 nipype >= 1.5.1
+numpy
 packaging
 pydot >= 1.2.3
 pydotplus

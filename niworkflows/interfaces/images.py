@@ -25,7 +25,6 @@ import os
 from functools import partial
 import numpy as np
 import nibabel as nb
-import nilearn.image as nli
 
 from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
@@ -557,6 +556,8 @@ class Conform(SimpleInterface):
             # Create new image
             data = reoriented.dataobj
             if resample:
+                import nilearn.image as nli
+
                 data = nli.resample_img(reoriented, target_affine, target_shape).dataobj
             reoriented = reoriented.__class__(data, target_affine, reoriented.header)
 
