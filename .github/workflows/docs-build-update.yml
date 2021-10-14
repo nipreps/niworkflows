@@ -12,6 +12,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        ssh-key: "${{ secrets.NIPREPS_DEPLOY }}"
+        fetch-depth: 0
 
     - name: Determine current branch/tag name
       run: |
@@ -32,7 +35,7 @@ jobs:
     - name: Install GraphViz
       run: |
         sudo apt-get update -y
-        sudo apt-get install -y graphviz
+        sudo apt-get install -y --no-install-recommends graphviz
 
     - name: Install dependencies
       run: |
@@ -42,35 +45,37 @@ jobs:
       run: |
           make -C docs/ SPHINXOPTS="-W" BUILDDIR="$HOME/docs" CURBRANCH="${CURBRANCH:-html}" html
 
+    - name: Checkout gh-pages
+      if: "!startsWith(github.ref, 'refs/tags/') || (github.event.pull_request.merged == true)"
+      run: |
+        git fetch
+        git checkout -b gh-pages origin/gh-pages
+
     - name: Push created tag to gh-pages
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-          MAJOR_MINOR=${CURBRANCH%.*}
-          if [[ "${MAJOR_MINOR}" == "" ]]; then
-              echo "Could not identify release series"
-              exit 1
-          fi
-          git checkout -b gh-pages origin/gh-pages
-          git pull
-          git rm -r ${MAJOR_MINOR}/
-          # It is fundamental that the directory does not exist at all.
-          rm -rf ${MAJOR_MINOR}
-          cp -r $HOME/docs/$CURBRANCH $PWD/${MAJOR_MINOR}
-          git commit -am "rel(${CURBRANCH}): Update docs of ${MAJOR_MINOR} series" || true
-          git push
+        MAJOR_MINOR=${CURBRANCH%.*}
+        if [[ "${MAJOR_MINOR}" == "" ]]; then
+            echo "Could not identify release series"
+            exit 1
+        fi
+        git rm -r ${MAJOR_MINOR}/
+        # It is fundamental that the directory does not exist at all.
+        rm -rf ${MAJOR_MINOR}
+        cp -r $HOME/docs/$CURBRANCH $PWD/${MAJOR_MINOR}
+        git commit -am "rel(${CURBRANCH}): Update docs of ${MAJOR_MINOR} series" || true
+        git push
 
     - name: Push "master" docs to gh-pages after a PR is merged
       if: github.event.pull_request.merged == true
       run: |
-          if [[ "${CURBRANCH}" != "master" ]]; then
-              echo "$CURBRANCH is not the default development branch"
-              exit 1
-          fi
-          git checkout -b gh-pages origin/gh-pages
-          git pull
-          git rm -r master/
-          # It is fundamental that the directory does not exist at all.
-          rm -rf master
-          cp -r $HOME/docs/$CURBRANCH $PWD/master
-          git commit -am "docs(master): Update docs of development line" || true
-          git push
+        if [[ "${CURBRANCH}" != "master" ]]; then
+            echo "$CURBRANCH is not the default development branch"
+            exit 1
+        fi
+        git rm -r master/
+        # It is fundamental that the directory does not exist at all.
+        rm -rf master
+        cp -r $HOME/docs/$CURBRANCH $PWD/master
+        git commit -am "docs(master): Update docs of development line" || true
+        git push

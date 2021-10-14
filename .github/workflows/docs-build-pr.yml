@@ -7,11 +7,13 @@ on:
 
 jobs:
   build:
-    if: "github.repository_owner != 'nipreps' && !contains(github.event.head_commit.message, '[skip ci]')"
+    if: "(github.repository_owner != 'nipreps') && !contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     - name: Determine current branch/tag name
       run: |
@@ -33,7 +35,7 @@ jobs:
     - name: Install GraphViz
       run: |
         sudo apt-get update -y
-        sudo apt-get install -y graphviz
+        sudo apt-get install -y --no-install-recommends graphviz
 
     - name: Install dependencies
       run: |
