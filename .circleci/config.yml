@@ -555,9 +555,9 @@ jobs:
             python -m pip install --no-cache-dir -r docs/requirements.txt
       - run:
           name: Build only this commit
-          command: make -C docs SPHINXOPTS="-W" BUILDDIR="/docs" CURBRANCH=${CIRCLE_TAG:-CIRCLE_BRANCH} html
+          command: make -C docs SPHINXOPTS="-W" BUILDDIR="$HOME/docs" CURBRANCH=${CIRCLE_TAG:-CIRCLE_BRANCH} html
       - store_artifacts:
-          path: /docs
+          path: ~/docs
 
 workflows:
   version: 2
