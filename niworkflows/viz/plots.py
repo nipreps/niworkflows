@@ -41,9 +41,11 @@ from nilearn._utils.niimg import _safe_get_data
 from skimage.morphology import ball
 
 from scipy import ndimage as ndi
+from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.cluster import ward_tree
 
 from niworkflows.interfaces.surf import get_crown_cifti
-from scipy.cluster.hierarchy import dendrogram, linkage
+
 
 DINA4_LANDSCAPE = (11.69, 8.27)
 
@@ -170,6 +172,7 @@ def plot_carpet(
     legend=False,
     tr=None,
     lut=None,
+    ward=False
 ):
     """
     Plot an image representation of voxel intensities across time also know
@@ -295,20 +298,27 @@ def plot_carpet(
 
         # Decimate data
         data, seg = _decimate_data(data, seg, size)
-
-	# Order following segmentation labels
+        
+        # Order following segmentation labels
         order_label = np.argsort(seg)[::-1]
         data = data[order_label]
         seg = seg[order_label]
 
-	# Apply clustering to reorder the rows
-        order = np.zeros(len(seg),dtype=np.int16)
+        # Z-score data
+        data = clean(data.T, standardize='zscore', t_r=tr, detrend=False, filter=False).T
+
+	    # Apply clustering to reorder the rows
+        order = np.zeros(len(seg), dtype=np.int16)
         region_lim = 0
         for i in reversed(np.unique(seg)):
-            nreg = np.count_nonzero(seg==i)
-            carpet_region = data[seg==i]
-            order_cluster = linkage(carpet_region, method='average', metric='euclidean', optimal_ordering=True)
-            dn = dendrogram(order_cluster)
+            nreg = np.count_nonzero(seg == i)
+            carpet_region = data[seg == i]
+            if ward:
+                children, _, n_leaves, _, distances = ward_tree(carpet_region, n_clusters=nreg, return_distance=True)
+                dn = get_dendrogram(children, n_leaves, distances)
+            else:
+                order_cluster = linkage(carpet_region, method='average', metric='euclidean', optimal_ordering=True)
+                dn = dendrogram(order_cluster)
             order[region_lim : region_lim + nreg] = np.asarray(dn['leaves']) + region_lim
             region_lim += nreg
 
@@ -1179,3 +1189,24 @@ def get_dilated_brainmask(atlaslabels, brainmask, radius=2):
     dilated_brainmask = ndi.binary_dilation(func_seg_mask, ball(radius))
 
     return dilated_brainmask, func_seg_mask
+
+def get_dendrogram(children, n_leaves, distances):
+    # Create linkage matrix and then return the dendrogram
+
+    # create the counts of samples under each node
+    counts = np.zeros(children.shape[0])
+    n_samples = n_leaves
+    for i, merge in enumerate(children):
+        current_count = 0
+        for child_idx in merge:
+            if child_idx < n_samples:
+                current_count += 1  # leaf node
+            else:
+                current_count += counts[child_idx - n_samples]
+        counts[i] = current_count
+
+    linkage_matrix = np.column_stack([children, distances,
+                                      counts]).astype(float)
+
+    # Return the corresponding dendrogram
+    return dendrogram(linkage_matrix,no_plot=True)
