@@ -68,16 +68,17 @@ jobs:
         git push
 
     - name: Push "master" docs to gh-pages after a PR is merged
-      if: github.event.pull_request.merged == true
+      if: github.ref == 'refs/heads/master'
       run: |
         if [[ "${CURBRANCH}" != "master" ]]; then
             echo "$CURBRANCH is not the default development branch"
             exit 1
         fi
         git checkout -b gh-pages origin/gh-pages
-        git rm -r master/
+        git rm -r master/ || true
         # It is fundamental that the directory does not exist at all.
         rm -rf master
         cp -r $HOME/docs/$CURBRANCH $PWD/master
+        git add master
         git commit -am "docs(master): Update docs of development line" || true
         git push
