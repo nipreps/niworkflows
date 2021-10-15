@@ -1,10 +1,17 @@
+1.4.2 (October 15, 2021)
+========================
+Bug-fix release in the 1.4.x series revising dependencies and including minor improvements to the Docker image, a complete overhaul of the documentation skin, building and deployment & archival.
+
+* DOC: Overhaul - new skin, new deployment & multiversion archival (#656, #657, #658)
+* MAINT: Revise Docker image building and dependencies (#655)
+
 1.4.1 (October 07, 2021)
 ========================
 Bug-fix release in the 1.4.x series.
 
 This depends on the latest nitransforms, enabling downstream tools to upgrade.
 
-  * FIX: Patch ``ants.Registration`` interface temporarily (#654)
+* FIX: Patch ``ants.Registration`` interface temporarily (#654)
 
 1.4.0 (September 1, 2021)
 =========================
