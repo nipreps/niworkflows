@@ -49,7 +49,7 @@ jobs:
           make -C docs/ SPHINXOPTS="-W" BUILDDIR="$HOME/docs" OUTDIR="${CURBRANCH:-html}" html
 
     - name: Push created tag to gh-pages
-      if: github.ref == 'refs/heads/master')
+      if: github.ref == 'refs/heads/master'
       run: |
         MAJOR_MINOR=${CURBRANCH%.*}
         if [[ "${MAJOR_MINOR}" == "" ]]; then
