@@ -111,7 +111,7 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -123,6 +123,12 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+html_js_files = [
+    "js/version-switch.js",
+]
+html_css_files = [
+    "css/version-switch.css",
+]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.

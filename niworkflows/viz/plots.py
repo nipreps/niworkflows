@@ -32,12 +32,6 @@ import matplotlib.cm as cm
 from matplotlib.colors import ListedColormap, Normalize
 from matplotlib.colorbar import ColorbarBase
 
-from nilearn.plotting import plot_img
-from nilearn.signal import clean
-from nilearn._utils import check_niimg_4d
-from nilearn._utils.niimg import _safe_get_data
-
-
 DINA4_LANDSCAPE = (11.69, 8.27)
 
 
@@ -244,6 +238,9 @@ def plot_carpet(
         legend = False
 
     else:  # Volumetric NIfTI
+        from nilearn._utils import check_niimg_4d
+        from nilearn._utils.niimg import _safe_get_data
+
         img_nii = check_niimg_4d(img, dtype="auto",)
         func_data = _safe_get_data(img_nii, ensure_finite=True)
         ntsteps = func_data.shape[-1]
@@ -307,6 +304,9 @@ def _carpet(
     nslices=None,
 ):
     """Common carpetplot building code for volumetric / CIFTI plots"""
+    from nilearn.plotting import plot_img
+    from nilearn.signal import clean
+
     notr = False
     if tr is None:
         notr = True

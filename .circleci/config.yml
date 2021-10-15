@@ -1,33 +1,3 @@
-docs_deploy: &docs
-  docker:
-    - image: node:8.10.0
-  steps:
-    - run:
-        name: Check whether this is the original repo
-        command: |
-          if [[ "$CIRCLE_PROJECT_USERNAME" != "nipreps" ]]; then
-              echo "Not in nipreps/niworkflows - skipping docs deploy."
-              circleci step halt
-          fi
-    - checkout
-    - attach_workspace:
-        at: docs/_build
-    - run:
-        name: Disable jekyll builds
-        command: touch docs/_build/html/.nojekyll
-    - run:
-        name: Install and configure dependencies
-        command: |
-          npm install -g --silent gh-pages@3.0.0
-          git config user.email "nipreps@gmail.com"
-          git config user.name "Documentation Push"
-    - add_ssh_keys:
-        fingerprints:
-          - "c8:a8:55:7d:1e:08:92:c2:86:29:7b:b4:4b:88:24:51"
-    - run:
-        name: Deploy docs to gh-pages branch
-        command: gh-pages --no-history --dotfiles --message "doc(update) [skip ci]" --dist docs/_build/html
-
 version: 2.1
 orbs:
   docker: circleci/docker@1.6.0
@@ -571,14 +541,6 @@ jobs:
       - FSLOUTPUTTYPE: NIFTI
       - SUBJECTS_DIR: /tmp/subjects
     steps:
-      - restore_cache:
-          keys:
-            - docs-v1-{{ .Branch }}-{{ .Revision }}
-            - docs-v1-{{ .Branch }}-
-            - docs-v1-master
-            - docs-v1-
-          paths:
-            - ./docs/_build/_html
       - checkout
       - run:
           name: Create subjects folder
@@ -593,62 +555,11 @@ jobs:
             python -m pip install --no-cache-dir -r docs/requirements.txt
       - run:
           name: Build only this commit
-          command: make -C docs SPHINXOPTS="-W" BUILDDIR="_build/no_version_html" html
-      - store_artifacts:
-          path: ./docs/_build/no_version_html
-      - run:
-          name: Find undocumented Python objects
           command: |
-            make -C docs docs-coverage
-            cat docs/_build/coverage/python.txt
+            BRANCH=$( echo $CIRCLE_BRANCH | sed 's+/+_+g' )
+            make -C docs SPHINXOPTS="-W" BUILDDIR="$HOME/docs" OUTDIR=${CIRCLE_TAG:-$BRANCH} html
       - store_artifacts:
-          path: ./docs/_build/coverage
-
-      # - run:
-      #     name: Install niworkflows
-      #     command: |
-      #       python -m pip install --no-cache-dir codecov
-      #       python -m pip install --no-cache-dir .[all]
-      # - run:
-      #     name: Build only this commit with coverage collection
-      #     command: |
-      #       make -C docs/ clean
-      #       export COVERAGE_FILE=/tmp/.coverage
-      #       coverage run --source=niworkflows $( which sphinx-build ) \
-      #           -b html -W -d docs/_build/no_version_doctrees ./docs/ docs/_build/no_version_html
-      #       coverage xml -o /tmp/documentation.xml
-      #       python -m codecov --file /tmp/documentation.xml --flags documentation -e CIRCLE_JOB
-
-      - run:
-          name: Generate Versioned Docs
-          command: |
-            set +e
-            force_versioned="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[docs?[ _]?versions?\]' )"
-            set -e
-            if [[ "x${CIRCLE_TAG}" = "x" && "${CIRCLE_BRANCH}" != "master" && "x${force_versioned}" = "x" ]]; then
-              echo "Not a tag or master branch - skipping versioned docs."
-              circleci step halt
-            else
-              python -m pip uninstall -y niworkflows
-              make -C docs/ clean
-              make -f ./docs/Makefile versioned CURBRANCH=${CIRCLE_TAG:-$CIRCLE_BRANCH}
-            fi
-      - save_cache:
-          key: docs-v1-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - ./docs/_build/_html
-      - persist_to_workspace:
-          root: docs/_build
-          paths: html
-      - store_artifacts:
-          path: ./docs/_build/html
-
-  deploy_docs_tag:
-    <<: *docs
-
-  deploy_docs_master:
-    <<: *docs
-
+          path: ~/docs
 
 workflows:
   version: 2
@@ -718,25 +629,5 @@ workflows:
                 - /tests?\/.*/
                 - /ds005\/.*/
                 - /ds054\/.*/
-            tags:
-              only: /.*/
-
-      - deploy_docs_master:
-          requires:
-            - test_pytest
-            - test_package
-            - build_docs
-          filters:
-            branches:
-              only: /master/
-            tags:
-              ignore: /.*/
-
-      - deploy_docs_tag:
-          requires:
-            - deploy_docker
-          filters:
-            branches:
-              ignore: /.*/
             tags:
               only: /.*/

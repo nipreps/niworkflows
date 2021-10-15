@@ -33,9 +33,6 @@ from io import StringIO
 import numpy as np
 import nibabel as nb
 
-from nilearn import image as nlimage
-from nilearn.plotting import plot_anat
-
 from nipype.utils import filemanip
 from .. import NIWORKFLOWS_LOG
 from ..utils.images import rotation2canonical, rotate_affine
@@ -211,6 +208,7 @@ def _3d_in_file(in_file):
     if in_file is a list of files, return an arbitrary file from
     the list, and an arbitrary volume from that file
     """
+    from nilearn import image as nlimage
 
     in_file = filemanip.filename_to_list(in_file)[0]
 
@@ -244,6 +242,7 @@ def plot_segs(
     seg_niis is a list of size one, it behaves as if it was plotting the mask.
     """
     from svgutils.transform import fromstring
+    from nilearn import image as nlimage
 
     plot_params = {} if plot_params is None else plot_params
 
@@ -280,6 +279,8 @@ def plot_segs(
 
 
 def _plot_anat_with_contours(image, segs=None, compress="auto", **plot_params):
+    from nilearn.plotting import plot_anat
+
     nsegs = len(segs or [])
     plot_params = plot_params or {}
     # plot_params' values can be None, however they MUST NOT
@@ -331,6 +332,8 @@ def plot_registration(
     Default order is: axial, coronal, sagittal
     """
     from svgutils.transform import fromstring
+    from nilearn.plotting import plot_anat
+    from nilearn import image as nlimage
 
     plot_params = {} if plot_params is None else plot_params
 
