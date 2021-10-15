@@ -557,7 +557,7 @@ jobs:
           name: Build only this commit
           command: |
             BRANCH=$( echo $CIRCLE_BRANCH | sed 's+/+_+g' )
-            make -C docs SPHINXOPTS="-W" BUILDDIR="$HOME/docs" CURBRANCH=${CIRCLE_TAG:-$BRANCH} html
+            make -C docs SPHINXOPTS="-W" BUILDDIR="$HOME/docs" OUTDIR=${CIRCLE_TAG:-$BRANCH} html
       - store_artifacts:
           path: ~/docs
 

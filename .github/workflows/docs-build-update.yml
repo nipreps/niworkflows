@@ -46,7 +46,7 @@ jobs:
 
     - name: Build docs
       run: |
-          make -C docs/ SPHINXOPTS="-W" BUILDDIR="$HOME/docs" CURBRANCH="${CURBRANCH:-html}" html
+          make -C docs/ SPHINXOPTS="-W" BUILDDIR="$HOME/docs" OUTDIR="${CURBRANCH:-html}" html
 
     - name: Push created tag to gh-pages
       if: startsWith(github.ref, 'refs/tags/')
