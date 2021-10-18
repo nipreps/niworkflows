@@ -33,7 +33,7 @@ class _CrownMaskInputSpec(BaseInterfaceInputSpec):
                               
 
 class _CrownMaskOutputSpec(TraitedSpec):
-    out_masks = File(exists=False, desc="Crown mask")
+    out_mask = File(exists=False, desc="Crown mask")
 
 
 class CrownMask(SimpleInterface):
@@ -51,8 +51,8 @@ class CrownMask(SimpleInterface):
         segm_img = nb.load(self.inputs.in_segm)
         brainmask_img = nb.load(self.inputs.in_brainmask)
 
-        segm = segm_img.get_fdata(dtype=np.int64)
-        brainmask = brainmask_img.get_fdata(dtype=np.int8)
+        segm = segm_img.get_fdata()
+        brainmask = brainmask_img.get_fdata()
 
         crown_mask, func_seg_mask = get_dilated_brainmask(
             atlaslabels=segm,
@@ -62,7 +62,7 @@ class CrownMask(SimpleInterface):
         # Remove the brain from the crown mask
         crown_mask[func_seg_mask] = False
         crown_file = str(Path("crown_mask.nii.gz").absolute())
-        nb.Nifti1Image(crown_mask, brainmask_img.affine, brainmask.header).to_filename(crown_file)
+        nb.Nifti1Image(crown_mask, brainmask_img.affine, brainmask_img.header).to_filename(crown_file)
         self._results["out_mask"] = crown_file
 
         return runtime
