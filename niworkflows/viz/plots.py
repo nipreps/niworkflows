@@ -1051,6 +1051,98 @@ def confounds_correlation_plot(
     return [ax0, ax1], gs
 
 
+def cifti_surfaces_plot(
+    in_cifti,
+    density="32k",
+    surface_type="inflated",
+    output_file=None,
+    **splt_kwargs
+):
+    """
+    Plots a CIFTI-2 dense timeseries onto left/right mesh surfaces.
+
+    Parameters
+    ----------
+    in_cifti : str
+        CIFTI-2 dense timeseries (.dtseries.nii)
+    density : str
+        Surface density
+    surface_type : str
+        Inflation level of mesh surfaces. Supported: midthickness, inflated, veryinflated
+    output_file: :obj:`str` or :obj:`None`
+        Path where the output figure should be saved. If this is not defined,
+        then the figure will be returned.
+    splt_kwargs : dict
+        Keyword arguments for `surfplot.Plot`
+
+    Outputs
+    -------
+    figure : matplotlib.pyplot.figure
+        Surface plot figure. Returned only if ``output_file`` is ``None``.
+    output_file: :obj:`str`
+        The file where the figure is saved.
+    """
+    import surfplot as splt
+    from surfplot.utils import add_fslr_medial_wall
+
+    def get_surface_meshes(density, surface_type):
+        import templateflow.api as tf
+        lh, rh = tf.get("fsLR", density=density, suffix=surface_type, extension=[".surf.gii"])
+        return str(lh), str(rh)
+
+    if density != "32k":
+        raise NotImplementedError("Only 32k density is currently supported.")
+
+    img = nb.cifti2.load(in_cifti)
+    if img.nifti_header.get_intent()[0] != "ConnDenseSeries":
+        raise TypeError(f"{in_cifti} is not a dense timeseries CIFTI file")
+
+    geo = img.header.get_index_map(1)
+    left_cortex, right_cortex = None, None
+    for bm in geo.brain_models:
+        if bm.brain_structure == "CIFTI_STRUCTURE_CORTEX_LEFT":
+            left_cortex = bm
+        elif bm.brain_structure == "CIFTI_STRUCTURE_CORTEX_RIGHT":
+            right_cortex = bm
+
+    if left_cortex is None or right_cortex is None:
+        raise RuntimeError("CIFTI is missing cortex information")
+
+    # use the middle point in the BOLD timeseries
+    data = img.get_fdata()[img.shape[0] // 2]
+
+    def concat_brain_struct_data(structs, data):
+        concat_data = np.array([])
+        for struct in structs:
+            struct_upper_bound = struct.index_offset + struct.index_count
+            struct_data = data[struct.index_offset:struct_upper_bound]
+            concat_data = np.concatenate((concat_data, struct_data))
+        return concat_data
+
+    cortex_data = concat_brain_struct_data((left_cortex, right_cortex), data)
+    if density == "32k":
+        assert len(cortex_data) == 59412, "Cortex data is not in fsLR space"
+    # medial wall needs to be added back in
+    cortex_data = add_fslr_medial_wall(cortex_data)
+    # set any negative values to 0 (transparent)
+    cortex_data[cortex_data < 0] = 0
+    lh_data, rh_data = np.array_split(cortex_data, 2)
+
+    # Build the figure
+    lh_mesh, rh_mesh = get_surface_meshes(density, surface_type)
+    p = splt.Plot(surf_lh=lh_mesh, surf_rh=rh_mesh, **splt_kwargs)
+    p.add_layer({'left': lh_data, 'right': rh_data}, cmap='YlOrRd_r')
+    figure = p.build()  # figsize - leave default?
+
+    if output_file is not None:
+        figure.savefig(output_file, bbox_inches="tight")
+        plt.close(figure)
+        figure = None
+        return output_file
+
+    return figure
+
+
 def _get_tr(img):
     """
     Attempt to extract repetition time from NIfTI/CIFTI header
