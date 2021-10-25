@@ -26,6 +26,7 @@ import numpy as np
 import nibabel as nb
 from .. import viz
 from .conftest import datadir
+from .generate_data import create_surface_dtseries
 from pathlib import Path
 
 
@@ -149,3 +150,11 @@ def test_compcor_variance_plot(tmp_path):
     out_file = str(out_dir / "variance_plot_short.svg")
     metadata_file = os.path.join(datadir, "confounds_metadata_short_test.tsv")
     viz.plots.compcor_variance_plot([metadata_file], output_file=out_file)
+
+
+def test_cifti_surfaces_plot(tmp_path, create_surface_dtseries):
+    """Test plotting CIFTI-2 surfaces"""
+    out_dir = Path(os.getenv("SAVE_CIRCLE_ARTIFACTS", str(tmp_path)))
+    out_file = str(out_dir / "cifti_surfaces_plot.svg")
+    viz.plots.cifti_surfaces_plot(create_surface_dtseries, output_file=out_file)
+    print(tmp_path)
