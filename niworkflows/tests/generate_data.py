@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import numpy as np
-import pytest
 
 
 def _create_dtseries_cifti(timepoints, models):
@@ -69,17 +68,3 @@ def _create_dtseries_cifti(timepoints, models):
     out_file = Path("test.dtseries.nii").absolute()
     ci.save(img, out_file)
     return out_file
-
-
-@pytest.fixture
-def create_surface_dtseries():
-    """Create a dense timeseries CIFTI-2 file"""
-    out_file = _create_dtseries_cifti(
-        timepoints=10,
-        models=[
-            ('CIFTI_STRUCTURE_CORTEX_LEFT', np.random.rand(29696, 10)),
-            ('CIFTI_STRUCTURE_CORTEX_RIGHT', np.random.rand(29716, 10)),
-        ],
-    )
-    yield str(out_file)
-    out_file.unlink()

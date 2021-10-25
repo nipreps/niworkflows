@@ -22,12 +22,15 @@
 #
 """Test viz module"""
 import os
+from pathlib import Path
+
 import numpy as np
 import nibabel as nb
-from .. import viz
+import pytest
+
 from .conftest import datadir
-from .generate_data import create_surface_dtseries
-from pathlib import Path
+from .generate_data import _create_dtseries_cifti
+from .. import viz
 
 
 def test_carpetplot():
@@ -152,9 +155,23 @@ def test_compcor_variance_plot(tmp_path):
     viz.plots.compcor_variance_plot([metadata_file], output_file=out_file)
 
 
+@pytest.fixture
+def create_surface_dtseries():
+    """Create a dense timeseries CIFTI-2 file with only cortex structures"""
+    out_file = _create_dtseries_cifti(
+        timepoints=10,
+        models=[
+            ('CIFTI_STRUCTURE_CORTEX_LEFT', np.random.rand(29696, 10)),
+            ('CIFTI_STRUCTURE_CORTEX_RIGHT', np.random.rand(29716, 10)),
+        ],
+    )
+    yield str(out_file)
+    out_file.unlink()
+
+
 def test_cifti_surfaces_plot(tmp_path, create_surface_dtseries):
     """Test plotting CIFTI-2 surfaces"""
+    tmp_path.chdir()
     out_dir = Path(os.getenv("SAVE_CIRCLE_ARTIFACTS", str(tmp_path)))
     out_file = str(out_dir / "cifti_surfaces_plot.svg")
     viz.plots.cifti_surfaces_plot(create_surface_dtseries, output_file=out_file)
-    print(tmp_path)
