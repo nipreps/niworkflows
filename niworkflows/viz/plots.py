@@ -1108,8 +1108,9 @@ def cifti_surfaces_plot(
     if left_cortex is None or right_cortex is None:
         raise RuntimeError("CIFTI is missing cortex information")
 
-    # use the middle point in the BOLD timeseries
-    data = img.get_fdata()[img.shape[0] // 2]
+    # calculate an average of the BOLD data, excluding the first 5 volumes
+    # as potential nonsteady states
+    data = img.get_fdata()[5:20].mean(axis=0)
 
     def concat_brain_struct_data(structs, data):
         concat_data = np.array([])
