@@ -171,7 +171,7 @@ def create_surface_dtseries():
 
 def test_cifti_surfaces_plot(tmp_path, create_surface_dtseries):
     """Test plotting CIFTI-2 surfaces"""
-    tmp_path.chdir()
+    os.chdir(tmp_path)
     out_dir = Path(os.getenv("SAVE_CIRCLE_ARTIFACTS", str(tmp_path)))
     out_file = str(out_dir / "cifti_surfaces_plot.svg")
     viz.plots.cifti_surfaces_plot(create_surface_dtseries, output_file=out_file)
