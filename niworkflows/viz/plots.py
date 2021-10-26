@@ -46,7 +46,6 @@ from sklearn.cluster import ward_tree
 
 from niworkflows.interfaces.surf import get_crown_cifti
 
-
 DINA4_LANDSCAPE = (11.69, 8.27)
 
 
@@ -314,7 +313,7 @@ def plot_carpet(
             nreg = np.count_nonzero(seg == i)
             carpet_region = data[seg == i]
             if ward:
-                children, _, n_leaves, _, distances = ward_tree(carpet_region, n_clusters=nreg, return_distance=True)
+                children, _, n_leaves, _, distances = ward_tree(carpet_region, return_distance=True)
                 dn = get_dendrogram(children, n_leaves, distances)
             else:
                 order_cluster = linkage(carpet_region, method='average', metric='euclidean', optimal_ordering=True)
@@ -427,7 +426,6 @@ def _carpet(
     )
 
     if default_lut:
-
         # Plot lines to separate compartments in carpet plot
         crown_boundary = np.where(seg[order] == 5)[0][-1] - 1
         wm_boundary = np.where(seg[order] == 1)[0][0] + 1
