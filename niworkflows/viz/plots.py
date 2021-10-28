@@ -412,7 +412,7 @@ def _carpet(
         subcortGM = mpatches.Patch(color=cmap.colors[2], label='Subcortical GM')
         cerebellum = mpatches.Patch(color=cmap.colors[1], label='Cerebellum')
         wm_csf = mpatches.Patch(color=cmap.colors[0], label='WM & CSF')
-        plt.legend(handles=[crown, cortGM, subcortGM, cerebellum, wm_csf])
+        plt.legend(handles=[crown, cortGM, subcortGM, cerebellum, wm_csf],fontsize=20)
 
     # Carpet plot
     ax1 = plt.subplot(gs[1])
@@ -429,8 +429,8 @@ def _carpet(
         # Plot lines to separate compartments in carpet plot
         crown_boundary = np.where(seg[order] == 5)[0][-1] - 1
         wm_boundary = np.where(seg[order] == 1)[0][0] + 1
-        ax1.axhline(y=crown_boundary, color=cmap.colors[-1], linewidth=2)
-        ax1.axhline(y=wm_boundary, color=cmap.colors[0], linewidth=2)
+        ax1.axhline(y=crown_boundary, color=cmap.colors[-1], linewidth=3)
+        ax1.axhline(y=wm_boundary, color=cmap.colors[0], linewidth=3)
 
     ax1.grid(False)
     ax1.set_yticks([])
@@ -440,9 +440,9 @@ def _carpet(
     interval = max((int(data.shape[-1] + 1) // 10, int(data.shape[-1] + 1) // 5, 1))
     xticks = list(range(0, data.shape[-1])[::interval])
     ax1.set_xticks(xticks)
-    ax1.set_xlabel("time (frame #)" if notr else "time (s)")
+    ax1.set_xlabel("time (frame #)" if notr else "time (s)",fontsize = 20)
     labels = tr * (np.array(xticks))
-    ax1.set_xticklabels(["%.02f" % t for t in labels.tolist()], fontsize=5)
+    ax1.set_xticklabels(["%.02f" % t for t in labels.tolist()], fontsize=18)
 
     # Remove and redefine spines
     for side in ["top", "right"]:
