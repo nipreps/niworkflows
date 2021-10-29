@@ -166,6 +166,7 @@ def init_epi_reference_wf(
         N4BiasFieldCorrection(
             dimension=3,
             copy_header=True,
+            n_iterations=[50]*n4_iter,
             convergence_threshold=1e-7,
             shrink_factor=4,
         ),
@@ -234,7 +235,6 @@ def init_epi_reference_wf(
         wf.connect(inputnode, "t_masks", per_run_avgs, "t_mask")
 
     # rodent-specific N4 settings
-    n4_avgs.inputs.n_iterations = [50] * n4_iter
     if adaptive_bspline_grid:
         from ...utils.images import _bspline_grid
         from ...utils.connections import pop_file as _pop

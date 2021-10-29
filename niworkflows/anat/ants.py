@@ -763,14 +763,15 @@ def init_atropos_wf(
             dimension=3,
             save_bias=True,
             copy_header=True,
+            n_iterations=[50]*n4_iter,
             convergence_threshold=1e-7,
             shrink_factor=4,
+            bspline_fitting_distance=bspline_fitting_distance,
         ),
         n_procs=omp_nthreads,
         name="inu_n4_final",
         iterfield=["input_image"],
     )
-    inu_n4_final.inputs.n_iterations = [50] * n4_iter
 
     try:
         inu_n4_final.inputs.rescale_intensities = True
@@ -894,9 +895,6 @@ def init_atropos_wf(
             (bspline_grid, inu_n4_final, [("out", "args")])
         ])
         # fmt:on
-    else:
-        # set INU bspline grid based on isotropic distance
-        inu_n4_final.inputs.bspline_fitting_distance = bspline_fitting_distance
 
     return wf
 
