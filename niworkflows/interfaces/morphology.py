@@ -23,14 +23,21 @@
 """ Handling brain mask"""
 
 from nipype.interfaces.base import (
-    traits, TraitedSpec, BaseInterfaceInputSpec, File, SimpleInterface
+    traits,
+    TraitedSpec,
+    BaseInterfaceInputSpec,
+    File,
+    SimpleInterface,
 )
 
+
 class _CrownMaskInputSpec(BaseInterfaceInputSpec):
-    in_segm = File(exists=True, mandatory=True, position=0, desc="Atlas from segmentation.")
+    in_segm = File(
+        exists=True, mandatory=True, position=0, desc="Atlas from segmentation."
+    )
     in_brainmask = File(exists=True, mandatory=True, position=1, desc="Brain mask.")
-    radius = traits.Int(default_value = 2, usedefault=True, desc="Radius of dilation")
-                              
+    radius = traits.Int(default_value=2, usedefault=True, desc="Radius of dilation")
+
 
 class _CrownMaskOutputSpec(TraitedSpec):
     out_mask = File(exists=False, desc="Crown mask")
@@ -44,10 +51,9 @@ class CrownMask(SimpleInterface):
 
     def _run_interface(self, runtime):
         import nibabel as nb
-        import numpy as np
         from pathlib import Path
 
-        #Open files
+        # Open files
         segm_img = nb.load(self.inputs.in_segm)
         brainmask_img = nb.load(self.inputs.in_brainmask)
 
@@ -62,8 +68,10 @@ class CrownMask(SimpleInterface):
         )
         # Remove the brain from the crown mask
         crown_mask[func_seg_mask] = False
-        crown_file = str((Path(runtime.cwd) / "crown_mask.nii.gz").absolute()))
-        nb.Nifti1Image(crown_mask, brainmask_img.affine, brainmask_img.header).to_filename(crown_file)
+        crown_file = str((Path(runtime.cwd) / "crown_mask.nii.gz").absolute())
+        nb.Nifti1Image(
+            crown_mask, brainmask_img.affine, brainmask_img.header
+        ).to_filename(crown_file)
         self._results["out_mask"] = crown_file
 
         return runtime
@@ -90,7 +98,7 @@ def get_dilated_brainmask(atlaslabels, brainmask, radius=2):
     func_seg_mask = (seg_mask + brainmask) > 0
 
     if func_seg_mask.ndim != 3:
-        raise Exception('The brain mask should be a 3D array')
+        raise Exception("The brain mask should be a 3D array")
 
     dilated_brainmask = ndi.binary_dilation(func_seg_mask, ball(radius))
 

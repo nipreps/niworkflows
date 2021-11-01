@@ -147,8 +147,11 @@ class fMRIPlot:
             grid_id += 1
 
         plot_carpet(
-            self.func_file, atlaslabels=self.seg_data, brainmask=self.mask_data,
-            subplot=grid[-1], tr=self.tr
+            self.func_file,
+            atlaslabels=self.seg_data,
+            brainmask=self.mask_data,
+            subplot=grid[-1],
+            tr=self.tr,
         )
         # spikesplot_cb([0.7, 0.78, 0.2, 0.008])
         return figure
@@ -237,7 +240,7 @@ def plot_carpet(
             else:
                 lidx = 3
             index_final = bm.index_offset + bm.index_count
-            seg[bm.index_offset:index_final] = lidx
+            seg[bm.index_offset : index_final] = lidx
         assert len(seg[seg < 1]) == 0, "Unassigned labels"
 
         # Decimate data
@@ -255,7 +258,10 @@ def plot_carpet(
 
     else:  # Volumetric NIfTI
         # Load data
-        img_nii = check_niimg_4d(img, dtype="auto",)
+        img_nii = check_niimg_4d(
+            img,
+            dtype="auto",
+        )
         func_data = _safe_get_data(img_nii, ensure_finite=True)
         ntsteps = func_data.shape[-1]
 
@@ -282,8 +288,9 @@ def plot_carpet(
         seg = lut[atlaslabels.astype(int)]
 
         # Incorporate the crown in the carpetplot
-        assert (seg[crown_mask] == 0).all(), \
-            "There is an overlap between the crown and the anatomical atlas."
+        assert (
+            seg[crown_mask] == 0
+        ).all(), "There is an overlap between the crown and the anatomical atlas."
         seg[crown_mask] = seg.max() + 1
 
         if (seg == 0).all():
@@ -297,7 +304,7 @@ def plot_carpet(
         # Order following segmentation labels
         order = np.argsort(seg)[::-1]
         # Set colormap
-        cmap = ListedColormap(cm.get_cmap("tab10").colors[:len(np.unique(seg))][::-1])
+        cmap = ListedColormap(cm.get_cmap("tab10").colors[: len(np.unique(seg))][::-1])
         assert len(cmap.colors) == len(
             np.unique(seg)
         ), "Mismatch between expected # of structures and colors"
@@ -324,7 +331,7 @@ def plot_carpet(
         subplot=subplot,
         title=title,
         output_file=output_file,
-        default_lut=default_lut
+        default_lut=default_lut,
     )
 
 
@@ -342,7 +349,7 @@ def _carpet(
     epinii=None,
     segnii=None,
     nslices=None,
-    default_lut=False
+    default_lut=False,
 ):
     """Common carpetplot building code for volumetric / CIFTI plots"""
     notr = False
@@ -382,11 +389,11 @@ def _carpet(
     ax0.spines["bottom"].set_visible(False)
 
     if default_lut:
-        crown = mpatches.Patch(color=cmap.colors[4], label='Crown')
-        cortGM = mpatches.Patch(color=cmap.colors[3], label='Cortical GM')
-        subcortGM = mpatches.Patch(color=cmap.colors[2], label='Subcortical GM')
-        cerebellum = mpatches.Patch(color=cmap.colors[1], label='Cerebellum')
-        wm_csf = mpatches.Patch(color=cmap.colors[0], label='WM & CSF')
+        crown = mpatches.Patch(color=cmap.colors[4], label="Crown")
+        cortGM = mpatches.Patch(color=cmap.colors[3], label="Cortical GM")
+        subcortGM = mpatches.Patch(color=cmap.colors[2], label="Subcortical GM")
+        cerebellum = mpatches.Patch(color=cmap.colors[1], label="Cerebellum")
+        wm_csf = mpatches.Patch(color=cmap.colors[0], label="WM & CSF")
         plt.legend(handles=[crown, cortGM, subcortGM, cerebellum, wm_csf])
 
     # Carpet plot
