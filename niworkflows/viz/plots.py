@@ -38,8 +38,6 @@ from nilearn.signal import clean
 from nilearn._utils import check_niimg_4d
 from nilearn._utils.niimg import _safe_get_data
 
-from scipy.cluster.hierarchy import linkage, dendrogram
-
 from niworkflows.interfaces.surf import get_crown_cifti
 from niworkflows.interfaces.morphology import get_dilated_brainmask
 
@@ -261,11 +259,11 @@ def plot_carpet(
         func_data = _safe_get_data(img_nii, ensure_finite=True)
         ntsteps = func_data.shape[-1]
 
+        # Dilate brain mask
         crown_mask, func_seg_mask = get_dilated_brainmask(atlaslabels, brainmask)
         # Remove the brain from the crown mask
         crown_mask[func_seg_mask] = False
 
-        # Incorporate the crown in the carpetplot
         # Map segmentation to brain areas
         # Boolean defining whether the default look up table is being used
         default_lut = False
@@ -282,6 +280,8 @@ def plot_carpet(
 
         # Apply lookup table
         seg = lut[atlaslabels.astype(int)]
+
+        # Incorporate the crown in the carpetplot
         assert (seg[crown_mask] == 0).all(), \
             "There is an overlap between the crown and the anatomical atlas."
         seg[crown_mask] = seg.max() + 1
@@ -401,7 +401,6 @@ def _carpet(
     )
 
     if default_lut:
-
         # Plot lines to separate compartments in carpet plot
         crown_boundary = np.where(seg[order] == 5)[0][-1] - 1
         wm_boundary = np.where(seg[order] == 1)[0][0] + 1

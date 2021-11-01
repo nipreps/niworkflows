@@ -54,6 +54,7 @@ class CrownMask(SimpleInterface):
         segm = segm_img.get_fdata()
         brainmask = brainmask_img.get_fdata()
 
+        # Obtain dilated brainmask
         crown_mask, func_seg_mask = get_dilated_brainmask(
             atlaslabels=segm,
             brainmask=brainmask,
