@@ -229,9 +229,9 @@ def test_generated_reportlets(bids_sessions, ordering):
     # make independent report
     out_dir = tempfile.mkdtemp()
     report = Report(
-        Path(out_dir),
+        Path(out_dir) / "fmriprep",
         "fakeuuid",
-        reportlets_dir=Path(bids_sessions),
+        reportlets_dir=Path(bids_sessions) / "fmriprep",
         subject_id="01",
         packagename="fmriprep",
     )

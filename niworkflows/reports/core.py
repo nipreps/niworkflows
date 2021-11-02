@@ -297,10 +297,6 @@ class Report:
         settings = load(config.read_text())
         self.packagename = self.packagename or settings.get("package", None)
 
-        if self.packagename is not None:
-            self.root = self.root / self.packagename
-            self.out_dir = self.out_dir / self.packagename
-
         if self.subject_id is not None:
             self.root = self.root / "sub-{}".format(self.subject_id)
 
