@@ -245,13 +245,13 @@ class Report:
     .. doctest::
 
     >>> robj = Report(testdir / 'out', 'madeoutuuid', subject_id='01', packagename='fmriprep',
-    ...               reportlets_dir=testdir / 'work' / 'reportlets')
+    ...               reportlets_dir=testdir / 'work' / 'reportlets' / 'fmriprep')
     >>> robj.layout.get(subject='01', desc='reconall')  # doctest: +ELLIPSIS
     [<BIDSFile filename='.../figures/sub-01_desc-reconall_T1w.svg'>]
 
     >>> robj.generate_report()
     0
-    >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
+    >>> len((testdir / 'out' / 'sub-01.html').read_text())
     36693
 
     .. testcleanup::
@@ -512,7 +512,7 @@ def run_reports(
     .. doctest::
 
     >>> run_reports(testdir / 'out', '01', 'madeoutuuid', packagename='fmriprep',
-    ...             reportlets_dir=testdir / 'work' / 'reportlets')
+    ...             reportlets_dir=testdir / 'work' / 'reportlets'/ 'fmriprep')
     0
 
     .. testcleanup::

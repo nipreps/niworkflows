@@ -112,7 +112,7 @@ def test_report1():
     return Report(
         Path(out_dir),
         "fakeuuid",
-        reportlets_dir=Path(test_data_path),
+        reportlets_dir=Path(test_data_path) / 'fmriprep',
         subject_id="01",
         packagename="fmriprep",
     )
@@ -124,7 +124,7 @@ def test_report2(bids_sessions):
     return Report(
         Path(out_dir),
         "fakeuuid",
-        reportlets_dir=Path(bids_sessions),
+        reportlets_dir=Path(bids_sessions) / 'fmriprep',
         subject_id="01",
         packagename="fmriprep",
     )
@@ -267,10 +267,9 @@ def test_generated_reportlets(bids_sessions, ordering):
     ],
 )
 def test_subject_id(tmp_path, subject_id, out_html):
-    reports = tmp_path / "reports"
+    reports = tmp_path / "reports" / "fmriprep"
     Path(
         reports
-        / "fmriprep"
         / (subject_id if subject_id.startswith("sub-") else f"sub-{subject_id}")
     ).mkdir(parents=True)
 
