@@ -344,7 +344,7 @@ def _carpet(
     interval = max((int(data.shape[-1] + 1) // 10, int(data.shape[-1] + 1) // 5, 1))
     xticks = list(range(0, data.shape[-1])[::interval])
     if notr:
-        xlabel = "time (frame #)"
+        xlabel = "time-points (index)"
         xticklabels = [round(xtick) for xtick in xticks]
     else:
         xlabel = "time (s)"
