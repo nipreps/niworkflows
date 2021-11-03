@@ -164,8 +164,8 @@ def plot_carpet(
     Parameters
     ----------
 
-        func : string
-            Path to NIfTI or CIFTI BOLD image
+        func : string or nibabel-image object
+            Path to NIfTI or CIFTI BOLD image, or a nibabel-image object
         atlaslabels: ndarray, optional
             A 3D array of integer labels from an atlas, resampled into ``img`` space.
             Required if ``func`` is a NIfTI image.
@@ -173,7 +173,7 @@ def plot_carpet(
             Detrend and standardize the data prior to plotting.
         nskip : int, optional
             Number of volumes at the beginning of the scan marked as nonsteady state.
-            Not used.
+            Only used by volumetric NIfTI.
         size : tuple, optional
             Size of figure.
         subplot : matplotlib Subplot, optional
@@ -197,7 +197,7 @@ def plot_carpet(
     epinii = None
     segnii = None
     nslices = None
-    img = nb.load(func)
+    img = nb.load(func) if isinstance(func, str) else func
 
     if isinstance(img, nb.Cifti2Image):
         assert (
@@ -243,6 +243,7 @@ def plot_carpet(
 
         img_nii = check_niimg_4d(img, dtype="auto",)
         func_data = _safe_get_data(img_nii, ensure_finite=True)
+        func_data = func_data[..., nskip:]
         ntsteps = func_data.shape[-1]
         data = func_data[atlaslabels > 0].reshape(-1, ntsteps)
         oseg = atlaslabels[atlaslabels > 0].reshape(-1)
@@ -283,6 +284,7 @@ def plot_carpet(
         nslices=nslices,
         tr=tr,
         subplot=subplot,
+        legend=legend,
         title=title,
         output_file=output_file,
     )
@@ -361,10 +363,15 @@ def _carpet(
     # Set 10 frame markers in X axis
     interval = max((int(data.shape[-1] + 1) // 10, int(data.shape[-1] + 1) // 5, 1))
     xticks = list(range(0, data.shape[-1])[::interval])
+    if notr:
+        xlabel = "time-points (index)"
+        xticklabels = [round(xtick) for xtick in xticks]
+    else:
+        xlabel = "time (s)"
+        xticklabels = ["%.02f" % (tr * xtick) for xtick in xticks]
     ax1.set_xticks(xticks)
-    ax1.set_xlabel("time (frame #)" if notr else "time (s)")
-    labels = tr * (np.array(xticks))
-    ax1.set_xticklabels(["%.02f" % t for t in labels.tolist()], fontsize=5)
+    ax1.set_xlabel(xlabel)
+    ax1.set_xticklabels(xticklabels)
 
     # Remove and redefine spines
     for side in ["top", "right"]:
@@ -379,6 +386,8 @@ def _carpet(
     ax1.spines["bottom"].set_visible(False)
     ax1.spines["left"].set_color("none")
     ax1.spines["left"].set_visible(False)
+    if title:
+        ax1.set_title(title)
 
     ax2 = None
     if legend:
