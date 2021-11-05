@@ -66,6 +66,7 @@ class fMRIPlot:
         units=None,
         vlines=None,
         spikes_files=None,
+        acompcor_mask_file=None
     ):
         func_img = nb.load(func_file)
         self.func_file = func_file
@@ -83,6 +84,8 @@ class fMRIPlot:
                 )
             if seg_file:
                 self.seg_data = np.asanyarray(nb.load(seg_file).dataobj)
+            if acompcor_masks_file:
+                self.acompcor_mask = np.asanyarray(nb.load(acompcor_mask_file).dataobj)
 
         if units is None:
             units = {}
@@ -152,7 +155,7 @@ class fMRIPlot:
 
         plot_carpet(
             self.func_file, atlaslabels=self.seg_data, brainmask=self.mask_data,
-            subplot=grid[-1], tr=self.tr
+            subplot=grid[-1], tr=self.tr, acompcor_mask = self.acompcor_mask
         )
         # spikesplot_cb([0.7, 0.78, 0.2, 0.008])
         return figure
@@ -171,7 +174,8 @@ def plot_carpet(
     legend=False,
     tr=None,
     lut=None,
-    ward=False
+    ward=False,
+    acompcor_mask=None,
 ):
     """
     Plot an image representation of voxel intensities across time also know
@@ -282,12 +286,17 @@ def plot_carpet(
 
         if (lut < 0).any():
             raise ValueError("The look up table should not contain negative values.")
-
+        
+        # Define the acompcor mask as 1st region
+        lut += 1
         # Apply lookup table
         seg = lut[atlaslabels.astype(int)]
+        seg[acompcor_mask] = 1
+
         assert (seg[crown_mask] == 0).all(), \
             "There is an overlap between the crown and the anatomical atlas."
         seg[crown_mask] = seg.max() + 1
+        
 
         if (seg == 0).all():
             raise ValueError("The segmented brain atlas is zero everywhere")
@@ -407,12 +416,13 @@ def _carpet(
     ax0.spines["bottom"].set_visible(False)
 
     if default_lut:
-        crown = mpatches.Patch(color=cmap.colors[4], label='Crown')
-        cortGM = mpatches.Patch(color=cmap.colors[3], label='Cortical GM')
-        subcortGM = mpatches.Patch(color=cmap.colors[2], label='Subcortical GM')
-        cerebellum = mpatches.Patch(color=cmap.colors[1], label='Cerebellum')
-        wm_csf = mpatches.Patch(color=cmap.colors[0], label='WM & CSF')
-        plt.legend(handles=[crown, cortGM, subcortGM, cerebellum, wm_csf],fontsize=20)
+        crown = mpatches.Patch(color=cmap.colors[5], label='Crown')
+        cortGM = mpatches.Patch(color=cmap.colors[4], label='Cortical GM')
+        subcortGM = mpatches.Patch(color=cmap.colors[3], label='Subcortical GM')
+        cerebellum = mpatches.Patch(color=cmap.colors[2], label='Cerebellum')
+        shallow_wm_csf = mpatches.Patch(color=cmap.color[1], label='shallow WM & CSF')
+        deep_wm_csf = mpatches.Patch(color=cmap.colors[0], label='deep WM & CSF')
+        plt.legend(handles=[crown, cortGM, subcortGM, cerebellum, shallow_wm_csf, deep_wm_csf],fontsize=20)
 
     # Carpet plot
     ax1 = plt.subplot(gs[1])
