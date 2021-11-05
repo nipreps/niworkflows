@@ -84,8 +84,8 @@ class fMRIPlot:
                 )
             if seg_file:
                 self.seg_data = np.asanyarray(nb.load(seg_file).dataobj)
-            if acompcor_masks_file:
-                self.acompcor_mask = np.asanyarray(nb.load(acompcor_mask_file).dataobj)
+            if acompcor_mask_file:
+                self.acompcor_mask = np.asanyarray(nb.load(acompcor_mask_file).dataobj).astype("uint8")
 
         if units is None:
             units = {}
@@ -214,6 +214,11 @@ def plot_carpet(
             # of frames is plotted instead of time.
         lut : ndarray, optional
             Look up table for segmentations
+        ward : boolean, optional
+            Boolean that determines if hierarchical ward clustering is used or
+            hierarchical average linkage clustering
+        acompcor_mask : ndarray, optional
+            A 3D binary array, resampled into ``img`` space.
 
     """
     epinii = None
@@ -288,7 +293,7 @@ def plot_carpet(
             raise ValueError("The look up table should not contain negative values.")
         
         # Define the acompcor mask as 1st region
-        lut += 1
+        lut[lut>0] += 1
         # Apply lookup table
         seg = lut[atlaslabels.astype(int)]
         seg[acompcor_mask] = 1
@@ -420,7 +425,7 @@ def _carpet(
         cortGM = mpatches.Patch(color=cmap.colors[4], label='Cortical GM')
         subcortGM = mpatches.Patch(color=cmap.colors[3], label='Subcortical GM')
         cerebellum = mpatches.Patch(color=cmap.colors[2], label='Cerebellum')
-        shallow_wm_csf = mpatches.Patch(color=cmap.color[1], label='shallow WM & CSF')
+        shallow_wm_csf = mpatches.Patch(color=cmap.colors[1], label='shallow WM & CSF')
         deep_wm_csf = mpatches.Patch(color=cmap.colors[0], label='deep WM & CSF')
         plt.legend(handles=[crown, cortGM, subcortGM, cerebellum, shallow_wm_csf, deep_wm_csf],fontsize=20)
 
@@ -437,10 +442,10 @@ def _carpet(
 
     if default_lut:
         # Plot lines to separate compartments in carpet plot
-        crown_boundary = np.where(seg[order] == 5)[0][-1] - 1
-        wm_boundary = np.where(seg[order] == 1)[0][0] + 1
+        crown_boundary = np.where(seg[order] == 6)[0][-1] - 1
+        wm_boundary = np.where(seg[order] == 2)[0][0] + 1
         ax1.axhline(y=crown_boundary, color=cmap.colors[-1], linewidth=3)
-        ax1.axhline(y=wm_boundary, color=cmap.colors[0], linewidth=3)
+        ax1.axhline(y=wm_boundary, color=cmap.colors[1], linewidth=3)
 
     ax1.grid(False)
     ax1.set_yticks([])
