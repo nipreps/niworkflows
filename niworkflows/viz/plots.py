@@ -296,6 +296,8 @@ def plot_carpet(
         lut[lut>0] += 1
         # Apply lookup table
         seg = lut[atlaslabels.astype(int)]
+        # Change type of acompcor_mask to bool
+        acompcor_mask = acompcor_mask.astype("bool")
         seg[acompcor_mask] = 1
 
         assert (seg[crown_mask] == 0).all(), \
