@@ -28,6 +28,7 @@ from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
     File,
     SimpleInterface,
+    InputMultiObject,
 )
 
 
@@ -36,6 +37,7 @@ class _CrownMaskInputSpec(BaseInterfaceInputSpec):
         exists=True, mandatory=True, position=0, desc="Atlas from segmentation."
     )
     in_brainmask = File(exists=True, mandatory=True, position=1, desc="Brain mask.")
+    in_vfs = InputMultiObject(File(exists=True, mandatory=True, position=2, desc="Img that define affine for saving crown mask"))
     radius = traits.Int(default_value=2, usedefault=True, desc="Radius of dilation")
 
 
@@ -52,10 +54,10 @@ class CrownMask(SimpleInterface):
     def _run_interface(self, runtime):
         import nibabel as nb
         from pathlib import Path
-
         # Open files
         segm_img = nb.load(self.inputs.in_segm)
         brainmask_img = nb.load(self.inputs.in_brainmask)
+        img = nb.load(self.inputs.in_vfs[0])
 
         segm = segm_img.get_fdata()
         brainmask = brainmask_img.get_fdata()
@@ -70,7 +72,7 @@ class CrownMask(SimpleInterface):
         crown_mask[func_seg_mask] = False
         crown_file = str((Path(runtime.cwd) / "crown_mask.nii.gz").absolute())
         nb.Nifti1Image(
-            crown_mask, brainmask_img.affine, brainmask_img.header
+            crown_mask, img.affine, img.header
         ).to_filename(crown_file)
         self._results["out_mask"] = crown_file
 
