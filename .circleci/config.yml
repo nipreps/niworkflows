@@ -185,10 +185,10 @@ jobs:
 
       - restore_cache:
           keys:
-            - mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-
-            - mask-regressions-v0-{{ .Branch }}-
-            - mask-regressions-v0-master-
-            - mask-regressions-v0-
+            - mask-regressions-v1-{{ .Branch }}-{{ .Revision }}-
+            - mask-regressions-v1-{{ .Branch }}-
+            - mask-regressions-v1-master-
+            - mask-regressions-v1-
             - mask-regressions-
       - run:
           name: Setup TemplateFlow
@@ -206,7 +206,7 @@ jobs:
             datalad update -r --merge -d epi-references/
             datalad get -J 2 -r -d epi-references/ epi-references/*
       - save_cache:
-          key: mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
+          key: mask-regressions-v1-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
           paths:
             - /tmp/templateflow
             - /tmp/data/epi-references
@@ -337,8 +337,8 @@ jobs:
 
       - restore_cache:
           keys:
-            - mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-
-            - mask-regressions-v0-{{ .Branch }}-
+            - mask-regressions-v1-{{ .Branch }}-{{ .Revision }}-
+            - mask-regressions-v1-{{ .Branch }}-
 
       - restore_cache:
           keys:
@@ -374,10 +374,10 @@ jobs:
             docker tag localhost:5000/niworkflows niworkflows:latest
       - restore_cache:
           keys:
-            - masks-workdir-v5-{{ .Branch }}-{{epoch}}
-            - masks-workdir-v5-{{ .Branch }}-
-            - masks-workdir-v5-master-
-            - masks-workdir-v5-
+            - masks-workdir-v6-{{ .Branch }}-{{epoch}}
+            - masks-workdir-v6-{{ .Branch }}-
+            - masks-workdir-v6-master-
+            - masks-workdir-v6-
       - run:
           name: Run regression tests on EPI masks
           no_output_timeout: 2h
@@ -409,7 +409,7 @@ jobs:
       - store_test_results:
           path: /tmp/masks/reports
       - save_cache:
-         key: masks-workdir-v5-{{ .Branch }}-{{ epoch }}
+         key: masks-workdir-v6-{{ .Branch }}-{{ epoch }}
          paths:
             - /tmp/masks/workdir
 
