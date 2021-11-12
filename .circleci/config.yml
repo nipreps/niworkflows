@@ -189,7 +189,6 @@ jobs:
             - mask-regressions-v1-{{ .Branch }}-
             - mask-regressions-v1-master-
             - mask-regressions-v1-
-            - mask-regressions-
       - run:
           name: Setup TemplateFlow
           command: |
