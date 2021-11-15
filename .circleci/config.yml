@@ -15,11 +15,10 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ .Revision }}
-            - build-v1--{{ .Revision }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-master-
-            - build-v1-
+            - build-v2-{{ .Branch }}-{{ .Revision }}
+            - build-v2--{{ .Revision }}
+            - build-v2-{{ .Branch }}-
+            - build-v2-master-
           paths:
             - /tmp/docker
             - /tmp/images
@@ -83,7 +82,7 @@ jobs:
             docker exec -it registry /bin/registry garbage-collect --delete-untagged \
                 /etc/docker/registry/config.yml
       - save_cache:
-          key: build-v1-{{ .Branch }}-{{ .Revision }}
+          key: build-v2-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/docker
             - /tmp/images
@@ -222,11 +221,7 @@ jobs:
           command: python -m pip install codecov
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ .Revision }}
-            - build-v1--{{ .Revision }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-master-
-            - build-v1-
+            - build-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Docker authentication
           command: |
@@ -341,11 +336,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ .Revision }}
-            - build-v1--{{ .Revision }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-master-
-            - build-v1-
+            - build-v2-{{ .Branch }}-{{ .Revision }}
       - run:
           name: Docker authentication
           command: |
@@ -494,11 +485,7 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ .Revision }}
-            - build-v1--{{ .Revision }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-master-
-            - build-v1-
+            - build-v2-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/docker
             - /tmp/images
