@@ -385,7 +385,7 @@ jobs:
               niworkflows:latest \
               coverage run -p --rcfile=setup.cfg \
                      -m pytest --junit-xml=/tmp/masks/reports/regression.xml \
-                     niworkflows/func/tests/
+                     niworkflows/func/tests/ -k ds000116
       - run:
           name: Clear reports folder & delete plot generator cache
           command: |
