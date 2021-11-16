@@ -1,3 +1,14 @@
+1.4.3 (November 16, 2021)
+=========================
+Patch release in the 1.4.x series, including improvements to the carpetplot figure.
+With thanks to Zaki A. for the contributions.
+
+  * ENH: Carpet plot tweaks (#617)
+  * FIX: Patch ``ants.Registration`` interface temporarily (#654)
+  * MAINT: Revise Docker image building and dependencies (#655)
+  * MAINT: Relax matplotlib constraint (#668)
+  * MAINT: Configure black to avoid excessive rewriting (#666)
+
 1.4.2 (October 15, 2021)
 ========================
 Bug-fix release in the 1.4.x series revising dependencies and including minor improvements to the Docker image, a complete overhaul of the documentation skin, building and deployment & archival.
