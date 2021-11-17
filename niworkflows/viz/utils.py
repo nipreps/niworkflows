@@ -33,9 +33,6 @@ from io import StringIO
 import numpy as np
 import nibabel as nb
 
-from nilearn import image as nlimage
-from nilearn.plotting import plot_anat
-
 from nipype.utils import filemanip
 from .. import NIWORKFLOWS_LOG
 from ..utils.images import rotation2canonical, rotate_affine
@@ -211,6 +208,7 @@ def _3d_in_file(in_file):
     if in_file is a list of files, return an arbitrary file from
     the list, and an arbitrary volume from that file
     """
+    from nilearn import image as nlimage
 
     in_file = filemanip.filename_to_list(in_file)[0]
 
@@ -244,6 +242,7 @@ def plot_segs(
     seg_niis is a list of size one, it behaves as if it was plotting the mask.
     """
     from svgutils.transform import fromstring
+    from nilearn import image as nlimage
 
     plot_params = {} if plot_params is None else plot_params
 
@@ -280,6 +279,8 @@ def plot_segs(
 
 
 def _plot_anat_with_contours(image, segs=None, compress="auto", **plot_params):
+    from nilearn.plotting import plot_anat
+
     nsegs = len(segs or [])
     plot_params = plot_params or {}
     # plot_params' values can be None, however they MUST NOT
@@ -324,12 +325,15 @@ def plot_registration(
     label=None,
     contour=None,
     compress="auto",
+    dismiss_affine=False,
 ):
     """
     Plots the foreground and background views
     Default order is: axial, coronal, sagittal
     """
     from svgutils.transform import fromstring
+    from nilearn.plotting import plot_anat
+    from nilearn import image as nlimage
 
     plot_params = {} if plot_params is None else plot_params
 
@@ -350,6 +354,15 @@ def plot_registration(
         contour_data = contour.get_fdata() % 39
         white = nlimage.new_img_like(contour, contour_data == 2)
         pial = nlimage.new_img_like(contour, contour_data >= 2)
+
+    if dismiss_affine:
+        canonical_r = rotation2canonical(anat_nii)
+        anat_nii = rotate_affine(anat_nii, rot=canonical_r)
+        if ribbon:
+            white = rotate_affine(white, rot=canonical_r)
+            pial = rotate_affine(pial, rot=canonical_r)
+        if contour:
+            contour = rotate_affine(contour, rot=canonical_r)
 
     # Plot each cut axis
     for i, mode in enumerate(list(order)):

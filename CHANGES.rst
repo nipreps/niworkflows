@@ -1,5 +1,31 @@
-1.4.0 (TBD)
-===========
+1.4.3 (November 16, 2021)
+=========================
+Patch release in the 1.4.x series, including improvements to the carpetplot figure.
+With thanks to Zaki A. for the contributions.
+
+  * ENH: Carpet plot tweaks (#617)
+  * FIX: Patch ``ants.Registration`` interface temporarily (#654)
+  * MAINT: Revise Docker image building and dependencies (#655)
+  * MAINT: Relax matplotlib constraint (#668)
+  * MAINT: Configure black to avoid excessive rewriting (#666)
+
+1.4.2 (October 15, 2021)
+========================
+Bug-fix release in the 1.4.x series revising dependencies and including minor improvements to the Docker image, a complete overhaul of the documentation skin, building and deployment & archival.
+
+* DOC: Overhaul - new skin, new deployment & multiversion archival (#656, #657, #658)
+* MAINT: Revise Docker image building and dependencies (#655)
+
+1.4.1 (October 07, 2021)
+========================
+Bug-fix release in the 1.4.x series.
+
+This depends on the latest nitransforms, enabling downstream tools to upgrade.
+
+* FIX: Patch ``ants.Registration`` interface temporarily (#654)
+
+1.4.0 (September 1, 2021)
+=========================
 First release in the 1.4.x series.
 This release includes enhancements and bug-fixes towards the release of the first
 beta version of *dMRIPrep*.
@@ -22,21 +48,19 @@ them: *NiRodents* and *NiBabies* (and their corresponding *fMRIPrep* extensions)
     * *You must cause any modified files to carry prominent notices stating that
       You changed the files*.
 
-A list of prominent changes follows:
+A list of prominent changes can be found below. (With thanks to Lea Waller for the contributions)
 
-1.4.0rc6 (May 17, 2021)
------------------------
+* DOC: Ensure copyright notice in all headers' comment (#635)
+* FIX: Set slope and intercept to 1/0 if not otherwise provided (#649)
+* FIX: ``DerivativesDataSink`` warning when it has multiple source files (#647)
+* FIX: ``FSDetectInputs`` mutually exclusive options for ``ReconAll`` (#646)
+* FIX: Remove pandas warning about use of keyword arguments (#645)
+* FIX: Improve ``SimpleBeforeAfterRPT`` contour visibility (#643)
 * FIX: ``DerivativesDataSink`` dismissing entity writing reportlet (#638)
+* FIX: Ensure ``IntensityClip`` input is a 3D file (#621)
 * FIX: Limit memory usage in ``EstimateReferenceImage`` (#629)
 * FIX: Purge removed ``--disable`` flag from *svgo* call (#626)
 * FIX: Readd ``sbref_file`` input to reference volume interface (#624)
-* ENH: Update visual report specification with fieldmaps (#634)
-* ENH: Expose the output of the ``ValidateImage`` node as an output in EPI reference workflow (#636)
-* DOC: Ensure copyright notice in all headers' comment (#635)
-* MAINT: Pin *svgutils* to previous versions (#596)
-
-Prior 1.4.0rc6
---------------
 * FIX: Update svgutils after breaking API changes (#620)
 * FIX: Address issues with ``RobustAverage`` global signal measurement (#607)
 * FIX: ``NonsteadyStatesDetector`` wrongly using Nipype's ``is_outlier`` (#605)
@@ -46,11 +70,15 @@ Prior 1.4.0rc6
 * FIX: Allow omission of ``<res>`` for template normalization (#582)
 * FIX: Include ``_T2starw`` ``_MTw`` and ``_TSE``-suffixes in ``build_path`` options (#584)
 * FIX: ``DerivativesDataSink`` warning when it has multiple source files (#573)
+* ENH: Allow ``SimpleBeforeAfterRPT`` plotting of image rotated to cardinal axes (#650)
+* ENH: Update visual report specification with fieldmaps (#634)
+* ENH: Expose the output of the ``ValidateImage`` node as an output in EPI reference workflow (#636)
 * ENH: Add an inversion operation to ``IntensityClip`` (#616)
 * ENH: Cross-cutting (modalities, species) workflow to generate EPI references (#610)
 * ENH: Add a ``RobustAverage`` interface and split volume selection (#602)
 * ENH: Revise some patterns of the ``BIDSLayout`` config to aid *SDCFlows* new API (#585)
 * ENH: Upstream *fMRIPrep*'s ``init_bbreg_wf`` to integrate it in *dMRIPrep* (#586)
+* MAINT: Pin *svgutils* to previous versions (#596)
 * MAINT: Drop gh-pages history, reducing repository size (#622)
 * MAINT: Add DS030 dataset, with clipped (55 timepoints) BOLD data (#609)
 * MAINT: Migrate ``ds003_downsampled`` to ``nipreps-data`` (#608)
@@ -58,6 +86,7 @@ Prior 1.4.0rc6
 * MAINT: Refactor structure of interfaces (#603)
 * MAINT: Drop Python 3.6, test setuptools builds, pip installations, and revise Docker pinned versions (#593)
 * MAINT: CircleCI housekeeping (#580)
+* RF: Write derivatives once, using deterministic gzip settings (#641)
 
 .. caution::
 
@@ -103,6 +132,16 @@ Prior 1.4.0rc6
     * ``NormalizeMotionParams`` now under ``confounds``.
     * ``FMRISummary``, ``CompCorVariancePlot``, ``ConfoundsCorrelationPlot`` from ``plotting``
 
+1.3.5 (October 01, 2021)
+========================
+Bug-fix release in the 1.3.x series
+
+  * FIX: Set slope and intercept to 1/0 if not otherwise provided (#649)
+  * FIX: DerivativesDataSink warning when it has multiple source files [backport #573] (#647)
+  * FIX: `FSDetectInputs` mutually exclusive options for `ReconAll` (#646)
+  * MNT: Update some version pinning and correct for *pandas* warning about keyword arguments (#645)
+  * CI: Use datalad-managed test data [BACKPORT] (#653)
+
 1.3.4 (June 8, 2021)
 ====================
 Bug-fix release in the 1.3.x series.
@@ -138,7 +177,7 @@ Addresses longstanding issues in the anatomical MRI brain extraction workflow.
 1.3.0 (September 11, 2020)
 ==========================
 First release in the 1.3.x series.
-This release includes enhancements and bug-fixes towards the release of the first 
+This release includes enhancements and bug-fixes towards the release of the first
 LTS (*long-term support*) version of *fMRIPrep*.
 *PyBIDS* has been revised to use more recent versions, a series of ANTs' interfaces
 have been deemed ready to upstream into *Nipype*, and several improvements regarding

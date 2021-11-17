@@ -24,7 +24,6 @@
 import numpy as np
 import nibabel as nb
 
-import scipy.ndimage as nd
 from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
@@ -176,6 +175,8 @@ def _tpm2roi(
     """
     Generate a mask from a tissue probability map
     """
+    import scipy.ndimage as nd
+
     tpm_img = nb.load(in_tpm)
     roi_mask = (tpm_img.get_fdata() >= pthres).astype(np.uint8)
 

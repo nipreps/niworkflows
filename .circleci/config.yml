@@ -1,38 +1,13 @@
-docs_deploy: &docs
-  docker:
-    - image: node:8.10.0
-  steps:
-    - run:
-        name: Check whether this is the original repo
-        command: |
-          if [[ "$CIRCLE_PROJECT_USERNAME" != "nipreps" ]]; then
-              echo "Not in nipreps/niworkflows - skipping docs deploy."
-              circleci step halt
-          fi
-    - checkout
-    - attach_workspace:
-        at: docs/_build
-    - run:
-        name: Disable jekyll builds
-        command: touch docs/_build/html/.nojekyll
-    - run:
-        name: Install and configure dependencies
-        command: |
-          npm install -g --silent gh-pages@3.0.0
-          git config user.email "nipreps@gmail.com"
-          git config user.name "Documentation Push"
-    - add_ssh_keys:
-        fingerprints:
-          - "c8:a8:55:7d:1e:08:92:c2:86:29:7b:b4:4b:88:24:51"
-    - run:
-        name: Deploy docs to gh-pages branch
-        command: gh-pages --no-history --dotfiles --message "doc(update) [skip ci]" --dist docs/_build/html
+version: 2.1
+orbs:
+  docker: circleci/docker@1.6.0
 
-version: 2
 jobs:
   build:
     machine:
-      image: ubuntu-1604:202007-01
+      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
+      # upgrade Docker version
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/src/niworkflows
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
@@ -40,7 +15,8 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
             - build-v1-master-
             - build-v1-
@@ -50,8 +26,8 @@ jobs:
       - run:
           name: Docker authentication
           command: |
-            if [[ -n $DOCKER_PASS ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            if [[ -n $DOCKER_PAT ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
             fi
       - run:
           name: Set up Docker registry
@@ -76,13 +52,13 @@ jobs:
             set -e
             if [[ "$success" = "0" ]]; then
                 echo "Pulling from local registry"
-                docker tag localhost:5000/ubuntu ubuntu:xenial-20191010
+                docker tag localhost:5000/ubuntu ubuntu:focal-20210416
                 docker pull localhost:5000/niworkflows
                 docker tag localhost:5000/niworkflows niworkflows:latest
             else
                 echo "Pulling from Docker Hub"
-                docker pull ubuntu:xenial-20191010
-                docker tag ubuntu:xenial-20191010 localhost:5000/ubuntu
+                docker pull ubuntu:focal-20210416
+                docker tag ubuntu:focal-20210416 localhost:5000/ubuntu
                 docker push localhost:5000/ubuntu
             fi
 
@@ -107,7 +83,7 @@ jobs:
             docker exec -it registry /bin/registry garbage-collect --delete-untagged \
                 /etc/docker/registry/config.yml
       - save_cache:
-          key: build-v1-{{ .Branch }}-{{ epoch }}
+          key: build-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - /tmp/docker
             - /tmp/images
@@ -194,50 +170,9 @@ jobs:
             - fslicense
             - src/
 
-      - run:
-          name: Check if regression data must be downloaded
-          command: |
-            cd /tmp/src/niworkflows
-            set +e
-            test_masks="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[test[ _]?masks?\]' )$( echo $CIRCLE_BRANCH | grep -i -E '^masks?/' )"
-            set -e
-            if [[ "x${CIRCLE_TAG}" = "x" && "${CIRCLE_BRANCH}" != "master" && "x${test_masks}" = "x" ]]; then
-              echo "Not a tag or master branch, not a ``masks?/`` branch, no ``[test_masks]`` label in commit message"
-              echo "Skipping download of test data for mask regressions."
-              circleci step halt
-            fi
-
-      - restore_cache:
-          keys:
-            - mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-
-            - mask-regressions-v0-{{ .Branch }}-
-            - mask-regressions-v0-master-
-            - mask-regressions-v0-
-            - mask-regressions-
-      - run:
-          name: Setup TemplateFlow
-          command: |
-            python -c "from templateflow import api as tfapi; \
-                       tfapi.get('MNI152NLin2009cAsym', resolution=1, label='brain', suffix='probseg'); \
-                       tfapi.get('MNI152NLin2009cAsym', resolution=2, desc='fMRIPrep', suffix='boldref'); \
-                       tfapi.get('MNI152NLin2009cAsym', resolution=2, desc='brain', suffix='mask'); "
-      - run:
-          name: Install epi-references
-          command: |
-            if [[ ! -d epi-references ]]; then
-              datalad install -r https://github.com/nipreps-data/epi-references.git
-            fi
-            datalad update -r --merge -d epi-references/
-            datalad get -J 2 -r -d epi-references/ epi-references/*
-      - save_cache:
-          key: mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-{{ epoch }}
-          paths:
-            - /tmp/templateflow
-            - /tmp/data/epi-references
-
   test_pytest:
     machine:
-      image: ubuntu-1604:202007-01
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/tests
     steps:
       - attach_workspace:
@@ -247,15 +182,16 @@ jobs:
           command: python -m pip install codecov
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
             - build-v1-master-
             - build-v1-
       - run:
           name: Docker authentication
           command: |
-            if [[ -n $DOCKER_PASS ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            if [[ -n $DOCKER_PAT ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
             fi
       - run:
           name: Set up Docker registry
@@ -287,9 +223,7 @@ jobs:
           no_output_timeout: 2h
           command: |
             mkdir -p $PWD/artifacts $PWD/summaries
-            sudo setfacl -d -m group:ubuntu:rwx $PWD
-            sudo setfacl -m group:ubuntu:rwx $PWD
-            docker run -u $( id -u ) -it --rm=false -w /src/niworkflows \
+            docker run -u $( id -u ):$( id -g ) -it --rm -w /src/niworkflows \
               -e COVERAGE_FILE=/tmp/summaries/.pytest.coverage \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
               -e FS_LICENSE=/etc/fslicense.txt \
@@ -312,7 +246,7 @@ jobs:
           name: Run reportlet tests
           no_output_timeout: 2h
           command: |
-            docker run -u $( id -u ) -it --rm=false -w /src/niworkflows \
+            docker run -u $( id -u ):$( id -g ) -it --rm -w /src/niworkflows \
               -e COVERAGE_FILE=/tmp/summaries/.reportlets.coverage \
               -e SAVE_CIRCLE_ARTIFACTS="/tmp/artifacts/" \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
@@ -338,126 +272,6 @@ jobs:
 
       - store_test_results:
           path: /tmp/tests/summaries/
-
-  test_masks:
-    machine:
-      image: ubuntu-1604:202007-01
-    working_directory: /tmp/masks
-    steps:
-      - attach_workspace:
-          at: /tmp
-
-      - run:
-          name: Determine whether regression tests (masks) must be executed
-          command: |
-            cd /tmp/src/niworkflows
-            set +e
-            test_masks="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[test[ _]?masks?\]' )$( echo $CIRCLE_BRANCH | grep -i -E '^masks?/' )"
-            set -e
-            if [[ "x${CIRCLE_TAG}" = "x" && "${CIRCLE_BRANCH}" != "master" && "x${test_masks}" = "x" ]]; then
-              echo "Not a tag or master branch, not a ``masks?/`` branch, no ``[test_masks]`` label in commit message"
-              echo "Skipping download of test data for mask regressions."
-              circleci step halt
-            fi
-
-      - restore_cache:
-          keys:
-            - mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-
-            - mask-regressions-v0-{{ .Branch }}-
-
-      - restore_cache:
-          keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-master-
-            - build-v1-
-      - run:
-          name: Docker authentication
-          command: |
-            if [[ -n $DOCKER_PASS ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-            fi
-      - run:
-          name: Set up Docker registry
-          command: |
-            if [[ -f /tmp/images/registry.tar.gz ]]; then
-              echo "Loading saved registry image"
-              docker load < /tmp/images/registry.tar.gz
-            else
-              echo "Pulling registry image from DockerHub"
-              docker pull registry:2
-              mkdir -p /tmp/images
-              docker save registry:2 | gzip > /tmp/images/registry.tar.gz
-            fi
-            docker run -d -p 5000:5000 --restart=always --name=registry \
-                -v /tmp/docker:/var/lib/registry registry:2
-      - run:
-          name: Pull images to registry
-          command: |
-            docker pull localhost:5000/niworkflows
-            docker tag localhost:5000/niworkflows niworkflows:latest
-      - restore_cache:
-          keys:
-            - masks-workdir-v5-{{ .Branch }}-{{epoch}}
-            - masks-workdir-v5-{{ .Branch }}-
-            - masks-workdir-v5-master-
-            - masks-workdir-v5-
-      - run:
-          name: Run regression tests on EPI masks
-          no_output_timeout: 2h
-          command: |
-            mkdir -p /tmp/masks/{reports,workdir} && \
-            docker run -ti -u $(id -u) -w /src/niworkflows \
-              -v /tmp/templateflow:/templateflow \
-              -v /tmp/data/epi-references:/data -v /tmp/masks/reports:/tmp/masks/reports \
-              -e COVERAGE_FILE=/tmp/masks/reports/.coverage \
-              -e TEMPLATEFLOW_HOME=/templateflow -e TEMPLATEFLOW_AUTOUPDATE=off \
-              -e FMRIPREP_REGRESSION_SOURCE=/data \
-              -e FMRIPREP_REGRESSION_REPORTS=/tmp/masks/reports \
-              -e CACHED_WORK_DIRECTORY=/tmp/work -v /tmp/masks/workdir:/tmp/work \
-              -v /tmp/fslicense/license.txt:/opt/freesurfer/license.txt:ro \
-              niworkflows:latest \
-              coverage run -p --rcfile=setup.cfg \
-                     -m pytest --junit-xml=/tmp/masks/reports/regression.xml \
-                     niworkflows/func/tests/
-      - run:
-          name: Clear reports folder & delete plot generator cache
-          command: |
-            pushd reports/
-            tar cvfz fmriprep_bold_mask.tar.gz fmriprep_bold_mask/*/*.nii.gz
-            rm -rf /tmp/masks/reports/fmriprep_bold_mask/
-            popd
-            find workdir/ -name "mask_diff_plot" -exec rm -rf {} +
-      - store_artifacts:
-          path: /tmp/masks/reports
-      - store_test_results:
-          path: /tmp/masks/reports
-      - save_cache:
-         key: masks-workdir-v5-{{ .Branch }}-{{ epoch }}
-         paths:
-            - /tmp/masks/workdir
-
-      - run:
-          name: Coverage preparation
-          command: |
-            docker run -ti -u $(id -u) -w /tmp/masks/reports \
-              -e COVERAGE_FILE=/tmp/masks/reports/.coverage \
-              -v /tmp/masks/reports:/tmp/masks/reports \
-              niworkflows:latest coverage combine
-            docker run -ti -u $(id -u) -w /tmp/masks/reports \
-              -e COVERAGE_FILE=/tmp/masks/reports/.coverage \
-              -v /tmp/masks/reports:/tmp/masks/reports \
-              niworkflows:latest coverage xml -o coverage.xml
-      - run:
-          name: Get codecov
-          command: python -m pip install codecov
-      - run:
-          name: Submit masks test coverage
-          working_directory: /tmp/src/niworkflows
-          command: |
-            cp /tmp/masks/reports/coverage.xml .
-            sed -i "s+/src/niworkflows+/tmp/src/niworkflows+g" coverage.xml
-            python -m codecov --file coverage.xml --flags masks -e CIRCLE_JOB
 
   test_package:
     docker:
@@ -514,12 +328,13 @@ jobs:
 
   deploy_docker:
     machine:
-      image: ubuntu-1604:202007-01
+      image: ubuntu-2004:202104-01
     working_directory: /tmp/src/
     steps:
       - restore_cache:
           keys:
-            - build-v1-{{ .Branch }}-{{ epoch }}
+            - build-v1-{{ .Branch }}-{{ .Revision }}
+            - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
             - build-v1-master-
             - build-v1-
@@ -529,8 +344,8 @@ jobs:
       - run:
           name: Docker authentication
           command: |
-            if [[ -n $DOCKER_PASS ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            if [[ -n $DOCKER_PAT ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
             fi
       - run:
           name: Set up Docker registry
@@ -553,12 +368,9 @@ jobs:
           name: Deploy to Docker Hub
           no_output_timeout: 40m
           command: |
-            if [[ -n "$DOCKER_PASS" ]]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker push nipreps/niworkflows:latest
-              docker tag nipreps/niworkflows nipreps/niworkflows:$CIRCLE_TAG
-              docker push nipreps/niworkflows:$CIRCLE_TAG
-            fi
+            docker push nipreps/niworkflows:latest
+            docker tag nipreps/niworkflows nipreps/niworkflows:$CIRCLE_TAG
+            docker push nipreps/niworkflows:$CIRCLE_TAG
 
   build_docs:
     docker:
@@ -567,14 +379,6 @@ jobs:
       - FSLOUTPUTTYPE: NIFTI
       - SUBJECTS_DIR: /tmp/subjects
     steps:
-      - restore_cache:
-          keys:
-            - docs-v1-{{ .Branch }}-{{ .Revision }}
-            - docs-v1-{{ .Branch }}-
-            - docs-v1-master
-            - docs-v1-
-          paths:
-            - ./docs/_build/_html
       - checkout
       - run:
           name: Create subjects folder
@@ -589,62 +393,11 @@ jobs:
             python -m pip install --no-cache-dir -r docs/requirements.txt
       - run:
           name: Build only this commit
-          command: make -C docs SPHINXOPTS="-W" BUILDDIR="_build/no_version_html" html
-      - store_artifacts:
-          path: ./docs/_build/no_version_html
-      - run:
-          name: Find undocumented Python objects
           command: |
-            make -C docs docs-coverage
-            cat docs/_build/coverage/python.txt
+            BRANCH=$( echo $CIRCLE_BRANCH | sed 's+/+_+g' )
+            make -C docs SPHINXOPTS="-W" BUILDDIR="$HOME/docs" OUTDIR=${CIRCLE_TAG:-$BRANCH} html
       - store_artifacts:
-          path: ./docs/_build/coverage
-
-      # - run:
-      #     name: Install niworkflows
-      #     command: |
-      #       python -m pip install --no-cache-dir codecov
-      #       python -m pip install --no-cache-dir .[all]
-      # - run:
-      #     name: Build only this commit with coverage collection
-      #     command: |
-      #       make -C docs/ clean
-      #       export COVERAGE_FILE=/tmp/.coverage
-      #       coverage run --source=niworkflows $( which sphinx-build ) \
-      #           -b html -W -d docs/_build/no_version_doctrees ./docs/ docs/_build/no_version_html
-      #       coverage xml -o /tmp/documentation.xml
-      #       python -m codecov --file /tmp/documentation.xml --flags documentation -e CIRCLE_JOB
-
-      - run:
-          name: Generate Versioned Docs
-          command: |
-            set +e
-            force_versioned="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[docs?[ _]?versions?\]' )"
-            set -e
-            if [[ "x${CIRCLE_TAG}" = "x" && "${CIRCLE_BRANCH}" != "master" && "x${force_versioned}" = "x" ]]; then
-              echo "Not a tag or master branch - skipping versioned docs."
-              circleci step halt
-            else
-              python -m pip uninstall -y niworkflows
-              make -C docs/ clean
-              make -f ./docs/Makefile versioned CURBRANCH=${CIRCLE_TAG:-$CIRCLE_BRANCH}
-            fi
-      - save_cache:
-          key: docs-v1-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - ./docs/_build/_html
-      - persist_to_workspace:
-          root: docs/_build
-          paths: html
-      - store_artifacts:
-          path: ./docs/_build/html
-
-  deploy_docs_tag:
-    <<: *docs
-
-  deploy_docs_master:
-    <<: *docs
-
+          path: ~/docs
 
 workflows:
   version: 2
@@ -679,14 +432,6 @@ workflows:
             tags:
               only: /.*/
 
-      - test_masks:
-          requires:
-            - build
-            - get_data
-          filters:
-            tags:
-              ignore: /.*/
-
       - deploy_pypi:
           requires:
             - test_pytest
@@ -714,25 +459,5 @@ workflows:
                 - /tests?\/.*/
                 - /ds005\/.*/
                 - /ds054\/.*/
-            tags:
-              only: /.*/
-
-      - deploy_docs_master:
-          requires:
-            - test_pytest
-            - test_package
-            - build_docs
-          filters:
-            branches:
-              only: /master/
-            tags:
-              ignore: /.*/
-
-      - deploy_docs_tag:
-          requires:
-            - deploy_docker
-          filters:
-            branches:
-              ignore: /.*/
             tags:
               only: /.*/
