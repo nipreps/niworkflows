@@ -32,8 +32,6 @@ from nipype.interfaces.base import (
     traits,
     isdefined,
 )
-from nitransforms.manip import TransformChain
-from nitransforms.linear import load as load_affine
 
 XFM_FMT = {
     ".lta": "fs",
@@ -96,6 +94,9 @@ def concatenate_xfms(
     in_files, out_file, out_inv=None, reference=None, moving=None, fmt="itk"
 ):
     """Concatenate linear transforms."""
+    from nitransforms.manip import TransformChain
+    from nitransforms.linear import load as load_affine
+
     xfm = TransformChain(
         [load_affine(f, fmt=XFM_FMT[Path(f).suffix]) for f in in_files]
     ).asaffine()

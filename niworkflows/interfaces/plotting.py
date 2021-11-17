@@ -22,7 +22,6 @@
 #
 """Visualization tools."""
 import numpy as np
-import pandas as pd
 
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
@@ -59,6 +58,8 @@ class FMRISummary(SimpleInterface):
     output_spec = _FMRISummaryOutputSpec
 
     def _run_interface(self, runtime):
+        import pandas as pd
+
         self._results["out_file"] = fname_presuffix(
             self.inputs.in_func,
             suffix="_fmriplot.svg",
