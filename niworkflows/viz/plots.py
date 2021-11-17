@@ -250,6 +250,7 @@ def plot_carpet(
     else:  # Volumetric NIfTI
         from nilearn._utils import check_niimg_4d
         from nilearn._utils.niimg import _safe_get_data
+        from niworkflows.interfaces.morphology import get_dilated_brainmask
 
         img_nii = check_niimg_4d(img, dtype="auto",)
         func_data = _safe_get_data(img_nii, ensure_finite=True)
@@ -320,7 +321,6 @@ def plot_carpet(
         nslices=nslices,
         tr=tr,
         subplot=subplot,
-        legend=legend,
         title=title,
         output_file=output_file,
         default_lut=default_lut,
