@@ -324,3 +324,25 @@ def nii_ones_like(in_file, value, dtype, newpath=None):
     nii.to_filename(out_file)
 
     return out_file
+
+
+def _bspline_grid(in_file):
+    """
+    Estimate B-Spline fitting distance grid using the number of slices of ``in_file``.
+
+    Using slice number to determine grid sparsity is inspired by the conversation found at
+    https://itk.org/pipermail/community/2014-February/005036.html
+    
+    """
+    import nibabel as nb
+    import numpy as np
+    import math
+
+    img = nb.load(in_file)
+    zooms = img.header.get_zooms()[:3]
+    # find extent of each dimension wrt voxel sizes
+    extent = np.array(img.shape[:3]) * zooms
+    # convert ratio to integers
+    retval = [f"{math.ceil(i / extent[np.argmin(extent)])}" for i in extent]
+    # return string for command line call
+    return f"-b [{'x'.join(retval)}]"

@@ -34,6 +34,8 @@ DEFAULT_MEMORY_MIN_GB = 0.01
 def init_epi_reference_wf(
     omp_nthreads,
     auto_bold_nss=False,
+    adaptive_bspline_grid=False,
+    n4_iter=5,
     name="epi_reference_wf",
 ):
     """
@@ -84,6 +86,12 @@ def init_epi_reference_wf(
         If ``True``, determines nonsteady states in the beginning of the timeseries
         and selects them for the averaging of each run.
         IMPORTANT: this option applies only to BOLD EPIs.
+    adaptive_bspline_grid : :obj:`bool`
+        If ``True``, determines the number of B-Spline grid elements from data shape
+        and feeds them into N4BiasFieldCorrection, rather than setting an isotropic distance.
+    n4_iter : :obj:`int`
+        The number of B-Spline fitting iterations (default: 5). Fewer (e.g. 4) are recommended
+        for rodents and other non-human/non-adult cases.
 
     Inputs
     ------
@@ -158,7 +166,7 @@ def init_epi_reference_wf(
         N4BiasFieldCorrection(
             dimension=3,
             copy_header=True,
-            n_iterations=[50] * 5,
+            n_iterations=[50]*n4_iter,
             convergence_threshold=1e-7,
             shrink_factor=4,
         ),
@@ -166,6 +174,7 @@ def init_epi_reference_wf(
         name="n4_avgs",
         iterfield=["input_image"],
     )
+
     clip_bg_noise = pe.MapNode(
         IntensityClip(p_min=2.0, p_max=100.0),
         name="clip_bg_noise",
@@ -224,6 +233,20 @@ def init_epi_reference_wf(
         # fmt:on
     else:
         wf.connect(inputnode, "t_masks", per_run_avgs, "t_mask")
+
+    # rodent-specific N4 settings
+    if adaptive_bspline_grid:
+        from ...utils.images import _bspline_grid
+        from ...utils.connections import pop_file as _pop
+        # set INU bspline grid based on voxel size
+        bspline_grid = pe.Node(niu.Function(function=_bspline_grid), name="bspline_grid")
+
+        # fmt:off
+        wf.connect([
+            (clip_avgs, bspline_grid, [(("out_file", _pop), "in_file")]),
+            (bspline_grid, n4_avgs, [("out", "args")])
+        ])
+        # fmt:on
 
     return wf
 

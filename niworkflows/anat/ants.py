@@ -507,6 +507,8 @@ def init_atropos_wf(
     padding=10,
     in_segmentation_model=tuple(ATROPOS_MODELS["T1w"].values()),
     bspline_fitting_distance=200,
+    adaptive_bspline_grid=False,
+    n4_iter=5,
     wm_prior=False,
 ):
     """
@@ -556,6 +558,12 @@ def init_atropos_wf(
         ``(4,4,2,3)`` uses K=4, CSF=4, GM=2, WM=3.
     bspline_fitting_distance : float
         The size of the b-spline mesh grid elements, in mm (default: 200)
+    adaptive_bspline_grid : :obj:`bool`
+        If true, defines the number of B-Spline mesh grid elements in each dimension rather
+        than using the isotropic distance given in ``bspline_fitting_distance``.
+    n4_iter : :obj:`int`
+        The number of B-Spline fitting iterations (default: 5). Fewer (e.g. 4) are recommended
+        for rodents and other non-human/non-adult cases.
     wm_prior : :obj:`bool`
         Whether the WM posterior obtained with ATROPOS should be regularized with a prior
         map (typically, mapped from the template). When ``wm_prior`` is ``True`` the input
@@ -755,7 +763,7 @@ def init_atropos_wf(
             dimension=3,
             save_bias=True,
             copy_header=True,
-            n_iterations=[50] * 5,
+            n_iterations=[50]*n4_iter,
             convergence_threshold=1e-7,
             shrink_factor=4,
             bspline_fitting_distance=bspline_fitting_distance,
@@ -875,6 +883,19 @@ def init_atropos_wf(
             (apply_wm_prior, inu_n4_final, [("out", "weight_image")]),
         ])
         # fmt: on
+
+    if adaptive_bspline_grid:
+        # set INU bspline grid based on image shape
+        from ..utils.images import _bspline_grid
+        bspline_grid = pe.Node(niu.Function(function=_bspline_grid), name="bspline_grid")
+
+        # fmt:off
+        wf.connect([
+            (inputnode, bspline_grid, [(("in_files", _pop), "in_file")]),
+            (bspline_grid, inu_n4_final, [("out", "args")])
+        ])
+        # fmt:on
+
     return wf
 
 
@@ -1045,7 +1066,6 @@ def init_n4_only_wf(
             ]),
         ])
         # fmt: on
-
     return wf
 
 
