@@ -36,6 +36,7 @@ def init_epi_reference_wf(
     auto_bold_nss=False,
     adaptive_bspline_grid=False,
     n4_iter=5,
+    shrink_factor=4,
     name="epi_reference_wf",
 ):
     """
@@ -168,7 +169,7 @@ def init_epi_reference_wf(
             copy_header=True,
             n_iterations=[50]*n4_iter,
             convergence_threshold=1e-7,
-            shrink_factor=4,
+            shrink_factor=shrink_factor,
         ),
         n_procs=omp_nthreads,
         name="n4_avgs",
