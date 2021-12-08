@@ -1,3 +1,11 @@
+1.4.4 (December 08, 2021)
+=========================
+Patch release in the 1.4.x series.
+
+This release enables better multi-echo handling in fMRIPrep.
+
+  * ENH: Return all bold files from init_bold_reference_wf (#673)
+
 1.4.3 (November 16, 2021)
 =========================
 Patch release in the 1.4.x series, including improvements to the carpetplot figure.
