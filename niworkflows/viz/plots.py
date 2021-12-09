@@ -1055,8 +1055,8 @@ def cifti_surfaces_plot(
     in_cifti,
     density="32k",
     surface_type="inflated",
+    clip_range=(0, None),
     output_file=None,
-    clip_range=None,
     **splt_kwargs
 ):
     """
@@ -1070,7 +1070,7 @@ def cifti_surfaces_plot(
         Surface density
     surface_type : str
         Inflation level of mesh surfaces. Supported: midthickness, inflated, veryinflated
-    clip_range : None or tuple
+    clip_range : tuple or None
         Range to clip `in_cifti` data prior to plotting.
         If not None, two values must be provided as lower and upper bounds.
         If values are None, no clipping is performed for that bound.
@@ -1122,9 +1122,8 @@ def cifti_surfaces_plot(
         raise ValueError("Cortex data is not in fsLR space")
     # medial wall needs to be added back in
     cortex_data = add_fslr_medial_wall(cortex_data)
-    # set any negative values to 0 (transparent)
     if clip_range:
-        cortex_data = _clip_data(cortex_data, clip_range[0], clip_range[1])
+        cortex_data = np.clip(cortex_data, clip_range[0], clip_range[1], out=cortex_data)
 
     cortex_data[cortex_data < 0] = 0
     lh_data, rh_data = np.array_split(cortex_data, 2)
@@ -1200,11 +1199,3 @@ def _concat_brain_struct_data(structs, data):
         struct_data = data[struct.index_offset:struct_upper_bound]
         concat_data = np.concatenate((concat_data, struct_data))
     return concat_data
-
-
-def _clip_data(data, lower, upper):
-    if lower is not None:
-        data[data < lower] = lower
-    if upper is not None:
-        data[data > upper] = upper
-    return data
