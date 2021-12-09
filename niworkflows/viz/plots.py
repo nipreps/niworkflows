@@ -1078,7 +1078,7 @@ def cifti_surfaces_plot(
         Path where the output figure should be saved. If this is not defined,
         then the figure will be returned.
     splt_kwargs : dict
-        Keyword arguments for `surfplot.Plot`
+        Keyword arguments for :obj:`surfplot.Plot`
 
     Outputs
     -------
@@ -1118,8 +1118,8 @@ def cifti_surfaces_plot(
     data = img.get_fdata()[5:20].mean(axis=0)
 
     cortex_data = _concat_brain_struct_data((left_cortex, right_cortex), data)
-    if density == "32k":
-        assert len(cortex_data) == 59412, "Cortex data is not in fsLR space"
+    if density == "32k" and len(cortex_data) != 59412:
+        raise ValueError("Cortex data is not in fsLR space")
     # medial wall needs to be added back in
     cortex_data = add_fslr_medial_wall(cortex_data)
     # set any negative values to 0 (transparent)
@@ -1131,7 +1131,12 @@ def cifti_surfaces_plot(
 
     # Build the figure
     lh_mesh, rh_mesh = get_surface_meshes(density, surface_type)
-    p = splt.Plot(surf_lh=lh_mesh, surf_rh=rh_mesh, **splt_kwargs)
+    p = splt.Plot(
+        surf_lh=lh_mesh,
+        surf_rh=rh_mesh,
+        layout=splt_kwargs.pop("layout", "row"),
+        **splt_kwargs
+    )
     p.add_layer({'left': lh_data, 'right': rh_data}, cmap='YlOrRd_r')
     figure = p.build()  # figsize - leave default?
 
