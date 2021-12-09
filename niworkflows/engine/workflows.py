@@ -25,6 +25,7 @@ Supercharging Nipype's workflow engine.
 
 Add special features to the Nipype's vanilla workflows
 """
+from collections import defaultdict
 from nipype.pipeline import engine as pe
 
 
@@ -46,21 +47,36 @@ class LiterateWorkflow(pe.Workflow):
         super(LiterateWorkflow, self).__init__(name, base_dir)
         self.__desc__ = None
         self.__postdesc__ = None
+        self._namespace = None
 
     def visit_desc(self):
         """Build a citation boilerplate by visiting all workflows."""
-        desc = []
+        desc = self.visit_desc_namespaced()
+        return "".join(desc.get(ns, "")
+                       for ns in (None, "anat", "fmap", "func", "dwi"))
+
+    def visit_desc_namespaced(self, namespace=None):
+        """Build a citation boilerplate by visiting all workflows.
+
+        Allow subworkflows to declare themselves in a namespace to ensure
+        associated workflow components are kept together.
+        """
+        desc = defaultdict(list)
+        if self._namespace is not None:
+            namespace = self._namespace
 
         if self.__desc__:
-            desc += [self.__desc__]
+            desc[namespace].append(self.__desc__)
 
         for node in pe.utils.topological_sort(self._graph)[0]:
             if isinstance(node, LiterateWorkflow):
-                add_desc = node.visit_desc()
-                if add_desc not in desc:
-                    desc.append(add_desc)
+                add_desc = node.visit_desc_namespaced(namespace)
+                for ns, substr in add_desc.items():
+                    if substr not in desc[ns]:
+                        desc[ns].append(substr)
 
         if self.__postdesc__:
-            desc += [self.__postdesc__]
+            desc[namespace].append(self.__postdesc__)
 
-        return "".join(desc)
+        return {ns: "".join(substr for substr in descs)
+                for ns, descs in desc.items()}
