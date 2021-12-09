@@ -1115,7 +1115,7 @@ def cifti_surfaces_plot(
 
     # calculate an average of the BOLD data, excluding the first 5 volumes
     # as potential nonsteady states
-    data = img.get_fdata()[5:20].mean(axis=0)
+    data = img.dataobj[5:20].mean(axis=0)
 
     cortex_data = _concat_brain_struct_data((left_cortex, right_cortex), data)
     if density == "32k" and len(cortex_data) != 59412:
