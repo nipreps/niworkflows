@@ -1125,7 +1125,6 @@ def cifti_surfaces_plot(
     if clip_range:
         cortex_data = np.clip(cortex_data, clip_range[0], clip_range[1], out=cortex_data)
 
-    cortex_data[cortex_data < 0] = 0
     lh_data, rh_data = np.array_split(cortex_data, 2)
 
     # Build the figure
