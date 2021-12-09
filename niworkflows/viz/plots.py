@@ -1056,6 +1056,7 @@ def cifti_surfaces_plot(
     density="32k",
     surface_type="inflated",
     output_file=None,
+    clip_range=None,
     **splt_kwargs
 ):
     """
@@ -1069,6 +1070,10 @@ def cifti_surfaces_plot(
         Surface density
     surface_type : str
         Inflation level of mesh surfaces. Supported: midthickness, inflated, veryinflated
+    clip_range : None or tuple
+        Range to clip `in_cifti` data prior to plotting.
+        If not None, two values must be provided as lower and upper bounds.
+        If values are None, no clipping is performed for that bound.
     output_file: :obj:`str` or :obj:`None`
         Path where the output figure should be saved. If this is not defined,
         then the figure will be returned.
@@ -1112,20 +1117,15 @@ def cifti_surfaces_plot(
     # as potential nonsteady states
     data = img.get_fdata()[5:20].mean(axis=0)
 
-    def concat_brain_struct_data(structs, data):
-        concat_data = np.array([])
-        for struct in structs:
-            struct_upper_bound = struct.index_offset + struct.index_count
-            struct_data = data[struct.index_offset:struct_upper_bound]
-            concat_data = np.concatenate((concat_data, struct_data))
-        return concat_data
-
-    cortex_data = concat_brain_struct_data((left_cortex, right_cortex), data)
+    cortex_data = _concat_brain_struct_data((left_cortex, right_cortex), data)
     if density == "32k":
         assert len(cortex_data) == 59412, "Cortex data is not in fsLR space"
     # medial wall needs to be added back in
     cortex_data = add_fslr_medial_wall(cortex_data)
     # set any negative values to 0 (transparent)
+    if clip_range:
+        cortex_data = _clip_data(cortex_data, clip_range[0], clip_range[1])
+
     cortex_data[cortex_data < 0] = 0
     lh_data, rh_data = np.array_split(cortex_data, 2)
 
@@ -1186,3 +1186,20 @@ def _decimate_data(data, seg, size):
     if t_dec:
         data = data[:, ::t_dec]
     return data, seg
+
+
+def _concat_brain_struct_data(structs, data):
+    concat_data = np.array([], dtype=data.dtype)
+    for struct in structs:
+        struct_upper_bound = struct.index_offset + struct.index_count
+        struct_data = data[struct.index_offset:struct_upper_bound]
+        concat_data = np.concatenate((concat_data, struct_data))
+    return concat_data
+
+
+def _clip_data(data, lower, upper):
+    if lower is not None:
+        data[data < lower] = lower
+    if upper is not None:
+        data[data > upper] = upper
+    return data
