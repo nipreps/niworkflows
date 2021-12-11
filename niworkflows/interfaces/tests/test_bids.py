@@ -171,7 +171,7 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
             ["lh.func.gii"],
             {"space": "fsaverage", "density": "10k", "hemi": "L"},
             "sub-100185/func/sub-100185_task-machinegame_run-1_"
-            "space-fsaverage_den-10k_hemi-L_bold.func.gii",
+            "hemi-L_space-fsaverage_den-10k_bold.func.gii",
             "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
