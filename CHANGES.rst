@@ -1,3 +1,12 @@
+1.4.5 (December 13, 2021)
+=========================
+Patch release in the 1.4.x series.
+
+In preparation for fMRIPrep 21.0.0 release.
+
+* FIX: Conform entity ordering to BIDS specification for derivatives (#676)
+* ENH: Add CIFTI surface plot (#663)
+
 1.4.4 (December 08, 2021)
 =========================
 Patch release in the 1.4.x series.
