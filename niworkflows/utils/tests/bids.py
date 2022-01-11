@@ -8,13 +8,14 @@ def generate_bids_skeleton(target_path, bids_config):
     """
     Converts a BIDS directory in dictionary form to a file structure.
 
+    The BIDS configuration can either be a YAML or JSON file, or :obj:dict: object.
+
     Parameters
     ----------
     target_path : str
         Path to generate BIDS directory at
     bids_config : dict or str
         Configuration on how to create the BIDS directory.
-        This can be either a dictionary, JSON, or YAML file.
     """
 
     if isinstance(bids_config, dict):
