@@ -1,7 +1,7 @@
 import pytest
 from bids import BIDSLayout
 
-from .test_bids_skeleton import generate_bids_skeleton
+from .bids import generate_bids_skeleton
 
 
 bids_dir_sessions = {
