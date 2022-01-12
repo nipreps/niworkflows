@@ -13,7 +13,7 @@ def generate_bids_skeleton(target_path, bids_config):
     Parameters
     ----------
     target_path : str
-        Path to generate BIDS directory at
+        Path to generate BIDS directory at (must not exist)
     bids_config : dict or str
         Configuration on how to create the BIDS directory.
     """
@@ -28,8 +28,9 @@ def generate_bids_skeleton(target_path, bids_config):
         except json.JSONDecodeError:
             bids_dict = yaml.load(bids_config, Loader=yaml.Loader)
 
+    _bids_dict = deepcopy(bids_dict)
     root = Path(target_path).absolute()
-    root.mkdir(parents=True, exist_ok=True)
+    root.mkdir(parents=True)
 
     desc = bids_dict.pop("dataset_description", None)
     if desc is None:
@@ -81,6 +82,8 @@ def generate_bids_skeleton(target_path, bids_config):
                     if metadata is not None:
                         nii_metadata = nii_file.parent / nii_file.name.replace("nii.gz", "json")
                         to_json(nii_metadata, metadata)
+
+    return _bids_dict
 
 
 def to_json(filename, data):
