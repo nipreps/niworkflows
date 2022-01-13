@@ -109,22 +109,23 @@ bids_dir_session_less = {
 
 
 @pytest.mark.parametrize(
-    "json_layout,n_files,n_subjects,n_sessions",
+    "test_id,json_layout,n_files,n_subjects,n_sessions",
     [
-        (bids_dir_sessions, 31, 3, 2),
-        (bids_dir_session_less, 25, 4, 0),
+        ('sessions', bids_dir_sessions, 31, 3, 2),
+        ('nosession', bids_dir_session_less, 25, 4, 0),
     ],
 )
-def test_generate_bids_skeleton(tmp_path, json_layout, n_files, n_subjects, n_sessions):
-    generate_bids_skeleton(tmp_path, json_layout)
-    datadesc = tmp_path / "dataset_description.json"
+def test_generate_bids_skeleton(tmp_path, test_id, json_layout, n_files, n_subjects, n_sessions):
+    root = tmp_path / test_id
+    generate_bids_skeleton(root, json_layout)
+    datadesc = root / "dataset_description.json"
     assert datadesc.exists()
     assert "BIDSVersion" in datadesc.read_text()
 
-    assert len([x for x in tmp_path.glob("**/*") if x.is_file()]) == n_files
+    assert len([x for x in root.glob("**/*") if x.is_file()]) == n_files
 
     # ensure layout is valid
-    layout = BIDSLayout(tmp_path)
+    layout = BIDSLayout(root)
     assert len(layout.get_subjects()) == n_subjects
     assert len(layout.get_sessions()) == n_sessions
 
