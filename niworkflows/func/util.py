@@ -95,8 +95,7 @@ def init_bold_reference_wf(
         Indicates whether the ``pre_mask`` input will be set (and thus, step 1
         should be skipped).
     multiecho : :obj:`bool`
-        If multiecho data was supplied, data from the first echo
-        will be selected
+        If multiecho data was supplied, data from the first echo will be selected
     name : :obj:`str`
         Name of workflow (default: ``bold_reference_wf``)
     gen_report : :obj:`bool`
@@ -106,6 +105,8 @@ def init_bold_reference_wf(
     ------
     bold_file : str
         BOLD series NIfTI file
+    all_bold_files : str
+        Validated and header-corrected BOLD series; multiple if multi-echo
     bold_mask : bool
         A tentative brain mask to initialize the workflow (requires ``pre_mask``
         parameter set ``True``).
@@ -160,6 +161,7 @@ methodology of *fMRIPrep*.
         niu.IdentityInterface(
             fields=[
                 "bold_file",
+                "all_bold_files",
                 "raw_ref_image",
                 "skip_vols",
                 "algo_dummy_scans",
@@ -212,6 +214,7 @@ methodology of *fMRIPrep*.
         (gen_avg, outputnode, [("out_file", "raw_ref_image")]),
         (get_dummy, outputnode, [("n_dummy", "algo_dummy_scans")]),
         (val_bold, outputnode, [(("out_file", _pop), "bold_file"),
+                                ("out_file", "all_bold_files"),
                                 (("out_report", _pop), "validation_report")]),
         (enhance_and_skullstrip_bold_wf, outputnode, [
             ("outputnode.bias_corrected_file", "ref_image"),

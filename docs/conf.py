@@ -242,6 +242,7 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
     "smriprep": ("https://www.nipreps.org/smriprep/", None),
+    "surfplot": ("https://surfplot.readthedocs.io/en/latest/", None),
     "templateflow": ("https://www.templateflow.org/python-client", None),
 }
 

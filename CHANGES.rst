@@ -1,13 +1,30 @@
+1.4.5 (December 13, 2021)
+=========================
+Patch release in the 1.4.x series.
+
+In preparation for fMRIPrep 21.0.0 release.
+
+* FIX: Conform entity ordering to BIDS specification for derivatives (#676)
+* ENH: Add CIFTI surface plot (#663)
+
+1.4.4 (December 08, 2021)
+=========================
+Patch release in the 1.4.x series.
+
+This release enables better multi-echo handling in fMRIPrep.
+
+* ENH: Return all bold files from init_bold_reference_wf (#673)
+
 1.4.3 (November 16, 2021)
 =========================
 Patch release in the 1.4.x series, including improvements to the carpetplot figure.
 With thanks to Zaki A. for the contributions.
 
-  * ENH: Carpet plot tweaks (#617)
-  * FIX: Patch ``ants.Registration`` interface temporarily (#654)
-  * MAINT: Revise Docker image building and dependencies (#655)
-  * MAINT: Relax matplotlib constraint (#668)
-  * MAINT: Configure black to avoid excessive rewriting (#666)
+* ENH: Carpet plot tweaks (#617)
+* FIX: Patch ``ants.Registration`` interface temporarily (#654)
+* MAINT: Revise Docker image building and dependencies (#655)
+* MAINT: Relax matplotlib constraint (#668)
+* MAINT: Configure black to avoid excessive rewriting (#666)
 
 1.4.2 (October 15, 2021)
 ========================
