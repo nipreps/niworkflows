@@ -149,6 +149,7 @@ def collect_participants(
 def collect_data(
     bids_dir,
     participant_label,
+    session_id=False,
     task=None,
     echo=None,
     bids_validate=True,
@@ -160,6 +161,23 @@ def collect_data(
     .. testsetup::
 
         >>> data_dir_canary()
+
+    Parameters
+    ----------
+    bids_dir : :obj:`str` or :obj:`bids.layout.BIDSLayout`
+        The BIDS directory
+    participant_label : :obj:`str`
+        The participant identifier
+    session_id : :obj:`str`, None, or ``False``
+        The session identifier. If ``False``, all sessions will be used (default).
+    task : :obj:`str` or None
+        The task identifier (for BOLD queries)
+    echo : :obj:`int` or None
+        The echo identifier (for BOLD queries)
+    bids_validate : :obj:`bool`
+        Whether the `bids_dir` is validated upon initialization
+    bids_filters: :obj:`dict` or None
+        Custom filters to alter default queries
 
     Examples
     --------
@@ -216,6 +234,10 @@ def collect_data(
 
     if echo:
         queries["bold"]["echo"] = echo
+
+    if session_id is not False:
+        for acq in queries.keys():
+            queries[acq]["session"] = session_id
 
     subj_data = {
         dtype: sorted(
