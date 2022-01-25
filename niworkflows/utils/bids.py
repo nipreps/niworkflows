@@ -26,6 +26,7 @@ import json
 import re
 import warnings
 from bids import BIDSLayout
+from bids.layout import Query
 from packaging.version import Version
 
 
@@ -149,7 +150,7 @@ def collect_participants(
 def collect_data(
     bids_dir,
     participant_label,
-    session_id=False,
+    session_id=Query.ANY,
     task=None,
     echo=None,
     bids_validate=True,
@@ -168,8 +169,8 @@ def collect_data(
         The BIDS directory
     participant_label : :obj:`str`
         The participant identifier
-    session_id : :obj:`str`, None, or ``False``
-        The session identifier. If ``False``, all sessions will be used (default).
+    session_id : :obj:`str`, None, or :obj:`bids.layout.Query`
+        The session identifier. By default, all sessions will be used.
     task : :obj:`str` or None
         The task identifier (for BOLD queries)
     echo : :obj:`int` or None
@@ -235,15 +236,12 @@ def collect_data(
     if echo:
         queries["bold"]["echo"] = echo
 
-    if session_id is not False:
-        for acq in queries.keys():
-            queries[acq]["session"] = session_id
-
     subj_data = {
         dtype: sorted(
             layout.get(
                 return_type="file",
                 subject=participant_label,
+                session=session_id,
                 extension=[".nii", ".nii.gz"],
                 **query,
             )
