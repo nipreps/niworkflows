@@ -224,19 +224,19 @@ class MergeSeries(SimpleInterface):
         return runtime
 
 
-class MergeROIsInputSpec(BaseInterfaceInputSpec):
+class _MergeROIsInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiObject(File(exists=True), desc="ROI files to be merged")
 
 
-class MergeROIsOutputSpec(TraitedSpec):
+class _MergeROIsOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="NIfTI containing all ROIs")
 
 
 class MergeROIs(SimpleInterface):
     """Combine multiple region of interest files (3D or 4D) into a single file"""
 
-    input_spec = MergeROIsInputSpec
-    output_spec = MergeROIsOutputSpec
+    input_spec = _MergeROIsInputSpec
+    output_spec = _MergeROIsOutputSpec
 
     def _run_interface(self, runtime):
         self._results["out_file"] = _merge_rois(self.inputs.in_files, newpath=runtime.cwd)
