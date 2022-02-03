@@ -21,13 +21,15 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """test nibabel interfaces."""
+import json
 import os
+from pathlib import Path
 import uuid
 import numpy as np
 import nibabel as nb
 import pytest
 
-from ..nibabel import Binarize, ApplyMask, SplitSeries, MergeSeries, MergeROIs
+from ..nibabel import Binarize, ApplyMask, SplitSeries, MergeSeries, MergeROIs, MapLabels
 
 
 @pytest.fixture
@@ -45,6 +47,11 @@ def create_roi(tmp_path):
     # cleanup files
     for f in files:
         f.unlink()
+
+
+def create_image(data, filename):
+    nb.Nifti1Image(data, affine=np.eye(4)).to_filename(str(filename))
+    return filename
 
 
 # create a slightly off affine
@@ -221,3 +228,37 @@ def test_MergeSeries(tmp_path):
 
     with pytest.raises(ValueError):
         MergeSeries(in_files=[str(in_file)] + [str(in_4D)], allow_4D=False).run()
+
+
+LABEL_MAPPINGS = {5: 1, 6: 1, 7: 2}
+LABEL_INPUT = np.arange(8).reshape(2, 2, 2)
+LABEL_OUTPUT = np.asarray([0, 1, 2, 3, 4, 1, 1, 2]).reshape(2, 2, 2)
+
+
+@pytest.mark.parametrize(
+    "data,mapping,tojson,expected",
+    [
+        (LABEL_INPUT, LABEL_MAPPINGS, False, LABEL_OUTPUT),
+        (LABEL_INPUT, LABEL_MAPPINGS, True, LABEL_OUTPUT),
+    ],
+)
+def test_map_labels(tmpdir, data, mapping, tojson, expected):
+    tmpdir.chdir()
+    in_file = create_image(data, Path("test.nii.gz"))
+    maplbl = MapLabels(in_file=in_file)
+    if tojson:
+        map_file = Path('mapping.json')
+        map_file.write_text(json.dumps(mapping))
+        maplbl.inputs.mappings_file = map_file
+    else:
+        maplbl.inputs.mappings = mapping
+    out_file = maplbl.run().outputs.out_file
+
+    orig = nb.load(in_file).get_fdata()
+    labels = nb.load(out_file).get_fdata()
+    assert orig.shape == labels.shape
+    assert np.all(labels == expected)
+
+    Path(in_file).unlink()
+    if tojson:
+        Path(map_file).unlink()
