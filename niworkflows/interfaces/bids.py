@@ -607,12 +607,17 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                             (4, 4) if self.inputs.space in STANDARD_SPACES else (2, 2)
                         )
 
-                    if curr_codes != xcodes or curr_units != units:
+                    curr_zooms = zooms = hdr.get_zooms()
+                    if out_entities["suffix"] == "bold":
+                        zooms = curr_zooms[:3] + (self.inputs.RepetitionTime,)
+
+                    if (curr_codes, curr_units, curr_zooms) != (xcodes, units, zooms):
                         self._results["fixed_hdr"][i] = True
                         new_header = hdr.copy()
                         new_header.set_qform(nii.affine, xcodes[0])
                         new_header.set_sform(nii.affine, xcodes[1])
                         new_header.set_xyzt_units(*units)
+                        new_header.set_zooms(zooms)
 
                 if data_dtype == "source":  # match source dtype
                     try:
