@@ -1,3 +1,14 @@
+1.5.0 (February 07, 2022)
+=========================
+First release in the 1.5.x series.
+This release upgrades the Dockerfile to use FSL6, and includes some new interfaces.
+
+  * ENH: Additional nibabel interfaces (#680)
+  * ENH: Add utility function to generate sample BIDS directory (#677)
+  * ENH: Update to FSL6 (#675)
+  * FIX: Scipy docs path (#681)
+  * TEST: Drop excessively long interface equivalence tests (#674)
+
 1.4.5 (December 13, 2021)
 =========================
 Patch release in the 1.4.x series.
