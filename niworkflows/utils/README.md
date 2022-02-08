@@ -1,9 +1,10 @@
-# Generating a BIDS skeleton
+# niworkflows.utils.testing
+## Generating a BIDS skeleton
 Creating a BIDS skeleton can be useful when testing methods that operate on diverse BIDS datasets.
 This readme contains some information on using `niworkflows.utils.tests.bids.generate_bids_skeleton()` to create a BIDS skeleton.
 
 
-## Example configuration
+### Example configuration
 
 > sessions.yaml
 
