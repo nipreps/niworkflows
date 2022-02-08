@@ -608,7 +608,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                         )
 
                     curr_zooms = zooms = hdr.get_zooms()
-                    if out_entities["suffix"] == "bold":
+                    if "RepetitionTime" in self.inputs.get():
                         zooms = curr_zooms[:3] + (self.inputs.RepetitionTime,)
 
                     if (curr_codes, curr_units, curr_zooms) != (xcodes, units, zooms):
