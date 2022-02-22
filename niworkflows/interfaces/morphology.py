@@ -69,9 +69,11 @@ class CrownMask(SimpleInterface):
         # Remove the brain from the crown mask
         crown_mask[func_seg_mask] = False
         crown_file = str((Path(runtime.cwd) / "crown_mask.nii.gz").absolute())
-        nb.Nifti1Image(
+        nii = nb.Nifti1Image(
             crown_mask, brainmask_img.affine, brainmask_img.header
-        ).to_filename(crown_file)
+        )
+        nii.set_data_dtype("uint8")
+        nii.to_filename(crown_file)
         self._results["out_mask"] = crown_file
 
         return runtime
