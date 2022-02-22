@@ -33,7 +33,7 @@ from nipype.interfaces.base import (
 
 class _CrownMaskInputSpec(BaseInterfaceInputSpec):
     in_segm = File(
-        exists=True, mandatory=True, position=0, desc="Atlas from segmentation."
+        exists=True, mandatory=True, position=0, desc="Input discrete segmentation of the brain."
     )
     in_brainmask = File(exists=True, mandatory=True, position=1, desc="Brain mask.")
     radius = traits.Int(default_value=2, usedefault=True, desc="Radius of dilation")
