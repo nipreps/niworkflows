@@ -258,7 +258,7 @@ def plot_carpet(
         ntsteps = func_data.shape[-1]
 
         # Dilate brain mask
-        crown_mask, func_seg_mask = get_dilated_brainmask(atlaslabels, brainmask)
+        crown_mask, func_seg_mask = get_dilated_brainmask(np.bool_(atlaslabels), np.bool_(brainmask))
         # Remove the brain from the crown mask
         crown_mask[func_seg_mask] = False
 

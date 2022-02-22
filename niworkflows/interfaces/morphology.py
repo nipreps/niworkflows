@@ -57,8 +57,8 @@ class CrownMask(SimpleInterface):
         segm_img = nb.load(self.inputs.in_segm)
         brainmask_img = nb.load(self.inputs.in_brainmask)
 
-        segm = segm_img.get_fdata()
-        brainmask = brainmask_img.get_fdata()
+        segm = np.bool_(segm_img.dataobj)
+        brainmask = np.bool_(brainmask_img.dataobj)
 
         # Obtain dilated brainmask
         crown_mask, func_seg_mask = get_dilated_brainmask(
@@ -82,7 +82,7 @@ def get_dilated_brainmask(atlaslabels, brainmask, radius=2):
     Parameters
     ----------
     atlaslabels: ndarray
-        A 3D array of integer labels from an atlas, resampled into ``img`` space.
+        A 3D binary array, resampled into ``img`` space.
     brainmask: ndarray
         A 3D binary array, resampled into ``img`` space.
     radius: int, optional
@@ -91,11 +91,8 @@ def get_dilated_brainmask(atlaslabels, brainmask, radius=2):
     from scipy import ndimage as ndi
     from skimage.morphology import ball
 
-    # Binarize the anatomical mask
-    seg_mask = (atlaslabels != 0).astype("uint8")
-
     # Union of functionally and anatomically extracted masks
-    func_seg_mask = (seg_mask + brainmask) > 0
+    func_seg_mask = seg_mask | brainmask
 
     if func_seg_mask.ndim != 3:
         raise Exception("The brain mask should be a 3D array")
