@@ -210,8 +210,7 @@ def plot_carpet(
         data = img.get_fdata().T
         matrix = img.header.matrix
 
-        dilated_brainmask, _ = get_dilated_brainmask(atlaslabels, brainmask)
-        crown_surf = get_crown_cifti(dilated_brainmask)
+        crown_surf = get_crown_cifti(crown_mask)
         struct_map = {
             "LEFT_CORTEX": 1,
             "RIGHT_CORTEX": 2,
@@ -227,7 +226,7 @@ def plot_carpet(
             else:
                 lidx = 3
             index_final = bm.index_offset + bm.index_count
-            seg[bm.index_offset : index_final] = lidx
+            seg[bm.index_offset:index_final] = lidx
         assert len(seg[seg < 1]) == 0, "Unassigned labels"
 
         # Decimate data
@@ -246,13 +245,12 @@ def plot_carpet(
     else:  # Volumetric NIfTI
         from nilearn._utils import check_niimg_4d
         from nilearn._utils.niimg import _safe_get_data
-        from niworkflows.interfaces.morphology import get_dilated_brainmask
 
         img_nii = check_niimg_4d(img, dtype="auto",)
         func_data = _safe_get_data(img_nii, ensure_finite=True)
         func_data = func_data[..., nskip:]
         ntsteps = func_data.shape[-1]
-        
+
         # Map segmentation to brain areas
         # Boolean defining whether the default look up table is being used
         default_lut = False
