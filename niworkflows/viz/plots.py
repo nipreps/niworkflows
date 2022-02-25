@@ -252,7 +252,7 @@ def plot_carpet(
         func_data = _safe_get_data(img_nii, ensure_finite=True)
         func_data = func_data[..., nskip:]
         ntsteps = func_data.shape[-1]
-
+        
         # Map segmentation to brain areas
         # Boolean defining whether the default look up table is being used
         default_lut = False
