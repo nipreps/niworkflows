@@ -51,6 +51,7 @@ class CrownMask(SimpleInterface):
 
     def _run_interface(self, runtime):
         import nibabel as nb
+        import numpy as np
         from pathlib import Path
 
         # Open files

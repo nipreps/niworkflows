@@ -39,12 +39,12 @@ DINA4_LANDSCAPE = (11.69, 8.27)
 class fMRIPlot:
     """Generates the fMRI Summary Plot."""
 
-    __slots__ = ("func_file", "mask_data", "tr", "seg_data", "confounds", "spikes")
+    __slots__ = ("func_file", "crown_mask", "tr", "seg_data", "confounds", "spikes")
 
     def __init__(
         self,
         func_file,
-        mask_file=None,
+        crown_file=None,
         data=None,
         conf_file=None,
         seg_file=None,
@@ -57,15 +57,11 @@ class fMRIPlot:
         func_img = nb.load(func_file)
         self.func_file = func_file
         self.tr = tr or _get_tr(func_img)
-        self.mask_data = None
         self.seg_data = None
 
         if not isinstance(func_img, nb.Cifti2Image):
-            self.mask_data = nb.fileslice.strided_scalar(
-                func_img.shape[:3], np.uint8(1)
-            )
-            if mask_file:
-                self.mask_data = np.asanyarray(nb.load(mask_file).dataobj).astype(
+            if crown_file:
+                self.crown_mask = np.asanyarray(nb.load(crown_file).dataobj).astype(
                     "uint8"
                 )
             if seg_file:
@@ -140,7 +136,7 @@ class fMRIPlot:
         plot_carpet(
             self.func_file,
             atlaslabels=self.seg_data,
-            brainmask=self.mask_data,
+            crown_mask=self.crown_mask,
             subplot=grid[-1],
             tr=self.tr,
         )
@@ -151,7 +147,7 @@ class fMRIPlot:
 def plot_carpet(
     func,
     atlaslabels,
-    brainmask,
+    crown_mask,
     detrend=True,
     nskip=0,
     size=(1500, 800),
@@ -256,11 +252,6 @@ def plot_carpet(
         func_data = _safe_get_data(img_nii, ensure_finite=True)
         func_data = func_data[..., nskip:]
         ntsteps = func_data.shape[-1]
-
-        # Dilate brain mask
-        crown_mask, func_seg_mask = get_dilated_brainmask(np.bool_(atlaslabels), np.bool_(brainmask))
-        # Remove the brain from the crown mask
-        crown_mask[func_seg_mask] = False
 
         # Map segmentation to brain areas
         # Boolean defining whether the default look up table is being used
