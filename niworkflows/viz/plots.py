@@ -170,7 +170,7 @@ def plot_carpet(
             Path to NIfTI or CIFTI BOLD image, or a nibabel-image object
         atlaslabels: ndarray, optional
             A 3D array of integer labels from an atlas, resampled into ``img`` space.
-        brainmask: ndarray, optional
+        crown_mask: ndarray, optional
             A 3D binary array, resampled into ``img`` space.
         detrend : boolean, optional
             Detrend and standardize the data prior to plotting.
