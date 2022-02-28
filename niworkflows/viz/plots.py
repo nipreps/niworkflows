@@ -32,32 +32,18 @@ import matplotlib.cm as cm
 import matplotlib.patches as mpatches
 from matplotlib.colors import ListedColormap, Normalize
 from matplotlib.colorbar import ColorbarBase
-
-from nilearn.plotting import plot_img
-from nilearn.signal import clean
-from nilearn._utils import check_niimg_4d
-from nilearn._utils.niimg import _safe_get_data
-
-from skimage.morphology import ball
-
-from scipy import ndimage as ndi
-from scipy.cluster.hierarchy import dendrogram, linkage
-from sklearn.cluster import ward_tree
-
-from niworkflows.interfaces.surf import get_crown_cifti
-
 DINA4_LANDSCAPE = (11.69, 8.27)
 
 
 class fMRIPlot:
     """Generates the fMRI Summary Plot."""
 
-    __slots__ = ("func_file", "mask_data", "tr", "seg_data", "confounds", "spikes")
+    __slots__ = ("func_file", "crown_mask", "tr", "seg_data", "confounds", "spikes")
 
     def __init__(
         self,
         func_file,
-        mask_file=None,
+        crown_file=None,
         data=None,
         conf_file=None,
         seg_file=None,
@@ -70,15 +56,11 @@ class fMRIPlot:
         func_img = nb.load(func_file)
         self.func_file = func_file
         self.tr = tr or _get_tr(func_img)
-        self.mask_data = None
         self.seg_data = None
 
         if not isinstance(func_img, nb.Cifti2Image):
-            self.mask_data = nb.fileslice.strided_scalar(
-                func_img.shape[:3], np.uint8(1)
-            )
-            if mask_file:
-                self.mask_data = np.asanyarray(nb.load(mask_file).dataobj).astype(
+            if crown_file:
+                self.crown_mask = np.asanyarray(nb.load(crown_file).dataobj).astype(
                     "uint8"
                 )
             if seg_file:
@@ -151,8 +133,11 @@ class fMRIPlot:
             grid_id += 1
 
         plot_carpet(
-            self.func_file, atlaslabels=self.seg_data, brainmask=self.mask_data,
-            subplot=grid[-1], tr=self.tr
+            self.func_file,
+            atlaslabels=self.seg_data,
+            crown_mask=self.crown_mask,
+            subplot=grid[-1],
+            tr=self.tr,
         )
         # spikesplot_cb([0.7, 0.78, 0.2, 0.008])
         return figure
@@ -161,7 +146,7 @@ class fMRIPlot:
 def plot_carpet(
     func,
     atlaslabels,
-    brainmask,
+    crown_mask,
     detrend=True,
     nskip=0,
     size=(1500, 800),
@@ -181,8 +166,8 @@ def plot_carpet(
     Parameters
     ----------
 
-        func : string
-            Path to NIfTI or CIFTI BOLD image
+        func : string or nibabel-image object
+            Path to NIfTI or CIFTI BOLD image, or a nibabel-image object
         atlaslabels: ndarray, optional
             A 3D array of integer labels from an atlas, resampled into ``img`` space.
         brainmask: ndarray, optional
@@ -191,7 +176,7 @@ def plot_carpet(
             Detrend and standardize the data prior to plotting.
         nskip : int, optional
             Number of volumes at the beginning of the scan marked as nonsteady state.
-            Not used.
+            Only used by volumetric NIfTI.
         size : tuple, optional
             Size of figure.
         subplot : matplotlib Subplot, optional
@@ -215,7 +200,7 @@ def plot_carpet(
     epinii = None
     segnii = None
     nslices = None
-    img = nb.load(func)
+    img = nb.load(func) if isinstance(func, str) else func
 
     if isinstance(img, nb.Cifti2Image):
         assert (
@@ -225,8 +210,7 @@ def plot_carpet(
         data = img.get_fdata().T
         matrix = img.header.matrix
 
-        dilated_brainmask, _ = get_dilated_brainmask(atlaslabels, brainmask)
-        crown_surf = get_crown_cifti(dilated_brainmask)
+        crown_surf = get_crown_cifti(crown_mask)
         struct_map = {
             "LEFT_CORTEX": 1,
             "RIGHT_CORTEX": 2,
@@ -259,16 +243,14 @@ def plot_carpet(
         legend = False
 
     else:  # Volumetric NIfTI
-        # Load data
+        from nilearn._utils import check_niimg_4d
+        from nilearn._utils.niimg import _safe_get_data
+
         img_nii = check_niimg_4d(img, dtype="auto",)
         func_data = _safe_get_data(img_nii, ensure_finite=True)
+        func_data = func_data[..., nskip:]
         ntsteps = func_data.shape[-1]
 
-        crown_mask, func_seg_mask = get_dilated_brainmask(atlaslabels, brainmask)
-        # Remove the brain from the crown mask
-        crown_mask[func_seg_mask] = False
-
-        # Incorporate the crown in the carpetplot
         # Map segmentation to brain areas
         # Boolean defining whether the default look up table is being used
         default_lut = False
@@ -285,8 +267,11 @@ def plot_carpet(
 
         # Apply lookup table
         seg = lut[atlaslabels.astype(int)]
-        assert (seg[crown_mask] == 0).all(), \
-            "There is an overlap between the crown and the anatomical atlas."
+
+        # Incorporate the crown in the carpetplot
+        assert (
+            seg[crown_mask] == 0
+        ).all(), "There is an overlap between the crown and the anatomical atlas."
         seg[crown_mask] = seg.max() + 1
 
         if (seg == 0).all():
@@ -322,7 +307,7 @@ def plot_carpet(
             region_lim += nreg
 
         # Set colormap
-        cmap = ListedColormap(cm.get_cmap("tab10").colors[:len(np.unique(seg))][::-1])
+        cmap = ListedColormap(cm.get_cmap("tab10").colors[: len(np.unique(seg))][::-1])
         assert len(cmap.colors) == len(
             np.unique(seg)
         ), "Mismatch between expected # of structures and colors"
@@ -349,7 +334,7 @@ def plot_carpet(
         subplot=subplot,
         title=title,
         output_file=output_file,
-        default_lut=default_lut
+        default_lut=default_lut,
     )
 
 
@@ -367,9 +352,12 @@ def _carpet(
     epinii=None,
     segnii=None,
     nslices=None,
-    default_lut=False
+    default_lut=False,
 ):
     """Common carpetplot building code for volumetric / CIFTI plots"""
+    from nilearn.plotting import plot_img
+    from nilearn.signal import clean
+
     notr = False
     if tr is None:
         notr = True
@@ -412,7 +400,7 @@ def _carpet(
         subcortGM = mpatches.Patch(color=cmap.colors[2], label='Subcortical GM')
         cerebellum = mpatches.Patch(color=cmap.colors[1], label='Cerebellum')
         wm_csf = mpatches.Patch(color=cmap.colors[0], label='WM & CSF')
-        plt.legend(handles=[crown, cortGM, subcortGM, cerebellum, wm_csf],fontsize=20)
+        plt.legend(handles=[crown, cortGM, subcortGM, cerebellum, wm_csf])
 
     # Carpet plot
     ax1 = plt.subplot(gs[1])
@@ -457,6 +445,8 @@ def _carpet(
     ax1.spines["bottom"].set_visible(False)
     ax1.spines["left"].set_color("none")
     ax1.spines["left"].set_visible(False)
+    if title:
+        ax1.set_title(title)
 
     ax2 = None
     if legend:
@@ -1120,6 +1110,102 @@ def confounds_correlation_plot(
     return [ax0, ax1], gs
 
 
+def cifti_surfaces_plot(
+    in_cifti,
+    density="32k",
+    surface_type="inflated",
+    clip_range=(0, None),
+    output_file=None,
+    **splt_kwargs
+):
+    """
+    Plots a CIFTI-2 dense timeseries onto left/right mesh surfaces.
+
+    Parameters
+    ----------
+    in_cifti : str
+        CIFTI-2 dense timeseries (.dtseries.nii)
+    density : str
+        Surface density
+    surface_type : str
+        Inflation level of mesh surfaces. Supported: midthickness, inflated, veryinflated
+    clip_range : tuple or None
+        Range to clip `in_cifti` data prior to plotting.
+        If not None, two values must be provided as lower and upper bounds.
+        If values are None, no clipping is performed for that bound.
+    output_file: :obj:`str` or :obj:`None`
+        Path where the output figure should be saved. If this is not defined,
+        then the figure will be returned.
+    splt_kwargs : dict
+        Keyword arguments for :obj:`surfplot.Plot`
+
+    Outputs
+    -------
+    figure : matplotlib.pyplot.figure
+        Surface plot figure. Returned only if ``output_file`` is ``None``.
+    output_file: :obj:`str`
+        The file where the figure is saved.
+    """
+    import surfplot as splt
+    from surfplot.utils import add_fslr_medial_wall
+
+    def get_surface_meshes(density, surface_type):
+        import templateflow.api as tf
+        lh, rh = tf.get("fsLR", density=density, suffix=surface_type, extension=[".surf.gii"])
+        return str(lh), str(rh)
+
+    if density != "32k":
+        raise NotImplementedError("Only 32k density is currently supported.")
+
+    img = nb.cifti2.load(in_cifti)
+    if img.nifti_header.get_intent()[0] != "ConnDenseSeries":
+        raise TypeError(f"{in_cifti} is not a dense timeseries CIFTI file")
+
+    geo = img.header.get_index_map(1)
+    left_cortex, right_cortex = None, None
+    for bm in geo.brain_models:
+        if bm.brain_structure == "CIFTI_STRUCTURE_CORTEX_LEFT":
+            left_cortex = bm
+        elif bm.brain_structure == "CIFTI_STRUCTURE_CORTEX_RIGHT":
+            right_cortex = bm
+
+    if left_cortex is None or right_cortex is None:
+        raise RuntimeError("CIFTI is missing cortex information")
+
+    # calculate an average of the BOLD data, excluding the first 5 volumes
+    # as potential nonsteady states
+    data = img.dataobj[5:20].mean(axis=0)
+
+    cortex_data = _concat_brain_struct_data((left_cortex, right_cortex), data)
+    if density == "32k" and len(cortex_data) != 59412:
+        raise ValueError("Cortex data is not in fsLR space")
+    # medial wall needs to be added back in
+    cortex_data = add_fslr_medial_wall(cortex_data)
+    if clip_range:
+        cortex_data = np.clip(cortex_data, clip_range[0], clip_range[1], out=cortex_data)
+
+    lh_data, rh_data = np.array_split(cortex_data, 2)
+
+    # Build the figure
+    lh_mesh, rh_mesh = get_surface_meshes(density, surface_type)
+    p = splt.Plot(
+        surf_lh=lh_mesh,
+        surf_rh=rh_mesh,
+        layout=splt_kwargs.pop("layout", "row"),
+        **splt_kwargs
+    )
+    p.add_layer({'left': lh_data, 'right': rh_data}, cmap='YlOrRd_r')
+    figure = p.build()  # figsize - leave default?
+
+    if output_file is not None:
+        figure.savefig(output_file, bbox_inches="tight")
+        plt.close(figure)
+        figure = None
+        return output_file
+
+    return figure
+
+
 def _get_tr(img):
     """
     Attempt to extract repetition time from NIfTI/CIFTI header
@@ -1162,7 +1248,6 @@ def _decimate_data(data, seg, size):
     if t_dec:
         data = data[:, ::t_dec]
     return data, seg
-
 
 def get_dilated_brainmask(atlaslabels, brainmask, radius=2):
     """Obtain the brain mask dilated
@@ -1208,3 +1293,11 @@ def get_dendrogram(children, n_leaves, distances):
 
     # Return the corresponding dendrogram
     return dendrogram(linkage_matrix,no_plot=True)
+
+def _concat_brain_struct_data(structs, data):
+    concat_data = np.array([], dtype=data.dtype)
+    for struct in structs:
+        struct_upper_bound = struct.index_offset + struct.index_count
+        struct_data = data[struct.index_offset:struct_upper_bound]
+        concat_data = np.concatenate((concat_data, struct_data))
+    return concat_data

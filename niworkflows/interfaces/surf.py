@@ -732,7 +732,7 @@ def get_crown_cifti(dilated_brainmask):
 
     Parameters
     ----------
-    dilated_brainmask : ndarray
-        A 3D binary array.
+    outbrain_surface : N x 3 :obj:`numpy.ndarray`
+        A point set of 3D coordinates where the functional data will be sampled.
     """
     raise NotImplementedError
