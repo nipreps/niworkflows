@@ -279,6 +279,7 @@ def _carpet(
     cmap,
     tr=None,
     detrend=True,
+    cluster="ward",
     subplot=None,
     legend=False,
     title=None,
@@ -288,8 +289,6 @@ def _carpet(
     nslices=None,
 ):
     """Common carpetplot building code for volumetric / CIFTI plots"""
-    from nilearn.plotting import plot_img
-    from nilearn.signal import clean
 
     notr = False
     if tr is None:
@@ -298,9 +297,35 @@ def _carpet(
 
     # Detrend data
     v = (None, None)
-    if detrend:
-        data = clean(data.T, t_r=tr).T
+    if detrend or cluster:
+        from nilearn.signal import clean
+
+        data = clean(data.T, t_r=tr, filter=False).T
         v = (-2, 2)
+
+    # Cluster segments (if argument enabled)
+    if cluster:
+        from scipy.cluster.hierarchy import linkage, dendrogram
+        from sklearn.cluster import ward_tree
+
+        order = np.zeros(len(seg), dtype=np.int16)
+        region_lim = 0
+        for i in reversed(np.unique(seg)):
+            carpet_region = data[seg == i]
+            if cluster == "linkage":
+                order_cluster = linkage(
+                    carpet_region, method="average", metric="euclidean", optimal_ordering=True
+                )
+            else:
+                children, _, n_leaves, _, distances = ward_tree(
+                    carpet_region, return_distance=True
+                )
+                order_cluster = _ward_to_linkage(children, n_leaves, distances)
+
+            dn = dendrogram(order_cluster, no_plot=True)
+            nreg = len(carpet_region)
+            order[region_lim:region_lim + nreg] = np.asarray(dn["leaves"]) + region_lim
+            region_lim += nreg
 
     # If subplot is not defined
     if subplot is None:
@@ -373,6 +398,8 @@ def _carpet(
 
     ax2 = None
     if legend:
+        from nilearn.plotting import plot_img
+
         gslegend = mgs.GridSpecFromSubplotSpec(5, 1, subplot_spec=gs[2], wspace=0.0, hspace=0.0)
         coords = np.linspace(int(0.10 * nslices), int(0.95 * nslices), 5).astype(np.uint8)
         for i, c in enumerate(coords.tolist()):
@@ -1152,3 +1179,20 @@ def _concat_brain_struct_data(structs, data):
         struct_data = data[struct.index_offset : struct_upper_bound]
         concat_data = np.concatenate((concat_data, struct_data))
     return concat_data
+
+
+def _ward_to_linkage(children, n_leaves, distances):
+    """Create linkage matrix from the output of Ward clustering."""
+    # create the counts of samples under each node
+    counts = np.zeros(children.shape[0])
+    n_samples = n_leaves
+    for i, merge in enumerate(children):
+        current_count = 0
+        for child_idx in merge:
+            current_count += (
+                1 if child_idx < n_samples else
+                counts[child_idx - n_samples]
+            )
+        counts[i] = current_count
+
+    return np.column_stack([children, distances, counts]).astype(float)
