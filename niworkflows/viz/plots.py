@@ -59,6 +59,7 @@ class fMRIPlot:
         self.func_file = func_file
         self.tr = tr or _get_tr(func_img)
         self.seg_data = None
+        self.acompcor_mask = None
 
         if not isinstance(func_img, nb.Cifti2Image):
             if crown_file:
@@ -258,6 +259,7 @@ def plot_carpet(
         # Map segmentation to brain areas
         # Boolean defining whether the default look up table is being used
         default_lut = False
+        acompcor_flag = False
         if lut is None:
             default_lut = True
             lut = np.zeros((261,), dtype="int")
@@ -269,14 +271,18 @@ def plot_carpet(
         if (lut < 0).any():
             raise ValueError("The look up table should not contain negative values.")
         
-        # Define the acompcor mask as 1st region
-        lut[lut>0] += 1
+        if acompcor_mask is not None:
+            # Define the acompcor mask as 1st region
+            lut[lut>0] += 1
+            acompcor_flag=True
+
         # Apply lookup table
         seg = lut[atlaslabels.astype(int)]
 
-        # Change type of acompcor_mask to bool
-        acompcor_mask = acompcor_mask.astype("bool")
-        seg[acompcor_mask] = 1
+        if acompcor_mask is not None:
+            # Change type of acompcor_mask to bool
+            acompcor_mask = acompcor_mask.astype("bool")
+            seg[acompcor_mask] = 1
 
         assert (seg[crown_mask] == 0).all(), \
             "There is an overlap between the crown and the anatomical atlas."
@@ -319,7 +325,7 @@ def plot_carpet(
             region_lim += nreg
 
         # Set colormap
-        cmap = ListedColormap(cm.get_cmap("tab10").colors[: len(np.unique(seg))][::-1])
+        cmap = ListedColormap(cm.get_cmap("tab10").colors[: len(np.unique(seg))+1][::-1])
         assert len(cmap.colors) == len(
             np.unique(seg)
         ), "Mismatch between expected # of structures and colors"
@@ -345,6 +351,7 @@ def plot_carpet(
         title=title,
         output_file=output_file,
         default_lut=default_lut,
+        acompcor_flag=acompcor_flag
     )
 
 
@@ -363,6 +370,7 @@ def _carpet(
     segnii=None,
     nslices=None,
     default_lut=False,
+    acompcor_flag=False
 ):
     """Common carpetplot building code for volumetric / CIFTI plots"""
     from nilearn.plotting import plot_img
@@ -409,9 +417,13 @@ def _carpet(
         cortGM = mpatches.Patch(color=cmap.colors[4], label='Cortical GM')
         subcortGM = mpatches.Patch(color=cmap.colors[3], label='Subcortical GM')
         cerebellum = mpatches.Patch(color=cmap.colors[2], label='Cerebellum')
-        shallow_wm_csf = mpatches.Patch(color=cmap.colors[1], label='shallow WM & CSF')
-        deep_wm_csf = mpatches.Patch(color=cmap.colors[0], label='deep WM & CSF')
-        plt.legend(handles=[crown, cortGM, subcortGM, cerebellum, shallow_wm_csf, deep_wm_csf])
+        if acompcor_flag:
+            shallow_wm_csf = mpatches.Patch(color=cmap.colors[1], label='shallow WM & CSF')
+            deep_wm_csf = mpatches.Patch(color=cmap.colors[0], label='deep WM & CSF')
+            plt.legend(handles=[crown, cortGM, subcortGM, cerebellum, shallow_wm_csf, deep_wm_csf])
+        else:
+            wm_csf = mpatches.Patch(color=cmap.colors[0], label='WM & CSF')
+            plt.legend(handles=[crown, cortGM, subcortGM, cerebellum, wm_csf])
 
     # Carpet plot
     ax1 = plt.subplot(gs[1])

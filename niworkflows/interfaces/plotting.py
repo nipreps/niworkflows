@@ -88,7 +88,7 @@ class FMRISummary(SimpleInterface):
             tr=self.inputs.tr,
             data=dataframe[["outliers", "DVARS", "FD"]],
             units={"outliers": "%", "FD": "mm"},
-            vlines={"FD": [self.inputs.fd_thres]},
+            vlines={"FD": [self.inputs.fd_thres]}
         ).plot()
         fig.savefig(self._results["out_file"], bbox_inches="tight")
         return runtime
