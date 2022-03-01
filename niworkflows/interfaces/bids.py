@@ -30,9 +30,6 @@ import re
 
 import nibabel as nb
 import numpy as np
-from bids.layout import parse_file_entities
-from bids.layout.writing import build_path
-from bids.utils import listify
 
 from nipype import logging
 from nipype.interfaces.base import (
@@ -190,6 +187,8 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
     output_spec = _BIDSInfoOutputSpec
 
     def _run_interface(self, runtime):
+        from bids.layout import parse_file_entities
+
         bids_dir = self.inputs.bids_dir
         in_file = self.inputs.in_file
         if bids_dir is not None:
@@ -508,6 +507,10 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             setattr(self.inputs, k, inputs[k])
 
     def _run_interface(self, runtime):
+        from bids.layout import parse_file_entities
+        from bids.layout.writing import build_path
+        from bids.utils import listify
+
         # Ready the output folder
         base_directory = runtime.cwd
         if isdefined(self.inputs.base_directory):
@@ -668,6 +671,10 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 if new_data is None:
                     set_consumables(new_header, orig_img.dataobj)
                     new_data = orig_img.dataobj.get_unscaled()
+                else:
+                    # Without this, we would be writing nans
+                    # This is our punishment for hacking around nibabel defaults
+                    new_header.set_slope_inter(slope=1., inter=0.)
                 unsafe_write_nifti_header_and_data(
                     fname=out_file,
                     header=new_header,
@@ -759,6 +766,8 @@ class ReadSidecarJSON(SimpleInterface):
     _always_run = True
 
     def __init__(self, fields=None, undef_fields=False, **inputs):
+        from bids.utils import listify
+
         super(ReadSidecarJSON, self).__init__(**inputs)
         self._fields = listify(fields or [])
         self._undef_fields = undef_fields
