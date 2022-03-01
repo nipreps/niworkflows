@@ -144,7 +144,7 @@ def plot_carpet(
     legend=False,
     tr=None,
     lut=None,
-    ward=False,
+    ward=True,
 ):
     """
     Plot an image representation of voxel intensities across time also know
@@ -183,7 +183,9 @@ def plot_carpet(
             # of frames is plotted instead of time.
         lut : ndarray, optional
             Look up table for segmentations
-
+        ward : boolean, optional
+            Boolean that determines if hierarchical ward clustering is used or
+            hierarchical average linkage clustering
     """
     epinii = None
     segnii = None
