@@ -60,13 +60,9 @@ class fMRIPlot:
         self.seg_data = None
 
         if not isinstance(func_img, nb.Cifti2Image):
-            self.mask_data = nb.fileslice.strided_scalar(
-                func_img.shape[:3], np.uint8(1)
-            )
+            self.mask_data = nb.fileslice.strided_scalar(func_img.shape[:3], np.uint8(1))
             if mask_file:
-                self.mask_data = np.asanyarray(nb.load(mask_file).dataobj).astype(
-                    "uint8"
-                )
+                self.mask_data = np.asanyarray(nb.load(mask_file).dataobj).astype("uint8")
             if seg_file:
                 self.seg_data = np.asanyarray(nb.load(seg_file).dataobj)
 
@@ -76,9 +72,7 @@ class fMRIPlot:
             vlines = {}
         self.confounds = {}
         if data is None and conf_file:
-            data = pd.read_csv(
-                conf_file, sep=r"[\t\s]+", usecols=usecols, index_col=False
-            )
+            data = pd.read_csv(conf_file, sep=r"[\t\s]+", usecols=usecols, index_col=False)
 
         if data is not None:
             for name in data.columns.ravel():
@@ -114,9 +108,7 @@ class fMRIPlot:
 
         grid_id = 0
         for tsz, name, iszs in self.spikes:
-            spikesplot(
-                tsz, title=name, outer_gs=grid[grid_id], tr=self.tr, zscored=iszs
-            )
+            spikesplot(tsz, title=name, outer_gs=grid[grid_id], tr=self.tr, zscored=iszs)
             grid_id += 1
 
         if self.confounds:
@@ -126,19 +118,10 @@ class fMRIPlot:
 
         for i, (name, kwargs) in enumerate(self.confounds.items()):
             tseries = kwargs.pop("values")
-            confoundplot(
-                tseries,
-                grid[grid_id],
-                tr=self.tr,
-                color=palette[i],
-                name=name,
-                **kwargs
-            )
+            confoundplot(tseries, grid[grid_id], tr=self.tr, color=palette[i], name=name, **kwargs)
             grid_id += 1
 
-        plot_carpet(
-            self.func_file, atlaslabels=self.seg_data, subplot=grid[-1], tr=self.tr
-        )
+        plot_carpet(self.func_file, atlaslabels=self.seg_data, subplot=grid[-1], tr=self.tr)
         # spikesplot_cb([0.7, 0.78, 0.2, 0.008])
         return figure
 
@@ -200,9 +183,7 @@ def plot_carpet(
     img = nb.load(func) if isinstance(func, str) else func
 
     if isinstance(img, nb.Cifti2Image):
-        assert (
-            img.nifti_header.get_intent()[0] == "ConnDenseSeries"
-        ), "Not a dense timeseries"
+        assert img.nifti_header.get_intent()[0] == "ConnDenseSeries", "Not a dense timeseries"
 
         data = img.get_fdata().T
         matrix = img.header.matrix
@@ -221,7 +202,7 @@ def plot_carpet(
             else:
                 lidx = 3
             index_final = bm.index_offset + bm.index_count
-            seg[bm.index_offset:index_final] = lidx
+            seg[bm.index_offset : index_final] = lidx
         assert len(seg[seg < 1]) == 0, "Unassigned labels"
 
         # Decimate data
@@ -241,7 +222,10 @@ def plot_carpet(
         from nilearn._utils import check_niimg_4d
         from nilearn._utils.niimg import _safe_get_data
 
-        img_nii = check_niimg_4d(img, dtype="auto",)
+        img_nii = check_niimg_4d(
+            img,
+            dtype="auto",
+        )
         func_data = _safe_get_data(img_nii, ensure_finite=True)
         func_data = func_data[..., nskip:]
         ntsteps = func_data.shape[-1]
@@ -268,9 +252,7 @@ def plot_carpet(
         if legend:
             epiavg = func_data.mean(3)
             epinii = nb.Nifti1Image(epiavg, img_nii.affine, img_nii.header)
-            segnii = nb.Nifti1Image(
-                lut[atlaslabels.astype(int)], epinii.affine, epinii.header
-            )
+            segnii = nb.Nifti1Image(lut[atlaslabels.astype(int)], epinii.affine, epinii.header)
             segnii.set_data_dtype("uint8")
             nslices = epiavg.shape[-1]
 
@@ -391,12 +373,8 @@ def _carpet(
 
     ax2 = None
     if legend:
-        gslegend = mgs.GridSpecFromSubplotSpec(
-            5, 1, subplot_spec=gs[2], wspace=0.0, hspace=0.0
-        )
-        coords = np.linspace(int(0.10 * nslices), int(0.95 * nslices), 5).astype(
-            np.uint8
-        )
+        gslegend = mgs.GridSpecFromSubplotSpec(5, 1, subplot_spec=gs[2], wspace=0.0, hspace=0.0)
+        coords = np.linspace(int(0.10 * nslices), int(0.95 * nslices), 5).astype(np.uint8)
         for i, c in enumerate(coords.tolist()):
             ax2 = plt.subplot(gslegend[i])
             plot_img(
@@ -499,10 +477,7 @@ def spikesplot(
         )
 
         ytick_vals = np.arange(0.0, zs_max, float(np.floor(zs_max / 2.0)))
-        yticks = (
-            list(reversed((-1.0 * ytick_vals[ytick_vals > 0]).tolist()))
-            + ytick_vals.tolist()
-        )
+        yticks = list(reversed((-1.0 * ytick_vals[ytick_vals > 0]).tolist())) + ytick_vals.tolist()
 
         # TODO plot min/max or mark spikes
         # yticks.insert(0, ts_z.min())
@@ -521,9 +496,7 @@ def spikesplot(
             np.median(ts_z[:, nskip:]),
             ts_z[:, nskip:].max(),
         ]
-        ax.set_ylim(
-            0, max(yticks[-1] * 1.05, (yticks[-1] - yticks[0]) * 2.0 + yticks[-1])
-        )
+        ax.set_ylim(0, max(yticks[-1] * 1.05, (yticks[-1] - yticks[0]) * 2.0 + yticks[-1]))
         # ax.set_ylim(ts_z[:, nskip:].min() * 0.95,
         #             ts_z[:, nskip:].max() * 1.05)
 
@@ -624,9 +597,7 @@ def confoundplot(
     tseries = np.array(tseries)
 
     # Define nested GridSpec
-    gs = mgs.GridSpecFromSubplotSpec(
-        1, 2, subplot_spec=gs_ts, width_ratios=[1, 100], wspace=0.0
-    )
+    gs = mgs.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs_ts, width_ratios=[1, 100], wspace=0.0)
 
     ax_ts = plt.subplot(gs[1])
     ax_ts.grid(False)
@@ -825,9 +796,7 @@ def compcor_variance_plot(
         if len(metadata_files) == 1:
             metadata_sources = ["CompCor"]
         else:
-            metadata_sources = [
-                "Decomposition {:d}".format(i) for i in range(len(metadata_files))
-            ]
+            metadata_sources = ["Decomposition {:d}".format(i) for i in range(len(metadata_files))]
     for file, source in zip(metadata_files, metadata_sources):
         metadata[source] = pd.read_csv(str(file), sep=r"\s+")
         metadata[source]["source"] = source
@@ -852,21 +821,14 @@ def compcor_variance_plot(
             decompositions.append((source, mask))
 
     if fig is not None:
-        ax = [
-            fig.add_subplot(1, len(decompositions), i + 1)
-            for i in range(len(decompositions))
-        ]
+        ax = [fig.add_subplot(1, len(decompositions), i + 1) for i in range(len(decompositions))]
     elif len(decompositions) > 1:
-        fig, ax = plt.subplots(
-            1, len(decompositions), figsize=(5 * len(decompositions), 5)
-        )
+        fig, ax = plt.subplots(1, len(decompositions), figsize=(5 * len(decompositions), 5))
     else:
         ax = [plt.axes()]
 
     for m, (source, mask) in enumerate(decompositions):
-        components = metadata[
-            (metadata["mask"] == mask) & (metadata["source"] == source)
-        ]
+        components = metadata[(metadata["mask"] == mask) & (metadata["source"] == source)]
         if len([m for s, m in decompositions if s == source]) > 1:
             title_mask = " ({} mask)".format(mask)
         else:
@@ -888,15 +850,11 @@ def compcor_variance_plot(
 
         for i, thr in enumerate(varexp_thresh):
             varexp[thr] = (
-                np.atleast_1d(
-                    np.searchsorted(components["cumulative_variance_explained"], thr)
-                )
+                np.atleast_1d(np.searchsorted(components["cumulative_variance_explained"], thr))
                 + 1
             )
             ax[m].axhline(y=100 * thr, color="lightgrey", linewidth=0.25)
-            ax[m].axvline(
-                x=varexp[thr], color="C{}".format(i), linewidth=2, linestyle=":"
-            )
+            ax[m].axvline(x=varexp[thr], color="C{}".format(i), linewidth=2, linestyle=":")
             ax[m].text(
                 0,
                 100 * thr,
@@ -907,9 +865,7 @@ def compcor_variance_plot(
             ax[m].text(
                 varexp[thr][0],
                 25,
-                "{} components explain\n{:.0f}% of variance".format(
-                    varexp[thr][0], 100 * thr
-                ),
+                "{} components explain\n{:.0f}% of variance".format(varexp[thr][0], 100 * thr),
                 rotation=90,
                 horizontalalignment="center",
                 fontsize="xx-small",
@@ -1057,7 +1013,7 @@ def cifti_surfaces_plot(
     surface_type="inflated",
     clip_range=(0, None),
     output_file=None,
-    **splt_kwargs
+    **splt_kwargs,
 ):
     """
     Plots a CIFTI-2 dense timeseries onto left/right mesh surfaces.
@@ -1092,6 +1048,7 @@ def cifti_surfaces_plot(
 
     def get_surface_meshes(density, surface_type):
         import templateflow.api as tf
+
         lh, rh = tf.get("fsLR", density=density, suffix=surface_type, extension=[".surf.gii"])
         return str(lh), str(rh)
 
@@ -1130,10 +1087,7 @@ def cifti_surfaces_plot(
     # Build the figure
     lh_mesh, rh_mesh = get_surface_meshes(density, surface_type)
     p = splt.Plot(
-        surf_lh=lh_mesh,
-        surf_rh=rh_mesh,
-        layout=splt_kwargs.pop("layout", "row"),
-        **splt_kwargs
+        surf_lh=lh_mesh, surf_rh=rh_mesh, layout=splt_kwargs.pop("layout", "row"), **splt_kwargs
     )
     p.add_layer({'left': lh_data, 'right': rh_data}, cmap='YlOrRd_r')
     figure = p.build()  # figsize - leave default?
@@ -1195,6 +1149,6 @@ def _concat_brain_struct_data(structs, data):
     concat_data = np.array([], dtype=data.dtype)
     for struct in structs:
         struct_upper_bound = struct.index_offset + struct.index_count
-        struct_data = data[struct.index_offset:struct_upper_bound]
+        struct_data = data[struct.index_offset : struct_upper_bound]
         concat_data = np.concatenate((concat_data, struct_data))
     return concat_data
