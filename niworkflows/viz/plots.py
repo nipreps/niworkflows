@@ -207,8 +207,6 @@ def plot_carpet(
 
         # Decimate data
         data, seg = _decimate_data(data, seg, size)
-        # preserve as much continuity as possible
-        order = seg.argsort(kind="stable")
 
         cmap = ListedColormap([cm.get_cmap("Paired").colors[i] for i in (1, 0, 7, 3)])
         assert len(cmap.colors) == len(
@@ -234,20 +232,19 @@ def plot_carpet(
 
         # Map segmentation
         if lut is None:
-            lut = np.zeros((256,), dtype="int")
-            lut[1:11] = 1
-            lut[255] = 2
-            lut[30:99] = 3
-            lut[100:201] = 4
+            lut = np.zeros((256,), dtype="uint32")
+            lut[1:11] = 4
+            lut[255] = 3
+            lut[30:99] = 2
+            lut[100:201] = 1
         # Apply lookup table
         seg = lut[oseg.astype(int)]
 
         # Decimate data
         data, seg = _decimate_data(data, seg, size)
-        # Order following segmentation labels
-        order = np.argsort(seg)[::-1]
+
         # Set colormap
-        cmap = ListedColormap(cm.get_cmap("tab10").colors[:4][::-1])
+        cmap = ListedColormap(cm.get_cmap("tab10").colors[:4])
 
         if legend:
             epiavg = func_data.mean(3)
@@ -259,7 +256,6 @@ def plot_carpet(
     return _carpet(
         data,
         seg,
-        order,
         cmap,
         epinii=epinii,
         segnii=segnii,
@@ -275,7 +271,6 @@ def plot_carpet(
 def _carpet(
     data,
     seg,
-    order,
     cmap,
     tr=None,
     detrend=True,
@@ -308,24 +303,29 @@ def _carpet(
         from scipy.cluster.hierarchy import linkage, dendrogram
         from sklearn.cluster import ward_tree
 
-        order = np.zeros(len(seg), dtype=np.int16)
-        region_lim = 0
-        for i in reversed(np.unique(seg)):
-            carpet_region = data[seg == i]
+        order = np.zeros(len(seg), dtype="uint32")
+        roi_start = 0
+        for i in np.unique(seg):
+            roi_mask = seg == i
+            roi = data[roi_mask]
             if cluster == "linkage":
-                order_cluster = linkage(
-                    carpet_region, method="average", metric="euclidean", optimal_ordering=True
+                linkage_matrix = linkage(
+                    roi, method="average", metric="euclidean", optimal_ordering=True
                 )
             else:
                 children, _, n_leaves, _, distances = ward_tree(
-                    carpet_region, return_distance=True
+                    roi, return_distance=True
                 )
-                order_cluster = _ward_to_linkage(children, n_leaves, distances)
+                linkage_matrix = _ward_to_linkage(children, n_leaves, distances)
 
-            dn = dendrogram(order_cluster, no_plot=True)
-            nreg = len(carpet_region)
-            order[region_lim:region_lim + nreg] = np.asarray(dn["leaves"]) + region_lim
-            region_lim += nreg
+            dn = dendrogram(linkage_matrix, no_plot=True)
+            nreg = len(roi)
+            order[roi_start:roi_start + nreg] = np.argwhere(roi_mask).squeeze()[
+                np.array(dn["leaves"])
+            ]
+            roi_start += nreg
+    else:
+        order = seg.argsort()
 
     # If subplot is not defined
     if subplot is None:
