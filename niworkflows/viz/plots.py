@@ -20,7 +20,7 @@
 #
 #     https://www.nipreps.org/community/licensing/
 #
-"""Plotting tools shared across MRIQC and FMRIPREP."""
+"""Plotting tools shared across MRIQC and fMRIPrep."""
 
 import numpy as np
 import nibabel as nb
@@ -38,7 +38,7 @@ DINA4_LANDSCAPE = (11.69, 8.27)
 class fMRIPlot:
     """Generates the fMRI Summary Plot."""
 
-    __slots__ = ("func_file", "mask_data", "tr", "seg_data", "confounds", "spikes")
+    __slots__ = ("func_file", "mask_data", "tr", "seg_data", "confounds", "spikes", "sort_carpet")
 
     def __init__(
         self,
@@ -52,12 +52,14 @@ class fMRIPlot:
         units=None,
         vlines=None,
         spikes_files=None,
+        sort_carpet=True,
     ):
         func_img = nb.load(func_file)
         self.func_file = func_file
         self.tr = tr or _get_tr(func_img)
         self.mask_data = None
         self.seg_data = None
+        self.sort_carpet = sort_carpet
 
         if not isinstance(func_img, nb.Cifti2Image):
             self.mask_data = nb.fileslice.strided_scalar(func_img.shape[:3], np.uint8(1))
@@ -121,7 +123,13 @@ class fMRIPlot:
             confoundplot(tseries, grid[grid_id], tr=self.tr, color=palette[i], name=name, **kwargs)
             grid_id += 1
 
-        plot_carpet(self.func_file, atlaslabels=self.seg_data, subplot=grid[-1], tr=self.tr)
+        plot_carpet(
+            self.func_file,
+            atlaslabels=self.seg_data,
+            subplot=grid[-1],
+            tr=self.tr,
+            sort_rows=self.sort_carpet,
+        )
         # spikesplot_cb([0.7, 0.78, 0.2, 0.008])
         return figure
 
@@ -138,6 +146,7 @@ def plot_carpet(
     legend=False,
     tr=None,
     lut=None,
+    sort_rows="ward",
 ):
     """
     Plot an image representation of voxel intensities across time also know
@@ -146,35 +155,41 @@ def plot_carpet(
 
     Parameters
     ----------
-
-        func : string or nibabel-image object
-            Path to NIfTI or CIFTI BOLD image, or a nibabel-image object
-        atlaslabels: ndarray, optional
-            A 3D array of integer labels from an atlas, resampled into ``img`` space.
-            Required if ``func`` is a NIfTI image.
-        detrend : boolean, optional
-            Detrend and standardize the data prior to plotting.
-        nskip : int, optional
-            Number of volumes at the beginning of the scan marked as nonsteady state.
-            Only used by volumetric NIfTI.
-        size : tuple, optional
-            Size of figure.
-        subplot : matplotlib Subplot, optional
-            Subplot to plot figure on.
-        title : string, optional
-            The title displayed on the figure.
-        output_file : string, or None, optional
-            The name of an image file to export the plot to. Valid extensions
-            are .png, .pdf, .svg. If output_file is not None, the plot
-            is saved to a file, and the display is closed.
-        legend : bool
-            Whether to render the average functional series with ``atlaslabels`` as
-            overlay.
-        tr : float , optional
-            Specify the TR, if specified it uses this value. If left as None,
-            # of frames is plotted instead of time.
-        lut : ndarray, optional
-            Look up table for segmentations
+    func : string or nibabel-image object
+        Path to NIfTI or CIFTI BOLD image, or a nibabel-image object
+    atlaslabels: ndarray, optional
+        A 3D array of integer labels from an atlas, resampled into ``img`` space.
+        Required if ``func`` is a NIfTI image.
+    detrend : boolean, optional
+        Detrend and standardize the data prior to plotting.
+    nskip : int, optional
+        Number of volumes at the beginning of the scan marked as nonsteady state.
+        Only used by volumetric NIfTI.
+    size : tuple, optional
+        Size of figure.
+    subplot : matplotlib Subplot, optional
+        Subplot to plot figure on.
+    title : string, optional
+        The title displayed on the figure.
+    output_file : string, or None, optional
+        The name of an image file to export the plot to. Valid extensions
+        are .png, .pdf, .svg. If output_file is not None, the plot
+        is saved to a file, and the display is closed.
+    legend : bool
+        Whether to render the average functional series with ``atlaslabels`` as
+        overlay.
+    tr : float , optional
+        Specify the TR, if specified it uses this value. If left as None,
+        # of frames is plotted instead of time.
+    lut : ndarray, optional
+        Look up table for segmentations
+    sort_rows : :obj:`str` or :obj:`False` or :obj:`None`
+        Apply a clustering algorithm to reorganize the rows of the carpet.
+        ``""``, ``False``, and ``None`` skip clustering sorting.
+        ``"linkage"`` uses linkage hierarchical clustering
+        :obj:`scipy.cluster.hierarchy.linkage`.
+        Any other value that Python evaluates to ``True`` will use the
+        default clustering, which is :obj:`sklearn.cluster.ward_tree`.
 
     """
     epinii = None
@@ -265,6 +280,7 @@ def plot_carpet(
         legend=legend,
         title=title,
         output_file=output_file,
+        sort_rows=sort_rows,
     )
 
 
@@ -274,7 +290,6 @@ def _carpet(
     cmap,
     tr=None,
     detrend=True,
-    cluster="ward",
     subplot=None,
     legend=False,
     title=None,
@@ -282,6 +297,7 @@ def _carpet(
     epinii=None,
     segnii=None,
     nslices=None,
+    sort_rows="ward",
 ):
     """Common carpetplot building code for volumetric / CIFTI plots"""
 
@@ -292,14 +308,14 @@ def _carpet(
 
     # Detrend data
     v = (None, None)
-    if detrend or cluster:
+    if detrend or sort_rows:
         from nilearn.signal import clean
 
         data = clean(data.T, t_r=tr, filter=False).T
         v = (-2, 2)
 
     # Cluster segments (if argument enabled)
-    if cluster:
+    if sort_rows:
         from scipy.cluster.hierarchy import linkage, dendrogram
         from sklearn.cluster import ward_tree
 
@@ -308,19 +324,17 @@ def _carpet(
         for i in np.unique(seg):
             roi_mask = seg == i
             roi = data[roi_mask]
-            if cluster == "linkage":
+            if sort_rows.lower() == "linkage":
                 linkage_matrix = linkage(
                     roi, method="average", metric="euclidean", optimal_ordering=True
                 )
             else:
-                children, _, n_leaves, _, distances = ward_tree(
-                    roi, return_distance=True
-                )
+                children, _, n_leaves, _, distances = ward_tree(roi, return_distance=True)
                 linkage_matrix = _ward_to_linkage(children, n_leaves, distances)
 
             dn = dendrogram(linkage_matrix, no_plot=True)
             nreg = len(roi)
-            order[roi_start:roi_start + nreg] = np.argwhere(roi_mask).squeeze()[
+            order[roi_start : roi_start + nreg] = np.argwhere(roi_mask).squeeze()[
                 np.array(dn["leaves"])
             ]
             roi_start += nreg
@@ -1189,10 +1203,7 @@ def _ward_to_linkage(children, n_leaves, distances):
     for i, merge in enumerate(children):
         current_count = 0
         for child_idx in merge:
-            current_count += (
-                1 if child_idx < n_samples else
-                counts[child_idx - n_samples]
-            )
+            current_count += 1 if child_idx < n_samples else counts[child_idx - n_samples]
         counts[i] = current_count
 
     return np.column_stack([children, distances, counts]).astype(float)
