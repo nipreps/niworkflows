@@ -33,39 +33,84 @@ from .generate_data import _create_dtseries_cifti
 from .. import viz
 
 
-def test_carpetplot():
+@pytest.mark.parametrize("tr", (None, 0.7))
+@pytest.mark.parametrize("sorting", (None, "ward", "linkage"))
+def test_carpetplot(tr, sorting):
     """Write a carpetplot"""
-    out_file_nifti = None
-    out_file_cifti = None
     save_artifacts = os.getenv("SAVE_CIRCLE_ARTIFACTS", False)
-    if save_artifacts:
-        out_file_nifti = os.path.join(save_artifacts, "carpetplot_nifti.svg")
-        out_file_cifti = os.path.join(save_artifacts, "carpetplot_cifti.svg")
 
-    # volumetric NIfTI
+    rng = np.random.default_rng(2010)
+
     viz.plot_carpet(
-        os.path.join(
-            datadir, "sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz"
+        rng.normal(100, 20, size=(18000, 1900)),
+        title="carpetplot with title",
+        tr=tr,
+        output_file=(
+            os.path.join(
+                save_artifacts,
+                f"carpet_nosegs_{'index' if tr is None else 'seg'}_"
+                f"{'nosort' if sorting is None else sorting}.svg"
+            ) if save_artifacts else None
         ),
-        atlaslabels=np.asanyarray(
-            nb.load(
-                os.path.join(
-                    datadir,
-                    "sub-ds205s03_task-functionallocalizer_run-01_bold_parc.nii.gz",
-                )
-            ).dataobj
-        ),
-        output_file=out_file_nifti,
-        legend=True,
+        sort_rows=sorting,
+        drop_trs=15,
     )
 
-    # CIFTI
+    labels = ("Cortical GM", "Deep GM", "Cerebellar GM", "WM + brainstem", "CSF")
+    sizes = (200, 100, 50, 100, 50)
+    total_size = np.sum(sizes)
+    data = np.zeros((total_size, 300))
+
+    indexes = np.arange(total_size)
+    rng.shuffle(indexes)
+    segments = {}
+    start = 0
+    for group, size in zip(labels, sizes):
+        segments[group] = indexes[start:start + size]
+        data[indexes[start:start + size]] = rng.normal(
+            rng.standard_normal(1) * 100,
+            rng.normal(20, 5, size=1),
+            size=(size, 300)
+        )
+        start += size
+
     viz.plot_carpet(
-        os.path.join(
-            datadir,
-            "sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii",
+        data,
+        segments,
+        tr=tr,
+        output_file=(
+            os.path.join(
+                save_artifacts,
+                f"carpet_random_{'index' if tr is None else 'seg'}_"
+                f"{'nosort' if sorting is None else sorting}.svg"
+            ) if save_artifacts else None
         ),
-        output_file=out_file_cifti,
+        sort_rows=sorting,
+    )
+
+    data = np.zeros((total_size, 300))
+    indexes = np.arange(total_size)
+    rng.shuffle(indexes)
+    segments = {}
+    start = 0
+    for i, (group, size) in enumerate(zip(labels, sizes)):
+        segments[group] = indexes[start:start + size]
+        data[indexes[start:start + size]] = i
+        start += size
+
+    viz.plot_carpet(
+        data,
+        segments,
+        detrend=False,
+        tr=tr,
+        output_file=(
+            os.path.join(
+                save_artifacts,
+                f"carpet_const_{'index' if tr is None else 'seg'}_"
+                f"{'nosort' if sorting is None else sorting}.svg"
+            ) if save_artifacts else None
+        ),
+        sort_rows=sorting,
     )
 
 

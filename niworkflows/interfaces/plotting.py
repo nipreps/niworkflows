@@ -21,7 +21,9 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Visualization tools."""
+from collections import defaultdict
 import numpy as np
+import nibabel as nb
 
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
@@ -37,14 +39,14 @@ from ..viz.plots import fMRIPlot, compcor_variance_plot, confounds_correlation_p
 
 class _FMRISummaryInputSpec(BaseInterfaceInputSpec):
     in_func = File(exists=True, mandatory=True, desc="")
-    in_mask = File(exists=True, desc="")
+    in_spikes_bg = File(exists=True, desc="")
+    fd = File(exists=True, desc="")
+    dvars = File(exists=True, desc="")
+    outliers = File(exists=True, desc="")
     in_segm = File(exists=True, desc="")
-    in_spikes_bg = File(exists=True, mandatory=True, desc="")
-    fd = File(exists=True, mandatory=True, desc="")
-    fd_thres = traits.Float(0.2, usedefault=True, desc="")
-    dvars = File(exists=True, mandatory=True, desc="")
-    outliers = File(exists=True, mandatory=True, desc="")
     tr = traits.Either(None, traits.Float, usedefault=True, desc="the TR")
+    fd_thres = traits.Float(0.2, usedefault=True, desc="")
+    drop_trs = traits.Int(0, usedefault=True, desc="dummy scans")
 
 
 class _FMRISummaryOutputSpec(TraitedSpec):
@@ -67,28 +69,41 @@ class FMRISummary(SimpleInterface):
             newpath=runtime.cwd,
         )
 
-        dataframe = pd.DataFrame(
-            {
-                "outliers": np.loadtxt(self.inputs.outliers, usecols=[0]).tolist(),
-                # Pick non-standardize dvars (col 1)
-                # First timepoint is NaN (difference)
-                "DVARS": [np.nan]
-                + np.loadtxt(self.inputs.dvars, skiprows=1, usecols=[1]).tolist(),
-                # First timepoint is zero (reference volume)
-                "FD": [0.0]
-                + np.loadtxt(self.inputs.fd, skiprows=1, usecols=[0]).tolist(),
-            }
+        dataframe = pd.DataFrame({
+            "outliers": np.loadtxt(self.inputs.outliers, usecols=[0]).tolist(),
+            # Pick non-standardize dvars (col 1)
+            # First timepoint is NaN (difference)
+            "DVARS": [np.nan]
+            + np.loadtxt(self.inputs.dvars, skiprows=1, usecols=[1]).tolist(),
+            # First timepoint is zero (reference volume)
+            "FD": [0.0]
+            + np.loadtxt(self.inputs.fd, skiprows=1, usecols=[0]).tolist(),
+        }) if (
+            isdefined(self.inputs.outliers)
+            and isdefined(self.inputs.dvars)
+            and isdefined(self.inputs.fd)
+        ) else None
+
+        input_data = nb.load(self.inputs.in_func)
+        seg_file = self.inputs.in_segm if isdefined(self.inputs.in_segm) else None
+        dataset, segments = (
+            _cifti_timeseries(input_data)
+            if isinstance(input_data, nb.Cifti2Image) else
+            _nifti_timeseries(input_data, seg_file)
         )
 
         fig = fMRIPlot(
-            self.inputs.in_func,
-            mask_file=self.inputs.in_mask if isdefined(self.inputs.in_mask) else None,
-            seg_file=self.inputs.in_segm if isdefined(self.inputs.in_segm) else None,
-            spikes_files=[self.inputs.in_spikes_bg],
+            dataset,
+            segments=segments,
+            spikes_files=(
+                [self.inputs.in_spikes_bg]
+                if isdefined(self.inputs.in_spikes_bg) else None
+            ),
             tr=self.inputs.tr,
-            data=dataframe[["outliers", "DVARS", "FD"]],
+            confounds=dataframe,
             units={"outliers": "%", "FD": "mm"},
             vlines={"FD": [self.inputs.fd_thres]},
+            nskip=self.inputs.drop_trs,
         ).plot()
         fig.savefig(self._results["out_file"], bbox_inches="tight")
         return runtime
@@ -203,3 +218,57 @@ class ConfoundsCorrelationPlot(SimpleInterface):
             reference=self.inputs.reference_column,
         )
         return runtime
+
+
+def _cifti_timeseries(dataset):
+    """Extract timeseries from CIFTI2 dataset."""
+    dataset = nb.load(dataset) if isinstance(dataset, str) else dataset
+
+    if dataset.nifti_header.get_intent()[0] != "ConnDenseSeries":
+        raise ValueError("Not a dense timeseries")
+
+    data = dataset.get_fdata(dtype="float32").T
+    matrix = dataset.header.matrix
+    seg = defaultdict(list)
+    for bm in matrix.get_index_map(1).brain_models:
+        label = bm.brain_structure.replace("CIFTI_STRUCTURE_", "").replace("_", " ").title()
+        if "CORTEX" not in bm.brain_structure and "CEREBELLUM" not in bm.brain_structure:
+            label = "Other"
+
+        seg[label] += list(range(
+            bm.index_offset, bm.index_offset + bm.index_count
+        ))
+
+    return data, seg
+
+
+def _nifti_timeseries(
+    dataset,
+    segmentation=None,
+    lut=None,
+    labels=("CSF", "WM", "Cerebellum", "Cortex")
+):
+    """Extract timeseries from NIfTI1/2 datasets."""
+    dataset = nb.load(dataset) if isinstance(dataset, str) else dataset
+    data = dataset.get_fdata(dtype="float32").reshape((-1, dataset.shape[-1]))
+
+    if segmentation is None:
+        return data, None
+
+    segmentation = nb.load(segmentation) if isinstance(segmentation, str) else segmentation
+    # Map segmentation
+    if lut is None:
+        lut = np.zeros((256,), dtype="int")
+        lut[1:11] = 4
+        lut[255] = 3
+        lut[30:99] = 2
+        lut[100:201] = 1
+    # Apply lookup table
+    seg = lut[np.asanyarray(segmentation.dataobj, dtype=int)].reshape(-1)
+    fgmask = seg > 0
+    seg = seg[fgmask]
+    seg_dict = {}
+    for i in np.unique(seg):
+        seg_dict[labels[i - 1]] = np.argwhere(seg == i).squeeze()
+
+    return data[fgmask], seg_dict
