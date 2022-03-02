@@ -37,11 +37,11 @@ class _BinaryDilationInputSpec(BaseInterfaceInputSpec):
 
 
 class _BinaryDilationOutputSpec(TraitedSpec):
-    out_mask = File(exists=False, desc="Crown mask")
+    out_mask = File(exists=False, desc="dilated mask")
 
 
 class BinaryDilation(SimpleInterface):
-    """Dilate brain mask for computing the crown mask."""
+    """Binary dilation of a mask."""
 
     input_spec = _BinaryDilationInputSpec
     output_spec = _BinaryDilationOutputSpec
