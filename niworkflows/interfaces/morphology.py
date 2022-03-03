@@ -61,9 +61,7 @@ class BinaryDilation(SimpleInterface):
             radius=self.inputs.radius,
         )
         out_file = str((Path(runtime.cwd) / "dilated_mask.nii.gz").absolute())
-        out_img = mask_img.__class__(
-            dilated, mask_img.affine, mask_img.header
-        )
+        out_img = mask_img.__class__(dilated, mask_img.affine, mask_img.header)
         out_img.set_data_dtype("uint8")
         out_img.to_filename(out_file)
         self._results["out_mask"] = out_file
@@ -73,7 +71,7 @@ class BinaryDilation(SimpleInterface):
 def image_binary_dilation(in_mask, radius=2):
     """
     Dilate the input binary mask.
-    
+
     Parameters
     ----------
     in_mask: :obj:`numpy.ndarray`
