@@ -26,11 +26,18 @@ from pathlib import Path
 
 import numpy as np
 import nibabel as nb
+import pandas as pd
 import pytest
 
 from .conftest import datadir
 from .generate_data import _create_dtseries_cifti
 from .. import viz
+from niworkflows.viz.plots import fMRIPlot
+from niworkflows.interfaces.plotting import (
+    _cifti_timeseries,
+    _nifti_timeseries,
+    _get_tr,
+)
 
 
 @pytest.mark.parametrize("tr", (None, 0.7))
@@ -111,6 +118,45 @@ def test_carpetplot(tr, sorting):
             ) if save_artifacts else None
         ),
         sort_rows=sorting,
+    )
+
+
+@pytest.mark.parametrize("input_files", [
+    ("sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz", None),
+    ("sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii", None),
+    ("sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz",
+     "sub-ds205s03_task-functionallocalizer_run-01_bold_parc.nii.gz"),
+])
+def test_fmriplot(input_files):
+    """Exercise the fMRIPlot class."""
+    save_artifacts = os.getenv("SAVE_CIRCLE_ARTIFACTS", False)
+    rng = np.random.default_rng(2010)
+
+    in_file = os.path.join(datadir, input_files[0])
+    seg_file = os.path.join(datadir, input_files[1]) if input_files[1] is not None else None
+
+    dtype = "nifti" if input_files[0].endswith("volreg.nii.gz") else "cifti"
+    has_seg = "_parc" if seg_file else ""
+
+    timeseries, segments = (
+        _nifti_timeseries(in_file, seg_file) if dtype == "nifti" else
+        _cifti_timeseries(in_file)
+    )
+
+    fMRIPlot(
+        timeseries,
+        segments,
+        tr=_get_tr(nb.load(in_file)),
+        confounds=pd.DataFrame({
+            "outliers": rng.normal(0.2, 0.2, timeseries.shape[-1] - 1),
+            "DVARS": rng.normal(0.2, 0.2, timeseries.shape[-1] - 1),
+            "FD": rng.normal(0.2, 0.2, timeseries.shape[-1] - 1),
+        }),
+        units={"FD": "mm"},
+        paired_carpet=dtype == "cifti",
+    ).plot().savefig(
+        os.path.join(save_artifacts, f"fmriplot_{dtype}{has_seg}.svg"),
+        bbox_inches="tight",
     )
 
 

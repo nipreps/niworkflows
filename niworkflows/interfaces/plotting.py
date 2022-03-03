@@ -99,7 +99,10 @@ class FMRISummary(SimpleInterface):
                 [self.inputs.in_spikes_bg]
                 if isdefined(self.inputs.in_spikes_bg) else None
             ),
-            tr=self.inputs.tr,
+            tr=(
+                self.inputs.tr if isdefined(self.inputs.tr) else
+                _get_tr(self.inputs.in_func)
+            ),
             confounds=dataframe,
             units={"outliers": "%", "FD": "mm"},
             vlines={"FD": [self.inputs.fd_thres]},
@@ -227,7 +230,6 @@ def _cifti_timeseries(dataset):
     if dataset.nifti_header.get_intent()[0] != "ConnDenseSeries":
         raise ValueError("Not a dense timeseries")
 
-    data = dataset.get_fdata(dtype="float32").T
     matrix = dataset.header.matrix
     seg = defaultdict(list)
     for bm in matrix.get_index_map(1).brain_models:
@@ -239,7 +241,7 @@ def _cifti_timeseries(dataset):
             bm.index_offset, bm.index_offset + bm.index_count
         ))
 
-    return data, seg
+    return dataset.get_fdata(dtype="float32").T, seg
 
 
 def _nifti_timeseries(
@@ -272,3 +274,25 @@ def _nifti_timeseries(
         seg_dict[labels[i - 1]] = np.argwhere(seg == i).squeeze()
 
     return data[fgmask], seg_dict
+
+
+def _get_tr(img):
+    """
+    Attempt to extract repetition time from NIfTI/CIFTI header
+
+    Examples
+    --------
+    >>> _get_tr(nb.load(Path(test_data) /
+    ...    'sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz'))
+    2.2
+    >>> _get_tr(nb.load(Path(test_data) /
+    ...    'sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii'))
+    2.0
+
+    """
+
+    try:
+        return img.header.matrix.get_index_map(0).series_step
+    except AttributeError:
+        return img.header.get_zooms()[-1]
+    raise RuntimeError("Could not extract TR - unknown data structure type")

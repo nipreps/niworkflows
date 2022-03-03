@@ -38,7 +38,16 @@ DINA4_LANDSCAPE = (11.69, 8.27)
 class fMRIPlot:
     """Generates the fMRI Summary Plot."""
 
-    __slots__ = ("timeseries", "segments", "tr", "confounds", "spikes", "nskip", "sort_carpet")
+    __slots__ = (
+        "timeseries",
+        "segments",
+        "tr",
+        "confounds",
+        "spikes",
+        "nskip",
+        "sort_carpet",
+        "paired_carpet",
+    )
 
     def __init__(
         self,
@@ -46,7 +55,6 @@ class fMRIPlot:
         segments,
         confounds=None,
         conf_file=None,
-        seg_file=None,
         tr=None,
         usecols=None,
         units=None,
@@ -54,12 +62,14 @@ class fMRIPlot:
         spikes_files=None,
         nskip=0,
         sort_carpet=True,
+        paired_carpet=False,
     ):
         self.timeseries = timeseries
         self.segments = segments
         self.tr = tr
         self.nskip = nskip
         self.sort_carpet = sort_carpet
+        self.paired_carpet = paired_carpet
 
         if units is None:
             units = {}
@@ -70,9 +80,9 @@ class fMRIPlot:
             confounds = pd.read_csv(conf_file, sep=r"[\t\s]+", usecols=usecols, index_col=False)
 
         if confounds is not None:
-            for name in confounds.columns.ravel():
+            for name in confounds.columns:
                 self.confounds[name] = {
-                    "values": confounds[[name]].values.ravel().tolist(),
+                    "values": confounds[[name]].values.squeeze().tolist(),
                     "units": units.get(name),
                     "cutoff": vlines.get(name),
                 }
@@ -123,6 +133,7 @@ class fMRIPlot:
             tr=self.tr,
             sort_rows=self.sort_carpet,
             drop_trs=self.nskip,
+            cmap="paired" if self.paired_carpet else None,
         )
         return figure
 
@@ -209,7 +220,7 @@ def plot_carpet(
 
         for seg_label, seg_idx in segments.items():
             roi_data = data[seg_idx]
-            if sort_rows.lower() == "linkage":
+            if isinstance(sort_rows, str) and sort_rows.lower() == "linkage":
                 linkage_matrix = linkage(
                     roi_data, method="average", metric="euclidean", optimal_ordering=True
                 )

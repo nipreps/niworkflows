@@ -24,7 +24,11 @@
 import os
 import nibabel as nb
 from niworkflows import viz
-from niworkflows.interfaces.plotting import _cifti_timeseries, _nifti_timeseries
+from niworkflows.interfaces.plotting import (
+    _get_tr,
+    _cifti_timeseries,
+    _nifti_timeseries,
+)
 from niworkflows.tests.conftest import datadir
 
 
@@ -75,25 +79,3 @@ def test_nifti_carpetplot():
         ),
         drop_trs=0,
     )
-
-
-def _get_tr(img):
-    """
-    Attempt to extract repetition time from NIfTI/CIFTI header
-
-    Examples
-    --------
-    >>> _get_tr(nb.load(Path(test_data) /
-    ...    'sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz'))
-    2.2
-    >>> _get_tr(nb.load(Path(test_data) /
-    ...    'sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii'))
-    2.0
-
-    """
-
-    try:
-        return img.header.matrix.get_index_map(0).series_step
-    except AttributeError:
-        return img.header.get_zooms()[-1]
-    raise RuntimeError("Could not extract TR - unknown data structure type")
