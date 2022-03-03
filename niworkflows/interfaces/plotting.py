@@ -21,7 +21,6 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Visualization tools."""
-from collections import defaultdict
 import numpy as np
 import nibabel as nb
 
@@ -231,12 +230,18 @@ def _cifti_timeseries(dataset):
         raise ValueError("Not a dense timeseries")
 
     matrix = dataset.header.matrix
-    seg = defaultdict(list)
+    labels = {
+        "CIFTI_STRUCTURE_CORTEX_LEFT": "CtxL",
+        "CIFTI_STRUCTURE_CORTEX_RIGHT": "CtxR",
+        "CIFTI_STRUCTURE_CEREBELLUM_LEFT": "CbL",
+        "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": "CbR",
+    }
+    seg = {label: [] for label in list(labels.values()) + ["Other"]}
     for bm in matrix.get_index_map(1).brain_models:
-        label = bm.brain_structure.replace("CIFTI_STRUCTURE_", "").replace("_", " ").title()
-        if "CORTEX" not in bm.brain_structure and "CEREBELLUM" not in bm.brain_structure:
-            label = "Other"
-
+        label = (
+            "Other" if bm.brain_structure not in labels else
+            labels[bm.brain_structure]
+        )
         seg[label] += list(range(
             bm.index_offset, bm.index_offset + bm.index_count
         ))
@@ -248,7 +253,7 @@ def _nifti_timeseries(
     dataset,
     segmentation=None,
     lut=None,
-    labels=("CSF", "WM", "Cerebellum", "Cortex")
+    labels=("Ctx GM", "dGM", "WM+CSF", "Cb")
 ):
     """Extract timeseries from NIfTI1/2 datasets."""
     dataset = nb.load(dataset) if isinstance(dataset, str) else dataset
@@ -261,10 +266,10 @@ def _nifti_timeseries(
     # Map segmentation
     if lut is None:
         lut = np.zeros((256,), dtype="int")
-        lut[1:11] = 4
-        lut[255] = 3
-        lut[30:99] = 2
-        lut[100:201] = 1
+        lut[100:201] = 1  # Ctx GM
+        lut[30:99] = 2    # dGM
+        lut[1:11] = 3     # WM+CSF
+        lut[255] = 4      # Cerebellum
     # Apply lookup table
     seg = lut[np.asanyarray(segmentation.dataobj, dtype=int)].reshape(-1)
     fgmask = seg > 0
