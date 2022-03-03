@@ -88,7 +88,7 @@ class BinarySubtraction(SimpleInterface):
         data = np.bool_(base_img.dataobj)
         data[np.bool_(nb.load(self.inputs.in_subtract).dataobj)] = False
 
-        out_file = str((Path(runtime.cwd) / "dilated_mask.nii.gz").absolute())
+        out_file = str((Path(runtime.cwd) / "subtracted_mask.nii.gz").absolute())
         out_img = base_img.__class__(
             data,
             base_img.affine,
