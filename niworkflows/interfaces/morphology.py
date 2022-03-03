@@ -77,7 +77,7 @@ class _BinarySubtractionOutputSpec(TraitedSpec):
 
 
 class BinarySubtraction(SimpleInterface):
-    """Binary dilation of a mask."""
+    """Binary subtraction of two masks."""
 
     input_spec = _BinarySubtractInputSpec
     output_spec = _BinarySubtractionOutputSpec
