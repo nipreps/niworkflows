@@ -38,48 +38,51 @@ DINA4_LANDSCAPE = (11.69, 8.27)
 class fMRIPlot:
     """Generates the fMRI Summary Plot."""
 
-    __slots__ = ("func_file", "mask_data", "tr", "seg_data", "confounds", "spikes", "sort_carpet")
+    __slots__ = (
+        "timeseries",
+        "segments",
+        "tr",
+        "confounds",
+        "spikes",
+        "nskip",
+        "sort_carpet",
+        "paired_carpet",
+    )
 
     def __init__(
         self,
-        func_file,
-        mask_file=None,
-        data=None,
+        timeseries,
+        segments,
+        confounds=None,
         conf_file=None,
-        seg_file=None,
         tr=None,
         usecols=None,
         units=None,
         vlines=None,
         spikes_files=None,
+        nskip=0,
         sort_carpet=True,
+        paired_carpet=False,
     ):
-        func_img = nb.load(func_file)
-        self.func_file = func_file
-        self.tr = tr or _get_tr(func_img)
-        self.mask_data = None
-        self.seg_data = None
+        self.timeseries = timeseries
+        self.segments = segments
+        self.tr = tr
+        self.nskip = nskip
         self.sort_carpet = sort_carpet
-
-        if not isinstance(func_img, nb.Cifti2Image):
-            self.mask_data = nb.fileslice.strided_scalar(func_img.shape[:3], np.uint8(1))
-            if mask_file:
-                self.mask_data = np.asanyarray(nb.load(mask_file).dataobj).astype("uint8")
-            if seg_file:
-                self.seg_data = np.asanyarray(nb.load(seg_file).dataobj)
+        self.paired_carpet = paired_carpet
 
         if units is None:
             units = {}
         if vlines is None:
             vlines = {}
         self.confounds = {}
-        if data is None and conf_file:
-            data = pd.read_csv(conf_file, sep=r"[\t\s]+", usecols=usecols, index_col=False)
+        if confounds is None and conf_file:
+            confounds = pd.read_csv(conf_file, sep=r"[\t\s]+", usecols=usecols, index_col=False)
 
-        if data is not None:
-            for name in data.columns.ravel():
+        if confounds is not None:
+            for name in confounds.columns:
                 self.confounds[name] = {
-                    "values": data[[name]].values.ravel().tolist(),
+                    "values": confounds[[name]].values.squeeze().tolist(),
                     "units": units.get(name),
                     "cutoff": vlines.get(name),
                 }
@@ -124,50 +127,51 @@ class fMRIPlot:
             grid_id += 1
 
         plot_carpet(
-            self.func_file,
-            atlaslabels=self.seg_data,
+            self.timeseries,
+            segments=self.segments,
             subplot=grid[-1],
             tr=self.tr,
             sort_rows=self.sort_carpet,
+            drop_trs=self.nskip,
+            cmap="paired" if self.paired_carpet else None,
         )
-        # spikesplot_cb([0.7, 0.78, 0.2, 0.008])
         return figure
 
 
 def plot_carpet(
-    func,
-    atlaslabels=None,
+    data,
+    segments=None,
+    cmap=None,
+    tr=None,
     detrend=True,
-    nskip=0,
-    size=(950, 800),
     subplot=None,
     title=None,
     output_file=None,
-    legend=False,
-    tr=None,
-    lut=None,
+    size=(900, 1200),
     sort_rows="ward",
+    drop_trs=0,
 ):
     """
-    Plot an image representation of voxel intensities across time also know
-    as the "carpet plot" or "Power plot". See Jonathan Power Neuroimage
-    2017 Jul 1; 154:150-158.
+    Plot an image representation of voxel intensities across time.
+
+    This kind of plot is known as "carpet plot" or "Power plot".
+    See Jonathan Power Neuroimage 2017 Jul 1; 154:150-158.
 
     Parameters
     ----------
-    func : string or nibabel-image object
-        Path to NIfTI or CIFTI BOLD image, or a nibabel-image object
-    atlaslabels: ndarray, optional
-        A 3D array of integer labels from an atlas, resampled into ``img`` space.
-        Required if ``func`` is a NIfTI image.
-    detrend : boolean, optional
+    data : N x T :obj:`numpy.array`
+        The functional data to be plotted (*N* sampling locations by *T* timepoints).
+    segments: :obj:`dict`, optional
+        A mapping between segment labels (e.g., `"Left Cortex"`) and list of indexes
+        in the data array.
+    cmap : colormap
+        Overrides the generation of an automated colormap.
+    tr : float , optional
+        Specify the TR, if specified it uses this value. If left as None,
+        # of frames is plotted instead of time.
+    detrend : :obj:`bool`, optional
         Detrend and standardize the data prior to plotting.
-    nskip : int, optional
-        Number of volumes at the beginning of the scan marked as nonsteady state.
-        Only used by volumetric NIfTI.
-    size : tuple, optional
-        Size of figure.
-    subplot : matplotlib Subplot, optional
+    subplot : matplotlib subplot, optional
         Subplot to plot figure on.
     title : string, optional
         The title displayed on the figure.
@@ -175,14 +179,8 @@ def plot_carpet(
         The name of an image file to export the plot to. Valid extensions
         are .png, .pdf, .svg. If output_file is not None, the plot
         is saved to a file, and the display is closed.
-    legend : bool
-        Whether to render the average functional series with ``atlaslabels`` as
-        overlay.
-    tr : float , optional
-        Specify the TR, if specified it uses this value. If left as None,
-        # of frames is plotted instead of time.
-    lut : ndarray, optional
-        Look up table for segmentations
+    size : :obj:`tuple`
+        Maximum number of samples to plot (voxels, timepoints)
     sort_rows : :obj:`str` or :obj:`False` or :obj:`None`
         Apply a clustering algorithm to reorganize the rows of the carpet.
         ``""``, ``False``, and ``None`` skip clustering sorting.
@@ -192,204 +190,106 @@ def plot_carpet(
         default clustering, which is :obj:`sklearn.cluster.ward_tree`.
 
     """
-    epinii = None
-    segnii = None
-    nslices = None
-    img = nb.load(func) if isinstance(func, str) else func
-
-    if isinstance(img, nb.Cifti2Image):
-        assert img.nifti_header.get_intent()[0] == "ConnDenseSeries", "Not a dense timeseries"
-
-        data = img.get_fdata().T
-        matrix = img.header.matrix
-        struct_map = {
-            "LEFT_CORTEX": 1,
-            "RIGHT_CORTEX": 2,
-            "SUBCORTICAL": 3,
-            "CEREBELLUM": 4,
+    if segments is None:
+        segments = {
+            "brain": list(range(data.shape[0]))
         }
-        seg = np.zeros((data.shape[0],), dtype="uint32")
-        for bm in matrix.get_index_map(1).brain_models:
-            if "CORTEX" in bm.brain_structure:
-                lidx = (1, 2)["RIGHT" in bm.brain_structure]
-            elif "CEREBELLUM" in bm.brain_structure:
-                lidx = 4
-            else:
-                lidx = 3
-            index_final = bm.index_offset + bm.index_count
-            seg[bm.index_offset : index_final] = lidx
-        assert len(seg[seg < 1]) == 0, "Unassigned labels"
 
-        # Decimate data
-        data, seg = _decimate_data(data, seg, size)
-
+    if cmap is None:
+        cmap = ListedColormap(cm.get_cmap("tab10").colors[:len(segments)])
+    elif cmap == "paired":
         cmap = ListedColormap([cm.get_cmap("Paired").colors[i] for i in (1, 0, 7, 3)])
-        assert len(cmap.colors) == len(
-            struct_map
-        ), "Mismatch between expected # of structures and colors"
 
-        # ensure no legend for CIFTI
-        legend = False
-
-    else:  # Volumetric NIfTI
-        from nilearn._utils import check_niimg_4d
-        from nilearn._utils.niimg import _safe_get_data
-
-        img_nii = check_niimg_4d(
-            img,
-            dtype="auto",
-        )
-        func_data = _safe_get_data(img_nii, ensure_finite=True)
-        func_data = func_data[..., nskip:]
-        ntsteps = func_data.shape[-1]
-        data = func_data[atlaslabels > 0].reshape(-1, ntsteps)
-        oseg = atlaslabels[atlaslabels > 0].reshape(-1)
-
-        # Map segmentation
-        if lut is None:
-            lut = np.zeros((256,), dtype="uint32")
-            lut[1:11] = 4
-            lut[255] = 3
-            lut[30:99] = 2
-            lut[100:201] = 1
-        # Apply lookup table
-        seg = lut[oseg.astype(int)]
-
-        # Decimate data
-        data, seg = _decimate_data(data, seg, size)
-
-        # Set colormap
-        cmap = ListedColormap(cm.get_cmap("tab10").colors[:4])
-
-        if legend:
-            epiavg = func_data.mean(3)
-            epinii = nb.Nifti1Image(epiavg, img_nii.affine, img_nii.header)
-            segnii = nb.Nifti1Image(lut[atlaslabels.astype(int)], epinii.affine, epinii.header)
-            segnii.set_data_dtype("uint8")
-            nslices = epiavg.shape[-1]
-
-    return _carpet(
-        data,
-        seg,
-        cmap,
-        epinii=epinii,
-        segnii=segnii,
-        nslices=nslices,
-        tr=tr,
-        subplot=subplot,
-        legend=legend,
-        title=title,
-        output_file=output_file,
-        sort_rows=sort_rows,
-    )
-
-
-def _carpet(
-    data,
-    seg,
-    cmap,
-    tr=None,
-    detrend=True,
-    subplot=None,
-    legend=False,
-    title=None,
-    output_file=None,
-    epinii=None,
-    segnii=None,
-    nslices=None,
-    sort_rows="ward",
-):
-    """Common carpetplot building code for volumetric / CIFTI plots"""
-
-    notr = False
-    if tr is None:
-        notr = True
-        tr = 1.0
-
-    # Detrend data
-    v = (None, None)
-    if detrend or sort_rows:
+    vminmax = (None, None)
+    if detrend:
         from nilearn.signal import clean
-
         data = clean(data.T, t_r=tr, filter=False).T
-        v = (-2, 2)
+        vminmax = (np.percentile(data, 2), np.percentile(data, 98))
+
+    # Decimate number of time-series before clustering
+    n_dec = int((1.8 * data.shape[0]) // size[0])
+    if n_dec > 1:
+        segments = {
+            lab: idx[::n_dec] for lab, idx in segments.items()
+        }
 
     # Cluster segments (if argument enabled)
     if sort_rows:
         from scipy.cluster.hierarchy import linkage, dendrogram
         from sklearn.cluster import ward_tree
 
-        order = np.zeros(len(seg), dtype="uint32")
-        roi_start = 0
-        for i in np.unique(seg):
-            roi_mask = seg == i
-            roi = data[roi_mask]
-            if sort_rows.lower() == "linkage":
+        for seg_label, seg_idx in segments.items():
+            roi_data = data[seg_idx]
+            if isinstance(sort_rows, str) and sort_rows.lower() == "linkage":
                 linkage_matrix = linkage(
-                    roi, method="average", metric="euclidean", optimal_ordering=True
+                    roi_data, method="average", metric="euclidean", optimal_ordering=True
                 )
             else:
-                children, _, n_leaves, _, distances = ward_tree(roi, return_distance=True)
+                children, _, n_leaves, _, distances = ward_tree(roi_data, return_distance=True)
                 linkage_matrix = _ward_to_linkage(children, n_leaves, distances)
 
             dn = dendrogram(linkage_matrix, no_plot=True)
-            nreg = len(roi)
-            order[roi_start : roi_start + nreg] = np.argwhere(roi_mask).squeeze()[
-                np.array(dn["leaves"])
-            ]
-            roi_start += nreg
-    else:
-        order = seg.argsort()
+            # Override the ordering of the indices in this segment
+            segments[seg_label] = np.array(seg_idx)[np.array(dn["leaves"])]
 
     # If subplot is not defined
     if subplot is None:
         subplot = mgs.GridSpec(1, 1)[0]
 
+    # Length before decimation
+    n_trs = data.shape[-1] - drop_trs
+
     # Define nested GridSpec
-    wratios = [1, 100, 20]
     gs = mgs.GridSpecFromSubplotSpec(
-        1,
-        2 + int(legend),
-        subplot_spec=subplot,
-        width_ratios=wratios[: 2 + int(legend)],
-        wspace=0.0,
+        1, 2, subplot_spec=subplot, width_ratios=(1, 100), wspace=0.0,
     )
 
     # Segmentation colorbar
+    colors = np.hstack([[i + 1] * len(v) for i, v in enumerate(segments.values())])
     ax0 = plt.subplot(gs[0])
     ax0.set_yticks([])
     ax0.set_xticks([])
-    ax0.imshow(seg[order, np.newaxis], interpolation="none", aspect="auto", cmap=cmap)
+    ax0.imshow(
+        colors[:, np.newaxis],
+        interpolation="none",
+        aspect="auto",
+        cmap=cmap
+    )
 
     ax0.grid(False)
     ax0.spines["left"].set_visible(False)
     ax0.spines["bottom"].set_color("none")
     ax0.spines["bottom"].set_visible(False)
 
+    # Calculate time decimation factor
+    t_dec = max(int((1.8 * n_trs) // size[1]), 1)
+    data = data[np.hstack(list(segments.values())), drop_trs::t_dec]
+
     # Carpet plot
     ax1 = plt.subplot(gs[1])
     ax1.imshow(
-        data[order],
+        data,
         interpolation="nearest",
         aspect="auto",
         cmap="gray",
-        vmin=v[0],
-        vmax=v[1],
+        vmin=vminmax[0],
+        vmax=vminmax[1],
     )
 
     ax1.grid(False)
     ax1.set_yticks([])
     ax1.set_yticklabels([])
 
-    # Set 10 frame markers in X axis
-    interval = max((int(data.shape[-1] + 1) // 10, int(data.shape[-1] + 1) // 5, 1))
-    xticks = list(range(0, data.shape[-1])[::interval])
-    if notr:
-        xlabel = "time-points (index)"
-        xticklabels = [round(xtick) for xtick in xticks]
-    else:
-        xlabel = "time (s)"
-        xticklabels = ["%.02f" % (tr * xtick) for xtick in xticks]
+    xticks = np.linspace(0, data.shape[-1], endpoint=True, num=7)
+    xlabel = "time-points (index)"
+    xticklabels = (xticks * n_trs / data.shape[-1]).astype("uint32") + drop_trs
+    if tr is not None:
+        xlabel = "time (mm:ss)"
+        xticklabels = [
+            f"{int(t // 60):02d}:{(t % 60).round(0).astype(int):02d}"
+            for t in (tr * xticklabels)
+        ]
+
     ax1.set_xticks(xticks)
     ax1.set_xlabel(xlabel)
     ax1.set_xticklabels(xticklabels)
@@ -410,26 +310,6 @@ def _carpet(
     if title:
         ax1.set_title(title)
 
-    ax2 = None
-    if legend:
-        from nilearn.plotting import plot_img
-
-        gslegend = mgs.GridSpecFromSubplotSpec(5, 1, subplot_spec=gs[2], wspace=0.0, hspace=0.0)
-        coords = np.linspace(int(0.10 * nslices), int(0.95 * nslices), 5).astype(np.uint8)
-        for i, c in enumerate(coords.tolist()):
-            ax2 = plt.subplot(gslegend[i])
-            plot_img(
-                segnii,
-                bg_img=epinii,
-                axes=ax2,
-                display_mode="z",
-                annotate=False,
-                cut_coords=[c],
-                threshold=0.1,
-                cmap=cmap,
-                interpolation="nearest",
-            )
-
     if output_file is not None:
         figure = plt.gcf()
         figure.savefig(output_file, bbox_inches="tight")
@@ -437,7 +317,7 @@ def _carpet(
         figure = None
         return output_file
 
-    return (ax0, ax1, ax2), gs
+    return (ax0, ax1), gs
 
 
 def spikesplot(
@@ -1142,55 +1022,11 @@ def cifti_surfaces_plot(
     return figure
 
 
-def _get_tr(img):
-    """
-    Attempt to extract repetition time from NIfTI/CIFTI header
-
-    Examples
-    --------
-    >>> _get_tr(nb.load(Path(test_data) /
-    ...    'sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz'))
-    2.2
-    >>> _get_tr(nb.load(Path(test_data) /
-    ...    'sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii'))
-    2.0
-    """
-
-    try:
-        return img.header.matrix.get_index_map(0).series_step
-    except AttributeError:
-        return img.header.get_zooms()[-1]
-    raise RuntimeError("Could not extract TR - unknown data structure type")
-
-
-def _decimate_data(data, seg, size):
-    """Decimate timeseries data
-
-    Parameters
-    ----------
-    data : ndarray
-        2 element array of timepoints and samples
-    seg : ndarray
-        1 element array of samples
-    size : tuple
-        2 element for P/T decimation
-
-    """
-    p_dec = 1 + data.shape[0] // size[0]
-    if p_dec:
-        data = data[::p_dec, :]
-        seg = seg[::p_dec]
-    t_dec = 1 + data.shape[1] // size[1]
-    if t_dec:
-        data = data[:, ::t_dec]
-    return data, seg
-
-
 def _concat_brain_struct_data(structs, data):
     concat_data = np.array([], dtype=data.dtype)
     for struct in structs:
         struct_upper_bound = struct.index_offset + struct.index_count
-        struct_data = data[struct.index_offset : struct_upper_bound]
+        struct_data = data[struct.index_offset:struct_upper_bound]
         concat_data = np.concatenate((concat_data, struct_data))
     return concat_data
 
