@@ -55,7 +55,7 @@ def test_carpetplot(tr, sorting):
         output_file=(
             os.path.join(
                 save_artifacts,
-                f"carpet_nosegs_{'index' if tr is None else 'seg'}_"
+                f"carpet_nosegs_{'index' if tr is None else 'time'}_"
                 f"{'nosort' if sorting is None else sorting}.svg"
             ) if save_artifacts else None
         ),
@@ -113,7 +113,7 @@ def test_carpetplot(tr, sorting):
         output_file=(
             os.path.join(
                 save_artifacts,
-                f"carpet_const_{'index' if tr is None else 'seg'}_"
+                f"carpet_const_{'index' if tr is None else 'time'}_"
                 f"{'nosort' if sorting is None else sorting}.svg"
             ) if save_artifacts else None
         ),
