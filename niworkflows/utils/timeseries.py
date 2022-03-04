@@ -73,7 +73,7 @@ def _nifti_timeseries(
     # Map segmentation
     if remap_rois or lut is not None:
         if lut is None:
-            lut = np.zeros((256,), dtype="int")
+            lut = np.zeros((256,), dtype="uint8")
             lut[100:201] = 1  # Ctx GM
             lut[30:99] = 2    # dGM
             lut[1:11] = 3     # WM+CSF
