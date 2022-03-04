@@ -150,6 +150,7 @@ def plot_carpet(
     size=(900, 1200),
     sort_rows="ward",
     drop_trs=0,
+    legend=True,
 ):
     """
     Plot an image representation of voxel intensities across time.
@@ -195,6 +196,10 @@ def plot_carpet(
             "whole brain (voxels)": list(range(data.shape[0]))
         }
 
+    nsegments = len(segments)
+    if nsegments == 1:
+        legend = False
+
     if cmap is None:
         colors = cm.get_cmap("tab10").colors
     elif cmap == "paired":
@@ -202,11 +207,12 @@ def plot_carpet(
         colors[0], colors[1] = colors[1], colors[0]
         colors[2], colors[7] = colors[7], colors[2]
 
-    vminmax = (None, None)
     if detrend:
         from nilearn.signal import clean
         data = clean(data.T, t_r=tr, filter=False).T
-        vminmax = (np.percentile(data, 2), np.percentile(data, 98))
+
+    # We want all subplots to have the same dynamic range
+    vminmax = (np.percentile(data, 2), np.percentile(data, 98))
 
     # Decimate number of time-series before clustering
     n_dec = int((1.8 * data.shape[0]) // size[0])
@@ -244,8 +250,6 @@ def plot_carpet(
     # Calculate time decimation factor
     t_dec = max(int((1.8 * n_trs) // size[1]), 1)
     data = data[:, drop_trs::t_dec]
-
-    nsegments = len(segments)
 
     # Define nested GridSpec
     gs = mgs.GridSpecFromSubplotSpec(
@@ -285,14 +289,9 @@ def plot_carpet(
         xticks = np.linspace(0, data.shape[-1], endpoint=True, num=7)
         ax.set_xticks(xticks)
         ax.set_yticks([])
-        ax.set_ylabel(label)
         ax.grid(False)
 
-        if i < (nsegments - 1):
-            ax.spines["bottom"].set_color("none")
-            ax.spines["bottom"].set_visible(False)
-            ax.set_xticklabels([])
-        else:
+        if i == (nsegments - 1):
             xlabel = "time-points (index)"
             xticklabels = (xticks * n_trs / data.shape[-1]).astype("uint32") + drop_trs
             if tr is not None:
@@ -307,9 +306,50 @@ def plot_carpet(
             ax.spines["bottom"].set_position(("outward", 5))
             ax.spines["bottom"].set_color("k")
             ax.spines["bottom"].set_linewidth(.8)
+        else:
+            ax.set_xticklabels([])
+            ax.set_xticks([])
+            ax.spines["bottom"].set_color("none")
+            ax.spines["bottom"].set_visible(False)
 
         if title and i == 0:
             ax.set_title(title)
+
+    if nsegments == 1:
+        ax.set_ylabel(label)
+
+    if legend:
+        from matplotlib.patches import Patch
+        from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+        axlegend = inset_axes(
+            ax,
+            width="100%",
+            height=0.01,
+            loc='lower center',
+            borderpad=-4.1,
+        )
+        axlegend.grid(False)
+        axlegend.set_xticks([])
+        axlegend.set_yticks([])
+        axlegend.patch.set_alpha(0.0)
+        for loc in ("top", "bottom", "left", "right"):
+            axlegend.spines[loc].set_color("none")
+            axlegend.spines[loc].set_visible(False)
+
+        axlegend.legend(
+            handles=[
+                Patch(color=colors[i], label=l)
+                for i, l in enumerate(segments.keys())
+            ],
+            loc="upper center",
+            bbox_to_anchor=(0.5, 0),
+            shadow=False,
+            fancybox=False,
+            ncol=min(len(segments.keys()), 5),
+            frameon=False,
+            prop={'size': 8}
+        )
 
     if output_file is not None:
         figure = plt.gcf()
