@@ -55,7 +55,7 @@ def _cifti_timeseries(dataset):
 def _nifti_timeseries(
     dataset,
     segmentation=None,
-    labels=("Ctx GM", "dGM", "WM+CSF", "Cb"),
+    labels=("Ctx GM", "dGM", "WM+CSF", "Cb", "Crown"),
     remap_rois=True,
     lut=None,
 ):
@@ -66,17 +66,20 @@ def _nifti_timeseries(
     if segmentation is None:
         return data, None
 
+    # Open NIfTI and extract numpy array
     segmentation = nb.load(segmentation) if isinstance(segmentation, str) else segmentation
+    segmentation = np.asanyarray(segmentation.dataobj, dtype=int).reshape(-1)
+
     # Map segmentation
     if remap_rois or lut is not None:
         if lut is None:
-            lut = np.zeros((256,), dtype="int")
+            lut = np.zeros((256,), dtype="uint8")
             lut[100:201] = 1  # Ctx GM
             lut[30:99] = 2    # dGM
             lut[1:11] = 3     # WM+CSF
             lut[255] = 4      # Cerebellum
         # Apply lookup table
-        segmentation = lut[np.asanyarray(segmentation.dataobj, dtype=int)].reshape(-1)
+        segmentation = lut[segmentation]
 
     fgmask = segmentation > 0
     segmentation = segmentation[fgmask]
