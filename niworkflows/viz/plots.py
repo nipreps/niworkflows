@@ -29,7 +29,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import gridspec as mgs
 import matplotlib.cm as cm
-from matplotlib.colors import ListedColormap, Normalize
+from matplotlib.colors import Normalize
 from matplotlib.colorbar import ColorbarBase
 
 DINA4_LANDSCAPE = (11.69, 8.27)
@@ -192,13 +192,15 @@ def plot_carpet(
     """
     if segments is None:
         segments = {
-            "brain": list(range(data.shape[0]))
+            "whole brain (voxels)": list(range(data.shape[0]))
         }
 
     if cmap is None:
-        cmap = ListedColormap(cm.get_cmap("tab10").colors[:len(segments)])
+        colors = cm.get_cmap("tab10").colors
     elif cmap == "paired":
-        cmap = ListedColormap([cm.get_cmap("Paired").colors[i] for i in (1, 0, 7, 3)])
+        colors = list(cm.get_cmap("Paired").colors)
+        colors[0], colors[1] = colors[1], colors[0]
+        colors[2], colors[7] = colors[7], colors[2]
 
     vminmax = (None, None)
     if detrend:
@@ -239,76 +241,75 @@ def plot_carpet(
     # Length before decimation
     n_trs = data.shape[-1] - drop_trs
 
-    # Define nested GridSpec
-    gs = mgs.GridSpecFromSubplotSpec(
-        1, 2, subplot_spec=subplot, width_ratios=(1, 100), wspace=0.0,
-    )
-
-    # Segmentation colorbar
-    colors = np.hstack([[i + 1] * len(v) for i, v in enumerate(segments.values())])
-    ax0 = plt.subplot(gs[0])
-    ax0.set_yticks([])
-    ax0.set_xticks([])
-    ax0.imshow(
-        colors[:, np.newaxis],
-        interpolation="none",
-        aspect="auto",
-        cmap=cmap
-    )
-
-    ax0.grid(False)
-    ax0.spines["left"].set_visible(False)
-    ax0.spines["bottom"].set_color("none")
-    ax0.spines["bottom"].set_visible(False)
-
     # Calculate time decimation factor
     t_dec = max(int((1.8 * n_trs) // size[1]), 1)
-    data = data[np.hstack(list(segments.values())), drop_trs::t_dec]
+    data = data[:, drop_trs::t_dec]
 
-    # Carpet plot
-    ax1 = plt.subplot(gs[1])
-    ax1.imshow(
-        data,
-        interpolation="nearest",
-        aspect="auto",
-        cmap="gray",
-        vmin=vminmax[0],
-        vmax=vminmax[1],
+    nsegments = len(segments)
+
+    # Define nested GridSpec
+    gs = mgs.GridSpecFromSubplotSpec(
+        nsegments,
+        1,
+        subplot_spec=subplot,
+        hspace=0.05,
+        height_ratios=[len(v) for v in segments.values()]
     )
 
-    ax1.grid(False)
-    ax1.set_yticks([])
-    ax1.set_yticklabels([])
+    for i, (label, indices) in enumerate(segments.items()):
+        # Carpet plot
+        ax = plt.subplot(gs[i])
 
-    xticks = np.linspace(0, data.shape[-1], endpoint=True, num=7)
-    xlabel = "time-points (index)"
-    xticklabels = (xticks * n_trs / data.shape[-1]).astype("uint32") + drop_trs
-    if tr is not None:
-        xlabel = "time (mm:ss)"
-        xticklabels = [
-            f"{int(t // 60):02d}:{(t % 60).round(0).astype(int):02d}"
-            for t in (tr * xticklabels)
-        ]
+        ax.imshow(
+            data[indices, :],
+            interpolation="nearest",
+            aspect="auto",
+            cmap="gray",
+            vmin=vminmax[0],
+            vmax=vminmax[1],
+        )
 
-    ax1.set_xticks(xticks)
-    ax1.set_xlabel(xlabel)
-    ax1.set_xticklabels(xticklabels)
-
-    # Remove and redefine spines
-    for side in ["top", "right"]:
         # Toggle the spine objects
-        ax0.spines[side].set_color("none")
-        ax0.spines[side].set_visible(False)
-        ax1.spines[side].set_color("none")
-        ax1.spines[side].set_visible(False)
+        ax.spines["top"].set_color("none")
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_color("none")
+        ax.spines["right"].set_visible(False)
 
-    ax1.yaxis.set_ticks_position("left")
-    ax1.xaxis.set_ticks_position("bottom")
-    ax1.spines["bottom"].set_visible(False)
-    ax1.spines["left"].set_color("none")
-    ax1.spines["left"].set_visible(False)
-    if title:
-        ax1.set_title(title)
+        # Make colored left axis
+        ax.spines["left"].set_linewidth(3)
+        ax.spines["left"].set_color(colors[i])
+        ax.spines["left"].set_capstyle("butt")
+        ax.spines["left"].set_position(("outward", 2))
+
+        # Make all subplots have same xticks
+        xticks = np.linspace(0, data.shape[-1], endpoint=True, num=7)
+        ax.set_xticks(xticks)
+        ax.set_yticks([])
+        ax.set_ylabel(label)
+        ax.grid(False)
+
+        if i < (nsegments - 1):
+            ax.spines["bottom"].set_color("none")
+            ax.spines["bottom"].set_visible(False)
+            ax.set_xticklabels([])
+        else:
+            xlabel = "time-points (index)"
+            xticklabels = (xticks * n_trs / data.shape[-1]).astype("uint32") + drop_trs
+            if tr is not None:
+                xlabel = "time (mm:ss)"
+                xticklabels = [
+                    f"{int(t // 60):02d}:{(t % 60).round(0).astype(int):02d}"
+                    for t in (tr * xticklabels)
+                ]
+
+            ax.set_xlabel(xlabel)
+            ax.set_xticklabels(xticklabels)
+            ax.spines["bottom"].set_position(("outward", 5))
+            ax.spines["bottom"].set_color("k")
+            ax.spines["bottom"].set_linewidth(.8)
+
+        if title and i == 0:
+            ax.set_title(title)
 
     if output_file is not None:
         figure = plt.gcf()
@@ -317,7 +318,7 @@ def plot_carpet(
         figure = None
         return output_file
 
-    return (ax0, ax1), gs
+    return gs
 
 
 def spikesplot(

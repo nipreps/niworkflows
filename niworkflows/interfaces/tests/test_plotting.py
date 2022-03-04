@@ -24,11 +24,8 @@
 import os
 import nibabel as nb
 from niworkflows import viz
-from niworkflows.interfaces.plotting import (
-    _get_tr,
-    _cifti_timeseries,
-    _nifti_timeseries,
-)
+from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
+from niworkflows.interfaces.plotting import _get_tr
 from niworkflows.tests.conftest import datadir
 
 

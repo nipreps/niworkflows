@@ -21,7 +21,6 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Visualization tools."""
-from collections import defaultdict
 import numpy as np
 import nibabel as nb
 
@@ -34,7 +33,12 @@ from nipype.interfaces.base import (
     traits,
     isdefined,
 )
-from ..viz.plots import fMRIPlot, compcor_variance_plot, confounds_correlation_plot
+from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
+from niworkflows.viz.plots import (
+    fMRIPlot,
+    compcor_variance_plot,
+    confounds_correlation_plot,
+)
 
 
 class _FMRISummaryInputSpec(BaseInterfaceInputSpec):
@@ -101,7 +105,7 @@ class FMRISummary(SimpleInterface):
             ),
             tr=(
                 self.inputs.tr if isdefined(self.inputs.tr) else
-                _get_tr(self.inputs.in_func)
+                _get_tr(input_data)
             ),
             confounds=dataframe,
             units={"outliers": "%", "FD": "mm"},
@@ -221,59 +225,6 @@ class ConfoundsCorrelationPlot(SimpleInterface):
             reference=self.inputs.reference_column,
         )
         return runtime
-
-
-def _cifti_timeseries(dataset):
-    """Extract timeseries from CIFTI2 dataset."""
-    dataset = nb.load(dataset) if isinstance(dataset, str) else dataset
-
-    if dataset.nifti_header.get_intent()[0] != "ConnDenseSeries":
-        raise ValueError("Not a dense timeseries")
-
-    matrix = dataset.header.matrix
-    seg = defaultdict(list)
-    for bm in matrix.get_index_map(1).brain_models:
-        label = bm.brain_structure.replace("CIFTI_STRUCTURE_", "").replace("_", " ").title()
-        if "CORTEX" not in bm.brain_structure and "CEREBELLUM" not in bm.brain_structure:
-            label = "Other"
-
-        seg[label] += list(range(
-            bm.index_offset, bm.index_offset + bm.index_count
-        ))
-
-    return dataset.get_fdata(dtype="float32").T, seg
-
-
-def _nifti_timeseries(
-    dataset,
-    segmentation=None,
-    lut=None,
-    labels=("CSF", "WM", "Cerebellum", "Cortex")
-):
-    """Extract timeseries from NIfTI1/2 datasets."""
-    dataset = nb.load(dataset) if isinstance(dataset, str) else dataset
-    data = dataset.get_fdata(dtype="float32").reshape((-1, dataset.shape[-1]))
-
-    if segmentation is None:
-        return data, None
-
-    segmentation = nb.load(segmentation) if isinstance(segmentation, str) else segmentation
-    # Map segmentation
-    if lut is None:
-        lut = np.zeros((256,), dtype="int")
-        lut[1:11] = 4
-        lut[255] = 3
-        lut[30:99] = 2
-        lut[100:201] = 1
-    # Apply lookup table
-    seg = lut[np.asanyarray(segmentation.dataobj, dtype=int)].reshape(-1)
-    fgmask = seg > 0
-    seg = seg[fgmask]
-    seg_dict = {}
-    for i in np.unique(seg):
-        seg_dict[labels[i - 1]] = np.argwhere(seg == i).squeeze()
-
-    return data[fgmask], seg_dict
 
 
 def _get_tr(img):
