@@ -33,11 +33,8 @@ from .conftest import datadir
 from .generate_data import _create_dtseries_cifti
 from .. import viz
 from niworkflows.viz.plots import fMRIPlot
-from niworkflows.interfaces.plotting import (
-    _cifti_timeseries,
-    _nifti_timeseries,
-    _get_tr,
-)
+from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
+from niworkflows.interfaces.plotting import _get_tr
 
 
 @pytest.mark.parametrize("tr", (None, 0.7))

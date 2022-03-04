@@ -33,7 +33,12 @@ from nipype.interfaces.base import (
     traits,
     isdefined,
 )
-from ..viz.plots import fMRIPlot, compcor_variance_plot, confounds_correlation_plot
+from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
+from niworkflows.viz.plots import (
+    fMRIPlot,
+    compcor_variance_plot,
+    confounds_correlation_plot,
+)
 
 
 class _FMRISummaryInputSpec(BaseInterfaceInputSpec):
@@ -220,65 +225,6 @@ class ConfoundsCorrelationPlot(SimpleInterface):
             reference=self.inputs.reference_column,
         )
         return runtime
-
-
-def _cifti_timeseries(dataset):
-    """Extract timeseries from CIFTI2 dataset."""
-    dataset = nb.load(dataset) if isinstance(dataset, str) else dataset
-
-    if dataset.nifti_header.get_intent()[0] != "ConnDenseSeries":
-        raise ValueError("Not a dense timeseries")
-
-    matrix = dataset.header.matrix
-    labels = {
-        "CIFTI_STRUCTURE_CORTEX_LEFT": "CtxL",
-        "CIFTI_STRUCTURE_CORTEX_RIGHT": "CtxR",
-        "CIFTI_STRUCTURE_CEREBELLUM_LEFT": "CbL",
-        "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": "CbR",
-    }
-    seg = {label: [] for label in list(labels.values()) + ["Other"]}
-    for bm in matrix.get_index_map(1).brain_models:
-        label = (
-            "Other" if bm.brain_structure not in labels else
-            labels[bm.brain_structure]
-        )
-        seg[label] += list(range(
-            bm.index_offset, bm.index_offset + bm.index_count
-        ))
-
-    return dataset.get_fdata(dtype="float32").T, seg
-
-
-def _nifti_timeseries(
-    dataset,
-    segmentation=None,
-    lut=None,
-    labels=("Ctx GM", "dGM", "WM+CSF", "Cb")
-):
-    """Extract timeseries from NIfTI1/2 datasets."""
-    dataset = nb.load(dataset) if isinstance(dataset, str) else dataset
-    data = dataset.get_fdata(dtype="float32").reshape((-1, dataset.shape[-1]))
-
-    if segmentation is None:
-        return data, None
-
-    segmentation = nb.load(segmentation) if isinstance(segmentation, str) else segmentation
-    # Map segmentation
-    if lut is None:
-        lut = np.zeros((256,), dtype="int")
-        lut[100:201] = 1  # Ctx GM
-        lut[30:99] = 2    # dGM
-        lut[1:11] = 3     # WM+CSF
-        lut[255] = 4      # Cerebellum
-    # Apply lookup table
-    seg = lut[np.asanyarray(segmentation.dataobj, dtype=int)].reshape(-1)
-    fgmask = seg > 0
-    seg = seg[fgmask]
-    seg_dict = {}
-    for i in np.unique(seg):
-        seg_dict[labels[i - 1]] = np.argwhere(seg == i).squeeze()
-
-    return data[fgmask], seg_dict
 
 
 def _get_tr(img):
