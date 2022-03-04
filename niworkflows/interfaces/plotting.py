@@ -105,7 +105,7 @@ class FMRISummary(SimpleInterface):
             ),
             tr=(
                 self.inputs.tr if isdefined(self.inputs.tr) else
-                _get_tr(self.inputs.in_func)
+                _get_tr(input_data)
             ),
             confounds=dataframe,
             units={"outliers": "%", "FD": "mm"},
