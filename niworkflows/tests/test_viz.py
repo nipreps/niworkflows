@@ -60,7 +60,7 @@ def test_carpetplot(tr, sorting):
         drop_trs=15,
     )
 
-    labels = ("Cortical GM", "Deep GM", "Cerebellar GM", "WM + brainstem", "CSF")
+    labels = ("Ctx GM", "Subctx GM", "WM+CSF", "Cereb.", "Edge")
     sizes = (200, 100, 50, 100, 50)
     total_size = np.sum(sizes)
     data = np.zeros((total_size, 300))
