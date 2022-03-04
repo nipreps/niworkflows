@@ -66,7 +66,10 @@ def _nifti_timeseries(
     if segmentation is None:
         return data, None
 
+    # Open NIfTI and extract numpy array
     segmentation = nb.load(segmentation) if isinstance(segmentation, str) else segmentation
+    segmentation = np.asanyarray(segmentation.dataobj, dtype=int).reshape(-1)
+
     # Map segmentation
     if remap_rois or lut is not None:
         if lut is None:
@@ -76,7 +79,7 @@ def _nifti_timeseries(
             lut[1:11] = 3     # WM+CSF
             lut[255] = 4      # Cerebellum
         # Apply lookup table
-        segmentation = lut[np.asanyarray(segmentation.dataobj, dtype=int)].reshape(-1)
+        segmentation = lut[segmentation]
 
     fgmask = segmentation > 0
     segmentation = segmentation[fgmask]
