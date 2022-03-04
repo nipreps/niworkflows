@@ -55,7 +55,7 @@ def _cifti_timeseries(dataset):
 def _nifti_timeseries(
     dataset,
     segmentation=None,
-    labels=("Ctx GM", "dGM", "WM+CSF", "Cb"),
+    labels=("Ctx GM", "dGM", "WM+CSF", "Cb", "Crown"),
     remap_rois=True,
     lut=None,
 ):
