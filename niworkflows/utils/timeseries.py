@@ -56,7 +56,7 @@ def _nifti_timeseries(
     dataset,
     segmentation=None,
     labels=("Ctx GM", "dGM", "WM+CSF", "Cb", "Crown"),
-    remap_rois=True,
+    remap_rois=False,
     lut=None,
 ):
     """Extract timeseries from NIfTI1/2 datasets."""
@@ -69,6 +69,8 @@ def _nifti_timeseries(
     # Open NIfTI and extract numpy array
     segmentation = nb.load(segmentation) if isinstance(segmentation, str) else segmentation
     segmentation = np.asanyarray(segmentation.dataobj, dtype=int).reshape(-1)
+
+    remap_rois = remap_rois or (len(np.unique(segmentation[segmentation > 0])) > len(labels))
 
     # Map segmentation
     if remap_rois or lut is not None:
