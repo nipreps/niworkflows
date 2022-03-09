@@ -1,3 +1,10 @@
+1.4.6 (March 09, 2022)
+======================
+Patch release in the 1.4.x series.
+
+* FIX: Unlink destination files before saving derivative (#683)
+* FIX: Set pixdim[4] to match RepetitionTime (#679)
+
 1.4.5 (December 13, 2021)
 =========================
 Patch release in the 1.4.x series.
