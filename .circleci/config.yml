@@ -276,7 +276,7 @@ jobs:
 
   test_package:
     docker:
-      - image: circleci/python:3.8.5
+      - image: cimg/python:3.9
     working_directory: /tmp/src/niworkflows
     steps:
       - checkout
@@ -300,7 +300,7 @@ jobs:
 
   deploy_pypi:
     docker:
-      - image: circleci/python:3.8.5
+      - image: cimg/python:3.9
     working_directory: /tmp/src/niworkflows
     steps:
       - checkout
@@ -375,7 +375,7 @@ jobs:
 
   build_docs:
     docker:
-      - image: circleci/python:3.8.5
+      - image: cimg/python:3.9
     environment:
       - FSLOUTPUTTYPE: NIFTI
       - SUBJECTS_DIR: /tmp/subjects
@@ -392,6 +392,11 @@ jobs:
           command: |
             python -m pip install --no-cache-dir -U "pip>=20.3"
             python -m pip install --no-cache-dir -r docs/requirements.txt
+            eval "$(pyenv init -)"
+      - run:
+          name: Install Niworkflows
+          command: |
+            python -m pip install .
       - run:
           name: Build only this commit
           command: |

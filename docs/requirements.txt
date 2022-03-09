@@ -10,3 +10,4 @@ sphinx ~= 4.2
 sphinxcontrib-apidoc
 sphinxcontrib-napoleon
 templateflow
+nitransforms >= 20.0.0rc3

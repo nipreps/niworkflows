@@ -630,12 +630,17 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                             (4, 4) if self.inputs.space in STANDARD_SPACES else (2, 2)
                         )
 
-                    if curr_codes != xcodes or curr_units != units:
+                    curr_zooms = zooms = hdr.get_zooms()
+                    if "RepetitionTime" in self.inputs.get():
+                        zooms = curr_zooms[:3] + (self.inputs.RepetitionTime,)
+
+                    if (curr_codes, curr_units, curr_zooms) != (xcodes, units, zooms):
                         self._results["fixed_hdr"][i] = True
                         new_header = hdr.copy()
                         new_header.set_qform(nii.affine, xcodes[0])
                         new_header.set_sform(nii.affine, xcodes[1])
                         new_header.set_xyzt_units(*units)
+                        new_header.set_zooms(zooms)
 
                 if data_dtype == "source":  # match source dtype
                     try:
@@ -664,6 +669,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                         new_header.set_data_dtype(data_dtype)
                 del nii
 
+            out_file.unlink(missing_ok=True)
             if new_data is new_header is None:
                 _copy_any(orig_file, str(out_file))
             else:
@@ -704,9 +710,11 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                             legacy_metadata[key] = self._metadata.pop(key)
                     if legacy_metadata:
                         sidecar = out_file.parent / f"{_splitext(str(out_file))[0]}.json"
+                        sidecar.unlink(missing_ok=True)
                         sidecar.write_text(dumps(legacy_metadata, sort_keys=True, indent=2))
                 # The future: the extension is the first . and everything after
                 sidecar = out_file.parent / f"{out_file.name.split('.', 1)[0]}.json"
+                sidecar.unlink(missing_ok=True)
                 sidecar.write_text(dumps(self._metadata, sort_keys=True, indent=2))
                 self._results["out_meta"] = str(sidecar)
         return runtime

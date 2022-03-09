@@ -9,6 +9,13 @@ This release upgrades the Dockerfile to use FSL6, and includes some new interfac
   * FIX: Scipy docs path (#681)
   * TEST: Drop excessively long interface equivalence tests (#674)
 
+1.4.6 (March 09, 2022)
+======================
+Patch release in the 1.4.x series.
+
+* FIX: Unlink destination files before saving derivative (#683)
+* FIX: Set pixdim[4] to match RepetitionTime (#679)
+
 1.4.5 (December 13, 2021)
 =========================
 Patch release in the 1.4.x series.
@@ -160,15 +167,22 @@ A list of prominent changes can be found below. (With thanks to Lea Waller for t
     * ``NormalizeMotionParams`` now under ``confounds``.
     * ``FMRISummary``, ``CompCorVariancePlot``, ``ConfoundsCorrelationPlot`` from ``plotting``
 
+1.3.6 (March 09, 2022)
+======================
+Bug-fix release in the 1.3.x series
+
+* FIX: Set pixdim[4] to match RepetitionTime (#679)
+* DOC: Fix doc builds for 1.3.x series (#692)
+
 1.3.5 (October 01, 2021)
 ========================
 Bug-fix release in the 1.3.x series
 
-  * FIX: Set slope and intercept to 1/0 if not otherwise provided (#649)
-  * FIX: DerivativesDataSink warning when it has multiple source files [backport #573] (#647)
-  * FIX: `FSDetectInputs` mutually exclusive options for `ReconAll` (#646)
-  * MNT: Update some version pinning and correct for *pandas* warning about keyword arguments (#645)
-  * CI: Use datalad-managed test data [BACKPORT] (#653)
+* FIX: Set slope and intercept to 1/0 if not otherwise provided (#649)
+* FIX: DerivativesDataSink warning when it has multiple source files [backport #573] (#647)
+* FIX: `FSDetectInputs` mutually exclusive options for `ReconAll` (#646)
+* MNT: Update some version pinning and correct for *pandas* warning about keyword arguments (#645)
+* CI: Use datalad-managed test data [BACKPORT] (#653)
 
 1.3.4 (June 8, 2021)
 ====================

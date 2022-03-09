@@ -80,24 +80,26 @@ class _ExpandModelInputSpec(BaseInterfaceInputSpec):
 Formula for generating model expansions. By default, the
 32-parameter expansion will be generated. Note that any expressions
 to be expanded *must* be in parentheses, even if they include only
-a single variable (e.g., ``(x)^2``, not ``x^2``). Examples:
+a single variable (e.g., ``(x)^2``, not ``x^2``).
 
-* ``rps + wm + csf + gsr`` : 9-parameter model. ``rps`` denotes realignment
-  parameters, ``wm`` denotes mean white matter signal, ``csf`` denotes mean
-  cerebrospinal fluid signal, and ``gsr`` denotes mean global signal.
-* ``(dd1(rps + wm + csf + gsr))^^2`` : 36-parameter expansion.
-  ``rps + wm + csf + gsr`` denotes that realignment parameters and mean
-  WM, CSF, and global signals should be included. ``dd1`` denotes that
-  these signals should be augmented with their first temporal
-  derivatives. ``^^2`` denotes that the original signals and temporal
-  derivatives should be augmented with quadratic expansions.
-* ``(dd1(rps))^^2`` : 24-parameter expansion. ``rps`` denotes that
-  realignment parameters should be included. ``dd1`` and ``^^2`` denote
-  temporal derivative and quadratic expansions as above.
-* ``(dd1(rps + wm + csf + gsr))^^2 + others`` : generate all expansion
-  terms necessary for a 36-parameter model as above, and
-  concatenate those expansion terms to all other regressor columns
-  in the confounds file.
+Examples:
+
+  * ``rps + wm + csf + gsr`` : 9-parameter model. ``rps`` denotes realignment
+    parameters, ``wm`` denotes mean white matter signal, ``csf`` denotes mean
+    cerebrospinal fluid signal, and ``gsr`` denotes mean global signal.
+  * ``(dd1(rps + wm + csf + gsr))^^2`` : 36-parameter expansion.
+    ``rps + wm + csf + gsr`` denotes that realignment parameters and mean
+    WM, CSF, and global signals should be included. ``dd1`` denotes that
+    these signals should be augmented with their first temporal
+    derivatives. ``^^2`` denotes that the original signals and temporal
+    derivatives should be augmented with quadratic expansions.
+  * ``(dd1(rps))^^2`` : 24-parameter expansion. ``rps`` denotes that
+    realignment parameters should be included. ``dd1`` and ``^^2`` denote
+    temporal derivative and quadratic expansions as above.
+  * ``(dd1(rps + wm + csf + gsr))^^2 + others`` : generate all expansion
+    terms necessary for a 36-parameter model as above, and
+    concatenate those expansion terms to all other regressor columns
+    in the confounds file.
 
 """,
     )
