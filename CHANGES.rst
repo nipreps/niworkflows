@@ -1,3 +1,18 @@
+1.5.1 (March 11, 2022)
+======================
+A bugfix release addressing several issues and improving the carpet plot.
+
+* FIX: Set ``pixdim[4]`` to match ``RepetitionTime`` (#679)
+* FIX: Unlink destination files before saving derivative (#683)
+* FIX: Smarter decision to remap input segmentation to carpetplot (#691)
+* FIX: Error handling the segmentation in NIfTI extraction (#689)
+* ENH: Add a legend to carpet plots with more than one segment (#690)
+* ENH: Miscellaneous improvements to carpetplot (#688)
+* ENH: Refactor carpetplot reasigning responsibilities (#687)
+* ENH: Initiate a module of nipype interfaces for mathematical morphology (#651)
+* ENH: Reorder within-segment rows of carpetplot with hierarchical clustering (#686)
+* DOC: Fix doc builds in ``maint/1.3.x`` (#692)
+
 1.5.0 (February 07, 2022)
 =========================
 First release in the 1.5.x series.
