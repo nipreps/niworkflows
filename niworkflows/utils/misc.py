@@ -21,6 +21,7 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Miscellaneous utilities."""
+import os
 
 
 __all__ = [
@@ -331,6 +332,16 @@ def check_valid_fs_license():
         )
         proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
     return proc.returncode == 0 and "ERROR:" not in proc.stdout.decode()
+
+
+def unlink(pathlike, missing_ok=False):
+    """Backport of Path.unlink from Python 3.8+ with missing_ok keyword"""
+    # PY37 hack; drop when python_requires >= 3.8
+    try:
+        os.unlink(pathlike)
+    except FileNotFoundError:
+        if not missing_ok:
+            raise
 
 
 if __name__ == "__main__":
