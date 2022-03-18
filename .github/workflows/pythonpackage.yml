@@ -40,8 +40,37 @@ jobs:
         name: dist
         path: dist/
 
+  get_data:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create test data directory
+      run: mkdir -p $HOME/.cache/stanford-crn
+    - name: Load test data cache
+      uses: actions/cache@v2
+      id: stanford-crn
+      with:
+        path: ~/.cache/stanford-crn/
+        key: data-v0-${{ github.ref_name }}-${{ github.sha }}
+        restore-keys: |
+          data-v0-${{ github.ref_name }}-
+          data-v0-
+    - name: Install datalad
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y git-annex --no-install-recommends
+        python -m pip install datalad==0.14.7 datalad-osf
+        datalad wtf
+    - name: Fetch test data
+      run: |
+        DS=$HOME/.cache/stanford-crn
+        datalad install -r -s https://github.com/nipreps-data/niworkflows-data.git $DS
+        cd $DS
+        git -C BIDS-examples-1-enh-ds054 checkout enh/ds054
+        datalad update -r --merge -d .
+        datalad get -J 2 -r ds000003 ds000030/sub-10228/func
+
   test:
-    needs: [build]
+    needs: [build, get_data]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -58,6 +87,12 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Load test data cache
+      uses: actions/cache@v2
+      id: stanford-crn
+      with:
+        path: ~/.cache/stanford-crn/
+        key: data-v0-${{ github.ref_name }}-${{ github.sha }}
     - name: Fetch packages
       uses: actions/download-artifact@v3
       with:
