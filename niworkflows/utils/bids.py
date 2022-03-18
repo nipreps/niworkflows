@@ -58,6 +58,10 @@ def collect_participants(
     Returns the list of participants to be finally processed.
     Requesting all subjects in a BIDS directory root:
 
+    .. testsetup::
+
+        >>> data_dir_canary()
+
     Examples
     --------
     >>> collect_participants(str(datadir / 'ds114'), bids_validate=False)
@@ -153,6 +157,10 @@ def collect_data(
     """
     Uses pybids to retrieve the input data for a given participant
 
+    .. testsetup::
+
+        >>> data_dir_canary()
+
     Examples
     --------
     >>> bids_root, _ = collect_data(str(datadir / 'ds054'), '100185',
@@ -231,6 +239,10 @@ def collect_data(
 def get_metadata_for_nifti(in_file, bids_dir=None, validate=True):
     """
     Fetch metadata for a given NIfTI file.
+
+    .. testsetup::
+
+        >>> data_dir_canary()
 
     Examples
     --------

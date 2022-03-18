@@ -32,6 +32,7 @@ import pytest
 from nipype.interfaces.base import Undefined
 
 from .. import bids as bintfs
+from niworkflows.testing import needs_data_dir
 
 
 XFORM_CODES = {
@@ -608,6 +609,7 @@ def test_DerivativesDataSink_values(tmp_path, dtype):
     assert sha1(out_file.read_bytes()).hexdigest() == checksum
 
 
+@needs_data_dir
 @pytest.mark.parametrize("field", ["RepetitionTime", "UndefinedField"])
 def test_ReadSidecarJSON_connection(testdata_dir, field):
     """

@@ -22,9 +22,12 @@
 #
 """Check the refmap module."""
 import os
+import unittest
 from ..refmap import init_epi_reference_wf
+from ....testing import has_afni
 
 
+@unittest.skipUnless(has_afni, "Needs AFNI")
 def test_reference(tmpdir, ds000030_dir, workdir, outdir):
     """Exercise the EPI reference workflow."""
     tmpdir.chdir()

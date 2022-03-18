@@ -32,14 +32,10 @@ import tempfile
 import pkg_resources
 
 from .utils.bids import collect_data
-
-test_data_env = os.getenv(
-    "TEST_DATA_HOME", str(Path.home() / ".cache" / "stanford-crn")
+from .testing import (
+    test_data_env, test_output_dir, test_workdir, data_dir,
+    data_env_canary, data_dir_canary
 )
-test_output_dir = os.getenv("TEST_OUTPUT_DIR")
-test_workdir = os.getenv("TEST_WORK_DIR")
-
-data_dir = Path(test_data_env) / "BIDS-examples-1-enh-ds054"
 
 
 @pytest.fixture(autouse=True)
@@ -52,6 +48,7 @@ def add_np(doctest_namespace):
     doctest_namespace["pytest"] = pytest
     doctest_namespace["Path"] = Path
     doctest_namespace["datadir"] = data_dir
+    doctest_namespace["data_dir_canary"] = data_dir_canary
     doctest_namespace["bids_collect_data"] = collect_data
     doctest_namespace["test_data"] = pkg_resources.resource_filename(
         "niworkflows", "tests/data"
@@ -82,6 +79,7 @@ def testdata_dir():
 
 @pytest.fixture
 def ds000030_dir():
+    data_env_canary()
     return Path(test_data_env) / "ds000030"
 
 
