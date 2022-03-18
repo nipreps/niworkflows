@@ -95,6 +95,8 @@ jobs:
       uses: GabrielBB/xvfb-action@v1
       with:
         run: pytest -sv --no-xvfb --doctest-modules --cov niworkflows niworkflows
+    - uses: codecov/codecov-action@v2
+      name: Submit to CodeCov
 
   flake8:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
