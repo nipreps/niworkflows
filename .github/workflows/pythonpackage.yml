@@ -75,7 +75,14 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
-        install: [sdist, wheel, repo, editable]
+        install: [repo]
+        include:
+          - python-version: 3.9
+            install: sdist
+          - python-version: 3.9
+            install: wheel
+          - python-version: 3.9
+            install: editable
     env:
       INSTALL_TYPE: ${{ matrix.install }}
 
