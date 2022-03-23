@@ -1,3 +1,9 @@
+1.5.2 (March 23, 2022)
+======================
+A bugfix release ensuring compatibility with Python 3.7.
+
+* FIX: Add ``unlink()`` with ``missing_ok`` for Python 3.7 (#695)
+
 1.5.1 (March 11, 2022)
 ======================
 A bugfix release addressing several issues and improving the carpet plot.
