@@ -27,6 +27,7 @@ from unittest import mock
 
 import pytest
 from ..misc import pass_dummy_scans, check_valid_fs_license
+from niworkflows.testing import has_freesurfer
 
 
 @pytest.mark.parametrize(
@@ -56,6 +57,7 @@ def test_fs_license_check(stdout, rc, valid):
         assert check_valid_fs_license() is valid
 
 
+@pytest.mark.skipif(not has_freesurfer, reason="Needs FreeSurfer")
 @pytest.mark.skipif(not os.getenv("FS_LICENSE"), reason="No FS license found")
 def test_fs_license_check2(monkeypatch):
     """Execute the canary itself."""

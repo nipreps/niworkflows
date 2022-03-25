@@ -35,7 +35,8 @@ from ..interfaces.reportlets.masks import (
     SimpleShowMaskRPT,
     ROIsPlot,
 )
-from .conftest import _run_interface_mock, datadir, has_fsl, has_freesurfer
+from ..testing import has_fsl, has_freesurfer
+from .conftest import _run_interface_mock, datadir
 
 
 def _smoke_test_report(report_interface, artifact_name):

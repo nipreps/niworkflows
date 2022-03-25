@@ -48,6 +48,10 @@ class StructuralReference(fs.RobustTemplate):
     """
     Shortcut RobustTemplate with a copy of the source if a single volume is provided.
 
+    .. testsetup::
+
+        >>> data_dir_canary()
+
     Examples
     --------
     >>> t1w = bids_collect_data(

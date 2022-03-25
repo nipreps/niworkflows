@@ -105,6 +105,10 @@ class BIDSInfo(SimpleInterface):
     This interface uses only the basename, not the path, to determine the
     subject, session, task, run, acquisition or reconstruction.
 
+    .. testsetup::
+
+        >>> data_dir_canary()
+
     >>> bids_info = BIDSInfo(bids_dir=str(datadir / 'ds054'), bids_validate=False)
     >>> bids_info.inputs.in_file = '''\
 sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz'''
@@ -224,6 +228,10 @@ class BIDSDataGrabber(SimpleInterface):
     """
     Collect files from a BIDS directory structure.
 
+    .. testsetup::
+
+        >>> data_dir_canary()
+
     >>> bids_src = BIDSDataGrabber(anat_only=False)
     >>> bids_src.inputs.subject_data = bids_collect_data(
     ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]
@@ -319,6 +327,10 @@ class DerivativesDataSink(SimpleInterface):
 
     Saves the ``in_file`` into a BIDS-Derivatives folder provided
     by ``base_directory``, given the input reference ``source_file``.
+
+    .. testsetup::
+
+        >>> data_dir_canary()
 
     >>> import tempfile
     >>> tmpdir = Path(tempfile.mkdtemp())
@@ -731,6 +743,10 @@ class _ReadSidecarJSONOutputSpec(_BIDSInfoOutputSpec):
 class ReadSidecarJSON(SimpleInterface):
     """
     Read JSON sidecar files of a BIDS tree.
+
+    .. testsetup::
+
+        >>> data_dir_canary()
 
     >>> fmap = str(datadir / 'ds054' / 'sub-100185' / 'fmap' /
     ...            'sub-100185_phasediff.nii.gz')

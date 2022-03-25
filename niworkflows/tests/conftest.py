@@ -26,19 +26,10 @@ from pathlib import Path
 from datetime import datetime as dt
 import pytest
 from templateflow.api import get as get_template
-from nipype.interfaces.fsl import Info as FSLInfo
-from nipype.interfaces.freesurfer import Info as FreeSurferInfo
+from niworkflows.testing import test_data_env, data_env_canary
 
 filepath = os.path.dirname(os.path.realpath(__file__))
 datadir = os.path.realpath(os.path.join(filepath, "data"))
-
-test_data_env = os.getenv(
-    "TEST_DATA_HOME", str(Path.home() / ".cache" / "nipreps-data")
-)
-data_dir = Path(test_data_env) / "ds000003"
-
-has_fsl = FSLInfo.version() is not None
-has_freesurfer = FreeSurferInfo.version() is not None
 
 
 def _run_interface_mock(objekt, runtime):
@@ -63,7 +54,8 @@ def reference_mask():
 
 @pytest.fixture
 def moving():
-    return str(data_dir / "sub-01/anat/sub-01_T1w.nii.gz")
+    data_env_canary()
+    return str(Path(test_data_env) / "ds000003/sub-01/anat/sub-01_T1w.nii.gz")
 
 
 @pytest.fixture

@@ -29,6 +29,7 @@ from nipype.interfaces import nilearn as nl
 import pytest
 
 from .. import images as im
+from niworkflows.testing import has_afni
 
 
 @pytest.mark.parametrize(
@@ -153,6 +154,7 @@ def test_conform_set_zooms(tmpdir):
     assert np.allclose(out_img.header.get_zooms(), conform.inputs.target_zooms)
 
 
+@pytest.mark.skipif(not has_afni, reason="Needs AFNI")
 @pytest.mark.parametrize("shape", [
     (10, 10, 10),
     (10, 10, 10, 1),
