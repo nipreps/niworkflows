@@ -29,17 +29,13 @@ from nipype.interfaces import nilearn as nl
 import pytest
 
 from .. import images as im
+from niworkflows.testing import has_afni
 
 
 @pytest.mark.parametrize(
     "nvols, nmasks, ext, factor",
     [
-        (500, 10, ".nii", 2),
-        (500, 10, ".nii.gz", 5),
         (200, 3, ".nii", 1.1),
-        (200, 3, ".nii.gz", 2),
-        (200, 10, ".nii", 1.1),
-        (200, 10, ".nii.gz", 2),
     ],
 )
 def test_signal_extraction_equivalence(tmp_path, nvols, nmasks, ext, factor):
@@ -158,6 +154,7 @@ def test_conform_set_zooms(tmpdir):
     assert np.allclose(out_img.header.get_zooms(), conform.inputs.target_zooms)
 
 
+@pytest.mark.skipif(not has_afni, reason="Needs AFNI")
 @pytest.mark.parametrize("shape", [
     (10, 10, 10),
     (10, 10, 10, 1),
