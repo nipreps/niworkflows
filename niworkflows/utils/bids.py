@@ -222,7 +222,7 @@ def collect_data(
             layout.get(
                 return_type="file",
                 subject=participant_label,
-                extension=["nii", "nii.gz"],
+                extension=[".nii", ".nii.gz"],
                 **query,
             )
         )
