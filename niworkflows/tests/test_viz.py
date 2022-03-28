@@ -140,7 +140,7 @@ def test_fmriplot(input_files):
         _cifti_timeseries(in_file)
     )
 
-    fMRIPlot(
+    fig = fMRIPlot(
         timeseries,
         segments,
         tr=_get_tr(nb.load(in_file)),
@@ -151,10 +151,12 @@ def test_fmriplot(input_files):
         }),
         units={"FD": "mm"},
         paired_carpet=dtype == "cifti",
-    ).plot().savefig(
-        os.path.join(save_artifacts, f"fmriplot_{dtype}{has_seg}.svg"),
-        bbox_inches="tight",
-    )
+    ).plot()
+    if save_artifacts:
+        fig.savefig(
+            os.path.join(save_artifacts, f"fmriplot_{dtype}{has_seg}.svg"),
+            bbox_inches="tight",
+        )
 
 
 def test_plot_melodic_components(tmp_path):
