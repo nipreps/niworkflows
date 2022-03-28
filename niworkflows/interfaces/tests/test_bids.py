@@ -150,28 +150,28 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
             BOLD_PATH,
             ["aroma.csv"],
             {"suffix": "AROMAnoiseICs"},
-            "sub-100185/func/sub-100185_task-machinegame_run-1_AROMAnoiseICs.csv",
+            "sub-100185/func/sub-100185_task-machinegame_run-01_AROMAnoiseICs.csv",
             "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
             BOLD_PATH,
             ["confounds.tsv"],
             {"suffix": "regressors", "desc": "confounds"},
-            "sub-100185/func/sub-100185_task-machinegame_run-1_desc-confounds_regressors.tsv",
+            "sub-100185/func/sub-100185_task-machinegame_run-01_desc-confounds_regressors.tsv",
             "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
             BOLD_PATH,
             ["mixing.tsv"],
             {"suffix": "mixing", "desc": "MELODIC"},
-            "sub-100185/func/sub-100185_task-machinegame_run-1_desc-MELODIC_mixing.tsv",
+            "sub-100185/func/sub-100185_task-machinegame_run-01_desc-MELODIC_mixing.tsv",
             "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
             BOLD_PATH,
             ["lh.func.gii"],
             {"space": "fsaverage", "density": "10k", "hemi": "L"},
-            "sub-100185/func/sub-100185_task-machinegame_run-1_"
+            "sub-100185/func/sub-100185_task-machinegame_run-01_"
             "hemi-L_space-fsaverage_den-10k_bold.func.gii",
             "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
@@ -179,7 +179,7 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
             BOLD_PATH,
             ["hcp.dtseries.nii"],
             {"space": "fsLR", "density": "91k"},
-            "sub-100185/func/sub-100185_task-machinegame_run-1_"
+            "sub-100185/func/sub-100185_task-machinegame_run-01_"
             "space-fsLR_den-91k_bold.dtseries.nii",
             "53d9b486d08fec5a952f68fcbcddb38a72818d4c",
         ),
@@ -187,28 +187,28 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
             BOLD_PATH,
             ["ref.nii"],
             {"space": "MNI", "suffix": "boldref"},
-            "sub-100185/func/sub-100185_task-machinegame_run-1_space-MNI_boldref.nii",
+            "sub-100185/func/sub-100185_task-machinegame_run-01_space-MNI_boldref.nii",
             "53d9b486d08fec5a952f68fcbcddb38a72818d4c",
         ),
         (
             BOLD_PATH,
             ["dseg.nii"],
             {"space": "MNI", "suffix": "dseg", "desc": "aseg"},
-            "sub-100185/func/sub-100185_task-machinegame_run-1_space-MNI_desc-aseg_dseg.nii",
+            "sub-100185/func/sub-100185_task-machinegame_run-01_space-MNI_desc-aseg_dseg.nii",
             "ddadc9be8224eebe0177a65bf87300f275e17e96",
         ),
         (
             BOLD_PATH,
             ["mask.nii"],
             {"space": "MNI", "suffix": "mask", "desc": "brain"},
-            "sub-100185/func/sub-100185_task-machinegame_run-1_space-MNI_desc-brain_mask.nii",
+            "sub-100185/func/sub-100185_task-machinegame_run-01_space-MNI_desc-brain_mask.nii",
             "f97a1877508139b42ea9fc476bdba367b001ab00",
         ),
         (
             BOLD_PATH,
             ["bold.nii"],
             {"space": "MNI", "desc": "preproc"},
-            "sub-100185/func/sub-100185_task-machinegame_run-1_space-MNI_desc-preproc_bold.nii",
+            "sub-100185/func/sub-100185_task-machinegame_run-01_space-MNI_desc-preproc_bold.nii",
             "aa1eed935e6a8dcca646b0c78ee57218e30e2974",
         ),
         # Nondeterministic order - do we really need this to work, or we can stay safe with
@@ -246,10 +246,10 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
             "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
         (
-            "sub-07/ses-preop/anat/sub-07_ses-preop_run-1_T1w.nii.gz",
+            "sub-07/ses-preop/anat/sub-07_ses-preop_run-01_T1w.nii.gz",
             ["tfm.txt"],
             {"from": "orig", "to": "T1w", "suffix": "xfm"},
-            "sub-07/ses-preop/anat/sub-07_ses-preop_run-1_from-orig_to-T1w_mode-image_xfm.txt",
+            "sub-07/ses-preop/anat/sub-07_ses-preop_run-01_from-orig_to-T1w_mode-image_xfm.txt",
             "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         ),
     ],
@@ -303,7 +303,7 @@ def test_DerivativesDataSink_build_path(
 
     if dismiss_entities:
         if "run" in dismiss_entities:
-            expectation = [e.replace("_run-1", "") for e in expectation]
+            expectation = [e.replace("_run-01", "") for e in expectation]
 
         if "session" in dismiss_entities:
             expectation = [
@@ -536,10 +536,10 @@ def test_DerivativesDataSink_fmapid(tmp_path):
     source_file = [
         (tmp_path / s)
         for s in [
-            "sub-36/fmap/sub-36_dir-1_run-1_epi.nii.gz",
-            "sub-36/fmap/sub-36_dir-1_run-2_epi.nii.gz",
-            "sub-36/fmap/sub-36_dir-2_run-1_epi.nii.gz",
-            "sub-36/fmap/sub-36_dir-2_run-2_epi.nii.gz",
+            "sub-36/fmap/sub-36_dir-1_run-01_epi.nii.gz",
+            "sub-36/fmap/sub-36_dir-1_run-02_epi.nii.gz",
+            "sub-36/fmap/sub-36_dir-2_run-01_epi.nii.gz",
+            "sub-36/fmap/sub-36_dir-2_run-02_epi.nii.gz",
         ]
     ]
     for fname in source_file:
