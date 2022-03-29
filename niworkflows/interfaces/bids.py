@@ -126,7 +126,7 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
 
     >>> bids_info = BIDSInfo(bids_dir=str(datadir / 'ds054'), bids_validate=False)
     >>> bids_info.inputs.in_file = '''\
-sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_rec-MB_acq-AP_run-1_bold.nii.gz'''
+sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_rec-MB_acq-AP_run-01_bold.nii.gz'''
     >>> res = bids_info.run()
     >>> res.outputs
     <BLANKLINE>
@@ -416,12 +416,12 @@ class DerivativesDataSink(SimpleInterface):
     >>> dsink.inputs.desc = 'preproc'
     >>> res = dsink.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
-    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-1_\
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
 desc-preproc_bold.nii'
 
     >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
     >>> bids_dir.mkdir(parents=True, exist_ok=True)
-    >>> tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-1_bold.nii.gz'
+    >>> tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-01_bold.nii.gz'
     >>> tricky_source.open('w').close()
     >>> dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)
     >>> dsink.inputs.in_file = str(tmpfile)
@@ -430,7 +430,7 @@ desc-preproc_bold.nii'
     >>> dsink.inputs.RepetitionTime = 0.75
     >>> res = dsink.run()
     >>> res.outputs.out_meta  # doctest: +ELLIPSIS
-    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-1_\
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
 desc-preproc_bold.json'
 
     >>> Path(res.outputs.out_meta).read_text().splitlines()[1]
@@ -450,7 +450,7 @@ desc-preproc_bold.json'
     >>> dsink.inputs.RepetitionTime = 0.75
     >>> res = dsink.run()
     >>> res.outputs.out_meta  # doctest: +ELLIPSIS
-    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-1_\
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
 space-MNI152NLin6Asym_res-01_desc-preproc_bold.json'
 
     >>> lines = Path(res.outputs.out_meta).read_text().splitlines()
@@ -475,7 +475,7 @@ space-MNI152NLin6Asym_res-01_desc-preproc_bold.json'
     >>> dsink.inputs.meta_dict = {'RepetitionTime': 1.75, 'SkullStripped': False, 'Z': 'val'}
     >>> res = dsink.run()
     >>> res.outputs.out_meta  # doctest: +ELLIPSIS
-    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-1_\
+    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_\
 space-MNI152NLin6Asym_desc-preproc_bold.json'
 
     >>> lines = Path(res.outputs.out_meta).read_text().splitlines()
