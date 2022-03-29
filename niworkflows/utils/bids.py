@@ -150,7 +150,7 @@ def collect_participants(
 def collect_data(
     bids_dir,
     participant_label,
-    session_id=Query.ANY,
+    session_id=Query.OPTIONAL,
     task=None,
     echo=None,
     bids_validate=True,
