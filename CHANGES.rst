@@ -1,3 +1,9 @@
+1.3.7 (March 31, 2022)
+======================
+Bug-fix release in the 1.3.x series
+
+* FIX: Use copy function that does not preserve mtime when creating fsaverage directories (#703)
+
 1.3.6 (March 09, 2022)
 ======================
 Bug-fix release in the 1.3.x series
