@@ -24,7 +24,7 @@
 from collections import defaultdict
 from json import dumps, loads
 from pathlib import Path
-from shutil import copytree, rmtree
+import shutil
 from pkg_resources import resource_filename as _pkgres
 import re
 
@@ -913,10 +913,15 @@ class BIDSFreeSurferDir(SimpleInterface):
 
             # Finesse is overrated. Either leave it alone or completely clobber it.
             if dest.exists() and self.inputs.overwrite_fsaverage:
-                rmtree(dest)
+                shutil.rmtree(dest)
             if not dest.exists():
                 try:
-                    copytree(source, dest)
+                    # Use copy instead of copy2; copy calls copymode while copy2 calls
+                    # copystat, which will preserve atime/mtime.
+                    # atime should *not* be copied to avoid triggering processes that
+                    # sweep un-accessed files.
+                    # If we want to preserve mtime, that will require a new copy function.
+                    shutil.copytree(source, dest, copy_function=shutil.copy)
                 except FileExistsError:
                     LOGGER.warning(
                         "%s exists; if multiple jobs are running in parallel"

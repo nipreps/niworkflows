@@ -156,6 +156,12 @@ A list of prominent changes can be found below. (With thanks to Lea Waller for t
     * ``NormalizeMotionParams`` now under ``confounds``.
     * ``FMRISummary``, ``CompCorVariancePlot``, ``ConfoundsCorrelationPlot`` from ``plotting``
 
+1.3.7 (March 31, 2022)
+======================
+Bug-fix release in the 1.3.x series
+
+* FIX: Use copy function that does not preserve mtime when creating fsaverage directories (#703)
+
 1.3.6 (March 09, 2022)
 ======================
 Bug-fix release in the 1.3.x series
