@@ -1,3 +1,12 @@
+1.4.7 (March 31, 2022)
+======================
+Bug-fix release in the 1.4.x series.
+
+* FIX: Use copy function that does not preserve mtime when creating fsaverage directories (#703)
+* FIX: Add unlink() with missing_ok for Python 3.7 (#695)
+* ENH: Select magnitude images in collect_data for BIDS 1.5.0 (#594)
+* CI: Install package across Python versions and run pytest  (#697)
+
 1.4.6 (March 09, 2022)
 ======================
 Patch release in the 1.4.x series.
