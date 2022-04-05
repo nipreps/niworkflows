@@ -444,7 +444,7 @@ cannot be found."""
             # Get the template specified by the user.
             ref_mask = get_template(
                 self.inputs.template, desc="brain", suffix="mask", **template_spec
-            )
+            ) or get_template(self.inputs.template, label="brain", suffix="mask", **template_spec)
 
             # Default is explicit masking disabled
             args["fixed_image"] = ref_template
