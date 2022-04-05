@@ -1,3 +1,18 @@
+1.5.3 (April 05, 2022)
+======================
+
+A bugfix release incorporating changes from the 1.3.x and 1.4.x
+maintenance series.
+
+* FIX: Alternate query for template brain mask (#704)
+* FIX: Use copy function that does not preserve mtime when creating fsaverage directories (#703)
+* FIX: Test failures (#701)
+* ENH: Add optional session filter when collecting data (#678)
+* ENH: Specify path pattern for transformation files in dwi datatype (#699)
+* REF: Move BIDS skeleton generation into new ``testing`` module (#682)
+* MNT: Select magnitude images in collect_data for BIDS 1.5.0 (#594)
+* CI: Install package across Python versions and run pytest (#697)
+
 1.5.2 (March 23, 2022)
 ======================
 A bugfix release ensuring compatibility with Python 3.7.
