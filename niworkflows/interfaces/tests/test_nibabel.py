@@ -230,6 +230,24 @@ def test_MergeSeries(tmp_path):
         MergeSeries(in_files=[str(in_file)] + [str(in_4D)], allow_4D=False).run()
 
 
+def test_MergeSeries_affines(tmp_path):
+    os.chdir(str(tmp_path))
+
+    files = ['img0.nii.gz', 'img1.nii.gz']
+    data = np.ones((10, 10, 10), dtype=int)
+    aff = np.eye(4)
+    nb.Nifti1Image(data, aff, None).to_filename(files[0])
+    # slightly alter affine
+    aff[0][0] = 1.00005
+    nb.Nifti1Image(data, aff, None).to_filename(files[1])
+
+    # affine mismatch will cause this to fail
+    with pytest.raises(ValueError):
+        MergeSeries(in_files=files).run()
+    # but works if we set a tolerance
+    MergeSeries(in_files=files, affine_tolerance=1e-04).run()
+
+
 LABEL_MAPPINGS = {5: 1, 6: 1, 7: 2}
 LABEL_INPUT = np.arange(8).reshape(2, 2, 2)
 LABEL_OUTPUT = np.asarray([0, 1, 2, 3, 4, 1, 1, 2]).reshape(2, 2, 2)

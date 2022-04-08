@@ -186,6 +186,7 @@ class _MergeSeriesInputSpec(BaseInterfaceInputSpec):
     allow_4D = traits.Bool(
         True, usedefault=True, desc="whether 4D images are allowed to be concatenated"
     )
+    affine_tolerance = traits.Float(desc="Absolute tolerance allowed between image affines")
 
 
 class _MergeSeriesOutputSpec(TraitedSpec):
@@ -200,8 +201,17 @@ class MergeSeries(SimpleInterface):
 
     def _run_interface(self, runtime):
         nii_list = []
+        aff0 = None
         for f in self.inputs.in_files:
             filenii = nb.squeeze_image(nb.load(f))
+            if self.inputs.affine_tolerance:
+                if aff0 is None:
+                    aff0 = filenii.affine
+                elif not np.allclose(aff0, filenii.affine, atol=self.inputs.affine_tolerance):
+                    raise ValueError(
+                        "Difference in affines greater than allowed tolerance "
+                        f"{self.inputs.affine_tolerance}"
+                    )
             ndim = filenii.dataobj.ndim
             if ndim == 3:
                 nii_list.append(filenii)
@@ -214,7 +224,10 @@ class MergeSeries(SimpleInterface):
                     "Input image has an incorrect number of dimensions" f" ({ndim})."
                 )
 
-        img_4d = nb.concat_images(nii_list)
+        img_4d = nb.concat_images(
+            nii_list,
+            check_affines=not bool(self.inputs.affine_tolerance)
+        )
         out_file = fname_presuffix(
             self.inputs.in_files[0], suffix="_merged", newpath=runtime.cwd
         )
