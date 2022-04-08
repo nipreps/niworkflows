@@ -1,3 +1,12 @@
+1.4.8 (April 08, 2022)
+======================
+Bug-fix release in the 1.4.x series.
+
+This change enables a bug-fix in sdcflows where images with slightly
+different affines were unable to be concatenated for use with TOPUP.
+
+* ENH: Add ``affine_tolerance`` flag to ``MergeSeries`` (#706)
+
 1.4.7 (March 31, 2022)
 ======================
 Bug-fix release in the 1.4.x series.
