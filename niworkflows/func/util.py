@@ -363,6 +363,8 @@ def init_enhance_and_skullstrip_bold_wf(
         reportlet for the skull-stripping
 
     """
+    from niworkflows.interfaces.nibabel import BinaryDilation
+    
     workflow = Workflow(name=name)
     inputnode = pe.Node(
         niu.IdentityInterface(fields=["in_file", "pre_mask"]), name="inputnode"
@@ -375,15 +377,7 @@ def init_enhance_and_skullstrip_bold_wf(
     )
 
     # Dilate pre_mask
-    pre_dilate = pe.Node(
-        fsl.DilateImage(
-            operation="max",
-            kernel_shape="sphere",
-            kernel_size=3.0,
-            internal_datatype="char",
-        ),
-        name="pre_mask_dilate",
-    )
+    pre_dilate = pe.Node(BinaryDilation(), name="pre_mask_dilate")
 
     # Ensure mask's header matches reference's
     check_hdr = pe.Node(MatchHeader(), name="check_hdr", run_without_submitting=True)
