@@ -376,12 +376,6 @@ def init_enhance_and_skullstrip_bold_wf(
         name="outputnode",
     )
 
-    # Dilate pre_mask
-    pre_dilate = pe.Node(BinaryDilation(), name="pre_mask_dilate")
-
-    # Ensure mask's header matches reference's
-    check_hdr = pe.Node(MatchHeader(), name="check_hdr", run_without_submitting=True)
-
     # Run N4 normally, force num_threads=1 for stability (images are small, no need for >1)
     n4_correct = pe.Node(
         N4BiasFieldCorrection(
@@ -436,7 +430,6 @@ def init_enhance_and_skullstrip_bold_wf(
 
     if not pre_mask:
         from nipype.interfaces.ants.utils import AI
-        from ..interfaces.nibabel import Binarize
 
         bold_template = get_template(
             "MNI152NLin2009cAsym", resolution=2, desc="fMRIPrep", suffix="boldref"
@@ -489,10 +482,12 @@ def init_enhance_and_skullstrip_bold_wf(
             ),
             name="map_brainmask",
         )
-        binarize_mask = pe.Node(Binarize(thresh_low=brainmask_thresh), name="binarize_mask")
+        # Ensure mask's header matches reference's
+        check_hdr = pe.Node(MatchHeader(), name="check_hdr", run_without_submitting=True)
 
         # fmt: off
         workflow.connect([
+            (inputnode, check_hdr, [("in_file", "reference")]),
             (inputnode, init_aff, [("in_file", "moving_image")]),
             (inputnode, map_brainmask, [("in_file", "reference_image")]),
             (inputnode, norm, [("in_file", "moving_image")]),
@@ -501,22 +496,19 @@ def init_enhance_and_skullstrip_bold_wf(
                 ("reverse_invert_flags", "invert_transform_flags"),
                 ("reverse_transforms", "transforms"),
             ]),
-            (map_brainmask, binarize_mask, [("output_image", "in_file")]),
-            (binarize_mask, pre_dilate, [("out_mask", "in_file")]),
+            (map_brainmask, check_hdr, [("output_image", "in_file")]),
+            (check_hdr, n4_correct, [("out_file", "weight_image")]),
         ])
         # fmt: on
     else:
         # fmt: off
         workflow.connect([
-            (inputnode, pre_dilate, [("pre_mask", "in_file")]),
+            (inputnode, n4_correct, [("pre_mask", "weight_image")]),
         ])
         # fmt: on
 
     # fmt: off
     workflow.connect([
-        (inputnode, check_hdr, [("in_file", "reference")]),
-        (pre_dilate, check_hdr, [("out_file", "in_file")]),
-        (check_hdr, n4_correct, [("out_file", "weight_image")]),
         (inputnode, n4_correct, [("in_file", "input_image")]),
         (inputnode, fixhdr_unifize, [("in_file", "hdr_file")]),
         (inputnode, fixhdr_skullstrip2, [("in_file", "hdr_file")]),
