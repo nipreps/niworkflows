@@ -364,7 +364,7 @@ def init_enhance_and_skullstrip_bold_wf(
 
     """
     from niworkflows.interfaces.nibabel import BinaryDilation
-    
+
     workflow = Workflow(name=name)
     inputnode = pe.Node(
         niu.IdentityInterface(fields=["in_file", "pre_mask"]), name="inputnode"
