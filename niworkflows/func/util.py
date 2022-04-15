@@ -363,6 +363,8 @@ def init_enhance_and_skullstrip_bold_wf(
         reportlet for the skull-stripping
 
     """
+    from niworkflows.interfaces.nibabel import BinaryDilation
+    
     workflow = Workflow(name=name)
     inputnode = pe.Node(
         niu.IdentityInterface(fields=["in_file", "pre_mask"]), name="inputnode"
@@ -375,15 +377,7 @@ def init_enhance_and_skullstrip_bold_wf(
     )
 
     # Dilate pre_mask
-    pre_dilate = pe.Node(
-        fsl.DilateImage(
-            operation="max",
-            kernel_shape="sphere",
-            kernel_size=3.0,
-            internal_datatype="char",
-        ),
-        name="pre_mask_dilate",
-    )
+    pre_dilate = pe.Node(BinaryDilation(), name="pre_mask_dilate")
 
     # Ensure mask's header matches reference's
     check_hdr = pe.Node(MatchHeader(), name="check_hdr", run_without_submitting=True)
@@ -482,8 +476,7 @@ def init_enhance_and_skullstrip_bold_wf(
         norm.inputs.fixed_image = str(bold_template)
         map_brainmask = pe.Node(
             ApplyTransforms(
-                interpolation="BSpline",
-                float=True,
+                interpolation="Linear",
                 # Use the higher resolution and probseg for numerical stability in rounding
                 input_image=str(
                     get_template(
@@ -523,7 +516,7 @@ def init_enhance_and_skullstrip_bold_wf(
     workflow.connect([
         (inputnode, check_hdr, [("in_file", "reference")]),
         (pre_dilate, check_hdr, [("out_file", "in_file")]),
-        (check_hdr, n4_correct, [("out_file", "mask_image")]),
+        (check_hdr, n4_correct, [("out_file", "weight_image")]),
         (inputnode, n4_correct, [("in_file", "input_image")]),
         (inputnode, fixhdr_unifize, [("in_file", "hdr_file")]),
         (inputnode, fixhdr_skullstrip2, [("in_file", "hdr_file")]),
