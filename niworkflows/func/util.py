@@ -391,8 +391,8 @@ def init_enhance_and_skullstrip_bold_wf(
     skullstrip_first_pass = pe.Node(
         fsl.BET(frac=0.2, mask=True), name="skullstrip_first_pass"
     )
-    bet_dilate = pe.Node(BinaryDilation(radius=6), name="skullstrip_first_dilate")
-    bet_mask = pe.Node(ApplyMask(), name="skullstrip_first_mask")
+    first_dilate = pe.Node(BinaryDilation(radius=6), name="first_dilate")
+    first_mask = pe.Node(ApplyMask(), name="first_mask")
 
     # Use AFNI's unifize for T2 constrast & fix header
     unifize = pe.Node(
@@ -505,10 +505,10 @@ def init_enhance_and_skullstrip_bold_wf(
         (inputnode, fixhdr_unifize, [("in_file", "hdr_file")]),
         (inputnode, fixhdr_skullstrip2, [("in_file", "hdr_file")]),
         (n4_correct, skullstrip_first_pass, [("output_image", "in_file")]),
-        (skullstrip_first_pass, bet_dilate, [("mask_file", "in_file")]),
-        (bet_dilate, bet_mask, [("out_file", "in_mask")]),
-        (skullstrip_first_pass, bet_mask, [("out_file", "in_file")]),
-        (bet_mask, unifize, [("out_file", "in_file")]),
+        (skullstrip_first_pass, first_dilate, [("mask_file", "in_file")]),
+        (first_dilate, first_mask, [("out_file", "in_mask")]),
+        (skullstrip_first_pass, first_mask, [("out_file", "in_file")]),
+        (first_mask, unifize, [("out_file", "in_file")]),
         (unifize, fixhdr_unifize, [("out_file", "in_file")]),
         (fixhdr_unifize, skullstrip_second_pass, [("out_file", "in_file")]),
         (skullstrip_first_pass, combine_masks, [("mask_file", "in_file")]),
