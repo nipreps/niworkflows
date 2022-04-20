@@ -90,7 +90,7 @@ jobs:
 
   get_data:
     docker:
-      - image: continuumio/miniconda3:4.9.2-alpine
+      - image: continuumio/miniconda3:4.10.3
     working_directory: /tmp/data
     environment:
       - TEMPLATEFLOW_HOME: /tmp/templateflow
@@ -101,13 +101,17 @@ jobs:
             - env-v2-master-
             - env-v2-
       - run:
+          name: Ensure conda and Python are up-to-date
+          command: |
+            conda update -n base conda python -c defaults
+            python -m pip install --no-cache-dir -U pip
+      - run:
           name: Setup git-annex, DataLad & TemplateFlow
           command: |
-            conda install -y -c anaconda -c conda-forge git-annex datalad wget
-            python -m pip install --no-cache-dir -U datalad-osf
+            conda install -y -c conda-forge git-annex datalad wget
             git config --global user.name 'NiPreps Bot'
             git config --global user.email 'nipreps@gmail.com'
-            python -m pip install --no-cache-dir -U templateflow
+            python -m pip install --no-cache-dir -U datalad-osf templateflow
       - save_cache:
           key: env-v2-{{ .Branch }}-{{ .BuildNum }}
           paths:
