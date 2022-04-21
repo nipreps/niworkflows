@@ -97,9 +97,9 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - env-v1-{{ .Branch }}-
-            - env-v1-maint/1.4.x-
-            - env-v1-
+            - env-v2-{{ .Branch }}-
+            - env-v2-maint/1.4.x-
+            - env-v2-
       - run:
           name: Setup git-annex, DataLad & TemplateFlow
           command: |
@@ -109,7 +109,7 @@ jobs:
             git config --global user.email 'nipreps@gmail.com'
             python -m pip install --no-cache-dir -U templateflow
       - save_cache:
-          key: env-v1-{{ .Branch }}-{{ .BuildNum }}
+          key: env-v2-{{ .Branch }}-{{ .BuildNum }}
           paths:
             - /opt/conda
 
