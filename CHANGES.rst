@@ -1,3 +1,13 @@
+1.4.9 (April 21, 2022)
+======================
+Bug-fix release in the 1.4.x series.
+
+This release includes improvements to the reliability of the BOLD masking workflow,
+as well as an fMRIPrep bug-fix when reusing multi-echo anatomicals.
+
+  * FIX: Account for potential lists of lists in multi-echo cases (#719)
+  * FIX: Improve reliability of BOLD masking workflow (#712)
+
 1.4.8 (April 08, 2022)
 ======================
 Bug-fix release in the 1.4.x series.
