@@ -1,3 +1,11 @@
+1.4.9 (April 21, 2022)
+======================
+Bug-fix release in the 1.4.x series.
+
+This change improves the robustness of the BOLD masking workflow used in fMRIPrep.
+
+  * FIX: Improve reliability of BOLD masking workflow (#712)
+
 1.4.8 (April 08, 2022)
 ======================
 Bug-fix release in the 1.4.x series.
