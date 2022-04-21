@@ -18,7 +18,7 @@ jobs:
             - build-v1-{{ .Branch }}-{{ .Revision }}
             - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
-            - build-v1-master-
+            - build-v1-maint/1.4.x-
             - build-v1-
           paths:
             - /tmp/docker
@@ -98,7 +98,7 @@ jobs:
       - restore_cache:
           keys:
             - env-v1-{{ .Branch }}-
-            - env-v1-master-
+            - env-v1-maint/1.4.x-
             - env-v1-
       - run:
           name: Setup git-annex, DataLad & TemplateFlow
@@ -117,7 +117,7 @@ jobs:
           keys:
             - data-v3-{{ .Branch }}-{{ epoch }}
             - data-v3-{{ .Branch }}-
-            - data-v3-master-
+            - data-v3-maint/1.4.x-
             - data-v3-
       - run:
           name: Get test data from ds000003
@@ -185,7 +185,7 @@ jobs:
             - build-v1-{{ .Branch }}-{{ .Revision }}
             - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
-            - build-v1-master-
+            - build-v1-maint/1.4.x-
             - build-v1-
       - run:
           name: Docker authentication
@@ -215,7 +215,7 @@ jobs:
           keys:
             - data-v3-{{ .Branch }}-{{ epoch }}
             - data-v3-{{ .Branch }}-
-            - data-v3-master-
+            - data-v3-maint/1.4.x-
             - data-v3-
 
       - run:
@@ -337,7 +337,7 @@ jobs:
             - build-v1-{{ .Branch }}-{{ .Revision }}
             - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
-            - build-v1-master-
+            - build-v1-maint/1.4.x-
             - build-v1-
           paths:
             - /tmp/docker
