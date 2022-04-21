@@ -363,6 +363,8 @@ def init_enhance_and_skullstrip_bold_wf(
         reportlet for the skull-stripping
 
     """
+    from niworkflows.interfaces.nibabel import ApplyMask, BinaryDilation
+
     workflow = Workflow(name=name)
     inputnode = pe.Node(
         niu.IdentityInterface(fields=["in_file", "pre_mask"]), name="inputnode"
@@ -373,20 +375,6 @@ def init_enhance_and_skullstrip_bold_wf(
         ),
         name="outputnode",
     )
-
-    # Dilate pre_mask
-    pre_dilate = pe.Node(
-        fsl.DilateImage(
-            operation="max",
-            kernel_shape="sphere",
-            kernel_size=3.0,
-            internal_datatype="char",
-        ),
-        name="pre_mask_dilate",
-    )
-
-    # Ensure mask's header matches reference's
-    check_hdr = pe.Node(MatchHeader(), name="check_hdr", run_without_submitting=True)
 
     # Run N4 normally, force num_threads=1 for stability (images are small, no need for >1)
     n4_correct = pe.Node(
@@ -403,16 +391,8 @@ def init_enhance_and_skullstrip_bold_wf(
     skullstrip_first_pass = pe.Node(
         fsl.BET(frac=0.2, mask=True), name="skullstrip_first_pass"
     )
-    bet_dilate = pe.Node(
-        fsl.DilateImage(
-            operation="max",
-            kernel_shape="sphere",
-            kernel_size=6.0,
-            internal_datatype="char",
-        ),
-        name="skullstrip_first_dilate",
-    )
-    bet_mask = pe.Node(fsl.ApplyMask(), name="skullstrip_first_mask")
+    first_dilate = pe.Node(BinaryDilation(radius=6), name="first_dilate")
+    first_mask = pe.Node(ApplyMask(), name="first_mask")
 
     # Use AFNI's unifize for T2 constrast & fix header
     unifize = pe.Node(
@@ -438,11 +418,10 @@ def init_enhance_and_skullstrip_bold_wf(
     combine_masks = pe.Node(fsl.BinaryMaths(operation="mul"), name="combine_masks")
 
     # Compute masked brain
-    apply_mask = pe.Node(fsl.ApplyMask(), name="apply_mask")
+    apply_mask = pe.Node(ApplyMask(), name="apply_mask")
 
     if not pre_mask:
         from nipype.interfaces.ants.utils import AI
-        from ..interfaces.nibabel import Binarize
 
         bold_template = get_template(
             "MNI152NLin2009cAsym", resolution=2, desc="fMRIPrep", suffix="boldref"
@@ -495,10 +474,12 @@ def init_enhance_and_skullstrip_bold_wf(
             ),
             name="map_brainmask",
         )
-        binarize_mask = pe.Node(Binarize(thresh_low=brainmask_thresh), name="binarize_mask")
+        # Ensure mask's header matches reference's
+        check_hdr = pe.Node(MatchHeader(), name="check_hdr", run_without_submitting=True)
 
         # fmt: off
         workflow.connect([
+            (inputnode, check_hdr, [("in_file", "reference")]),
             (inputnode, init_aff, [("in_file", "moving_image")]),
             (inputnode, map_brainmask, [("in_file", "reference_image")]),
             (inputnode, norm, [("in_file", "moving_image")]),
@@ -507,37 +488,34 @@ def init_enhance_and_skullstrip_bold_wf(
                 ("reverse_invert_flags", "invert_transform_flags"),
                 ("reverse_transforms", "transforms"),
             ]),
-            (map_brainmask, binarize_mask, [("output_image", "in_file")]),
-            (binarize_mask, pre_dilate, [("out_mask", "in_file")]),
+            (map_brainmask, check_hdr, [("output_image", "in_file")]),
+            (check_hdr, n4_correct, [("out_file", "weight_image")]),
         ])
         # fmt: on
     else:
         # fmt: off
         workflow.connect([
-            (inputnode, pre_dilate, [("pre_mask", "in_file")]),
+            (inputnode, n4_correct, [("pre_mask", "weight_image")]),
         ])
         # fmt: on
 
     # fmt: off
     workflow.connect([
-        (inputnode, check_hdr, [("in_file", "reference")]),
-        (pre_dilate, check_hdr, [("out_file", "in_file")]),
-        (check_hdr, n4_correct, [("out_file", "weight_image")]),
         (inputnode, n4_correct, [("in_file", "input_image")]),
         (inputnode, fixhdr_unifize, [("in_file", "hdr_file")]),
         (inputnode, fixhdr_skullstrip2, [("in_file", "hdr_file")]),
         (n4_correct, skullstrip_first_pass, [("output_image", "in_file")]),
-        (skullstrip_first_pass, bet_dilate, [("mask_file", "in_file")]),
-        (bet_dilate, bet_mask, [("out_file", "mask_file")]),
-        (skullstrip_first_pass, bet_mask, [("out_file", "in_file")]),
-        (bet_mask, unifize, [("out_file", "in_file")]),
+        (skullstrip_first_pass, first_dilate, [("mask_file", "in_file")]),
+        (first_dilate, first_mask, [("out_file", "in_mask")]),
+        (skullstrip_first_pass, first_mask, [("out_file", "in_file")]),
+        (first_mask, unifize, [("out_file", "in_file")]),
         (unifize, fixhdr_unifize, [("out_file", "in_file")]),
         (fixhdr_unifize, skullstrip_second_pass, [("out_file", "in_file")]),
         (skullstrip_first_pass, combine_masks, [("mask_file", "in_file")]),
         (skullstrip_second_pass, fixhdr_skullstrip2, [("out_file", "in_file")]),
         (fixhdr_skullstrip2, combine_masks, [("out_file", "operand_file")]),
         (fixhdr_unifize, apply_mask, [("out_file", "in_file")]),
-        (combine_masks, apply_mask, [("out_file", "mask_file")]),
+        (combine_masks, apply_mask, [("out_file", "in_mask")]),
         (combine_masks, outputnode, [("out_file", "mask_file")]),
         (apply_mask, outputnode, [("out_file", "skull_stripped_file")]),
         (n4_correct, outputnode, [("output_image", "bias_corrected_file")]),
@@ -579,6 +557,8 @@ def init_skullstrip_bold_wf(name="skullstrip_bold_wf"):
         reportlet for the skull-stripping
 
     """
+    from niworkflows.interfaces.nibabel import ApplyMask
+
     workflow = Workflow(name=name)
     inputnode = pe.Node(niu.IdentityInterface(fields=["in_file"]), name="inputnode")
     outputnode = pe.Node(
@@ -594,7 +574,7 @@ def init_skullstrip_bold_wf(name="skullstrip_bold_wf"):
         afni.Automask(dilate=1, outputtype="NIFTI_GZ"), name="skullstrip_second_pass"
     )
     combine_masks = pe.Node(fsl.BinaryMaths(operation="mul"), name="combine_masks")
-    apply_mask = pe.Node(fsl.ApplyMask(), name="apply_mask")
+    apply_mask = pe.Node(ApplyMask(), name="apply_mask")
     mask_reportlet = pe.Node(SimpleShowMaskRPT(), name="mask_reportlet")
 
     # fmt: off
@@ -606,7 +586,7 @@ def init_skullstrip_bold_wf(name="skullstrip_bold_wf"):
         (combine_masks, outputnode, [("out_file", "mask_file")]),
         # Masked file
         (inputnode, apply_mask, [("in_file", "in_file")]),
-        (combine_masks, apply_mask, [("out_file", "mask_file")]),
+        (combine_masks, apply_mask, [("out_file", "in_mask")]),
         (apply_mask, outputnode, [("out_file", "skull_stripped_file")]),
         # Reportlet
         (inputnode, mask_reportlet, [("in_file", "background_file")]),
