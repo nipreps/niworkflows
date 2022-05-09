@@ -58,7 +58,7 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get install -y git-annex --no-install-recommends
-        python -m pip install datalad==0.14.7 datalad-osf
+        python -m pip install datalad datalad-osf
         datalad wtf
     - name: Fetch test data
       run: |
