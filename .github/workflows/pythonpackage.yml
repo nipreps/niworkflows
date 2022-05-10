@@ -57,7 +57,7 @@ jobs:
     - name: Install datalad
       run: |
         python -m pip install datalad-installer
-        datalad-installer --sudo ok git-annex -m datalad/git-annex
+        datalad-installer --sudo ok git-annex
         python -m pip install datalad datalad-osf
         datalad wtf
     - name: Pacify git
