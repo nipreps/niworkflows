@@ -42,6 +42,9 @@ jobs:
 
   get_data:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
     - name: Create test data directory
       run: mkdir -p $HOME/.cache/stanford-crn
@@ -54,12 +57,25 @@ jobs:
         restore-keys: |
           data-v0-${{ github.ref_name }}-
           data-v0-
+    - name: Setup conda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-activate-base: true
+        activate-environment: ""
+    - name: Verify environment
+      run: |
+        conda info
+        which python
     - name: Install datalad
       run: |
-        sudo apt-get update -y
-        sudo apt-get install -y git-annex --no-install-recommends
-        python -m pip install datalad==0.14.7 datalad-osf
+        python -m pip install datalad-installer
+        datalad-installer --sudo ok git-annex
+        python -m pip install datalad datalad-osf
         datalad wtf
+    - name: Pacify git
+      run: |
+        git config --global user.email "github@niworkflows.ci"
+        git config --global user.name "Niworkflows Action"
     - name: Fetch test data
       run: |
         DS=$HOME/.cache/stanford-crn
