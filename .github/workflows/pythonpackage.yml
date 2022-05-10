@@ -56,10 +56,14 @@ jobs:
           data-v0-
     - name: Install datalad
       run: |
-        sudo apt-get update -y
-        sudo apt-get install -y git-annex --no-install-recommends
+        python -m pip install datalad-installer
+        datalad-installer --sudo ok git-annex -m datalad/git-annex
         python -m pip install datalad datalad-osf
         datalad wtf
+    - name: Pacify git
+      run: |
+        git config --global user.email "github@niworkflows.ci"
+        git config --global user.name "Niworkflows Action"
     - name: Fetch test data
       run: |
         DS=$HOME/.cache/stanford-crn
