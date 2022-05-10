@@ -103,11 +103,11 @@ jobs:
       - run:
           name: Setup git-annex, DataLad & TemplateFlow
           command: |
-            conda install -y -c anaconda -c conda-forge git-annex datalad wget
-            python -m pip install --no-cache-dir -U datalad-osf
+            apk update && apk add --no-cache coreutils
+            conda install -y -c conda-forge datalad git wget
+            python -m pip install --no-cache-dir -U datalad-osf templateflow
             git config --global user.name 'NiPreps Bot'
             git config --global user.email 'nipreps@gmail.com'
-            python -m pip install --no-cache-dir -U templateflow
       - save_cache:
           key: env-v2-{{ .Branch }}-{{ .BuildNum }}
           paths:
