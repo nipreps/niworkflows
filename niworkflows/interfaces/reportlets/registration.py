@@ -22,8 +22,8 @@
 #
 """ReportCapableInterfaces for registration tools."""
 import os
-from distutils.version import LooseVersion
 
+from looseversion import LooseVersion
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     traits,
