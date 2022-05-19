@@ -1,3 +1,2 @@
 recursive-exclude niworkflows/ conftest.py
 include versioneer.py
-include niworkflows/_version.py

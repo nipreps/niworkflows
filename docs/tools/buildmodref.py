@@ -10,7 +10,7 @@ import re
 # local imports
 from apigen import ApiDocWriter
 # version comparison
-from looseversion import LooseVersion
+from packaging.version import Version
 
 #*****************************************************************************
 
