@@ -1,3 +1,4 @@
+networkx != 2.8.1
 furo ~= 2021.10.09
 matplotlib >= 2.2.0
 nibabel
