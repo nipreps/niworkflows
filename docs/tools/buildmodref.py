@@ -35,7 +35,7 @@ def writeapi(package, outdir, source_version, other_defines=True):
     # are not (re)generated. This avoids automatic generation of documentation
     # for older or newer versions if such versions are installed on the system.
 
-    installed_version = V(module.__version__)
+    installed_version = Version(module.__version__)
     if source_version != installed_version:
         abort("Installed version does not match source version")
 
