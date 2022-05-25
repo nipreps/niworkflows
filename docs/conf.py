@@ -14,7 +14,21 @@
 #
 import os
 import sys
+from unittest import mock
+import tempfile
+
 from packaging.version import Version
+import templateflow
+
+# Prevent etelemetry from loading at all
+# Could set NO_ET environment variable, but why?
+sys.modules["etelemetry"] = mock.Mock()
+
+# Keep templateflow API intact except for fetching files.
+# Return an existent but empty temporary file
+tffiledesc, tffilename = tempfile.mkstemp()
+os.close(tffiledesc)
+templateflow.api.get = mock.MagicMock(return_value=tffilename)
 
 from niworkflows import __version__, __copyright__, __packagename__
 
