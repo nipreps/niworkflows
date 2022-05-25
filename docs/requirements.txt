@@ -1,5 +1,5 @@
 attrs
-furo ~= 2022.04.07
+furo ~= 2022.4.7
 nipype >= 1.5.1
 packaging
 sphinx ~= 4.2
