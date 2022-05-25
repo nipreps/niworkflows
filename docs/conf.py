@@ -14,7 +14,29 @@
 #
 import os
 import sys
+from unittest import mock
+import tempfile
+
 from packaging.version import Version
+import templateflow
+
+# Prevent etelemetry from loading at all
+# Could set NO_ET environment variable, but why?
+MOCKS = [
+    "etelemetry",
+    "matplotlib",
+    "matplotlib.pyplot",
+    "matplotlib.cm",
+    "matplotlib.colors",
+    "matplotlib.colorbar",
+]
+sys.modules.update({mod: mock.Mock() for mod in MOCKS})
+
+# Keep templateflow API intact except for fetching files.
+# Return an existent but empty temporary file
+tffiledesc, tffilename = tempfile.mkstemp()
+os.close(tffiledesc)
+templateflow.api.get = mock.MagicMock(return_value=tffilename)
 
 from niworkflows import __version__, __copyright__, __packagename__
 
@@ -47,7 +69,6 @@ extensions = [
 ]
 
 autodoc_mock_imports = [
-    "matplotlib",
     "nilearn",
     "nitime",
     "numpy",
@@ -57,6 +78,7 @@ autodoc_mock_imports = [
     "svgutils",
     "templateflow",
     "transforms3d",
+    "yaml",
 ]
 
 # Accept custom section names to be parsed for numpy-style docstrings
@@ -234,13 +256,13 @@ apidoc_extra_args = ["--module-first", "-d 1", "-T"]
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     "bids": ("https://bids-standard.github.io/pybids/", None),
-    "matplotlib": ("https://matplotlib.org/", None),
+    "matplotlib": ("https://matplotlib.org/stable", None),
     "nibabel": ("https://nipy.org/nibabel/", None),
     "nipype": ("https://nipype.readthedocs.io/en/latest/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/dev", None),
     "python": ("https://docs.python.org/3/", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy-1.8.0/html-scipyorg/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "smriprep": ("https://www.nipreps.org/smriprep/", None),
     "surfplot": ("https://surfplot.readthedocs.io/en/latest/", None),
     "templateflow": ("https://www.templateflow.org/python-client", None),
