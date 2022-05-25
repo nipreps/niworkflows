@@ -22,7 +22,15 @@ import templateflow
 
 # Prevent etelemetry from loading at all
 # Could set NO_ET environment variable, but why?
-sys.modules["etelemetry"] = mock.Mock()
+MOCKS = [
+    "etelemetry",
+    "matplotlib",
+    "matplotlib.pyplot",
+    "matplotlib.cm",
+    "matplotlib.colors",
+    "matplotlib.colorbar",
+]
+sys.modules.update({mod: mock.Mock() for mod in MOCKS})
 
 # Keep templateflow API intact except for fetching files.
 # Return an existent but empty temporary file
@@ -61,7 +69,6 @@ extensions = [
 ]
 
 autodoc_mock_imports = [
-    "matplotlib",
     "nilearn",
     "nitime",
     "numpy",
@@ -71,6 +78,7 @@ autodoc_mock_imports = [
     "svgutils",
     "templateflow",
     "transforms3d",
+    "yaml",
 ]
 
 # Accept custom section names to be parsed for numpy-style docstrings

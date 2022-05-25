@@ -1,14 +1,8 @@
-networkx != 2.8.1
-furo ~= 2021.10.09
-matplotlib >= 2.2.0
-nibabel
+attrs
+furo ~= 2022.04.07
 nipype >= 1.5.1
-numpy
 packaging
-pydot >= 1.2.3
-pydotplus
 sphinx ~= 4.2
 sphinxcontrib-apidoc
 sphinxcontrib-napoleon
 templateflow
-nitransforms >= 20.0.0rc3
