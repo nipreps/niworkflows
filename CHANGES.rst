@@ -1,3 +1,18 @@
+1.6.0 (May 25, 2022)
+====================
+New feature release in the 1.6.x series. This series will support sMRIPrep 0.9,
+fMRIPrep 22.0., and nibabies 22.1.
+
+* FIX: Address some reliability issues of the functional masking workflow (#714)
+* FIX: Improve reliability of BOLD masking workflow (#712)
+* FIX: Account for potential lists of lists in multi-echo cases (#719)
+* ENH: Added MRtrix3 gradients to derivative path patterns (#724)
+* ENH: Add T2starmap as a functional derivative (#720)
+* MAINT: Replace distutils use, upgrade versioneer (#725)
+* CI: Let datalad handle git-annex installation (#721)
+* CI: Bump environment cache version (#717)
+* CI: Fallback to maintenance branch first (#716)
+
 1.5.4 (April 08, 2022)
 ======================
 Bug-fix release in the 1.5.x series.
