@@ -31,6 +31,9 @@ import pytest
 import tempfile
 import pkg_resources
 
+# disable ET
+os.environ['NO_ET'] = '1'
+
 from .utils.bids import collect_data
 from .testing import (
     test_data_env, test_output_dir, test_workdir, data_dir,
