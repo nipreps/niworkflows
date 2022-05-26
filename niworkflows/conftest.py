@@ -34,15 +34,12 @@ import pkg_resources
 # disable ET
 os.environ['NO_ET'] = '1'
 
-from .utils.bids import collect_data
-from .testing import (
-    test_data_env, test_output_dir, test_workdir, data_dir,
-    data_env_canary, data_dir_canary
-)
-
 
 @pytest.fixture(autouse=True)
 def add_np(doctest_namespace):
+    from .utils.bids import collect_data
+    from .testing import data_dir, data_dir_canary
+
     doctest_namespace["PY_VERSION"] = version_info
     doctest_namespace["np"] = np
     doctest_namespace["nb"] = nb
@@ -77,20 +74,24 @@ def add_np(doctest_namespace):
 
 @pytest.fixture
 def testdata_dir():
+    from .testing import data_dir
     return data_dir
 
 
 @pytest.fixture
 def ds000030_dir():
+    from .testing import test_data_env, data_env_canary
     data_env_canary()
     return Path(test_data_env) / "ds000030"
 
 
 @pytest.fixture
 def workdir():
+    from .testing import test_workdir
     return None if test_workdir is None else Path(test_workdir)
 
 
 @pytest.fixture
 def outdir():
+    from .testing import test_output_dir
     return None if test_output_dir is None else Path(test_output_dir)
