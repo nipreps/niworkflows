@@ -1,3 +1,11 @@
+1.6.1 (May 27, 2022)
+====================
+Bug-fix release in the 1.6.x series.
+
+This release allows downstream tools to use nitransforms 22.0.
+
+* MNT: Relax nitransforms dependency #727
+
 1.6.0 (May 25, 2022)
 ====================
 New feature release in the 1.6.x series. This series will support sMRIPrep 0.9,
