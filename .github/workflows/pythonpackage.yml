@@ -9,6 +9,9 @@ on:
     tags: [ '*' ]
   pull_request:
     branches: [ master, 'maint/*' ]
+  schedule:
+    - cron: '0 0 * * *'
+
 
 jobs:
   build:
@@ -92,15 +95,20 @@ jobs:
       matrix:
         python-version: [3.7, 3.8, 3.9]
         install: [repo]
+        pip-flags: ['', '--pre']
         include:
           - python-version: 3.9
             install: sdist
+            pip-flags: ''
           - python-version: 3.9
             install: wheel
+            pip-flags: ''
           - python-version: 3.9
             install: editable
+            pip-flags: ''
     env:
       INSTALL_TYPE: ${{ matrix.install }}
+      PIP_FLAGS: ${{ matrix.pip-flags }}
 
     steps:
     - uses: actions/checkout@v3
@@ -143,7 +151,7 @@ jobs:
         fi
         echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
     - name: Install package
-      run: python -m pip install $ARCHIVE
+      run: python -m pip install $PIP_FLAGS $ARCHIVE
     - name: Check version
       run: |
         # Interpolate version
@@ -157,7 +165,7 @@ jobs:
         echo "INSTALLED: \"${INSTALLED_VERSION}\""
         test "${INSTALLED_VERSION}" = "${THISVERSION}"
     - name: Install test dependencies
-      run: python -m pip install "niworkflows[tests]"
+      run: python -m pip install $PIP_FLAGS "niworkflows[tests]"
     - name: Run tests
       uses: GabrielBB/xvfb-action@v1
       with:
