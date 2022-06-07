@@ -457,7 +457,7 @@ def transform_to_2d(data, max_axis):
 
     # take the values where the absolute value of the projection
     # is the highest
-    maximum_intensity_data = data[inds]
+    maximum_intensity_data = data[tuple(inds)]
 
     return np.rot90(maximum_intensity_data)
 
