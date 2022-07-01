@@ -1,3 +1,12 @@
+1.6.2 (July 1, 2022)
+====================
+Bug-fix release in the 1.6.x series.
+
+This release fixes a bug where BIDS data collection would fail if using ``session``
+as a BIDS filter.
+
+* FIX: Ensure we do not clobber entities from bids filters (#731)
+
 1.6.1 (May 27, 2022)
 ====================
 Bug-fix release in the 1.6.x series.
