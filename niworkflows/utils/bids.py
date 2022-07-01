@@ -207,7 +207,8 @@ def collect_data(
     >>> bids_root['t2w']  # doctest: +ELLIPSIS
     []
     >>> bids_root, _ = collect_data(str(datadir / 'ds051'), '01',
-    ...                             bids_validate=False, bids_filters={'t1w':{'run': 1}})
+    ...                             bids_validate=False,
+    ...                             bids_filters={'t1w':{'run': 1, 'session': None}})
     >>> bids_root['t1w']  # doctest: +ELLIPSIS
     ['.../ds051/sub-01/anat/sub-01_run-01_T1w.nii.gz']
 
@@ -216,6 +217,13 @@ def collect_data(
         layout = bids_dir
     else:
         layout = BIDSLayout(str(bids_dir), validate=bids_validate)
+
+    layout_get_kwargs = {
+        'return_type': 'file',
+        'subject': participant_label,
+        'extension': ['.nii', '.nii.gz'],
+        'session': session_id,
+    }
 
     queries = {
         "fmap": {"datatype": "fmap"},
@@ -229,6 +237,10 @@ def collect_data(
     bids_filters = bids_filters or {}
     for acq, entities in bids_filters.items():
         queries[acq].update(entities)
+        for entity in list(layout_get_kwargs.keys()):
+            if entity in entities:
+                # avoid clobbering layout.get
+                del layout_get_kwargs[entity]
 
     if task:
         queries["bold"]["task"] = task
@@ -237,15 +249,7 @@ def collect_data(
         queries["bold"]["echo"] = echo
 
     subj_data = {
-        dtype: sorted(
-            layout.get(
-                return_type="file",
-                subject=participant_label,
-                session=session_id,
-                extension=[".nii", ".nii.gz"],
-                **query,
-            )
-        )
+        dtype: sorted(layout.get(**layout_get_kwargs, **query))
         for dtype, query in queries.items()
     }
 
