@@ -357,8 +357,8 @@ def _create_cifti_image(
         bold_img = resample_to_img(bold_img, label_img)
 
     # ensure images match HCP orientation (LAS)
-    bold_img = reorient_image(bold_img, target_orientation="LAS")
-    label_img = reorient_image(label_img, target_orientation="LAS")
+    bold_img = reorient_image(bold_img, target_ornt="LAS")
+    label_img = reorient_image(label_img, target_ornt="LAS")
 
     bold_data = bold_img.get_fdata(dtype="float32")
     timepoints = bold_img.shape[3]
