@@ -515,7 +515,7 @@ class ReorientImage(SimpleInterface):
     output_spec = ReorientImageOutputSpec
 
     def _run_interface(self, runtime):
-        self._results["out_file"] = reorient_image(
+        self._results["out_file"] = reorient_file(
             self.inputs.in_file,
             target_file=self.inputs.target_file,
             target_ornt=self.inputs.target_orientation,
@@ -523,8 +523,8 @@ class ReorientImage(SimpleInterface):
         return runtime
 
 
-def reorient_image(
-    in_file: str, *, target_file: str = None, target_ornt: str = None, newpath: str = None
+def reorient_file(
+    in_file: str, *, target_file: str = None, target_ornt: str = None, newpath: str = None,
 ) -> str:
     """
     Reorient an image.
@@ -541,22 +541,32 @@ def reorient_image(
     import nibabel as nb
 
     img = nb.load(in_file)
-    img_axcodes = nb.aff2axcodes(img.affine)
-    in_ornt = nb.orientations.axcodes2ornt(img_axcodes)
+    if not target_file and not target_ornt:
+        raise TypeError("No target orientation or file is specified.")
 
     if target_file:
         target_img = nb.load(target_file)
         target_ornt = nb.aff2axcodes(target_img.affine)
 
-    out_ornt = nb.orientations.axcodes2ornt(target_ornt)
-    ornt_xfm = nb.orientations.ornt_transform(in_ornt, out_ornt)
-    reoriented = img.as_reoriented(ornt_xfm)
+    reoriented = reorient_image(img, target_ornt)
 
     if newpath is None:
         newpath = Path()
     out_file = str((Path(newpath) / "reoriented.nii.gz").absolute())
     reoriented.to_filename(out_file)
     return out_file
+
+
+def reorient_image(img: nb.spatialimages.SpatialImage, target_ornt: str):
+    """Reorient an image in memory."""
+    import nibabel as nb
+
+    img_axcodes = nb.aff2axcodes(img.affine)
+    in_ornt = nb.orientations.axcodes2ornt(img_axcodes)
+    out_ornt = nb.orientations.axcodes2ornt(target_ornt)
+    ornt_xfm = nb.orientations.ornt_transform(in_ornt, out_ornt)
+    r_img = img.as_reoriented(ornt_xfm)
+    return r_img
 
 
 def _gen_reference(
