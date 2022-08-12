@@ -36,7 +36,7 @@ def init_gradunwarp_wf(
     wf = Workflow(name=name)
 
     inputnode = pe.Node(
-        niu.IdentityInterface(fields=["in_file", "coeff_file", "grad_file"]), name="inputnode"
+        niu.IdentityInterface(fields=["input_file", "coeff_file", "grad_file"]), name="inputnode"
     )
     outputnode = pe.Node(
         niu.IdentityInterface(
@@ -48,8 +48,8 @@ def init_gradunwarp_wf(
         name="outputnode",
     )
 
-    gradient_unwarp = pe.Node(GradUnwarp(), name="grad_unwarp")
-    convert_warp = pe.Node(
+    gradient_unwarp = pe.MapNode(GradUnwarp(), name="grad_unwarp")
+    convert_warp = pe.MapNode(
         ConvertWarp(
             abswarp=True,
             out_relwarp=True,
@@ -60,7 +60,7 @@ def init_gradunwarp_wf(
     # fmt:off
     wf.connect([
         (inputnode, gradient_unwarp, [
-            ("in_file", "infile"),
+            ("input_file", "infile"),
             ("coeff_file", "coeffile"),
             ("grad_file", "gradfile"),
         ]),
@@ -70,6 +70,9 @@ def init_gradunwarp_wf(
         (gradient_unwarp, convert_warp, [
             ("warp_file", "warp1"),
         ]),
+        (gradient_unwarp, output_node, [
+            ("corrected_file", "corrected_file")
+        ])
     ])
     # fmt:on
 
