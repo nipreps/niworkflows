@@ -27,10 +27,8 @@ the Center for Reproducible Neuroscience (http://reproducibility.stanford.edu/),
 as well as for open-source software distribution.
 """
 from datetime import datetime
-from ._version import get_versions
-
-__version__ = get_versions()["version"]
-del get_versions
+from . import _version
+__version__ = _version.get_versions()['version']
 
 __packagename__ = "niworkflows"
 __copyright__ = "Copyright {}, The NiPreps Developers".format(
