@@ -697,3 +697,30 @@ def test_fsdir_missing_space(tmp_path):
     bintfs.BIDSFreeSurferDir(
         derivatives=str(tmp_path), spaces=["fsaverage2"], freesurfer_home=fshome
     ).run()
+
+
+@pytest.mark.skipif(not os.getenv("FREESURFER_HOME"), reason="No FreeSurfer")
+@pytest.mark.parametrize('min_version', [None, '7.0.0'])
+def test_fsdir_min_version(tmp_path, min_version):
+    fshome = os.environ["FREESURFER_HOME"]
+    subjects_dir = tmp_path / "freesurfer"
+
+    patched_subject_dir = subjects_dir / 'fsaverage' / 'older'
+    patched_subject_dir.mkdir(parents=True)
+
+    bfsd = bintfs.BIDSFreeSurferDir(
+        subjects_dir=subjects_dir,
+        derivatives=str(tmp_path),
+        spaces=["fsaverage"],
+        freesurfer_home=fshome,
+    )
+
+    if min_version:
+        bfsd.inputs.minimum_fs_version = min_version
+
+    bfsd.run()
+    if min_version:
+        # should have been overwritten with proper subjects dir
+        assert not patched_subject_dir.exists()
+    else:
+        assert patched_subject_dir.exists()
