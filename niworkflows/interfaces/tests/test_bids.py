@@ -705,13 +705,13 @@ def test_fsdir_min_version(tmp_path, min_version):
     fshome = os.environ["FREESURFER_HOME"]
     subjects_dir = tmp_path / "freesurfer"
 
-    patched_subject_dir = subjects_dir / 'fsaverage6' / 'older'
+    patched_subject_dir = subjects_dir / 'fsaverage' / 'older'
     patched_subject_dir.mkdir(parents=True)
 
     bfsd = bintfs.BIDSFreeSurferDir(
         subjects_dir=subjects_dir,
         derivatives=str(tmp_path),
-        spaces=["fsaverage6"],
+        spaces=["fsaverage"],
         freesurfer_home=fshome,
     )
 
