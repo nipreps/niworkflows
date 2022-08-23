@@ -848,6 +848,7 @@ class _BIDSFreeSurferDirInputSpec(BaseInterfaceInputSpec):
     overwrite_fsaverage = traits.Bool(
         False, usedefault=True, desc="Overwrite fsaverage directories, if present"
     )
+    minimum_fs_version = traits.Enum("7.0.0", desc="Minimum FreeSurfer version for compatibility")
 
 
 class _BIDSFreeSurferDirOutputSpec(TraitedSpec):
@@ -910,6 +911,12 @@ class BIDSFreeSurferDir(SimpleInterface):
                     continue
                 else:
                     raise FileNotFoundError("Expected to find '%s' to copy" % source)
+
+            if dest.exists() and self.inputs.minimum_fs_version == "7.0.0":
+                label = dest / 'label' / 'rh.FG1.mpm.vpnl.label'  # new in FS7
+                if not label.exists():
+                    # remove previous output and let us recopy
+                    shutil.rmtree(dest)
 
             # Finesse is overrated. Either leave it alone or completely clobber it.
             if dest.exists() and self.inputs.overwrite_fsaverage:
