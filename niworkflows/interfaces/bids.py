@@ -912,7 +912,11 @@ class BIDSFreeSurferDir(SimpleInterface):
                 else:
                     raise FileNotFoundError("Expected to find '%s' to copy" % source)
 
-            if dest.exists() and self.inputs.minimum_fs_version == "7.0.0":
+            if (
+                space == 'fsaverage'
+                and dest.exists()
+                and self.inputs.minimum_fs_version == "7.0.0"
+            ):
                 label = dest / 'label' / 'rh.FG1.mpm.vpnl.label'  # new in FS7
                 if not label.exists():
                     # remove previous output and let us recopy
