@@ -225,6 +225,7 @@ class _RobustAverageInputSpec(BaseInterfaceInputSpec):
     nonnegative = traits.Bool(
         True, usedefault=True, desc="whether the output should be clipped below zero"
     )
+    num_threads = traits.Int(desc="number of threads")
 
 
 class _RobustAverageOutputSpec(TraitedSpec):
@@ -234,6 +235,7 @@ class _RobustAverageOutputSpec(TraitedSpec):
         traits.Float, desc="the ratio to the grand mean or global signal drift"
     )
     out_hmc = OutputMultiObject(File(exists=True), desc="head-motion correction matrices")
+    out_hmc_volumes = OutputMultiObject(File(exists=True), desc="head-motion correction volumes")
 
 
 class RobustAverage(SimpleInterface):
@@ -319,13 +321,18 @@ class RobustAverage(SimpleInterface):
         if self.inputs.mc_method == "AFNI":
             from nipype.interfaces.afni import Volreg
 
-            res = Volreg(
+            volreg = Volreg(
                 in_file=self._results["out_volumes"],
-                args="-Fourier -twopass",
+                interp="Fourier",
+                args="-twopass",
                 zpad=4,
                 outputtype="NIFTI_GZ",
-            ).run()
-            # self._results["out_hmc"] = res.outputs.oned_matrix_save
+            )
+            if isdefined(self.inputs.num_threads):
+                volreg.inputs.num_threads = self.inputs.num_threads
+
+            res = volreg.run()
+            self._results["out_hmc"] = res.outputs.oned_matrix_save
 
         elif self.inputs.mc_method == "FSL":
             from nipype.interfaces.fsl import MCFLIRT
@@ -338,6 +345,7 @@ class RobustAverage(SimpleInterface):
             self._results["out_hmc"] = res.outputs.mat_file
 
         if self.inputs.mc_method:
+            self._results["out_hmc_volumes"] = res.outputs.out_file
             data = nb.load(res.outputs.out_file).get_fdata(dtype="float32")
 
         data = np.clip(
