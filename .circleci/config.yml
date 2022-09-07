@@ -104,7 +104,7 @@ jobs:
           name: Setup git-annex, DataLad & TemplateFlow
           command: |
             apk update && apk add --no-cache coreutils
-            conda install -y -c conda-forge datalad git wget
+            conda install -y -c conda-forge python=*=*cpython datalad git wget
             python -m pip install --no-cache-dir -U datalad-osf templateflow
             git config --global user.name 'NiPreps Bot'
             git config --global user.email 'nipreps@gmail.com'
