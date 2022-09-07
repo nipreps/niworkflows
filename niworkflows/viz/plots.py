@@ -1040,8 +1040,8 @@ def cifti_surfaces_plot(
         raise ValueError("Cortex data is not in fsLR space")
 
     # medial wall needs to be added back in
-    lh_data = np.full(max(left_cortex.vertex_indices) + 1, np.nan)
-    rh_data = np.full(max(right_cortex.vertex_indices) + 1, np.nan)
+    lh_data = np.full(left_cortex.surface_number_of_vertices, np.nan)
+    rh_data = np.full(right_cortex.surface_number_of_vertices, np.nan)
     lh_data[left_cortex.vertex_indices] = _concat_brain_struct_data([left_cortex], data)
     rh_data[right_cortex.vertex_indices] = _concat_brain_struct_data([right_cortex], data)
 
