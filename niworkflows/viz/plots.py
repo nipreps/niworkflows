@@ -975,7 +975,7 @@ def cifti_surfaces_plot(
     surface_type="inflated",
     clip_range=(0, None),
     output_file=None,
-    **splt_kwargs,
+    **kwargs,
 ):
     """
     Plots a CIFTI-2 dense timeseries onto left/right mesh surfaces.
@@ -995,8 +995,8 @@ def cifti_surfaces_plot(
     output_file: :obj:`str` or :obj:`None`
         Path where the output figure should be saved. If this is not defined,
         then the figure will be returned.
-    splt_kwargs : dict
-        Keyword arguments for :obj:`surfplot.Plot`
+    kwargs : dict
+        Keyword arguments for :obj:`nilearn.plotting.plot_surf`
 
     Outputs
     -------
@@ -1049,13 +1049,15 @@ def cifti_surfaces_plot(
         lh_data = np.clip(lh_data, clip_range[0], clip_range[1], out=lh_data)
         rh_data = np.clip(rh_data, clip_range[0], clip_range[1], out=rh_data)
 
+    cmap = kwargs.pop('cmap', 'YlOrRd_r')
+
     # Build the figure
     lh_mesh, rh_mesh = get_surface_meshes(density, surface_type)
     figure = plt.figure(figsize=plt.figaspect(0.5))
     ax0 = figure.add_subplot(1, 2, 1, projection='3d')
-    plot_surf(lh_mesh, lh_data, cmap='YlOrRd_r', axes=ax0)
+    plot_surf(lh_mesh, lh_data, cmap=cmap, axes=ax0, **kwargs)
     ax1 = figure.add_subplot(1, 2, 2, projection='3d')
-    plot_surf(lh_mesh, lh_data, cmap='YlOrRd_r', axes=ax1)
+    plot_surf(lh_mesh, lh_data, cmap=cmap, axes=ax1, **kwargs)
 
     if output_file is not None:
         figure.savefig(output_file, bbox_inches="tight")
