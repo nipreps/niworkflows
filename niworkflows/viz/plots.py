@@ -1062,7 +1062,6 @@ def cifti_surfaces_plot(
     if output_file is not None:
         figure.savefig(output_file, bbox_inches="tight")
         plt.close(figure)
-        del figure
         return output_file
 
     return figure
