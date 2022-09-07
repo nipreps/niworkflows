@@ -1005,8 +1005,7 @@ def cifti_surfaces_plot(
     output_file: :obj:`str`
         The file where the figure is saved.
     """
-    import surfplot as splt
-    from surfplot.utils import add_fslr_medial_wall
+    from nilearn.plotting import plot_surf
 
     def get_surface_meshes(density, surface_type):
         import templateflow.api as tf
@@ -1036,28 +1035,31 @@ def cifti_surfaces_plot(
     # as potential nonsteady states
     data = img.dataobj[5:20].mean(axis=0)
 
-    cortex_data = _concat_brain_struct_data((left_cortex, right_cortex), data)
-    if density == "32k" and len(cortex_data) != 59412:
+    if density == "32k" and len(data) != 91282:
         raise ValueError("Cortex data is not in fsLR space")
-    # medial wall needs to be added back in
-    cortex_data = add_fslr_medial_wall(cortex_data)
-    if clip_range:
-        cortex_data = np.clip(cortex_data, clip_range[0], clip_range[1], out=cortex_data)
 
-    lh_data, rh_data = np.array_split(cortex_data, 2)
+    # medial wall needs to be added back in
+    lh_data = np.full(max(left_cortex.vertex_indices) + 1, np.nan)
+    rh_data = np.full(max(right_cortex.vertex_indices) + 1, np.nan)
+    lh_data[left_cortex.vertex_indices] = _concat_brain_struct_data([left_cortex], data)
+    rh_data[right_cortex.vertex_indices] = _concat_brain_struct_data([right_cortex], data)
+
+    if clip_range:
+        lh_data = np.clip(lh_data, clip_range[0], clip_range[1], out=lh_data)
+        rh_data = np.clip(rh_data, clip_range[0], clip_range[1], out=rh_data)
 
     # Build the figure
     lh_mesh, rh_mesh = get_surface_meshes(density, surface_type)
-    p = splt.Plot(
-        surf_lh=lh_mesh, surf_rh=rh_mesh, layout=splt_kwargs.pop("layout", "row"), **splt_kwargs
-    )
-    p.add_layer({'left': lh_data, 'right': rh_data}, cmap='YlOrRd_r')
-    figure = p.build()  # figsize - leave default?
+    figure = plt.figure(figsize=plt.figaspect(0.5))
+    ax0 = figure.add_subplot(1, 2, 1, projection='3d')
+    plot_surf(lh_mesh, lh_data, cmap='YlOrRd_r', axes=ax0)
+    ax1 = figure.add_subplot(1, 2, 2, projection='3d')
+    plot_surf(lh_mesh, lh_data, cmap='YlOrRd_r', axes=ax1)
 
     if output_file is not None:
         figure.savefig(output_file, bbox_inches="tight")
         plt.close(figure)
-        figure = None
+        del figure
         return output_file
 
     return figure
