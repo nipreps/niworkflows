@@ -1035,7 +1035,8 @@ def cifti_surfaces_plot(
     # as potential nonsteady states
     data = img.dataobj[5:20].mean(axis=0)
 
-    if density == "32k" and len(data) != 91282:
+    counts = (left_cortex.index_count, right_cortex.index_count)
+    if density == "32k" and counts != (29696, 29716):
         raise ValueError("Cortex data is not in fsLR space")
 
     # medial wall needs to be added back in
