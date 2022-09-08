@@ -1,3 +1,18 @@
+1.6.3 (September 08, 2022)
+==========================
+Patch release in the 1.6.x series.
+
+This release includes a new interface and improvements to existing interfaces.
+
+  * CI: Fix commit check (#744)
+  * CI: Extract pip pre checks into separate, skippable job (#743)
+  * FIX: Missing outputs in RobustAverage (#741)
+  * ENH: ReorientImage interface (#736)
+  * ENH: Add minimum_fs_version input to BIDSFreeSurferDir (#739)
+  * MNT: Pin traits < 6.4 (#738)
+  * MNT: Upgrade versioneer (#737)
+  * MAINT: Remove pins that broke prerelease tests (#735)
+
 1.6.2 (July 1, 2022)
 ====================
 Bug-fix release in the 1.6.x series.
