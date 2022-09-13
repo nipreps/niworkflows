@@ -1,3 +1,12 @@
+1.6.4 (September 13, 2022)
+==========================
+Patch release in the 1.6.x series.
+
+This release includes a fix that resolves an issue with empty TSV files.
+
+* FIX: TSV2JSON should convert empty TSV files to empty JSON files (#746)
+
+
 1.6.3 (September 08, 2022)
 ==========================
 Patch release in the 1.6.x series.
