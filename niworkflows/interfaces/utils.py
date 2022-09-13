@@ -949,25 +949,31 @@ def _tsv2json(
 
     # from fmriprep
     def less_breakable(a_string):
-        """ hardens the string to different envs (i.e. case insensitive, no
-        whitespace, '#' """
+        """hardens the string to different envs (i.e. case insensitive, no
+        whitespace, '#'"""
         return "".join(a_string.split()).strip("#")
 
     drop_columns = drop_columns or []
     additional_metadata = additional_metadata or {}
-    tsv_data = pd.read_csv(in_tsv, sep="\t")
+    try:
+        tsv_data = pd.read_csv(in_tsv, "\t")
+    except pd.errors.EmptyDataError:
+        tsv_data = pd.DataFrame()
     for k, v in additional_metadata.items():
         tsv_data[k] = [v] * len(tsv_data.index)
     for col in drop_columns:
         tsv_data.drop(labels=col, axis="columns", inplace=True)
-    tsv_data.set_index(index_column, drop=True, inplace=True)
+    if index_column in tsv_data:
+        tsv_data.set_index(index_column, drop=True, inplace=True)
     if enforce_case:
         tsv_data.index = [
             re.sub(re_to_snake, snake, less_breakable(i), 0).lower()
             for i in tsv_data.index
         ]
         tsv_data.columns = [
-            re.sub(re_to_camel, camel, less_breakable(i).title(), 0).replace("Csf", "CSF")
+            re.sub(re_to_camel, camel, less_breakable(i).title(), 0).replace(
+                "Csf", "CSF"
+            )
             for i in tsv_data.columns
         ]
     json_data = tsv_data.to_json(orient="index")
