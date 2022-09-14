@@ -189,20 +189,14 @@ jobs:
       name: Submit to CodeCov
 
   test-pre:
-    needs: [build, get_data, check_if_skip]
+    needs: [get_data, check_if_skip]
     if: ${{ !contains(needs.check_if_skip.outputs.commit_message, '[skip pre]') }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9, "3.10"]
         install: [repo]
         pip-flags: ['--pre']
-        include:
-          # VTK won't build official 3.10 wheels before 9.2.0
-          # PyVista has posted dev versions, at least
-          - python-version: '3.10'
-            install: repo
-            pip-flags: '--pre --find-links https://wheels.pyvista.org/'
 
     env:
       INSTALL_TYPE: ${{ matrix.install }}
@@ -233,25 +227,8 @@ jobs:
         restore-keys: |
           templateflow-v0-${{ github.ref_name }}-
           templateflow-v0-
-    - name: Fetch packages
-      uses: actions/download-artifact@v3
-      with:
-        name: dist
-        path: dist/
-    - name: Select archive
-      run: |
-        if [ "$INSTALL_TYPE" = "sdist" ]; then
-          ARCHIVE=$( ls dist/*.tar.gz )
-        elif [ "$INSTALL_TYPE" = "wheel" ]; then
-          ARCHIVE=$( ls dist/*.whl )
-        elif [ "$INSTALL_TYPE" = "repo" ]; then
-          ARCHIVE="."
-        elif [ "$INSTALL_TYPE" = "editable" ]; then
-          ARCHIVE="-e ."
-        fi
-        echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
     - name: Install package
-      run: python -m pip install $PIP_FLAGS $ARCHIVE
+      run: python -m pip install $PIP_FLAGS .
     - name: Check version
       run: |
         # Interpolate version
