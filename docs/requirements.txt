@@ -1,5 +1,6 @@
 attrs
 furo ~= 2022.4.7
+matplotlib >= 2.2.0
 nipype >= 1.5.1
 traits < 6.4
 packaging
@@ -7,3 +8,4 @@ sphinx ~= 4.2
 sphinxcontrib-apidoc
 sphinxcontrib-napoleon
 templateflow
+nitransforms >= 20.0.0rc3
