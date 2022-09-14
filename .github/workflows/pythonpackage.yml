@@ -12,6 +12,9 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+concurrency:
+  group: python-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check_if_skip:
@@ -38,17 +41,14 @@ jobs:
     needs: check_if_skip
     if: "!contains(needs.check_if_skip.outputs.commit_message, '[skip ci]')"
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3
     - name: Display Python version
       run: python -c "import sys; print(sys.version)"
     - name: Check python version and install build
