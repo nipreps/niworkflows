@@ -9,85 +9,280 @@ on:
     tags: [ '*' ]
   pull_request:
     branches: [ master, 'maint/*' ]
+  schedule:
+    - cron: '0 0 * * *'
+
 
 jobs:
+  check_if_skip:
+    runs-on: ubuntu-latest
+    outputs:
+      commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
+    steps:
+      - name: Get repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Print head git commit message
+        id: get_commit_message
+        run: |
+          if [[ -z "$COMMIT_MSG" ]]; then
+            COMMIT_MSG=$(git show -s --format=%s)
+          fi
+          echo $COMMIT_MSG
+          echo "::set-output name=commit_message::$COMMIT_MSG"
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+
   build:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    needs: check_if_skip
+    if: "!contains(needs.check_if_skip.outputs.commit_message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Display Python version
+      run: python -c "import sys; print(sys.version)"
+    - name: Check python version and install build
+      run: |
+        python --version
+        python -m pip install -U build twine
+    - name: Build niworkflows
+      run: python -m build
+    - name: Check distributions
+      run: twine check dist/*
+    - uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: dist/
+
+  get_data:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+    - name: Create test data directory
+      run: mkdir -p $HOME/.cache/stanford-crn
+    - name: Load test data cache
+      uses: actions/cache@v2
+      id: stanford-crn
+      with:
+        path: ~/.cache/stanford-crn/
+        key: data-v0-${{ github.ref_name }}-${{ github.sha }}
+        restore-keys: |
+          data-v0-${{ github.ref_name }}-
+          data-v0-
+    - name: Setup conda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-activate-base: true
+        activate-environment: ""
+    - name: Verify environment
+      run: |
+        conda info
+        which python
+    - name: Install datalad
+      run: |
+        python -m pip install datalad-installer
+        datalad-installer --sudo ok git-annex
+        python -m pip install datalad datalad-osf
+        datalad wtf
+    - name: Pacify git
+      run: |
+        git config --global user.email "github@niworkflows.ci"
+        git config --global user.name "Niworkflows Action"
+    - name: Fetch test data
+      run: |
+        DS=$HOME/.cache/stanford-crn
+        datalad install -r -s https://github.com/nipreps-data/niworkflows-data.git $DS
+        cd $DS
+        git -C BIDS-examples-1-enh-ds054 checkout enh/ds054
+        datalad update -r --merge -d .
+        datalad get -J 2 -r ds000003 ds000030/sub-10228/func
+
+  test:
+    needs: [build, get_data]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
+        install: [repo]
+        include:
+          - python-version: 3.9
+            install: sdist
+          - python-version: 3.9
+            install: wheel
+          - python-version: 3.9
+            install: editable
+
+    env:
+      INSTALL_TYPE: ${{ matrix.install }}
 
     steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    - uses: actions/checkout@v2
+    - name: Load test data cache
+      uses: actions/cache@v2
+      id: stanford-crn
       with:
-        ssh-key: "${{ secrets.NIPREPS_DEPLOY }}"
-        fetch-depth: 0
-    - name: Build in confined, updated environment and interpolate version
+        path: ~/.cache/stanford-crn/
+        key: data-v0-${{ github.ref_name }}-${{ github.sha }}
+    - name: Load TemplateFlow cache
+      uses: actions/cache@v2
+      id: templateflow
+      with:
+        path: ~/.cache/templateflow
+        key: templateflow-v0-${{ github.ref_name }}-${{ strategy.job-index }}-${{ github.sha }}
+        restore-keys: |
+          templateflow-v0-${{ github.ref_name }}-
+          templateflow-v0-
+    - name: Fetch packages
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: dist/
+    - name: Select archive
       run: |
-        python -m venv /tmp/buildenv
-        source /tmp/buildenv/bin/activate
-        python -m pip install -U setuptools pip wheel twine docutils
-        python setup.py sdist bdist_wheel
-        python -m twine check dist/niworkflows*
+        if [ "$INSTALL_TYPE" = "sdist" ]; then
+          ARCHIVE=$( ls dist/*.tar.gz )
+        elif [ "$INSTALL_TYPE" = "wheel" ]; then
+          ARCHIVE=$( ls dist/*.whl )
+        elif [ "$INSTALL_TYPE" = "repo" ]; then
+          ARCHIVE="."
+        elif [ "$INSTALL_TYPE" = "editable" ]; then
+          ARCHIVE="-e ."
+        fi
+        echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
+    - name: Install package
+      run: python -m pip install $ARCHIVE
+    - name: Check version
+      run: |
         # Interpolate version
         if [[ "$GITHUB_REF" == refs/tags/* ]]; then
           TAG=${GITHUB_REF##*/}
         fi
         THISVERSION=$( python get_version.py )
         THISVERSION=${TAG:-$THISVERSION}
-        echo "Expected VERSION: \"${THISVERSION}\""
-        echo "THISVERSION=${THISVERSION}" >> ${GITHUB_ENV}
-    - name: Install in confined environment [sdist]
-      run: |
-        python -m venv /tmp/install_sdist
-        source /tmp/install_sdist/bin/activate
-        python -m pip install --upgrade pip wheel
-        python -m pip install dist/niworkflows*.tar.gz
         INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
         echo "VERSION: \"${THISVERSION}\""
         echo "INSTALLED: \"${INSTALLED_VERSION}\""
         test "${INSTALLED_VERSION}" = "${THISVERSION}"
-    - name: Install in confined environment [wheel]
-      run: |
-        python -m venv /tmp/install_wheel
-        source /tmp/install_wheel/bin/activate
-        python -m pip install --upgrade pip wheel
-        python -m pip install dist/niworkflows*.whl
-        INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
-        echo "INSTALLED: \"${INSTALLED_VERSION}\""
-        test "${INSTALLED_VERSION}" = "${THISVERSION}"
-    - name: Install in confined environment [pip install .]
-      run: |
-        python -m venv /tmp/setup_install
-        source /tmp/setup_install/bin/activate
-        python -m pip install --upgrade pip wheel
-        python -m pip install .
-        INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
-        echo "INSTALLED: \"${INSTALLED_VERSION}\""
-        test "${INSTALLED_VERSION}" = "${THISVERSION}"
-    - name: Install in confined environment [pip install -e .]
-      run: |
-        python -m venv /tmp/setup_develop
-        source /tmp/setup_develop/bin/activate
-        python -m pip install pip
-        python -m pip install --upgrade pip wheel
-        python -m pip install -e .
-        INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
-        echo "INSTALLED: \"${INSTALLED_VERSION}\""
-        test "${INSTALLED_VERSION}" = "${THISVERSION}"
-  flake8:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    - name: Install test dependencies
+      run: python -m pip install "niworkflows[tests]"
+    - name: Run tests
+      uses: GabrielBB/xvfb-action@v1
+      with:
+        run: pytest -sv --no-xvfb --doctest-modules --cov niworkflows niworkflows
+    - uses: codecov/codecov-action@v2
+      name: Submit to CodeCov
+
+  test-pre:
+    needs: [build, get_data, check_if_skip]
+    if: ${{ !contains(needs.check_if_skip.outputs.commit_message, '[skip pre]') }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+        install: [repo]
+        pip-flags: ['--pre']
+        include:
+          # VTK won't build official 3.10 wheels before 9.2.0
+          # PyVista has posted dev versions, at least
+          - python-version: '3.10'
+            install: repo
+            pip-flags: '--pre --find-links https://wheels.pyvista.org/'
+
+    env:
+      INSTALL_TYPE: ${{ matrix.install }}
+      PIP_FLAGS: ${{ matrix.pip-flags }}
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Debug commit message
+      run: echo "${{ needs.check_if_skip.outputs.commit_message }}"
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Load test data cache
+      uses: actions/cache@v2
+      id: stanford-crn
+      with:
+        path: ~/.cache/stanford-crn/
+        key: data-v0-${{ github.ref_name }}-${{ github.sha }}
+    - name: Load TemplateFlow cache
+      uses: actions/cache@v2
+      id: templateflow
+      with:
+        path: ~/.cache/templateflow
+        key: templateflow-v0-${{ github.ref_name }}-${{ strategy.job-index }}-${{ github.sha }}
+        restore-keys: |
+          templateflow-v0-${{ github.ref_name }}-
+          templateflow-v0-
+    - name: Fetch packages
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: dist/
+    - name: Select archive
+      run: |
+        if [ "$INSTALL_TYPE" = "sdist" ]; then
+          ARCHIVE=$( ls dist/*.tar.gz )
+        elif [ "$INSTALL_TYPE" = "wheel" ]; then
+          ARCHIVE=$( ls dist/*.whl )
+        elif [ "$INSTALL_TYPE" = "repo" ]; then
+          ARCHIVE="."
+        elif [ "$INSTALL_TYPE" = "editable" ]; then
+          ARCHIVE="-e ."
+        fi
+        echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
+    - name: Install package
+      run: python -m pip install $PIP_FLAGS $ARCHIVE
+    - name: Check version
+      run: |
+        # Interpolate version
+        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          TAG=${GITHUB_REF##*/}
+        fi
+        THISVERSION=$( python get_version.py )
+        THISVERSION=${TAG:-$THISVERSION}
+        INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
+        echo "VERSION: \"${THISVERSION}\""
+        echo "INSTALLED: \"${INSTALLED_VERSION}\""
+        test "${INSTALLED_VERSION}" = "${THISVERSION}"
+    - name: Install test dependencies
+      run: python -m pip install $PIP_FLAGS "niworkflows[tests]"
+    - name: Run tests
+      uses: GabrielBB/xvfb-action@v1
+      with:
+        run: pytest -sv --no-xvfb --doctest-modules --cov niworkflows niworkflows
+    - uses: codecov/codecov-action@v2
+      name: Submit to CodeCov
+
+  flake8:
+    needs: check_if_skip
+    if: "!contains(needs.check_if_skip.outputs.commit_message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
     - name: Set up Python 3.7
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v3
       with:
         python-version: 3.7
     - run: pip install flake8
