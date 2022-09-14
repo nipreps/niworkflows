@@ -184,6 +184,16 @@ A list of prominent changes can be found below. (With thanks to Lea Waller for t
     * ``NormalizeMotionParams`` now under ``confounds``.
     * ``FMRISummary``, ``CompCorVariancePlot``, ``ConfoundsCorrelationPlot`` from ``plotting``
 
+1.3.8 (September 14, 2022)
+==========================
+Bug-fix release in the 1.3.x series
+
+Backports and minor maintenance.
+
+* FIX: TSV2JSON should convert empty TSV files to empty JSON files (#747)
+* FIX: Stop relying on deprecated indexing behavior (#730)
+* MNT: Update docs and GitHub actions config from master in LTS branch (#748)
+
 1.3.7 (March 31, 2022)
 ======================
 Bug-fix release in the 1.3.x series

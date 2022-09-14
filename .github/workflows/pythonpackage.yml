@@ -9,22 +9,46 @@ on:
     tags: [ '*' ]
   pull_request:
     branches: [ master, 'maint/*' ]
+  schedule:
+    - cron: '0 0 * * *'
+
+concurrency:
+  group: python-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+  check_if_skip:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
+    outputs:
+      commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
+    steps:
+      - name: Get repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Print head git commit message
+        id: get_commit_message
+        run: |
+          if [[ -z "$COMMIT_MSG" ]]; then
+            COMMIT_MSG=$(git show -s --format=%s)
+          fi
+          echo $COMMIT_MSG
+          echo "::set-output name=commit_message::$COMMIT_MSG"
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+
+  build:
+    needs: check_if_skip
+    if: "!contains(needs.check_if_skip.outputs.commit_message, '[skip ci]')"
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - name: Set up Python 3
+      uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3
     - name: Display Python version
       run: python -c "import sys; print(sys.version)"
     - name: Check python version and install build
@@ -42,11 +66,14 @@ jobs:
 
   get_data:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
     - name: Create test data directory
       run: mkdir -p $HOME/.cache/stanford-crn
     - name: Load test data cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: stanford-crn
       with:
         path: ~/.cache/stanford-crn/
@@ -54,12 +81,25 @@ jobs:
         restore-keys: |
           data-v0-${{ github.ref_name }}-
           data-v0-
+    - name: Setup conda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-activate-base: true
+        activate-environment: ""
+    - name: Verify environment
+      run: |
+        conda info
+        which python
     - name: Install datalad
       run: |
-        sudo apt-get update -y
-        sudo apt-get install -y git-annex --no-install-recommends
-        python -m pip install datalad==0.14.7 datalad-osf
+        python -m pip install datalad-installer
+        datalad-installer --sudo ok git-annex
+        python -m pip install datalad datalad-osf
         datalad wtf
+    - name: Pacify git
+      run: |
+        git config --global user.email "github@niworkflows.ci"
+        git config --global user.name "Niworkflows Action"
     - name: Fetch test data
       run: |
         DS=$HOME/.cache/stanford-crn
@@ -83,6 +123,7 @@ jobs:
             install: wheel
           - python-version: 3.9
             install: editable
+
     env:
       INSTALL_TYPE: ${{ matrix.install }}
 
@@ -91,17 +132,17 @@ jobs:
       with:
         fetch-depth: 0
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Load test data cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: stanford-crn
       with:
         path: ~/.cache/stanford-crn/
         key: data-v0-${{ github.ref_name }}-${{ github.sha }}
     - name: Load TemplateFlow cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: templateflow
       with:
         path: ~/.cache/templateflow
@@ -142,6 +183,8 @@ jobs:
         test "${INSTALLED_VERSION}" = "${THISVERSION}"
     - name: Install test dependencies
       run: python -m pip install "niworkflows[tests]"
+    - name: Set TEST_DATA_HOME
+      run: echo "TEST_DATA_HOME=$HOME/.cache/stanford-crn" >> $GITHUB_ENV
     - name: Run tests
       uses: GabrielBB/xvfb-action@v1
       with:
@@ -149,13 +192,76 @@ jobs:
     - uses: codecov/codecov-action@v2
       name: Submit to CodeCov
 
+  test-pre:
+    needs: [get_data, check_if_skip]
+    if: ${{ !contains(needs.check_if_skip.outputs.commit_message, '[skip pre]') }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8, 3.9, "3.10"]
+        install: [repo]
+        pip-flags: ['--pre']
+
+    env:
+      INSTALL_TYPE: ${{ matrix.install }}
+      PIP_FLAGS: ${{ matrix.pip-flags }}
+
+    steps:
+    - name: Debug commit message
+      run: echo "${{ needs.check_if_skip.outputs.commit_message }}"
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Load test data cache
+      uses: actions/cache@v3
+      id: stanford-crn
+      with:
+        path: ~/.cache/stanford-crn/
+        key: data-v0-${{ github.ref_name }}-${{ github.sha }}
+    - name: Load TemplateFlow cache
+      uses: actions/cache@v3
+      id: templateflow
+      with:
+        path: ~/.cache/templateflow
+        key: templateflow-v0-${{ github.ref_name }}-${{ strategy.job-index }}-${{ github.sha }}
+        restore-keys: |
+          templateflow-v0-${{ github.ref_name }}-
+          templateflow-v0-
+    - name: Install package
+      run: python -m pip install $PIP_FLAGS .
+    - name: Check version
+      run: |
+        # Interpolate version
+        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          TAG=${GITHUB_REF##*/}
+        fi
+        THISVERSION=$( python get_version.py )
+        THISVERSION=${TAG:-$THISVERSION}
+        INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
+        echo "VERSION: \"${THISVERSION}\""
+        echo "INSTALLED: \"${INSTALLED_VERSION}\""
+        test "${INSTALLED_VERSION}" = "${THISVERSION}"
+    - name: Install test dependencies
+      run: python -m pip install $PIP_FLAGS "niworkflows[tests]"
+    - name: Set TEST_DATA_HOME
+      run: echo "TEST_DATA_HOME=$HOME/.cache/stanford-crn" >> $GITHUB_ENV
+    - name: Run tests
+      run: pytest -sv --doctest-modules -n auto --cov niworkflows niworkflows
+    - uses: codecov/codecov-action@v3
+      name: Submit to CodeCov
+
   flake8:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    needs: check_if_skip
+    if: "!contains(needs.check_if_skip.outputs.commit_message, '[skip ci]')"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.7
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: 3.7
     - run: pip install flake8

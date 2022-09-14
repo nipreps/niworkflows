@@ -21,8 +21,9 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """KeySelect tests."""
+from pathlib import Path
 import pytest
-from ..utility import KeySelect
+from ..utility import KeySelect, _tsv2json
 
 
 def test_KeySelect():
@@ -32,3 +33,11 @@ def test_KeySelect():
 
     with pytest.raises(ValueError):
         KeySelect(fields=[])
+
+
+def test_tsv2json(tmp_path):
+    Path.write_bytes(tmp_path / 'empty.tsv', bytes())
+    res = _tsv2json(tmp_path / 'empty.tsv', None, 'any_column')
+    assert res == {}
+    res = _tsv2json(tmp_path / 'empty.tsv', None, 'any_column', additional_metadata={'a': 'b'})
+    assert res == {}
