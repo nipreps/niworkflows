@@ -482,8 +482,7 @@ def init_enhance_and_skullstrip_bold_wf(
         norm.inputs.fixed_image = str(bold_template)
         map_brainmask = pe.Node(
             ApplyTransforms(
-                interpolation="BSpline",
-                float=True,
+                interpolation="Linear",
                 # Use the higher resolution and probseg for numerical stability in rounding
                 input_image=str(
                     get_template(
@@ -523,7 +522,7 @@ def init_enhance_and_skullstrip_bold_wf(
     workflow.connect([
         (inputnode, check_hdr, [("in_file", "reference")]),
         (pre_dilate, check_hdr, [("out_file", "in_file")]),
-        (check_hdr, n4_correct, [("out_file", "mask_image")]),
+        (check_hdr, n4_correct, [("out_file", "weight_image")]),
         (inputnode, n4_correct, [("in_file", "input_image")]),
         (inputnode, fixhdr_unifize, [("in_file", "hdr_file")]),
         (inputnode, fixhdr_skullstrip2, [("in_file", "hdr_file")]),

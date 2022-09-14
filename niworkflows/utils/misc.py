@@ -107,11 +107,20 @@ def fix_multi_T1w_source_name(in_files):
     ...     '/path/to/sub-045_ses-retest_T1w.nii.gz'])
     '/path/to/sub-045_T1w.nii.gz'
 
+
+    >>> fix_multi_T1w_source_name([
+    ...    ('/path/to/sub-045-echo-1_T1w.nii.gz', 'path/to/sub-045-echo-2_T1w.nii.gz')])
+    '/path/to/sub-045_T1w.nii.gz'
+
     """
     import os
     from nipype.utils.filemanip import filename_to_list
 
-    base, in_file = os.path.split(filename_to_list(in_files)[0])
+    in_file = filename_to_list(in_files)[0]
+    if isinstance(in_file, (list, tuple)):
+        in_file = in_file[0]
+
+    base, in_file = os.path.split(in_file)
     subject_label = in_file.split("_", 1)[0].split("-")[1]
     return os.path.join(base, "sub-%s_T1w.nii.gz" % subject_label)
 

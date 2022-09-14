@@ -54,6 +54,26 @@ This release upgrades the Dockerfile to use FSL6, and includes some new interfac
   * FIX: Scipy docs path (#681)
   * TEST: Drop excessively long interface equivalence tests (#674)
 
+1.4.10 (September 14, 2022)
+===========================
+Bug-fix release in the 1.4.x series
+
+Backports and minor maintenance.
+
+* FIX: TSV2JSON should convert empty TSV files to empty JSON files (#747)
+* FIX: Stop relying on deprecated indexing behavior (#730)
+* MNT: Update docs and GitHub actions config from master in LTS branch (#748)
+
+1.4.9 (April 21, 2022)
+======================
+Bug-fix release in the 1.4.x series.
+
+This release includes improvements to the reliability of the BOLD masking workflow,
+as well as an fMRIPrep bug-fix when reusing multi-echo anatomicals.
+
+  * FIX: Account for potential lists of lists in multi-echo cases (#719)
+  * FIX: Improve reliability of BOLD masking workflow (#712)
+
 1.4.8 (April 08, 2022)
 ======================
 Bug-fix release in the 1.4.x series.
@@ -229,6 +249,16 @@ A list of prominent changes can be found below. (With thanks to Lea Waller for t
     * ``CopyXForm``, ``CopyHeader``, ``SanitizeImage`` now under ``header``
     * ``NormalizeMotionParams`` now under ``confounds``.
     * ``FMRISummary``, ``CompCorVariancePlot``, ``ConfoundsCorrelationPlot`` from ``plotting``
+
+1.3.8 (September 14, 2022)
+==========================
+Bug-fix release in the 1.3.x series
+
+Backports and minor maintenance.
+
+* FIX: TSV2JSON should convert empty TSV files to empty JSON files (#747)
+* FIX: Stop relying on deprecated indexing behavior (#730)
+* MNT: Update docs and GitHub actions config from master in LTS branch (#748)
 
 1.3.7 (March 31, 2022)
 ======================
