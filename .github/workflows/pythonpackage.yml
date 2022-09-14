@@ -12,6 +12,9 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+concurrency:
+  group: python-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check_if_skip:
@@ -38,17 +41,14 @@ jobs:
     needs: check_if_skip
     if: "!contains(needs.check_if_skip.outputs.commit_message, '[skip ci]')"
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - name: Set up Python 3
+      uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3
     - name: Display Python version
       run: python -c "import sys; print(sys.version)"
     - name: Check python version and install build
@@ -73,7 +73,7 @@ jobs:
     - name: Create test data directory
       run: mkdir -p $HOME/.cache/stanford-crn
     - name: Load test data cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: stanford-crn
       with:
         path: ~/.cache/stanford-crn/
@@ -132,17 +132,17 @@ jobs:
       with:
         fetch-depth: 0
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Load test data cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: stanford-crn
       with:
         path: ~/.cache/stanford-crn/
         key: data-v0-${{ github.ref_name }}-${{ github.sha }}
     - name: Load TemplateFlow cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: templateflow
       with:
         path: ~/.cache/templateflow
@@ -191,7 +191,7 @@ jobs:
       name: Submit to CodeCov
 
   test-pre:
-    needs: [build, get_data, check_if_skip]
+    needs: [get_data, check_if_skip]
     if: ${{ !contains(needs.check_if_skip.outputs.commit_message, '[skip pre]') }}
     runs-on: ubuntu-latest
     strategy:
@@ -217,17 +217,17 @@ jobs:
       with:
         fetch-depth: 0
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Load test data cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: stanford-crn
       with:
         path: ~/.cache/stanford-crn/
         key: data-v0-${{ github.ref_name }}-${{ github.sha }}
     - name: Load TemplateFlow cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: templateflow
       with:
         path: ~/.cache/templateflow
@@ -235,25 +235,8 @@ jobs:
         restore-keys: |
           templateflow-v0-${{ github.ref_name }}-
           templateflow-v0-
-    - name: Fetch packages
-      uses: actions/download-artifact@v3
-      with:
-        name: dist
-        path: dist/
-    - name: Select archive
-      run: |
-        if [ "$INSTALL_TYPE" = "sdist" ]; then
-          ARCHIVE=$( ls dist/*.tar.gz )
-        elif [ "$INSTALL_TYPE" = "wheel" ]; then
-          ARCHIVE=$( ls dist/*.whl )
-        elif [ "$INSTALL_TYPE" = "repo" ]; then
-          ARCHIVE="."
-        elif [ "$INSTALL_TYPE" = "editable" ]; then
-          ARCHIVE="-e ."
-        fi
-        echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
     - name: Install package
-      run: python -m pip install $PIP_FLAGS $ARCHIVE
+      run: python -m pip install $PIP_FLAGS .
     - name: Check version
       run: |
         # Interpolate version
@@ -272,7 +255,7 @@ jobs:
       uses: GabrielBB/xvfb-action@v1
       with:
         run: pytest -sv --no-xvfb --doctest-modules --cov niworkflows niworkflows
-    - uses: codecov/codecov-action@v2
+    - uses: codecov/codecov-action@v3
       name: Submit to CodeCov
 
   flake8:
@@ -282,7 +265,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.7
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: 3.7
     - run: pip install flake8
