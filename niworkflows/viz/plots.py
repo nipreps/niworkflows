@@ -1048,19 +1048,38 @@ def cifti_surfaces_plot(
     if clip_range:
         lh_data = np.clip(lh_data, clip_range[0], clip_range[1], out=lh_data)
         rh_data = np.clip(rh_data, clip_range[0], clip_range[1], out=rh_data)
+        mn, mx = clip_range
+    else:
+        mn, mx = None, None
+
+    if mn is None:
+        mn = np.min(data)
+    if mx is None:
+        mx = np.max(data)
 
     cmap = kwargs.pop('cmap', 'YlOrRd_r')
 
     # Build the figure
     lh_mesh, rh_mesh = get_surface_meshes(density, surface_type)
-    figure = plt.figure(figsize=plt.figaspect(0.5))
-    ax0 = figure.add_subplot(1, 2, 1, projection='3d')
-    plot_surf(lh_mesh, lh_data, cmap=cmap, axes=ax0, **kwargs)
-    ax1 = figure.add_subplot(1, 2, 2, projection='3d')
-    plot_surf(lh_mesh, lh_data, cmap=cmap, axes=ax1, **kwargs)
+    figure = plt.figure(figsize=plt.figaspect(0.25))
+    ax00 = figure.add_subplot(1, 4, 1, projection='3d', rasterized=True)
+    plot_surf(lh_mesh, lh_data, hemi='left', view='lateral', cmap=cmap, axes=ax00, figure=figure, **kwargs)
+    ax00.dist = 7
+    ax01 = figure.add_subplot(1, 4, 2, projection='3d', rasterized=True)
+    plot_surf(rh_mesh, rh_data, hemi='right', view='lateral', cmap=cmap, axes=ax01, figure=figure, **kwargs)
+    ax01.dist = 7
+    ax10 = figure.add_subplot(1, 4, 3, projection='3d', rasterized=True)
+    plot_surf(lh_mesh, lh_data, hemi='left', view='medial', cmap=cmap, axes=ax10, figure=figure, **kwargs)
+    ax10.dist = 7
+    ax11 = figure.add_subplot(1, 4, 4, projection='3d', rasterized=True)
+    plot_surf(rh_mesh, rh_data, hemi='right', view='medial', cmap=cmap, axes=ax11, figure=figure, **kwargs)
+    ax11.dist = 7
+
+    mappable = cm.ScalarMappable(norm=Normalize(mn, mx), cmap=cmap)
+    figure.colorbar(mappable, shrink=0.2, ax=figure.axes, location='bottom')
 
     if output_file is not None:
-        figure.savefig(output_file, bbox_inches="tight")
+        figure.savefig(output_file, bbox_inches="tight", dpi=400)
         plt.close(figure)
         return output_file
 
