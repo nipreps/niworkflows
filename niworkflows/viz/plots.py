@@ -1058,25 +1058,40 @@ def cifti_surfaces_plot(
         mx = np.max(data)
 
     cmap = kwargs.pop('cmap', 'YlOrRd_r')
+    cbar_map = cm.ScalarMappable(norm=Normalize(mn, mx), cmap=cmap)
+
+    # Make background maps that rescale to a medium gray
+    lh_bg = np.zeros(lh_data.shape, 'int8')
+    rh_bg = np.zeros(rh_data.shape, 'int8')
+    lh_bg[:2] = [3, -2]
+    rh_bg[:2] = [3, -2]
+
+    lh_mesh, rh_mesh = get_surface_meshes(density, surface_type)
+    lh_kwargs = dict(surf_mesh=lh_mesh, surf_map=lh_data, bg_map=lh_bg)
+    rh_kwargs = dict(surf_mesh=rh_mesh, surf_map=rh_data, bg_map=rh_bg)
 
     # Build the figure
-    lh_mesh, rh_mesh = get_surface_meshes(density, surface_type)
-    figure = plt.figure(figsize=plt.figaspect(0.25))
-    ax00 = figure.add_subplot(1, 4, 1, projection='3d', rasterized=True)
-    plot_surf(lh_mesh, lh_data, hemi='left', view='lateral', cmap=cmap, axes=ax00, figure=figure, **kwargs)
-    ax00.dist = 7
-    ax01 = figure.add_subplot(1, 4, 2, projection='3d', rasterized=True)
-    plot_surf(rh_mesh, rh_data, hemi='right', view='lateral', cmap=cmap, axes=ax01, figure=figure, **kwargs)
-    ax01.dist = 7
-    ax10 = figure.add_subplot(1, 4, 3, projection='3d', rasterized=True)
-    plot_surf(lh_mesh, lh_data, hemi='left', view='medial', cmap=cmap, axes=ax10, figure=figure, **kwargs)
-    ax10.dist = 7
-    ax11 = figure.add_subplot(1, 4, 4, projection='3d', rasterized=True)
-    plot_surf(rh_mesh, rh_data, hemi='right', view='medial', cmap=cmap, axes=ax11, figure=figure, **kwargs)
-    ax11.dist = 7
+    figure = plt.figure(figsize=plt.figaspect(0.25), constrained_layout=True)
+    for i, view in enumerate(('lateral', 'medial')):
+        for j, hemi in enumerate(('left', 'right')):
+            title = f'{hemi.title()} - {view.title()}'
+            ax = figure.add_subplot(1, 4, i * 2 + j + 1, projection='3d', rasterized=True)
+            hemi_kwargs = (lh_kwargs, rh_kwargs)[j]
+            plot_surf(
+                hemi=hemi,
+                view=view,
+                title=title,
+                cmap=cmap,
+                vmin=mn,
+                vmax=mx,
+                axes=ax,
+                **hemi_kwargs,
+                **kwargs
+            )
+            # plot_surf sets this to 8, which seems a little far out, but 6 starts clipping
+            ax.dist = 7
 
-    mappable = cm.ScalarMappable(norm=Normalize(mn, mx), cmap=cmap)
-    figure.colorbar(mappable, shrink=0.2, ax=figure.axes, location='bottom')
+    figure.colorbar(cbar_map, shrink=0.2, ax=figure.axes, location='bottom')
 
     if output_file is not None:
         figure.savefig(output_file, bbox_inches="tight", dpi=400)
