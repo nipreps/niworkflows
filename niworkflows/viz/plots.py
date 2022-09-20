@@ -975,7 +975,7 @@ def cifti_surfaces_plot(
     surface_type="inflated",
     clip_range=(0, None),
     output_file=None,
-    **splt_kwargs,
+    **kwargs,
 ):
     """
     Plots a CIFTI-2 dense timeseries onto left/right mesh surfaces.
@@ -995,8 +995,8 @@ def cifti_surfaces_plot(
     output_file: :obj:`str` or :obj:`None`
         Path where the output figure should be saved. If this is not defined,
         then the figure will be returned.
-    splt_kwargs : dict
-        Keyword arguments for :obj:`surfplot.Plot`
+    kwargs : dict
+        Keyword arguments for :obj:`nilearn.plotting.plot_surf`
 
     Outputs
     -------
@@ -1005,8 +1005,7 @@ def cifti_surfaces_plot(
     output_file: :obj:`str`
         The file where the figure is saved.
     """
-    import surfplot as splt
-    from surfplot.utils import add_fslr_medial_wall
+    from nilearn.plotting import plot_surf
 
     def get_surface_meshes(density, surface_type):
         import templateflow.api as tf
@@ -1036,28 +1035,67 @@ def cifti_surfaces_plot(
     # as potential nonsteady states
     data = img.dataobj[5:20].mean(axis=0)
 
-    cortex_data = _concat_brain_struct_data((left_cortex, right_cortex), data)
-    if density == "32k" and len(cortex_data) != 59412:
+    counts = (left_cortex.index_count, right_cortex.index_count)
+    if density == "32k" and counts != (29696, 29716):
         raise ValueError("Cortex data is not in fsLR space")
-    # medial wall needs to be added back in
-    cortex_data = add_fslr_medial_wall(cortex_data)
-    if clip_range:
-        cortex_data = np.clip(cortex_data, clip_range[0], clip_range[1], out=cortex_data)
 
-    lh_data, rh_data = np.array_split(cortex_data, 2)
+    # medial wall needs to be added back in
+    lh_data = np.full(left_cortex.surface_number_of_vertices, np.nan)
+    rh_data = np.full(right_cortex.surface_number_of_vertices, np.nan)
+    lh_data[left_cortex.vertex_indices] = _concat_brain_struct_data([left_cortex], data)
+    rh_data[right_cortex.vertex_indices] = _concat_brain_struct_data([right_cortex], data)
+
+    if clip_range:
+        lh_data = np.clip(lh_data, clip_range[0], clip_range[1], out=lh_data)
+        rh_data = np.clip(rh_data, clip_range[0], clip_range[1], out=rh_data)
+        mn, mx = clip_range
+    else:
+        mn, mx = None, None
+
+    if mn is None:
+        mn = np.min(data)
+    if mx is None:
+        mx = np.max(data)
+
+    cmap = kwargs.pop('cmap', 'YlOrRd_r')
+    cbar_map = cm.ScalarMappable(norm=Normalize(mn, mx), cmap=cmap)
+
+    # Make background maps that rescale to a medium gray
+    lh_bg = np.zeros(lh_data.shape, 'int8')
+    rh_bg = np.zeros(rh_data.shape, 'int8')
+    lh_bg[:2] = [3, -2]
+    rh_bg[:2] = [3, -2]
+
+    lh_mesh, rh_mesh = get_surface_meshes(density, surface_type)
+    lh_kwargs = dict(surf_mesh=lh_mesh, surf_map=lh_data, bg_map=lh_bg)
+    rh_kwargs = dict(surf_mesh=rh_mesh, surf_map=rh_data, bg_map=rh_bg)
 
     # Build the figure
-    lh_mesh, rh_mesh = get_surface_meshes(density, surface_type)
-    p = splt.Plot(
-        surf_lh=lh_mesh, surf_rh=rh_mesh, layout=splt_kwargs.pop("layout", "row"), **splt_kwargs
-    )
-    p.add_layer({'left': lh_data, 'right': rh_data}, cmap='YlOrRd_r')
-    figure = p.build()  # figsize - leave default?
+    figure = plt.figure(figsize=plt.figaspect(0.25), constrained_layout=True)
+    for i, view in enumerate(('lateral', 'medial')):
+        for j, hemi in enumerate(('left', 'right')):
+            title = f'{hemi.title()} - {view.title()}'
+            ax = figure.add_subplot(1, 4, i * 2 + j + 1, projection='3d', rasterized=True)
+            hemi_kwargs = (lh_kwargs, rh_kwargs)[j]
+            plot_surf(
+                hemi=hemi,
+                view=view,
+                title=title,
+                cmap=cmap,
+                vmin=mn,
+                vmax=mx,
+                axes=ax,
+                **hemi_kwargs,
+                **kwargs
+            )
+            # plot_surf sets this to 8, which seems a little far out, but 6 starts clipping
+            ax.dist = 7
+
+    figure.colorbar(cbar_map, shrink=0.2, ax=figure.axes, location='bottom')
 
     if output_file is not None:
-        figure.savefig(output_file, bbox_inches="tight")
+        figure.savefig(output_file, bbox_inches="tight", dpi=400)
         plt.close(figure)
-        figure = None
         return output_file
 
     return figure

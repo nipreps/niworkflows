@@ -114,14 +114,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9, "3.10"]
         install: [repo]
         include:
-          - python-version: 3.9
+          - python-version: 3
             install: sdist
-          - python-version: 3.9
+          - python-version: 3
             install: wheel
-          - python-version: 3.9
+          - python-version: 3
             install: editable
 
     env:
@@ -196,15 +196,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9, "3.10"]
         install: [repo]
         pip-flags: ['--pre']
-        include:
-          # VTK won't build official 3.10 wheels before 9.2.0
-          # PyVista has posted dev versions, at least
-          - python-version: '3.10'
-            install: repo
-            pip-flags: '--pre --find-links https://wheels.pyvista.org/'
 
     env:
       INSTALL_TYPE: ${{ matrix.install }}
