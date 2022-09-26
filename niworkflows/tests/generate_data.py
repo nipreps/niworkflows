@@ -39,6 +39,9 @@ def _create_dtseries_cifti(timepoints, models):
                 brain_structure=name,
             )
             setattr(bm, attr, indices)
+            if model_type == "CIFTI_MODEL_TYPE_SURFACE":
+                # define total vertices for surface models
+                setattr(bm, "surface_number_of_vertices", 32492)
             index_offset += len(data)
             brain_models.append(bm)
             timeseries = np.column_stack((timeseries, data.T))
