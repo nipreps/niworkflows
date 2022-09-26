@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM nipreps/miniconda:py38_1.4.2
+FROM nipreps/miniconda:py39_2205.0
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:${CONDA_PATH}/lib"
