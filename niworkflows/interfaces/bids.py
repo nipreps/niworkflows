@@ -50,7 +50,7 @@ from nipype.interfaces.io import add_traits
 from templateflow.api import templates as _get_template_list
 from ..utils.bids import _init_layout, relative_to_root
 from ..utils.images import set_consumables, unsafe_write_nifti_header_and_data
-from ..utils.misc import splitext as _splitext, _copy_any, unlink
+from ..utils.misc import _copy_any, unlink
 
 regz = re.compile(r"\.gz$")
 _pybids_spec = loads(Path(_pkgres("niworkflows", "data/nipreps.json")).read_text())
@@ -710,21 +710,6 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 }
             )
             if self._metadata:
-                out_file = Path(self._results["out_file"][0])
-                # 1.3.x hack
-                # For dtseries, we have been generating weird non-BIDS JSON files.
-                # We can safely keep producing them to avoid breaking derivatives, but
-                # only the existing keys should keep going into them.
-                if out_file.name.endswith(".dtseries.nii"):
-                    legacy_metadata = {}
-                    for key in ("grayordinates", "space", "surface", "surface_density", "volume"):
-                        if key in self._metadata:
-                            legacy_metadata[key] = self._metadata.pop(key)
-                    if legacy_metadata:
-                        sidecar = out_file.parent / f"{_splitext(str(out_file))[0]}.json"
-                        unlink(sidecar, missing_ok=True)
-                        sidecar.write_text(dumps(legacy_metadata, sort_keys=True, indent=2))
-                # The future: the extension is the first . and everything after
                 sidecar = out_file.parent / f"{out_file.name.split('.', 1)[0]}.json"
                 unlink(sidecar, missing_ok=True)
                 sidecar.write_text(dumps(self._metadata, sort_keys=True, indent=2))

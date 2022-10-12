@@ -342,7 +342,7 @@ def test_DerivativesDataSink_build_path(
         assert sha1(Path(out).read_bytes()).hexdigest() == chksum
 
 
-def test_DerivativesDataSink_dtseries_json_hack(tmp_path):
+def test_DerivativesDataSink_dtseries_json(tmp_path):
     cifti_fname = str(tmp_path / "test.dtseries.nii")
 
     axes = (nb.cifti2.SeriesAxis(start=0, step=2, size=20),
@@ -376,8 +376,7 @@ def test_DerivativesDataSink_dtseries_json_hack(tmp_path):
     old_sidecar = out_path.with_name("sub-01_task-rest_space-fsLR_bold.dtseries.json")
     new_sidecar = out_path.with_name("sub-01_task-rest_space-fsLR_bold.json")
 
-    assert old_sidecar.exists()
-    assert "grayordinates" in json.loads(old_sidecar.read_text())
+    assert not old_sidecar.exists()
     assert new_sidecar.exists()
     assert "RepetitionTime" in json.loads(new_sidecar.read_text())
 
