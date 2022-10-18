@@ -457,7 +457,10 @@ space-MNI152NLin6Asym_res-01_desc-preproc_bold.json'
     >>> lines[1]
     '  "RepetitionTime": 0.75,'
 
-    >>> lines[2]
+    >>> lines[2]  # doctest: +ELLIPSIS
+    '  "Resolution": "Template MNI152NLin6Asym (1.0x1.0x1.0 mm^3)...'
+
+    >>> lines[3]
     '  "SkullStripped": true'
 
     >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
