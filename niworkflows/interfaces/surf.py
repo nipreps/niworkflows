@@ -154,13 +154,19 @@ class Path2BIDS(SimpleInterface):
     suffix = smoothwm
     <BLANKLINE>
 
+    >>> Path2BIDS(in_file='lh.sulc_converted.gii').run().outputs
+    <BLANKLINE>
+    extension = .gii
+    hemi = L
+    suffix = sulc
+    <BLANKLINE>
     """
 
     input_spec = _Path2BIDSInputSpec
     output_spec = _Path2BIDSOutputSpec
     _pattern = re.compile(
         r"(?P<hemi>[lr])h.(?P<suffix>(wm|smoothwm|pial|midthickness|"
-        r"inflated|vinflated|sphere|flat))[\w\d_-]*(?P<extprefix>\.\w+)?"
+        r"inflated|vinflated|sphere|flat|sulc|curv|thickness))[\w\d_-]*(?P<extprefix>\.\w+)?"
     )
     _excluded = ("extprefix",)
 
