@@ -37,7 +37,6 @@ from nipype.interfaces.base import (
     File,
     traits,
     SimpleInterface,
-    Directory,
 )
 import templateflow.api as tf
 
@@ -168,7 +167,7 @@ class CiftiNameSource(SimpleInterface):
         return runtime
 
 
-def _prepare_cifti(surface_density: str) -> typing.List[list, str, dict]:
+def _prepare_cifti(surface_density: str) -> typing.Tuple[list, str, dict]:
     """
     Fetch the required templates needed for CIFTI-2 generation, based on input surface density.
 
@@ -265,8 +264,8 @@ def _prepare_cifti(surface_density: str) -> typing.List[list, str, dict]:
 def _create_cifti_image(
     bold_file: str,
     volume_label: str,
-    bold_surfs: typing.List[str, str],
-    surface_labels: typing.List[str, str],
+    bold_surfs: typing.Tuple[str, str],
+    surface_labels: typing.Tuple[str, str],
     tr: float,
     metadata: typing.Optional[dict] = None,
 ):
@@ -280,9 +279,9 @@ def _create_cifti_image(
     volume_label
         Subcortical label file
     bold_surfs
-        BOLD surface timeseries [L,R]
+        BOLD surface timeseries (L,R)
     surface_labels
-        Surface label files used to remove medial wall
+        Surface label files used to remove medial wall (L,R)
     tr
         BOLD repetition time
     metadata
