@@ -187,7 +187,7 @@ def _prepare_cifti(surface_density: str) -> typing.Tuple[list, str, dict]:
 
     Examples
     --------
-    >>> surface_labels, volume_labels, metadata_file = _prepare_cifti('32k')
+    >>> surface_labels, volume_labels, metadata = _prepare_cifti('32k')
     >>> surface_labels  # doctest: +ELLIPSIS
     ['.../tpl-fsLR_hemi-L_den-32k_desc-nomedialwall_dparc.label.gii', \
      '.../tpl-fsLR_hemi-R_den-32k_desc-nomedialwall_dparc.label.gii']
