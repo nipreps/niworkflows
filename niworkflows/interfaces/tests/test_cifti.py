@@ -10,20 +10,21 @@ from ..cifti import GenerateCifti, CIFTI_STRUCT_WITH_LABELS
 
 @pytest.fixture(scope="module")
 def cifti_data():
-    out = Path().absolute()
-    volume_file = str(out / "volume.nii.gz")
-    left_gii = str(out / "left.gii")
-    right_gii = str(out / "right.gii")
-    surface_data = [nb.gifti.GiftiDataArray(np.ones(32492)) for _ in range(4)]
-    vol = nb.Nifti1Image(np.ones((91, 109, 91, 4)), np.eye(4))
-    gii = nb.GiftiImage(darrays=surface_data)
+    import tempfile
 
-    vol.to_filename(volume_file)
-    gii.to_filename(left_gii)
-    gii.to_filename(right_gii)
-    yield volume_file, left_gii, right_gii
-    for f in (volume_file, left_gii, right_gii):
-        Path(f).unlink()
+    with tempfile.TemporaryDirectory('cifti-data') as tmp:
+        out = Path(tmp).absolute()
+        volume_file = str(out / "volume.nii.gz")
+        left_gii = str(out / "left.gii")
+        right_gii = str(out / "right.gii")
+        surface_data = [nb.gifti.GiftiDataArray(np.ones(32492)) for _ in range(4)]
+        vol = nb.Nifti1Image(np.ones((91, 109, 91, 4)), np.eye(4))
+        gii = nb.GiftiImage(darrays=surface_data)
+
+        vol.to_filename(volume_file)
+        gii.to_filename(left_gii)
+        gii.to_filename(right_gii)
+        yield volume_file, left_gii, right_gii
 
 
 def test_GenerateCifti(tmpdir, cifti_data):
