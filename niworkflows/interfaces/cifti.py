@@ -82,8 +82,8 @@ class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
         usedefault=True,
         desc="CIFTI surface target space",
     )
-    surface_density = traits.Enum(
-        "32k", "59k", desc="Surface vertices density."
+    grayordinates = traits.Enum(
+        "91k", "170k", usedefault=True, desc="Final CIFTI grayordinates"
     )
     TR = traits.Float(mandatory=True, desc="Repetition time")
     surface_bolds = traits.List(
@@ -94,10 +94,8 @@ class _GenerateCiftiInputSpec(BaseInterfaceInputSpec):
 
 
 class _GenerateCiftiOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="generated CIFTI file")
-    out_metadata = File(exists=True, desc="variant metadata JSON")
-    variant = traits.Str(desc="Name of variant space")
-    density = traits.Str(desc="Total number of grayordinates")
+    out_file = File(desc="generated CIFTI file")
+    out_metadata = File(desc="CIFTI metadata JSON")
 
 
 class GenerateCifti(SimpleInterface):
@@ -108,7 +106,8 @@ class GenerateCifti(SimpleInterface):
     output_spec = _GenerateCiftiOutputSpec
 
     def _run_interface(self, runtime):
-        surface_labels, volume_labels, metadata = _prepare_cifti(self.inputs.surface_density)
+
+        surface_labels, volume_labels, metadata = _prepare_cifti(self.inputs.grayordinates)
         self._results["out_file"] = _create_cifti_image(
             self.inputs.bold_file,
             volume_labels,
@@ -167,14 +166,14 @@ class CiftiNameSource(SimpleInterface):
         return runtime
 
 
-def _prepare_cifti(surface_density: str) -> typing.Tuple[list, str, dict]:
+def _prepare_cifti(grayordinates: str) -> typing.Tuple[list, str, dict]:
     """
     Fetch the required templates needed for CIFTI-2 generation, based on input surface density.
 
     Parameters
     ----------
-    surface_density :
-        Surface density (required for `fsLR` surfaces)
+    grayordinates :
+        Total CIFTI grayordinates (91k, 170k)
 
     Returns
     -------
@@ -187,7 +186,7 @@ def _prepare_cifti(surface_density: str) -> typing.Tuple[list, str, dict]:
 
     Examples
     --------
-    >>> surface_labels, volume_labels, metadata = _prepare_cifti('32k')
+    >>> surface_labels, volume_labels, metadata = _prepare_cifti('91k')
     >>> surface_labels  # doctest: +ELLIPSIS
     ['.../tpl-fsLR_hemi-L_den-32k_desc-nomedialwall_dparc.label.gii', \
      '.../tpl-fsLR_hemi-R_den-32k_desc-nomedialwall_dparc.label.gii']
@@ -199,24 +198,27 @@ def _prepare_cifti(surface_density: str) -> typing.Tuple[list, str, dict]:
 
     """
 
-    vertices_key = {
-        "32k": {
+    grayord_key = {
+        "91k": {
+            "surface-den": "32k",
             "tf-res": "02",
             "grayords": "91,282",
             "res-mm": "2mm"
         },
-        "59k": {
+        "170k": {
+            "surface-den": "59k",
             "tf-res": "06",
             "grayords": "170,494",
             "res-mm": "1.6mm"
         }
     }
-    if surface_density not in vertices_key:
-        raise NotImplementedError("Density {surface_density} is not supported.")
+    if grayordinates not in grayord_key:
+        raise NotImplementedError("Grayordinates {grayordinates} is not supported.")
 
-    tf_vol_res = vertices_key[surface_density]['tf-res']
-    grayords = vertices_key[surface_density]['grayords']
-    res_mm = vertices_key[surface_density]['res-mm']
+    tf_vol_res = grayord_key[grayordinates]['tf-res']
+    total_grayords = grayord_key[grayordinates]['grayords']
+    res_mm = grayord_key[grayordinates]['res-mm']
+    surface_density = grayord_key[grayordinates]['surface-den']
     # Fetch templates
     surface_labels = [
         str(
@@ -248,7 +250,7 @@ def _prepare_cifti(surface_density: str) -> typing.Tuple[list, str, dict]:
     )
     metadata = {
         "Density": (
-            f"{grayords} grayordinates corresponding to all of the grey matter sampled at a "
+            f"{total_grayords} grayordinates corresponding to all of the grey matter sampled at a "
             f"{res_mm} average vertex spacing on the surface and as {res_mm} voxels subcortically"
         ),
         "SpatialReference": {
@@ -257,7 +259,6 @@ def _prepare_cifti(surface_density: str) -> typing.Tuple[list, str, dict]:
             "CIFTI_STRUCTURE_RIGHT_CORTEX": surfaces_url % "R",
         }
     }
-
     return surface_labels, volume_label, metadata
 
 
@@ -319,13 +320,8 @@ def _create_cifti_image(
             # currently only supports L/R cortex
             surf_ts = nb.load(bold_surfs[hemi == "RIGHT"])
             surf_verts = len(surf_ts.darrays[0].data)
-            if surface_labels[0].endswith(".annot"):
-                annot = nb.freesurfer.read_annot(surface_labels[hemi == "RIGHT"])
-                # remove medial wall
-                medial = np.nonzero(annot[0] != annot[2].index(b"unknown"))[0]
-            else:
-                annot = nb.load(surface_labels[hemi == "RIGHT"])
-                medial = np.nonzero(annot.darrays[0].data)[0]
+            labels = nb.load(surface_labels[hemi == "RIGHT"])
+            medial = np.nonzero(labels.darrays[0].data)[0]
             # extract values across volumes
             ts = np.array([tsarr.data[medial] for tsarr in surf_ts.darrays])
 

@@ -36,7 +36,7 @@ def test_GenerateCifti(tmpdir, cifti_data):
     gen = GenerateCifti(
         bold_file=bold_volume,
         surface_bolds=bold_surfaces,
-        surface_density='32k',
+        grayordinates="91k",
         TR=1,
     )
     res = gen.run().outputs
