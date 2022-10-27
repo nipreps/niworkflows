@@ -47,7 +47,7 @@ from nipype.interfaces.base import (
     SimpleInterface,
 )
 from nipype.interfaces.io import add_traits
-from templateflow.api import templates as _get_template_list
+import templateflow as tf
 from ..utils.bids import _init_layout, relative_to_root
 from ..utils.images import set_consumables, unsafe_write_nifti_header_and_data
 from ..utils.misc import _copy_any, unlink
@@ -57,7 +57,7 @@ _pybids_spec = loads(Path(_pkgres("niworkflows", "data/nipreps.json")).read_text
 BIDS_DERIV_ENTITIES = frozenset({e["name"] for e in _pybids_spec["entities"]})
 BIDS_DERIV_PATTERNS = tuple(_pybids_spec["default_path_patterns"])
 
-STANDARD_SPACES = _get_template_list()
+STANDARD_SPACES = tf.api.templates()
 LOGGER = logging.getLogger("nipype.interface")
 
 
@@ -457,7 +457,10 @@ space-MNI152NLin6Asym_res-01_desc-preproc_bold.json'
     >>> lines[1]
     '  "RepetitionTime": 0.75,'
 
-    >>> lines[2]
+    >>> lines[2]  # doctest: +ELLIPSIS
+    '  "Resolution": "Template MNI152NLin6Asym (1.0x1.0x1.0 mm^3)...'
+
+    >>> lines[3]
     '  "SkullStripped": true'
 
     >>> bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'
@@ -575,6 +578,17 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         # Clean up native resolution with space
         if out_entities.get("resolution") == "native" and out_entities.get("space"):
             out_entities.pop("resolution", None)
+
+        # Expand templateflow resolutions
+        resolution = out_entities.get("resolution")
+        space = out_entities.get("space")
+        if resolution:
+            # Standard spaces
+            if space in STANDARD_SPACES:
+                res = _get_tf_resolution(space, resolution)
+            else:  # TODO: Nonstandard?
+                res = "Unknown"
+            self._metadata['Resolution'] = res
 
         if len(set(out_entities["extension"])) == 1:
             out_entities["extension"] = out_entities["extension"][0]
@@ -926,3 +940,38 @@ class BIDSFreeSurferDir(SimpleInterface):
                     )
 
         return runtime
+
+
+def _get_tf_resolution(space: str, resolution: str) -> str:
+    """
+    Query templateflow template information to elaborate on template resolution.
+
+    Examples
+    --------
+    >>> _get_tf_resolution('MNI152NLin2009cAsym', '01') # doctest: +ELLIPSIS
+    'Template MNI152NLin2009cAsym (1.0x1.0x1.0 mm^3)...'
+    >>> _get_tf_resolution('MNI152NLin2009cAsym', '1') # doctest: +ELLIPSIS
+    'Template MNI152NLin2009cAsym (1.0x1.0x1.0 mm^3)...'
+    >>> _get_tf_resolution('MNI152NLin2009cAsym', '10')
+    'Unknown'
+    """
+    metadata = tf.api.get_metadata(space)
+    resolutions = metadata.get('res', {})
+    res_meta = None
+
+    # Due to inconsistencies, resolution keys may or may not be zero-padded
+    padded_res = f'{str(resolution):0>2}'
+    for r in (resolution, padded_res):
+        if r in resolutions:
+            res_meta = resolutions[r]
+    if res_meta is None:
+        return "Unknown"
+
+    def _fmt_xyz(coords: list) -> str:
+        xyz = "x".join([str(c) for c in coords])
+        return f"{xyz} mm^3"
+
+    return (
+        f"Template {space} ({_fmt_xyz(res_meta['zooms'])}),"
+        f" curated by TemplateFlow {tf.__version__}"
+    )
