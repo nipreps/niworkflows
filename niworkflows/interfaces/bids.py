@@ -25,6 +25,7 @@ from collections import defaultdict
 from json import dumps, loads
 from pathlib import Path
 import shutil
+import os
 from pkg_resources import resource_filename as _pkgres
 import re
 
@@ -626,6 +627,19 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             out_file.parent.mkdir(exist_ok=True, parents=True)
             self._results["out_file"].append(str(out_file))
             self._results["compression"].append(str(dest_file).endswith(".gz"))
+
+            # An odd but possible case is that an input file is in the location of
+            # the output and we have made no changes to it.
+            # The primary use case is pre-computed derivatives where the output
+            # directory will be filled in.
+            # From a provenance perspective, I would rather inputs and outputs be
+            # cleanly separated, but that is better handled by warnings at the CLI
+            # level than a crash in a datasink.
+            try:
+                if os.path.samefile(orig_file, out_file):
+                    continue
+            except FileNotFoundError:
+                pass
 
             # Set data and header iff changes need to be made. If these are
             # still None when it's time to write, just copy.
