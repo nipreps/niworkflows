@@ -502,6 +502,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
     _allowed_entities = set(_config_entities)
     _standard_spaces = STANDARD_SPACES
     _file_patterns = BIDS_DERIV_PATTERNS
+    _default_dtypes = DEFAULT_DTYPES
 
     def __init__(self, allowed_entities=None, out_path_base=None, **inputs):
         """Initialize the SimpleInterface and extend inputs with custom entities."""
@@ -651,7 +652,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             is_nifti = out_file.name.endswith(
                 (".nii", ".nii.gz")
             ) and not out_file.name.endswith((".dtseries.nii", ".dtseries.nii.gz"))
-            data_dtype = self.inputs.data_dtype or DEFAULT_DTYPES[self.inputs.suffix]
+            data_dtype = self.inputs.data_dtype or self._default_dtypes[self.inputs.suffix]
             if is_nifti and any((self.inputs.check_hdr, data_dtype)):
                 nii = nb.load(orig_file)
 
