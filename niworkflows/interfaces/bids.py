@@ -498,7 +498,10 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
     output_spec = _DerivativesDataSinkOutputSpec
     out_path_base = "niworkflows"
     _always_run = True
-    _allowed_entities = set(BIDS_DERIV_ENTITIES)
+    _config_entities = BIDS_DERIV_ENTITIES
+    _allowed_entities = set(_config_entities)
+    _standard_spaces = STANDARD_SPACES
+    _file_patterns = BIDS_DERIV_PATTERNS
 
     def __init__(self, allowed_entities=None, out_path_base=None, **inputs):
         """Initialize the SimpleInterface and extend inputs with custom entities."""
@@ -585,7 +588,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         space = out_entities.get("space")
         if resolution:
             # Standard spaces
-            if space in STANDARD_SPACES:
+            if space in self._standard_spaces:
                 res = _get_tf_resolution(space, resolution)
             else:  # TODO: Nonstandard?
                 res = "Unknown"
@@ -595,8 +598,8 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             out_entities["extension"] = out_entities["extension"][0]
 
         # Insert custom (non-BIDS) entities from allowed_entities.
-        custom_entities = set(out_entities.keys()) - set(BIDS_DERIV_ENTITIES)
-        patterns = BIDS_DERIV_PATTERNS
+        custom_entities = set(out_entities.keys()) - set(self._config_entities)
+        patterns = self._file_patterns
         if custom_entities:
             # Example: f"{key}-{{{key}}}" -> "task-{task}"
             custom_pat = "_".join(f"{key}-{{{key}}}" for key in sorted(custom_entities))
@@ -667,7 +670,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                     xcodes = (1, 1)  # Derivative in its original scanner space
                     if self.inputs.space:
                         xcodes = (
-                            (4, 4) if self.inputs.space in STANDARD_SPACES else (2, 2)
+                            (4, 4) if self.inputs.space in self._standard_spaces else (2, 2)
                         )
 
                     curr_zooms = zooms = hdr.get_zooms()
