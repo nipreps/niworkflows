@@ -499,7 +499,6 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
     out_path_base = "niworkflows"
     _always_run = True
     _config_entities = BIDS_DERIV_ENTITIES
-    _allowed_entities = set(_config_entities)
     _standard_spaces = STANDARD_SPACES
     _file_patterns = BIDS_DERIV_PATTERNS
     _default_dtypes = DEFAULT_DTYPES
@@ -599,7 +598,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             out_entities["extension"] = out_entities["extension"][0]
 
         # Insert custom (non-BIDS) entities from allowed_entities.
-        custom_entities = set(out_entities.keys()) - set(self._config_entities)
+        custom_entities = set(out_entities) - set(self._config_entities)
         patterns = self._file_patterns
         if custom_entities:
             # Example: f"{key}-{{{key}}}" -> "task-{task}"
