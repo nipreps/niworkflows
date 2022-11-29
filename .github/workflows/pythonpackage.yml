@@ -37,8 +37,6 @@ jobs:
           COMMIT_MSG: ${{ github.event.head_commit.message }}
 
   build:
-    needs: check_if_skip
-    if: "!contains(needs.check_if_skip.outputs.commit_message, '[skip ci]')"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -252,8 +250,6 @@ jobs:
       name: Submit to CodeCov
 
   flake8:
-    needs: check_if_skip
-    if: "!contains(needs.check_if_skip.outputs.commit_message, '[skip ci]')"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
