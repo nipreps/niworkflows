@@ -32,8 +32,7 @@ jobs:
           if [[ -z "$COMMIT_MSG" ]]; then
             COMMIT_MSG=$(git show -s --format=%s)
           fi
-          echo $COMMIT_MSG
-          echo "::set-output name=commit_message::$COMMIT_MSG"
+          echo commit_message=$COMMIT_MSG | tee -a $GITHUB_OUTPUT
         env:
           COMMIT_MSG: ${{ github.event.head_commit.message }}
 
