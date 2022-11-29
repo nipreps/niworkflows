@@ -22,6 +22,7 @@
 #
 """Nibabel-based interfaces."""
 from pathlib import Path
+from warnings import warn
 
 import numpy as np
 import nibabel as nb
@@ -132,9 +133,19 @@ class _BinaryDilationOutputSpec(TraitedSpec):
 
 class BinaryDilation(SimpleInterface):
     """Morphological binary dilation using Scipy."""
+    # DEPRECATED in 1.7.0
+    # To remove in 1.9.0
 
     input_spec = _BinaryDilationInputSpec
     output_spec = _BinaryDilationOutputSpec
+
+    def __init__(self, from_file=None, resource_monitor=None, **inputs):
+        warn("""\
+niworkflows.interfaces.nibabel.BinaryDilation is deprecated in favor of
+niworkflows.interfaces.morphology.BinaryDilation. Please validate that
+interface for your use case and switch.
+""", DeprecationWarning, stacklevel=2)
+        super().__init__(from_file=from_file, resource_monitor=resource_monitor, **inputs)
 
     def _run_interface(self, runtime):
         self._results["out_file"] = _dilate(

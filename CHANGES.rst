@@ -1,3 +1,20 @@
+1.7.0 (November 29, 2022)
+=========================
+New feature release in the 1.7.x series. This series will support sMRIPrep 0.10,
+fMRIPrep 22.1, and NiBabies 22.2.
+
+This will be the last minor release series to support Python 3.7.
+
+* FIX: Use ``np.bool_`` instead of deprecated np.bool (#760)
+* FIX: Use nilearn plot_surf over surfplot (#745)
+* ENH: Allow DerivativesDataSink to handle output==input (#758)
+* ENH: Add ``Resolution`` field to metadata if data has ``res`` entity (#754)
+* ENH: Add morphometric suffixes to pattern matching (#753)
+* RF: GenerateCifti interface (#756)
+* MNT: Loosen dependency versions (#759)
+* MNT: Remove non-compliant ``dtseries.json`` metadata (#750)
+* MNT: Build FreeSurfer 7.2 (#751)
+
 1.6.4 (September 13, 2022)
 ==========================
 Patch release in the 1.6.x series.
