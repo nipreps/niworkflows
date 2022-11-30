@@ -506,7 +506,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
     def __init__(self, allowed_entities=None, out_path_base=None, **inputs):
         """Initialize the SimpleInterface and extend inputs with custom entities."""
         self._allowed_entities = set(allowed_entities or []).union(
-            self._allowed_entities
+            set(self._config_entities)
         )
         if out_path_base:
             self.out_path_base = out_path_base
