@@ -1009,7 +1009,7 @@ def confounds_correlation_plot(
     ax0 = plt.subplot(gs[0, :10])
     ax1 = plt.subplot(gs[0, 11:])
 
-    mask = np.zeros_like(corr, dtype=np.bool)
+    mask = np.zeros_like(corr, dtype=bool)
     mask[np.triu_indices_from(mask)] = True
     sns.heatmap(corr, linewidths=0.5, cmap="coolwarm", center=0, square=True, ax=ax0)
     ax0.tick_params(axis="both", which="both", width=0)

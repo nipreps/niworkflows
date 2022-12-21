@@ -19,6 +19,7 @@ jobs:
             - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
             - build-v1-maint/1.4.x-
+            - build-v1-master-
             - build-v1-
           paths:
             - /tmp/docker
@@ -99,15 +100,16 @@ jobs:
           keys:
             - env-v2-{{ .Branch }}-
             - env-v2-maint/1.4.x-
+            - env-v2-master-
             - env-v2-
       - run:
           name: Setup git-annex, DataLad & TemplateFlow
           command: |
-            conda install -y -c anaconda -c conda-forge git-annex datalad wget
-            python -m pip install --no-cache-dir -U datalad-osf
+            apk update && apk add --no-cache coreutils
+            conda install -y -c conda-forge python=*=*cpython datalad git wget
+            python -m pip install --no-cache-dir -U datalad-osf templateflow
             git config --global user.name 'NiPreps Bot'
             git config --global user.email 'nipreps@gmail.com'
-            python -m pip install --no-cache-dir -U templateflow
       - save_cache:
           key: env-v2-{{ .Branch }}-{{ .BuildNum }}
           paths:
@@ -118,6 +120,7 @@ jobs:
             - data-v3-{{ .Branch }}-{{ epoch }}
             - data-v3-{{ .Branch }}-
             - data-v3-maint/1.4.x-
+            - data-v3-master-
             - data-v3-
       - run:
           name: Get test data from ds000003
@@ -183,10 +186,6 @@ jobs:
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ .Revision }}
-            - build-v1--{{ .Revision }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-maint/1.4.x-
-            - build-v1-
       - run:
           name: Docker authentication
           command: |
@@ -214,9 +213,6 @@ jobs:
       - restore_cache:
           keys:
             - data-v3-{{ .Branch }}-{{ epoch }}
-            - data-v3-{{ .Branch }}-
-            - data-v3-maint/1.4.x-
-            - data-v3-
 
       - run:
           name: Run unit tests
@@ -335,10 +331,6 @@ jobs:
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ .Revision }}
-            - build-v1--{{ .Revision }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-maint/1.4.x-
-            - build-v1-
           paths:
             - /tmp/docker
             - /tmp/images
