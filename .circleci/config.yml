@@ -18,6 +18,7 @@ jobs:
             - build-v1-{{ .Branch }}-{{ .Revision }}
             - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
+            - build-v1-maint/1.3.x-
             - build-v1-master-
             - build-v1-
           paths:
@@ -98,6 +99,7 @@ jobs:
       - restore_cache:
           keys:
             - env-v2-{{ .Branch }}-
+            - env-v2-maint/1.3.x-
             - env-v2-master-
             - env-v2-
       - run:
@@ -117,6 +119,7 @@ jobs:
           keys:
             - data-v3-{{ .Branch }}-{{ epoch }}
             - data-v3-{{ .Branch }}-
+            - data-v3-maint/1.3.x-
             - data-v3-master-
             - data-v3-
       - run:
@@ -187,6 +190,7 @@ jobs:
           keys:
             - mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-
             - mask-regressions-v0-{{ .Branch }}-
+            - mask-regressions-v0-maint/1.3.x-
             - mask-regressions-v0-master-
             - mask-regressions-v0-
             - mask-regressions-
@@ -224,10 +228,6 @@ jobs:
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ .Revision }}
-            - build-v1--{{ .Revision }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-master-
-            - build-v1-
       - run:
           name: Docker authentication
           command: |
@@ -255,9 +255,6 @@ jobs:
       - restore_cache:
           keys:
             - data-v3-{{ .Branch }}-{{ epoch }}
-            - data-v3-{{ .Branch }}-
-            - data-v3-master-
-            - data-v3-
 
       - run:
           name: Run unit tests
@@ -339,14 +336,10 @@ jobs:
       - restore_cache:
           keys:
             - mask-regressions-v0-{{ .Branch }}-{{ .Revision }}-
-            - mask-regressions-v0-{{ .Branch }}-
 
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ epoch }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-master-
-            - build-v1-
       - run:
           name: Docker authentication
           command: |
@@ -376,6 +369,7 @@ jobs:
           keys:
             - masks-workdir-v3-{{ .Branch }}-{{epoch}}
             - masks-workdir-v3-{{ .Branch }}-
+            - masks-workdir-v3-maint/1.3.x-
             - masks-workdir-v3-master-
             - masks-workdir-v3-
       - run:
@@ -495,10 +489,6 @@ jobs:
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ .Revision }}
-            - build-v1--{{ .Revision }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-master-
-            - build-v1-
           paths:
             - /tmp/docker
             - /tmp/images
