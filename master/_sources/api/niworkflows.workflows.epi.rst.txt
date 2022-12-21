@@ -1,0 +1,15 @@
+niworkflows.workflows.epi package
+=================================
+
+.. automodule:: niworkflows.workflows.epi
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   niworkflows.workflows.epi.refmap

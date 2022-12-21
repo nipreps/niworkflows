@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.anat.freesurfer &mdash; niworkflows 1.1.12 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.1.12
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Library API (application program interface)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>niworkflows.anat.freesurfer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><b>Warning:</b> This document is for an old version of niworkflows.</p>
+<h1>Source code for niworkflows.anat.freesurfer</h1><div class="highlight"><pre>
+<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2021 The NiPreps Developers &lt;nipreps@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#</span>
+<span class="c1"># We support and encourage derived works from this project, please read</span>
+<span class="c1"># about our expectations at</span>
+<span class="c1">#</span>
+<span class="c1">#     https://www.nipreps.org/community/licensing/</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;FreeSurfer-related workflows.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">getenv</span>
+<span class="kn">from</span> <span class="nn">nipype.pipeline</span> <span class="kn">import</span> <span class="n">engine</span> <span class="k">as</span> <span class="n">pe</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">utility</span> <span class="k">as</span> <span class="n">niu</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">io</span> <span class="k">as</span> <span class="n">nio</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">freesurfer</span> <span class="k">as</span> <span class="n">fs</span>
+
+<span class="kn">from</span> <span class="nn">..interfaces.freesurfer</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MakeMidthickness</span><span class="p">,</span>
+    <span class="n">PatchedRobustRegister</span> <span class="k">as</span> <span class="n">RobustRegister</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..interfaces.surf</span> <span class="kn">import</span> <span class="n">NormalizeSurf</span>
+
+
+<div class="viewcode-block" id="init_gifti_surface_wf"><a class="viewcode-back" href="../../../api/niworkflows.anat.freesurfer.html#niworkflows.anat.freesurfer.init_gifti_surface_wf">[docs]</a><span class="k">def</span> <span class="nf">init_gifti_surface_wf</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;gifti_surface_wf&quot;</span><span class="p">,</span> <span class="n">subjects_dir</span><span class="o">=</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;SUBJECTS_DIR&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build a Nipype workflow to prepare GIFTI surfaces from FreeSurfer.</span>
+
+<span class="sd">    This workflow prepares GIFTI surfaces from a FreeSurfer subjects directory</span>
+<span class="sd">    If midthickness (or graymid) surfaces do not exist, they are generated and</span>
+<span class="sd">    saved to the subject directory as ``lh/rh.midthickness``.</span>
+<span class="sd">    These, along with the gray/white matter boundary (``lh/rh.smoothwm``), pial</span>
+<span class="sd">    sufaces (``lh/rh.pial``) and inflated surfaces (``lh/rh.inflated``) are</span>
+<span class="sd">    converted to GIFTI files.</span>
+<span class="sd">    Additionally, the vertex coordinates are :py:class:`recentered</span>
+<span class="sd">    &lt;smriprep.interfaces.NormalizeSurf&gt;` to align with native T1w space.</span>
+
+<span class="sd">    Workflow Graph</span>
+<span class="sd">        .. workflow::</span>
+<span class="sd">            :graph2use: orig</span>
+<span class="sd">            :simple_form: yes</span>
+
+<span class="sd">            from niworkflows.anat.freesurfer import init_gifti_surface_wf</span>
+<span class="sd">            wf = init_gifti_surface_wf(subjects_dir=&quot;/tmp&quot;)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subjects_dir : str</span>
+<span class="sd">        FreeSurfer&#39;s ``$SUBJECTS_DIR`` environment variable.</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name for the workflow hierarchy of Nipype</span>
+
+<span class="sd">    Inputs</span>
+<span class="sd">    ------</span>
+<span class="sd">    in_t1w : str</span>
+<span class="sd">        original (pre-``recon-all``), reference T1w image.</span>
+<span class="sd">    subject_id : str</span>
+<span class="sd">        FreeSurfer subject ID</span>
+
+<span class="sd">    Outputs</span>
+<span class="sd">    -------</span>
+<span class="sd">    surfaces : list</span>
+<span class="sd">        GIFTI surfaces for gray/white matter boundary, pial surface,</span>
+<span class="sd">        midthickness (or graymid) surface, and inflated surfaces.</span>
+<span class="sd">    surf_norm : list</span>
+<span class="sd">        Normalized (re-centered) GIFTI surfaces aligned in native T1w</span>
+<span class="sd">        space, corresponding to the ``surfaces`` output.</span>
+<span class="sd">    fsnative_to_t1w_xfm : str</span>
+<span class="sd">        LTA formatted affine transform file.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">subjects_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;``$SUBJECTS_DIR`` must be set&quot;</span><span class="p">)</span>
+
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">inputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">([</span><span class="s2">&quot;in_t1w&quot;</span><span class="p">,</span> <span class="s2">&quot;subject_id&quot;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;inputnode&quot;</span>
+    <span class="p">)</span>
+    <span class="n">outputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">([</span><span class="s2">&quot;surfaces&quot;</span><span class="p">,</span> <span class="s2">&quot;surf_norm&quot;</span><span class="p">,</span> <span class="s2">&quot;fsnative_to_t1w_xfm&quot;</span><span class="p">]),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;outputnode&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">fssource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">nio</span><span class="o">.</span><span class="n">FreeSurferSource</span><span class="p">(</span><span class="n">subjects_dir</span><span class="o">=</span><span class="n">subjects_dir</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;fssource&quot;</span><span class="p">,</span>
+        <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">fsnative_2_t1_xfm</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">RobustRegister</span><span class="p">(</span><span class="n">auto_sens</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">est_int_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;fsnative_2_t1_xfm&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">midthickness</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">MakeMidthickness</span><span class="p">(</span><span class="n">thickness</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">out_name</span><span class="o">=</span><span class="s2">&quot;midthickness&quot;</span><span class="p">),</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="s2">&quot;in_file&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;midthickness&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">save_midthickness</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">nio</span><span class="o">.</span><span class="n">DataSink</span><span class="p">(</span><span class="n">parameterization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">base_directory</span><span class="o">=</span><span class="n">subjects_dir</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;save_midthickness&quot;</span><span class="p">,</span>
+        <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">surface_list</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">niu</span><span class="o">.</span><span class="n">Merge</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">ravel_inputs</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;surface_list&quot;</span><span class="p">,</span>
+        <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">fs_2_gii</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
+        <span class="n">fs</span><span class="o">.</span><span class="n">MRIsConvert</span><span class="p">(</span><span class="n">out_datatype</span><span class="o">=</span><span class="s2">&quot;gii&quot;</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="s2">&quot;in_file&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;fs_2_gii&quot;</span>
+    <span class="p">)</span>
+    <span class="n">fix_surfs</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">NormalizeSurf</span><span class="p">(),</span> <span class="n">iterfield</span><span class="o">=</span><span class="s2">&quot;in_file&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;fix_surfs&quot;</span><span class="p">)</span>
+
+    <span class="c1"># fmt: off</span>
+    <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">fssource</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;subject_id&quot;</span><span class="p">,</span> <span class="s2">&quot;subject_id&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">save_midthickness</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;subject_id&quot;</span><span class="p">,</span> <span class="s2">&quot;container&quot;</span><span class="p">)]),</span>
+        <span class="c1"># Generate fsnative-to-T1w transform</span>
+        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">fsnative_2_t1_xfm</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;in_t1w&quot;</span><span class="p">,</span> <span class="s2">&quot;target_file&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">fssource</span><span class="p">,</span> <span class="n">fsnative_2_t1_xfm</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;orig&quot;</span><span class="p">,</span> <span class="s2">&quot;source_file&quot;</span><span class="p">)]),</span>
+        <span class="c1"># Generate midthickness surfaces and save to FreeSurfer derivatives</span>
+        <span class="p">(</span><span class="n">fssource</span><span class="p">,</span> <span class="n">midthickness</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;smoothwm&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;graymid&quot;</span><span class="p">,</span> <span class="s2">&quot;graymid&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">midthickness</span><span class="p">,</span> <span class="n">save_midthickness</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;surf.@graymid&quot;</span><span class="p">)]),</span>
+        <span class="c1"># Produce valid GIFTI surface files (dense mesh)</span>
+        <span class="p">(</span><span class="n">fssource</span><span class="p">,</span> <span class="n">surface_list</span><span class="p">,</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;smoothwm&quot;</span><span class="p">,</span> <span class="s2">&quot;in1&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;pial&quot;</span><span class="p">,</span> <span class="s2">&quot;in2&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;inflated&quot;</span><span class="p">,</span> <span class="s2">&quot;in3&quot;</span><span class="p">),</span>
+        <span class="p">]),</span>
+        <span class="p">(</span><span class="n">save_midthickness</span><span class="p">,</span> <span class="n">surface_list</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in4&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">surface_list</span><span class="p">,</span> <span class="n">fs_2_gii</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">fs_2_gii</span><span class="p">,</span> <span class="n">fix_surfs</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;converted&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">fsnative_2_t1_xfm</span><span class="p">,</span> <span class="n">fix_surfs</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_reg_file&quot;</span><span class="p">,</span> <span class="s2">&quot;transform_file&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">fsnative_2_t1_xfm</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_reg_file&quot;</span><span class="p">,</span> <span class="s2">&quot;fsnative_to_t1w_xfm&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">fix_surfs</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;surf_norm&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">fs_2_gii</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;converted&quot;</span><span class="p">,</span> <span class="s2">&quot;surfaces&quot;</span><span class="p">)]),</span>
+    <span class="p">])</span>
+    <span class="c1"># fmt: on</span>
+
+    <span class="k">return</span> <span class="n">workflow</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.1.12
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../../../1.0.0/index.html">1.0.0</a></dd>
+            <dd><a href="../../../../1.0.0rc1/index.html">1.0.0rc1</a></dd>
+            <dd><a href="../../../../1.0.0rc2/index.html">1.0.0rc2</a></dd>
+            <dd><a href="../../../../1.0.1/index.html">1.0.1</a></dd>
+            <dd><a href="../../../../1.0.2/index.html">1.0.2</a></dd>
+            <dd><a href="../../../../1.0.3/index.html">1.0.3</a></dd>
+            <dd><a href="../../../../1.0.4/index.html">1.0.4</a></dd>
+            <dd><a href="../../../../1.1.0/index.html">1.1.0</a></dd>
+            <dd><a href="../../../../1.1.1/index.html">1.1.1</a></dd>
+            <dd><a href="../../../../1.1.10/index.html">1.1.10</a></dd>
+            <dd><a href="../../../../1.1.11/index.html">1.1.11</a></dd>
+            <dd><a href="freesurfer.html">1.1.12</a></dd>
+            <dd><a href="../../../../1.1.2/index.html">1.1.2</a></dd>
+            <dd><a href="../../../../1.1.3/index.html">1.1.3</a></dd>
+            <dd><a href="../../../../1.1.4/index.html">1.1.4</a></dd>
+            <dd><a href="../../../../1.1.5/index.html">1.1.5</a></dd>
+            <dd><a href="../../../../1.1.6/index.html">1.1.6</a></dd>
+            <dd><a href="../../../../1.1.7/index.html">1.1.7</a></dd>
+            <dd><a href="../../../../1.1.8/index.html">1.1.8</a></dd>
+            <dd><a href="../../../../1.1.9/index.html">1.1.9</a></dd>
+            <dd><a href="../../../../1.2.0/index.html">1.2.0</a></dd>
+            <dd><a href="../../../../1.2.0rc1/index.html">1.2.0rc1</a></dd>
+            <dd><a href="../../../../1.2.0rc2/index.html">1.2.0rc2</a></dd>
+            <dd><a href="../../../../1.2.0rc3/index.html">1.2.0rc3</a></dd>
+            <dd><a href="../../../../1.2.0rc4/index.html">1.2.0rc4</a></dd>
+            <dd><a href="../../../../1.2.0rc5/index.html">1.2.0rc5</a></dd>
+            <dd><a href="../../../../1.2.1/index.html">1.2.1</a></dd>
+            <dd><a href="../../../../1.2.2/index.html">1.2.2</a></dd>
+            <dd><a href="../../../../1.2.3/index.html">1.2.3</a></dd>
+            <dd><a href="../../../../1.2.4/index.html">1.2.4</a></dd>
+            <dd><a href="../../../../1.2.5/index.html">1.2.5</a></dd>
+            <dd><a href="../../../../1.2.6/index.html">1.2.6</a></dd>
+            <dd><a href="../../../../1.2.7/index.html">1.2.7</a></dd>
+            <dd><a href="../../../../1.2.8/index.html">1.2.8</a></dd>
+            <dd><a href="../../../../1.2.9/index.html">1.2.9</a></dd>
+            <dd><a href="../../../../1.3.0/index.html">1.3.0</a></dd>
+            <dd><a href="../../../../1.3.0rc1/index.html">1.3.0rc1</a></dd>
+            <dd><a href="../../../../1.3.0rc2/index.html">1.3.0rc2</a></dd>
+            <dd><a href="../../../../1.3.0rc3/index.html">1.3.0rc3</a></dd>
+            <dd><a href="../../../../1.3.1/index.html">1.3.1</a></dd>
+            <dd><a href="../../../../1.3.2/index.html">1.3.2</a></dd>
+            <dd><a href="../../../../1.3.3/index.html">1.3.3</a></dd>
+            <dd><a href="../../../../1.3.4/index.html">1.3.4</a></dd>
+            <dd><a href="../../../../1.3.5/index.html">1.3.5</a></dd>
+            <dd><a href="../../../../1.4.0/index.html">1.4.0</a></dd>
+            <dd><a href="../../../../1.4.0rc0/index.html">1.4.0rc0</a></dd>
+            <dd><a href="../../../../1.4.0rc1/index.html">1.4.0rc1</a></dd>
+            <dd><a href="../../../../1.4.0rc2/index.html">1.4.0rc2</a></dd>
+            <dd><a href="../../../../1.4.0rc3/index.html">1.4.0rc3</a></dd>
+            <dd><a href="../../../../1.4.0rc4/index.html">1.4.0rc4</a></dd>
+            <dd><a href="../../../../1.4.0rc5/index.html">1.4.0rc5</a></dd>
+            <dd><a href="../../../../1.4.0rc6/index.html">1.4.0rc6</a></dd>
+            <dd><a href="../../../../1.1.12/index.html">1.1.12</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../../../enh_report-plot-axis/index.html">enh/report-plot-axis</a></dd>
+            <dd><a href="../../../../feat_infants-rodents/index.html">feat/infants-rodents</a></dd>
+            <dd><a href="../../../../maint_1.0.x/index.html">maint/1.0.x</a></dd>
+            <dd><a href="../../../../maint_1.1.x/index.html">maint/1.1.x</a></dd>
+            <dd><a href="../../../../maint_1.2.x/index.html">maint/1.2.x</a></dd>
+            <dd><a href="../../../../maint_1.3.x/index.html">maint/1.3.x</a></dd>
+            <dd><a href="../../../../master/index.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

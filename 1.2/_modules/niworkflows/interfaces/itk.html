@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.interfaces.itk &mdash; niworkflows 1.2.9 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.2.9
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Library API (application program interface)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>niworkflows.interfaces.itk</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><b>Warning:</b> This document is for an old version of niworkflows.</p>
+<h1>Source code for niworkflows.interfaces.itk</h1><div class="highlight"><pre>
+<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2021 The NiPreps Developers &lt;nipreps@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#</span>
+<span class="c1"># We support and encourage derived works from this project, please read</span>
+<span class="c1"># about our expectations at</span>
+<span class="c1">#</span>
+<span class="c1">#     https://www.nipreps.org/community/licensing/</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;ITK files handling.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">mimetypes</span> <span class="kn">import</span> <span class="n">guess_type</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
+
+<span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">traits</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
+    <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
+    <span class="n">File</span><span class="p">,</span>
+    <span class="n">InputMultiObject</span><span class="p">,</span>
+    <span class="n">OutputMultiObject</span><span class="p">,</span>
+    <span class="n">SimpleInterface</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.fixes</span> <span class="kn">import</span> <span class="n">_FixTraitApplyTransformsInputSpec</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;nipype.interface&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_MCFLIRT2ITKInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_files</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
+        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;list of MAT files from MCFLIRT&quot;</span>
+    <span class="p">)</span>
+    <span class="n">in_reference</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
+        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input image for spatial reference&quot;</span>
+    <span class="p">)</span>
+    <span class="n">in_source</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input image for spatial source&quot;</span><span class="p">)</span>
+    <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span>
+        <span class="mi">1</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nohash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;number of parallel processes&quot;</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_MCFLIRT2ITKOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the output ITKTransform file&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="MCFLIRT2ITK"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.itk.html#niworkflows.interfaces.itk.MCFLIRT2ITK">[docs]</a><span class="k">class</span> <span class="nc">MCFLIRT2ITK</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a list of MAT files from MCFLIRT into an ITK Transform file.&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_MCFLIRT2ITKInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_MCFLIRT2ITKOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">num_threads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span>
+        <span class="k">if</span> <span class="n">num_threads</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">num_threads</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">with</span> <span class="n">TemporaryDirectory</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;tmp-&quot;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp_folder</span><span class="p">:</span>
+            <span class="c1"># Inputs are ready to run in parallel</span>
+            <span class="k">if</span> <span class="n">num_threads</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">num_threads</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
+
+                <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">num_threads</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+                    <span class="n">itk_outs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                        <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+                            <span class="n">_mat2itk</span><span class="p">,</span>
+                            <span class="p">[</span>
+                                <span class="p">(</span>
+                                    <span class="n">in_mat</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_reference</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_source</span><span class="p">,</span>
+                                    <span class="n">i</span><span class="p">,</span>
+                                    <span class="n">tmp_folder</span><span class="p">,</span>
+                                <span class="p">)</span>
+                                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">in_mat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">)</span>
+                            <span class="p">],</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">itk_outs</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">_mat2itk</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="n">in_mat</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_reference</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_source</span><span class="p">,</span>
+                            <span class="n">i</span><span class="p">,</span>
+                            <span class="n">tmp_folder</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">in_mat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">)</span>
+                <span class="p">]</span>
+
+        <span class="c1"># Compose the collated ITK transform file and write</span>
+        <span class="n">tfms</span> <span class="o">=</span> <span class="s2">&quot;#Insight Transform File V1.0</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">el</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">itk_outs</span><span class="p">)]</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="s2">&quot;mat2itk.txt&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">],</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tfms</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_MultiApplyTransformsInputSpec</span><span class="p">(</span><span class="n">_FixTraitApplyTransformsInputSpec</span><span class="p">):</span>
+    <span class="n">input_image</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
+        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input time-series as a list of volumes after splitting&quot;</span>
+        <span class="s2">&quot; through the fourth dimension&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span>
+        <span class="mi">1</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nohash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;number of parallel processes&quot;</span>
+    <span class="p">)</span>
+    <span class="n">save_cmd</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
+        <span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;write a log of command lines that were applied&quot;</span>
+    <span class="p">)</span>
+    <span class="n">copy_dtype</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
+        <span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;copy dtype from inputs to outputs&quot;</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_MultiApplyTransformsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_files</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the output ITKTransform file&quot;</span><span class="p">)</span>
+    <span class="n">log_cmdline</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;a list of command lines used to apply transforms&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="MultiApplyTransforms"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.itk.html#niworkflows.interfaces.itk.MultiApplyTransforms">[docs]</a><span class="k">class</span> <span class="nc">MultiApplyTransforms</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply the corresponding list of input transforms.&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_MultiApplyTransformsInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_MultiApplyTransformsOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="c1"># Get all inputs from the ApplyTransforms object</span>
+        <span class="n">ifargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+        <span class="c1"># Extract number of input images and transforms</span>
+        <span class="n">in_files</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;input_image&quot;</span><span class="p">)</span>
+        <span class="n">num_files</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_files</span><span class="p">)</span>
+        <span class="n">transforms</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;transforms&quot;</span><span class="p">)</span>
+        <span class="c1"># Get number of parallel jobs</span>
+        <span class="n">num_threads</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;num_threads&quot;</span><span class="p">)</span>
+        <span class="n">save_cmd</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;save_cmd&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Remove certain keys</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;environ&quot;</span><span class="p">,</span> <span class="s2">&quot;ignore_exception&quot;</span><span class="p">,</span> <span class="s2">&quot;terminal_output&quot;</span><span class="p">,</span> <span class="s2">&quot;output_image&quot;</span><span class="p">]:</span>
+            <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># Get a temp folder ready</span>
+        <span class="n">tmp_folder</span> <span class="o">=</span> <span class="n">TemporaryDirectory</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;tmp-&quot;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
+
+        <span class="n">xfms_list</span> <span class="o">=</span> <span class="n">_arrange_xfms</span><span class="p">(</span><span class="n">transforms</span><span class="p">,</span> <span class="n">num_files</span><span class="p">,</span> <span class="n">tmp_folder</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xfms_list</span><span class="p">)</span> <span class="o">!=</span> <span class="n">num_files</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Number of files and entries in the transforms list do not match&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Inputs are ready to run in parallel</span>
+        <span class="k">if</span> <span class="n">num_threads</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">num_threads</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">num_threads</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">out_files</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">_applytfms</span><span class="p">((</span><span class="n">in_file</span><span class="p">,</span> <span class="n">in_xfm</span><span class="p">,</span> <span class="n">ifargs</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">in_xfm</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">in_files</span><span class="p">,</span> <span class="n">xfms_list</span><span class="p">))</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
+
+            <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">num_threads</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+                <span class="n">out_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+                        <span class="n">_applytfms</span><span class="p">,</span>
+                        <span class="p">[</span>
+                            <span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">in_xfm</span><span class="p">,</span> <span class="n">ifargs</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">in_xfm</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                                <span class="nb">zip</span><span class="p">(</span><span class="n">in_files</span><span class="p">,</span> <span class="n">xfms_list</span><span class="p">)</span>
+                            <span class="p">)</span>
+                        <span class="p">],</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+        <span class="n">tmp_folder</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+
+        <span class="c1"># Collect output file names, after sorting by index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_files&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">out_files</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">save_cmd</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;log_cmdline&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="s2">&quot;command.txt&quot;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;log_cmdline&quot;</span><span class="p">],</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cmdfile</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">-------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">el</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">out_files</span><span class="p">]),</span> <span class="n">file</span><span class="o">=</span><span class="n">cmdfile</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">def</span> <span class="nf">_mat2itk</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">nipype.interfaces.c3</span> <span class="kn">import</span> <span class="n">C3dAffineTool</span>
+    <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
+
+    <span class="n">in_file</span><span class="p">,</span> <span class="n">in_ref</span><span class="p">,</span> <span class="n">in_src</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">newpath</span> <span class="o">=</span> <span class="n">args</span>
+    <span class="c1"># Generate a temporal file name</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_itk-</span><span class="si">%05d</span><span class="s2">.txt&quot;</span> <span class="o">%</span> <span class="n">index</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">)</span>
+
+    <span class="c1"># Run c3d_affine_tool</span>
+    <span class="n">C3dAffineTool</span><span class="p">(</span>
+        <span class="n">transform_file</span><span class="o">=</span><span class="n">in_file</span><span class="p">,</span>
+        <span class="n">reference_file</span><span class="o">=</span><span class="n">in_ref</span><span class="p">,</span>
+        <span class="n">source_file</span><span class="o">=</span><span class="n">in_src</span><span class="p">,</span>
+        <span class="n">fsl2ras</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">itk_transform</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span>
+        <span class="n">resource_monitor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">transform</span> <span class="o">=</span> <span class="s2">&quot;#Transform </span><span class="si">%d</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">index</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">itkfh</span><span class="p">:</span>
+        <span class="n">transform</span> <span class="o">+=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">itkfh</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[</span><span class="mi">2</span><span class="p">:])</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_applytfms</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies ANTs&#39; antsApplyTransforms to the input image.</span>
+<span class="sd">    All inputs are zipped in one tuple to make it digestible by</span>
+<span class="sd">    multiprocessing&#39;s map</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+    <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
+    <span class="kn">from</span> <span class="nn">niworkflows.interfaces.fixes</span> <span class="kn">import</span> <span class="n">FixHeaderApplyTransforms</span> <span class="k">as</span> <span class="n">ApplyTransforms</span>
+
+    <span class="n">in_file</span><span class="p">,</span> <span class="n">in_xform</span><span class="p">,</span> <span class="n">ifargs</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">newpath</span> <span class="o">=</span> <span class="n">args</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+        <span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_xform-</span><span class="si">%05d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">index</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">,</span> <span class="n">use_ext</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+
+    <span class="n">copy_dtype</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;copy_dtype&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">xfm</span> <span class="o">=</span> <span class="n">ApplyTransforms</span><span class="p">(</span>
+        <span class="n">input_image</span><span class="o">=</span><span class="n">in_file</span><span class="p">,</span> <span class="n">transforms</span><span class="o">=</span><span class="n">in_xform</span><span class="p">,</span> <span class="n">output_image</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="o">**</span><span class="n">ifargs</span>
+    <span class="p">)</span>
+    <span class="n">xfm</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s2">&quot;allatonce&quot;</span>
+    <span class="n">xfm</span><span class="o">.</span><span class="n">resource_monitor</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">runtime</span> <span class="o">=</span> <span class="n">xfm</span><span class="o">.</span><span class="n">run</span><span class="p">()</span><span class="o">.</span><span class="n">runtime</span>
+
+    <span class="k">if</span> <span class="n">copy_dtype</span><span class="p">:</span>
+        <span class="n">nii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">mmap</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">in_dtype</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span><span class="o">.</span><span class="n">get_data_dtype</span><span class="p">()</span>
+
+        <span class="c1"># Overwrite only iff dtypes don&#39;t match</span>
+        <span class="k">if</span> <span class="n">in_dtype</span> <span class="o">!=</span> <span class="n">nii</span><span class="o">.</span><span class="n">get_data_dtype</span><span class="p">():</span>
+            <span class="n">nii</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="n">in_dtype</span><span class="p">)</span>
+            <span class="n">nii</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">runtime</span><span class="o">.</span><span class="n">cmdline</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_arrange_xfms</span><span class="p">(</span><span class="n">transforms</span><span class="p">,</span> <span class="n">num_files</span><span class="p">,</span> <span class="n">tmp_folder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convenience method to arrange the list of transforms that should be applied</span>
+<span class="sd">    to each input file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">base_xform</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;#Insight Transform File V1.0&quot;</span><span class="p">,</span> <span class="s2">&quot;#Transform 0&quot;</span><span class="p">]</span>
+    <span class="c1"># Initialize the transforms matrix</span>
+    <span class="n">xfms_T</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tf_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">transforms</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">tf_file</span> <span class="o">==</span> <span class="s2">&quot;identity&quot;</span><span class="p">:</span>
+            <span class="n">xfms_T</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">tf_file</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_files</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># If it is a deformation field, copy to the tfs_matrix directly</span>
+        <span class="k">if</span> <span class="n">guess_type</span><span class="p">(</span><span class="n">tf_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;text/plain&quot;</span><span class="p">:</span>
+            <span class="n">xfms_T</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">tf_file</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_files</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tf_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">tf_fh</span><span class="p">:</span>
+            <span class="n">tfdata</span> <span class="o">=</span> <span class="n">tf_fh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="c1"># If it is not an ITK transform file, copy to the tfs_matrix directly</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tfdata</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#Insight Transform File&quot;</span><span class="p">):</span>
+            <span class="n">xfms_T</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">tf_file</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_files</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Count number of transforms in ITK transform file</span>
+        <span class="n">nxforms</span> <span class="o">=</span> <span class="n">tfdata</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;#Transform&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Remove first line</span>
+        <span class="n">tfdata</span> <span class="o">=</span> <span class="n">tfdata</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="c1"># If it is a ITK transform file with only 1 xform, copy to the tfs_matrix directly</span>
+        <span class="k">if</span> <span class="n">nxforms</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">xfms_T</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">tf_file</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_files</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">nxforms</span> <span class="o">!=</span> <span class="n">num_files</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Number of transforms (</span><span class="si">%d</span><span class="s2">) found in the ITK file does not match&quot;</span>
+                <span class="s2">&quot; the number of input image files (</span><span class="si">%d</span><span class="s2">).&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nxforms</span><span class="p">,</span> <span class="n">num_files</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># At this point splitting transforms will be necessary, generate a base name</span>
+        <span class="n">out_base</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+            <span class="n">tf_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_pos-</span><span class="si">%03d</span><span class="s2">_xfm-</span><span class="si">{:05d}</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">tmp_folder</span><span class="o">.</span><span class="n">name</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">format</span>
+        <span class="c1"># Split combined ITK transforms file</span>
+        <span class="n">split_xfms</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">xform_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nxforms</span><span class="p">):</span>
+            <span class="c1"># Find start token to extract</span>
+            <span class="n">startidx</span> <span class="o">=</span> <span class="n">tfdata</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;#Transform </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">xform_i</span><span class="p">)</span>
+            <span class="n">next_xform</span> <span class="o">=</span> <span class="n">base_xform</span> <span class="o">+</span> <span class="n">tfdata</span><span class="p">[</span><span class="n">startidx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">startidx</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+            <span class="n">xfm_file</span> <span class="o">=</span> <span class="n">out_base</span><span class="p">(</span><span class="n">xform_i</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">xfm_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_xfm</span><span class="p">:</span>
+                <span class="n">out_xfm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">next_xform</span><span class="p">))</span>
+            <span class="n">split_xfms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xfm_file</span><span class="p">)</span>
+        <span class="n">xfms_T</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">split_xfms</span><span class="p">)</span>
+
+    <span class="c1"># Transpose back (only Python 3)</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">xfms_T</span><span class="p">)))</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.2.9
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../../../1.0.0/index.html">1.0.0</a></dd>
+            <dd><a href="../../../../1.0.0rc1/index.html">1.0.0rc1</a></dd>
+            <dd><a href="../../../../1.0.0rc2/index.html">1.0.0rc2</a></dd>
+            <dd><a href="../../../../1.0.1/index.html">1.0.1</a></dd>
+            <dd><a href="../../../../1.0.2/index.html">1.0.2</a></dd>
+            <dd><a href="../../../../1.0.3/index.html">1.0.3</a></dd>
+            <dd><a href="../../../../1.0.4/index.html">1.0.4</a></dd>
+            <dd><a href="../../../../1.1.0/index.html">1.1.0</a></dd>
+            <dd><a href="../../../../1.1.1/index.html">1.1.1</a></dd>
+            <dd><a href="../../../../1.1.10/index.html">1.1.10</a></dd>
+            <dd><a href="../../../../1.1.11/index.html">1.1.11</a></dd>
+            <dd><a href="../../../../1.1.12/index.html">1.1.12</a></dd>
+            <dd><a href="../../../../1.1.2/index.html">1.1.2</a></dd>
+            <dd><a href="../../../../1.1.3/index.html">1.1.3</a></dd>
+            <dd><a href="../../../../1.1.4/index.html">1.1.4</a></dd>
+            <dd><a href="../../../../1.1.5/index.html">1.1.5</a></dd>
+            <dd><a href="../../../../1.1.6/index.html">1.1.6</a></dd>
+            <dd><a href="../../../../1.1.7/index.html">1.1.7</a></dd>
+            <dd><a href="../../../../1.1.8/index.html">1.1.8</a></dd>
+            <dd><a href="../../../../1.1.9/index.html">1.1.9</a></dd>
+            <dd><a href="../../../../1.2.0/index.html">1.2.0</a></dd>
+            <dd><a href="../../../../1.2.0rc1/index.html">1.2.0rc1</a></dd>
+            <dd><a href="../../../../1.2.0rc2/index.html">1.2.0rc2</a></dd>
+            <dd><a href="../../../../1.2.0rc3/index.html">1.2.0rc3</a></dd>
+            <dd><a href="../../../../1.2.0rc4/index.html">1.2.0rc4</a></dd>
+            <dd><a href="../../../../1.2.0rc5/index.html">1.2.0rc5</a></dd>
+            <dd><a href="../../../../1.2.1/index.html">1.2.1</a></dd>
+            <dd><a href="../../../../1.2.2/index.html">1.2.2</a></dd>
+            <dd><a href="../../../../1.2.3/index.html">1.2.3</a></dd>
+            <dd><a href="../../../../1.2.4/index.html">1.2.4</a></dd>
+            <dd><a href="../../../../1.2.5/index.html">1.2.5</a></dd>
+            <dd><a href="../../../../1.2.6/index.html">1.2.6</a></dd>
+            <dd><a href="../../../../1.2.7/index.html">1.2.7</a></dd>
+            <dd><a href="../../../../1.2.8/index.html">1.2.8</a></dd>
+            <dd><a href="itk.html">1.2.9</a></dd>
+            <dd><a href="../../../../1.3.0/index.html">1.3.0</a></dd>
+            <dd><a href="../../../../1.3.0rc1/index.html">1.3.0rc1</a></dd>
+            <dd><a href="../../../../1.3.0rc2/index.html">1.3.0rc2</a></dd>
+            <dd><a href="../../../../1.3.0rc3/index.html">1.3.0rc3</a></dd>
+            <dd><a href="../../../../1.3.1/index.html">1.3.1</a></dd>
+            <dd><a href="../../../../1.3.2/index.html">1.3.2</a></dd>
+            <dd><a href="../../../../1.3.3/index.html">1.3.3</a></dd>
+            <dd><a href="../../../../1.3.4/index.html">1.3.4</a></dd>
+            <dd><a href="../../../../1.3.5/index.html">1.3.5</a></dd>
+            <dd><a href="../../../../1.4.0/index.html">1.4.0</a></dd>
+            <dd><a href="../../../../1.4.0rc0/index.html">1.4.0rc0</a></dd>
+            <dd><a href="../../../../1.4.0rc1/index.html">1.4.0rc1</a></dd>
+            <dd><a href="../../../../1.4.0rc2/index.html">1.4.0rc2</a></dd>
+            <dd><a href="../../../../1.4.0rc3/index.html">1.4.0rc3</a></dd>
+            <dd><a href="../../../../1.4.0rc4/index.html">1.4.0rc4</a></dd>
+            <dd><a href="../../../../1.4.0rc5/index.html">1.4.0rc5</a></dd>
+            <dd><a href="../../../../1.4.0rc6/index.html">1.4.0rc6</a></dd>
+            <dd><a href="../../../../1.2.9/index.html">1.2.9</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../../../enh_report-plot-axis/index.html">enh/report-plot-axis</a></dd>
+            <dd><a href="../../../../feat_infants-rodents/index.html">feat/infants-rodents</a></dd>
+            <dd><a href="../../../../maint_1.0.x/index.html">maint/1.0.x</a></dd>
+            <dd><a href="../../../../maint_1.1.x/index.html">maint/1.1.x</a></dd>
+            <dd><a href="../../../../maint_1.2.x/index.html">maint/1.2.x</a></dd>
+            <dd><a href="../../../../maint_1.3.x/index.html">maint/1.3.x</a></dd>
+            <dd><a href="../../../../master/index.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

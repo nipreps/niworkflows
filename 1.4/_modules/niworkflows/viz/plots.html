@@ -1,0 +1,1520 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
+        <title>niworkflows.viz.plots - niworkflows 1.4.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">niworkflows 1.4.10 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+    <span class="sidebar-brand-text">niworkflows</span>
+    <span id="version-slug" class="sidebar-brand-text">1.4.10</span>
+</a>
+
+<!-- Versions dropdown -->
+<div id="version-menu" class="version-tree">
+  <ul>
+  <li class="toctree-l1 has-children">
+  <span class="sidebar-brand-text">1.4.10</span>
+  <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
+  <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
+  <ul id="v-tags"></ul>
+  </ul>
+</div><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api.html">Library API (application program interface)</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.anat.html">niworkflows.anat package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.anat.ants.html">niworkflows.anat.ants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.anat.coregistration.html">niworkflows.anat.coregistration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.anat.freesurfer.html">niworkflows.anat.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.anat.skullstrip.html">niworkflows.anat.skullstrip module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.cli.html">niworkflows.cli package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.cli.boldref.html">niworkflows.cli.boldref module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.engine.html">niworkflows.engine package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.engine.workflows.html">niworkflows.engine.workflows module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.func.html">niworkflows.func package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.func.util.html">niworkflows.func.util module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.interfaces.html">niworkflows.interfaces package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.html">niworkflows.interfaces.reportlets package</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.base.html">niworkflows.interfaces.reportlets.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.masks.html">niworkflows.interfaces.reportlets.masks module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.registration.html">niworkflows.interfaces.reportlets.registration module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.segmentation.html">niworkflows.interfaces.reportlets.segmentation module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.bids.html">niworkflows.interfaces.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.bold.html">niworkflows.interfaces.bold module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.confounds.html">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.header.html">niworkflows.interfaces.header module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.images.html">niworkflows.interfaces.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.itk.html">niworkflows.interfaces.itk module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.nibabel.html">niworkflows.interfaces.nibabel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.nilearn.html">niworkflows.interfaces.nilearn module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.nitransforms.html">niworkflows.interfaces.nitransforms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.norm.html">niworkflows.interfaces.norm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.patches.html">niworkflows.interfaces.patches module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.plotting.html">niworkflows.interfaces.plotting module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.probmaps.html">niworkflows.interfaces.probmaps module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.reports.html">niworkflows.reports package</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.reports.core.html">niworkflows.reports.core module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.utils.html">niworkflows.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.bids.html">niworkflows.utils.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.connections.html">niworkflows.utils.connections module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.images.html">niworkflows.utils.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.misc.html">niworkflows.utils.misc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.spaces.html">niworkflows.utils.spaces module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.viz.html">niworkflows.viz package</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.viz.notebook.html">niworkflows.viz.notebook module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.viz.plots.html">niworkflows.viz.plots module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.viz.utils.html">niworkflows.viz.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.workflows.html">niworkflows.workflows package</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/niworkflows.workflows.epi.html">niworkflows.workflows.epi package</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.workflows.epi.refmap.html">niworkflows.workflows.epi.refmap module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">What’s new?</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for niworkflows.viz.plots</h1><div class="highlight"><pre>
+<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2021 The NiPreps Developers &lt;nipreps@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#</span>
+<span class="c1"># We support and encourage derived works from this project, please read</span>
+<span class="c1"># about our expectations at</span>
+<span class="c1">#</span>
+<span class="c1">#     https://www.nipreps.org/community/licensing/</span>
+<span class="c1">#</span>
+<span class="sd">"""Plotting tools shared across MRIQC and FMRIPREP."""</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">gridspec</span> <span class="k">as</span> <span class="n">mgs</span>
+<span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="k">as</span> <span class="nn">cm</span>
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">ListedColormap</span><span class="p">,</span> <span class="n">Normalize</span>
+<span class="kn">from</span> <span class="nn">matplotlib.colorbar</span> <span class="kn">import</span> <span class="n">ColorbarBase</span>
+
+<span class="n">DINA4_LANDSCAPE</span> <span class="o">=</span> <span class="p">(</span><span class="mf">11.69</span><span class="p">,</span> <span class="mf">8.27</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="fMRIPlot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.fMRIPlot">[docs]</a><span class="k">class</span> <span class="nc">fMRIPlot</span><span class="p">:</span>
+    <span class="sd">"""Generates the fMRI Summary Plot."""</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"func_file"</span><span class="p">,</span> <span class="s2">"mask_data"</span><span class="p">,</span> <span class="s2">"tr"</span><span class="p">,</span> <span class="s2">"seg_data"</span><span class="p">,</span> <span class="s2">"confounds"</span><span class="p">,</span> <span class="s2">"spikes"</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">func_file</span><span class="p">,</span>
+        <span class="n">mask_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">conf_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">seg_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">usecols</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vlines</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">spikes_files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">func_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">func_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func_file</span> <span class="o">=</span> <span class="n">func_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tr</span> <span class="o">=</span> <span class="n">tr</span> <span class="ow">or</span> <span class="n">_get_tr</span><span class="p">(</span><span class="n">func_img</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seg_data</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func_img</span><span class="p">,</span> <span class="n">nb</span><span class="o">.</span><span class="n">Cifti2Image</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_data</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">fileslice</span><span class="o">.</span><span class="n">strided_scalar</span><span class="p">(</span>
+                <span class="n">func_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">mask_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mask_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">mask_file</span><span class="p">)</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                    <span class="s2">"uint8"</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">seg_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">seg_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">seg_file</span><span class="p">)</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">vlines</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vlines</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">confounds</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">conf_file</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                <span class="n">conf_file</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">"[\t\s]+"</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="n">usecols</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">ravel</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">confounds</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">"values"</span><span class="p">:</span> <span class="n">data</span><span class="p">[[</span><span class="n">name</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                    <span class="s2">"units"</span><span class="p">:</span> <span class="n">units</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+                    <span class="s2">"cutoff"</span><span class="p">:</span> <span class="n">vlines</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+                <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">spikes_files</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">sp_file</span> <span class="ow">in</span> <span class="n">spikes_files</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">sp_file</span><span class="p">),</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+
+<div class="viewcode-block" id="fMRIPlot.plot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.fMRIPlot.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">"""Main plotter"""</span>
+        <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+        <span class="n">sns</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">"whitegrid"</span><span class="p">)</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">set_context</span><span class="p">(</span><span class="s2">"paper"</span><span class="p">,</span> <span class="n">font_scale</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">figure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">figure</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
+
+        <span class="n">nconfounds</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">confounds</span><span class="p">)</span>
+        <span class="n">nspikes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="p">)</span>
+        <span class="n">nrows</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">nconfounds</span> <span class="o">+</span> <span class="n">nspikes</span>
+
+        <span class="c1"># Create grid</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">mgs</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span>
+            <span class="n">nrows</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">height_ratios</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">nrows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="n">grid_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">tsz</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">iszs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="p">:</span>
+            <span class="n">spikesplot</span><span class="p">(</span>
+                <span class="n">tsz</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">outer_gs</span><span class="o">=</span><span class="n">grid</span><span class="p">[</span><span class="n">grid_id</span><span class="p">],</span> <span class="n">tr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">,</span> <span class="n">zscored</span><span class="o">=</span><span class="n">iszs</span>
+            <span class="p">)</span>
+            <span class="n">grid_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">confounds</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">seaborn</span> <span class="kn">import</span> <span class="n">color_palette</span>
+
+            <span class="n">palette</span> <span class="o">=</span> <span class="n">color_palette</span><span class="p">(</span><span class="s2">"husl"</span><span class="p">,</span> <span class="n">nconfounds</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">confounds</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">tseries</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"values"</span><span class="p">)</span>
+            <span class="n">confoundplot</span><span class="p">(</span>
+                <span class="n">tseries</span><span class="p">,</span>
+                <span class="n">grid</span><span class="p">[</span><span class="n">grid_id</span><span class="p">],</span>
+                <span class="n">tr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">palette</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+            <span class="n">grid_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">plot_carpet</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">func_file</span><span class="p">,</span> <span class="n">atlaslabels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seg_data</span><span class="p">,</span> <span class="n">subplot</span><span class="o">=</span><span class="n">grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">tr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tr</span>
+        <span class="p">)</span>
+        <span class="c1"># spikesplot_cb([0.7, 0.78, 0.2, 0.008])</span>
+        <span class="k">return</span> <span class="n">figure</span></div></div>
+
+
+<div class="viewcode-block" id="plot_carpet"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.plot_carpet">[docs]</a><span class="k">def</span> <span class="nf">plot_carpet</span><span class="p">(</span>
+    <span class="n">func</span><span class="p">,</span>
+    <span class="n">atlaslabels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">detrend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">nskip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">950</span><span class="p">,</span> <span class="mi">800</span><span class="p">),</span>
+    <span class="n">subplot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">tr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">lut</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Plot an image representation of voxel intensities across time also know</span>
+<span class="sd">    as the "carpet plot" or "Power plot". See Jonathan Power Neuroimage</span>
+<span class="sd">    2017 Jul 1; 154:150-158.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">        func : string or nibabel-image object</span>
+<span class="sd">            Path to NIfTI or CIFTI BOLD image, or a nibabel-image object</span>
+<span class="sd">        atlaslabels: ndarray, optional</span>
+<span class="sd">            A 3D array of integer labels from an atlas, resampled into ``img`` space.</span>
+<span class="sd">            Required if ``func`` is a NIfTI image.</span>
+<span class="sd">        detrend : boolean, optional</span>
+<span class="sd">            Detrend and standardize the data prior to plotting.</span>
+<span class="sd">        nskip : int, optional</span>
+<span class="sd">            Number of volumes at the beginning of the scan marked as nonsteady state.</span>
+<span class="sd">            Only used by volumetric NIfTI.</span>
+<span class="sd">        size : tuple, optional</span>
+<span class="sd">            Size of figure.</span>
+<span class="sd">        subplot : matplotlib Subplot, optional</span>
+<span class="sd">            Subplot to plot figure on.</span>
+<span class="sd">        title : string, optional</span>
+<span class="sd">            The title displayed on the figure.</span>
+<span class="sd">        output_file : string, or None, optional</span>
+<span class="sd">            The name of an image file to export the plot to. Valid extensions</span>
+<span class="sd">            are .png, .pdf, .svg. If output_file is not None, the plot</span>
+<span class="sd">            is saved to a file, and the display is closed.</span>
+<span class="sd">        legend : bool</span>
+<span class="sd">            Whether to render the average functional series with ``atlaslabels`` as</span>
+<span class="sd">            overlay.</span>
+<span class="sd">        tr : float , optional</span>
+<span class="sd">            Specify the TR, if specified it uses this value. If left as None,</span>
+<span class="sd">            # of frames is plotted instead of time.</span>
+<span class="sd">        lut : ndarray, optional</span>
+<span class="sd">            Look up table for segmentations</span>
+
+<span class="sd">    """</span>
+    <span class="n">epinii</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">segnii</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">nslices</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">func</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">nb</span><span class="o">.</span><span class="n">Cifti2Image</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">nifti_header</span><span class="o">.</span><span class="n">get_intent</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"ConnDenseSeries"</span>
+        <span class="p">),</span> <span class="s2">"Not a dense timeseries"</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">matrix</span>
+        <span class="n">struct_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"LEFT_CORTEX"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">"RIGHT_CORTEX"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">"SUBCORTICAL"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s2">"CEREBELLUM"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">seg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"uint32"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">bm</span> <span class="ow">in</span> <span class="n">matrix</span><span class="o">.</span><span class="n">get_index_map</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">brain_models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">"CORTEX"</span> <span class="ow">in</span> <span class="n">bm</span><span class="o">.</span><span class="n">brain_structure</span><span class="p">:</span>
+                <span class="n">lidx</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)[</span><span class="s2">"RIGHT"</span> <span class="ow">in</span> <span class="n">bm</span><span class="o">.</span><span class="n">brain_structure</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="s2">"CEREBELLUM"</span> <span class="ow">in</span> <span class="n">bm</span><span class="o">.</span><span class="n">brain_structure</span><span class="p">:</span>
+                <span class="n">lidx</span> <span class="o">=</span> <span class="mi">4</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lidx</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="n">index_final</span> <span class="o">=</span> <span class="n">bm</span><span class="o">.</span><span class="n">index_offset</span> <span class="o">+</span> <span class="n">bm</span><span class="o">.</span><span class="n">index_count</span>
+            <span class="n">seg</span><span class="p">[</span><span class="n">bm</span><span class="o">.</span><span class="n">index_offset</span><span class="p">:</span><span class="n">index_final</span><span class="p">]</span> <span class="o">=</span> <span class="n">lidx</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">seg</span><span class="p">[</span><span class="n">seg</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"Unassigned labels"</span>
+
+        <span class="c1"># Decimate data</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">seg</span> <span class="o">=</span> <span class="n">_decimate_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">seg</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="c1"># preserve as much continuity as possible</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">seg</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s2">"stable"</span><span class="p">)</span>
+
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">ListedColormap</span><span class="p">([</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">"Paired"</span><span class="p">)</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">cmap</span><span class="o">.</span><span class="n">colors</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="n">struct_map</span>
+        <span class="p">),</span> <span class="s2">"Mismatch between expected # of structures and colors"</span>
+
+        <span class="c1"># ensure no legend for CIFTI</span>
+        <span class="n">legend</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># Volumetric NIfTI</span>
+        <span class="kn">from</span> <span class="nn">nilearn._utils</span> <span class="kn">import</span> <span class="n">check_niimg_4d</span>
+        <span class="kn">from</span> <span class="nn">nilearn._utils.niimg</span> <span class="kn">import</span> <span class="n">_safe_get_data</span>
+
+        <span class="n">img_nii</span> <span class="o">=</span> <span class="n">check_niimg_4d</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,)</span>
+        <span class="n">func_data</span> <span class="o">=</span> <span class="n">_safe_get_data</span><span class="p">(</span><span class="n">img_nii</span><span class="p">,</span> <span class="n">ensure_finite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">func_data</span> <span class="o">=</span> <span class="n">func_data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">nskip</span><span class="p">:]</span>
+        <span class="n">ntsteps</span> <span class="o">=</span> <span class="n">func_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">func_data</span><span class="p">[</span><span class="n">atlaslabels</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ntsteps</span><span class="p">)</span>
+        <span class="n">oseg</span> <span class="o">=</span> <span class="n">atlaslabels</span><span class="p">[</span><span class="n">atlaslabels</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Map segmentation</span>
+        <span class="k">if</span> <span class="n">lut</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">256</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"int"</span><span class="p">)</span>
+            <span class="n">lut</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">lut</span><span class="p">[</span><span class="mi">255</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">lut</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">99</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="n">lut</span><span class="p">[</span><span class="mi">100</span><span class="p">:</span><span class="mi">201</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="c1"># Apply lookup table</span>
+        <span class="n">seg</span> <span class="o">=</span> <span class="n">lut</span><span class="p">[</span><span class="n">oseg</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)]</span>
+
+        <span class="c1"># Decimate data</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">seg</span> <span class="o">=</span> <span class="n">_decimate_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">seg</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="c1"># Order following segmentation labels</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">seg</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Set colormap</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">ListedColormap</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">"tab10"</span><span class="p">)</span><span class="o">.</span><span class="n">colors</span><span class="p">[:</span><span class="mi">4</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">legend</span><span class="p">:</span>
+            <span class="n">epiavg</span> <span class="o">=</span> <span class="n">func_data</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">epinii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span><span class="n">epiavg</span><span class="p">,</span> <span class="n">img_nii</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">img_nii</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+            <span class="n">segnii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span>
+                <span class="n">lut</span><span class="p">[</span><span class="n">atlaslabels</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)],</span> <span class="n">epinii</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">epinii</span><span class="o">.</span><span class="n">header</span>
+            <span class="p">)</span>
+            <span class="n">segnii</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="s2">"uint8"</span><span class="p">)</span>
+            <span class="n">nslices</span> <span class="o">=</span> <span class="n">epiavg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">_carpet</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">,</span>
+        <span class="n">seg</span><span class="p">,</span>
+        <span class="n">order</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="p">,</span>
+        <span class="n">epinii</span><span class="o">=</span><span class="n">epinii</span><span class="p">,</span>
+        <span class="n">segnii</span><span class="o">=</span><span class="n">segnii</span><span class="p">,</span>
+        <span class="n">nslices</span><span class="o">=</span><span class="n">nslices</span><span class="p">,</span>
+        <span class="n">tr</span><span class="o">=</span><span class="n">tr</span><span class="p">,</span>
+        <span class="n">subplot</span><span class="o">=</span><span class="n">subplot</span><span class="p">,</span>
+        <span class="n">legend</span><span class="o">=</span><span class="n">legend</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+        <span class="n">output_file</span><span class="o">=</span><span class="n">output_file</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_carpet</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">seg</span><span class="p">,</span>
+    <span class="n">order</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="p">,</span>
+    <span class="n">tr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">detrend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">subplot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">epinii</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">segnii</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">nslices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">"""Common carpetplot building code for volumetric / CIFTI plots"""</span>
+    <span class="kn">from</span> <span class="nn">nilearn.plotting</span> <span class="kn">import</span> <span class="n">plot_img</span>
+    <span class="kn">from</span> <span class="nn">nilearn.signal</span> <span class="kn">import</span> <span class="n">clean</span>
+
+    <span class="n">notr</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">tr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">notr</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">tr</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="c1"># Detrend data</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">detrend</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">clean</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">t_r</span><span class="o">=</span><span class="n">tr</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># If subplot is not defined</span>
+    <span class="k">if</span> <span class="n">subplot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">subplot</span> <span class="o">=</span> <span class="n">mgs</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Define nested GridSpec</span>
+    <span class="n">wratios</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
+    <span class="n">gs</span> <span class="o">=</span> <span class="n">mgs</span><span class="o">.</span><span class="n">GridSpecFromSubplotSpec</span><span class="p">(</span>
+        <span class="mi">1</span><span class="p">,</span>
+        <span class="mi">2</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">legend</span><span class="p">),</span>
+        <span class="n">subplot_spec</span><span class="o">=</span><span class="n">subplot</span><span class="p">,</span>
+        <span class="n">width_ratios</span><span class="o">=</span><span class="n">wratios</span><span class="p">[:</span> <span class="mi">2</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">legend</span><span class="p">)],</span>
+        <span class="n">wspace</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Segmentation colorbar</span>
+    <span class="n">ax0</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ax0</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    <span class="n">ax0</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">ax0</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">seg</span><span class="p">[</span><span class="n">order</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">interpolation</span><span class="o">=</span><span class="s2">"none"</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+
+    <span class="n">ax0</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">ax0</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"left"</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">ax0</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"bottom"</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">"none"</span><span class="p">)</span>
+    <span class="n">ax0</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"bottom"</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Carpet plot</span>
+    <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">order</span><span class="p">],</span>
+        <span class="n">interpolation</span><span class="o">=</span><span class="s2">"nearest"</span><span class="p">,</span>
+        <span class="n">aspect</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s2">"gray"</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([])</span>
+
+    <span class="c1"># Set 10 frame markers in X axis</span>
+    <span class="n">interval</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">10</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">xticks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])[::</span><span class="n">interval</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">notr</span><span class="p">:</span>
+        <span class="n">xlabel</span> <span class="o">=</span> <span class="s2">"time-points (index)"</span>
+        <span class="n">xticklabels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">xtick</span><span class="p">)</span> <span class="k">for</span> <span class="n">xtick</span> <span class="ow">in</span> <span class="n">xticks</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xlabel</span> <span class="o">=</span> <span class="s2">"time (s)"</span>
+        <span class="n">xticklabels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"</span><span class="si">%.02f</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="n">tr</span> <span class="o">*</span> <span class="n">xtick</span><span class="p">)</span> <span class="k">for</span> <span class="n">xtick</span> <span class="ow">in</span> <span class="n">xticks</span><span class="p">]</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">xticks</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">xticklabels</span><span class="p">)</span>
+
+    <span class="c1"># Remove and redefine spines</span>
+    <span class="k">for</span> <span class="n">side</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"top"</span><span class="p">,</span> <span class="s2">"right"</span><span class="p">]:</span>
+        <span class="c1"># Toggle the spine objects</span>
+        <span class="n">ax0</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">"none"</span><span class="p">)</span>
+        <span class="n">ax0</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">"none"</span><span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">ax1</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_ticks_position</span><span class="p">(</span><span class="s2">"left"</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_ticks_position</span><span class="p">(</span><span class="s2">"bottom"</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"bottom"</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"left"</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">"none"</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"left"</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">title</span><span class="p">:</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+    <span class="n">ax2</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">legend</span><span class="p">:</span>
+        <span class="n">gslegend</span> <span class="o">=</span> <span class="n">mgs</span><span class="o">.</span><span class="n">GridSpecFromSubplotSpec</span><span class="p">(</span>
+            <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">subplot_spec</span><span class="o">=</span><span class="n">gs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="p">)</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.10</span> <span class="o">*</span> <span class="n">nslices</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.95</span> <span class="o">*</span> <span class="n">nslices</span><span class="p">),</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">uint8</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">tolist</span><span class="p">()):</span>
+            <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gslegend</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">plot_img</span><span class="p">(</span>
+                <span class="n">segnii</span><span class="p">,</span>
+                <span class="n">bg_img</span><span class="o">=</span><span class="n">epinii</span><span class="p">,</span>
+                <span class="n">axes</span><span class="o">=</span><span class="n">ax2</span><span class="p">,</span>
+                <span class="n">display_mode</span><span class="o">=</span><span class="s2">"z"</span><span class="p">,</span>
+                <span class="n">annotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">cut_coords</span><span class="o">=</span><span class="p">[</span><span class="n">c</span><span class="p">],</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+                <span class="n">interpolation</span><span class="o">=</span><span class="s2">"nearest"</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
+        <span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">output_file</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">ax0</span><span class="p">,</span> <span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">),</span> <span class="n">gs</span>
+
+
+<div class="viewcode-block" id="spikesplot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.spikesplot">[docs]</a><span class="k">def</span> <span class="nf">spikesplot</span><span class="p">(</span>
+    <span class="n">ts_z</span><span class="p">,</span>
+    <span class="n">outer_gs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">zscored</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">spike_thresh</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Spike plot"</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">"viridis"</span><span class="p">,</span>
+    <span class="n">hide_x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">nskip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    A spikes plot. Thanks to Bob Dogherty (this docstring needs be improved with proper ack)</span>
+<span class="sd">    """</span>
+
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">outer_gs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">gs</span> <span class="o">=</span> <span class="n">mgs</span><span class="o">.</span><span class="n">GridSpecFromSubplotSpec</span><span class="p">(</span>
+            <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">subplot_spec</span><span class="o">=</span><span class="n">outer_gs</span><span class="p">,</span> <span class="n">width_ratios</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Define TR and number of frames</span>
+    <span class="k">if</span> <span class="n">tr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tr</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="c1"># Load timeseries, zscored slice-wise</span>
+    <span class="n">nslices</span> <span class="o">=</span> <span class="n">ts_z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ntsteps</span> <span class="o">=</span> <span class="n">ts_z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Load a colormap</span>
+    <span class="n">my_cmap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">nslices</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">my_cmap</span><span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">sl</span><span class="p">))</span> <span class="k">for</span> <span class="n">sl</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nslices</span><span class="p">)]</span>
+
+    <span class="n">stem</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ts_z</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="c1"># Plot one line per axial slice timeseries</span>
+    <span class="k">for</span> <span class="n">sl</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nslices</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stem</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ts_z</span><span class="p">[</span><span class="n">sl</span><span class="p">,</span> <span class="p">:],</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">sl</span><span class="p">],</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">markerline</span><span class="p">,</span> <span class="n">stemlines</span><span class="p">,</span> <span class="n">baseline</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="n">ts_z</span><span class="p">[</span><span class="n">sl</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">markerline</span><span class="p">,</span> <span class="s2">"markerfacecolor"</span><span class="p">,</span> <span class="n">colors</span><span class="p">[</span><span class="n">sl</span><span class="p">])</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">baseline</span><span class="p">,</span> <span class="s2">"color"</span><span class="p">,</span> <span class="n">colors</span><span class="p">[</span><span class="n">sl</span><span class="p">],</span> <span class="s2">"linewidth"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">stemlines</span><span class="p">,</span> <span class="s2">"color"</span><span class="p">,</span> <span class="n">colors</span><span class="p">[</span><span class="n">sl</span><span class="p">],</span> <span class="s2">"linewidth"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Handle X, Y axes</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Handle X axis</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="n">ntsteps</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span>
+    <span class="n">xticks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">last</span><span class="p">)[::</span><span class="mi">20</span><span class="p">])</span> <span class="o">+</span> <span class="p">[</span><span class="n">last</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_x</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">xticks</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_x</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"time (frame #)"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"time (s)"</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">"</span><span class="si">%.02f</span><span class="s2">"</span> <span class="o">%</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">(</span><span class="n">tr</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xticks</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()])</span>
+
+    <span class="c1"># Handle Y axis</span>
+    <span class="n">ylabel</span> <span class="o">=</span> <span class="s2">"slice-wise noise average on background"</span>
+    <span class="k">if</span> <span class="n">zscored</span><span class="p">:</span>
+        <span class="n">ylabel</span> <span class="o">+=</span> <span class="s2">" (z-scored)"</span>
+        <span class="n">zs_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ts_z</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="o">-</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ts_z</span><span class="p">[:,</span> <span class="n">nskip</span><span class="p">:])</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">*</span> <span class="mf">1.05</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ts_z</span><span class="p">[:,</span> <span class="n">nskip</span><span class="p">:])</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">*</span> <span class="mf">1.05</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">ytick_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">zs_max</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">zs_max</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)))</span>
+        <span class="n">yticks</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">((</span><span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">ytick_vals</span><span class="p">[</span><span class="n">ytick_vals</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()))</span>
+            <span class="o">+</span> <span class="n">ytick_vals</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="c1"># TODO plot min/max or mark spikes</span>
+        <span class="c1"># yticks.insert(0, ts_z.min())</span>
+        <span class="c1"># yticks += [ts_z.max()]</span>
+        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">ytick_vals</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">ntsteps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">val</span><span class="p">,</span> <span class="o">-</span><span class="n">val</span><span class="p">),</span> <span class="s2">"k:"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">ntsteps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">val</span><span class="p">),</span> <span class="s2">"k:"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+
+        <span class="c1"># Plot spike threshold</span>
+        <span class="k">if</span> <span class="n">zs_max</span> <span class="o">&lt;</span> <span class="n">spike_thresh</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">ntsteps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">spike_thresh</span><span class="p">,</span> <span class="o">-</span><span class="n">spike_thresh</span><span class="p">),</span> <span class="s2">"k:"</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">ntsteps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">spike_thresh</span><span class="p">,</span> <span class="n">spike_thresh</span><span class="p">),</span> <span class="s2">"k:"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">yticks</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ts_z</span><span class="p">[:,</span> <span class="n">nskip</span><span class="p">:]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">ts_z</span><span class="p">[:,</span> <span class="n">nskip</span><span class="p">:]),</span>
+            <span class="n">ts_z</span><span class="p">[:,</span> <span class="n">nskip</span><span class="p">:]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+        <span class="p">]</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">yticks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.05</span><span class="p">,</span> <span class="p">(</span><span class="n">yticks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">yticks</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="n">yticks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="c1"># ax.set_ylim(ts_z[:, nskip:].min() * 0.95,</span>
+        <span class="c1">#             ts_z[:, nskip:].max() * 1.05)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+        <span class="n">ylabel</span><span class="p">,</span>
+        <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">),</span>
+        <span class="n">xycoords</span><span class="o">=</span><span class="s2">"axes fraction"</span><span class="p">,</span>
+        <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">textcoords</span><span class="o">=</span><span class="s2">"offset points"</span><span class="p">,</span>
+        <span class="n">va</span><span class="o">=</span><span class="s2">"center"</span><span class="p">,</span>
+        <span class="n">ha</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">"gray"</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">bbox</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">"boxstyle"</span><span class="p">:</span> <span class="s2">"round"</span><span class="p">,</span>
+            <span class="s2">"fc"</span><span class="p">:</span> <span class="s2">"w"</span><span class="p">,</span>
+            <span class="s2">"ec"</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
+            <span class="s2">"color"</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
+            <span class="s2">"lw"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">"alpha"</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([])</span>
+
+    <span class="c1"># if yticks:</span>
+    <span class="c1">#     # ax.set_yticks(yticks)</span>
+    <span class="c1">#     # ax.set_yticklabels(['%.02f' % y for y in yticks])</span>
+    <span class="c1">#     # Plot maximum and minimum horizontal lines</span>
+    <span class="c1">#     ax.plot((0, ntsteps - 1), (yticks[0], yticks[0]), 'k:')</span>
+    <span class="c1">#     ax.plot((0, ntsteps - 1), (yticks[-1], yticks[-1]), 'k:')</span>
+
+    <span class="k">for</span> <span class="n">side</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"top"</span><span class="p">,</span> <span class="s2">"right"</span><span class="p">]:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">"none"</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_x</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"bottom"</span><span class="p">]</span><span class="o">.</span><span class="n">set_position</span><span class="p">((</span><span class="s2">"outward"</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_ticks_position</span><span class="p">(</span><span class="s2">"bottom"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"bottom"</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">"none"</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"bottom"</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># ax.spines["left"].set_position(('outward', 30))</span>
+    <span class="c1"># ax.yaxis.set_ticks_position('left')</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"left"</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"left"</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># labels = [label for label in ax.yaxis.get_ticklabels()]</span>
+    <span class="c1"># labels[0].set_weight('bold')</span>
+    <span class="c1"># labels[-1].set_weight('bold')</span>
+    <span class="k">if</span> <span class="n">title</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="spikesplot_cb"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.spikesplot_cb">[docs]</a><span class="k">def</span> <span class="nf">spikesplot_cb</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"viridis"</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># Add colorbar</span>
+    <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
+
+    <span class="n">cax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+    <span class="n">cb</span> <span class="o">=</span> <span class="n">ColorbarBase</span><span class="p">(</span>
+        <span class="n">cax</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">),</span>
+        <span class="n">spacing</span><span class="o">=</span><span class="s2">"proportional"</span><span class="p">,</span>
+        <span class="n">orientation</span><span class="o">=</span><span class="s2">"horizontal"</span><span class="p">,</span>
+        <span class="n">drawedges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">cb</span><span class="o">.</span><span class="n">set_ticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+    <span class="n">cb</span><span class="o">.</span><span class="n">set_ticklabels</span><span class="p">([</span><span class="s2">"Inferior"</span><span class="p">,</span> <span class="s2">"(axial slice)"</span><span class="p">,</span> <span class="s2">"Superior"</span><span class="p">])</span>
+    <span class="n">cb</span><span class="o">.</span><span class="n">outline</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">cb</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cax</span></div>
+
+
+<div class="viewcode-block" id="confoundplot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.confoundplot">[docs]</a><span class="k">def</span> <span class="nf">confoundplot</span><span class="p">(</span>
+    <span class="n">tseries</span><span class="p">,</span>
+    <span class="n">gs_ts</span><span class="p">,</span>
+    <span class="n">gs_dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">hide_x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"b"</span><span class="p">,</span>
+    <span class="n">nskip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ylims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+    <span class="c1"># Define TR and number of frames</span>
+    <span class="n">notr</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">tr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">notr</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">tr</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">ntsteps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tseries</span><span class="p">)</span>
+    <span class="n">tseries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tseries</span><span class="p">)</span>
+
+    <span class="c1"># Define nested GridSpec</span>
+    <span class="n">gs</span> <span class="o">=</span> <span class="n">mgs</span><span class="o">.</span><span class="n">GridSpecFromSubplotSpec</span><span class="p">(</span>
+        <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">subplot_spec</span><span class="o">=</span><span class="n">gs_ts</span><span class="p">,</span> <span class="n">width_ratios</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="n">wspace</span><span class="o">=</span><span class="mf">0.0</span>
+    <span class="p">)</span>
+
+    <span class="n">ax_ts</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ax_ts</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Set 10 frame markers in X axis</span>
+    <span class="n">interval</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">ntsteps</span> <span class="o">//</span> <span class="mi">10</span><span class="p">,</span> <span class="n">ntsteps</span> <span class="o">//</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">xticks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ntsteps</span><span class="p">)[::</span><span class="n">interval</span><span class="p">])</span>
+    <span class="n">ax_ts</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">xticks</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_x</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">notr</span><span class="p">:</span>
+            <span class="n">ax_ts</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"time (frame #)"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax_ts</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"time (s)"</span><span class="p">)</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">tr</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xticks</span><span class="p">)</span>
+            <span class="n">ax_ts</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">"</span><span class="si">%.02f</span><span class="s2">"</span> <span class="o">%</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">labels</span><span class="o">.</span><span class="n">tolist</span><span class="p">()])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax_ts</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([])</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">+=</span> <span class="s2">" [</span><span class="si">%s</span><span class="s2">]"</span> <span class="o">%</span> <span class="n">units</span>
+
+        <span class="n">ax_ts</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">),</span>
+            <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">xycoords</span><span class="o">=</span><span class="s2">"axes fraction"</span><span class="p">,</span>
+            <span class="n">textcoords</span><span class="o">=</span><span class="s2">"offset points"</span><span class="p">,</span>
+            <span class="n">va</span><span class="o">=</span><span class="s2">"center"</span><span class="p">,</span>
+            <span class="n">ha</span><span class="o">=</span><span class="s2">"left"</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+            <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+            <span class="n">bbox</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">"boxstyle"</span><span class="p">:</span> <span class="s2">"round"</span><span class="p">,</span>
+                <span class="s2">"fc"</span><span class="p">:</span> <span class="s2">"w"</span><span class="p">,</span>
+                <span class="s2">"ec"</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
+                <span class="s2">"color"</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
+                <span class="s2">"lw"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s2">"alpha"</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">side</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"top"</span><span class="p">,</span> <span class="s2">"right"</span><span class="p">]:</span>
+        <span class="n">ax_ts</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">"none"</span><span class="p">)</span>
+        <span class="n">ax_ts</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_x</span><span class="p">:</span>
+        <span class="n">ax_ts</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"bottom"</span><span class="p">]</span><span class="o">.</span><span class="n">set_position</span><span class="p">((</span><span class="s2">"outward"</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+        <span class="n">ax_ts</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_ticks_position</span><span class="p">(</span><span class="s2">"bottom"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax_ts</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"bottom"</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">"none"</span><span class="p">)</span>
+        <span class="n">ax_ts</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"bottom"</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># ax_ts.spines["left"].set_position(('outward', 30))</span>
+    <span class="n">ax_ts</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"left"</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">"none"</span><span class="p">)</span>
+    <span class="n">ax_ts</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">"left"</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># ax_ts.yaxis.set_ticks_position('left')</span>
+
+    <span class="n">ax_ts</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    <span class="n">ax_ts</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([])</span>
+
+    <span class="n">nonnan</span> <span class="o">=</span> <span class="n">tseries</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">tseries</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">nonnan</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Calculate Y limits</span>
+        <span class="n">valrange</span> <span class="o">=</span> <span class="n">nonnan</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">nonnan</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">def_ylims</span> <span class="o">=</span> <span class="p">[</span><span class="n">nonnan</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">valrange</span><span class="p">,</span> <span class="n">nonnan</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">valrange</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ylims</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ylims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">def_ylims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">def_ylims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ylims</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="k">if</span> <span class="n">ylims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">def_ylims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">def_ylims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ylims</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+
+        <span class="c1"># Add space for plot title and mean/SD annotation</span>
+        <span class="n">def_ylims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="p">(</span><span class="n">def_ylims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">def_ylims</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">ax_ts</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">def_ylims</span><span class="p">)</span>
+
+        <span class="c1"># Annotate stats</span>
+        <span class="n">maxv</span> <span class="o">=</span> <span class="n">nonnan</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">nonnan</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">stdv</span> <span class="o">=</span> <span class="n">nonnan</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+        <span class="n">p95</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">nonnan</span><span class="p">,</span> <span class="mf">95.0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">maxv</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">stdv</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">p95</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">stats_label</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">r</span><span class="s2">"max: </span><span class="si">{max:.3f}{units}</span><span class="s2"> $\bullet$ mean: </span><span class="si">{mean:.3f}{units}</span><span class="s2"> "</span>
+        <span class="sa">r</span><span class="s2">"$\bullet$ $\sigma$: </span><span class="si">{sigma:.3f}</span><span class="s2">"</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">max</span><span class="o">=</span><span class="n">maxv</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">stdv</span><span class="p">)</span>
+    <span class="n">ax_ts</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+        <span class="n">stats_label</span><span class="p">,</span>
+        <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">),</span>
+        <span class="n">xycoords</span><span class="o">=</span><span class="s2">"axes fraction"</span><span class="p">,</span>
+        <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">textcoords</span><span class="o">=</span><span class="s2">"offset points"</span><span class="p">,</span>
+        <span class="n">va</span><span class="o">=</span><span class="s2">"center"</span><span class="p">,</span>
+        <span class="n">ha</span><span class="o">=</span><span class="s2">"right"</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">bbox</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">"boxstyle"</span><span class="p">:</span> <span class="s2">"round"</span><span class="p">,</span>
+            <span class="s2">"fc"</span><span class="p">:</span> <span class="s2">"w"</span><span class="p">,</span>
+            <span class="s2">"ec"</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
+            <span class="s2">"color"</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
+            <span class="s2">"lw"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">"alpha"</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Annotate percentile 95</span>
+    <span class="n">ax_ts</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">ntsteps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="n">p95</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"lightgray"</span><span class="p">)</span>
+    <span class="n">ax_ts</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+        <span class="s2">"</span><span class="si">%.2f</span><span class="s2">"</span> <span class="o">%</span> <span class="n">p95</span><span class="p">,</span>
+        <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p95</span><span class="p">),</span>
+        <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">textcoords</span><span class="o">=</span><span class="s2">"offset points"</span><span class="p">,</span>
+        <span class="n">va</span><span class="o">=</span><span class="s2">"center"</span><span class="p">,</span>
+        <span class="n">ha</span><span class="o">=</span><span class="s2">"right"</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">"lightgray"</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cutoff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cutoff</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">thr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cutoff</span><span class="p">):</span>
+        <span class="n">ax_ts</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">ntsteps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="n">thr</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"dimgray"</span><span class="p">)</span>
+
+        <span class="n">ax_ts</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+            <span class="s2">"</span><span class="si">%.2f</span><span class="s2">"</span> <span class="o">%</span> <span class="n">thr</span><span class="p">,</span>
+            <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">thr</span><span class="p">),</span>
+            <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">textcoords</span><span class="o">=</span><span class="s2">"offset points"</span><span class="p">,</span>
+            <span class="n">va</span><span class="o">=</span><span class="s2">"center"</span><span class="p">,</span>
+            <span class="n">ha</span><span class="o">=</span><span class="s2">"right"</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">"dimgray"</span><span class="p">,</span>
+            <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">ax_ts</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tseries</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+    <span class="n">ax_ts</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">ntsteps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">gs_dist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax_dist</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs_dist</span><span class="p">)</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">displot</span><span class="p">(</span><span class="n">tseries</span><span class="p">,</span> <span class="n">vertical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax_dist</span><span class="p">)</span>
+        <span class="n">ax_dist</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Timesteps"</span><span class="p">)</span>
+        <span class="n">ax_dist</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ax_ts</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">())</span>
+        <span class="n">ax_dist</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([])</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">ax_ts</span><span class="p">,</span> <span class="n">ax_dist</span><span class="p">],</span> <span class="n">gs</span>
+    <span class="k">return</span> <span class="n">ax_ts</span><span class="p">,</span> <span class="n">gs</span></div>
+
+
+<div class="viewcode-block" id="compcor_variance_plot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.compcor_variance_plot">[docs]</a><span class="k">def</span> <span class="nf">compcor_variance_plot</span><span class="p">(</span>
+    <span class="n">metadata_files</span><span class="p">,</span>
+    <span class="n">metadata_sources</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">varexp_thresh</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">),</span>
+    <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    metadata_files: list</span>
+<span class="sd">        List of paths to files containing component metadata. If more than one</span>
+<span class="sd">        decomposition has been performed (e.g., anatomical and temporal</span>
+<span class="sd">        CompCor decompositions), then all metadata files can be provided in</span>
+<span class="sd">        the list. However, each metadata file should have a corresponding</span>
+<span class="sd">        entry in `metadata_sources`.</span>
+<span class="sd">    metadata_sources: list or None</span>
+<span class="sd">        List of source names (e.g., ['aCompCor']) for decompositions. This</span>
+<span class="sd">        list should be of the same length as `metadata_files`.</span>
+<span class="sd">    output_file: str or None</span>
+<span class="sd">        Path where the output figure should be saved. If this is not defined,</span>
+<span class="sd">        then the plotting axes will be returned instead of the saved figure</span>
+<span class="sd">        path.</span>
+<span class="sd">    varexp_thresh: tuple</span>
+<span class="sd">        Set of variance thresholds to include in the plot (default 0.5, 0.7,</span>
+<span class="sd">        0.9).</span>
+<span class="sd">    fig: figure or None</span>
+<span class="sd">        Existing figure on which to plot.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ax: axes</span>
+<span class="sd">        Plotting axes. Returned only if the `output_file` parameter is None.</span>
+<span class="sd">    output_file: str</span>
+<span class="sd">        The file where the figure is saved.</span>
+<span class="sd">    """</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">metadata_sources</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metadata_files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">metadata_sources</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"CompCor"</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metadata_sources</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s2">"Decomposition </span><span class="si">{:d}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metadata_files</span><span class="p">))</span>
+            <span class="p">]</span>
+    <span class="k">for</span> <span class="n">file</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">metadata_files</span><span class="p">,</span> <span class="n">metadata_sources</span><span class="p">):</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="n">source</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">"\s+"</span><span class="p">)</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="n">source</span><span class="p">][</span><span class="s2">"source"</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+    <span class="n">bbox_txt</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"boxstyle"</span><span class="p">:</span> <span class="s2">"round"</span><span class="p">,</span>
+        <span class="s2">"fc"</span><span class="p">:</span> <span class="s2">"white"</span><span class="p">,</span>
+        <span class="s2">"ec"</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
+        <span class="s2">"color"</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
+        <span class="s2">"linewidth"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">"alpha"</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">decompositions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">data_sources</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">"source"</span><span class="p">,</span> <span class="s2">"mask"</span><span class="p">])</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">mask</span> <span class="ow">in</span> <span class="n">data_sources</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span>
+            <span class="n">metadata</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">metadata</span><span class="p">[</span><span class="s2">"source"</span><span class="p">]</span> <span class="o">==</span> <span class="n">source</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s2">"mask"</span><span class="p">]</span> <span class="o">==</span> <span class="n">mask</span><span class="p">)][</span>
+                <span class="s2">"singular_value"</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="n">decompositions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">source</span><span class="p">,</span> <span class="n">mask</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">decompositions</span><span class="p">),</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">decompositions</span><span class="p">))</span>
+        <span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">decompositions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+            <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">decompositions</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">decompositions</span><span class="p">),</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">()]</span>
+
+    <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">decompositions</span><span class="p">):</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span>
+            <span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s2">"mask"</span><span class="p">]</span> <span class="o">==</span> <span class="n">mask</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s2">"source"</span><span class="p">]</span> <span class="o">==</span> <span class="n">source</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">([</span><span class="n">m</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">decompositions</span> <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="n">source</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">title_mask</span> <span class="o">=</span> <span class="s2">" (</span><span class="si">{}</span><span class="s2"> mask)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">title_mask</span> <span class="o">=</span> <span class="s2">""</span>
+        <span class="n">fig_title</span> <span class="o">=</span> <span class="s2">"</span><span class="si">{}{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">title_mask</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">components</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">components</span><span class="p">[</span><span class="s2">"cumulative_variance_explained"</span><span class="p">]),</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">"purple"</span><span class="p">,</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"number of components in model"</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"cumulative variance explained (%)"</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">fig_title</span><span class="p">)</span>
+
+        <span class="n">varexp</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">thr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">varexp_thresh</span><span class="p">):</span>
+            <span class="n">varexp</span><span class="p">[</span><span class="n">thr</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">components</span><span class="p">[</span><span class="s2">"cumulative_variance_explained"</span><span class="p">],</span> <span class="n">thr</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="o">+</span> <span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">thr</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"lightgrey"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">varexp</span><span class="p">[</span><span class="n">thr</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"C</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">":"</span>
+            <span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                <span class="mi">0</span><span class="p">,</span>
+                <span class="mi">100</span> <span class="o">*</span> <span class="n">thr</span><span class="p">,</span>
+                <span class="s2">"</span><span class="si">{:.0f}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">thr</span><span class="p">),</span>
+                <span class="n">fontsize</span><span class="o">=</span><span class="s2">"x-small"</span><span class="p">,</span>
+                <span class="n">bbox</span><span class="o">=</span><span class="n">bbox_txt</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                <span class="n">varexp</span><span class="p">[</span><span class="n">thr</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="mi">25</span><span class="p">,</span>
+                <span class="s2">"</span><span class="si">{}</span><span class="s2"> components explain</span><span class="se">\n</span><span class="si">{:.0f}% o</span><span class="s2">f variance"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">varexp</span><span class="p">[</span><span class="n">thr</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">thr</span>
+                <span class="p">),</span>
+                <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
+                <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">"center"</span><span class="p">,</span>
+                <span class="n">fontsize</span><span class="o">=</span><span class="s2">"xx-small"</span><span class="p">,</span>
+                <span class="n">bbox</span><span class="o">=</span><span class="n">bbox_txt</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+        <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
+            <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">"x-small"</span><span class="p">)</span>
+            <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="s2">"vertical"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">side</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"top"</span><span class="p">,</span> <span class="s2">"right"</span><span class="p">,</span> <span class="s2">"left"</span><span class="p">]:</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">"none"</span><span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
+        <span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">output_file</span>
+    <span class="k">return</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="confounds_correlation_plot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.confounds_correlation_plot">[docs]</a><span class="k">def</span> <span class="nf">confounds_correlation_plot</span><span class="p">(</span>
+    <span class="n">confounds_file</span><span class="p">,</span>
+    <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_dim</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reference</span><span class="o">=</span><span class="s2">"global_signal"</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Generate a bar plot with the correlation of confounds.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    confounds_file: :obj:`str`</span>
+<span class="sd">        File containing all confound regressors to be included in the</span>
+<span class="sd">        correlation plot.</span>
+<span class="sd">    figure: figure or None</span>
+<span class="sd">        Existing figure on which to plot.</span>
+<span class="sd">    columns: :obj:`list` or :obj:`None`.</span>
+<span class="sd">        Select a list of columns from the dataset.</span>
+<span class="sd">    max_dim: :obj:`int`</span>
+<span class="sd">        The maximum number of regressors to be included in the output plot.</span>
+<span class="sd">        Reductions (e.g., CompCor) of high-dimensional data can yield so many</span>
+<span class="sd">        regressors that the correlation structure becomes obfuscated. This</span>
+<span class="sd">        criterion selects the ``max_dim`` regressors that have the largest</span>
+<span class="sd">        correlation magnitude with ``reference`` for inclusion in the plot.</span>
+<span class="sd">    output_file: :obj:`str` or :obj:`None`</span>
+<span class="sd">        Path where the output figure should be saved. If this is not defined,</span>
+<span class="sd">        then the plotting axes will be returned instead of the saved figure</span>
+<span class="sd">        path.</span>
+<span class="sd">    reference: :obj:`str`</span>
+<span class="sd">        ``confounds_correlation_plot`` prepares a bar plot of the correlations</span>
+<span class="sd">        of each confound regressor with a reference column. By default, this</span>
+<span class="sd">        is the global signal (so that collinearities with the global signal</span>
+<span class="sd">        can readily be assessed).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    axes and gridspec</span>
+<span class="sd">        Plotting axes and gridspec. Returned only if ``output_file`` is ``None``.</span>
+<span class="sd">    output_file: :obj:`str`</span>
+<span class="sd">        The file where the figure is saved.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+    <span class="n">confounds_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">confounds_file</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">columns</span><span class="p">:</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>  <span class="c1"># Drop duplicates</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">reference</span><span class="p">)</span>  <span class="c1"># Make sure the reference is included</span>
+        <span class="n">confounds_data</span> <span class="o">=</span> <span class="n">confounds_data</span><span class="p">[[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">]]</span>
+
+    <span class="n">confounds_data</span> <span class="o">=</span> <span class="n">confounds_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+        <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">confounds_data</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="p">]</span>
+    <span class="n">corr</span> <span class="o">=</span> <span class="n">confounds_data</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+
+    <span class="n">gscorr</span> <span class="o">=</span> <span class="n">corr</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">gscorr</span><span class="p">[</span><span class="s2">"index"</span><span class="p">]</span> <span class="o">=</span> <span class="n">gscorr</span><span class="o">.</span><span class="n">index</span>
+    <span class="n">gscorr</span><span class="p">[</span><span class="n">reference</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">gscorr</span><span class="p">[</span><span class="n">reference</span><span class="p">])</span>
+    <span class="n">gs_descending</span> <span class="o">=</span> <span class="n">gscorr</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">reference</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">"index"</span><span class="p">]</span>
+    <span class="n">n_vars</span> <span class="o">=</span> <span class="n">corr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">max_dim</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">n_vars</span><span class="p">,</span> <span class="n">max_dim</span><span class="p">)</span>
+
+    <span class="n">gs_descending</span> <span class="o">=</span> <span class="n">gs_descending</span><span class="p">[:</span><span class="n">max_dim</span><span class="p">]</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">corr</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">gs_descending</span><span class="p">]</span>
+    <span class="n">corr</span> <span class="o">=</span> <span class="n">corr</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">features</span><span class="p">,</span> <span class="n">features</span><span class="p">]</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">corr</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">figure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="n">gs</span> <span class="o">=</span> <span class="n">mgs</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">)</span>
+    <span class="n">ax0</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="mi">10</span><span class="p">])</span>
+    <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">:])</span>
+
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">corr</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="n">mask</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">triu_indices_from</span><span class="p">(</span><span class="n">mask</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">corr</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"coolwarm"</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">square</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax0</span><span class="p">)</span>
+    <span class="n">ax0</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">"both"</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">"both"</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax0</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
+        <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">"small"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax0</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
+        <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">"small"</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">gscorr</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">"index"</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">reference</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span>
+        <span class="n">order</span><span class="o">=</span><span class="n">gs_descending</span><span class="p">,</span>
+        <span class="n">palette</span><span class="o">=</span><span class="s2">"Reds_d"</span><span class="p">,</span>
+        <span class="n">saturation</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Confound time series"</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Magnitude of correlation with </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">reference</span><span class="p">))</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">"x"</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">"both"</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">"both"</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax1</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
+        <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">"small"</span><span class="p">)</span>
+        <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="s2">"vertical"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax1</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
+        <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">"small"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">side</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"top"</span><span class="p">,</span> <span class="s2">"right"</span><span class="p">,</span> <span class="s2">"left"</span><span class="p">]:</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">"none"</span><span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
+        <span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">output_file</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">ax0</span><span class="p">,</span> <span class="n">ax1</span><span class="p">],</span> <span class="n">gs</span></div>
+
+
+<div class="viewcode-block" id="cifti_surfaces_plot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.cifti_surfaces_plot">[docs]</a><span class="k">def</span> <span class="nf">cifti_surfaces_plot</span><span class="p">(</span>
+    <span class="n">in_cifti</span><span class="p">,</span>
+    <span class="n">density</span><span class="o">=</span><span class="s2">"32k"</span><span class="p">,</span>
+    <span class="n">surface_type</span><span class="o">=</span><span class="s2">"inflated"</span><span class="p">,</span>
+    <span class="n">clip_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">splt_kwargs</span>
+<span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Plots a CIFTI-2 dense timeseries onto left/right mesh surfaces.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    in_cifti : str</span>
+<span class="sd">        CIFTI-2 dense timeseries (.dtseries.nii)</span>
+<span class="sd">    density : str</span>
+<span class="sd">        Surface density</span>
+<span class="sd">    surface_type : str</span>
+<span class="sd">        Inflation level of mesh surfaces. Supported: midthickness, inflated, veryinflated</span>
+<span class="sd">    clip_range : tuple or None</span>
+<span class="sd">        Range to clip `in_cifti` data prior to plotting.</span>
+<span class="sd">        If not None, two values must be provided as lower and upper bounds.</span>
+<span class="sd">        If values are None, no clipping is performed for that bound.</span>
+<span class="sd">    output_file: :obj:`str` or :obj:`None`</span>
+<span class="sd">        Path where the output figure should be saved. If this is not defined,</span>
+<span class="sd">        then the figure will be returned.</span>
+<span class="sd">    splt_kwargs : dict</span>
+<span class="sd">        Keyword arguments for :obj:`surfplot.Plot`</span>
+
+<span class="sd">    Outputs</span>
+<span class="sd">    -------</span>
+<span class="sd">    figure : matplotlib.pyplot.figure</span>
+<span class="sd">        Surface plot figure. Returned only if ``output_file`` is ``None``.</span>
+<span class="sd">    output_file: :obj:`str`</span>
+<span class="sd">        The file where the figure is saved.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span> <span class="nn">surfplot</span> <span class="k">as</span> <span class="nn">splt</span>
+    <span class="kn">from</span> <span class="nn">surfplot.utils</span> <span class="kn">import</span> <span class="n">add_fslr_medial_wall</span>
+
+    <span class="k">def</span> <span class="nf">get_surface_meshes</span><span class="p">(</span><span class="n">density</span><span class="p">,</span> <span class="n">surface_type</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">templateflow.api</span> <span class="k">as</span> <span class="nn">tf</span>
+        <span class="n">lh</span><span class="p">,</span> <span class="n">rh</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"fsLR"</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">surface_type</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="p">[</span><span class="s2">".surf.gii"</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">lh</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">rh</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">density</span> <span class="o">!=</span> <span class="s2">"32k"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"Only 32k density is currently supported."</span><span class="p">)</span>
+
+    <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">cifti2</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_cifti</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">nifti_header</span><span class="o">.</span><span class="n">get_intent</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"ConnDenseSeries"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">in_cifti</span><span class="si">}</span><span class="s2"> is not a dense timeseries CIFTI file"</span><span class="p">)</span>
+
+    <span class="n">geo</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_index_map</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">left_cortex</span><span class="p">,</span> <span class="n">right_cortex</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">bm</span> <span class="ow">in</span> <span class="n">geo</span><span class="o">.</span><span class="n">brain_models</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">bm</span><span class="o">.</span><span class="n">brain_structure</span> <span class="o">==</span> <span class="s2">"CIFTI_STRUCTURE_CORTEX_LEFT"</span><span class="p">:</span>
+            <span class="n">left_cortex</span> <span class="o">=</span> <span class="n">bm</span>
+        <span class="k">elif</span> <span class="n">bm</span><span class="o">.</span><span class="n">brain_structure</span> <span class="o">==</span> <span class="s2">"CIFTI_STRUCTURE_CORTEX_RIGHT"</span><span class="p">:</span>
+            <span class="n">right_cortex</span> <span class="o">=</span> <span class="n">bm</span>
+
+    <span class="k">if</span> <span class="n">left_cortex</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">right_cortex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"CIFTI is missing cortex information"</span><span class="p">)</span>
+
+    <span class="c1"># calculate an average of the BOLD data, excluding the first 5 volumes</span>
+    <span class="c1"># as potential nonsteady states</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">cortex_data</span> <span class="o">=</span> <span class="n">_concat_brain_struct_data</span><span class="p">((</span><span class="n">left_cortex</span><span class="p">,</span> <span class="n">right_cortex</span><span class="p">),</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">density</span> <span class="o">==</span> <span class="s2">"32k"</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cortex_data</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">59412</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Cortex data is not in fsLR space"</span><span class="p">)</span>
+    <span class="c1"># medial wall needs to be added back in</span>
+    <span class="n">cortex_data</span> <span class="o">=</span> <span class="n">add_fslr_medial_wall</span><span class="p">(</span><span class="n">cortex_data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">clip_range</span><span class="p">:</span>
+        <span class="n">cortex_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">cortex_data</span><span class="p">,</span> <span class="n">clip_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">clip_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">out</span><span class="o">=</span><span class="n">cortex_data</span><span class="p">)</span>
+
+    <span class="n">lh_data</span><span class="p">,</span> <span class="n">rh_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">cortex_data</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># Build the figure</span>
+    <span class="n">lh_mesh</span><span class="p">,</span> <span class="n">rh_mesh</span> <span class="o">=</span> <span class="n">get_surface_meshes</span><span class="p">(</span><span class="n">density</span><span class="p">,</span> <span class="n">surface_type</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">splt</span><span class="o">.</span><span class="n">Plot</span><span class="p">(</span>
+        <span class="n">surf_lh</span><span class="o">=</span><span class="n">lh_mesh</span><span class="p">,</span>
+        <span class="n">surf_rh</span><span class="o">=</span><span class="n">rh_mesh</span><span class="p">,</span>
+        <span class="n">layout</span><span class="o">=</span><span class="n">splt_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"layout"</span><span class="p">,</span> <span class="s2">"row"</span><span class="p">),</span>
+        <span class="o">**</span><span class="n">splt_kwargs</span>
+    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_layer</span><span class="p">({</span><span class="s1">'left'</span><span class="p">:</span> <span class="n">lh_data</span><span class="p">,</span> <span class="s1">'right'</span><span class="p">:</span> <span class="n">rh_data</span><span class="p">},</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">'YlOrRd_r'</span><span class="p">)</span>
+    <span class="n">figure</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>  <span class="c1"># figsize - leave default?</span>
+
+    <span class="k">if</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">output_file</span>
+
+    <span class="k">return</span> <span class="n">figure</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_tr</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Attempt to extract repetition time from NIfTI/CIFTI header</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; _get_tr(nb.load(Path(test_data) /</span>
+<span class="sd">    ...    'sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz'))</span>
+<span class="sd">    2.2</span>
+<span class="sd">    &gt;&gt;&gt; _get_tr(nb.load(Path(test_data) /</span>
+<span class="sd">    ...    'sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii'))</span>
+<span class="sd">    2.0</span>
+<span class="sd">    """</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">img</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">get_index_map</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">series_step</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">img</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"Could not extract TR - unknown data structure type"</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_decimate_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">seg</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+    <span class="sd">"""Decimate timeseries data</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : ndarray</span>
+<span class="sd">        2 element array of timepoints and samples</span>
+<span class="sd">    seg : ndarray</span>
+<span class="sd">        1 element array of samples</span>
+<span class="sd">    size : tuple</span>
+<span class="sd">        2 element for P/T decimation</span>
+
+<span class="sd">    """</span>
+    <span class="n">p_dec</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">p_dec</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[::</span><span class="n">p_dec</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">seg</span> <span class="o">=</span> <span class="n">seg</span><span class="p">[::</span><span class="n">p_dec</span><span class="p">]</span>
+    <span class="n">t_dec</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">t_dec</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">::</span><span class="n">t_dec</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">seg</span>
+
+
+<span class="k">def</span> <span class="nf">_concat_brain_struct_data</span><span class="p">(</span><span class="n">structs</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">concat_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">struct</span> <span class="ow">in</span> <span class="n">structs</span><span class="p">:</span>
+        <span class="n">struct_upper_bound</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">index_offset</span> <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">index_count</span>
+        <span class="n">struct_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">struct</span><span class="o">.</span><span class="n">index_offset</span><span class="p">:</span><span class="n">struct_upper_bound</span><span class="p">]</span>
+        <span class="n">concat_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">concat_data</span><span class="p">,</span> <span class="n">struct_data</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">concat_data</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Copyright 2022, The NiPreps Developers
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/scripts/furo.js"></script>
+    <script src="../../../_static/js/version-switch.js"></script>
+    </body>
+</html>

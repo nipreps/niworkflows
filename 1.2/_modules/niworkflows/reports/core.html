@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.reports.core &mdash; niworkflows 1.2.9 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.2.9
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Library API (application program interface)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>niworkflows.reports.core</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><b>Warning:</b> This document is for an old version of niworkflows.</p>
+<h1>Source code for niworkflows.reports.core</h1><div class="highlight"><pre>
+<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2021 The NiPreps Developers &lt;nipreps@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#</span>
+<span class="c1"># We support and encourage derived works from this project, please read</span>
+<span class="c1"># about our expectations at</span>
+<span class="c1">#</span>
+<span class="c1">#     https://www.nipreps.org/community/licensing/</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Reports builder for BIDS-Apps.</span>
+
+<span class="sd">Generalizes report generation across BIDS-Apps</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">compress</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="kn">import</span> <span class="n">resource_filename</span> <span class="k">as</span> <span class="n">pkgrf</span>
+<span class="kn">from</span> <span class="nn">bids.layout</span> <span class="kn">import</span> <span class="n">BIDSLayout</span><span class="p">,</span> <span class="n">add_config_paths</span>
+<span class="kn">import</span> <span class="nn">jinja2</span>
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">copyfile</span>
+
+<span class="c1"># Add a new figures spec</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">add_config_paths</span><span class="p">(</span><span class="n">figures</span><span class="o">=</span><span class="n">pkgrf</span><span class="p">(</span><span class="s2">&quot;niworkflows&quot;</span><span class="p">,</span> <span class="s2">&quot;data/nipreps.json&quot;</span><span class="p">))</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">if</span> <span class="s2">&quot;Configuration &#39;figures&#39; already exists&quot;</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+        <span class="k">raise</span>
+
+<span class="n">PLURAL_SUFFIX</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;echo&quot;</span><span class="p">,</span> <span class="s2">&quot;es&quot;</span><span class="p">)])</span>
+<span class="n">SVG_SNIPPET</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sd">&quot;&quot;&quot;\</span>
+<span class="sd">&lt;object class=&quot;svg-reportlet&quot; type=&quot;image/svg+xml&quot; data=&quot;./{0}&quot;&gt;</span>
+<span class="sd">Problem loading figure {0}. If the link below works, please try \</span>
+<span class="sd">reloading the report in your browser.&lt;/object&gt;</span>
+<span class="sd">&lt;/div&gt;</span>
+<span class="sd">&lt;div class=&quot;elem-filename&quot;&gt;</span>
+<span class="sd">    Get figure file: &lt;a href=&quot;./{0}&quot; target=&quot;_blank&quot;&gt;{0}&lt;/a&gt;</span>
+<span class="sd">&lt;/div&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="sd">&quot;&quot;&quot;\</span>
+<span class="sd">&lt;img class=&quot;svg-reportlet&quot; src=&quot;./{0}&quot; style=&quot;width: 100%&quot; /&gt;</span>
+<span class="sd">&lt;/div&gt;</span>
+<span class="sd">&lt;div class=&quot;elem-filename&quot;&gt;</span>
+<span class="sd">    Get figure file: &lt;a href=&quot;./{0}&quot; target=&quot;_blank&quot;&gt;{0}&lt;/a&gt;</span>
+<span class="sd">&lt;/div&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="Element"><a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.Element">[docs]</a><span class="k">class</span> <span class="nc">Element</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Just a basic component of a report&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span></div>
+
+
+<div class="viewcode-block" id="Reportlet"><a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.Reportlet">[docs]</a><span class="k">class</span> <span class="nc">Reportlet</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A reportlet has title, description and a list of components with either an</span>
+<span class="sd">    HTML fragment or a path to an SVG file, and possibly a caption. This is a</span>
+<span class="sd">    factory class to generate Reportlets reusing the layout from a ``Report``</span>
+<span class="sd">    object.</span>
+
+<span class="sd">    .. testsetup::</span>
+
+<span class="sd">    &gt;&gt;&gt; cwd = os.getcwd()</span>
+<span class="sd">    &gt;&gt;&gt; os.chdir(tmpdir)</span>
+
+<span class="sd">    &gt;&gt;&gt; from pkg_resources import resource_filename</span>
+<span class="sd">    &gt;&gt;&gt; from shutil import copytree</span>
+<span class="sd">    &gt;&gt;&gt; from bids.layout import BIDSLayout</span>
+<span class="sd">    &gt;&gt;&gt; test_data_path = resource_filename(&#39;niworkflows&#39;, &#39;data/tests/work&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; testdir = Path(tmpdir)</span>
+<span class="sd">    &gt;&gt;&gt; data_dir = copytree(test_data_path, str(testdir / &#39;work&#39;))</span>
+<span class="sd">    &gt;&gt;&gt; out_figs = testdir / &#39;out&#39; / &#39;fmriprep&#39;</span>
+<span class="sd">    &gt;&gt;&gt; bl = BIDSLayout(str(testdir / &#39;work&#39; / &#39;reportlets&#39;),</span>
+<span class="sd">    ...                 config=&#39;figures&#39;, validate=False)</span>
+
+<span class="sd">    .. doctest::</span>
+
+<span class="sd">    &gt;&gt;&gt; bl.get(subject=&#39;01&#39;, desc=&#39;reconall&#39;) # doctest: +ELLIPSIS</span>
+<span class="sd">    [&lt;BIDSFile filename=&#39;.../fmriprep/sub-01/figures/sub-01_desc-reconall_T1w.svg&#39;&gt;]</span>
+
+<span class="sd">    &gt;&gt;&gt; len(bl.get(subject=&#39;01&#39;, space=&#39;.*&#39;, regex_search=True))</span>
+<span class="sd">    2</span>
+
+<span class="sd">    &gt;&gt;&gt; r = Reportlet(bl, out_figs, config={</span>
+<span class="sd">    ...     &#39;title&#39;: &#39;Some Title&#39;, &#39;bids&#39;: {&#39;datatype&#39;: &#39;figures&#39;, &#39;desc&#39;: &#39;reconall&#39;},</span>
+<span class="sd">    ...     &#39;description&#39;: &#39;Some description&#39;})</span>
+<span class="sd">    &gt;&gt;&gt; r.name</span>
+<span class="sd">    &#39;datatype-figures_desc-reconall&#39;</span>
+
+<span class="sd">    &gt;&gt;&gt; r.components[0][0].startswith(&#39;&lt;img&#39;)</span>
+<span class="sd">    True</span>
+
+<span class="sd">    &gt;&gt;&gt; r = Reportlet(bl, out_figs, config={</span>
+<span class="sd">    ...     &#39;title&#39;: &#39;Some Title&#39;, &#39;bids&#39;: {&#39;datatype&#39;: &#39;figures&#39;, &#39;desc&#39;: &#39;reconall&#39;},</span>
+<span class="sd">    ...     &#39;description&#39;: &#39;Some description&#39;, &#39;static&#39;: False})</span>
+<span class="sd">    &gt;&gt;&gt; r.name</span>
+<span class="sd">    &#39;datatype-figures_desc-reconall&#39;</span>
+
+<span class="sd">    &gt;&gt;&gt; r.components[0][0].startswith(&#39;&lt;object&#39;)</span>
+<span class="sd">    True</span>
+
+<span class="sd">    &gt;&gt;&gt; r = Reportlet(bl, out_figs, config={</span>
+<span class="sd">    ...     &#39;title&#39;: &#39;Some Title&#39;, &#39;bids&#39;: {&#39;datatype&#39;: &#39;figures&#39;, &#39;desc&#39;: &#39;summary&#39;},</span>
+<span class="sd">    ...     &#39;description&#39;: &#39;Some description&#39;})</span>
+
+<span class="sd">    &gt;&gt;&gt; r.components[0][0].startswith(&#39;&lt;h3&#39;)</span>
+<span class="sd">    True</span>
+
+<span class="sd">    &gt;&gt;&gt; r.components[0][1] is None</span>
+<span class="sd">    True</span>
+
+<span class="sd">    &gt;&gt;&gt; r = Reportlet(bl, out_figs, config={</span>
+<span class="sd">    ...     &#39;title&#39;: &#39;Some Title&#39;,</span>
+<span class="sd">    ...     &#39;bids&#39;: {&#39;datatype&#39;: &#39;figures&#39;, &#39;space&#39;: &#39;.*&#39;, &#39;regex_search&#39;: True},</span>
+<span class="sd">    ...     &#39;caption&#39;: &#39;Some description {space}&#39;})</span>
+<span class="sd">    &gt;&gt;&gt; sorted(r.components)[0][1]</span>
+<span class="sd">    &#39;Some description MNI152NLin2009cAsym&#39;</span>
+
+<span class="sd">    &gt;&gt;&gt; sorted(r.components)[1][1]</span>
+<span class="sd">    &#39;Some description MNI152NLin6Asym&#39;</span>
+
+
+<span class="sd">    &gt;&gt;&gt; r = Reportlet(bl, out_figs, config={</span>
+<span class="sd">    ...     &#39;title&#39;: &#39;Some Title&#39;,</span>
+<span class="sd">    ...     &#39;bids&#39;: {&#39;datatype&#39;: &#39;fmap&#39;, &#39;space&#39;: &#39;.*&#39;, &#39;regex_search&#39;: True},</span>
+<span class="sd">    ...     &#39;caption&#39;: &#39;Some description {space}&#39;})</span>
+<span class="sd">    &gt;&gt;&gt; r.is_empty()</span>
+<span class="sd">    True</span>
+
+<span class="sd">    .. testcleanup::</span>
+
+<span class="sd">    &gt;&gt;&gt; os.chdir(cwd)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Reportlet must have a config object&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">-</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;bids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subtitle</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;subtitle&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Query the BIDS layout of reportlets</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;bids&quot;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">components</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">bidsfile</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">src</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">bidsfile</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">suffixes</span><span class="p">)</span>
+            <span class="n">desc_text</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;caption&quot;</span><span class="p">)</span>
+
+            <span class="n">contents</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">&quot;.html&quot;</span><span class="p">:</span>
+                <span class="n">contents</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">&quot;.svg&quot;</span><span class="p">:</span>
+                <span class="n">entities</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">bidsfile</span><span class="o">.</span><span class="n">entities</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">desc_text</span><span class="p">:</span>
+                    <span class="n">desc_text</span> <span class="o">=</span> <span class="n">desc_text</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">entities</span><span class="p">)</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">html_anchor</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">html_anchor</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+                    <span class="n">dst</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">html_anchor</span>
+                    <span class="n">dst</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">copyfile</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_hardlink</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                <span class="n">contents</span> <span class="o">=</span> <span class="n">SVG_SNIPPET</span><span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;static&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">html_anchor</span><span class="p">)</span>
+
+                <span class="c1"># Our current implementations of dynamic reportlets do this themselves,</span>
+                <span class="c1"># however I&#39;ll leave the code here since this is potentially something we</span>
+                <span class="c1"># will want to transfer from every figure generator to this location.</span>
+                <span class="c1"># The following code misses setting preserveAspecRatio=&quot;xMidYMid meet&quot;</span>
+                <span class="c1"># if not is_static:</span>
+                <span class="c1">#     # Remove height and width attributes from initial &lt;svg&gt; tag</span>
+                <span class="c1">#     svglines = out_file.read_text().splitlines()</span>
+                <span class="c1">#     expr = re.compile(r&#39; (height|width)=[&quot;\&#39;][0-9]+(\.[0-9]*)?[a-z]*[&quot;\&#39;]&#39;)</span>
+                <span class="c1">#     for l, line in enumerate(svglines[:6]):</span>
+                <span class="c1">#         if line.strip().startswith(&#39;&lt;svg&#39;):</span>
+                <span class="c1">#             newline = expr.sub(&#39;&#39;, line)</span>
+                <span class="c1">#             svglines[l] = newline</span>
+                <span class="c1">#             out_file.write_text(&#39;\n&#39;.join(svglines))</span>
+                <span class="c1">#             break</span>
+
+            <span class="k">if</span> <span class="n">contents</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">contents</span><span class="p">,</span> <span class="n">desc_text</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Reportlet.is_empty"><a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.Reportlet.is_empty">[docs]</a>    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span></div></div>
+
+
+<div class="viewcode-block" id="SubReport"><a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.SubReport">[docs]</a><span class="k">class</span> <span class="nc">SubReport</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;SubReports are sections within a Report.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">isnested</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reportlets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reportlets</span> <span class="o">=</span> <span class="n">reportlets</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isnested</span> <span class="o">=</span> <span class="n">isnested</span></div>
+
+
+<div class="viewcode-block" id="Report"><a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.Report">[docs]</a><span class="k">class</span> <span class="nc">Report</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The full report object. This object maintains a BIDSLayout to index</span>
+<span class="sd">    all reportlets.</span>
+
+
+<span class="sd">    .. testsetup::</span>
+
+<span class="sd">    &gt;&gt;&gt; cwd = os.getcwd()</span>
+<span class="sd">    &gt;&gt;&gt; os.chdir(tmpdir)</span>
+
+<span class="sd">    &gt;&gt;&gt; from pkg_resources import resource_filename</span>
+<span class="sd">    &gt;&gt;&gt; from shutil import copytree</span>
+<span class="sd">    &gt;&gt;&gt; from bids.layout import BIDSLayout</span>
+<span class="sd">    &gt;&gt;&gt; test_data_path = resource_filename(&#39;niworkflows&#39;, &#39;data/tests/work&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; testdir = Path(tmpdir)</span>
+<span class="sd">    &gt;&gt;&gt; data_dir = copytree(test_data_path, str(testdir / &#39;work&#39;))</span>
+<span class="sd">    &gt;&gt;&gt; out_figs = testdir / &#39;out&#39; / &#39;fmriprep&#39;</span>
+
+<span class="sd">    .. doctest::</span>
+
+<span class="sd">    &gt;&gt;&gt; robj = Report(testdir / &#39;out&#39;, &#39;madeoutuuid&#39;, subject_id=&#39;01&#39;, packagename=&#39;fmriprep&#39;,</span>
+<span class="sd">    ...               reportlets_dir=testdir / &#39;work&#39; / &#39;reportlets&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; robj.layout.get(subject=&#39;01&#39;, desc=&#39;reconall&#39;)  # doctest: +ELLIPSIS</span>
+<span class="sd">    [&lt;BIDSFile filename=&#39;.../figures/sub-01_desc-reconall_T1w.svg&#39;&gt;]</span>
+
+<span class="sd">    &gt;&gt;&gt; robj.generate_report()</span>
+<span class="sd">    0</span>
+<span class="sd">    &gt;&gt;&gt; len((testdir / &#39;out&#39; / &#39;fmriprep&#39; / &#39;sub-01.html&#39;).read_text())</span>
+<span class="sd">    36693</span>
+
+<span class="sd">    .. testcleanup::</span>
+
+<span class="sd">    &gt;&gt;&gt; os.chdir(cwd)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">out_dir</span><span class="p">,</span>
+        <span class="n">run_uuid</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">out_filename</span><span class="o">=</span><span class="s2">&quot;report.html&quot;</span><span class="p">,</span>
+        <span class="n">packagename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">reportlets_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">subject_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">reportlets_dir</span> <span class="ow">or</span> <span class="n">out_dir</span><span class="p">)</span>
+
+        <span class="c1"># Initialize structuring elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sections</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_filename</span> <span class="o">=</span> <span class="n">out_filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_uuid</span> <span class="o">=</span> <span class="n">run_uuid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span> <span class="o">=</span> <span class="n">packagename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="n">subject_id</span>
+        <span class="k">if</span> <span class="n">subject_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">subject_id</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span> <span class="k">if</span> <span class="n">subject_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sub-&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">subject_id</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">out_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;sub-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span><span class="si">}</span><span class="s2">.html&quot;</span>
+
+        <span class="c1"># Default template from niworkflows</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">pkgrf</span><span class="p">(</span><span class="s2">&quot;niworkflows&quot;</span><span class="p">,</span> <span class="s2">&quot;reports/report.tpl&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_config</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">config</span> <span class="ow">or</span> <span class="n">pkgrf</span><span class="p">(</span><span class="s2">&quot;niworkflows&quot;</span><span class="p">,</span> <span class="s2">&quot;reports/default.yml&quot;</span><span class="p">)))</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_load_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">yaml</span> <span class="kn">import</span> <span class="n">safe_load</span> <span class="k">as</span> <span class="n">load</span>
+
+        <span class="n">settings</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span> <span class="ow">or</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;package&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;sub-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;template_path&quot;</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template_path</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;template_path&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sections&quot;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="Report.init_layout"><a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.Report.init_layout">[docs]</a>    <span class="k">def</span> <span class="nf">init_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">BIDSLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">&quot;figures&quot;</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Report.index"><a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.Report.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Traverse the reports config definition and instantiate reportlets.</span>
+
+<span class="sd">        This method also places figures in their final location.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initialize a BIDS layout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_layout</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">subrep_cfg</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="c1"># First determine whether we need to split by some ordering</span>
+            <span class="c1"># (ie. sessions / tasks / runs), which are separated by commas.</span>
+            <span class="n">orderings</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">subrep_cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ordering&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span>
+            <span class="p">]</span>
+            <span class="n">entities</span><span class="p">,</span> <span class="n">list_combos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_orderings</span><span class="p">(</span><span class="n">orderings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">list_combos</span><span class="p">:</span>  <span class="c1"># E.g. this is an anatomical reportlet</span>
+                <span class="n">reportlets</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">Reportlet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">subrep_cfg</span><span class="p">[</span><span class="s2">&quot;reportlets&quot;</span><span class="p">]</span>
+                <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Do not use dictionary for queries, as we need to preserve ordering</span>
+                <span class="c1"># of ordering columns.</span>
+                <span class="n">reportlets</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">list_combos</span><span class="p">:</span>
+                    <span class="c1"># do not display entities with the value None.</span>
+                    <span class="n">c_filt</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
+                    <span class="n">ent_filt</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compress</span><span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
+                    <span class="c1"># Set a common title for this particular combination c</span>
+                    <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Reports for: </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> &lt;span class=&quot;bids-entity&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/span&gt;&#39;</span>
+                            <span class="o">%</span> <span class="p">(</span><span class="n">ent_filt</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">c_filt</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">c_filt</span><span class="p">))</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">subrep_cfg</span><span class="p">[</span><span class="s2">&quot;reportlets&quot;</span><span class="p">]:</span>
+                        <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;bids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">entities</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">))})</span>
+                        <span class="n">rlet</span> <span class="o">=</span> <span class="n">Reportlet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">rlet</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+                            <span class="n">rlet</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
+                            <span class="n">title</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="n">reportlets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rlet</span><span class="p">)</span>
+
+            <span class="c1"># Filter out empty reportlets</span>
+            <span class="n">reportlets</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">reportlets</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">r</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()]</span>
+            <span class="k">if</span> <span class="n">reportlets</span><span class="p">:</span>
+                <span class="n">sub_report</span> <span class="o">=</span> <span class="n">SubReport</span><span class="p">(</span>
+                    <span class="n">subrep_cfg</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                    <span class="n">isnested</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">list_combos</span><span class="p">),</span>
+                    <span class="n">reportlets</span><span class="o">=</span><span class="n">reportlets</span><span class="p">,</span>
+                    <span class="n">title</span><span class="o">=</span><span class="n">subrep_cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub_report</span><span class="p">)</span>
+
+        <span class="c1"># Populate errors section</span>
+        <span class="n">error_dir</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">/</span> <span class="s2">&quot;sub-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;log&quot;</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_uuid</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">error_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="kn">from</span> <span class="nn">..utils.misc</span> <span class="kn">import</span> <span class="n">read_crashfile</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_crashfile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">error_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;crash*.*&quot;</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="Report.generate_report"><a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.Report.generate_report">[docs]</a>    <span class="k">def</span> <span class="nf">generate_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Once the Report has been indexed, the final HTML can be generated&quot;&quot;&quot;</span>
+        <span class="n">logs_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">/</span> <span class="s2">&quot;logs&quot;</span>
+
+        <span class="n">boilerplate</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">boiler_idx</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s2">&quot;CITATION.html&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;&lt;body&gt;(.*?)&lt;/body&gt;&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">findall</span><span class="p">((</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s2">&quot;CITATION.html&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="n">boilerplate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">boiler_idx</span><span class="p">,</span> <span class="s2">&quot;HTML&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;&lt;div class=&quot;boiler-html&quot;&gt;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s1">&lt;/div&gt;&#39;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">boiler_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s2">&quot;CITATION.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s2">&quot;CITATION.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+            <span class="n">boilerplate</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">boiler_idx</span><span class="p">,</span> <span class="s2">&quot;Markdown&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;&lt;pre&gt;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">&lt;/pre&gt;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
+            <span class="n">boiler_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s2">&quot;CITATION.tex&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+                    <span class="sa">r</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">begin</span><span class="si">{document}</span><span class="s2">(.*?)</span><span class="se">\\</span><span class="s2">end</span><span class="si">{document}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span>
+                <span class="p">)</span>
+                <span class="o">.</span><span class="n">findall</span><span class="p">((</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s2">&quot;CITATION.tex&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="n">boilerplate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">boiler_idx</span><span class="p">,</span>
+                    <span class="s2">&quot;LaTeX&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;&lt;pre&gt;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">&lt;/pre&gt;</span>
+<span class="s2">&lt;h3&gt;Bibliography&lt;/h3&gt;</span>
+<span class="s2">&lt;pre&gt;</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">pkgrf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packagename</span><span class="p">,</span> <span class="s1">&#39;data/boilerplate.bib&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="si">}</span><span class="s2">&lt;/pre&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">boiler_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">env</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span>
+            <span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">FileSystemLoader</span><span class="p">(</span><span class="n">searchpath</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_path</span><span class="o">.</span><span class="n">parent</span><span class="p">)),</span>
+            <span class="n">trim_blocks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">lstrip_blocks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">autoescape</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">report_tpl</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">report_render</span> <span class="o">=</span> <span class="n">report_tpl</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
+            <span class="n">sections</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="n">boilerplate</span><span class="o">=</span><span class="n">boilerplate</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Write out report</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_filename</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">report_render</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;UTF-8&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_process_orderings</span><span class="p">(</span><span class="n">orderings</span><span class="p">,</span> <span class="n">layout</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate relevant combinations of orderings with observed values.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ---------</span>
+<span class="sd">        orderings : :obj:`list` of :obj:`list` of :obj:`str`</span>
+<span class="sd">            Sections prescribing an ordering to select across sessions, acquisitions, runs, etc.</span>
+<span class="sd">        layout : :obj:`bids.layout.BIDSLayout`</span>
+<span class="sd">            The BIDS layout</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        entities: :obj:`list` of :obj:`str`</span>
+<span class="sd">            The relevant orderings that had unique values</span>
+<span class="sd">        value_combos: :obj:`list` of :obj:`tuple`</span>
+<span class="sd">            Unique value combinations for the entities</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get a set of all unique entity combinations</span>
+        <span class="n">all_value_combos</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">bids_file</span><span class="o">.</span><span class="n">get_entities</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">orderings</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">bids_file</span> <span class="ow">in</span> <span class="n">layout</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="c1"># remove the all None member if it exists</span>
+        <span class="n">none_member</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="kc">None</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">orderings</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">none_member</span> <span class="ow">in</span> <span class="n">all_value_combos</span><span class="p">:</span>
+            <span class="n">all_value_combos</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="kc">None</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">orderings</span><span class="p">]))</span>
+        <span class="c1"># see what values exist for each entity</span>
+        <span class="n">unique_values</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span><span class="n">value</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">all_value_combos</span><span class="p">}</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">orderings</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="c1"># if all values are None for an entity, we do not want to keep that entity</span>
+        <span class="n">keep_idx</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="kc">False</span> <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">val_set</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">val_set</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">val_set</span> <span class="k">else</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">val_set</span> <span class="ow">in</span> <span class="n">unique_values</span>
+        <span class="p">]</span>
+        <span class="c1"># the &quot;kept&quot; entities</span>
+        <span class="n">entities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compress</span><span class="p">(</span><span class="n">orderings</span><span class="p">,</span> <span class="n">keep_idx</span><span class="p">))</span>
+        <span class="c1"># the &quot;kept&quot; value combinations</span>
+        <span class="n">value_combos</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">(</span><span class="n">compress</span><span class="p">(</span><span class="n">value_combo</span><span class="p">,</span> <span class="n">keep_idx</span><span class="p">))</span> <span class="k">for</span> <span class="n">value_combo</span> <span class="ow">in</span> <span class="n">all_value_combos</span>
+        <span class="p">]</span>
+        <span class="c1"># sort the value combinations alphabetically from the first entity to the last entity</span>
+        <span class="n">value_combos</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">entry</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;0&quot;</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">entry</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">entities</span><span class="p">,</span> <span class="n">value_combos</span></div>
+
+
+<div class="viewcode-block" id="run_reports"><a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.run_reports">[docs]</a><span class="k">def</span> <span class="nf">run_reports</span><span class="p">(</span>
+    <span class="n">out_dir</span><span class="p">,</span>
+    <span class="n">subject_label</span><span class="p">,</span>
+    <span class="n">run_uuid</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reportlets_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">packagename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run the reports.</span>
+
+<span class="sd">    .. testsetup::</span>
+
+<span class="sd">    &gt;&gt;&gt; cwd = os.getcwd()</span>
+<span class="sd">    &gt;&gt;&gt; os.chdir(tmpdir)</span>
+
+<span class="sd">    &gt;&gt;&gt; from pkg_resources import resource_filename</span>
+<span class="sd">    &gt;&gt;&gt; from shutil import copytree</span>
+<span class="sd">    &gt;&gt;&gt; test_data_path = resource_filename(&#39;niworkflows&#39;, &#39;data/tests/work&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; testdir = Path(tmpdir)</span>
+<span class="sd">    &gt;&gt;&gt; data_dir = copytree(test_data_path, str(testdir / &#39;work&#39;))</span>
+<span class="sd">    &gt;&gt;&gt; (testdir / &#39;fmriprep&#39;).mkdir(parents=True, exist_ok=True)</span>
+
+<span class="sd">    .. doctest::</span>
+
+<span class="sd">    &gt;&gt;&gt; run_reports(testdir / &#39;out&#39;, &#39;01&#39;, &#39;madeoutuuid&#39;, packagename=&#39;fmriprep&#39;,</span>
+<span class="sd">    ...             reportlets_dir=testdir / &#39;work&#39; / &#39;reportlets&#39;)</span>
+<span class="sd">    0</span>
+
+<span class="sd">    .. testcleanup::</span>
+
+<span class="sd">    &gt;&gt;&gt; os.chdir(cwd)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Report</span><span class="p">(</span>
+        <span class="n">out_dir</span><span class="p">,</span>
+        <span class="n">run_uuid</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+        <span class="n">subject_id</span><span class="o">=</span><span class="n">subject_label</span><span class="p">,</span>
+        <span class="n">packagename</span><span class="o">=</span><span class="n">packagename</span><span class="p">,</span>
+        <span class="n">reportlets_dir</span><span class="o">=</span><span class="n">reportlets_dir</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">generate_report</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="generate_reports"><a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.generate_reports">[docs]</a><span class="k">def</span> <span class="nf">generate_reports</span><span class="p">(</span>
+    <span class="n">subject_list</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">run_uuid</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">work_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">packagename</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Execute run_reports on a list of subjects.&quot;&quot;&quot;</span>
+    <span class="n">reportlets_dir</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">work_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">reportlets_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;reportlets&quot;</span>
+    <span class="n">report_errors</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">run_reports</span><span class="p">(</span>
+            <span class="n">output_dir</span><span class="p">,</span>
+            <span class="n">subject_label</span><span class="p">,</span>
+            <span class="n">run_uuid</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+            <span class="n">packagename</span><span class="o">=</span><span class="n">packagename</span><span class="p">,</span>
+            <span class="n">reportlets_dir</span><span class="o">=</span><span class="n">reportlets_dir</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">subject_label</span> <span class="ow">in</span> <span class="n">subject_list</span>
+    <span class="p">]</span>
+
+    <span class="n">errno</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">report_errors</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">errno</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">logging</span>
+
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;cli&quot;</span><span class="p">)</span>
+        <span class="n">error_list</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> (</span><span class="si">%d</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">subid</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">subid</span><span class="p">,</span> <span class="n">err</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">subject_list</span><span class="p">,</span> <span class="n">report_errors</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">err</span>
+        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s2">&quot;Preprocessing did not finish successfully. Errors occurred while processing &quot;</span>
+            <span class="s2">&quot;data from participants: </span><span class="si">%s</span><span class="s2">. Check the HTML reports for details.&quot;</span><span class="p">,</span>
+            <span class="n">error_list</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">errno</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.2.9
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../../../1.0.0/index.html">1.0.0</a></dd>
+            <dd><a href="../../../../1.0.0rc1/index.html">1.0.0rc1</a></dd>
+            <dd><a href="../../../../1.0.0rc2/index.html">1.0.0rc2</a></dd>
+            <dd><a href="../../../../1.0.1/index.html">1.0.1</a></dd>
+            <dd><a href="../../../../1.0.2/index.html">1.0.2</a></dd>
+            <dd><a href="../../../../1.0.3/index.html">1.0.3</a></dd>
+            <dd><a href="../../../../1.0.4/index.html">1.0.4</a></dd>
+            <dd><a href="../../../../1.1.0/index.html">1.1.0</a></dd>
+            <dd><a href="../../../../1.1.1/index.html">1.1.1</a></dd>
+            <dd><a href="../../../../1.1.10/index.html">1.1.10</a></dd>
+            <dd><a href="../../../../1.1.11/index.html">1.1.11</a></dd>
+            <dd><a href="../../../../1.1.12/index.html">1.1.12</a></dd>
+            <dd><a href="../../../../1.1.2/index.html">1.1.2</a></dd>
+            <dd><a href="../../../../1.1.3/index.html">1.1.3</a></dd>
+            <dd><a href="../../../../1.1.4/index.html">1.1.4</a></dd>
+            <dd><a href="../../../../1.1.5/index.html">1.1.5</a></dd>
+            <dd><a href="../../../../1.1.6/index.html">1.1.6</a></dd>
+            <dd><a href="../../../../1.1.7/index.html">1.1.7</a></dd>
+            <dd><a href="../../../../1.1.8/index.html">1.1.8</a></dd>
+            <dd><a href="../../../../1.1.9/index.html">1.1.9</a></dd>
+            <dd><a href="../../../../1.2.0/index.html">1.2.0</a></dd>
+            <dd><a href="../../../../1.2.0rc1/index.html">1.2.0rc1</a></dd>
+            <dd><a href="../../../../1.2.0rc2/index.html">1.2.0rc2</a></dd>
+            <dd><a href="../../../../1.2.0rc3/index.html">1.2.0rc3</a></dd>
+            <dd><a href="../../../../1.2.0rc4/index.html">1.2.0rc4</a></dd>
+            <dd><a href="../../../../1.2.0rc5/index.html">1.2.0rc5</a></dd>
+            <dd><a href="../../../../1.2.1/index.html">1.2.1</a></dd>
+            <dd><a href="../../../../1.2.2/index.html">1.2.2</a></dd>
+            <dd><a href="../../../../1.2.3/index.html">1.2.3</a></dd>
+            <dd><a href="../../../../1.2.4/index.html">1.2.4</a></dd>
+            <dd><a href="../../../../1.2.5/index.html">1.2.5</a></dd>
+            <dd><a href="../../../../1.2.6/index.html">1.2.6</a></dd>
+            <dd><a href="../../../../1.2.7/index.html">1.2.7</a></dd>
+            <dd><a href="../../../../1.2.8/index.html">1.2.8</a></dd>
+            <dd><a href="core.html">1.2.9</a></dd>
+            <dd><a href="../../../../1.3.0/index.html">1.3.0</a></dd>
+            <dd><a href="../../../../1.3.0rc1/index.html">1.3.0rc1</a></dd>
+            <dd><a href="../../../../1.3.0rc2/index.html">1.3.0rc2</a></dd>
+            <dd><a href="../../../../1.3.0rc3/index.html">1.3.0rc3</a></dd>
+            <dd><a href="../../../../1.3.1/index.html">1.3.1</a></dd>
+            <dd><a href="../../../../1.3.2/index.html">1.3.2</a></dd>
+            <dd><a href="../../../../1.3.3/index.html">1.3.3</a></dd>
+            <dd><a href="../../../../1.3.4/index.html">1.3.4</a></dd>
+            <dd><a href="../../../../1.3.5/index.html">1.3.5</a></dd>
+            <dd><a href="../../../../1.4.0/index.html">1.4.0</a></dd>
+            <dd><a href="../../../../1.4.0rc0/index.html">1.4.0rc0</a></dd>
+            <dd><a href="../../../../1.4.0rc1/index.html">1.4.0rc1</a></dd>
+            <dd><a href="../../../../1.4.0rc2/index.html">1.4.0rc2</a></dd>
+            <dd><a href="../../../../1.4.0rc3/index.html">1.4.0rc3</a></dd>
+            <dd><a href="../../../../1.4.0rc4/index.html">1.4.0rc4</a></dd>
+            <dd><a href="../../../../1.4.0rc5/index.html">1.4.0rc5</a></dd>
+            <dd><a href="../../../../1.4.0rc6/index.html">1.4.0rc6</a></dd>
+            <dd><a href="../../../../1.2.9/index.html">1.2.9</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../../../enh_report-plot-axis/index.html">enh/report-plot-axis</a></dd>
+            <dd><a href="../../../../feat_infants-rodents/index.html">feat/infants-rodents</a></dd>
+            <dd><a href="../../../../maint_1.0.x/index.html">maint/1.0.x</a></dd>
+            <dd><a href="../../../../maint_1.1.x/index.html">maint/1.1.x</a></dd>
+            <dd><a href="../../../../maint_1.2.x/index.html">maint/1.2.x</a></dd>
+            <dd><a href="../../../../maint_1.3.x/index.html">maint/1.3.x</a></dd>
+            <dd><a href="../../../../master/index.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

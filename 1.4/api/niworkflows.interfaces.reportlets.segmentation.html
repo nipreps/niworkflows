@@ -1,0 +1,776 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.interfaces.bids module" href="niworkflows.interfaces.bids.html" /><link rel="prev" title="niworkflows.interfaces.reportlets.registration module" href="niworkflows.interfaces.reportlets.registration.html" />
+
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
+        <title>niworkflows.interfaces.reportlets.segmentation module - niworkflows 1.4.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/version-switch.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">niworkflows 1.4.10 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+    <span class="sidebar-brand-text">niworkflows</span>
+    <span id="version-slug" class="sidebar-brand-text">1.4.10</span>
+</a>
+
+<!-- Versions dropdown -->
+<div id="version-menu" class="version-tree">
+  <ul>
+  <li class="toctree-l1 has-children">
+  <span class="sidebar-brand-text">1.4.10</span>
+  <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
+  <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
+  <ul id="v-tags"></ul>
+  </ul>
+</div><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../api.html">Library API (application program interface)</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.anat.html">niworkflows.anat package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.ants.html">niworkflows.anat.ants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.coregistration.html">niworkflows.anat.coregistration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.freesurfer.html">niworkflows.anat.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.skullstrip.html">niworkflows.anat.skullstrip module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.cli.html">niworkflows.cli package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.cli.boldref.html">niworkflows.cli.boldref module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.engine.workflows.html">niworkflows.engine.workflows module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.func.html">niworkflows.func package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.func.util.html">niworkflows.func.util module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 current has-children"><a class="reference internal" href="niworkflows.interfaces.reportlets.html">niworkflows.interfaces.reportlets package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.base.html">niworkflows.interfaces.reportlets.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.masks.html">niworkflows.interfaces.reportlets.masks module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.registration.html">niworkflows.interfaces.reportlets.registration module</a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">niworkflows.interfaces.reportlets.segmentation module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.bids.html">niworkflows.interfaces.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.bold.html">niworkflows.interfaces.bold module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.confounds.html">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.header.html">niworkflows.interfaces.header module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.images.html">niworkflows.interfaces.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.itk.html">niworkflows.interfaces.itk module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.nibabel.html">niworkflows.interfaces.nibabel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.nilearn.html">niworkflows.interfaces.nilearn module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.nitransforms.html">niworkflows.interfaces.nitransforms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.norm.html">niworkflows.interfaces.norm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.patches.html">niworkflows.interfaces.patches module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.plotting.html">niworkflows.interfaces.plotting module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.probmaps.html">niworkflows.interfaces.probmaps module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.reports.core.html">niworkflows.reports.core module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.bids.html">niworkflows.utils.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.connections.html">niworkflows.utils.connections module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.images.html">niworkflows.utils.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.misc.html">niworkflows.utils.misc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.spaces.html">niworkflows.utils.spaces module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.viz.html">niworkflows.viz package</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.viz.notebook.html">niworkflows.viz.notebook module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.viz.plots.html">niworkflows.viz.plots module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.viz.utils.html">niworkflows.viz.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.workflows.html">niworkflows.workflows package</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="niworkflows.workflows.epi.html">niworkflows.workflows.epi package</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.workflows.epi.refmap.html">niworkflows.workflows.epi.refmap module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new?</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-niworkflows.interfaces.reportlets.segmentation">
+<span id="niworkflows-interfaces-reportlets-segmentation-module"></span><h1>niworkflows.interfaces.reportlets.segmentation module<a class="headerlink" href="#module-niworkflows.interfaces.reportlets.segmentation" title="Permalink to this headline">#</a></h1>
+<p>ReportCapableInterfaces for segmentation tools.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.segmentation.FASTRPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.segmentation.</span></span><span class="sig-name descname"><span class="pre">FASTRPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/segmentation.html#FASTRPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.segmentation.FASTRPT" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="niworkflows.interfaces.reportlets.base.html#niworkflows.interfaces.reportlets.base.SegmentationRC" title="niworkflows.interfaces.reportlets.base.SegmentationRC"><code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.reportlets.base.SegmentationRC</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.fsl.preprocess.FAST</span></code></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">fast</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><p><strong>in_files</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Image, or multi-channel set of images, to be segmented.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: -1).</p>
+</dd>
+<dt class="field-even">Optional Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>bias_iters</strong> (<em>1 &lt;= an integer &lt;= 10</em>) – Number of main-loop iterations during bias-field removal.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-I</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>bias_lowpass</strong> (<em>4 &lt;= an integer &lt;= 40</em>) – Bias field smoothing extent (FWHM) in mm.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-l</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>hyper</strong> (<em>0.0 &lt;= a floating point number &lt;= 1.0</em>) – Segmentation spatial smoothness.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-H</span> <span class="pre">%.2f</span></code>.</p></li>
+<li><p><strong>img_type</strong> (<em>1 or 2 or 3</em>) – Int specifying type of image: (1 = T1, 2 = T2, 3 = PD).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-t</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>init_seg_smooth</strong> (<em>0.0001 &lt;= a floating point number &lt;= 0.1</em>) – Initial segmentation spatial smoothness (during bias field estimation).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-f</span> <span class="pre">%.3f</span></code>.</p></li>
+<li><p><strong>init_transform</strong> (<em>a pathlike object or string representing an existing file</em>) – &lt;standard2input.mat&gt; initialise using priors.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-a</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>iters_afterbias</strong> (<em>1 &lt;= an integer &lt;= 20</em>) – Number of main-loop iterations after bias-field removal.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-O</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>manual_seg</strong> (<em>a pathlike object or string representing an existing file</em>) – Filename containing intensities.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-s</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>mixel_smooth</strong> (<em>0.0 &lt;= a floating point number &lt;= 1.0</em>) – Spatial smoothness for mixeltype.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-R</span> <span class="pre">%.2f</span></code>.</p></li>
+<li><p><strong>no_bias</strong> (<em>a boolean</em>) – Do not remove bias field.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-N</span></code>.</p></li>
+<li><p><strong>no_pve</strong> (<em>a boolean</em>) – Turn off PVE (partial volume estimation).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--nopve</span></code>.</p></li>
+<li><p><strong>number_classes</strong> (<em>1 &lt;= an integer &lt;= 10</em>) – Number of tissue-type classes.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-n</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>other_priors</strong> (<em>a list of from 3 to 3 items which are a pathlike object or string representing a file</em>) – Alternative prior images.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-A</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>out_basename</strong> (<em>a pathlike object or string representing a file</em>) – Base name of output files.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-o</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
+<li><p><strong>output_biascorrected</strong> (<em>a boolean</em>) – Output restored image (bias-corrected image).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-B</span></code>.</p></li>
+<li><p><strong>output_biasfield</strong> (<em>a boolean</em>) – Output estimated bias field.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-b</span></code>.</p></li>
+<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’</em>) – FSL output type.</p></li>
+<li><p><strong>probability_maps</strong> (<em>a boolean</em>) – Outputs individual probability maps.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-p</span></code>.</p></li>
+<li><p><strong>segment_iters</strong> (<em>1 &lt;= an integer &lt;= 50</em>) – Number of segmentation-initialisation iterations.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-W</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>segments</strong> (<em>a boolean</em>) – Outputs a separate binary image for each tissue type.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-g</span></code>.</p></li>
+<li><p><strong>use_priors</strong> (<em>a boolean</em>) – Use priors throughout.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-P</span></code>.</p></li>
+<li><p><strong>verbose</strong> (<em>a boolean</em>) – Switch on diagnostic messages.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-v</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bias_field</strong> (<em>a list of items which are a pathlike object or string representing a file</em>)</p></li>
+<li><p><strong>mixeltype</strong> (<em>a pathlike object or string representing a file</em>) – Path/name of mixeltype volume file _mixeltype.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p></li>
+<li><p><strong>partial_volume_files</strong> (<em>a list of items which are a pathlike object or string representing a file</em>)</p></li>
+<li><p><strong>partial_volume_map</strong> (<em>a pathlike object or string representing a file</em>) – Path/name of partial volume file _pveseg.</p></li>
+<li><p><strong>probability_maps</strong> (<em>a list of items which are a pathlike object or string representing a file</em>)</p></li>
+<li><p><strong>restored_image</strong> (<em>a list of items which are a pathlike object or string representing a file</em>)</p></li>
+<li><p><strong>tissue_class_files</strong> (<em>a list of items which are a pathlike object or string representing a file</em>)</p></li>
+<li><p><strong>tissue_class_map</strong> (<em>a pathlike object or string representing an existing file</em>) – Path/name of binary segmented volume file one val for each class  _seg.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.segmentation.ICA_AROMARPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.segmentation.</span></span><span class="sig-name descname"><span class="pre">ICA_AROMARPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/segmentation.html#ICA_AROMARPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.segmentation.ICA_AROMARPT" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.mixins.reporting.ReportCapableInterface</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.fsl.aroma.ICA_AROMA</span></code></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">ICA_AROMA.py</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>denoise_type</strong> (<em>‘nonaggr’ or ‘aggr’ or ‘both’ or ‘no’</em>) – Type of denoising strategy:
+-no: only classification, no denoising
+-nonaggr (default): non-aggresssive denoising, i.e. partial component regression
+-aggr: aggressive denoising, i.e. full component regression
+-both: both aggressive and non-aggressive denoising (two outputs).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-den</span> <span class="pre">%s</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">nonaggr</span></code>)</p></li>
+<li><p><strong>feat_dir</strong> (<em>a pathlike object or string representing an existing directory</em>) – If a feat directory exists and temporal filtering has not been run yet, ICA_AROMA can use the files in this directory.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-feat</span> <span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">in_file</span></code>, <code class="docutils literal notranslate"><span class="pre">mat_file</span></code>, <code class="docutils literal notranslate"><span class="pre">fnirt_warp_file</span></code>, <code class="docutils literal notranslate"><span class="pre">motion_parameters</span></code>.</p></li>
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Volume to be denoised.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-i</span> <span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">feat_dir</span></code>.</p></li>
+<li><p><strong>motion_parameters</strong> (<em>a pathlike object or string representing an existing file</em>) – Motion parameters file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-mc</span> <span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">feat_dir</span></code>.</p></li>
+<li><p><strong>out_dir</strong> (<em>a pathlike object or string representing a directory</em>) – Output directory.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-o</span> <span class="pre">%s</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">out</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TR</strong> (<em>a float</em>) – TR in seconds. If this is not specified the TR will be extracted from the header of the fMRI nifti file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-tr</span> <span class="pre">%.3f</span></code>.</p></li>
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>dim</strong> (<em>an integer</em>) – Dimensionality reduction when running MELODIC (defualt is automatic estimation).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-dim</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>fnirt_warp_file</strong> (<em>a pathlike object or string representing an existing file</em>) – File name of the warp-file describing the non-linear registration (e.g. FSL FNIRT) of the structural data to MNI152 space (.nii.gz).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-warp</span> <span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">feat_dir</span></code>.</p></li>
+<li><p><strong>mask</strong> (<em>a pathlike object or string representing an existing file</em>) – Path/name volume mask.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-m</span> <span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">feat_dir</span></code>.</p></li>
+<li><p><strong>mat_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Path/name of the mat-file describing the affine registration (e.g. FSL FLIRT) of the functional data to structural space (.mat file).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-affmat</span> <span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">feat_dir</span></code>.</p></li>
+<li><p><strong>melodic_dir</strong> (<em>a pathlike object or string representing an existing directory</em>) – Path to MELODIC directory if MELODIC has already been run.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-meldir</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report generated by Nipype.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">ica_aroma_reportlet.svg</span></code>)</p></li>
+<li><p><strong>report_mask</strong> (<em>a pathlike object or string representing a file</em>) – Mask used to draw the outline on the reportlet. If not set the mask will be derived from the data.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>aggr_denoised_file</strong> (<em>a pathlike object or string representing an existing file</em>) – If generated: aggressively denoised volume.</p></li>
+<li><p><strong>nonaggr_denoised_file</strong> (<em>a pathlike object or string representing an existing file</em>) – If generated: non aggressively denoised volume.</p></li>
+<li><p><strong>out_dir</strong> (<em>a pathlike object or string representing an existing directory</em>) – Directory contains (in addition to the denoised files): melodic.ica + classified_motion_components + classification_overview + feature_scores + melodic_ic_mni).</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.segmentation.MELODICRPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.segmentation.</span></span><span class="sig-name descname"><span class="pre">MELODICRPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/segmentation.html#MELODICRPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.segmentation.MELODICRPT" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.fsl.model.MELODIC</span></code></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">melodic</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs</dt>
+<dd class="field-odd"><p><strong>in_files</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Input file names (either single file name or a list).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-i</span> <span class="pre">%s</span></code> (position: 0).</p>
+</dd>
+<dt class="field-even">Optional Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ICs</strong> (<em>a pathlike object or string representing an existing file</em>) – Filename of the IC components file for mixture modelling.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--ICs=%s</span></code>.</p></li>
+<li><p><strong>approach</strong> (<em>a string</em>) – Approach for decomposition, 2D: defl, symm (default), 3D: tica (default), concat.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-a</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>bg_image</strong> (<em>a pathlike object or string representing an existing file</em>) – Specify background image for report (default: mean image).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--bgimage=%s</span></code>.</p></li>
+<li><p><strong>bg_threshold</strong> (<em>a float</em>) – Brain/non-brain threshold used to mask non-brain voxels, as a percentage (only if –nobet selected).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--bgthreshold=%f</span></code>.</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>cov_weight</strong> (<em>a float</em>) – Voxel-wise weights for the covariance matrix (e.g. segmentation information).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--covarweight=%f</span></code>.</p></li>
+<li><p><strong>dim</strong> (<em>an integer</em>) – Dimensionality reduction into #num dimensions (default: automatic estimation).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-d</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>dim_est</strong> (<em>a string</em>) – Use specific dim. estimation technique: lap, bic, mdl, aic, mean (default: lap).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--dimest=%s</span></code>.</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>epsilon</strong> (<em>a float</em>) – Minimum error change.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--eps=%f</span></code>.</p></li>
+<li><p><strong>epsilonS</strong> (<em>a float</em>) – Minimum error change for rank-1 approximation in TICA.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--epsS=%f</span></code>.</p></li>
+<li><p><strong>log_power</strong> (<em>a boolean</em>) – Calculate log of power for frequency spectrum.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--logPower</span></code>.</p></li>
+<li><p><strong>mask</strong> (<em>a pathlike object or string representing an existing file</em>) – File name of mask for thresholding.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-m</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>max_restart</strong> (<em>an integer</em>) – Maximum number of restarts.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--maxrestart=%d</span></code>.</p></li>
+<li><p><strong>maxit</strong> (<em>an integer</em>) – Maximum number of iterations before restart.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--maxit=%d</span></code>.</p></li>
+<li><p><strong>migp</strong> (<em>a boolean</em>) – Switch on MIGP data reduction.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--migp</span></code>.</p></li>
+<li><p><strong>migpN</strong> (<em>an integer</em>) – Number of internal Eigenmaps.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--migpN</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>migp_factor</strong> (<em>an integer</em>) – Internal Factor of mem-threshold relative to number of Eigenmaps (default: 2).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--migp_factor</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>migp_shuffle</strong> (<em>a boolean</em>) – Randomise MIGP file order (default: TRUE).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--migp_shuffle</span></code>.</p></li>
+<li><p><strong>mix</strong> (<em>a pathlike object or string representing an existing file</em>) – Mixing matrix for mixture modelling / filtering.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--mix=%s</span></code>.</p></li>
+<li><p><strong>mm_thresh</strong> (<em>a float</em>) – Threshold for Mixture Model based inference.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--mmthresh=%f</span></code>.</p></li>
+<li><p><strong>no_bet</strong> (<em>a boolean</em>) – Switch off BET.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--nobet</span></code>.</p></li>
+<li><p><strong>no_mask</strong> (<em>a boolean</em>) – Switch off masking.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--nomask</span></code>.</p></li>
+<li><p><strong>no_mm</strong> (<em>a boolean</em>) – Switch off mixture modelling on IC maps.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--no_mm</span></code>.</p></li>
+<li><p><strong>non_linearity</strong> (<em>a string</em>) – Nonlinearity: gauss, tanh, pow3, pow4.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--nl=%s</span></code>.</p></li>
+<li><p><strong>num_ICs</strong> (<em>an integer</em>) – Number of IC’s to extract (for deflation approach).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-n</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>out_all</strong> (<em>a boolean</em>) – Output everything.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--Oall</span></code>.</p></li>
+<li><p><strong>out_dir</strong> (<em>a pathlike object or string representing a directory</em>) – Output directory name.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-o</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>out_mean</strong> (<em>a boolean</em>) – Output mean volume.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--Omean</span></code>.</p></li>
+<li><p><strong>out_orig</strong> (<em>a boolean</em>) – Output the original ICs.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--Oorig</span></code>.</p></li>
+<li><p><strong>out_pca</strong> (<em>a boolean</em>) – Output PCA results.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--Opca</span></code>.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report generated by Nipype.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">melodic_reportlet.svg</span></code>)</p></li>
+<li><p><strong>out_stats</strong> (<em>a boolean</em>) – Output thresholded maps and probability maps.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--Ostats</span></code>.</p></li>
+<li><p><strong>out_unmix</strong> (<em>a boolean</em>) – Output unmixing matrix.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--Ounmix</span></code>.</p></li>
+<li><p><strong>out_white</strong> (<em>a boolean</em>) – Output whitening/dewhitening matrices.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--Owhite</span></code>.</p></li>
+<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’</em>) – FSL output type.</p></li>
+<li><p><strong>pbsc</strong> (<em>a boolean</em>) – Switch off conversion to percent BOLD signal change.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--pbsc</span></code>.</p></li>
+<li><p><strong>rem_cmp</strong> (<em>a list of items which are an integer</em>) – Component numbers to remove.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-f</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>remove_deriv</strong> (<em>a boolean</em>) – Removes every second entry in paradigm file (EV derivatives).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--remove_deriv</span></code>.</p></li>
+<li><p><strong>report</strong> (<em>a boolean</em>) – Generate Melodic web report.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--report</span></code>.</p></li>
+<li><p><strong>report_maps</strong> (<em>a string</em>) – Control string for spatial map images (see slicer).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--report_maps=%s</span></code>.</p></li>
+<li><p><strong>report_mask</strong> (<em>a pathlike object or string representing a file</em>) – Mask used to draw the outline on the reportlet. If not set the mask will be derived from the data.</p></li>
+<li><p><strong>s_con</strong> (<em>a pathlike object or string representing an existing file</em>) – T-contrast matrix across subject-domain.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--Scon=%s</span></code>.</p></li>
+<li><p><strong>s_des</strong> (<em>a pathlike object or string representing an existing file</em>) – Design matrix across subject-domain.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--Sdes=%s</span></code>.</p></li>
+<li><p><strong>sep_vn</strong> (<em>a boolean</em>) – Switch off joined variance normalization.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--sep_vn</span></code>.</p></li>
+<li><p><strong>sep_whiten</strong> (<em>a boolean</em>) – Switch on separate whitening.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--sep_whiten</span></code>.</p></li>
+<li><p><strong>smode</strong> (<em>a pathlike object or string representing an existing file</em>) – Matrix of session modes for report generation.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--smode=%s</span></code>.</p></li>
+<li><p><strong>t_con</strong> (<em>a pathlike object or string representing an existing file</em>) – T-contrast matrix across time-domain.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--Tcon=%s</span></code>.</p></li>
+<li><p><strong>t_des</strong> (<em>a pathlike object or string representing an existing file</em>) – Design matrix across time-domain.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--Tdes=%s</span></code>.</p></li>
+<li><p><strong>tr_sec</strong> (<em>a float</em>) – TR in seconds.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--tr=%f</span></code>.</p></li>
+<li><p><strong>update_mask</strong> (<em>a boolean</em>) – Switch off mask updating.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--update_mask</span></code>.</p></li>
+<li><p><strong>var_norm</strong> (<em>a boolean</em>) – Switch off variance normalization.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--vn</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_dir</strong> (<em>a pathlike object or string representing an existing directory</em>)</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p></li>
+<li><p><strong>report_dir</strong> (<em>a pathlike object or string representing an existing directory</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.segmentation.ReconAllRPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.segmentation.</span></span><span class="sig-name descname"><span class="pre">ReconAllRPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/segmentation.html#ReconAllRPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.segmentation.ReconAllRPT" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="niworkflows.interfaces.reportlets.base.html#niworkflows.interfaces.reportlets.base.SurfaceSegmentationRC" title="niworkflows.interfaces.reportlets.base.SurfaceSegmentationRC"><code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.reportlets.base.SurfaceSegmentationRC</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.freesurfer.preprocess.ReconAll</span></code></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">recon-all</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Optional Inputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>FLAIR_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Convert FLAIR image to orig directory.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-FLAIR</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>T1_files</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Name of T1 file to process.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-i</span> <span class="pre">%s...</span></code>.</p></li>
+<li><p><strong>T2_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Convert T2 image to orig directory.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-T2</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>big_ventricles</strong> (<em>a boolean</em>) – For use in subjects with enlarged ventricles.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-bigventricles</span></code>.</p></li>
+<li><p><strong>brainstem</strong> (<em>a boolean</em>) – Segment brainstem structures.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-brainstem-structures</span></code>.</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>directive</strong> (<em>‘all’ or ‘autorecon1’ or ‘autorecon2’ or ‘autorecon2-volonly’ or ‘autorecon2-perhemi’ or ‘autorecon2-inflate1’ or ‘autorecon2-cp’ or ‘autorecon2-wm’ or ‘autorecon3’ or ‘autorecon3-T2pial’ or ‘autorecon-pial’ or ‘autorecon-hemi’ or ‘localGI’ or ‘qcache’</em>) – Process directive.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-%s</span></code> (position: 0).
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">all</span></code>)</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>expert</strong> (<em>a pathlike object or string representing an existing file</em>) – Set parameters using expert file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-expert</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>flags</strong> (<em>a list of items which are a string</em>) – Additional parameters.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>hemi</strong> (<em>‘lh’ or ‘rh’</em>) – Hemisphere to process.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-hemi</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>hippocampal_subfields_T1</strong> (<em>a boolean</em>) – Segment hippocampal subfields using input T1 scan.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-hippocampal-subfields-T1</span></code>.</p></li>
+<li><p><strong>hippocampal_subfields_T2</strong> (<em>a tuple of the form: (a pathlike object or string representing an existing file, a string)</em>) – Segment hippocampal subfields using T2 scan, identified by ID (may be combined with hippocampal_subfields_T1).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-hippocampal-subfields-T2</span> <span class="pre">%s</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>hires</strong> (<em>a boolean</em>) – Conform to minimum voxel size (for voxels &lt; 1mm).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-hires</span></code>.</p></li>
+<li><p><strong>mprage</strong> (<em>a boolean</em>) – Assume scan parameters are MGH MP-RAGE protocol, which produces darker gray matter.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-mprage</span></code>.</p></li>
+<li><p><strong>mri_aparc2aseg</strong> (<em>a string</em>) – Flags to pass to mri_aparc2aseg commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_ca_label</strong> (<em>a string</em>) – Flags to pass to mri_ca_label commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_ca_normalize</strong> (<em>a string</em>) – Flags to pass to mri_ca_normalize commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_ca_register</strong> (<em>a string</em>) – Flags to pass to mri_ca_register commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_edit_wm_with_aseg</strong> (<em>a string</em>) – Flags to pass to mri_edit_wm_with_aseg commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_em_register</strong> (<em>a string</em>) – Flags to pass to mri_em_register commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_fill</strong> (<em>a string</em>) – Flags to pass to mri_fill commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_mask</strong> (<em>a string</em>) – Flags to pass to mri_mask commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_normalize</strong> (<em>a string</em>) – Flags to pass to mri_normalize commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_pretess</strong> (<em>a string</em>) – Flags to pass to mri_pretess commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_remove_neck</strong> (<em>a string</em>) – Flags to pass to mri_remove_neck commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_segment</strong> (<em>a string</em>) – Flags to pass to mri_segment commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_segstats</strong> (<em>a string</em>) – Flags to pass to mri_segstats commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_tessellate</strong> (<em>a string</em>) – Flags to pass to mri_tessellate commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mri_watershed</strong> (<em>a string</em>) – Flags to pass to mri_watershed commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mris_anatomical_stats</strong> (<em>a string</em>) – Flags to pass to mris_anatomical_stats commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mris_ca_label</strong> (<em>a string</em>) – Flags to pass to mris_ca_label commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mris_fix_topology</strong> (<em>a string</em>) – Flags to pass to mris_fix_topology commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mris_inflate</strong> (<em>a string</em>) – Flags to pass to mri_inflate commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mris_make_surfaces</strong> (<em>a string</em>) – Flags to pass to mris_make_surfaces commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mris_register</strong> (<em>a string</em>) – Flags to pass to mris_register commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mris_smooth</strong> (<em>a string</em>) – Flags to pass to mri_smooth commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mris_sphere</strong> (<em>a string</em>) – Flags to pass to mris_sphere commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mris_surf2vol</strong> (<em>a string</em>) – Flags to pass to mris_surf2vol commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>mrisp_paint</strong> (<em>a string</em>) – Flags to pass to mrisp_paint commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>openmp</strong> (<em>an integer</em>) – Number of processors to use in parallel.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-openmp</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
+<li><p><strong>parallel</strong> (<em>a boolean</em>) – Enable parallel execution.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-parallel</span></code>.</p></li>
+<li><p><strong>subject_id</strong> (<em>a string</em>) – Subject name.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-subjid</span> <span class="pre">%s</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">recon_all</span></code>)</p></li>
+<li><p><strong>subjects_dir</strong> (<em>a pathlike object or string representing an existing directory</em>) – Path to subjects directory.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-sd</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>talairach</strong> (<em>a string</em>) – Flags to pass to talairach commands.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">expert</span></code>.</p></li>
+<li><p><strong>use_FLAIR</strong> (<em>a boolean</em>) – Use FLAIR image to refine the pial surface.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-FLAIRpial</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">use_T2</span></code>.</p></li>
+<li><p><strong>use_T2</strong> (<em>a boolean</em>) – Use T2 image to refine the pial surface.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-T2pial</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">use_FLAIR</span></code>.</p></li>
+<li><p><strong>xopts</strong> (<em>‘use’ or ‘clean’ or ‘overwrite’</em>) – Use, delete or overwrite existing expert options file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-xopts-%s</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Outputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>BA_stats</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Brodmann Area statistics files.</p></li>
+<li><p><strong>T1</strong> (<em>a pathlike object or string representing an existing file</em>) – Intensity normalized whole-head volume.</p></li>
+<li><p><strong>annot</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Surface annotation files.</p></li>
+<li><p><strong>aparc_a2009s_stats</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Aparc a2009s parcellation statistics files.</p></li>
+<li><p><strong>aparc_aseg</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Aparc parcellation projected into aseg volume.</p></li>
+<li><p><strong>aparc_stats</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Aparc parcellation statistics files.</p></li>
+<li><p><strong>area_pial</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Mean area of triangles each vertex on the pial surface is associated with.</p></li>
+<li><p><strong>aseg</strong> (<em>a pathlike object or string representing an existing file</em>) – Volumetric map of regions from automatic segmentation.</p></li>
+<li><p><strong>aseg_stats</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Automated segmentation statistics file.</p></li>
+<li><p><strong>avg_curv</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Average atlas curvature, sampled to subject.</p></li>
+<li><p><strong>brain</strong> (<em>a pathlike object or string representing an existing file</em>) – Intensity normalized brain-only volume.</p></li>
+<li><p><strong>brainmask</strong> (<em>a pathlike object or string representing an existing file</em>) – Skull-stripped (brain-only) volume.</p></li>
+<li><p><strong>curv</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Maps of surface curvature.</p></li>
+<li><p><strong>curv_pial</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Curvature of pial surface.</p></li>
+<li><p><strong>curv_stats</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Curvature statistics files.</p></li>
+<li><p><strong>entorhinal_exvivo_stats</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Entorhinal exvivo statistics files.</p></li>
+<li><p><strong>filled</strong> (<em>a pathlike object or string representing an existing file</em>) – Subcortical mass volume.</p></li>
+<li><p><strong>graymid</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Graymid/midthickness surface meshes.</p></li>
+<li><p><strong>inflated</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Inflated surface meshes.</p></li>
+<li><p><strong>jacobian_white</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Distortion required to register to spherical atlas.</p></li>
+<li><p><strong>label</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Volume and surface label files.</p></li>
+<li><p><strong>norm</strong> (<em>a pathlike object or string representing an existing file</em>) – Normalized skull-stripped volume.</p></li>
+<li><p><strong>nu</strong> (<em>a pathlike object or string representing an existing file</em>) – Non-uniformity corrected whole-head volume.</p></li>
+<li><p><strong>orig</strong> (<em>a pathlike object or string representing an existing file</em>) – Base image conformed to Freesurfer space.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p></li>
+<li><p><strong>pial</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Gray matter/pia mater surface meshes.</p></li>
+<li><p><strong>rawavg</strong> (<em>a pathlike object or string representing an existing file</em>) – Volume formed by averaging input images.</p></li>
+<li><p><strong>ribbon</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Volumetric maps of cortical ribbons.</p></li>
+<li><p><strong>smoothwm</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Smoothed original surface meshes.</p></li>
+<li><p><strong>sphere</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Spherical surface meshes.</p></li>
+<li><p><strong>sphere_reg</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Spherical registration file.</p></li>
+<li><p><strong>subject_id</strong> (<em>a string</em>) – Subject name for whom to retrieve data.</p></li>
+<li><p><strong>subjects_dir</strong> (<em>a pathlike object or string representing an existing directory</em>) – Freesurfer subjects directory.</p></li>
+<li><p><strong>sulc</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Surface maps of sulcal depth.</p></li>
+<li><p><strong>thickness</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Surface maps of cortical thickness.</p></li>
+<li><p><strong>volume</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Surface maps of cortical volume.</p></li>
+<li><p><strong>white</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – White/gray matter surface meshes.</p></li>
+<li><p><strong>wm</strong> (<em>a pathlike object or string representing an existing file</em>) – Segmented white-matter volume.</p></li>
+<li><p><strong>wmparc</strong> (<em>a pathlike object or string representing an existing file</em>) – Aparc parcellation projected into subcortical white matter.</p></li>
+<li><p><strong>wmparc_stats</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – White matter parcellation statistics file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="niworkflows.interfaces.bids.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">niworkflows.interfaces.bids module</div>
+              </div>
+              <svg><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="niworkflows.interfaces.reportlets.registration.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">niworkflows.interfaces.reportlets.registration module</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Copyright 2022, The NiPreps Developers
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
+    <script src="../_static/js/version-switch.js"></script>
+    </body>
+</html>

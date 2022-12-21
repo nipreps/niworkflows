@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.utils.bids module &mdash; niworkflows 1.1.12 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="niworkflows.utils.images module" href="niworkflows.utils.images.html" />
+    <link rel="prev" title="niworkflows.utils package" href="niworkflows.utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.1.12
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.anat.html">niworkflows.anat package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.func.html">niworkflows.func package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="niworkflows.utils.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">niworkflows.utils.bids module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.utils.images.html">niworkflows.utils.images module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.utils.misc.html">niworkflows.utils.misc module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.utils.spaces.html">niworkflows.utils.spaces module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.viz.html">niworkflows.viz package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
+          <li><a href="niworkflows.utils.html">niworkflows.utils package</a> &raquo;</li>
+      <li>niworkflows.utils.bids module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/niworkflows.utils.bids.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../../master/api/niworkflows.utils.bids.html"><b>Warning:</b> This document is for an old version of niworkflows. The main version is master.</a></p>
+<div class="section" id="module-niworkflows.utils.bids">
+<span id="niworkflows-utils-bids-module"></span><h1>niworkflows.utils.bids module<a class="headerlink" href="#module-niworkflows.utils.bids" title="Permalink to this headline">¶</a></h1>
+<p>Helpers for handling BIDS-like neuroimaging structures.</p>
+<dl class="py exception">
+<dt id="niworkflows.utils.bids.BIDSError">
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></code><code class="sig-name descname"><span class="pre">BIDSError</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_root</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#BIDSError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.BIDSError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="niworkflows.utils.bids.BIDSWarning">
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></code><code class="sig-name descname"><span class="pre">BIDSWarning</span></code><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#BIDSWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.BIDSWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeWarning" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.bids.check_pipeline_version">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></code><code class="sig-name descname"><span class="pre">check_pipeline_version</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cvers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#check_pipeline_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.check_pipeline_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search for existing BIDS pipeline output and compares against current pipeline version.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">json</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;PipelineDescription&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.1.1rc5&quot;</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">desc_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span> <span class="o">/</span> <span class="s1">&#39;sample_dataset_description.json&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">desc_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cvers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Current pipeline version</p></li>
+<li><p><strong>data_desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">os.PathLike</span></code></a>) – Path to pipeline output’s <code class="docutils literal notranslate"><span class="pre">dataset_description.json</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">check_pipeline_version</span><span class="p">(</span><span class="s1">&#39;1.1.1rc5&#39;</span><span class="p">,</span> <span class="s1">&#39;sample_dataset_description.json&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">check_pipeline_version</span><span class="p">(</span><span class="s1">&#39;1.1.1rc5+129.gbe0e5158&#39;</span><span class="p">,</span> <span class="s1">&#39;sample_dataset_description.json&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">check_pipeline_version</span><span class="p">(</span><span class="s1">&#39;1.2&#39;</span><span class="p">,</span> <span class="s1">&#39;sample_dataset_description.json&#39;</span><span class="p">)</span>  
+<span class="go">&#39;Previous output generated ...&#39;</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>message</strong> – A warning string if there is a difference between versions, otherwise <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.bids.collect_data">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></code><code class="sig-name descname"><span class="pre">collect_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bids_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">participant_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#collect_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.collect_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses pybids to retrieve the input data for a given participant</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bids_root</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">collect_data</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datadir</span> <span class="o">/</span> <span class="s1">&#39;ds054&#39;</span><span class="p">),</span> <span class="s1">&#39;100185&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                            <span class="n">bids_validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bids_root</span><span class="p">[</span><span class="s1">&#39;fmap&#39;</span><span class="p">]</span>  
+<span class="go">[&#39;.../ds054/sub-100185/fmap/sub-100185_magnitude1.nii.gz&#39;, &#39;.../ds054/sub-100185/fmap/sub-100185_magnitude2.nii.gz&#39;, &#39;.../ds054/sub-100185/fmap/sub-100185_phasediff.nii.gz&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bids_root</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]</span>  
+<span class="go">[&#39;.../ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.gz&#39;, &#39;.../ds054/sub-100185/func/sub-100185_task-machinegame_run-02_bold.nii.gz&#39;, &#39;.../ds054/sub-100185/func/sub-100185_task-machinegame_run-03_bold.nii.gz&#39;, &#39;.../ds054/sub-100185/func/sub-100185_task-machinegame_run-04_bold.nii.gz&#39;, &#39;.../ds054/sub-100185/func/sub-100185_task-machinegame_run-05_bold.nii.gz&#39;, &#39;.../ds054/sub-100185/func/sub-100185_task-machinegame_run-06_bold.nii.gz&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bids_root</span><span class="p">[</span><span class="s1">&#39;sbref&#39;</span><span class="p">]</span>  
+<span class="go">[&#39;.../ds054/sub-100185/func/sub-100185_task-machinegame_run-01_sbref.nii.gz&#39;, &#39;.../ds054/sub-100185/func/sub-100185_task-machinegame_run-02_sbref.nii.gz&#39;, &#39;.../ds054/sub-100185/func/sub-100185_task-machinegame_run-03_sbref.nii.gz&#39;, &#39;.../ds054/sub-100185/func/sub-100185_task-machinegame_run-04_sbref.nii.gz&#39;, &#39;.../ds054/sub-100185/func/sub-100185_task-machinegame_run-05_sbref.nii.gz&#39;, &#39;.../ds054/sub-100185/func/sub-100185_task-machinegame_run-06_sbref.nii.gz&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bids_root</span><span class="p">[</span><span class="s1">&#39;t1w&#39;</span><span class="p">]</span>  
+<span class="go">[&#39;.../ds054/sub-100185/anat/sub-100185_T1w.nii.gz&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bids_root</span><span class="p">[</span><span class="s1">&#39;t2w&#39;</span><span class="p">]</span>  
+<span class="go">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bids_root</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">collect_data</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datadir</span> <span class="o">/</span> <span class="s1">&#39;ds051&#39;</span><span class="p">),</span> <span class="s1">&#39;01&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                            <span class="n">bids_validate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bids_filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;t1w&#39;</span><span class="p">:{</span><span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bids_root</span><span class="p">[</span><span class="s1">&#39;t1w&#39;</span><span class="p">]</span>  
+<span class="go">[&#39;.../ds051/sub-01/anat/sub-01_run-01_T1w.nii.gz&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.bids.collect_participants">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></code><code class="sig-name descname"><span class="pre">collect_participants</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bids_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">participant_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#collect_participants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.collect_participants" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the participants under the BIDS root and checks that participants
+designated with the participant_label argument exist in that folder.
+Returns the list of participants to be finally processed.
+Requesting all subjects in a BIDS directory root:</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">collect_participants</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datadir</span> <span class="o">/</span> <span class="s1">&#39;ds114&#39;</span><span class="p">),</span> <span class="n">bids_validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">[&#39;01&#39;, &#39;02&#39;, &#39;03&#39;, &#39;04&#39;, &#39;05&#39;, &#39;06&#39;, &#39;07&#39;, &#39;08&#39;, &#39;09&#39;, &#39;10&#39;]</span>
+</pre></div>
+</div>
+<p>Requesting two subjects, given their IDs:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">collect_participants</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datadir</span> <span class="o">/</span> <span class="s1">&#39;ds114&#39;</span><span class="p">),</span> <span class="n">participant_label</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;02&#39;</span><span class="p">,</span> <span class="s1">&#39;04&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                     <span class="n">bids_validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">[&#39;02&#39;, &#39;04&#39;]</span>
+</pre></div>
+</div>
+<p>Requesting two subjects, given their IDs (works with ‘sub-‘ prefixes):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">collect_participants</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datadir</span> <span class="o">/</span> <span class="s1">&#39;ds114&#39;</span><span class="p">),</span> <span class="n">participant_label</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;sub-02&#39;</span><span class="p">,</span> <span class="s1">&#39;sub-04&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                     <span class="n">bids_validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">[&#39;02&#39;, &#39;04&#39;]</span>
+</pre></div>
+</div>
+<p>Requesting two subjects, but one does not exist:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">collect_participants</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datadir</span> <span class="o">/</span> <span class="s1">&#39;ds114&#39;</span><span class="p">),</span> <span class="n">participant_label</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;02&#39;</span><span class="p">,</span> <span class="s1">&#39;14&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                     <span class="n">bids_validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">[&#39;02&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">collect_participants</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="nb">str</span><span class="p">(</span><span class="n">datadir</span> <span class="o">/</span> <span class="s1">&#39;ds114&#39;</span><span class="p">),</span> <span class="n">participant_label</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;02&#39;</span><span class="p">,</span> <span class="s1">&#39;14&#39;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bids_validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">BIDSError</span>:
+<span class="gp">...</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.bids.get_metadata_for_nifti">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></code><code class="sig-name descname"><span class="pre">get_metadata_for_nifti</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#get_metadata_for_nifti"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.get_metadata_for_nifti" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch metadata for a given NIfTI file.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">get_metadata_for_nifti</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">datadir</span> <span class="o">/</span> <span class="s1">&#39;ds054&#39;</span> <span class="o">/</span> <span class="s1">&#39;sub-100185&#39;</span> <span class="o">/</span> <span class="s1">&#39;fmap&#39;</span> <span class="o">/</span> <span class="s1">&#39;sub-100185_phasediff.nii.gz&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;Manufacturer&#39;</span><span class="p">]</span>
+<span class="go">&#39;SIEMENS&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.bids.group_multiecho">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></code><code class="sig-name descname"><span class="pre">group_multiecho</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bold_sess</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#group_multiecho"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.group_multiecho" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiplex multi-echo EPIs into arrays.</p>
+<p>Dual-echo is a special case of multi-echo, which is treated as single-echo data.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bold_sess</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sub-01_task-rest_echo-1_run-01_bold.nii.gz&quot;</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="s2">&quot;sub-01_task-rest_echo-2_run-01_bold.nii.gz&quot;</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="s2">&quot;sub-01_task-rest_echo-1_run-02_bold.nii.gz&quot;</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="s2">&quot;sub-01_task-rest_echo-2_run-02_bold.nii.gz&quot;</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="s2">&quot;sub-01_task-rest_echo-3_run-02_bold.nii.gz&quot;</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="s2">&quot;sub-01_task-rest_run-03_bold.nii.gz&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group_multiecho</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">)</span>
+<span class="go">[&#39;sub-01_task-rest_echo-1_run-01_bold.nii.gz&#39;,</span>
+<span class="go"> &#39;sub-01_task-rest_echo-2_run-01_bold.nii.gz&#39;,</span>
+<span class="go">[&#39;sub-01_task-rest_echo-1_run-02_bold.nii.gz&#39;,</span>
+<span class="go"> &#39;sub-01_task-rest_echo-2_run-02_bold.nii.gz&#39;,</span>
+<span class="go"> &#39;sub-01_task-rest_echo-3_run-02_bold.nii.gz&#39;],</span>
+<span class="go"> &#39;sub-01_task-rest_run-03_bold.nii.gz&#39;]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bold_sess</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;sub-01_task-rest_echo-3_run-01_bold.nii.gz&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group_multiecho</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">)</span>
+<span class="go">[[&#39;sub-01_task-rest_echo-1_run-01_bold.nii.gz&#39;,</span>
+<span class="go">  &#39;sub-01_task-rest_echo-2_run-01_bold.nii.gz&#39;,</span>
+<span class="go">  &#39;sub-01_task-rest_echo-3_run-01_bold.nii.gz&#39;],</span>
+<span class="go"> [&#39;sub-01_task-rest_echo-1_run-02_bold.nii.gz&#39;,</span>
+<span class="go">  &#39;sub-01_task-rest_echo-2_run-02_bold.nii.gz&#39;,</span>
+<span class="go">  &#39;sub-01_task-rest_echo-3_run-02_bold.nii.gz&#39;],</span>
+<span class="go">  &#39;sub-01_task-rest_run-03_bold.nii.gz&#39;]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bold_sess</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">&quot;sub-01_task-beh_echo-1_run-01_bold.nii.gz&quot;</span><span class="p">,</span>
+<span class="gp">... </span>              <span class="s2">&quot;sub-01_task-beh_echo-2_run-01_bold.nii.gz&quot;</span><span class="p">,</span>
+<span class="gp">... </span>              <span class="s2">&quot;sub-01_task-beh_echo-1_run-02_bold.nii.gz&quot;</span><span class="p">,</span>
+<span class="gp">... </span>              <span class="s2">&quot;sub-01_task-beh_echo-2_run-02_bold.nii.gz&quot;</span><span class="p">,</span>
+<span class="gp">... </span>              <span class="s2">&quot;sub-01_task-beh_echo-3_run-02_bold.nii.gz&quot;</span><span class="p">,</span>
+<span class="gp">... </span>              <span class="s2">&quot;sub-01_task-beh_run-03_bold.nii.gz&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group_multiecho</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">)</span>
+<span class="go">[[&#39;sub-01_task-rest_echo-1_run-01_bold.nii.gz&#39;,</span>
+<span class="go">  &#39;sub-01_task-rest_echo-2_run-01_bold.nii.gz&#39;,</span>
+<span class="go">  &#39;sub-01_task-rest_echo-3_run-01_bold.nii.gz&#39;],</span>
+<span class="go"> [&#39;sub-01_task-rest_echo-1_run-02_bold.nii.gz&#39;,</span>
+<span class="go">  &#39;sub-01_task-rest_echo-2_run-02_bold.nii.gz&#39;,</span>
+<span class="go">  &#39;sub-01_task-rest_echo-3_run-02_bold.nii.gz&#39;],</span>
+<span class="go">  &#39;sub-01_task-rest_run-03_bold.nii.gz&#39;,</span>
+<span class="go">  &#39;sub-01_task-beh_echo-1_run-01_bold.nii.gz&#39;,</span>
+<span class="go">  &#39;sub-01_task-beh_echo-2_run-01_bold.nii.gz&#39;,</span>
+<span class="go"> [&#39;sub-01_task-beh_echo-1_run-02_bold.nii.gz&#39;,</span>
+<span class="go">  &#39;sub-01_task-beh_echo-2_run-02_bold.nii.gz&#39;,</span>
+<span class="go">  &#39;sub-01_task-beh_echo-3_run-02_bold.nii.gz&#39;],</span>
+<span class="go">  &#39;sub-01_task-beh_run-03_bold.nii.gz&#39;]</span>
+</pre></div>
+</div>
+<p>Some tests from <a class="reference external" href="https://neurostars.org/t/fmriprep-from-singularity-unboundlocalerror/3299/7">https://neurostars.org/t/fmriprep-from-singularity-unboundlocalerror/3299/7</a></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bold_sess</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;sub-01_task-AudLoc_echo-1_bold.nii&#39;</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="s1">&#39;sub-01_task-AudLoc_echo-2_bold.nii&#39;</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="s1">&#39;sub-01_task-FJT_echo-1_bold.nii&#39;</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="s1">&#39;sub-01_task-FJT_echo-2_bold.nii&#39;</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="s1">&#39;sub-01_task-LDT_echo-1_bold.nii&#39;</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="s1">&#39;sub-01_task-LDT_echo-2_bold.nii&#39;</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="s1">&#39;sub-01_task-MotLoc_echo-1_bold.nii&#39;</span><span class="p">,</span>
+<span class="gp">... </span>             <span class="s1">&#39;sub-01_task-MotLoc_echo-2_bold.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group_multiecho</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">)</span> <span class="o">==</span> <span class="n">bold_sess</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bold_sess</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;sub-01_task-MotLoc_echo-3_bold.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">groups</span> <span class="o">=</span> <span class="n">group_multiecho</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="go">6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">]</span>
+<span class="go">[False, False, False, False, False, False, True]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="go">3</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.bids.relative_to_root">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></code><code class="sig-name descname"><span class="pre">relative_to_root</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#relative_to_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.relative_to_root" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the BIDS root folder given one file path’s.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">relative_to_root</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s2">&quot;/sub-03/sourcedata/sub-01/anat/sub-01_T1.nii.gz&quot;</span>
+<span class="gp">... </span><span class="p">))</span>
+<span class="go">&#39;sub-01/anat/sub-01_T1.nii.gz&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">relative_to_root</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s2">&quot;/sub-03/anat/sourcedata/sub-01/ses-preop/anat/sub-01_ses-preop_T1.nii.gz&quot;</span>
+<span class="gp">... </span><span class="p">))</span>
+<span class="go">&#39;sub-01/ses-preop/anat/sub-01_ses-preop_T1.nii.gz&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">relative_to_root</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s2">&quot;sub-01/anat/sub-01_T1.nii.gz&quot;</span>
+<span class="gp">... </span><span class="p">))</span>
+<span class="go">&#39;sub-01/anat/sub-01_T1.nii.gz&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">relative_to_root</span><span class="p">(</span><span class="s2">&quot;anat/sub-01_T1.nii.gz&quot;</span><span class="p">))</span>
+<span class="go">&#39;anat/sub-01_T1.nii.gz&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="niworkflows.utils.html" class="btn btn-neutral float-left" title="niworkflows.utils package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="niworkflows.utils.images.html" class="btn btn-neutral float-right" title="niworkflows.utils.images module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.1.12
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt id="v-tags">Tags</dt>
+        </dl>
+        <dl>
+            <dt id="v-branches">Branches</dt>
+        </dl>
+    </div>
+</div>
+
+
+<script src="../../js/rtd-versions.js"></script>
+
+</body>
+</html>

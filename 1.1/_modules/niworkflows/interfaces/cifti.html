@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.interfaces.cifti &mdash; niworkflows 1.1.12 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.1.12
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Library API (application program interface)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>niworkflows.interfaces.cifti</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><b>Warning:</b> This document is for an old version of niworkflows.</p>
+<h1>Source code for niworkflows.interfaces.cifti</h1><div class="highlight"><pre>
+<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2021 The NiPreps Developers &lt;nipreps@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#</span>
+<span class="c1"># We support and encourage derived works from this project, please read</span>
+<span class="c1"># about our expectations at</span>
+<span class="c1">#</span>
+<span class="c1">#     https://www.nipreps.org/community/licensing/</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;Handling connectivity: combines FreeSurfer surfaces with subcortical volumes.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">from</span> <span class="nn">nibabel</span> <span class="kn">import</span> <span class="n">cifti2</span> <span class="k">as</span> <span class="n">ci</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">resample_to_img</span>
+
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">split_filename</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
+    <span class="n">File</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
+    <span class="n">SimpleInterface</span><span class="p">,</span>
+    <span class="n">Directory</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">import</span> <span class="nn">templateflow.api</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="n">CIFTI_SURFACES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;fsaverage5&quot;</span><span class="p">,</span> <span class="s2">&quot;fsaverage6&quot;</span><span class="p">,</span> <span class="s2">&quot;fsLR&quot;</span><span class="p">)</span>
+<span class="n">CIFTI_VOLUMES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;MNI152NLin2009cAsym&quot;</span><span class="p">,</span> <span class="s2">&quot;MNI152NLin6Asym&quot;</span><span class="p">)</span>
+<span class="n">CIFTI_STRUCT_WITH_LABELS</span> <span class="o">=</span> <span class="p">{</span>  <span class="c1"># CITFI structures with corresponding labels</span>
+    <span class="c1"># SURFACES</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_CORTEX_LEFT&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_CORTEX_RIGHT&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># SUBCORTICAL</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_ACCUMBENS_LEFT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">26</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_ACCUMBENS_RIGHT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">58</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_AMYGDALA_LEFT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">18</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_AMYGDALA_RIGHT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">54</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_BRAIN_STEM&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">16</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_CAUDATE_LEFT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">11</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_CAUDATE_RIGHT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">50</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_CEREBELLUM_LEFT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,),</span>  <span class="c1"># DKT31  # HCP MNI152</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_CEREBELLUM_RIGHT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">45</span><span class="p">,</span> <span class="mi">47</span><span class="p">,),</span>  <span class="c1"># DKT31  # HCP MNI152</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">28</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">60</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">17</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">53</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_PALLIDUM_LEFT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">13</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_PALLIDUM_RIGHT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">52</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_PUTAMEN_LEFT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">12</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_PUTAMEN_RIGHT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">51</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_THALAMUS_LEFT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">10</span><span class="p">,),</span>
+    <span class="s2">&quot;CIFTI_STRUCTURE_THALAMUS_RIGHT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">49</span><span class="p">,),</span>
+<span class="p">}</span>
+<span class="n">CIFTI_VARIANTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;HCP grayordinates&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;fsLR&quot;</span><span class="p">,</span> <span class="s2">&quot;MNI152NLin6Asym&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;fMRIPrep grayordinates&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;fsaverage&quot;</span><span class="p">,</span> <span class="s2">&quot;MNI152NLin2009cAsym&quot;</span><span class="p">),</span>
+<span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">_GenerateCiftiInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">bold_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input BOLD file&quot;</span><span class="p">)</span>
+    <span class="n">volume_target</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
+        <span class="s2">&quot;MNI152NLin6Asym&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;MNI152NLin2009cAsym&quot;</span><span class="p">,</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;CIFTI volumetric output space&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">surface_target</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
+        <span class="s2">&quot;fsLR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fsaverage5&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fsaverage6&quot;</span><span class="p">,</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;CIFTI surface target space&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">surface_density</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
+        <span class="s2">&quot;10k&quot;</span><span class="p">,</span> <span class="s2">&quot;32k&quot;</span><span class="p">,</span> <span class="s2">&quot;41k&quot;</span><span class="p">,</span> <span class="s2">&quot;59k&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Surface vertices density.&quot;</span>
+    <span class="p">)</span>
+    <span class="n">TR</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Repetition time&quot;</span><span class="p">)</span>
+    <span class="n">surface_bolds</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span>
+        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;list of surface BOLD GIFTI files&quot;</span> <span class="s2">&quot; (length 2 with order [L,R])&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;FreeSurfer SUBJECTS_DIR&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_GenerateCiftiOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;generated CIFTI file&quot;</span><span class="p">)</span>
+    <span class="n">out_metadata</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;variant metadata JSON&quot;</span><span class="p">)</span>
+    <span class="n">variant</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Name of variant space&quot;</span><span class="p">)</span>
+    <span class="n">density</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Total number of grayordinates&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="GenerateCifti"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.cifti.html#niworkflows.interfaces.cifti.GenerateCifti">[docs]</a><span class="k">class</span> <span class="nc">GenerateCifti</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate CIFTI image from BOLD file in target spaces.</span>
+
+<span class="sd">    Currently supports ``fsLR``, ``fsaverage5``, or ``fsaverage6`` for template surfaces and</span>
+<span class="sd">    ``MNI152NLin6Asym`` or ``MNI152NLin2009cAsym`` as template volumes.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_GenerateCiftiInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_GenerateCiftiOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">annotation_files</span><span class="p">,</span> <span class="n">label_file</span> <span class="o">=</span> <span class="n">_get_cifti_data</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surface_target</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">volume_target</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surface_density</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">out_metadata</span><span class="p">,</span> <span class="n">variant</span><span class="p">,</span> <span class="n">density</span> <span class="o">=</span> <span class="n">_get_cifti_variant</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surface_target</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">volume_target</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surface_density</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;out_metadata&quot;</span><span class="p">:</span> <span class="n">out_metadata</span><span class="p">,</span> <span class="s2">&quot;variant&quot;</span><span class="p">:</span> <span class="n">variant</span><span class="p">})</span>
+        <span class="k">if</span> <span class="n">density</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;density&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">density</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_create_cifti_image</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bold_file</span><span class="p">,</span>
+            <span class="n">label_file</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surface_bolds</span><span class="p">,</span>
+            <span class="n">annotation_files</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">TR</span><span class="p">,</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surface_target</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">volume_target</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_CiftiNameSourceInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">variant</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span>
+        <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;unique label of spaces used in combination to generate CIFTI file&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">density</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;density label&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_CiftiNameSourceOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_name</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;(partial) filename formatted according to template&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="CiftiNameSource"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.cifti.html#niworkflows.interfaces.cifti.CiftiNameSource">[docs]</a><span class="k">class</span> <span class="nc">CiftiNameSource</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct new filename based on unique label of spaces used to generate a CIFTI file.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; namer = CiftiNameSource()</span>
+<span class="sd">    &gt;&gt;&gt; namer.inputs.variant = &#39;HCP grayordinates&#39;</span>
+<span class="sd">    &gt;&gt;&gt; res = namer.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_name</span>
+<span class="sd">    &#39;space-fsLR_bold.dtseries&#39;</span>
+
+<span class="sd">    &gt;&gt;&gt; namer.inputs.density = &#39;32k&#39;</span>
+<span class="sd">    &gt;&gt;&gt; res = namer.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_name</span>
+<span class="sd">    &#39;space-fsLR_den-32k_bold.dtseries&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_CiftiNameSourceInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_CiftiNameSourceOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;hcp&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">variant</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">suffix</span> <span class="o">+=</span> <span class="s2">&quot;space-fsLR_&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">density</span><span class="p">:</span>
+            <span class="n">suffix</span> <span class="o">+=</span> <span class="s2">&quot;den-</span><span class="si">{}</span><span class="s2">_&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">density</span><span class="p">)</span>
+
+        <span class="n">suffix</span> <span class="o">+=</span> <span class="s2">&quot;bold.dtseries&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">suffix</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_cifti_data</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">volume</span><span class="p">,</span> <span class="n">subjects_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fetch surface and volumetric label files for CIFTI creation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    surface : str</span>
+<span class="sd">        Target surface space</span>
+<span class="sd">    volume : str</span>
+<span class="sd">        Target volume space</span>
+<span class="sd">    subjects_dir : str, optional</span>
+<span class="sd">        Path to FreeSurfer subjects directory (required `fsaverage5`/`fsaverage6` surfaces)</span>
+<span class="sd">    density : str, optional</span>
+<span class="sd">        Surface density (required for `fsLR` surfaces)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    annotation_files : list</span>
+<span class="sd">        Surface annotation files to allow removal of medial wall</span>
+<span class="sd">    label_file : str</span>
+<span class="sd">        Volumetric label file of subcortical structures</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; annots, label = _get_cifti_data(&#39;fsLR&#39;, &#39;MNI152NLin6Asym&#39;, density=&#39;32k&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; annots  # doctest: +ELLIPSIS</span>
+<span class="sd">    [&#39;.../tpl-fsLR_hemi-L_den-32k_desc-nomedialwall_dparc.label.gii&#39;, \</span>
+<span class="sd">     &#39;.../tpl-fsLR_hemi-R_den-32k_desc-nomedialwall_dparc.label.gii&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; label  # doctest: +ELLIPSIS</span>
+<span class="sd">    &#39;.../tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">surface</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">CIFTI_SURFACES</span> <span class="ow">or</span> <span class="n">volume</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">CIFTI_VOLUMES</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Variant (surface: </span><span class="si">{0}</span><span class="s2">, volume: </span><span class="si">{1}</span><span class="s2">) is not supported&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">surface</span><span class="p">,</span> <span class="n">volume</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">tpl_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;dseg&quot;</span><span class="p">}</span>
+    <span class="c1"># fMRIPrep grayordinates</span>
+    <span class="k">if</span> <span class="n">volume</span> <span class="o">==</span> <span class="s2">&quot;MNI152NLin2009cAsym&quot;</span><span class="p">:</span>
+        <span class="n">tpl_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;resolution&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;desc&quot;</span><span class="p">:</span> <span class="s2">&quot;DKT31&quot;</span><span class="p">})</span>
+        <span class="n">annotation_files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">subjects_dir</span> <span class="o">/</span> <span class="n">surface</span> <span class="o">/</span> <span class="s2">&quot;label&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*h.aparc.annot&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="c1"># HCP grayordinates</span>
+    <span class="k">elif</span> <span class="n">volume</span> <span class="o">==</span> <span class="s2">&quot;MNI152NLin6Asym&quot;</span><span class="p">:</span>
+        <span class="c1"># templateflow specific resolutions (2mm, 1.6mm)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;32k&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;59k&quot;</span><span class="p">:</span> <span class="s2">&quot;6&quot;</span><span class="p">}[</span><span class="n">density</span><span class="p">]</span>
+        <span class="n">tpl_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;atlas&quot;</span><span class="p">:</span> <span class="s2">&quot;HCP&quot;</span><span class="p">,</span> <span class="s2">&quot;resolution&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">})</span>
+        <span class="n">annotation_files</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="s2">&quot;fsLR&quot;</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;nomedialwall&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;dparc&quot;</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotation_files</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Invalid number of surface annotation files&quot;</span><span class="p">)</span>
+    <span class="n">label_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="o">**</span><span class="n">tpl_kwargs</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">annotation_files</span><span class="p">,</span> <span class="n">label_file</span>
+
+
+<span class="k">def</span> <span class="nf">_get_cifti_variant</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">volume</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identify CIFTI variant and return metadata.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    surface : str</span>
+<span class="sd">        Target surface space</span>
+<span class="sd">    volume : str</span>
+<span class="sd">        Target volume space</span>
+<span class="sd">    density : str, optional</span>
+<span class="sd">        Surface density (required for `fsLR` surfaces)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    out_metadata : str</span>
+<span class="sd">        JSON file with variant metadata</span>
+<span class="sd">    variant : str</span>
+<span class="sd">        Name of CIFTI variant</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; metafile, variant, _ = _get_cifti_variant(&#39;fsaverage5&#39;, &#39;MNI152NLin2009cAsym&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; str(metafile)  # doctest: +ELLIPSIS</span>
+<span class="sd">    &#39;.../dtseries_variant.json&#39;</span>
+<span class="sd">    &gt;&gt;&gt; variant</span>
+<span class="sd">    &#39;fMRIPrep grayordinates&#39;</span>
+
+<span class="sd">    &gt;&gt;&gt; _, variant, grayords = _get_cifti_variant(&#39;fsLR&#39;, &#39;MNI152NLin6Asym&#39;, density=&#39;59k&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; variant</span>
+<span class="sd">    &#39;HCP grayordinates&#39;</span>
+<span class="sd">    &gt;&gt;&gt; grayords</span>
+<span class="sd">    &#39;170k&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">surface</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;fsaverage5&quot;</span><span class="p">,</span> <span class="s2">&quot;fsaverage6&quot;</span><span class="p">):</span>
+        <span class="n">density</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;fsaverage5&quot;</span><span class="p">:</span> <span class="s2">&quot;10k&quot;</span><span class="p">,</span> <span class="s2">&quot;fsaverage6&quot;</span><span class="p">:</span> <span class="s2">&quot;41k&quot;</span><span class="p">}[</span><span class="n">surface</span><span class="p">]</span>
+        <span class="n">surface</span> <span class="o">=</span> <span class="s2">&quot;fsaverage&quot;</span>
+
+    <span class="k">for</span> <span class="n">variant</span><span class="p">,</span> <span class="n">targets</span> <span class="ow">in</span> <span class="n">CIFTI_VARIANTS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span> <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">volume</span><span class="p">)):</span>
+            <span class="k">break</span>
+        <span class="n">variant</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">variant</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;No corresponding variant for (surface: </span><span class="si">{0}</span><span class="s2">, volume: </span><span class="si">{1}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">surface</span><span class="p">,</span> <span class="n">volume</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">grayords</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">out_metadata</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;dtseries_variant.json&quot;</span>
+    <span class="n">out_json</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;space&quot;</span><span class="p">:</span> <span class="n">variant</span><span class="p">,</span>
+        <span class="s2">&quot;surface&quot;</span><span class="p">:</span> <span class="n">surface</span><span class="p">,</span>
+        <span class="s2">&quot;volume&quot;</span><span class="p">:</span> <span class="n">volume</span><span class="p">,</span>
+        <span class="s2">&quot;surface_density&quot;</span><span class="p">:</span> <span class="n">density</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">surface</span> <span class="o">==</span> <span class="s2">&quot;fsLR&quot;</span><span class="p">:</span>
+        <span class="n">grayords</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;32k&quot;</span><span class="p">:</span> <span class="s2">&quot;91k&quot;</span><span class="p">,</span> <span class="s2">&quot;59k&quot;</span><span class="p">:</span> <span class="s2">&quot;170k&quot;</span><span class="p">}[</span><span class="n">density</span><span class="p">]</span>
+        <span class="n">out_json</span><span class="p">[</span><span class="s2">&quot;grayordinates&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grayords</span>
+
+    <span class="n">out_metadata</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">out_json</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out_metadata</span><span class="p">,</span> <span class="n">variant</span><span class="p">,</span> <span class="n">grayords</span>
+
+
+<span class="k">def</span> <span class="nf">_create_cifti_image</span><span class="p">(</span>
+    <span class="n">bold_file</span><span class="p">,</span> <span class="n">label_file</span><span class="p">,</span> <span class="n">bold_surfs</span><span class="p">,</span> <span class="n">annotation_files</span><span class="p">,</span> <span class="n">tr</span><span class="p">,</span> <span class="n">targets</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate CIFTI image in target space.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bold_file : str</span>
+<span class="sd">        BOLD volumetric timeseries</span>
+<span class="sd">    label_file : str</span>
+<span class="sd">        Subcortical label file</span>
+<span class="sd">    bold_surfs : list</span>
+<span class="sd">        BOLD surface timeseries [L,R]</span>
+<span class="sd">    annotation_files : list</span>
+<span class="sd">        Surface label files used to remove medial wall</span>
+<span class="sd">    tr : float</span>
+<span class="sd">        BOLD repetition time</span>
+<span class="sd">    targets : tuple or list</span>
+<span class="sd">        Surface and volumetric output spaces</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    out :</span>
+<span class="sd">        BOLD data saved as CIFTI dtseries</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bold_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bold_file</span><span class="p">)</span>
+    <span class="n">label_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">label_file</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">label_img</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">bold_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">]:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Resampling bold volume to match label dimensions&quot;</span><span class="p">)</span>
+        <span class="n">bold_img</span> <span class="o">=</span> <span class="n">resample_to_img</span><span class="p">(</span><span class="n">bold_img</span><span class="p">,</span> <span class="n">label_img</span><span class="p">)</span>
+
+    <span class="c1"># ensure images match HCP orientation (LAS)</span>
+    <span class="n">bold_img</span> <span class="o">=</span> <span class="n">_reorient_image</span><span class="p">(</span><span class="n">bold_img</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;LAS&quot;</span><span class="p">)</span>
+    <span class="n">label_img</span> <span class="o">=</span> <span class="n">_reorient_image</span><span class="p">(</span><span class="n">label_img</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;LAS&quot;</span><span class="p">)</span>
+
+    <span class="n">bold_data</span> <span class="o">=</span> <span class="n">bold_img</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+    <span class="n">timepoints</span> <span class="o">=</span> <span class="n">bold_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">label_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">label_img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;int16&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Create brain models</span>
+    <span class="n">idx_offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">brainmodels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">bm_ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">timepoints</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">structure</span><span class="p">,</span> <span class="n">labels</span> <span class="ow">in</span> <span class="n">CIFTI_STRUCT_WITH_LABELS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># surface model</span>
+            <span class="n">model_type</span> <span class="o">=</span> <span class="s2">&quot;CIFTI_MODEL_TYPE_SURFACE&quot;</span>
+            <span class="c1"># use the corresponding annotation</span>
+            <span class="n">hemi</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># currently only supports L/R cortex</span>
+            <span class="n">surf_ts</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bold_surfs</span><span class="p">[</span><span class="n">hemi</span> <span class="o">==</span> <span class="s2">&quot;RIGHT&quot;</span><span class="p">])</span>
+            <span class="n">surf_verts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surf_ts</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">annotation_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.annot&quot;</span><span class="p">):</span>
+                <span class="n">annot</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">read_annot</span><span class="p">(</span><span class="n">annotation_files</span><span class="p">[</span><span class="n">hemi</span> <span class="o">==</span> <span class="s2">&quot;RIGHT&quot;</span><span class="p">])</span>
+                <span class="c1"># remove medial wall</span>
+                <span class="n">medial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">annot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">annot</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;unknown&quot;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">annot</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">annotation_files</span><span class="p">[</span><span class="n">hemi</span> <span class="o">==</span> <span class="s2">&quot;RIGHT&quot;</span><span class="p">])</span>
+                <span class="n">medial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">annot</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># extract values across volumes</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">tsarr</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">medial</span><span class="p">]</span> <span class="k">for</span> <span class="n">tsarr</span> <span class="ow">in</span> <span class="n">surf_ts</span><span class="o">.</span><span class="n">darrays</span><span class="p">])</span>
+
+            <span class="n">vert_idx</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2VertexIndices</span><span class="p">(</span><span class="n">medial</span><span class="p">)</span>
+            <span class="n">bm</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2BrainModel</span><span class="p">(</span>
+                <span class="n">index_offset</span><span class="o">=</span><span class="n">idx_offset</span><span class="p">,</span>
+                <span class="n">index_count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">vert_idx</span><span class="p">),</span>
+                <span class="n">model_type</span><span class="o">=</span><span class="n">model_type</span><span class="p">,</span>
+                <span class="n">brain_structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+                <span class="n">vertex_indices</span><span class="o">=</span><span class="n">vert_idx</span><span class="p">,</span>
+                <span class="n">n_surface_vertices</span><span class="o">=</span><span class="n">surf_verts</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">idx_offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vert_idx</span><span class="p">)</span>
+            <span class="n">bm_ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">bm_ts</span><span class="p">,</span> <span class="n">ts</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model_type</span> <span class="o">=</span> <span class="s2">&quot;CIFTI_MODEL_TYPE_VOXELS&quot;</span>
+            <span class="n">vox</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
+                <span class="n">ijk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">label_data</span> <span class="o">==</span> <span class="n">label</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ijk</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># skip label if nothing matches</span>
+                    <span class="k">continue</span>
+                <span class="n">ts</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">bold_data</span><span class="p">[</span><span class="n">ijk</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">ts</span> <span class="ow">is</span> <span class="kc">None</span>
+                    <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">ts</span><span class="p">,</span> <span class="n">bold_data</span><span class="p">[</span><span class="n">ijk</span><span class="p">]))</span>
+                <span class="p">)</span>
+                <span class="n">vox</span> <span class="o">+=</span> <span class="p">[</span>
+                    <span class="p">[</span><span class="n">ijk</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">idx</span><span class="p">],</span> <span class="n">ijk</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">idx</span><span class="p">],</span> <span class="n">ijk</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">idx</span><span class="p">]]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ts</span><span class="p">))</span>
+                <span class="p">]</span>
+
+            <span class="n">vox</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2VoxelIndicesIJK</span><span class="p">(</span><span class="n">vox</span><span class="p">)</span>
+            <span class="n">bm</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2BrainModel</span><span class="p">(</span>
+                <span class="n">index_offset</span><span class="o">=</span><span class="n">idx_offset</span><span class="p">,</span>
+                <span class="n">index_count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">vox</span><span class="p">),</span>
+                <span class="n">model_type</span><span class="o">=</span><span class="n">model_type</span><span class="p">,</span>
+                <span class="n">brain_structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+                <span class="n">voxel_indices_ijk</span><span class="o">=</span><span class="n">vox</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">idx_offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vox</span><span class="p">)</span>
+            <span class="n">bm_ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">bm_ts</span><span class="p">,</span> <span class="n">ts</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+        <span class="c1"># add each brain structure to list</span>
+        <span class="n">brainmodels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bm</span><span class="p">)</span>
+
+    <span class="c1"># add volume information</span>
+    <span class="n">brainmodels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2Volume</span><span class="p">(</span>
+            <span class="n">bold_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span>
+            <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2TransformationMatrixVoxelIndicesIJKtoXYZ</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">bold_img</span><span class="o">.</span><span class="n">affine</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># generate Matrix information</span>
+    <span class="n">series_map</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2MatrixIndicesMap</span><span class="p">(</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
+        <span class="s2">&quot;CIFTI_INDEX_TYPE_SERIES&quot;</span><span class="p">,</span>
+        <span class="n">number_of_series_points</span><span class="o">=</span><span class="n">timepoints</span><span class="p">,</span>
+        <span class="n">series_exponent</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">series_start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">series_step</span><span class="o">=</span><span class="n">tr</span><span class="p">,</span>
+        <span class="n">series_unit</span><span class="o">=</span><span class="s2">&quot;SECOND&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">geometry_map</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2MatrixIndicesMap</span><span class="p">(</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="s2">&quot;CIFTI_INDEX_TYPE_BRAIN_MODELS&quot;</span><span class="p">,</span> <span class="n">maps</span><span class="o">=</span><span class="n">brainmodels</span>
+    <span class="p">)</span>
+    <span class="c1"># provide some metadata to CIFTI matrix</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;surface&quot;</span><span class="p">:</span> <span class="n">targets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">&quot;volume&quot;</span><span class="p">:</span> <span class="n">targets</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="p">}</span>
+    <span class="c1"># generate and save CIFTI image</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2Matrix</span><span class="p">()</span>
+    <span class="n">matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">series_map</span><span class="p">)</span>
+    <span class="n">matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geometry_map</span><span class="p">)</span>
+    <span class="n">matrix</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2MetaData</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
+    <span class="n">hdr</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2Header</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2Image</span><span class="p">(</span><span class="n">dataobj</span><span class="o">=</span><span class="n">bm_ts</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">hdr</span><span class="p">)</span>
+    <span class="n">img</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="n">bold_img</span><span class="o">.</span><span class="n">get_data_dtype</span><span class="p">())</span>
+    <span class="n">img</span><span class="o">.</span><span class="n">nifti_header</span><span class="o">.</span><span class="n">set_intent</span><span class="p">(</span><span class="s2">&quot;NIFTI_INTENT_CONNECTIVITY_DENSE_SERIES&quot;</span><span class="p">)</span>
+
+    <span class="n">out_file</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.dtseries.nii&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split_filename</span><span class="p">(</span><span class="n">bold_file</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ci</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">out_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="n">out_file</span>
+
+
+<span class="k">def</span> <span class="nf">_reorient_image</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">target_img</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coerce an image to a target orientation.</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        Only RAS -&gt; LAS conversion is currently supported</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img : :obj:`SpatialImage`</span>
+<span class="sd">        image to be reoriented</span>
+<span class="sd">    target_img : :obj:`SpatialImage`, optional</span>
+<span class="sd">        target in desired orientation</span>
+<span class="sd">    orientation : :obj:`str` or :obj:`tuple`, optional</span>
+<span class="sd">        desired orientation, if no target image is provided</span>
+
+<span class="sd">    .. testsetup::</span>
+<span class="sd">    &gt;&gt;&gt; img = nb.load(Path(test_data) / &#39;testSpatialNormalizationRPTMovingWarpedImage.nii.gz&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; las_img = img.as_reoriented([[0, -1], [1, 1], [2, 1]])</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; nimg = _reorient_image(img, target_img=img)</span>
+<span class="sd">    &gt;&gt;&gt; nb.aff2axcodes(nimg.affine)</span>
+<span class="sd">    (&#39;R&#39;, &#39;A&#39;, &#39;S&#39;)</span>
+
+<span class="sd">    &gt;&gt;&gt; nimg = _reorient_image(img, target_img=las_img)</span>
+<span class="sd">    &gt;&gt;&gt; nb.aff2axcodes(nimg.affine)</span>
+<span class="sd">    (&#39;L&#39;, &#39;A&#39;, &#39;S&#39;)</span>
+
+<span class="sd">    &gt;&gt;&gt; nimg = _reorient_image(img, orientation=&#39;LAS&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; nb.aff2axcodes(nimg.affine)</span>
+<span class="sd">    (&#39;L&#39;, &#39;A&#39;, &#39;S&#39;)</span>
+
+<span class="sd">    &gt;&gt;&gt; _reorient_image(img, orientation=&#39;LPI&#39;)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">      ...</span>
+<span class="sd">    NotImplementedError: Cannot reorient ...</span>
+
+<span class="sd">    &gt;&gt;&gt; _reorient_image(img)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">      ...</span>
+<span class="sd">    RuntimeError: No orientation ...</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">orient0</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">aff2axcodes</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">affine</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">target_img</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">orient1</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">aff2axcodes</span><span class="p">(</span><span class="n">target_img</span><span class="o">.</span><span class="n">affine</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">orientation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">orient1</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">orientation</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No orientation to reorient to!&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">orient0</span> <span class="o">==</span> <span class="n">orient1</span><span class="p">:</span>  <span class="c1"># already in desired orientation</span>
+        <span class="k">return</span> <span class="n">img</span>
+    <span class="k">elif</span> <span class="n">orient0</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">(</span><span class="s2">&quot;RAS&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">orient1</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">(</span><span class="s2">&quot;LAS&quot;</span><span class="p">):</span>  <span class="c1"># RAS -&gt; LAS</span>
+        <span class="k">return</span> <span class="n">img</span><span class="o">.</span><span class="n">as_reoriented</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Cannot reorient </span><span class="si">{0}</span><span class="s2"> to </span><span class="si">{1}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">orient0</span><span class="p">,</span> <span class="n">orient1</span><span class="p">)</span>
+        <span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.1.12
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../../../1.0.0/index.html">1.0.0</a></dd>
+            <dd><a href="../../../../1.0.0rc1/index.html">1.0.0rc1</a></dd>
+            <dd><a href="../../../../1.0.0rc2/index.html">1.0.0rc2</a></dd>
+            <dd><a href="../../../../1.0.1/index.html">1.0.1</a></dd>
+            <dd><a href="../../../../1.0.2/index.html">1.0.2</a></dd>
+            <dd><a href="../../../../1.0.3/index.html">1.0.3</a></dd>
+            <dd><a href="../../../../1.0.4/index.html">1.0.4</a></dd>
+            <dd><a href="../../../../1.1.0/index.html">1.1.0</a></dd>
+            <dd><a href="../../../../1.1.1/index.html">1.1.1</a></dd>
+            <dd><a href="../../../../1.1.10/index.html">1.1.10</a></dd>
+            <dd><a href="../../../../1.1.11/index.html">1.1.11</a></dd>
+            <dd><a href="cifti.html">1.1.12</a></dd>
+            <dd><a href="../../../../1.1.2/index.html">1.1.2</a></dd>
+            <dd><a href="../../../../1.1.3/index.html">1.1.3</a></dd>
+            <dd><a href="../../../../1.1.4/index.html">1.1.4</a></dd>
+            <dd><a href="../../../../1.1.5/index.html">1.1.5</a></dd>
+            <dd><a href="../../../../1.1.6/index.html">1.1.6</a></dd>
+            <dd><a href="../../../../1.1.7/index.html">1.1.7</a></dd>
+            <dd><a href="../../../../1.1.8/index.html">1.1.8</a></dd>
+            <dd><a href="../../../../1.1.9/index.html">1.1.9</a></dd>
+            <dd><a href="../../../../1.2.0/index.html">1.2.0</a></dd>
+            <dd><a href="../../../../1.2.0rc1/index.html">1.2.0rc1</a></dd>
+            <dd><a href="../../../../1.2.0rc2/index.html">1.2.0rc2</a></dd>
+            <dd><a href="../../../../1.2.0rc3/index.html">1.2.0rc3</a></dd>
+            <dd><a href="../../../../1.2.0rc4/index.html">1.2.0rc4</a></dd>
+            <dd><a href="../../../../1.2.0rc5/index.html">1.2.0rc5</a></dd>
+            <dd><a href="../../../../1.2.1/index.html">1.2.1</a></dd>
+            <dd><a href="../../../../1.2.2/index.html">1.2.2</a></dd>
+            <dd><a href="../../../../1.2.3/index.html">1.2.3</a></dd>
+            <dd><a href="../../../../1.2.4/index.html">1.2.4</a></dd>
+            <dd><a href="../../../../1.2.5/index.html">1.2.5</a></dd>
+            <dd><a href="../../../../1.2.6/index.html">1.2.6</a></dd>
+            <dd><a href="../../../../1.2.7/index.html">1.2.7</a></dd>
+            <dd><a href="../../../../1.2.8/index.html">1.2.8</a></dd>
+            <dd><a href="../../../../1.2.9/index.html">1.2.9</a></dd>
+            <dd><a href="../../../../1.3.0/index.html">1.3.0</a></dd>
+            <dd><a href="../../../../1.3.0rc1/index.html">1.3.0rc1</a></dd>
+            <dd><a href="../../../../1.3.0rc2/index.html">1.3.0rc2</a></dd>
+            <dd><a href="../../../../1.3.0rc3/index.html">1.3.0rc3</a></dd>
+            <dd><a href="../../../../1.3.1/index.html">1.3.1</a></dd>
+            <dd><a href="../../../../1.3.2/index.html">1.3.2</a></dd>
+            <dd><a href="../../../../1.3.3/index.html">1.3.3</a></dd>
+            <dd><a href="../../../../1.3.4/index.html">1.3.4</a></dd>
+            <dd><a href="../../../../1.3.5/index.html">1.3.5</a></dd>
+            <dd><a href="../../../../1.4.0/index.html">1.4.0</a></dd>
+            <dd><a href="../../../../1.4.0rc0/index.html">1.4.0rc0</a></dd>
+            <dd><a href="../../../../1.4.0rc1/index.html">1.4.0rc1</a></dd>
+            <dd><a href="../../../../1.4.0rc2/index.html">1.4.0rc2</a></dd>
+            <dd><a href="../../../../1.4.0rc3/index.html">1.4.0rc3</a></dd>
+            <dd><a href="../../../../1.4.0rc4/index.html">1.4.0rc4</a></dd>
+            <dd><a href="../../../../1.4.0rc5/index.html">1.4.0rc5</a></dd>
+            <dd><a href="../../../../1.4.0rc6/index.html">1.4.0rc6</a></dd>
+            <dd><a href="../../../../1.1.12/index.html">1.1.12</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../../../enh_report-plot-axis/index.html">enh/report-plot-axis</a></dd>
+            <dd><a href="../../../../feat_infants-rodents/index.html">feat/infants-rodents</a></dd>
+            <dd><a href="../../../../maint_1.0.x/index.html">maint/1.0.x</a></dd>
+            <dd><a href="../../../../maint_1.1.x/index.html">maint/1.1.x</a></dd>
+            <dd><a href="../../../../maint_1.2.x/index.html">maint/1.2.x</a></dd>
+            <dd><a href="../../../../maint_1.3.x/index.html">maint/1.3.x</a></dd>
+            <dd><a href="../../../../master/index.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

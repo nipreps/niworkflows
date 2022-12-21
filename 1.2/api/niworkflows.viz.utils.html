@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.viz.utils module &mdash; niworkflows 1.2.9 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="What’s new?" href="../changelog.html" />
+    <link rel="prev" title="niworkflows.viz.plots module" href="niworkflows.viz.plots.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.2.9
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.anat.html">niworkflows.anat package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.cli.html">niworkflows.cli package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.func.html">niworkflows.func package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="niworkflows.viz.html">niworkflows.viz package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="niworkflows.viz.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.viz.notebook.html">niworkflows.viz.notebook module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.viz.plots.html">niworkflows.viz.plots module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">niworkflows.viz.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
+          <li><a href="niworkflows.viz.html">niworkflows.viz package</a> &raquo;</li>
+      <li>niworkflows.viz.utils module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/niworkflows.viz.utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../../master/api/niworkflows.viz.utils.html"><b>Warning:</b> This document is for an old version of niworkflows. The main version is master.</a></p>
+<div class="section" id="module-niworkflows.viz.utils">
+<span id="niworkflows-viz-utils-module"></span><h1>niworkflows.viz.utils module<a class="headerlink" href="#module-niworkflows.viz.utils" title="Permalink to this headline">¶</a></h1>
+<p>Helper tools for visualization purposes.</p>
+<dl class="py function">
+<dt id="niworkflows.viz.utils.compose_view">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.viz.utils.</span></code><code class="sig-name descname"><span class="pre">compose_view</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bg_svgs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fg_svgs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'report.svg'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/viz/utils.html#compose_view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.viz.utils.compose_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compose the input svgs into one standalone svg with CSS flickering animation.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.viz.utils.cuts_from_bbox">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.viz.utils.</span></code><code class="sig-name descname"><span class="pre">cuts_from_bbox</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask_nii</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cuts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/viz/utils.html#cuts_from_bbox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.viz.utils.cuts_from_bbox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find equi-spaced cuts for presenting images.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.viz.utils.extract_svg">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.viz.utils.</span></code><code class="sig-name descname"><span class="pre">extract_svg</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display_object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/viz/utils.html#extract_svg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.viz.utils.extract_svg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the preamble of the svg files generated with nilearn.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.viz.utils.plot_melodic_components">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.viz.utils.</span></code><code class="sig-name descname"><span class="pre">plot_melodic_components</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">melodic_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'melodic_reportlet.svg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">report_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_components_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/viz/utils.html#plot_melodic_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.viz.utils.plot_melodic_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the spatiotemporal components extracted by FSL MELODIC
+from functional MRI data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>melodic_dir</strong> (<em>str</em>) – Path pointing to the outputs of MELODIC</p></li>
+<li><p><strong>in_file</strong> (<em>str</em>) – Path pointing to the reference fMRI dataset. This file
+will be used to extract the TR value, if the <code class="docutils literal notranslate"><span class="pre">tr</span></code> argument
+is not set. This file will be used to calculate a mask
+if <code class="docutils literal notranslate"><span class="pre">report_mask</span></code> is not provided.</p></li>
+<li><p><strong>tr</strong> (<em>float</em>) – Repetition time in seconds</p></li>
+<li><p><strong>out_file</strong> (<em>str</em>) – Path where the resulting SVG file will be stored</p></li>
+<li><p><strong>compress</strong> (<code class="docutils literal notranslate"><span class="pre">'auto'</span></code> or bool) – Whether SVG should be compressed. If <code class="docutils literal notranslate"><span class="pre">'auto'</span></code>, compression
+will be executed if dependencies are installed (SVGO)</p></li>
+<li><p><strong>report_mask</strong> (<em>str</em>) – Path to a brain mask corresponding to <code class="docutils literal notranslate"><span class="pre">in_file</span></code></p></li>
+<li><p><strong>noise_components_file</strong> (<em>str</em>) – A CSV file listing the indexes of components classified as noise
+by some manual or automated (e.g. ICA-AROMA) procedure. If a
+<code class="docutils literal notranslate"><span class="pre">noise_components_file</span></code> is provided, then components will be
+plotted with red/green colors (correspondingly to whether they
+are in the file -noise components, red-, or not -signal, green-).
+When all or none of the components are in the file, a warning
+is printed at the top.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.viz.utils.plot_registration">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.viz.utils.</span></code><code class="sig-name descname"><span class="pre">plot_registration</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">anat_nii</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">div_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('z',</span> <span class="pre">'x',</span> <span class="pre">'y')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cuts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate_brightness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contour</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dismiss_affine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/viz/utils.html#plot_registration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.viz.utils.plot_registration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the foreground and background views
+Default order is: axial, coronal, sagittal</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.viz.utils.plot_segs">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.viz.utils.</span></code><code class="sig-name descname"><span class="pre">plot_segs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_nii</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seg_niis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox_nii</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">plot_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/viz/utils.html#plot_segs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.viz.utils.plot_segs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a static mosaic with ROIs represented by their delimiting contour.</p>
+<p>Plot segmentation as contours over the image (e.g. anatomical).
+seg_niis should be a list of files. mask_nii helps determine the cut
+coordinates. plot_params will be passed on to nilearn plot_* functions. If
+seg_niis is a list of size one, it behaves as if it was plotting the mask.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.viz.utils.robust_set_limits">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.viz.utils.</span></code><code class="sig-name descname"><span class="pre">robust_set_limits</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(15,</span> <span class="pre">99.8)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/viz/utils.html#robust_set_limits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.viz.utils.robust_set_limits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set (vmax, vmin) based on percentiles of the data.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.viz.utils.svg2str">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.viz.utils.</span></code><code class="sig-name descname"><span class="pre">svg2str</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display_object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/viz/utils.html#svg2str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.viz.utils.svg2str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize a nilearn display object to string.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.viz.utils.svg_compress">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.viz.utils.</span></code><code class="sig-name descname"><span class="pre">svg_compress</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/viz/utils.html#svg_compress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.viz.utils.svg_compress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a blob SVG from a matplotlib figure, may perform compression.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.viz.utils.transform_to_2d">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.viz.utils.</span></code><code class="sig-name descname"><span class="pre">transform_to_2d</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_axis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/viz/utils.html#transform_to_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.viz.utils.transform_to_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Projects 3d data cube along one axis using maximum intensity with
+preservation of the signs. Adapted from nilearn.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="niworkflows.viz.plots.html" class="btn btn-neutral float-left" title="niworkflows.viz.plots module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../changelog.html" class="btn btn-neutral float-right" title="What’s new?" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.2.9
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt id="v-tags">Tags</dt>
+        </dl>
+        <dl>
+            <dt id="v-branches">Branches</dt>
+        </dl>
+    </div>
+</div>
+
+
+<script src="../../js/rtd-versions.js"></script>
+
+</body>
+</html>

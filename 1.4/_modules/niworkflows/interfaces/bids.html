@@ -1,0 +1,1252 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
+        <title>niworkflows.interfaces.bids - niworkflows 1.4.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">niworkflows 1.4.10 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+    <span class="sidebar-brand-text">niworkflows</span>
+    <span id="version-slug" class="sidebar-brand-text">1.4.10</span>
+</a>
+
+<!-- Versions dropdown -->
+<div id="version-menu" class="version-tree">
+  <ul>
+  <li class="toctree-l1 has-children">
+  <span class="sidebar-brand-text">1.4.10</span>
+  <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
+  <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
+  <ul id="v-tags"></ul>
+  </ul>
+</div><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api.html">Library API (application program interface)</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.anat.html">niworkflows.anat package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.anat.ants.html">niworkflows.anat.ants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.anat.coregistration.html">niworkflows.anat.coregistration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.anat.freesurfer.html">niworkflows.anat.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.anat.skullstrip.html">niworkflows.anat.skullstrip module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.cli.html">niworkflows.cli package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.cli.boldref.html">niworkflows.cli.boldref module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.engine.html">niworkflows.engine package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.engine.workflows.html">niworkflows.engine.workflows module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.func.html">niworkflows.func package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.func.util.html">niworkflows.func.util module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.interfaces.html">niworkflows.interfaces package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.html">niworkflows.interfaces.reportlets package</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.base.html">niworkflows.interfaces.reportlets.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.masks.html">niworkflows.interfaces.reportlets.masks module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.registration.html">niworkflows.interfaces.reportlets.registration module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.segmentation.html">niworkflows.interfaces.reportlets.segmentation module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.bids.html">niworkflows.interfaces.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.bold.html">niworkflows.interfaces.bold module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.confounds.html">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.header.html">niworkflows.interfaces.header module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.images.html">niworkflows.interfaces.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.itk.html">niworkflows.interfaces.itk module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.nibabel.html">niworkflows.interfaces.nibabel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.nilearn.html">niworkflows.interfaces.nilearn module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.nitransforms.html">niworkflows.interfaces.nitransforms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.norm.html">niworkflows.interfaces.norm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.patches.html">niworkflows.interfaces.patches module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.plotting.html">niworkflows.interfaces.plotting module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.probmaps.html">niworkflows.interfaces.probmaps module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.reports.html">niworkflows.reports package</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.reports.core.html">niworkflows.reports.core module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.utils.html">niworkflows.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.bids.html">niworkflows.utils.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.connections.html">niworkflows.utils.connections module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.images.html">niworkflows.utils.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.misc.html">niworkflows.utils.misc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.spaces.html">niworkflows.utils.spaces module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.viz.html">niworkflows.viz package</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.viz.notebook.html">niworkflows.viz.notebook module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.viz.plots.html">niworkflows.viz.plots module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.viz.utils.html">niworkflows.viz.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.workflows.html">niworkflows.workflows package</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/niworkflows.workflows.epi.html">niworkflows.workflows.epi package</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.workflows.epi.refmap.html">niworkflows.workflows.epi.refmap module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">What’s new?</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for niworkflows.interfaces.bids</h1><div class="highlight"><pre>
+<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2021 The NiPreps Developers &lt;nipreps@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the "License");</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an "AS IS" BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#</span>
+<span class="c1"># We support and encourage derived works from this project, please read</span>
+<span class="c1"># about our expectations at</span>
+<span class="c1">#</span>
+<span class="c1">#     https://www.nipreps.org/community/licensing/</span>
+<span class="c1">#</span>
+<span class="sd">"""Interfaces for handling BIDS-like neuroimaging structures."""</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">dumps</span><span class="p">,</span> <span class="n">loads</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="kn">import</span> <span class="n">resource_filename</span> <span class="k">as</span> <span class="n">_pkgres</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">traits</span><span class="p">,</span>
+    <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">Undefined</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
+    <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
+    <span class="n">DynamicTraitedSpec</span><span class="p">,</span>
+    <span class="n">File</span><span class="p">,</span>
+    <span class="n">Directory</span><span class="p">,</span>
+    <span class="n">InputMultiObject</span><span class="p">,</span>
+    <span class="n">OutputMultiObject</span><span class="p">,</span>
+    <span class="n">Str</span><span class="p">,</span>
+    <span class="n">SimpleInterface</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">import</span> <span class="n">add_traits</span>
+<span class="kn">from</span> <span class="nn">templateflow.api</span> <span class="kn">import</span> <span class="n">templates</span> <span class="k">as</span> <span class="n">_get_template_list</span>
+<span class="kn">from</span> <span class="nn">..utils.bids</span> <span class="kn">import</span> <span class="n">_init_layout</span><span class="p">,</span> <span class="n">relative_to_root</span>
+<span class="kn">from</span> <span class="nn">..utils.images</span> <span class="kn">import</span> <span class="n">set_consumables</span><span class="p">,</span> <span class="n">unsafe_write_nifti_header_and_data</span>
+<span class="kn">from</span> <span class="nn">..utils.misc</span> <span class="kn">import</span> <span class="n">splitext</span> <span class="k">as</span> <span class="n">_splitext</span><span class="p">,</span> <span class="n">_copy_any</span><span class="p">,</span> <span class="n">unlink</span>
+
+<span class="n">regz</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\.gz$"</span><span class="p">)</span>
+<span class="n">_pybids_spec</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">_pkgres</span><span class="p">(</span><span class="s2">"niworkflows"</span><span class="p">,</span> <span class="s2">"data/nipreps.json"</span><span class="p">))</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+<span class="n">BIDS_DERIV_ENTITIES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">e</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_pybids_spec</span><span class="p">[</span><span class="s2">"entities"</span><span class="p">]})</span>
+<span class="n">BIDS_DERIV_PATTERNS</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_pybids_spec</span><span class="p">[</span><span class="s2">"default_path_patterns"</span><span class="p">])</span>
+
+<span class="n">STANDARD_SPACES</span> <span class="o">=</span> <span class="n">_get_template_list</span><span class="p">()</span>
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"nipype.interface"</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_none</span><span class="p">():</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="c1"># Automatically coerce certain suffixes (DerivativesDataSink)</span>
+<span class="n">DEFAULT_DTYPES</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span>
+    <span class="n">_none</span><span class="p">,</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">"mask"</span><span class="p">,</span> <span class="s2">"uint8"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"dseg"</span><span class="p">,</span> <span class="s2">"int16"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"probseg"</span><span class="p">,</span> <span class="s2">"float32"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"boldref"</span><span class="p">,</span> <span class="s2">"source"</span><span class="p">),</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_BIDSBaseInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">bids_dir</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Either</span><span class="p">(</span>
+        <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">Directory</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"optional bids directory"</span>
+    <span class="p">)</span>
+    <span class="n">bids_validate</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"enable BIDS validator"</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_BIDSInfoInputSpec</span><span class="p">(</span><span class="n">_BIDSBaseInputSpec</span><span class="p">):</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"input file, part of a BIDS tree"</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_BIDSInfoOutputSpec</span><span class="p">(</span><span class="n">DynamicTraitedSpec</span><span class="p">):</span>
+    <span class="n">subject</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">()</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">()</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">()</span>
+    <span class="n">acquisition</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">()</span>
+    <span class="n">reconstruction</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">()</span>
+    <span class="n">run</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">()</span>
+    <span class="n">suffix</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="BIDSInfo"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.BIDSInfo">[docs]</a><span class="k">class</span> <span class="nc">BIDSInfo</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Extract BIDS entities from a BIDS-conforming path.</span>
+
+<span class="sd">    This interface uses only the basename, not the path, to determine the</span>
+<span class="sd">    subject, session, task, run, acquisition or reconstruction.</span>
+
+<span class="sd">    .. testsetup::</span>
+
+<span class="sd">        &gt;&gt;&gt; data_dir_canary()</span>
+
+<span class="sd">    &gt;&gt;&gt; bids_info = BIDSInfo(bids_dir=str(datadir / 'ds054'), bids_validate=False)</span>
+<span class="sd">    &gt;&gt;&gt; bids_info.inputs.in_file = '''\</span>
+<span class="sd">sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz'''</span>
+<span class="sd">    &gt;&gt;&gt; res = bids_info.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+<span class="sd">    acquisition = &lt;undefined&gt;</span>
+<span class="sd">    reconstruction = &lt;undefined&gt;</span>
+<span class="sd">    run = &lt;undefined&gt;</span>
+<span class="sd">    session = retest</span>
+<span class="sd">    subject = 01</span>
+<span class="sd">    suffix = bold</span>
+<span class="sd">    task = covertverbgeneration</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+
+<span class="sd">    &gt;&gt;&gt; bids_info = BIDSInfo(bids_dir=str(datadir / 'ds054'), bids_validate=False)</span>
+<span class="sd">    &gt;&gt;&gt; bids_info.inputs.in_file = '''\</span>
+<span class="sd">sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_rec-MB_acq-AP_run-1_bold.nii.gz'''</span>
+<span class="sd">    &gt;&gt;&gt; res = bids_info.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+<span class="sd">    acquisition = AP</span>
+<span class="sd">    reconstruction = MB</span>
+<span class="sd">    run = 1</span>
+<span class="sd">    session = retest</span>
+<span class="sd">    subject = 01</span>
+<span class="sd">    suffix = bold</span>
+<span class="sd">    task = covertverbgeneration</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+
+<span class="sd">    &gt;&gt;&gt; bids_info = BIDSInfo(bids_dir=str(datadir / 'ds054'), bids_validate=False)</span>
+<span class="sd">    &gt;&gt;&gt; bids_info.inputs.in_file = '''\</span>
+<span class="sd">sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_acq-AP_run-01_bold.nii.gz'''</span>
+<span class="sd">    &gt;&gt;&gt; res = bids_info.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+<span class="sd">    acquisition = AP</span>
+<span class="sd">    reconstruction = &lt;undefined&gt;</span>
+<span class="sd">    run = 1</span>
+<span class="sd">    session = retest</span>
+<span class="sd">    subject = 01</span>
+<span class="sd">    suffix = bold</span>
+<span class="sd">    task = covertverbgeneration</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+
+<span class="sd">    &gt;&gt;&gt; bids_info = BIDSInfo(bids_validate=False)</span>
+<span class="sd">    &gt;&gt;&gt; bids_info.inputs.in_file = str(</span>
+<span class="sd">    ...     datadir / 'ds114' / 'sub-01' / 'ses-retest' /</span>
+<span class="sd">    ...     'func' / 'sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz')</span>
+<span class="sd">    &gt;&gt;&gt; res = bids_info.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+<span class="sd">    acquisition = &lt;undefined&gt;</span>
+<span class="sd">    reconstruction = &lt;undefined&gt;</span>
+<span class="sd">    run = &lt;undefined&gt;</span>
+<span class="sd">    session = retest</span>
+<span class="sd">    subject = 01</span>
+<span class="sd">    suffix = bold</span>
+<span class="sd">    task = covertverbgeneration</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+
+<span class="sd">    &gt;&gt;&gt; bids_info = BIDSInfo(bids_validate=False)</span>
+<span class="sd">    &gt;&gt;&gt; bids_info.inputs.in_file = '''\</span>
+<span class="sd">sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz'''</span>
+<span class="sd">    &gt;&gt;&gt; res = bids_info.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+<span class="sd">    acquisition = &lt;undefined&gt;</span>
+<span class="sd">    reconstruction = &lt;undefined&gt;</span>
+<span class="sd">    run = &lt;undefined&gt;</span>
+<span class="sd">    session = retest</span>
+<span class="sd">    subject = 01</span>
+<span class="sd">    suffix = bold</span>
+<span class="sd">    task = covertverbgeneration</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+
+<span class="sd">    """</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_BIDSInfoInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_BIDSInfoOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">bids.layout</span> <span class="kn">import</span> <span class="n">parse_file_entities</span>
+
+        <span class="n">bids_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bids_dir</span>
+        <span class="n">in_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span>
+        <span class="k">if</span> <span class="n">bids_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">bids_dir</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">parse_file_entities</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Undefined</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_BIDSInfoOutputSpec</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_BIDSDataGrabberInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">subject_data</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">Str</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span>
+    <span class="n">subject_id</span> <span class="o">=</span> <span class="n">Str</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">_BIDSDataGrabberOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_dict</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">"output data structure"</span><span class="p">)</span>
+    <span class="n">fmap</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">"output fieldmaps"</span><span class="p">)</span>
+    <span class="n">bold</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">"output functional images"</span><span class="p">)</span>
+    <span class="n">sbref</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">"output sbrefs"</span><span class="p">)</span>
+    <span class="n">t1w</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">"output T1w images"</span><span class="p">)</span>
+    <span class="n">roi</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">"output ROI images"</span><span class="p">)</span>
+    <span class="n">t2w</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">"output T2w images"</span><span class="p">)</span>
+    <span class="n">flair</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">"output FLAIR images"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BIDSDataGrabber"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.BIDSDataGrabber">[docs]</a><span class="k">class</span> <span class="nc">BIDSDataGrabber</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Collect files from a BIDS directory structure.</span>
+
+<span class="sd">    .. testsetup::</span>
+
+<span class="sd">        &gt;&gt;&gt; data_dir_canary()</span>
+
+<span class="sd">    &gt;&gt;&gt; bids_src = BIDSDataGrabber(anat_only=False)</span>
+<span class="sd">    &gt;&gt;&gt; bids_src.inputs.subject_data = bids_collect_data(</span>
+<span class="sd">    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]</span>
+<span class="sd">    &gt;&gt;&gt; bids_src.inputs.subject_id = '01'</span>
+<span class="sd">    &gt;&gt;&gt; res = bids_src.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.t1w  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE</span>
+<span class="sd">    ['.../ds114/sub-01/ses-retest/anat/sub-01_ses-retest_T1w.nii.gz',</span>
+<span class="sd">     '.../ds114/sub-01/ses-test/anat/sub-01_ses-test_T1w.nii.gz']</span>
+
+<span class="sd">    """</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_BIDSDataGrabberInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_BIDSDataGrabberOutputSpec</span>
+    <span class="n">_require_funcs</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">anat_only</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"anat_only"</span><span class="p">)</span>
+        <span class="n">anat_derivatives</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"anat_derivatives"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BIDSDataGrabber</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">anat_only</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_require_funcs</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">anat_only</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_require_t1w</span> <span class="o">=</span> <span class="n">anat_derivatives</span> <span class="ow">is</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">bids_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_data</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"out_dict"</span><span class="p">]</span> <span class="o">=</span> <span class="n">bids_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bids_dict</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_require_t1w</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">bids_dict</span><span class="p">[</span><span class="s1">'t1w'</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                <span class="s2">"No T1w images found for subject sub-</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_require_funcs</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">bids_dict</span><span class="p">[</span><span class="s2">"bold"</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                <span class="s2">"No functional images found for subject sub-</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">imtype</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"bold"</span><span class="p">,</span> <span class="s2">"t2w"</span><span class="p">,</span> <span class="s2">"flair"</span><span class="p">,</span> <span class="s2">"fmap"</span><span class="p">,</span> <span class="s2">"sbref"</span><span class="p">,</span> <span class="s2">"roi"</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">bids_dict</span><span class="p">[</span><span class="n">imtype</span><span class="p">]:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">'No "</span><span class="si">%s</span><span class="s1">" images found for sub-</span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">imtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_DerivativesDataSinkInputSpec</span><span class="p">(</span><span class="n">DynamicTraitedSpec</span><span class="p">,</span> <span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">base_directory</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Directory</span><span class="p">(</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">"Path to the base directory for storing data."</span>
+    <span class="p">)</span>
+    <span class="n">check_hdr</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"fix headers of NIfTI outputs"</span><span class="p">)</span>
+    <span class="n">compress</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Either</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">),</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">"whether ``in_file`` should be compressed (True), uncompressed (False) "</span>
+        <span class="s2">"or left unmodified (None, default)."</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">data_dtype</span> <span class="o">=</span> <span class="n">Str</span><span class="p">(</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">"NumPy datatype to coerce NIfTI data to, or `source` to"</span>
+        <span class="s2">"match the input file dtype"</span>
+    <span class="p">)</span>
+    <span class="n">dismiss_entities</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Either</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">Str</span><span class="p">),</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">"a list entities that will not be propagated from the source file"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
+        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"the object to be saved"</span>
+    <span class="p">)</span>
+    <span class="n">meta_dict</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">DictStrAny</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">"an input dictionary containing metadata"</span><span class="p">)</span>
+    <span class="n">source_file</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
+        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"the source file(s) to extract entities from"</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_DerivativesDataSinkOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"written file path"</span><span class="p">))</span>
+    <span class="n">out_meta</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"written JSON sidecar path"</span><span class="p">))</span>
+    <span class="n">compression</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Either</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">),</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">"whether ``in_file`` should be compressed (True), uncompressed (False) "</span>
+        <span class="s2">"or left unmodified (None)."</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">fixed_hdr</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"whether derivative header was fixed"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DerivativesDataSink"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.DerivativesDataSink">[docs]</a><span class="k">class</span> <span class="nc">DerivativesDataSink</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Store derivative files.</span>
+
+<span class="sd">    Saves the ``in_file`` into a BIDS-Derivatives folder provided</span>
+<span class="sd">    by ``base_directory``, given the input reference ``source_file``.</span>
+
+<span class="sd">    .. testsetup::</span>
+
+<span class="sd">        &gt;&gt;&gt; data_dir_canary()</span>
+
+<span class="sd">    &gt;&gt;&gt; import tempfile</span>
+<span class="sd">    &gt;&gt;&gt; tmpdir = Path(tempfile.mkdtemp())</span>
+<span class="sd">    &gt;&gt;&gt; tmpfile = tmpdir / 'a_temp_file.nii.gz'</span>
+<span class="sd">    &gt;&gt;&gt; tmpfile.open('w').close()  # "touch" the file</span>
+<span class="sd">    &gt;&gt;&gt; t1w_source = bids_collect_data(</span>
+<span class="sd">    ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]['t1w'][0]</span>
+<span class="sd">    &gt;&gt;&gt; dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.in_file = str(tmpfile)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.source_file = t1w_source</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.desc = 'denoised'</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.compress = False</span>
+<span class="sd">    &gt;&gt;&gt; res = dsink.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_file  # doctest: +ELLIPSIS</span>
+<span class="sd">    '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_desc-denoised_T1w.nii'</span>
+
+<span class="sd">    &gt;&gt;&gt; tmpfile = tmpdir / 'a_temp_file.nii'</span>
+<span class="sd">    &gt;&gt;&gt; tmpfile.open('w').close()  # "touch" the file</span>
+<span class="sd">    &gt;&gt;&gt; dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,</span>
+<span class="sd">    ...                             allowed_entities=("custom",))</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.in_file = str(tmpfile)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.source_file = t1w_source</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.custom = 'noise'</span>
+<span class="sd">    &gt;&gt;&gt; res = dsink.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_file  # doctest: +ELLIPSIS</span>
+<span class="sd">    '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom-noise_T1w.nii'</span>
+
+<span class="sd">    &gt;&gt;&gt; dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,</span>
+<span class="sd">    ...                             allowed_entities=("custom",))</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.in_file = [str(tmpfile), str(tmpfile)]</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.source_file = t1w_source</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.custom = [1, 2]</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.compress = True</span>
+<span class="sd">    &gt;&gt;&gt; res = dsink.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_file  # doctest: +ELLIPSIS</span>
+<span class="sd">    ['.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom-1_T1w.nii.gz',</span>
+<span class="sd">     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom-2_T1w.nii.gz']</span>
+
+<span class="sd">    &gt;&gt;&gt; dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,</span>
+<span class="sd">    ...                             allowed_entities=("custom1", "custom2"))</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.in_file = [str(tmpfile)] * 2</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.source_file = t1w_source</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.custom1 = [1, 2]</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.custom2 = "b"</span>
+<span class="sd">    &gt;&gt;&gt; res = dsink.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_file  # doctest: +ELLIPSIS</span>
+<span class="sd">    ['.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom1-1_custom2-b_T1w.nii',</span>
+<span class="sd">     '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom1-2_custom2-b_T1w.nii']</span>
+
+<span class="sd">    When multiple source files are passed, only common entities are passed down.</span>
+<span class="sd">    For example, if two T1w images from different sessions are used to generate</span>
+<span class="sd">    a single image, the session entity is removed automatically.</span>
+
+<span class="sd">    &gt;&gt;&gt; bids_dir = tmpdir / 'bidsroot'</span>
+<span class="sd">    &gt;&gt;&gt; multi_source = [</span>
+<span class="sd">    ...     bids_dir / 'sub-02/ses-A/anat/sub-02_ses-A_T1w.nii.gz',</span>
+<span class="sd">    ...     bids_dir / 'sub-02/ses-B/anat/sub-02_ses-B_T1w.nii.gz']</span>
+<span class="sd">    &gt;&gt;&gt; for source_file in multi_source:</span>
+<span class="sd">    ...     source_file.parent.mkdir(parents=True, exist_ok=True)</span>
+<span class="sd">    ...     _ = source_file.write_text("")</span>
+<span class="sd">    &gt;&gt;&gt; dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.in_file = str(tmpfile)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.source_file = list(map(str, multi_source))</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.desc = 'preproc'</span>
+<span class="sd">    &gt;&gt;&gt; res = dsink.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_file  # doctest: +ELLIPSIS</span>
+<span class="sd">    '.../niworkflows/sub-02/anat/sub-02_desc-preproc_T1w.nii'</span>
+
+<span class="sd">    If, on the other hand, only one is used, the session is preserved:</span>
+
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.source_file = str(multi_source[0])</span>
+<span class="sd">    &gt;&gt;&gt; res = dsink.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_file  # doctest: +ELLIPSIS</span>
+<span class="sd">    '.../niworkflows/sub-02/ses-A/anat/sub-02_ses-A_desc-preproc_T1w.nii'</span>
+
+<span class="sd">    &gt;&gt;&gt; bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'</span>
+<span class="sd">    &gt;&gt;&gt; bids_dir.mkdir(parents=True, exist_ok=True)</span>
+<span class="sd">    &gt;&gt;&gt; tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-01_bold.nii.gz'</span>
+<span class="sd">    &gt;&gt;&gt; tricky_source.open('w').close()</span>
+<span class="sd">    &gt;&gt;&gt; dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.in_file = str(tmpfile)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.source_file = str(tricky_source)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.desc = 'preproc'</span>
+<span class="sd">    &gt;&gt;&gt; res = dsink.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_file  # doctest: +ELLIPSIS</span>
+<span class="sd">    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-1_\</span>
+<span class="sd">desc-preproc_bold.nii'</span>
+
+<span class="sd">    &gt;&gt;&gt; bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'</span>
+<span class="sd">    &gt;&gt;&gt; bids_dir.mkdir(parents=True, exist_ok=True)</span>
+<span class="sd">    &gt;&gt;&gt; tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-1_bold.nii.gz'</span>
+<span class="sd">    &gt;&gt;&gt; tricky_source.open('w').close()</span>
+<span class="sd">    &gt;&gt;&gt; dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.in_file = str(tmpfile)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.source_file = str(tricky_source)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.desc = 'preproc'</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.RepetitionTime = 0.75</span>
+<span class="sd">    &gt;&gt;&gt; res = dsink.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_meta  # doctest: +ELLIPSIS</span>
+<span class="sd">    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-1_\</span>
+<span class="sd">desc-preproc_bold.json'</span>
+
+<span class="sd">    &gt;&gt;&gt; Path(res.outputs.out_meta).read_text().splitlines()[1]</span>
+<span class="sd">    '  "RepetitionTime": 0.75'</span>
+
+<span class="sd">    &gt;&gt;&gt; bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'</span>
+<span class="sd">    &gt;&gt;&gt; bids_dir.mkdir(parents=True, exist_ok=True)</span>
+<span class="sd">    &gt;&gt;&gt; tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-01_bold.nii.gz'</span>
+<span class="sd">    &gt;&gt;&gt; tricky_source.open('w').close()</span>
+<span class="sd">    &gt;&gt;&gt; dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,</span>
+<span class="sd">    ...                             SkullStripped=True)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.in_file = str(tmpfile)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.source_file = str(tricky_source)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.desc = 'preproc'</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.space = 'MNI152NLin6Asym'</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.resolution = '01'</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.RepetitionTime = 0.75</span>
+<span class="sd">    &gt;&gt;&gt; res = dsink.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_meta  # doctest: +ELLIPSIS</span>
+<span class="sd">    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-1_\</span>
+<span class="sd">space-MNI152NLin6Asym_res-01_desc-preproc_bold.json'</span>
+
+<span class="sd">    &gt;&gt;&gt; lines = Path(res.outputs.out_meta).read_text().splitlines()</span>
+<span class="sd">    &gt;&gt;&gt; lines[1]</span>
+<span class="sd">    '  "RepetitionTime": 0.75,'</span>
+
+<span class="sd">    &gt;&gt;&gt; lines[2]</span>
+<span class="sd">    '  "SkullStripped": true'</span>
+
+<span class="sd">    &gt;&gt;&gt; bids_dir = tmpdir / 'bidsroot' / 'sub-02' / 'ses-noanat' / 'func'</span>
+<span class="sd">    &gt;&gt;&gt; bids_dir.mkdir(parents=True, exist_ok=True)</span>
+<span class="sd">    &gt;&gt;&gt; tricky_source = bids_dir / 'sub-02_ses-noanat_task-rest_run-01_bold.nii.gz'</span>
+<span class="sd">    &gt;&gt;&gt; tricky_source.open('w').close()</span>
+<span class="sd">    &gt;&gt;&gt; dsink = DerivativesDataSink(base_directory=str(tmpdir), check_hdr=False,</span>
+<span class="sd">    ...                             SkullStripped=True)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.in_file = str(tmpfile)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.source_file = str(tricky_source)</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.desc = 'preproc'</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.resolution = 'native'</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.space = 'MNI152NLin6Asym'</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.RepetitionTime = 0.75</span>
+<span class="sd">    &gt;&gt;&gt; dsink.inputs.meta_dict = {'RepetitionTime': 1.75, 'SkullStripped': False, 'Z': 'val'}</span>
+<span class="sd">    &gt;&gt;&gt; res = dsink.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_meta  # doctest: +ELLIPSIS</span>
+<span class="sd">    '.../niworkflows/sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-1_\</span>
+<span class="sd">space-MNI152NLin6Asym_desc-preproc_bold.json'</span>
+
+<span class="sd">    &gt;&gt;&gt; lines = Path(res.outputs.out_meta).read_text().splitlines()</span>
+<span class="sd">    &gt;&gt;&gt; lines[1]</span>
+<span class="sd">    '  "RepetitionTime": 0.75,'</span>
+
+<span class="sd">    &gt;&gt;&gt; lines[2]</span>
+<span class="sd">    '  "SkullStripped": true,'</span>
+
+<span class="sd">    &gt;&gt;&gt; lines[3]</span>
+<span class="sd">    '  "Z": "val"'</span>
+
+<span class="sd">    """</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_DerivativesDataSinkInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_DerivativesDataSinkOutputSpec</span>
+    <span class="n">out_path_base</span> <span class="o">=</span> <span class="s2">"niworkflows"</span>
+    <span class="n">_always_run</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">_allowed_entities</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">BIDS_DERIV_ENTITIES</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed_entities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_path_base</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">"""Initialize the SimpleInterface and extend inputs with custom entities."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_allowed_entities</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">allowed_entities</span> <span class="ow">or</span> <span class="p">[])</span><span class="o">.</span><span class="n">union</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_allowed_entities</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">out_path_base</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">out_path_base</span> <span class="o">=</span> <span class="n">out_path_base</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_static_traits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="o">.</span><span class="n">class_editable_traits</span><span class="p">()</span> <span class="o">+</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_allowed_entities</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">dynamic_input</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_static_traits</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">dynamic_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">dynamic_input</span><span class="p">)</span>
+
+        <span class="c1"># First regular initialization (constructs InputSpec object)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">add_traits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allowed_entities</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allowed_entities</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
+            <span class="c1"># Add additional input fields (self.inputs is an object)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">inputs</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">bids.layout</span> <span class="kn">import</span> <span class="n">parse_file_entities</span>
+        <span class="kn">from</span> <span class="nn">bids.layout.writing</span> <span class="kn">import</span> <span class="n">build_path</span>
+        <span class="kn">from</span> <span class="nn">bids.utils</span> <span class="kn">import</span> <span class="n">listify</span>
+
+        <span class="c1"># Ready the output folder</span>
+        <span class="n">base_directory</span> <span class="o">=</span> <span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
+        <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span><span class="p">):</span>
+            <span class="n">base_directory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span>
+        <span class="n">base_directory</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">base_directory</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="n">out_path</span> <span class="o">=</span> <span class="n">base_directory</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_path_base</span>
+        <span class="n">out_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Ensure we have a list</span>
+        <span class="n">in_file</span> <span class="o">=</span> <span class="n">listify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>
+
+        <span class="c1"># Read in the dictionary of metadata</span>
+        <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">meta_dict</span><span class="p">):</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">meta_dict</span>
+            <span class="c1"># inputs passed in construction take priority</span>
+            <span class="n">meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">meta</span>
+
+        <span class="c1"># Initialize entities with those from the source file.</span>
+        <span class="n">in_entities</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">parse_file_entities</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">relative_to_root</span><span class="p">(</span><span class="n">source_file</span><span class="p">)))</span>
+            <span class="k">for</span> <span class="n">source_file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span>
+        <span class="p">]</span>
+        <span class="n">out_entities</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">in_entities</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">ent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">==</span> <span class="n">v</span> <span class="k">for</span> <span class="n">ent</span> <span class="ow">in</span> <span class="n">in_entities</span><span class="p">[</span><span class="mi">1</span><span class="p">:])}</span>
+        <span class="k">for</span> <span class="n">drop_entity</span> <span class="ow">in</span> <span class="n">listify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dismiss_entities</span> <span class="ow">or</span> <span class="p">[]):</span>
+            <span class="n">out_entities</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">drop_entity</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># Override extension with that of the input file(s)</span>
+        <span class="n">out_entities</span><span class="p">[</span><span class="s2">"extension"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="c1"># _splitext does not accept .surf.gii (for instance)</span>
+            <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">orig_file</span><span class="p">)</span><span class="o">.</span><span class="n">suffixes</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">orig_file</span> <span class="ow">in</span> <span class="n">in_file</span>
+        <span class="p">]</span>
+
+        <span class="n">compress</span> <span class="o">=</span> <span class="n">listify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">compress</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">compress</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">compress</span> <span class="o">=</span> <span class="n">compress</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ext</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">out_entities</span><span class="p">[</span><span class="s2">"extension"</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">compress</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ext</span> <span class="o">=</span> <span class="n">regz</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+                <span class="n">out_entities</span><span class="p">[</span><span class="s2">"extension"</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s2">.gz"</span> <span class="k">if</span> <span class="n">compress</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">else</span> <span class="n">ext</span>
+
+        <span class="c1"># Override entities with those set as inputs</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allowed_entities</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">isdefined</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                <span class="n">out_entities</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c1"># Clean up native resolution with space</span>
+        <span class="k">if</span> <span class="n">out_entities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"resolution"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"native"</span> <span class="ow">and</span> <span class="n">out_entities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"space"</span><span class="p">):</span>
+            <span class="n">out_entities</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"resolution"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">out_entities</span><span class="p">[</span><span class="s2">"extension"</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">out_entities</span><span class="p">[</span><span class="s2">"extension"</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_entities</span><span class="p">[</span><span class="s2">"extension"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Insert custom (non-BIDS) entities from allowed_entities.</span>
+        <span class="n">custom_entities</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">out_entities</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">BIDS_DERIV_ENTITIES</span><span class="p">)</span>
+        <span class="n">patterns</span> <span class="o">=</span> <span class="n">BIDS_DERIV_PATTERNS</span>
+        <span class="k">if</span> <span class="n">custom_entities</span><span class="p">:</span>
+            <span class="c1"># Example: f"{key}-{{{key}}}" -&gt; "task-{task}"</span>
+            <span class="n">custom_pat</span> <span class="o">=</span> <span class="s2">"_"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">-</span><span class="se">{{</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="se">}}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">custom_entities</span><span class="p">))</span>
+            <span class="n">patterns</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">pat</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"_{suffix"</span><span class="p">,</span> <span class="s2">"_"</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">""</span><span class="p">,</span> <span class="n">custom_pat</span><span class="p">,</span> <span class="s2">"{suffix"</span><span class="p">)))</span>
+                <span class="k">for</span> <span class="n">pat</span> <span class="ow">in</span> <span class="n">patterns</span>
+            <span class="p">]</span>
+
+        <span class="c1"># Prepare SimpleInterface outputs object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"out_file"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"compression"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"fixed_hdr"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+
+        <span class="n">dest_files</span> <span class="o">=</span> <span class="n">build_path</span><span class="p">(</span><span class="n">out_entities</span><span class="p">,</span> <span class="n">path_patterns</span><span class="o">=</span><span class="n">patterns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dest_files</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not build path with entities </span><span class="si">{</span><span class="n">out_entities</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
+
+        <span class="c1"># Make sure the interpolated values is embedded in a list, and check</span>
+        <span class="n">dest_files</span> <span class="o">=</span> <span class="n">listify</span><span class="p">(</span><span class="n">dest_files</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dest_files</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Input files (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span><span class="si">}</span><span class="s2">) not matched "</span>
+                <span class="sa">f</span><span class="s2">"by interpolated patterns (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dest_files</span><span class="p">)</span><span class="si">}</span><span class="s2">)."</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">orig_file</span><span class="p">,</span> <span class="n">dest_file</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">dest_files</span><span class="p">)):</span>
+            <span class="n">out_file</span> <span class="o">=</span> <span class="n">out_path</span> <span class="o">/</span> <span class="n">dest_file</span>
+            <span class="n">out_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"out_file"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"compression"</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dest_file</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">".gz"</span><span class="p">))</span>
+
+            <span class="c1"># Set data and header iff changes need to be made. If these are</span>
+            <span class="c1"># still None when it's time to write, just copy.</span>
+            <span class="n">new_data</span><span class="p">,</span> <span class="n">new_header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+            <span class="n">is_nifti</span> <span class="o">=</span> <span class="n">out_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
+                <span class="p">(</span><span class="s2">".nii"</span><span class="p">,</span> <span class="s2">".nii.gz"</span><span class="p">)</span>
+            <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">out_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">".dtseries.nii"</span><span class="p">,</span> <span class="s2">".dtseries.nii.gz"</span><span class="p">))</span>
+            <span class="n">data_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">data_dtype</span> <span class="ow">or</span> <span class="n">DEFAULT_DTYPES</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">suffix</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">is_nifti</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">check_hdr</span><span class="p">,</span> <span class="n">data_dtype</span><span class="p">)):</span>
+                <span class="n">nii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">orig_file</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">check_hdr</span><span class="p">:</span>
+                    <span class="n">hdr</span> <span class="o">=</span> <span class="n">nii</span><span class="o">.</span><span class="n">header</span>
+                    <span class="n">curr_units</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                        <span class="p">[</span><span class="kc">None</span> <span class="k">if</span> <span class="n">u</span> <span class="o">==</span> <span class="s2">"unknown"</span> <span class="k">else</span> <span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">hdr</span><span class="o">.</span><span class="n">get_xyzt_units</span><span class="p">()]</span>
+                    <span class="p">)</span>
+                    <span class="n">curr_codes</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">hdr</span><span class="p">[</span><span class="s2">"qform_code"</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">hdr</span><span class="p">[</span><span class="s2">"sform_code"</span><span class="p">]))</span>
+
+                    <span class="c1"># Default to mm, use sec if data type is bold</span>
+                    <span class="n">units</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">curr_units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">"mm"</span><span class="p">,</span>
+                        <span class="s2">"sec"</span> <span class="k">if</span> <span class="n">out_entities</span><span class="p">[</span><span class="s2">"suffix"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"bold"</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">xcodes</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Derivative in its original scanner space</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">space</span><span class="p">:</span>
+                        <span class="n">xcodes</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">space</span> <span class="ow">in</span> <span class="n">STANDARD_SPACES</span> <span class="k">else</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                        <span class="p">)</span>
+
+                    <span class="n">curr_zooms</span> <span class="o">=</span> <span class="n">zooms</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="s2">"RepetitionTime"</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
+                        <span class="n">zooms</span> <span class="o">=</span> <span class="n">curr_zooms</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">RepetitionTime</span><span class="p">,)</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="n">curr_codes</span><span class="p">,</span> <span class="n">curr_units</span><span class="p">,</span> <span class="n">curr_zooms</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="n">xcodes</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">zooms</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"fixed_hdr"</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">new_header</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                        <span class="n">new_header</span><span class="o">.</span><span class="n">set_qform</span><span class="p">(</span><span class="n">nii</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">xcodes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">new_header</span><span class="o">.</span><span class="n">set_sform</span><span class="p">(</span><span class="n">nii</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">xcodes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">new_header</span><span class="o">.</span><span class="n">set_xyzt_units</span><span class="p">(</span><span class="o">*</span><span class="n">units</span><span class="p">)</span>
+                        <span class="n">new_header</span><span class="o">.</span><span class="n">set_zooms</span><span class="p">(</span><span class="n">zooms</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">data_dtype</span> <span class="o">==</span> <span class="s2">"source"</span><span class="p">:</span>  <span class="c1"># match source dtype</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">data_dtype</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">get_data_dtype</span><span class="p">()</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">"Could not get data type of file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+                        <span class="p">)</span>
+                        <span class="n">data_dtype</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="n">data_dtype</span><span class="p">:</span>
+                    <span class="n">data_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">data_dtype</span><span class="p">)</span>
+                    <span class="n">orig_dtype</span> <span class="o">=</span> <span class="n">nii</span><span class="o">.</span><span class="n">get_data_dtype</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">orig_dtype</span> <span class="o">!=</span> <span class="n">data_dtype</span><span class="p">:</span>
+                        <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">"Changing </span><span class="si">{</span><span class="n">out_file</span><span class="si">}</span><span class="s2"> dtype from </span><span class="si">{</span><span class="n">orig_dtype</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">data_dtype</span><span class="si">}</span><span class="s2">"</span>
+                        <span class="p">)</span>
+                        <span class="c1"># coerce dataobj to new data dtype</span>
+                        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">data_dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+                            <span class="n">new_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">(</span><span class="n">nii</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">data_dtype</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">new_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">nii</span><span class="o">.</span><span class="n">dataobj</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_dtype</span><span class="p">)</span>
+                        <span class="c1"># and set header to match</span>
+                        <span class="k">if</span> <span class="n">new_header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">new_header</span> <span class="o">=</span> <span class="n">nii</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                        <span class="n">new_header</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="n">data_dtype</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">nii</span>
+
+            <span class="n">unlink</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">new_data</span> <span class="ow">is</span> <span class="n">new_header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_copy_any</span><span class="p">(</span><span class="n">orig_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">orig_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">orig_file</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">new_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">set_consumables</span><span class="p">(</span><span class="n">new_header</span><span class="p">,</span> <span class="n">orig_img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span>
+                    <span class="n">new_data</span> <span class="o">=</span> <span class="n">orig_img</span><span class="o">.</span><span class="n">dataobj</span><span class="o">.</span><span class="n">get_unscaled</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Without this, we would be writing nans</span>
+                    <span class="c1"># This is our punishment for hacking around nibabel defaults</span>
+                    <span class="n">new_header</span><span class="o">.</span><span class="n">set_slope_inter</span><span class="p">(</span><span class="n">slope</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">inter</span><span class="o">=</span><span class="mf">0.</span><span class="p">)</span>
+                <span class="n">unsafe_write_nifti_header_and_data</span><span class="p">(</span>
+                    <span class="n">fname</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span>
+                    <span class="n">header</span><span class="o">=</span><span class="n">new_header</span><span class="p">,</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">new_data</span>
+                <span class="p">)</span>
+                <span class="k">del</span> <span class="n">orig_img</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"out_file"</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">meta_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">copyable_trait_names</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="n">k</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">meta_fields</span>
+                    <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_traits</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">:</span>
+                <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"out_file"</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="c1"># 1.3.x hack</span>
+                <span class="c1"># For dtseries, we have been generating weird non-BIDS JSON files.</span>
+                <span class="c1"># We can safely keep producing them to avoid breaking derivatives, but</span>
+                <span class="c1"># only the existing keys should keep going into them.</span>
+                <span class="k">if</span> <span class="n">out_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">".dtseries.nii"</span><span class="p">):</span>
+                    <span class="n">legacy_metadata</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"grayordinates"</span><span class="p">,</span> <span class="s2">"space"</span><span class="p">,</span> <span class="s2">"surface"</span><span class="p">,</span> <span class="s2">"surface_density"</span><span class="p">,</span> <span class="s2">"volume"</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">:</span>
+                            <span class="n">legacy_metadata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">legacy_metadata</span><span class="p">:</span>
+                        <span class="n">sidecar</span> <span class="o">=</span> <span class="n">out_file</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">_splitext</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">.json"</span>
+                        <span class="n">unlink</span><span class="p">(</span><span class="n">sidecar</span><span class="p">,</span> <span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">sidecar</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">dumps</span><span class="p">(</span><span class="n">legacy_metadata</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+                <span class="c1"># The future: the extension is the first . and everything after</span>
+                <span class="n">sidecar</span> <span class="o">=</span> <span class="n">out_file</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">out_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'.'</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">.json"</span>
+                <span class="n">unlink</span><span class="p">(</span><span class="n">sidecar</span><span class="p">,</span> <span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">sidecar</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"out_meta"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sidecar</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_ReadSidecarJSONInputSpec</span><span class="p">(</span><span class="n">_BIDSBaseInputSpec</span><span class="p">):</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"the input nifti file"</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_ReadSidecarJSONOutputSpec</span><span class="p">(</span><span class="n">_BIDSInfoOutputSpec</span><span class="p">):</span>
+    <span class="n">out_dict</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Dict</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="ReadSidecarJSON"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.ReadSidecarJSON">[docs]</a><span class="k">class</span> <span class="nc">ReadSidecarJSON</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Read JSON sidecar files of a BIDS tree.</span>
+
+<span class="sd">    .. testsetup::</span>
+
+<span class="sd">        &gt;&gt;&gt; data_dir_canary()</span>
+
+<span class="sd">    &gt;&gt;&gt; fmap = str(datadir / 'ds054' / 'sub-100185' / 'fmap' /</span>
+<span class="sd">    ...            'sub-100185_phasediff.nii.gz')</span>
+
+<span class="sd">    &gt;&gt;&gt; meta = ReadSidecarJSON(in_file=fmap, bids_dir=str(datadir / 'ds054'),</span>
+<span class="sd">    ...                        bids_validate=False).run()</span>
+<span class="sd">    &gt;&gt;&gt; meta.outputs.subject</span>
+<span class="sd">    '100185'</span>
+<span class="sd">    &gt;&gt;&gt; meta.outputs.suffix</span>
+<span class="sd">    'phasediff'</span>
+<span class="sd">    &gt;&gt;&gt; meta.outputs.out_dict['Manufacturer']</span>
+<span class="sd">    'SIEMENS'</span>
+<span class="sd">    &gt;&gt;&gt; meta = ReadSidecarJSON(in_file=fmap, fields=['Manufacturer'],</span>
+<span class="sd">    ...                        bids_dir=str(datadir / 'ds054'),</span>
+<span class="sd">    ...                        bids_validate=False).run()</span>
+<span class="sd">    &gt;&gt;&gt; meta.outputs.out_dict['Manufacturer']</span>
+<span class="sd">    'SIEMENS'</span>
+<span class="sd">    &gt;&gt;&gt; meta.outputs.Manufacturer</span>
+<span class="sd">    'SIEMENS'</span>
+<span class="sd">    &gt;&gt;&gt; meta.outputs.OtherField  # doctest: +IGNORE_EXCEPTION_DETAIL</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    AttributeError:</span>
+<span class="sd">    &gt;&gt;&gt; meta = ReadSidecarJSON(</span>
+<span class="sd">    ...     in_file=fmap, fields=['MadeUpField'],</span>
+<span class="sd">    ...     bids_dir=str(datadir / 'ds054'),</span>
+<span class="sd">    ...     bids_validate=False).run()  # doctest: +IGNORE_EXCEPTION_DETAIL</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    KeyError:</span>
+<span class="sd">    &gt;&gt;&gt; meta = ReadSidecarJSON(in_file=fmap, fields=['MadeUpField'],</span>
+<span class="sd">    ...                        undef_fields=True,</span>
+<span class="sd">    ...                        bids_dir=str(datadir / 'ds054'),</span>
+<span class="sd">    ...                        bids_validate=False).run()</span>
+<span class="sd">    &gt;&gt;&gt; meta.outputs.MadeUpField</span>
+<span class="sd">    &lt;undefined&gt;</span>
+
+<span class="sd">    """</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_ReadSidecarJSONInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_ReadSidecarJSONOutputSpec</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_always_run</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">undef_fields</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">bids.utils</span> <span class="kn">import</span> <span class="n">listify</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ReadSidecarJSON</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span> <span class="o">=</span> <span class="n">listify</span><span class="p">(</span><span class="n">fields</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undef_fields</span> <span class="o">=</span> <span class="n">undef_fields</span>
+
+    <span class="k">def</span> <span class="nf">_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ReadSidecarJSON</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_outputs</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">:</span>
+            <span class="n">base</span> <span class="o">=</span> <span class="n">add_traits</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">base</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bids_dir</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">_init_layout</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bids_validate</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Fill in BIDS entities of the output ("*_id")</span>
+        <span class="n">output_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_BIDSInfoOutputSpec</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">parse_file_entities</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Undefined</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">output_keys</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Fill in metadata</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"out_dict"</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
+
+        <span class="c1"># Set dynamic outputs if fields input is present</span>
+        <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_undef_fields</span> <span class="ow">and</span> <span class="n">fname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="s1">'Metadata field "</span><span class="si">%s</span><span class="s1">" not found for file </span><span class="si">%s</span><span class="s1">'</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">Undefined</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_BIDSFreeSurferDirInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">derivatives</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span>
+        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"BIDS derivatives directory"</span>
+    <span class="p">)</span>
+    <span class="n">freesurfer_home</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span>
+        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"FreeSurfer installation directory"</span>
+    <span class="p">)</span>
+    <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Either</span><span class="p">(</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(),</span>
+        <span class="n">Directory</span><span class="p">(),</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">"freesurfer"</span><span class="p">,</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">"Name of FreeSurfer subjects directory"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">spaces</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"Set of output spaces to prepare"</span><span class="p">)</span>
+    <span class="n">overwrite_fsaverage</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
+        <span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"Overwrite fsaverage directories, if present"</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_BIDSFreeSurferDirOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Directory</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"FreeSurfer subjects directory"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BIDSFreeSurferDir"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.BIDSFreeSurferDir">[docs]</a><span class="k">class</span> <span class="nc">BIDSFreeSurferDir</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Prepare a FreeSurfer subjects directory for use in a BIDS context.</span>
+
+<span class="sd">    Constructs a subjects directory path, creating if necessary, and copies</span>
+<span class="sd">    fsaverage subjects (if necessary or forced via ``overwrite_fsaverage``)</span>
+<span class="sd">    into from the local FreeSurfer distribution.</span>
+
+<span class="sd">    If ``subjects_dir`` is an absolute path, then it is returned as the output</span>
+<span class="sd">    ``subjects_dir``.</span>
+<span class="sd">    If it is a relative path, it will be resolved relative to the</span>
+<span class="sd">    ```derivatives`` directory.`</span>
+
+<span class="sd">    Regardless of the path, if ``fsaverage`` spaces are provided, they will be</span>
+<span class="sd">    verified to exist, or copied from ``$FREESURFER_HOME/subjects``, if missing.</span>
+
+<span class="sd">    The output ``subjects_dir`` is intended to be passed to ``ReconAll`` and</span>
+<span class="sd">    other FreeSurfer interfaces.</span>
+
+<span class="sd">    """</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_BIDSFreeSurferDirInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_BIDSFreeSurferDirOutputSpec</span>
+    <span class="n">_always_run</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subjects_dir</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
+            <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">derivatives</span><span class="p">)</span> <span class="o">/</span> <span class="n">subjects_dir</span>
+        <span class="n">subjects_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"subjects_dir"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">subjects_dir</span><span class="p">)</span>
+
+        <span class="n">orig_subjects_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">freesurfer_home</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"subjects"</span>
+
+        <span class="c1"># Source is target, so just quit</span>
+        <span class="k">if</span> <span class="n">subjects_dir</span> <span class="o">==</span> <span class="n">orig_subjects_dir</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">runtime</span>
+
+        <span class="n">spaces</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">spaces</span><span class="p">)</span>
+        <span class="c1"># Always copy fsaverage, for proper recon-all functionality</span>
+        <span class="k">if</span> <span class="s2">"fsaverage"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spaces</span><span class="p">:</span>
+            <span class="n">spaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"fsaverage"</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">space</span> <span class="ow">in</span> <span class="n">spaces</span><span class="p">:</span>
+            <span class="c1"># Skip non-freesurfer spaces and fsnative</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">space</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"fsaverage"</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="n">orig_subjects_dir</span> <span class="o">/</span> <span class="n">space</span>
+            <span class="n">dest</span> <span class="o">=</span> <span class="n">subjects_dir</span> <span class="o">/</span> <span class="n">space</span>
+
+            <span class="c1"># Edge case, but give a sensible error</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">source</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">"Expected to find '</span><span class="si">%s</span><span class="s2">' to copy"</span> <span class="o">%</span> <span class="n">source</span><span class="p">)</span>
+
+            <span class="c1"># Finesse is overrated. Either leave it alone or completely clobber it.</span>
+            <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">overwrite_fsaverage</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">dest</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Use copy instead of copy2; copy calls copymode while copy2 calls</span>
+                    <span class="c1"># copystat, which will preserve atime/mtime.</span>
+                    <span class="c1"># atime should *not* be copied to avoid triggering processes that</span>
+                    <span class="c1"># sweep un-accessed files.</span>
+                    <span class="c1"># If we want to preserve mtime, that will require a new copy function.</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">copy_function</span><span class="o">=</span><span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="s2">"</span><span class="si">%s</span><span class="s2"> exists; if multiple jobs are running in parallel"</span>
+                        <span class="s2">", this can be safely ignored"</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">runtime</span></div>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Copyright 2022, The NiPreps Developers
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/scripts/furo.js"></script>
+    <script src="../../../_static/js/version-switch.js"></script>
+    </body>
+</html>

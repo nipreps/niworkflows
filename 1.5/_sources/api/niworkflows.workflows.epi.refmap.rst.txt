@@ -1,0 +1,7 @@
+niworkflows.workflows.epi.refmap module
+=======================================
+
+.. automodule:: niworkflows.workflows.epi.refmap
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.interfaces.confounds module &mdash; niworkflows 1.2.9 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="niworkflows.interfaces.fixes module" href="niworkflows.interfaces.fixes.html" />
+    <link rel="prev" title="niworkflows.interfaces.cifti module" href="niworkflows.interfaces.cifti.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.2.9
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.anat.html">niworkflows.anat package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.cli.html">niworkflows.cli package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.func.html">niworkflows.func package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="niworkflows.interfaces.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.ants.html">niworkflows.interfaces.ants module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.bids.html">niworkflows.interfaces.bids module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.images.html">niworkflows.interfaces.images module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.itk.html">niworkflows.interfaces.itk module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.masks.html">niworkflows.interfaces.masks module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.mni.html">niworkflows.interfaces.mni module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.nibabel.html">niworkflows.interfaces.nibabel module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.nilearn.html">niworkflows.interfaces.nilearn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.nitransforms.html">niworkflows.interfaces.nitransforms module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.patches.html">niworkflows.interfaces.patches module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.plotting.html">niworkflows.interfaces.plotting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.registration.html">niworkflows.interfaces.registration module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.report_base.html">niworkflows.interfaces.report_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.segmentation.html">niworkflows.interfaces.segmentation module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.utils.html">niworkflows.interfaces.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.viz.html">niworkflows.viz package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
+          <li><a href="niworkflows.interfaces.html">niworkflows.interfaces package</a> &raquo;</li>
+      <li>niworkflows.interfaces.confounds module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/niworkflows.interfaces.confounds.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../../master/api/niworkflows.interfaces.confounds.html"><b>Warning:</b> This document is for an old version of niworkflows. The main version is master.</a></p>
+<div class="section" id="module-niworkflows.interfaces.confounds">
+<span id="niworkflows-interfaces-confounds-module"></span><h1>niworkflows.interfaces.confounds module<a class="headerlink" href="#module-niworkflows.interfaces.confounds" title="Permalink to this headline">¶</a></h1>
+<p>Select terms for a confound model, and compute any requisite expansions.</p>
+<dl class="py class">
+<dt id="niworkflows.interfaces.confounds.ExpandModel">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.confounds.</span></code><code class="sig-name descname"><span class="pre">ExpandModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/confounds.html#ExpandModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.confounds.ExpandModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Expand a confound model according to a specified formula.</p>
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.confounds.ExpandModel.input_spec">
+<code class="sig-name descname"><span class="pre">input_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.confounds.ExpandModel.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.confounds._ExpandModelInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.confounds.ExpandModel.output_spec">
+<code class="sig-name descname"><span class="pre">output_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.confounds.ExpandModel.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.confounds._ExpandModelOutputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.confounds.NormalizeMotionParams">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.confounds.</span></code><code class="sig-name descname"><span class="pre">NormalizeMotionParams</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/confounds.html#NormalizeMotionParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.confounds.NormalizeMotionParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Convert input motion parameters into the designated convention.</p>
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.confounds.NormalizeMotionParams.input_spec">
+<code class="sig-name descname"><span class="pre">input_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.confounds.NormalizeMotionParams.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.confounds._NormalizeMotionParamsInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.confounds.NormalizeMotionParams.output_spec">
+<code class="sig-name descname"><span class="pre">output_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.confounds.NormalizeMotionParams.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.confounds._NormalizeMotionParamsOutputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.confounds.SpikeRegressors">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.confounds.</span></code><code class="sig-name descname"><span class="pre">SpikeRegressors</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/confounds.html#SpikeRegressors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.confounds.SpikeRegressors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Generate spike regressors.</p>
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.confounds.SpikeRegressors.input_spec">
+<code class="sig-name descname"><span class="pre">input_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.confounds.SpikeRegressors.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.confounds._SpikeRegressorsInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.confounds.SpikeRegressors.output_spec">
+<code class="sig-name descname"><span class="pre">output_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.confounds.SpikeRegressors.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.confounds._SpikeRegressorsOutputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.interfaces.confounds.exponential_terms">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.confounds.</span></code><code class="sig-name descname"><span class="pre">exponential_terms</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/confounds.html#exponential_terms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.confounds.exponential_terms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute exponential expansions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – A list of exponential terms to include. For instance, <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">2]</span></code>
+indicates that the first and second exponential terms should be added.
+To retain the original terms, <code class="docutils literal notranslate"><span class="pre">1</span></code> <em>must</em> be included in the list.</p></li>
+<li><p><strong>variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – List of variables for which exponential terms should be computed.</p></li>
+<li><p><strong>data</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code>) – Table of values of all observations of all variables.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>variables_exp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>) – A list of variables to include in the final data frame after adding
+the specified exponential terms.</p></li>
+<li><p><strong>data_exp</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code>) – Table of values of all observations of all variables, including any
+specified exponential terms.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.interfaces.confounds.parse_expression">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.confounds.</span></code><code class="sig-name descname"><span class="pre">parse_expression</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/confounds.html#parse_expression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.confounds.parse_expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse an expression in a model formula.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Formula expression: either a single variable or a variable group
+paired with an operation (exponentiation or differentiation).</p></li>
+<li><p><strong>parent_data</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code>) – The source data for the model expansion.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>) – A list of variables in the provided formula expression.</p></li>
+<li><p><strong>data</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code>) – A tabulation of all terms in the provided formula expression.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.interfaces.confounds.parse_formula">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.confounds.</span></code><code class="sig-name descname"><span class="pre">parse_formula</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unscramble</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/confounds.html#parse_formula"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.confounds.parse_formula" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a confound manipulation formula.</p>
+<p>Recursively parse a model formula by breaking it into additive atoms
+and tracking grouping symbol depth.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul>
+<li><p><strong>model_formula</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Expression for the model formula, e.g.
+<code class="docutils literal notranslate"><span class="pre">(a</span> <span class="pre">+</span> <span class="pre">b)^^2</span> <span class="pre">+</span> <span class="pre">dd1(c</span> <span class="pre">+</span> <span class="pre">(d</span> <span class="pre">+</span> <span class="pre">e)^3)</span> <span class="pre">+</span> <span class="pre">f</span></code>
+Note that any expressions to be expanded <em>must</em> be in parentheses,
+even if they include only a single variable
+(e.g., <code class="docutils literal notranslate"><span class="pre">(x)^2</span></code>, not <code class="docutils literal notranslate"><span class="pre">x^2</span></code>).
+Temporal derivative options:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">d6(variable)</span></code> for the 6th temporal derivative</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dd6(variable)</span></code> for all temporal derivatives up to the 6th</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">d4-6(variable)</span></code> for the 4th through 6th temporal derivatives</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> must be included in the temporal derivative range for the
+original term to be returned when temporal derivatives are computed.</p></li>
+</ul>
+</div></blockquote>
+<p>Exponential options:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">(variable)^6</span></code> for the 6th power</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">(variable)^^6</span></code> for all powers up to the 6th</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">(variable)^4-6</span></code> for the 4th through 6th powers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> must be included in the powers range for the original term to be
+returned when exponential terms are computed.</p></li>
+</ul>
+</div></blockquote>
+<p>Temporal derivatives and exponential terms are computed for all terms
+in the grouping symbols that they adjoin.</p>
+</li>
+<li><p><strong>parent_data</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code>) – A tabulation of all values usable in the model formula. Each additive
+term in <cite>model_formula</cite> should correspond either to a variable in this
+data frame or to instructions for operating on a variable (for
+instance, computing temporal derivatives or exponential terms).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – A list of variables included in the model parsed from the provided
+formula.</p></li>
+<li><p><strong>data</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code>) – All values in the complete model.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.interfaces.confounds.spike_regressors">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.confounds.</span></code><code class="sig-name descname"><span class="pre">spike_regressors</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criteria</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'motion_outlier'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_contiguous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concatenate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spikes'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/confounds.html#spike_regressors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.confounds.spike_regressors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add spike regressors to a confound/nuisance matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code>) – A tabulation of observations from which spike regressors should be
+estimated.</p></li>
+<li><p><strong>criteria</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> of (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="docutils literal notranslate"><span class="pre">'&gt;'</span></code> or <code class="docutils literal notranslate"><span class="pre">'&lt;'</span></code> or <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>)) – Criteria for generating a spike regressor. If, for a given frame, the
+value of the variable corresponding to the key exceeds the threshold
+indicated by the value, then a spike regressor is created for that
+frame. By default, the strategy from <a class="reference internal" href="#power2014" id="id1"><span>[Power2014]</span></a> is implemented: any
+frames with FD greater than 0.5 or standardised DV greater than 1.5
+are flagged for censoring.</p></li>
+<li><p><strong>header_prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The prefix used to indicate spike regressors in the output data table.</p></li>
+<li><p><strong>lags</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – A list indicating the frames to be censored relative to each flag.
+For instance, <code class="docutils literal notranslate"><span class="pre">[0]</span></code> censors the flagged frame, while <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code> censors
+both the flagged frame and the following frame.</p></li>
+<li><p><strong>minimum_contiguous</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>) – The minimum number of contiguous frames that must be unflagged for
+spike regression. If any series of contiguous unflagged frames is
+shorter than the specified minimum, then all of those frames will
+additionally have spike regressors implemented.</p></li>
+<li><p><strong>concatenate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>) – Indicates whether the returned object should include only spikes
+(if false) or all input time series and spikes (if true, default).</p></li>
+<li><p><strong>output</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Indicates whether the output should be formatted as spike regressors
+(‘spikes’, a separate column for each outlier) or as a temporal mask
+(‘mask’, a single output column indicating the locations of outliers).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>data</strong> – The input DataFrame with a column for each spike regressor.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="power2014"><span class="brackets"><a class="fn-backref" href="#id1">Power2014</a></span></dt>
+<dd><p>Power JD, et al. (2014)
+Methods to detect, characterize, and remove motion artifact in resting
+state fMRI. NeuroImage. doi:<a class="reference external" href="https://doi.org/10.1016/j.neuroimage.2013.08.048">10.1016/j.neuroimage.2013.08.048</a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.interfaces.confounds.temporal_derivatives">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.confounds.</span></code><code class="sig-name descname"><span class="pre">temporal_derivatives</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/confounds.html#temporal_derivatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.confounds.temporal_derivatives" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute temporal derivative terms by the method of backwards differences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – A list of temporal derivative terms to include. For instance, <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">2]</span></code>
+indicates that the first and second derivative terms should be added.
+To retain the original terms, <code class="docutils literal notranslate"><span class="pre">0</span></code> <em>must</em> be included in the list.</p></li>
+<li><p><strong>variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – List of variables for which temporal derivative terms should be
+computed.</p></li>
+<li><p><strong>data</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code>) – Table of values of all observations of all variables.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>variables_deriv</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>) – A list of variables to include in the final data frame after adding
+the specified derivative terms.</p></li>
+<li><p><strong>data_deriv</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code>) – Table of values of all observations of all variables, including any
+specified derivative terms.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="niworkflows.interfaces.cifti.html" class="btn btn-neutral float-left" title="niworkflows.interfaces.cifti module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="niworkflows.interfaces.fixes.html" class="btn btn-neutral float-right" title="niworkflows.interfaces.fixes module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.2.9
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt id="v-tags">Tags</dt>
+        </dl>
+        <dl>
+            <dt id="v-branches">Branches</dt>
+        </dl>
+    </div>
+</div>
+
+
+<script src="../../js/rtd-versions.js"></script>
+
+</body>
+</html>

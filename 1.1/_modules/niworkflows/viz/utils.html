@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.viz.utils &mdash; niworkflows 1.1.12 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.1.12
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Library API (application program interface)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>niworkflows.viz.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><b>Warning:</b> This document is for an old version of niworkflows.</p>
+<h1>Source code for niworkflows.viz.utils</h1><div class="highlight"><pre>
+<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2021 The NiPreps Developers &lt;nipreps@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#</span>
+<span class="c1"># We support and encourage derived works from this project, please read</span>
+<span class="c1"># about our expectations at</span>
+<span class="c1">#</span>
+<span class="c1">#     https://www.nipreps.org/community/licensing/</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;Helper tools for visualization purposes.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">which</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+
+<span class="kn">from</span> <span class="nn">nilearn</span> <span class="kn">import</span> <span class="n">image</span> <span class="k">as</span> <span class="n">nlimage</span>
+<span class="kn">from</span> <span class="nn">nilearn.plotting</span> <span class="kn">import</span> <span class="n">plot_anat</span>
+
+<span class="kn">from</span> <span class="nn">nipype.utils</span> <span class="kn">import</span> <span class="n">filemanip</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">NIWORKFLOWS_LOG</span>
+<span class="kn">from</span> <span class="nn">..utils.images</span> <span class="kn">import</span> <span class="n">rotation2canonical</span><span class="p">,</span> <span class="n">rotate_affine</span>
+
+
+<span class="n">SVGNS</span> <span class="o">=</span> <span class="s2">&quot;http://www.w3.org/2000/svg&quot;</span>
+
+
+<div class="viewcode-block" id="robust_set_limits"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.robust_set_limits">[docs]</a><span class="k">def</span> <span class="nf">robust_set_limits</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">plot_params</span><span class="p">,</span> <span class="n">percentiles</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mf">99.8</span><span class="p">)):</span>
+    <span class="sd">&quot;&quot;&quot;Set (vmax, vmin) based on percentiles of the data.&quot;&quot;&quot;</span>
+    <span class="n">plot_params</span><span class="p">[</span><span class="s2">&quot;vmin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plot_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vmin&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">percentiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">plot_params</span><span class="p">[</span><span class="s2">&quot;vmax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plot_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vmax&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">percentiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">plot_params</span></div>
+
+
+<div class="viewcode-block" id="svg_compress"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.svg_compress">[docs]</a><span class="k">def</span> <span class="nf">svg_compress</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate a blob SVG from a matplotlib figure, may perform compression.&quot;&quot;&quot;</span>
+    <span class="c1"># Check availability of svgo and cwebp</span>
+    <span class="n">has_compress</span> <span class="o">=</span> <span class="nb">all</span><span class="p">((</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;svgo&quot;</span><span class="p">),</span> <span class="n">which</span><span class="p">(</span><span class="s2">&quot;cwebp&quot;</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="n">compress</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_compress</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;Compression is required, but svgo or cwebp are not installed&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">compress</span> <span class="o">=</span> <span class="p">(</span><span class="n">compress</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">compress</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">has_compress</span>
+
+    <span class="c1"># Compress the SVG file using SVGO</span>
+    <span class="k">if</span> <span class="n">compress</span><span class="p">:</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;svgo -i - -o - -q -p 3 --pretty&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pout</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                <span class="n">cmd</span><span class="p">,</span>
+                <span class="nb">input</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
+                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">close_fds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">errno</span> <span class="kn">import</span> <span class="n">ENOENT</span>
+
+            <span class="k">if</span> <span class="n">compress</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">ENOENT</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="n">pout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Convert all of the rasters inside the SVG file with 80% compressed WEBP</span>
+    <span class="k">if</span> <span class="n">compress</span><span class="p">:</span>
+        <span class="n">new_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="n">StringIO</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fp</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;image/png&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="n">tmp_lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="p">]</span>
+                    <span class="k">while</span> <span class="s2">&quot;/&gt;&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">line</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                        <span class="n">tmp_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                    <span class="n">content</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_lines</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,  &quot;</span><span class="p">,</span> <span class="s2">&quot;,&quot;</span><span class="p">)</span>
+
+                    <span class="n">left</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;base64,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;base64,&quot;</span>
+                    <span class="n">left</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;image/png&quot;</span><span class="p">,</span> <span class="s2">&quot;image/webp&quot;</span><span class="p">)</span>
+                    <span class="n">right</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;base64,&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">png_b64</span> <span class="o">=</span> <span class="n">right</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">right</span> <span class="o">=</span> <span class="s1">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span>
+
+                    <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;cwebp -quiet -noalpha -q 80 -o - -- -&quot;</span>
+                    <span class="n">pout</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                        <span class="n">cmd</span><span class="p">,</span>
+                        <span class="nb">input</span><span class="o">=</span><span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">png_b64</span><span class="p">),</span>
+                        <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                        <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">close_fds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">stdout</span>
+                    <span class="n">webpimg</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">pout</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+                    <span class="n">new_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">webpimg</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">new_lines</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+
+    <span class="n">svg_start</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;&lt;svg &quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">svg_start</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">continue</span>
+
+    <span class="n">image_svg</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">svg_start</span><span class="p">:]</span>  <span class="c1"># strip out extra DOCTYPE, etc headers</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">image_svg</span><span class="p">)</span>  <span class="c1"># straight up giant string</span></div>
+
+
+<div class="viewcode-block" id="svg2str"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.svg2str">[docs]</a><span class="k">def</span> <span class="nf">svg2str</span><span class="p">(</span><span class="n">display_object</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Serialize a nilearn display object to string.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+
+    <span class="n">image_buf</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+    <span class="n">display_object</span><span class="o">.</span><span class="n">frame_axes</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+        <span class="n">image_buf</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;svg&quot;</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">image_buf</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="extract_svg"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.extract_svg">[docs]</a><span class="k">def</span> <span class="nf">extract_svg</span><span class="p">(</span><span class="n">display_object</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove the preamble of the svg files generated with nilearn.&quot;&quot;&quot;</span>
+    <span class="n">image_svg</span> <span class="o">=</span> <span class="n">svg2str</span><span class="p">(</span><span class="n">display_object</span><span class="p">,</span> <span class="n">dpi</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">compress</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">compress</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+        <span class="n">image_svg</span> <span class="o">=</span> <span class="n">svg_compress</span><span class="p">(</span><span class="n">image_svg</span><span class="p">,</span> <span class="n">compress</span><span class="p">)</span>
+    <span class="n">image_svg</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39; height=&quot;[0-9]+[a-z]*&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">image_svg</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">image_svg</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39; width=&quot;[0-9]+[a-z]*&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">image_svg</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">image_svg</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+        <span class="s2">&quot; viewBox&quot;</span><span class="p">,</span> <span class="s1">&#39; preseveAspectRation=&quot;xMidYMid meet&quot; viewBox&#39;</span><span class="p">,</span> <span class="n">image_svg</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
+    <span class="n">start_tag</span> <span class="o">=</span> <span class="s2">&quot;&lt;svg &quot;</span>
+    <span class="n">start_idx</span> <span class="o">=</span> <span class="n">image_svg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">start_tag</span><span class="p">)</span>
+    <span class="n">end_tag</span> <span class="o">=</span> <span class="s2">&quot;&lt;/svg&gt;&quot;</span>
+    <span class="n">end_idx</span> <span class="o">=</span> <span class="n">image_svg</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="n">end_tag</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">start_idx</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">end_idx</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;svg tags not found in extract_svg&quot;</span><span class="p">)</span>
+    <span class="c1"># rfind gives the start index of the substr. We want this substr</span>
+    <span class="c1"># included in our return value so we add its length to the index.</span>
+    <span class="n">end_idx</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">end_tag</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">image_svg</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="cuts_from_bbox"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.cuts_from_bbox">[docs]</a><span class="k">def</span> <span class="nf">cuts_from_bbox</span><span class="p">(</span><span class="n">mask_nii</span><span class="p">,</span> <span class="n">cuts</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find equi-spaced cuts for presenting images.&quot;&quot;&quot;</span>
+    <span class="n">mask_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">mask_nii</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+
+    <span class="c1"># First, project the number of masked voxels on each axes</span>
+    <span class="n">ijk_counts</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">mask_data</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>  <span class="c1"># project sagittal planes to transverse (i) axis</span>
+        <span class="n">mask_data</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>  <span class="c1"># project coronal planes to to longitudinal (j) axis</span>
+        <span class="n">mask_data</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>  <span class="c1"># project axial planes to vertical (k) axis</span>
+    <span class="p">]</span>
+
+    <span class="c1"># If all voxels are masked in a slice (say that happens at k=10),</span>
+    <span class="c1"># then the value for ijk_counts for the projection to k (ie. ijk_counts[2])</span>
+    <span class="c1"># at that element of the orthogonal axes (ijk_counts[2][10]) is</span>
+    <span class="c1"># the total number of voxels in that slice (ie. Ni x Nj).</span>
+    <span class="c1"># Here we define some thresholds to consider the plane as &quot;masked&quot;</span>
+    <span class="c1"># The thresholds vary because of the shape of the brain</span>
+    <span class="c1"># I have manually found that for the axial view requiring 30%</span>
+    <span class="c1"># of the slice elements to be masked drops almost empty boxes</span>
+    <span class="c1"># in the mosaic of axial planes (and also addresses #281)</span>
+    <span class="n">ijk_th</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">([</span>
+        <span class="p">(</span><span class="n">mask_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">mask_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">,</span>  <span class="c1"># sagittal</span>
+        <span class="p">(</span><span class="n">mask_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">mask_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># coronal</span>
+        <span class="p">(</span><span class="n">mask_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">mask_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mf">0.3</span><span class="p">,</span>  <span class="c1"># axial</span>
+    <span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="n">vox_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="n">cuts</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">vox_coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">th</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">ijk_counts</span><span class="p">,</span> <span class="n">ijk_th</span><span class="p">)):</span>
+        <span class="c1"># Start with full plane if mask is seemingly empty</span>
+        <span class="n">smin</span><span class="p">,</span> <span class="n">smax</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">mask_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">c</span> <span class="o">&gt;</span> <span class="n">th</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">B</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">cuts</span><span class="p">:</span>  <span class="c1"># Threshold too high</span>
+            <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">c</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">B</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="n">smin</span><span class="p">,</span> <span class="n">smax</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">B</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+        <span class="n">vox_coords</span><span class="p">[</span><span class="n">ax</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">smin</span><span class="p">,</span> <span class="n">smax</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">cuts</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">ras_coords</span> <span class="o">=</span> <span class="n">mask_nii</span><span class="o">.</span><span class="n">affine</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vox_coords</span><span class="p">)[:</span><span class="mi">3</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">ras_coords</span><span class="p">,</span> <span class="mi">3</span><span class="p">))}</span></div>
+
+
+<span class="k">def</span> <span class="nf">_3d_in_file</span><span class="p">(</span><span class="n">in_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; if self.inputs.in_file is 3d, return it.</span>
+<span class="sd">    if 4d, pick an arbitrary volume and return that.</span>
+
+<span class="sd">    if in_file is a list of files, return an arbitrary file from</span>
+<span class="sd">    the list, and an arbitrary volume from that file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">filemanip</span><span class="o">.</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">in_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">in_file</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">in_file</span> <span class="o">=</span> <span class="n">in_file</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_file</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">in_file</span>
+
+    <span class="k">return</span> <span class="n">nlimage</span><span class="o">.</span><span class="n">index_img</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="plot_segs"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.plot_segs">[docs]</a><span class="k">def</span> <span class="nf">plot_segs</span><span class="p">(</span>
+    <span class="n">image_nii</span><span class="p">,</span>
+    <span class="n">seg_niis</span><span class="p">,</span>
+    <span class="n">out_file</span><span class="p">,</span>
+    <span class="n">bbox_nii</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">masked</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">plot_params</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a static mosaic with ROIs represented by their delimiting contour.</span>
+
+<span class="sd">    Plot segmentation as contours over the image (e.g. anatomical).</span>
+<span class="sd">    seg_niis should be a list of files. mask_nii helps determine the cut</span>
+<span class="sd">    coordinates. plot_params will be passed on to nilearn plot_* functions. If</span>
+<span class="sd">    seg_niis is a list of size one, it behaves as if it was plotting the mask.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">svgutils.transform</span> <span class="kn">import</span> <span class="n">fromstring</span>
+
+    <span class="n">plot_params</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">plot_params</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">plot_params</span>
+
+    <span class="n">image_nii</span> <span class="o">=</span> <span class="n">_3d_in_file</span><span class="p">(</span><span class="n">image_nii</span><span class="p">)</span>
+    <span class="n">canonical_r</span> <span class="o">=</span> <span class="n">rotation2canonical</span><span class="p">(</span><span class="n">image_nii</span><span class="p">)</span>
+    <span class="n">image_nii</span> <span class="o">=</span> <span class="n">rotate_affine</span><span class="p">(</span><span class="n">image_nii</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="n">canonical_r</span><span class="p">)</span>
+    <span class="n">seg_niis</span> <span class="o">=</span> <span class="p">[</span><span class="n">rotate_affine</span><span class="p">(</span><span class="n">_3d_in_file</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="n">rot</span><span class="o">=</span><span class="n">canonical_r</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">seg_niis</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">image_nii</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span>
+
+    <span class="n">plot_params</span> <span class="o">=</span> <span class="n">robust_set_limits</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">plot_params</span><span class="p">)</span>
+
+    <span class="n">bbox_nii</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">image_nii</span> <span class="k">if</span> <span class="n">bbox_nii</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="n">rotate_affine</span><span class="p">(</span><span class="n">_3d_in_file</span><span class="p">(</span><span class="n">bbox_nii</span><span class="p">),</span> <span class="n">rot</span><span class="o">=</span><span class="n">canonical_r</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
+        <span class="n">bbox_nii</span> <span class="o">=</span> <span class="n">nlimage</span><span class="o">.</span><span class="n">threshold_img</span><span class="p">(</span><span class="n">bbox_nii</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">)</span>
+
+    <span class="n">cuts</span> <span class="o">=</span> <span class="n">cuts_from_bbox</span><span class="p">(</span><span class="n">bbox_nii</span><span class="p">,</span> <span class="n">cuts</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+    <span class="n">plot_params</span><span class="p">[</span><span class="s2">&quot;colors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">colors</span> <span class="ow">or</span> <span class="n">plot_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;colors&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">out_files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">plot_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;dimensions&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)):</span>
+        <span class="n">plot_params</span><span class="p">[</span><span class="s2">&quot;display_mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="n">plot_params</span><span class="p">[</span><span class="s2">&quot;cut_coords&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cuts</span><span class="p">[</span><span class="n">d</span><span class="p">]</span>
+        <span class="n">svg</span> <span class="o">=</span> <span class="n">_plot_anat_with_contours</span><span class="p">(</span>
+            <span class="n">image_nii</span><span class="p">,</span> <span class="n">segs</span><span class="o">=</span><span class="n">seg_niis</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="n">compress</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_params</span>
+        <span class="p">)</span>
+        <span class="c1"># Find and replace the figure_1 id.</span>
+        <span class="n">svg</span> <span class="o">=</span> <span class="n">svg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;figure_1&quot;</span><span class="p">,</span> <span class="s2">&quot;segmentation-</span><span class="si">%s</span><span class="s2">-</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">uuid4</span><span class="p">()),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">out_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fromstring</span><span class="p">(</span><span class="n">svg</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">out_files</span></div>
+
+
+<span class="k">def</span> <span class="nf">_plot_anat_with_contours</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">segs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_params</span><span class="p">):</span>
+    <span class="n">nsegs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">segs</span> <span class="ow">or</span> <span class="p">[])</span>
+    <span class="n">plot_params</span> <span class="o">=</span> <span class="n">plot_params</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="c1"># plot_params&#39; values can be None, however they MUST NOT</span>
+    <span class="c1"># be None for colors and levels from this point on.</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">plot_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;colors&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="n">levels</span> <span class="o">=</span> <span class="n">plot_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;levels&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="n">missing</span> <span class="o">=</span> <span class="n">nsegs</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">missing</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># missing may be negative</span>
+        <span class="kn">from</span> <span class="nn">seaborn</span> <span class="kn">import</span> <span class="n">color_palette</span>
+
+        <span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span> <span class="o">+</span> <span class="n">color_palette</span><span class="p">(</span><span class="s2">&quot;husl&quot;</span><span class="p">,</span> <span class="n">missing</span><span class="p">)</span>
+
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">[[</span><span class="n">c</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">colors</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">levels</span><span class="p">:</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">]]</span> <span class="o">*</span> <span class="n">nsegs</span>
+
+    <span class="c1"># anatomical</span>
+    <span class="n">display</span> <span class="o">=</span> <span class="n">plot_anat</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_params</span><span class="p">)</span>
+
+    <span class="c1"># remove plot_anat -specific parameters</span>
+    <span class="n">plot_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;display_mode&quot;</span><span class="p">)</span>
+    <span class="n">plot_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cut_coords&quot;</span><span class="p">)</span>
+
+    <span class="n">plot_params</span><span class="p">[</span><span class="s2">&quot;linewidths&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nsegs</span><span class="p">)):</span>
+        <span class="n">plot_params</span><span class="p">[</span><span class="s2">&quot;colors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">display</span><span class="o">.</span><span class="n">add_contours</span><span class="p">(</span><span class="n">segs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">levels</span><span class="o">=</span><span class="n">levels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">**</span><span class="n">plot_params</span><span class="p">)</span>
+
+    <span class="n">svg</span> <span class="o">=</span> <span class="n">extract_svg</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="n">compress</span><span class="p">)</span>
+    <span class="n">display</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">svg</span>
+
+
+<div class="viewcode-block" id="plot_registration"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.plot_registration">[docs]</a><span class="k">def</span> <span class="nf">plot_registration</span><span class="p">(</span>
+    <span class="n">anat_nii</span><span class="p">,</span>
+    <span class="n">div_id</span><span class="p">,</span>
+    <span class="n">plot_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">),</span>
+    <span class="n">cuts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">estimate_brightness</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">contour</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">dismiss_affine</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots the foreground and background views</span>
+<span class="sd">    Default order is: axial, coronal, sagittal</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">svgutils.transform</span> <span class="kn">import</span> <span class="n">fromstring</span>
+
+    <span class="n">plot_params</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">plot_params</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">plot_params</span>
+
+    <span class="c1"># Use default MNI cuts if none defined</span>
+    <span class="k">if</span> <span class="n">cuts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>  <span class="c1"># TODO</span>
+
+    <span class="n">out_files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">estimate_brightness</span><span class="p">:</span>
+        <span class="n">plot_params</span> <span class="o">=</span> <span class="n">robust_set_limits</span><span class="p">(</span><span class="n">anat_nii</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">plot_params</span><span class="p">)</span>
+
+    <span class="c1"># FreeSurfer ribbon.mgz</span>
+    <span class="n">ribbon</span> <span class="o">=</span> <span class="n">contour</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">contour</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()),</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">41</span><span class="p">,</span> <span class="mi">42</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ribbon</span><span class="p">:</span>
+        <span class="n">contour_data</span> <span class="o">=</span> <span class="n">contour</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span> <span class="o">%</span> <span class="mi">39</span>
+        <span class="n">white</span> <span class="o">=</span> <span class="n">nlimage</span><span class="o">.</span><span class="n">new_img_like</span><span class="p">(</span><span class="n">contour</span><span class="p">,</span> <span class="n">contour_data</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">pial</span> <span class="o">=</span> <span class="n">nlimage</span><span class="o">.</span><span class="n">new_img_like</span><span class="p">(</span><span class="n">contour</span><span class="p">,</span> <span class="n">contour_data</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dismiss_affine</span><span class="p">:</span>
+        <span class="n">canonical_r</span> <span class="o">=</span> <span class="n">rotation2canonical</span><span class="p">(</span><span class="n">anat_nii</span><span class="p">)</span>
+        <span class="n">anat_nii</span> <span class="o">=</span> <span class="n">rotate_affine</span><span class="p">(</span><span class="n">anat_nii</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="n">canonical_r</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ribbon</span><span class="p">:</span>
+            <span class="n">white</span> <span class="o">=</span> <span class="n">rotate_affine</span><span class="p">(</span><span class="n">white</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="n">canonical_r</span><span class="p">)</span>
+            <span class="n">pial</span> <span class="o">=</span> <span class="n">rotate_affine</span><span class="p">(</span><span class="n">pial</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="n">canonical_r</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">contour</span><span class="p">:</span>
+            <span class="n">contour</span> <span class="o">=</span> <span class="n">rotate_affine</span><span class="p">(</span><span class="n">contour</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="n">canonical_r</span><span class="p">)</span>
+
+    <span class="c1"># Plot each cut axis</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">mode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">order</span><span class="p">)):</span>
+        <span class="n">plot_params</span><span class="p">[</span><span class="s2">&quot;display_mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="n">plot_params</span><span class="p">[</span><span class="s2">&quot;cut_coords&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cuts</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">plot_params</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plot_params</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Generate nilearn figure</span>
+        <span class="n">display</span> <span class="o">=</span> <span class="n">plot_anat</span><span class="p">(</span><span class="n">anat_nii</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ribbon</span><span class="p">:</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;levels&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">],</span> <span class="s2">&quot;linewidths&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">}</span>
+            <span class="n">display</span><span class="o">.</span><span class="n">add_contours</span><span class="p">(</span><span class="n">white</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">display</span><span class="o">.</span><span class="n">add_contours</span><span class="p">(</span><span class="n">pial</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">contour</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">display</span><span class="o">.</span><span class="n">add_contours</span><span class="p">(</span><span class="n">contour</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="n">svg</span> <span class="o">=</span> <span class="n">extract_svg</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="n">compress</span><span class="p">)</span>
+        <span class="n">display</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># Find and replace the figure_1 id.</span>
+        <span class="n">svg</span> <span class="o">=</span> <span class="n">svg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;figure_1&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">-</span><span class="si">%s</span><span class="s2">-</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">div_id</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">uuid4</span><span class="p">()),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">out_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fromstring</span><span class="p">(</span><span class="n">svg</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">out_files</span></div>
+
+
+<div class="viewcode-block" id="compose_view"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.compose_view">[docs]</a><span class="k">def</span> <span class="nf">compose_view</span><span class="p">(</span><span class="n">bg_svgs</span><span class="p">,</span> <span class="n">fg_svgs</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="s2">&quot;report.svg&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compose the input svgs into one standalone svg with CSS flickering animation.&quot;&quot;&quot;</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+    <span class="n">out_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_compose_view</span><span class="p">(</span><span class="n">bg_svgs</span><span class="p">,</span> <span class="n">fg_svgs</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">ref</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_compose_view</span><span class="p">(</span><span class="n">bg_svgs</span><span class="p">,</span> <span class="n">fg_svgs</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">svgutils.compose</span> <span class="kn">import</span> <span class="n">Unit</span>
+    <span class="kn">from</span> <span class="nn">svgutils.transform</span> <span class="kn">import</span> <span class="n">SVGFigure</span><span class="p">,</span> <span class="n">GroupElement</span>
+
+    <span class="k">if</span> <span class="n">fg_svgs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fg_svgs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Merge SVGs and get roots</span>
+    <span class="n">svgs</span> <span class="o">=</span> <span class="n">bg_svgs</span> <span class="o">+</span> <span class="n">fg_svgs</span>
+    <span class="n">roots</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">svgs</span><span class="p">]</span>
+
+    <span class="c1"># Query the size of each</span>
+    <span class="n">sizes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">svgs</span><span class="p">:</span>
+        <span class="n">viewbox</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;viewBox&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)]</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">viewbox</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">viewbox</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">sizes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
+    <span class="n">nsvgs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bg_svgs</span><span class="p">)</span>
+
+    <span class="n">sizes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sizes</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the scale to fit all widths</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="n">sizes</span><span class="p">[</span><span class="n">ref</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">scales</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="n">sizes</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">heights</span> <span class="o">=</span> <span class="n">sizes</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scales</span>
+
+    <span class="c1"># Compose the views panel: total size is the width of</span>
+    <span class="c1"># any element (used the first here) and the sum of heights</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">SVGFigure</span><span class="p">(</span><span class="n">Unit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2">px&quot;</span><span class="p">),</span> <span class="n">Unit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">heights</span><span class="p">[:</span><span class="n">nsvgs</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">px&quot;</span><span class="p">))</span>
+
+    <span class="n">yoffset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">roots</span><span class="p">):</span>
+        <span class="n">r</span><span class="o">.</span><span class="n">moveto</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">yoffset</span><span class="p">,</span> <span class="n">scale_x</span><span class="o">=</span><span class="n">scales</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="p">(</span><span class="n">nsvgs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">yoffset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">yoffset</span> <span class="o">+=</span> <span class="n">heights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c1"># Group background and foreground panels in two groups</span>
+    <span class="k">if</span> <span class="n">fg_svgs</span><span class="p">:</span>
+        <span class="n">newroots</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">GroupElement</span><span class="p">(</span><span class="n">roots</span><span class="p">[:</span><span class="n">nsvgs</span><span class="p">],</span> <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;background-svg&quot;</span><span class="p">}),</span>
+            <span class="n">GroupElement</span><span class="p">(</span><span class="n">roots</span><span class="p">[</span><span class="n">nsvgs</span><span class="p">:],</span> <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;foreground-svg&quot;</span><span class="p">}),</span>
+        <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">newroots</span> <span class="o">=</span> <span class="n">roots</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newroots</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;preserveAspectRatio&quot;</span><span class="p">,</span> <span class="s2">&quot;xMidYMid meet&quot;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdirname</span><span class="p">:</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdirname</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;tmp.svg&quot;</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">))</span>
+        <span class="c1"># Post processing</span>
+        <span class="n">svg</span> <span class="o">=</span> <span class="n">out_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+
+    <span class="c1"># Remove &lt;?xml... line</span>
+    <span class="k">if</span> <span class="n">svg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;?xml&quot;</span><span class="p">):</span>
+        <span class="n">svg</span> <span class="o">=</span> <span class="n">svg</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="c1"># Add styles for the flicker animation</span>
+    <span class="k">if</span> <span class="n">fg_svgs</span><span class="p">:</span>
+        <span class="n">svg</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+            <span class="mi">2</span><span class="p">,</span>
+            <span class="sd">&quot;&quot;&quot;\</span>
+<span class="sd">&lt;style type=&quot;text/css&quot;&gt;</span>
+<span class="sd">@keyframes flickerAnimation%s { 0%% {opacity: 1;} 100%% { opacity: 0; }}</span>
+<span class="sd">.foreground-svg { animation: 1s ease-in-out 0s alternate none infinite paused flickerAnimation%s;}</span>
+<span class="sd">.foreground-svg:hover { animation-play-state: running;}</span>
+<span class="sd">&lt;/style&gt;&quot;&quot;&quot;</span>
+            <span class="o">%</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">uuid4</span><span class="p">()]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">svg</span>
+
+
+<div class="viewcode-block" id="transform_to_2d"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.transform_to_2d">[docs]</a><span class="k">def</span> <span class="nf">transform_to_2d</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">max_axis</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Projects 3d data cube along one axis using maximum intensity with</span>
+<span class="sd">    preservation of the signs. Adapted from nilearn.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="c1"># get the shape of the array we are projecting to</span>
+    <span class="n">new_shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">new_shape</span><span class="p">[</span><span class="n">max_axis</span><span class="p">]</span>
+
+    <span class="c1"># generate a 3D indexing array that points to max abs value in the</span>
+    <span class="c1"># current projection</span>
+    <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="n">new_shape</span><span class="p">)</span>
+    <span class="n">inds</span> <span class="o">=</span> <span class="p">[</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">]</span>
+    <span class="n">inds</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">max_axis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">max_axis</span><span class="p">))</span>
+
+    <span class="c1"># take the values where the absolute value of the projection</span>
+    <span class="c1"># is the highest</span>
+    <span class="n">maximum_intensity_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">inds</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">maximum_intensity_data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plot_melodic_components"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.plot_melodic_components">[docs]</a><span class="k">def</span> <span class="nf">plot_melodic_components</span><span class="p">(</span>
+    <span class="n">melodic_dir</span><span class="p">,</span>
+    <span class="n">in_file</span><span class="p">,</span>
+    <span class="n">tr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">out_file</span><span class="o">=</span><span class="s2">&quot;melodic_reportlet.svg&quot;</span><span class="p">,</span>
+    <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">report_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">noise_components_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots the spatiotemporal components extracted by FSL MELODIC</span>
+<span class="sd">    from functional MRI data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    melodic_dir : str</span>
+<span class="sd">        Path pointing to the outputs of MELODIC</span>
+<span class="sd">    in_file :  str</span>
+<span class="sd">        Path pointing to the reference fMRI dataset. This file</span>
+<span class="sd">        will be used to extract the TR value, if the ``tr`` argument</span>
+<span class="sd">        is not set. This file will be used to calculate a mask</span>
+<span class="sd">        if ``report_mask`` is not provided.</span>
+<span class="sd">    tr : float</span>
+<span class="sd">        Repetition time in seconds</span>
+<span class="sd">    out_file : str</span>
+<span class="sd">        Path where the resulting SVG file will be stored</span>
+<span class="sd">    compress : ``&#39;auto&#39;`` or bool</span>
+<span class="sd">        Whether SVG should be compressed. If ``&#39;auto&#39;``, compression</span>
+<span class="sd">        will be executed if dependencies are installed (SVGO)</span>
+<span class="sd">    report_mask : str</span>
+<span class="sd">        Path to a brain mask corresponding to ``in_file``</span>
+<span class="sd">    noise_components_file : str</span>
+<span class="sd">        A CSV file listing the indexes of components classified as noise</span>
+<span class="sd">        by some manual or automated (e.g. ICA-AROMA) procedure. If a</span>
+<span class="sd">        ``noise_components_file`` is provided, then components will be</span>
+<span class="sd">        plotted with red/green colors (correspondingly to whether they</span>
+<span class="sd">        are in the file -noise components, red-, or not -signal, green-).</span>
+<span class="sd">        When all or none of the components are in the file, a warning</span>
+<span class="sd">        is printed at the top.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">index_img</span><span class="p">,</span> <span class="n">iter_img</span>
+    <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">import</span> <span class="nn">pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+    <span class="kn">from</span> <span class="nn">matplotlib.gridspec</span> <span class="kn">import</span> <span class="n">GridSpec</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+
+    <span class="n">sns</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">&quot;white&quot;</span><span class="p">)</span>
+    <span class="n">current_palette</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">color_palette</span><span class="p">()</span>
+    <span class="n">in_nii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tr</span><span class="p">:</span>
+        <span class="n">tr</span> <span class="o">=</span> <span class="n">in_nii</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">()[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="n">in_nii</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_xyzt_units</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">units</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">units</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;msec&quot;</span><span class="p">:</span>
+                <span class="n">tr</span> <span class="o">=</span> <span class="n">tr</span> <span class="o">/</span> <span class="mf">1000.0</span>
+            <span class="k">elif</span> <span class="n">units</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;usec&quot;</span><span class="p">:</span>
+                <span class="n">tr</span> <span class="o">=</span> <span class="n">tr</span> <span class="o">/</span> <span class="mf">1000000.0</span>
+            <span class="k">elif</span> <span class="n">units</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;sec&quot;</span><span class="p">:</span>
+                <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Unknown repetition time units &quot;</span> <span class="s2">&quot;specified - assuming seconds&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Repetition time units not specified - assuming seconds&quot;</span>
+            <span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">nilearn.input_data</span> <span class="kn">import</span> <span class="n">NiftiMasker</span>
+    <span class="kn">from</span> <span class="nn">nilearn.plotting</span> <span class="kn">import</span> <span class="n">cm</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">report_mask</span><span class="p">:</span>
+        <span class="n">nifti_masker</span> <span class="o">=</span> <span class="n">NiftiMasker</span><span class="p">(</span><span class="n">mask_strategy</span><span class="o">=</span><span class="s2">&quot;epi&quot;</span><span class="p">)</span>
+        <span class="n">nifti_masker</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">index_img</span><span class="p">(</span><span class="n">in_nii</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+        <span class="n">mask_img</span> <span class="o">=</span> <span class="n">nifti_masker</span><span class="o">.</span><span class="n">mask_img_</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mask_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">report_mask</span><span class="p">)</span>
+
+    <span class="n">mask_sl</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">mask_sl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">transform_to_2d</span><span class="p">(</span><span class="n">mask_img</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(),</span> <span class="n">j</span><span class="p">))</span>
+
+    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">melodic_dir</span><span class="p">,</span> <span class="s2">&quot;melodic_mix&quot;</span><span class="p">))</span>
+    <span class="n">power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">melodic_dir</span><span class="p">,</span> <span class="s2">&quot;melodic_FTmix&quot;</span><span class="p">))</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">melodic_dir</span><span class="p">,</span> <span class="s2">&quot;melodic_ICstats&quot;</span><span class="p">))</span>
+    <span class="n">n_components</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">Fs</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">tr</span>
+    <span class="n">Ny</span> <span class="o">=</span> <span class="n">Fs</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">Ny</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">power</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))))</span> <span class="o">/</span> <span class="p">(</span><span class="n">power</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># Set default colors</span>
+    <span class="n">color_title</span> <span class="o">=</span> <span class="s2">&quot;k&quot;</span>
+    <span class="n">color_time</span> <span class="o">=</span> <span class="n">current_palette</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">color_power</span> <span class="o">=</span> <span class="n">current_palette</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">classified_colors</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">warning_row</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Do not allocate warning row</span>
+    <span class="c1"># Only if the components file has been provided, a warning banner will</span>
+    <span class="c1"># be issued if all or none of the components were classified as noise</span>
+    <span class="k">if</span> <span class="n">noise_components_file</span><span class="p">:</span>
+        <span class="n">noise_components</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span>
+            <span class="n">noise_components_file</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="c1"># Activate warning row if pertinent</span>
+        <span class="n">warning_row</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">noise_components</span><span class="o">.</span><span class="n">size</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_components</span><span class="p">))</span>
+        <span class="n">classified_colors</span> <span class="o">=</span> <span class="p">{</span><span class="kc">True</span><span class="p">:</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="s2">&quot;g&quot;</span><span class="p">}</span>
+
+    <span class="n">n_rows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">n_components</span> <span class="o">+</span> <span class="p">(</span><span class="n">n_components</span> <span class="o">%</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">,</span> <span class="p">(</span><span class="n">n_rows</span> <span class="o">+</span> <span class="n">warning_row</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.85</span><span class="p">))</span>
+    <span class="n">gs</span> <span class="o">=</span> <span class="n">GridSpec</span><span class="p">(</span>
+        <span class="n">n_rows</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">warning_row</span><span class="p">,</span>
+        <span class="mi">9</span><span class="p">,</span>
+        <span class="n">width_ratios</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="n">height_ratios</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">*</span> <span class="n">warning_row</span> <span class="o">+</span> <span class="p">[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_rows</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">warning_row</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">ncomps</span> <span class="o">=</span> <span class="s2">&quot;NONE of the&quot;</span>
+        <span class="k">if</span> <span class="n">noise_components</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">n_components</span><span class="p">:</span>
+            <span class="n">ncomps</span> <span class="o">=</span> <span class="s2">&quot;ALL&quot;</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+            <span class="s2">&quot;WARNING: </span><span class="si">{}</span><span class="s2"> components were classified as noise&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ncomps</span><span class="p">),</span>
+            <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+            <span class="n">xycoords</span><span class="o">=</span><span class="s2">&quot;axes fraction&quot;</span><span class="p">,</span>
+            <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+            <span class="n">textcoords</span><span class="o">=</span><span class="s2">&quot;axes fraction&quot;</span><span class="p">,</span>
+            <span class="n">size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#ea8800&quot;</span><span class="p">,</span>
+            <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round&quot;</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;#f7dcb7&quot;</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s2">&quot;#FC990E&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_xaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">titlefmt</span> <span class="o">=</span> <span class="s2">&quot;C</span><span class="si">{id:d}{noise}</span><span class="s2">: Tot. var. expl. </span><span class="si">{var:.2g}</span><span class="s2">%&quot;</span><span class="o">.</span><span class="n">format</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">img</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">iter_img</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">melodic_dir</span><span class="p">,</span> <span class="s2">&quot;melodic_IC.nii.gz&quot;</span><span class="p">))):</span>
+
+        <span class="n">col</span> <span class="o">=</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">i</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="n">l_row</span> <span class="o">=</span> <span class="n">row</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">warning_row</span>
+        <span class="n">is_noise</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">classified_colors</span><span class="p">:</span>
+            <span class="c1"># If a noise components list is provided, assign red/green</span>
+            <span class="n">is_noise</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">in</span> <span class="n">noise_components</span>
+            <span class="n">color_title</span> <span class="o">=</span> <span class="n">color_time</span> <span class="o">=</span> <span class="n">color_power</span> <span class="o">=</span> <span class="n">classified_colors</span><span class="p">[</span><span class="n">is_noise</span><span class="p">]</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">l_row</span><span class="p">:</span><span class="n">l_row</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="n">col</span> <span class="o">*</span> <span class="mi">5</span><span class="p">])</span>
+            <span class="n">sl</span> <span class="o">=</span> <span class="n">transform_to_2d</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sl</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+                <span class="n">sl</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="n">m</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=+</span><span class="n">m</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">cold_white_hot</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span>
+            <span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">mask_sl</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">colors</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">(</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+                    <span class="n">titlefmt</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="s2">&quot; [noise]&quot;</span> <span class="o">*</span> <span class="n">is_noise</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="n">stats</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+                    <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">y</span><span class="o">=</span><span class="mf">1.18</span><span class="p">,</span>
+                    <span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+                    <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+                    <span class="n">verticalalignment</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="n">color_title</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="n">ax2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">l_row</span><span class="p">,</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">col</span> <span class="o">*</span> <span class="mi">5</span><span class="p">])</span>
+        <span class="n">ax3</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">l_row</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">col</span> <span class="o">*</span> <span class="mi">5</span><span class="p">])</span>
+
+        <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]))</span> <span class="o">*</span> <span class="n">tr</span><span class="p">,</span>
+            <span class="n">timeseries</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="mi">200</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]),</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">color_time</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">tr</span><span class="p">])</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">(</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax2</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
+            <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+            <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">color_time</span><span class="p">)</span>
+
+        <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">:],</span>
+            <span class="n">power</span><span class="p">[</span><span class="mi">0</span><span class="p">:,</span> <span class="n">i</span><span class="p">],</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">color_power</span><span class="p">,</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="mi">100</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">power</span><span class="p">[</span><span class="mi">0</span><span class="p">:,</span> <span class="n">i</span><span class="p">]),</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">f</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">(</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax3</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
+            <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+            <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">color_power</span><span class="p">)</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+        <span class="n">out_file</span><span class="p">,</span>
+        <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;svg&quot;</span><span class="p">,</span>
+        <span class="n">transparent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">,</span>
+        <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.1.12
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../../../1.0.0/index.html">1.0.0</a></dd>
+            <dd><a href="../../../../1.0.0rc1/index.html">1.0.0rc1</a></dd>
+            <dd><a href="../../../../1.0.0rc2/index.html">1.0.0rc2</a></dd>
+            <dd><a href="../../../../1.0.1/index.html">1.0.1</a></dd>
+            <dd><a href="../../../../1.0.2/index.html">1.0.2</a></dd>
+            <dd><a href="../../../../1.0.3/index.html">1.0.3</a></dd>
+            <dd><a href="../../../../1.0.4/index.html">1.0.4</a></dd>
+            <dd><a href="../../../../1.1.0/index.html">1.1.0</a></dd>
+            <dd><a href="../../../../1.1.1/index.html">1.1.1</a></dd>
+            <dd><a href="../../../../1.1.10/index.html">1.1.10</a></dd>
+            <dd><a href="../../../../1.1.11/index.html">1.1.11</a></dd>
+            <dd><a href="utils.html">1.1.12</a></dd>
+            <dd><a href="../../../../1.1.2/index.html">1.1.2</a></dd>
+            <dd><a href="../../../../1.1.3/index.html">1.1.3</a></dd>
+            <dd><a href="../../../../1.1.4/index.html">1.1.4</a></dd>
+            <dd><a href="../../../../1.1.5/index.html">1.1.5</a></dd>
+            <dd><a href="../../../../1.1.6/index.html">1.1.6</a></dd>
+            <dd><a href="../../../../1.1.7/index.html">1.1.7</a></dd>
+            <dd><a href="../../../../1.1.8/index.html">1.1.8</a></dd>
+            <dd><a href="../../../../1.1.9/index.html">1.1.9</a></dd>
+            <dd><a href="../../../../1.2.0/index.html">1.2.0</a></dd>
+            <dd><a href="../../../../1.2.0rc1/index.html">1.2.0rc1</a></dd>
+            <dd><a href="../../../../1.2.0rc2/index.html">1.2.0rc2</a></dd>
+            <dd><a href="../../../../1.2.0rc3/index.html">1.2.0rc3</a></dd>
+            <dd><a href="../../../../1.2.0rc4/index.html">1.2.0rc4</a></dd>
+            <dd><a href="../../../../1.2.0rc5/index.html">1.2.0rc5</a></dd>
+            <dd><a href="../../../../1.2.1/index.html">1.2.1</a></dd>
+            <dd><a href="../../../../1.2.2/index.html">1.2.2</a></dd>
+            <dd><a href="../../../../1.2.3/index.html">1.2.3</a></dd>
+            <dd><a href="../../../../1.2.4/index.html">1.2.4</a></dd>
+            <dd><a href="../../../../1.2.5/index.html">1.2.5</a></dd>
+            <dd><a href="../../../../1.2.6/index.html">1.2.6</a></dd>
+            <dd><a href="../../../../1.2.7/index.html">1.2.7</a></dd>
+            <dd><a href="../../../../1.2.8/index.html">1.2.8</a></dd>
+            <dd><a href="../../../../1.2.9/index.html">1.2.9</a></dd>
+            <dd><a href="../../../../1.3.0/index.html">1.3.0</a></dd>
+            <dd><a href="../../../../1.3.0rc1/index.html">1.3.0rc1</a></dd>
+            <dd><a href="../../../../1.3.0rc2/index.html">1.3.0rc2</a></dd>
+            <dd><a href="../../../../1.3.0rc3/index.html">1.3.0rc3</a></dd>
+            <dd><a href="../../../../1.3.1/index.html">1.3.1</a></dd>
+            <dd><a href="../../../../1.3.2/index.html">1.3.2</a></dd>
+            <dd><a href="../../../../1.3.3/index.html">1.3.3</a></dd>
+            <dd><a href="../../../../1.3.4/index.html">1.3.4</a></dd>
+            <dd><a href="../../../../1.3.5/index.html">1.3.5</a></dd>
+            <dd><a href="../../../../1.4.0/index.html">1.4.0</a></dd>
+            <dd><a href="../../../../1.4.0rc0/index.html">1.4.0rc0</a></dd>
+            <dd><a href="../../../../1.4.0rc1/index.html">1.4.0rc1</a></dd>
+            <dd><a href="../../../../1.4.0rc2/index.html">1.4.0rc2</a></dd>
+            <dd><a href="../../../../1.4.0rc3/index.html">1.4.0rc3</a></dd>
+            <dd><a href="../../../../1.4.0rc4/index.html">1.4.0rc4</a></dd>
+            <dd><a href="../../../../1.4.0rc5/index.html">1.4.0rc5</a></dd>
+            <dd><a href="../../../../1.4.0rc6/index.html">1.4.0rc6</a></dd>
+            <dd><a href="../../../../1.1.12/index.html">1.1.12</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../../../enh_report-plot-axis/index.html">enh/report-plot-axis</a></dd>
+            <dd><a href="../../../../feat_infants-rodents/index.html">feat/infants-rodents</a></dd>
+            <dd><a href="../../../../maint_1.0.x/index.html">maint/1.0.x</a></dd>
+            <dd><a href="../../../../maint_1.1.x/index.html">maint/1.1.x</a></dd>
+            <dd><a href="../../../../maint_1.2.x/index.html">maint/1.2.x</a></dd>
+            <dd><a href="../../../../maint_1.3.x/index.html">maint/1.3.x</a></dd>
+            <dd><a href="../../../../master/index.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

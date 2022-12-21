@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What’s new? &mdash; niworkflows 1.1.12 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="niworkflows.viz.utils module" href="api/niworkflows.viz.utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.1.12
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Library API (application program interface)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">What’s new?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#march-19-2020">1.1.12 (March 19, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#march-17-2020">1.1.11 (March 17, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#march-11-2020">1.1.10 (March 11, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#march-05-2020">1.1.9 (March 05, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#february-26-2020">1.1.8 (February 26, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#february-14-2020">1.1.7 (February 14, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#february-7-2020">1.1.6 (February 7, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#february-6-2020">1.1.5 (February 6, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#january-28-2020">1.1.4 (January 28, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#january-16-2020">1.1.3 (January 16, 2020)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#december-17-2019">1.1.2 (December 17, 2019)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">1.1.1 (December 17, 2019)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#december-9-2019">1.1.0 (December 9, 2019)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-series">1.0.x series</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#december-18-2019">1.0.3 (December 18, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">1.0.2 (December 9, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#november-27-2019">1.0.1 (November 27, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#november-26-2019">1.0.0 (November 26, 2019)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">0.10.x series</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#october-8-2019">0.10.4 (October 8, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#september-9-2019">0.10.3 (September 9, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#july-24-2019">0.10.2 (July 24, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#july-22-2019">0.10.1 (July 22, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#july-12-2019">0.10.0 (July 12, 2019)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">0.9.x series</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#july-8-2019">0.9.6 (July 8, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#june-5-2019">0.9.5 (June 5, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">0.9.4 (June 5, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#may-15-2019">0.9.3 (May 15, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#may-6-2019">0.9.2-1 (May 6, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">0.9.2 (May 6, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#may-3-2019">0.9.1-1 (May 3, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">0.9.1 (May 3, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">0.9.0 (May 3, 2019)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">0.8.x series</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#april-4-2019">0.8.2 (April 4, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#march-15-2019">0.8.1 (March 15, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#march-05-2019">0.8.0 (March 05, 2019)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id10">0.7.x series</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#february-19-2019">0.7.2 (February 19, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#post1-february-12-2019">0.7.1.post1 (February 12, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#february-07-2019">0.7.1 (February 07, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#february-04-2019">0.7.0 (February 04, 2019)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#old-0-x-series">Old 0.x series</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#january-23-2019">0.6.1 (January 23, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#january-18-2019">0.6.0 (January 18, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">0.5.4 (January 23, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#january-08-2019">0.5.3 (January 08, 2019)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#post5-december-14-2018">0.5.2.post5 (December 14, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#post4-december-13-2018">0.5.2.post4 (December 13, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#post3-december-13-2018">0.5.2.post3 (December 13, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#post2-december-12-2018">0.5.2.post2 (December 12, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#post1-december-10-2018">0.5.2.post1 (December 10, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#december-8-2018">0.5.2 (December 8, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#november-8-2018">0.5.1 (November 8, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#october-26-2018">0.5.0 (October 26, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#october-15-2018">0.4.4 (October 15, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#september-4-2018">0.4.3 (September 4, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#july-5-2018">0.4.2 (July 5, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#june-7-2018">0.4.1 (June 7, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#may-31-2018">0.4.0 (May 31, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#may-11-2018">0.3.13 (May 11, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#may-05-2018">0.3.12 (May 05, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#april-20-2018">0.3.8 (April 20, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#march-22-2018">0.3.7 (March 22, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#march-14-2018">0.3.6 (March 14, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#february-28-2018">0.3.5 (February 28, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#february-22-2018">0.3.4 (February 22, 2018)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16">0.3.3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id17">0.3.1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id18">0.3.0</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id19">0.2.8</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id20">0.2.7</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id21">0.2.6</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id22">0.2.5</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id23">0.2.4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id24">0.2.3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id25">0.2.2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id26">0.2.1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id27">0.2.0</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id28">0.1.11</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id29">0.1.10</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id30">0.1.9</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id31">0.1.8</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id32">0.1.7</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id33">0.1.6</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id34">0.1.5</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id35">0.1.4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id36">0.1.3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id37">0.1.2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id38">0.1.1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id39">0.1.0</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id40">0.0.7</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id41">0.0.6</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id42">0.0.3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id43">0.0.2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id44">0.0.1</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>What’s new?</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/changelog.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../master/changelog.html"><b>Warning:</b> This document is for an old version of niworkflows. The main version is master.</a></p>
+<div class="section" id="what-s-new">
+<h1>What’s new?<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="march-19-2020">
+<h2>1.1.12 (March 19, 2020)<a class="headerlink" href="#march-19-2020" title="Permalink to this headline">¶</a></h2>
+<p>Bug-fix release in the 1.1.x series.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>FIX: Update naming patterns in figures.json (#483)</p></li>
+<li><p>FIX: Add CE agent to output figure filename templates (#482)</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="march-17-2020">
+<h2>1.1.11 (March 17, 2020)<a class="headerlink" href="#march-17-2020" title="Permalink to this headline">¶</a></h2>
+<p>Bug-fix release to improve CIFTI compatibility with workbench tools.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>FIX: Ensure BOLD and label orientations are equal (#477)</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="march-11-2020">
+<h2>1.1.10 (March 11, 2020)<a class="headerlink" href="#march-11-2020" title="Permalink to this headline">¶</a></h2>
+<p>Bug-fix release in the 1.1.x series.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>ENH: Overwrite attr’s string conversion dunders (#475)</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="march-05-2020">
+<h2>1.1.9 (March 05, 2020)<a class="headerlink" href="#march-05-2020" title="Permalink to this headline">¶</a></h2>
+<p>Bug-fix release in the 1.1.x series.</p>
+<p>This release contains maintenance actions on the CI infrastructure after
+migration to the <a class="reference external" href="https://www.nipreps.org">NiPreps organization</a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>FIX: replace mutable <code class="docutils literal notranslate"><span class="pre">list</span></code> with <code class="docutils literal notranslate"><span class="pre">tuple</span></code> in ANTs’ workflow (#473)</p></li>
+<li><p>MAINT: Pacify security patterns found by Codacy (#474)</p></li>
+<li><p>MAINT: Miscellaneous housekeeping (#472)</p></li>
+<li><p>MAINT: Fix test_masks (#470)</p></li>
+<li><p>MAINT: Use docker-registry for caching on CircleCI (#471)</p></li>
+<li><p>MAINT: Revise code coverage collection (#469)</p></li>
+<li><p>MAINT: Transfer to nipreps organization (#468)</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="february-26-2020">
+<h2>1.1.8 (February 26, 2020)<a class="headerlink" href="#february-26-2020" title="Permalink to this headline">¶</a></h2>
+<p>Bug-fix release in the 1.1.x series.</p>
+<p>This release includes some minor improvements to formatting of reports and derivative metadata.</p>
+<ul class="simple">
+<li><p>FIX: Check fo valid qform before calculating change (#466) &#64;effigies</p></li>
+<li><p>ENH: Display errors as summary/details elements (#464) &#64;effigies</p></li>
+<li><p>ENH: Add a pure-Python ApplyMask interface, based on NiBabel (#463) &#64;oesteban</p></li>
+<li><p>MAINT: Replace <code class="docutils literal notranslate"><span class="pre">os</span></code> operations with <code class="docutils literal notranslate"><span class="pre">pathlib</span></code>, indent JSON sidecars (#467) &#64;mgxd</p></li>
+</ul>
+</div>
+<div class="section" id="february-14-2020">
+<h2>1.1.7 (February 14, 2020)<a class="headerlink" href="#february-14-2020" title="Permalink to this headline">¶</a></h2>
+<p>Minor improvements to enable fMRIPrep 20.0.0 release.</p>
+<ul class="simple">
+<li><p>ENH: Revise SpatialReference caching for ease of use, accessibility (#461) &#64;mgxd</p></li>
+<li><p>ENH: Downgrade log level for superfluous scans (#460) &#64;mgxd</p></li>
+<li><p>ENH: Enable optional BIDS entity filtering to data collection utility (#407) &#64;bpinsard</p></li>
+</ul>
+</div>
+<div class="section" id="february-7-2020">
+<h2>1.1.6 (February 7, 2020)<a class="headerlink" href="#february-7-2020" title="Permalink to this headline">¶</a></h2>
+<p>Update NiBabel pinned version.</p>
+<ul class="simple">
+<li><p>MAINT: Update nibabel’s pin to &gt;=3.0.1</p></li>
+</ul>
+</div>
+<div class="section" id="february-6-2020">
+<h2>1.1.5 (February 6, 2020)<a class="headerlink" href="#february-6-2020" title="Permalink to this headline">¶</a></h2>
+<p>A refactor of recently introduced spaces/references/spatial-references objects,
+and some methods for upstream pipelines.</p>
+<ul class="simple">
+<li><p>ENH: Revision of spaces module for consistency (#457)</p></li>
+<li><p>ENH: Add BIDS output version checker (#456)</p></li>
+<li><p>ENH: Standard space querying (#455)</p></li>
+<li><p>ENH: Add cache to <code class="docutils literal notranslate"><span class="pre">SpatialReferences</span></code> (#453)</p></li>
+<li><p>ENH: Add helper function for cleaning a directory (#454)</p></li>
+<li><p>FIX: Parsing of floats in <code class="docutils literal notranslate"><span class="pre">ResampleImageBySpacing</span></code> (#452)</p></li>
+</ul>
+</div>
+<div class="section" id="january-28-2020">
+<h2>1.1.4 (January 28, 2020)<a class="headerlink" href="#january-28-2020" title="Permalink to this headline">¶</a></h2>
+<p>Minor enhancements to better represent spaces/spatial-references,
+and increasing the test coverage of the Reports System (with thanks to J. Kent
+for the contribution):</p>
+<ul class="simple">
+<li><p>ENH: Separate <code class="docutils literal notranslate"><span class="pre">Space</span></code> and <code class="docutils literal notranslate"><span class="pre">SpatialReferences</span></code> (#451)</p></li>
+<li><p>ENH+TST: Add all valid entities to the default report specification (#447)</p></li>
+</ul>
+</div>
+<div class="section" id="january-16-2020">
+<h2>1.1.3 (January 16, 2020)<a class="headerlink" href="#january-16-2020" title="Permalink to this headline">¶</a></h2>
+<p>A fix/enhancement of the report generation system. With thanks to J. Kent for
+the contribution.</p>
+<ul class="simple">
+<li><p>ENH/FIX: parse orderings to account for missing entities (#443)</p></li>
+</ul>
+</div>
+<div class="section" id="december-17-2019">
+<h2>1.1.2 (December 17, 2019)<a class="headerlink" href="#december-17-2019" title="Permalink to this headline">¶</a></h2>
+<p>Hotfix of 1.1.1</p>
+<ul class="simple">
+<li><p>FIX: <code class="docutils literal notranslate"><span class="pre">IntraModalMerge</span></code> - Undefined input name used in <code class="docutils literal notranslate"><span class="pre">_run_interface</span></code> (#442)</p></li>
+</ul>
+</div>
+<div class="section" id="id1">
+<h2>1.1.1 (December 17, 2019)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>A bugfix release to support addressing <a class="reference external" href="https://github.com/nipreps/sdcflows/issues/77">nipreps/sdcflows#77</a>.
+With thanks to Alejandro De La Vega for contributions.</p>
+<ul class="simple">
+<li><p>FIX: <code class="docutils literal notranslate"><span class="pre">IntraModalMerge</span></code> failed for dims (x, y, z, 1) (#441) &#64;oesteban</p></li>
+<li><p>ENH: Add <code class="docutils literal notranslate"><span class="pre">n4_only</span></code> workflow – to skip brain extraction (#435) &#64;adelavega</p></li>
+<li><p>MAINT: Update nibabel to 3.0.0rc1 (#439) &#64;mgxd</p></li>
+</ul>
+</div>
+<div class="section" id="december-9-2019">
+<h2>1.1.0 (December 9, 2019)<a class="headerlink" href="#december-9-2019" title="Permalink to this headline">¶</a></h2>
+<p>The first minor release of the niworkflows 1.x series. Numerous interfaces (GenerateCifti, CiftiNameSource, GiftiNameSource) have been changed to be compatible with HCP grayordinates.</p>
+<ul class="simple">
+<li><p>ENH: CIFTI / fsLR density (#436) &#64;mgxd</p></li>
+<li><p>ENH: Expand GenerateCifti &amp; MedialNaNs interfaces to support HCP grayordinates / fsLR surfaces (#417) &#64;mgxd</p></li>
+</ul>
+</div>
+<div class="section" id="x-series">
+<h2>1.0.x series<a class="headerlink" href="#x-series" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="december-18-2019">
+<h3>1.0.3 (December 18, 2019)<a class="headerlink" href="#december-18-2019" title="Permalink to this headline">¶</a></h3>
+<p>Hot-fix release in the 1.0.x series. Backported from 1.1.2.</p>
+<ul class="simple">
+<li><p>FIX: <code class="docutils literal notranslate"><span class="pre">IntraModalMerge</span></code> - Undefined input name used in <code class="docutils literal notranslate"><span class="pre">_run_interface</span></code> (#442)</p></li>
+<li><p>FIX: <code class="docutils literal notranslate"><span class="pre">IntraModalMerge</span></code> failed for dims (x, y, z, 1) (#441) &#64;oesteban</p></li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h3>1.0.2 (December 9, 2019)<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>Bug-fix release in the 1.0.x series.</p>
+<ul class="simple">
+<li><p>FIX: Permit dummy scans to be 0 (#438) &#64;jdkent</p></li>
+<li><p>MNT: Specify junit_family to suppress pytest DeprecationWarning (#432) &#64;effigies</p></li>
+</ul>
+</div>
+<div class="section" id="november-27-2019">
+<h3>1.0.1 (November 27, 2019)<a class="headerlink" href="#november-27-2019" title="Permalink to this headline">¶</a></h3>
+<p>Bug-fix release in the 1.0.x series.</p>
+<ul class="simple">
+<li><p>FIX: Ensure data type of masked image matches T1.mgz (#430) &#64;effigies</p></li>
+</ul>
+</div>
+<div class="section" id="november-26-2019">
+<h3>1.0.0 (November 26, 2019)<a class="headerlink" href="#november-26-2019" title="Permalink to this headline">¶</a></h3>
+<p>The first stable release of NIWorkflows.</p>
+<ul class="simple">
+<li><p>CI: Drop setup.py install/develop installs (#428) &#64;effigies</p></li>
+<li><p>DOC: Maintenance of the documentation building (#429) &#64;oesteban</p></li>
+<li><p>DOC: Generate versioned documentation of the API (#416) &#64;rwblair</p></li>
+<li><p>ENH: Add <code class="docutils literal notranslate"><span class="pre">copy_header</span></code> inputs to some ANTs interfaces (#401) &#64;oesteban</p></li>
+<li><p>ENH: Remove the data getters/utils modules (#427) &#64;oesteban</p></li>
+<li><p>ENH: Move nilearn interfaces over from fMRIPrep (#414) &#64;oesteban</p></li>
+<li><p>ENH: Reports use the default template from niworkflows, allowing overwrite (#419) &#64;oesteban</p></li>
+<li><p>FIX: Update all <code class="docutils literal notranslate"><span class="pre">SpatialImage.get_data</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">get_fdata</span></code> (#426) &#64;oesteban</p></li>
+<li><p>MAINT: Update <code class="docutils literal notranslate"><span class="pre">.gitignore</span></code> and <code class="docutils literal notranslate"><span class="pre">.dockerignore</span></code> (#420) &#64;oesteban</p></li>
+<li><p>MAINT: use scikit-image LTS for earlier python versions (#418) &#64;mgxd</p></li>
+<li><p>MAINT: Pin nipype&gt;=1.3.1, remove link dependencies from <code class="docutils literal notranslate"><span class="pre">setup.cfg</span></code> &#64;oesteban</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>0.10.x series<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="october-8-2019">
+<h3>0.10.4 (October 8, 2019)<a class="headerlink" href="#october-8-2019" title="Permalink to this headline">¶</a></h3>
+<p>Patch release with a few small bug fixes and improvements.</p>
+<ul class="simple">
+<li><p>FIX: Remove unused, undocumented output from the bold_reference workflow (#409) &#64;oesteban</p></li>
+<li><p>FIX: Do not validate built paths (#405) &#64;effigies</p></li>
+<li><p>FIX: Ensure that length of indices matches length of values (#397) &#64;rciric</p></li>
+<li><p>ENH: Add a new <code class="docutils literal notranslate"><span class="pre">Binarize</span></code> interface using nibabel (#402) &#64;oesteban</p></li>
+<li><p>ENH: Enable BIDSFreeSurferDir to take an absolute path as a subjects directory (#398) &#64;effigies</p></li>
+<li><p>TEST: Separate LTA length fixing and add doctest (#403) &#64;davhunt</p></li>
+</ul>
+</div>
+<div class="section" id="september-9-2019">
+<h3>0.10.3 (September 9, 2019)<a class="headerlink" href="#september-9-2019" title="Permalink to this headline">¶</a></h3>
+<p>Patch release with several bugfixes and two improvements on how NIfTI files were
+handled. With thanks to David Hunt and Ursula Tooley for contributions.</p>
+<ul class="simple">
+<li><p>ENH: Memory optimized header rewriting (#386) &#64;effigies</p></li>
+<li><p>ENH: Warn about copying sform to qform only if qform changes (#365) &#64;utooley</p></li>
+<li><p>FIX: Nonpositive values entered to N4 when calculating BOLDrefs (#389) &#64;oesteban</p></li>
+<li><p>FIX: Retain newlines in corrected LTA files (#391) &#64;davhunt</p></li>
+<li><p>FIX: Handle singleton decompositions (#383) &#64;rciric</p></li>
+<li><p>FIX: Revision of previous PR #337 / MELODIC did not converge (#381) &#64;oesteban</p></li>
+<li><p>MAINT:Confound metadata maintenance (#382) &#64;rciric</p></li>
+<li><p>TEST: Skip tests with non-Python dependencies when missing (#387) &#64;effigies</p></li>
+</ul>
+</div>
+<div class="section" id="july-24-2019">
+<h3>0.10.2 (July 24, 2019)<a class="headerlink" href="#july-24-2019" title="Permalink to this headline">¶</a></h3>
+<p>Patch release culminating the migration of workflows from fMRIPrep.</p>
+<ul class="simple">
+<li><p>TST: Bring EPI brain extraction tests from fMRIPrep (#380) &#64;oesteban</p></li>
+</ul>
+</div>
+<div class="section" id="july-22-2019">
+<h3>0.10.1 (July 22, 2019)<a class="headerlink" href="#july-22-2019" title="Permalink to this headline">¶</a></h3>
+<p>Minor release with bug fixes and pinning the latest stable release of the TemplateFlow client.</p>
+<ul class="simple">
+<li><p>PIN: latest templateflow client (0.4.1) &#64;oesteban</p></li>
+<li><p>FIX: Load file with mmap-False when modifying on-disk dtype (#378) &#64;effigies</p></li>
+<li><p>FIX: Require scikit-learn because nilearn does not (#376) &#64;effigies</p></li>
+</ul>
+</div>
+<div class="section" id="july-12-2019">
+<h3>0.10.0 (July 12, 2019)<a class="headerlink" href="#july-12-2019" title="Permalink to this headline">¶</a></h3>
+<p>Minor release to allow dependent tools to upgrade to PyBIDS 0.9 series (minimum 0.9.2).
+We’ve also moved to a <code class="docutils literal notranslate"><span class="pre">setup.cfg</span></code>-based setup to standardize configuration.</p>
+<ul class="simple">
+<li><p>MAINT: Use PyBIDS 0.9.2+ (#369) &#64;effigies</p></li>
+<li><p>MAINT: Switch to a <code class="docutils literal notranslate"><span class="pre">setup.cfg</span></code>-based setup (#375) &#64;effigies</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>0.9.x series<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="july-8-2019">
+<h3>0.9.6 (July 8, 2019)<a class="headerlink" href="#july-8-2019" title="Permalink to this headline">¶</a></h3>
+<p>Minor improvements to support some of the requirements generated during the development of fMRIPrep-1.1.12.</p>
+<ul class="simple">
+<li><p>ENH: Improvements to <code class="docutils literal notranslate"><span class="pre">RobustMNINormalization</span></code> (#368) &#64;oesteban</p></li>
+<li><p>RF: Miscellaneous improvements to allow multiplicity of templates and specs (#366) &#64;oesteban</p></li>
+</ul>
+</div>
+<div class="section" id="june-5-2019">
+<h3>0.9.5 (June 5, 2019)<a class="headerlink" href="#june-5-2019" title="Permalink to this headline">¶</a></h3>
+<p>Minor improvements to allow more flexible template selection within
+the brain extraction workflow, in particular to enable using infant and
+pediatric templates.</p>
+<ul class="simple">
+<li><p>ENH: Accept template specifications in <code class="docutils literal notranslate"><span class="pre">antsBrainExtraction</span></code> (#364) &#64;oesteban</p></li>
+</ul>
+</div>
+<div class="section" id="id5">
+<h3>0.9.4 (June 5, 2019)<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>A housekeeping release, including bugfixes and minor enhancements.
+With thanks to William H. Thompson for contributions.</p>
+<ul class="simple">
+<li><p>PIN: TemplateFlow to latest (0.3.0), including infant and pediatric templates (#363) &#64;oesteban</p></li>
+<li><p>RF: Move BOLD-reference generation workflows to niworkflows (#362) &#64;oesteban</p></li>
+<li><p>ENH: Create informative HTML reportlet on missing MELODIC mix (#337) &#64;effigies</p></li>
+<li><p>ENH: Signal extraction of parcels/ROIs from single NIfTI file (#303) &#64;wiheto</p></li>
+</ul>
+</div>
+<div class="section" id="may-15-2019">
+<h3>0.9.3 (May 15, 2019)<a class="headerlink" href="#may-15-2019" title="Permalink to this headline">¶</a></h3>
+<p>Hotfix to the new confounds plot showing correlations.</p>
+<ul class="simple">
+<li><p>FIX: Refine implementation of plotting confounds correlations (#360) &#64;oesteban</p></li>
+</ul>
+</div>
+<div class="section" id="may-6-2019">
+<h3>0.9.2-1 (May 6, 2019)<a class="headerlink" href="#may-6-2019" title="Permalink to this headline">¶</a></h3>
+<p>Hotfix to CopyXForm interface to keep backwards compatibility.</p>
+<ul class="simple">
+<li><p>FIX: fields were being replaced in outputs call (b418733) &#64;oesteban</p></li>
+</ul>
+</div>
+<div class="section" id="id6">
+<h3>0.9.2 (May 6, 2019)<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p>Hotfix addressing x-form issues on our <code class="docutils literal notranslate"><span class="pre">antsBrainExtraction</span></code>’s interpretation.</p>
+<ul class="simple">
+<li><p>ENH: Ensure consistency of headers along brain extraction workflow (#359) &#64;oesteban</p></li>
+</ul>
+</div>
+<div class="section" id="may-3-2019">
+<h3>0.9.1-1 (May 3, 2019)<a class="headerlink" href="#may-3-2019" title="Permalink to this headline">¶</a></h3>
+<p>A hotfix over latest hotfix.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>FIX: Minor bug introduced with #358 (<a class="reference external" href="https://github.com/nipreps/niworkflows/commit/ed7a8e6ca350d06ff5f4d9fe8bd7ed2f06ada9ad">ed7a8e</a>) &#64;oesteban</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="id7">
+<h3>0.9.1 (May 3, 2019)<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<p>A hotfix release to allow new documentation building of fMRIPrep.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>FIX: Tolerate missing ANTs at workflow construction (#358) &#64;effigies</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="id8">
+<h3>0.9.0 (May 3, 2019)<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<p>A number of new features and bugfixes. This release includes a refactor of the
+reports generation system that attempts to better generalize to other BIDS-Apps.
+The new reports internally use pybids to find reportlets, and the configuration
+file has been migrated to YAML to allow line breaks when captioning reportlets.
+The release also provides more infrastructure for fMRIPrep and sMRIPrep, including
+some BIDS-related interfaces.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>ENH: Miscellaneous improvements to the Reports (#357) &#64;oesteban</p></li>
+<li><p>ENH: Add a <code class="docutils literal notranslate"><span class="pre">KeySelect</span></code> interface (#347) &#64;oesteban</p></li>
+<li><p>FIX: BusError in <code class="docutils literal notranslate"><span class="pre">DerivativesDataSink</span></code> (#356) &#64;effigies</p></li>
+<li><p>Revert “FIX: BusError in <code class="docutils literal notranslate"><span class="pre">DerivativesDataSink</span></code>” (#355) &#64;effigies</p></li>
+<li><p>FIX: <code class="docutils literal notranslate"><span class="pre">GenerateSamplingReference</span></code> failed extension with #348 (#354) &#64;oesteban</p></li>
+<li><p>FIX: Revise tests after sloppy merge of #352 (#353) &#64;oesteban</p></li>
+<li><p>FIX: Reportlets path and output path were wrong (#352) &#64;oesteban</p></li>
+<li><p>FIX: Use safe loader for YAML data input in reports (#351) &#64;oesteban</p></li>
+<li><p>FIX: Allow <code class="docutils literal notranslate"><span class="pre">native</span></code> grids (i.e. pass-through) for <code class="docutils literal notranslate"><span class="pre">GenerateSamplingReference</span></code> (#348) &#64;oesteban</p></li>
+<li><p>FIX: BusError in <code class="docutils literal notranslate"><span class="pre">DerivativesDataSink</span></code> (#350) &#64;effigies</p></li>
+<li><p>ENH: Add new confounds model to reports template (#349) &#64;oesteban</p></li>
+<li><p>ENH/FIX: Migrate default config to YAML, fix ROIs query. (#346) &#64;oesteban</p></li>
+<li><p>REL: Synchronization with latest fMRIPrep changes + minor improvements (#345) &#64;oesteban</p></li>
+<li><p>ENH: <code class="docutils literal notranslate"><span class="pre">DerivativesDataSink</span></code> now accepts metadata dictionaries too (#332) &#64;oesteban</p></li>
+<li><p>ENH: Upstream <code class="docutils literal notranslate"><span class="pre">init_gifti_surface_wf</span></code> from sMRIPrep (#328) &#64;oesteban</p></li>
+<li><p>FIX: Do not generate 4D references out of 4D single-band references (SBRefs) (#338) &#64;oesteban</p></li>
+<li><p>FIX: Allow pipelining dynamic outputs of <code class="docutils literal notranslate"><span class="pre">ReadSidecarJSON</span></code> (#340) &#64;oesteban</p></li>
+<li><p>ENH: Dictionary manipulation / TSV to dict, merge multiple dicts (#341) &#64;rciric</p></li>
+<li><p>ENH: Run a second <code class="docutils literal notranslate"><span class="pre">N4BiasFieldCorrection</span></code> node to refine INU correction (#342) &#64;oesteban</p></li>
+<li><p>ENH: Add an <code class="docutils literal notranslate"><span class="pre">allowed_entities</span></code> setting in <code class="docutils literal notranslate"><span class="pre">DerivativesDataSink</span></code> (#343) &#64;oesteban</p></li>
+<li><p>ENH: Refactor of the Report generation tools (#344) &#64;oesteban</p></li>
+<li><p>PIN: Update dependencies - nilearn!=0.5.0,!=0.5.1 and latest templateflow (0.1.7)</p></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="id9">
+<h2>0.8.x series<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="april-4-2019">
+<h3>0.8.2 (April 4, 2019)<a class="headerlink" href="#april-4-2019" title="Permalink to this headline">¶</a></h3>
+<p>New release to go along with the upcoming MRIQC 0.15.0.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>ENH: Update CompCor plotting to allow getting NaNs (#326) &#64;rciric</p></li>
+<li><p>ENH: Ensure brain mask’s conformity (#324) &#64;oesteban</p></li>
+<li><p>ENH: Add several helper interfaces (#325) &#64;oesteban</p></li>
+<li><p>FIX: “NONE of the components…” banner was printed even when no AROMA file was present (#330) &#64;oesteban</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="march-15-2019">
+<h3>0.8.1 (March 15, 2019)<a class="headerlink" href="#march-15-2019" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>FIX: Revising antsBrainExtraction dual workflow (#316) &#64;oesteban</p></li>
+<li><p>ENH: Expose bias-corrected T1w before skull-stripping (#317) &#64;oesteban</p></li>
+<li><p>ENH: <code class="docutils literal notranslate"><span class="pre">DerivativesDataSink</span></code> - enable JSON sidecar writing (#318) &#64;oesteban</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="march-05-2019">
+<h3>0.8.0 (March 05, 2019)<a class="headerlink" href="#march-05-2019" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>[PIN] Update to TemplateFlow 0.1.0 (#315) &#64;oesteban</p></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="id10">
+<h2>0.7.x series<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="february-19-2019">
+<h3>0.7.2 (February 19, 2019)<a class="headerlink" href="#february-19-2019" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>[FIX] Scaling of confound fix (#310) &#64;wiheto</p></li>
+<li><p>[FIX] GenerateSamplingReference with correct zooms (#312) &#64;effigies</p></li>
+<li><p>[ENH] AROMA plots - add warning for edge cases (none/all are noise) (#292) &#64;jdkent</p></li>
+<li><p>[ENH] Confound enhancement (#287) &#64;rciric</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="post1-february-12-2019">
+<h3>0.7.1.post1 (February 12, 2019)<a class="headerlink" href="#post1-february-12-2019" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>[FIX] Do not cast <code class="docutils literal notranslate"><span class="pre">run</span></code> BIDS-entity to string (#307) &#64;oesteban</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="february-07-2019">
+<h3>0.7.1 (February 07, 2019)<a class="headerlink" href="#february-07-2019" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>[TST] Add test on <code class="docutils literal notranslate"><span class="pre">BIDSInfo</span></code> interface (#302) &#64;oesteban</p></li>
+<li><p>[MNT] Deprecate <code class="docutils literal notranslate"><span class="pre">getters</span></code> module (#305) &#64;oesteban</p></li>
+<li><p>[FIX] Improve bounding box computation from masks (#304) &#64;oesteban</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="february-04-2019">
+<h3>0.7.0 (February 04, 2019)<a class="headerlink" href="#february-04-2019" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>[ENH] Implementation of BIDS utilities using pybids (#299) &#64;oesteban</p></li>
+<li><p>[HOTFIX] Only check headers of NIfTI files (#300) &#64;oesteban</p></li>
+<li><p>[ENH] Option to sanitize NIfTI headers when writing derivatives (#298) &#64;oesteban</p></li>
+<li><p>[ENH] Do not save the original name and time stamp of gzip files (#295) &#64;oesteban</p></li>
+<li><p>[CI] Checkout source for coverage reporting (#290) &#64;effigies</p></li>
+<li><p>[CI] Add coverage (#288) &#64;effigies</p></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="old-0-x-series">
+<h2>Old 0.x series<a class="headerlink" href="#old-0-x-series" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="january-23-2019">
+<h3>0.6.1 (January 23, 2019)<a class="headerlink" href="#january-23-2019" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>[FIX] Allow arbitrary template names in <code class="docutils literal notranslate"><span class="pre">RobustMNINormalization</span></code> (#284) &#64;oesteban</p></li>
+<li><p>[FIX] Brain extraction broken connection (#286) &#64;oesteban</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="january-18-2019">
+<h3>0.6.0 (January 18, 2019)<a class="headerlink" href="#january-18-2019" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>[RF] Improve readability of parameters files (#276) &#64;oesteban</p></li>
+<li><p>[ENH] Improve niwflows.interfaces.freesurfer (#277) &#64;oesteban</p></li>
+<li><p>[ENH] Make BIDS regex more readable (#278) &#64;oesteban</p></li>
+<li><p>[ENH] Datalad+templateflow integration (#280) &#64;oesteban</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="id11">
+<h3>0.5.4 (January 23, 2019)<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>[HOTFIX] Fix <code class="docutils literal notranslate"><span class="pre">UnboundLocalError</span></code> in utils.bids (#285) &#64;oesteban</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="january-08-2019">
+<h3>0.5.3 (January 08, 2019)<a class="headerlink" href="#january-08-2019" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>[RF] Improve generalization of Reports generation (#275)</p></li>
+<li><p>[RF] Improve implementation of DerivativesDataSink (#274)</p></li>
+<li><p>[RF] Conform names to updated TemplateFlow, add options conducive to small animal neuroimaging (#271)</p></li>
+<li><p>[FIX] Do not resolve non-existent Paths (#272)</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="post5-december-14-2018">
+<h3>0.5.2.post5 (December 14, 2018)<a class="headerlink" href="#post5-december-14-2018" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>[FIX] <code class="docutils literal notranslate"><span class="pre">read_crashfile</span></code> stopped working after migration (#270)</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="post4-december-13-2018">
+<h3>0.5.2.post4 (December 13, 2018)<a class="headerlink" href="#post4-december-13-2018" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>[HOTFIX] <code class="docutils literal notranslate"><span class="pre">LiterateWorkflow</span></code> returning empty desc (#269)</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="post3-december-13-2018">
+<h3>0.5.2.post3 (December 13, 2018)<a class="headerlink" href="#post3-december-13-2018" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>[FIX] Summary fMRIPlot chokes when confounds are all-nan (#268)</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="post2-december-12-2018">
+<h3>0.5.2.post2 (December 12, 2018)<a class="headerlink" href="#post2-december-12-2018" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>[FIX] <code class="docutils literal notranslate"><span class="pre">get_metadata_for_nifti</span></code> broken in transfer from fmriprep (#267)</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="post1-december-10-2018">
+<h3>0.5.2.post1 (December 10, 2018)<a class="headerlink" href="#post1-december-10-2018" title="Permalink to this headline">¶</a></h3>
+<p>A hotfix release that ensures version is correctly reported when installed
+via Pypi.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>[MAINT] Clean-up dependencies (7a76a45)</p></li>
+<li><p>[HOTFIX] Ensure VERSION file is created at deployment (3e3a2f3)</p></li>
+<li><p>[TST] Add tests missed out in #263 (#266)</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="december-8-2018">
+<h3>0.5.2 (December 8, 2018)<a class="headerlink" href="#december-8-2018" title="Permalink to this headline">¶</a></h3>
+<p>With thanks to &#64;wiheto for contributions.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>[ENH] Upstream work from fMRIPrep (prep. sMRIPrep) (#263)</p></li>
+<li><p>[ENH] Integrate versioneer (#264)</p></li>
+<li><p>[FIX] X axis label for fMRIPlot - better respect TR and default to frame number (#261)</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="november-8-2018">
+<h3>0.5.1 (November 8, 2018)<a class="headerlink" href="#november-8-2018" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[FIX] Count non-steady-state volumes even if sbref is passed  (#258)</p></li>
+<li><p>[FIX] Remove empty nipype file (#259)</p></li>
+</ul>
+</div>
+<div class="section" id="october-26-2018">
+<h3>0.5.0 (October 26, 2018)<a class="headerlink" href="#october-26-2018" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[RF] Updates for templateflow (#257)</p></li>
+</ul>
+</div>
+<div class="section" id="october-15-2018">
+<h3>0.4.4 (October 15, 2018)<a class="headerlink" href="#october-15-2018" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Add “fMRIPrep” template, with new boldref template (#255)</p></li>
+<li><p>[ENH/MAINT] Refactor downloads, update NKI (#256)</p></li>
+</ul>
+</div>
+<div class="section" id="september-4-2018">
+<h3>0.4.3 (September 4, 2018)<a class="headerlink" href="#september-4-2018" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[FIX] Return runtime from EstimateReferenceImage._run_interface (#251)</p></li>
+<li><p>[ENH] Add nipype reimplementation of antsBrainExtraction (#244)</p></li>
+<li><p>[REF] Use runtime.cwd when possible in interfaces (#249)</p></li>
+</ul>
+</div>
+<div class="section" id="july-5-2018">
+<h3>0.4.2 (July 5, 2018)<a class="headerlink" href="#july-5-2018" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Add fs-32k template (#243)</p></li>
+<li><p>[FIX] Avoid mmap when overwriting input in copyxform (#247)</p></li>
+<li><p>[PIN] nipype 1.1.0 (#248)</p></li>
+</ul>
+</div>
+<div class="section" id="june-7-2018">
+<h3>0.4.1 (June 7, 2018)<a class="headerlink" href="#june-7-2018" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[FIX] Standardize DTK template name</p></li>
+</ul>
+</div>
+<div class="section" id="may-31-2018">
+<h3>0.4.0 (May 31, 2018)<a class="headerlink" href="#may-31-2018" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Resume external nipype dependency at version 1.0.4 (#241)</p></li>
+<li><p>[REF] Use nipype’s ReportCapableInterface mixin (#238)</p></li>
+<li><p>[MNT] Enable running tests in parallel (#240)</p></li>
+</ul>
+</div>
+<div class="section" id="may-11-2018">
+<h3>0.3.13 (May 11, 2018)<a class="headerlink" href="#may-11-2018" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[PIN] Update Nipype to current master in nipy/nipype</p></li>
+</ul>
+</div>
+<div class="section" id="may-05-2018">
+<h3>0.3.12 (May 05, 2018)<a class="headerlink" href="#may-05-2018" title="Permalink to this headline">¶</a></h3>
+<p>With thanks to &#64;danlurie for this new feature.</p>
+<ul class="simple">
+<li><p>[ENH] Constrained cost-function masking for T1-MNI registration (#233)</p></li>
+</ul>
+</div>
+<div class="section" id="april-20-2018">
+<h3>0.3.8 (April 20, 2018)<a class="headerlink" href="#april-20-2018" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[PIN] Update nipype PIN to current master</p></li>
+</ul>
+</div>
+<div class="section" id="march-22-2018">
+<h3>0.3.7 (March 22, 2018)<a class="headerlink" href="#march-22-2018" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] fMRI summary plot to take <code class="docutils literal notranslate"><span class="pre">_confounds.tsv</span></code> (#230)</p></li>
+</ul>
+</div>
+<div class="section" id="march-14-2018">
+<h3>0.3.6 (March 14, 2018)<a class="headerlink" href="#march-14-2018" title="Permalink to this headline">¶</a></h3>
+<p>Celebrating the 30th Anniversary of Pi Day!</p>
+<ul class="simple">
+<li><p>[ENH] Migrate the summary plot to niworkflows (#229)</p></li>
+<li><p>[ENH] Migrate carpetplot from MRIQC (#223)</p></li>
+</ul>
+</div>
+<div class="section" id="february-28-2018">
+<h3>0.3.5 (February 28, 2018)<a class="headerlink" href="#february-28-2018" title="Permalink to this headline">¶</a></h3>
+<p>With thanks to &#64;mgxd for the new atlas.</p>
+<ul class="simple">
+<li><p>[PIN] Nipype-1.0.2</p></li>
+<li><p>[ENH] Add OASIS joint-fusion label atlas (#228)</p></li>
+</ul>
+</div>
+<div class="section" id="february-22-2018">
+<h3>0.3.4 (February 22, 2018)<a class="headerlink" href="#february-22-2018" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Remove extensions from the nifti header (<a class="reference external" href="https://github.com/nipreps/niworkflows/pull/226">#226</a>)</p></li>
+<li><p>[FIX] Fixing conda version (<a class="reference external" href="https://github.com/nipreps/niworkflows/pull/227">#227</a>)</p></li>
+<li><p>[TST] Speed-up long tests (<a class="reference external" href="https://github.com/nipreps/niworkflows/pull/225">#225</a>)</p></li>
+<li><p>[TST] Migrate to CircleCI 2.0 (<a class="reference external" href="https://github.com/nipreps/niworkflows/pull/224">#224</a>)</p></li>
+</ul>
+</div>
+<div class="section" id="id16">
+<h3>0.3.3<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Added SanitizeImage interface (<a class="reference external" href="https://github.com/nipreps/niworkflows/pull/221">https://github.com/nipreps/niworkflows/pull/221</a>)</p></li>
+</ul>
+</div>
+<div class="section" id="id17">
+<h3>0.3.1<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[FIX] broken normalization retries (<a class="reference external" href="https://github.com/nipreps/niworkflows/pull/220">https://github.com/nipreps/niworkflows/pull/220</a>)</p></li>
+</ul>
+</div>
+<div class="section" id="id18">
+<h3>0.3.0<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[PIN] Nipype 1.0.0</p></li>
+</ul>
+</div>
+<div class="section" id="id19">
+<h3>0.2.8<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[PIN] Pinning nipype to oesteban/nipype (including
+nipy/nipype#2383, nipy/nipype#2384, nipy/nipype#2376)</p></li>
+</ul>
+</div>
+<div class="section" id="id20">
+<h3>0.2.7<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[PIN] Pinning nipype to nipy/nipype (including
+<a class="reference external" href="https://github.com/nipy/nipype/pull/2373">https://github.com/nipy/nipype/pull/2373</a>)</p></li>
+</ul>
+</div>
+<div class="section" id="id21">
+<h3>0.2.6<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[PIN] Pinning nipype to oesteban/nipype (including
+<a class="reference external" href="https://github.com/nipy/nipype/pull/2368">https://github.com/nipy/nipype/pull/2368</a>)</p></li>
+</ul>
+</div>
+<div class="section" id="id22">
+<h3>0.2.5<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[PIN] Pinning nipype to <a class="reference external" href="mailto:nipy/nipype&#37;&#52;&#48;master">nipy/nipype<span>&#64;</span>master</a></p></li>
+</ul>
+</div>
+<div class="section" id="id23">
+<h3>0.2.4<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[FIX] Regression of nipreps/fmriprep#868 - updated nipy/nipype#2325
+to fix it.</p></li>
+</ul>
+</div>
+<div class="section" id="id24">
+<h3>0.2.3<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[PIN] Upgrade internal Nipype to current master + current nipy/nipype#2325</p></li>
+<li><p>[ENH] Thinner lines in tissue segmentation (#215)</p></li>
+<li><p>[ENH] Use nearest for coreg visualization (#214)</p></li>
+</ul>
+</div>
+<div class="section" id="id25">
+<h3>0.2.2<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[PIN] Upgrade internal Nipype to current master + nipy/nipype#2325</p></li>
+</ul>
+</div>
+<div class="section" id="id26">
+<h3>0.2.1<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Add new ROIsPlot interface (#211)</p></li>
+<li><p>[PIN] Upgrade internal Nipype to current master.</p></li>
+</ul>
+</div>
+<div class="section" id="id27">
+<h3>0.2.0<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Generate SVGs only (#210)</p></li>
+<li><p>[PIN] Upgrade internal Nipype to master after the v0.14.0 release.</p></li>
+</ul>
+</div>
+<div class="section" id="id28">
+<h3>0.1.11<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Update internal Nipype including merging nipy/nipype#2285 before nipype itself does.</p></li>
+</ul>
+</div>
+<div class="section" id="id29">
+<h3>0.1.10<a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Lower priority of “Affines do not match” warning (#209)</p></li>
+<li><p>[FIX] Increase tolerance in GenerateSamplingReference (#207)</p></li>
+<li><p>[ENH] Upgrade internal Nipype</p></li>
+</ul>
+</div>
+<div class="section" id="id30">
+<h3>0.1.9<a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Display surface contours for MRICoregRPT if available (#204)</p></li>
+<li><p>[ENH] Crop BOLD sampling reference to reduce output file size (#205)</p></li>
+<li><p>[ENH] Close file descriptors where possible to avoid OS limits (#208)</p></li>
+<li><p>[ENH] Upgrade internal Nipype</p></li>
+</ul>
+</div>
+<div class="section" id="id31">
+<h3>0.1.8<a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Add NKI template data grabber (#200)</p></li>
+<li><p>[ENH] Enable sbref to be passed to EstimateReferenceImage (#199)</p></li>
+<li><p>[ENH] Add utilities for fixing NIfTI qform/sform matrices (#202)</p></li>
+<li><p>[ENH] Upgrade internal Nipype</p></li>
+</ul>
+</div>
+<div class="section" id="id32">
+<h3>0.1.7<a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Reporting interface for <cite>mri_coreg</cite></p></li>
+<li><p>[ENH] Upgrade internal Nipype</p></li>
+</ul>
+</div>
+<div class="section" id="id33">
+<h3>0.1.6<a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Add BIDS example getters (#189)</p></li>
+<li><p>[ENH] Add NormalizeMotionParams interface (#190)</p></li>
+<li><p>[ENH] Add ICA-AROMA reporting interface (#193)</p></li>
+<li><p>[FIX] Correctly handle temporal units in MELODIC plotting (#192)</p></li>
+<li><p>[ENH] Upgrade internal Nipype</p></li>
+</ul>
+</div>
+<div class="section" id="id34">
+<h3>0.1.5<a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Do not enforce float precision for ANTs (#187)</p></li>
+<li><p>[ENH] Clear header extensions when making ref image (#188)</p></li>
+<li><p>[ENH] Upgrade internal Nipype</p></li>
+</ul>
+</div>
+<div class="section" id="id35">
+<h3>0.1.4<a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Upgrade internal Nipype</p></li>
+</ul>
+</div>
+<div class="section" id="id36">
+<h3>0.1.3<a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Upgrade internal Nipype</p></li>
+</ul>
+</div>
+<div class="section" id="id37">
+<h3>0.1.2<a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Hotfix release (updated manifest)</p></li>
+</ul>
+</div>
+<div class="section" id="id38">
+<h3>0.1.1<a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Hotfix release (updated manifest)</p></li>
+</ul>
+</div>
+<div class="section" id="id39">
+<h3>0.1.0<a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Improve dependency management for users unable to use Docker/Singularity containers (#174)</p></li>
+<li><p>[DEP] Removed RobustMNINormalization <cite>testing</cite> input; use <cite>flavor-‘testing’</cite> instead (#172)</p></li>
+</ul>
+</div>
+<div class="section" id="id40">
+<h3>0.0.7<a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[ENH] Use AffineInitializer in RobustMNIRegistration (#169, #171)</p></li>
+<li><p>[ENH] Add CopyHeader interface (#168)</p></li>
+<li><p>[ENH] Add 3dUnifize to skull-stripping workflow (#167, #170)</p></li>
+<li><p>[ENH] Give access to num_threads in N4BiasFieldCorrection (#166)</p></li>
+<li><p>[ENH] Add a simple interface for visualising masks (#161)</p></li>
+<li><p>[ENH] Add a family of faster registration settings (#157)</p></li>
+<li><p>[ENH] More flexible settings for RobustMNIRegistration (#155)</p></li>
+<li><p>[ENH] Add EstimateReferenceImage interface (#148)</p></li>
+<li><p>[ENH] Add a SimpleBeforeAfter report capable interface (#144)</p></li>
+<li><p>[ENH] Add MELODIC report interface (#134)</p></li>
+</ul>
+</div>
+<div class="section" id="id41">
+<h3>0.0.6<a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>[FIX] Python 2.7 issues and testing (#130, #135)</p></li>
+<li><p>[ENH] Compress surface segmentation reports (#133)</p></li>
+<li><p>[ENH] Write bias image in skull-stripping workflow (#131)</p></li>
+<li><p>[FIX] BBRegisterRPT: Use <cite>inputs.subjects_dir</cite> to find structurals (#128)</p></li>
+<li><p>[ENH] Fetch full 2009c from OSF (#126)</p></li>
+<li><p>[ENH] Coregistration tweaks (#125)</p></li>
+<li><p>[FIX] Be more robust in detecting SVGO (#124)</p></li>
+<li><p>[ENH] Enable Lanczos interpolation (#122)</p></li>
+</ul>
+</div>
+<div class="section" id="id42">
+<h3>0.0.3<a class="headerlink" href="#id42" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Add parcellation derived from Harvard-Oxford template, to be
+used with the nonlinear-asym-09c template for the carpetplot</p></li>
+<li><p>Add headmask and normalize tpms in mni_icbm152_nlin_asym_09c</p></li>
+<li><p>Update MNI ICBM152 templates (linear and nonlinear-asym)</p></li>
+<li><p>Add MNI152 2009c nonlinear-symetric template (LAS)</p></li>
+<li><p>Add MNI152 nonlinear-symmetric template</p></li>
+<li><p>Add MNI EPI template and parcellation</p></li>
+<li><p>Switch data downloads from GDrive to OSF</p></li>
+<li><p>Fixed installer, now compatible with python 3</p></li>
+</ul>
+</div>
+<div class="section" id="id43">
+<h3>0.0.2<a class="headerlink" href="#id43" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Added MRI reorient workflow (based on AFNI)</p></li>
+</ul>
+</div>
+<div class="section" id="id44">
+<h3>0.0.1<a class="headerlink" href="#id44" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Added skull-stripping workflow based on AFNI</p></li>
+<li><p>Rewritten most of the shablona-derived names and description files</p></li>
+<li><p>Copied project structure from Shablona</p></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api/niworkflows.viz.utils.html" class="btn btn-neutral float-left" title="niworkflows.viz.utils module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.1.12
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt id="v-tags">Tags</dt>
+        </dl>
+        <dl>
+            <dt id="v-branches">Branches</dt>
+        </dl>
+    </div>
+</div>
+
+
+<script src="../js/rtd-versions.js"></script>
+
+</body>
+</html>

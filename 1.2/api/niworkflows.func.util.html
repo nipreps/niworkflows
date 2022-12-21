@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.func.util module &mdash; niworkflows 1.2.9 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="niworkflows.interfaces package" href="niworkflows.interfaces.html" />
+    <link rel="prev" title="niworkflows.func package" href="niworkflows.func.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.2.9
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.anat.html">niworkflows.anat package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.cli.html">niworkflows.cli package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="niworkflows.func.html">niworkflows.func package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="niworkflows.func.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">niworkflows.func.util module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.viz.html">niworkflows.viz package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
+          <li><a href="niworkflows.func.html">niworkflows.func package</a> &raquo;</li>
+      <li>niworkflows.func.util module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/niworkflows.func.util.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../../master/api/niworkflows.func.util.html"><b>Warning:</b> This document is for an old version of niworkflows. The main version is master.</a></p>
+<div class="section" id="module-niworkflows.func.util">
+<span id="niworkflows-func-util-module"></span><h1>niworkflows.func.util module<a class="headerlink" href="#module-niworkflows.func.util" title="Permalink to this headline">¶</a></h1>
+<p>Utility workflows.</p>
+<dl class="py function">
+<dt id="niworkflows.func.util.init_bold_reference_wf">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.func.util.</span></code><code class="sig-name descname"><span class="pre">init_bold_reference_wf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omp_nthreads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bold_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sbref_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">brainmask_thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.85</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiecho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bold_reference_wf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/func/util.html#init_bold_reference_wf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.func.util.init_bold_reference_wf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a workflow that generates reference BOLD images for a series.</p>
+<p>The raw reference image is the target of <abbr title="head motion correction">HMC</abbr>, and a
+contrast-enhanced reference is the subject of distortion correction, as well as
+boundary-based registration to T1w and template spaces.</p>
+<p>LIMITATION: If one wants to extract the reference from several SBRefs
+with several echoes each, the first echo should be selected elsewhere
+and run this interface in <code class="docutils literal notranslate"><span class="pre">multiecho</span> <span class="pre">=</span> <span class="pre">False</span></code> mode. In other words,
+SBRef inputs are assumed to be single-echo.</p>
+<p>LIMITATION: If a list of SBRefs is provided, each can be 3D or 4D, but they
+are assumed to be sampled in the exact same 3D-grid and have the same orientation
+information in their headers so that they can directly be merged into a 4D volume.</p>
+<dl>
+<dt>Workflow Graph</dt><dd><div class="figure align-default">
+<img alt="../_images/niworkflows-func-util-1.png" src="../_images/niworkflows-func-util-1.png" />
+</div>
+<p>(<a class="reference external" href="../api/niworkflows-func-util-1.py">Source code</a>, <a class="reference external" href="../api/niworkflows-func-util-1.png">png</a>, <a class="reference external" href="../api/niworkflows-func-util-1.svg">svg</a>, <a class="reference external" href="../api/niworkflows-func-util-1.pdf">pdf</a>)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>omp_nthreads</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – Maximum number of threads an individual process may use</p></li>
+<li><p><strong>bold_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – BOLD series NIfTI file</p></li>
+<li><p><strong>sbref_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>) – Single band (as opposed to multi band) reference NIfTI file.
+If <code class="docutils literal notranslate"><span class="pre">True</span></code> is passed, the workflow is built to accommodate SBRefs,
+but the input is left undefined (i.e., it is left open for connection)</p></li>
+<li><p><strong>brainmask_thresh</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>) – Lower threshold for the probabilistic brainmask to obtain
+the final binary mask (default: 0.85).</p></li>
+<li><p><strong>pre_mask</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>) – Indicates whether the <code class="docutils literal notranslate"><span class="pre">pre_mask</span></code> input will be set (and thus, step 1
+should be skipped).</p></li>
+<li><p><strong>multiecho</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>) – If multiecho data was supplied, data from the first echo
+will be selected</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Name of workflow (default: <code class="docutils literal notranslate"><span class="pre">bold_reference_wf</span></code>)</p></li>
+<li><p><strong>gen_report</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>) – Whether a mask report node should be appended in the end</p></li>
+</ul>
+</dd>
+<dt class="field-even">Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>bold_file</strong> (<em>str</em>) – BOLD series NIfTI file</p></li>
+<li><p><strong>bold_mask</strong> (<em>bool</em>) – A tentative brain mask to initialize the workflow (requires <code class="docutils literal notranslate"><span class="pre">pre_mask</span></code>
+parameter set <code class="docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
+<li><p><strong>dummy_scans</strong> (<em>int or None</em>) – Number of non-steady-state volumes specified by user at beginning of <code class="docutils literal notranslate"><span class="pre">bold_file</span></code></p></li>
+<li><p><strong>sbref_file</strong> (<em>str</em>) – single band (as opposed to multi band) reference NIfTI file</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bold_file</strong> (<em>str</em>) – Validated BOLD series NIfTI file</p></li>
+<li><p><strong>raw_ref_image</strong> (<em>str</em>) – Reference image to which BOLD series is motion corrected</p></li>
+<li><p><strong>skip_vols</strong> (<em>int</em>) – Number of non-steady-state volumes selected at beginning of <code class="docutils literal notranslate"><span class="pre">bold_file</span></code></p></li>
+<li><p><strong>algo_dummy_scans</strong> (<em>int</em>) – Number of non-steady-state volumes agorithmically detected at
+beginning of <code class="docutils literal notranslate"><span class="pre">bold_file</span></code></p></li>
+<li><p><strong>ref_image</strong> (<em>str</em>) – Contrast-enhanced reference image</p></li>
+<li><p><strong>ref_image_brain</strong> (<em>str</em>) – Skull-stripped reference image</p></li>
+<li><p><strong>bold_mask</strong> (<em>str</em>) – Skull-stripping mask of reference image</p></li>
+<li><p><strong>validation_report</strong> (<em>str</em>) – HTML reportlet indicating whether <code class="docutils literal notranslate"><span class="pre">bold_file</span></code> had a valid affine</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Subworkflows</dt><dd><ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">init_enhance_and_skullstrip_wf()</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.func.util.init_enhance_and_skullstrip_bold_wf">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.func.util.</span></code><code class="sig-name descname"><span class="pre">init_enhance_and_skullstrip_bold_wf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">brainmask_thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'enhance_and_skullstrip_bold_wf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omp_nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/func/util.html#init_enhance_and_skullstrip_bold_wf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.func.util.init_enhance_and_skullstrip_bold_wf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enhance and run brain extraction on a BOLD EPI image.</p>
+<p>This workflow takes in a <abbr title="blood-oxygen level-dependant">BOLD</abbr>
+<abbr title="functional MRI">fMRI</abbr> average/summary (e.g., a reference image
+averaging non-steady-state timepoints), and sharpens the histogram
+with the application of the N4 algorithm for removing the
+<abbr title="intensity non-uniformity">INU</abbr> bias field and calculates a signal
+mask.</p>
+<p>Steps of this workflow are:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Calculate a tentative mask by registering (9-parameters) to <em>fMRIPrep</em>’s
+<abbr title="echo-planar imaging">EPI</abbr> -<em>boldref</em> template, which
+is in MNI space.
+The tentative mask is obtained by resampling the MNI template’s
+brainmask into <em>boldref</em>-space.</p></li>
+<li><p>Binary dilation of the tentative mask with a sphere of 3mm diameter.</p></li>
+<li><p>Run ANTs’ <code class="docutils literal notranslate"><span class="pre">N4BiasFieldCorrection</span></code> on the input
+<abbr title="blood-oxygen level-dependant">BOLD</abbr> average, using the
+mask generated in 1) instead of the internal Otsu thresholding.</p></li>
+<li><p>Calculate a loose mask using FSL’s <code class="docutils literal notranslate"><span class="pre">bet</span></code>, with one mathematical morphology
+dilation of one iteration and a sphere of 6mm as structuring element.</p></li>
+<li><p>Mask the <abbr title="intensity non-uniformity">INU</abbr>-corrected image
+with the latest mask calculated in 3), then use AFNI’s <code class="docutils literal notranslate"><span class="pre">3dUnifize</span></code>
+to <em>standardize</em> the T2* contrast distribution.</p></li>
+<li><p>Calculate a mask using AFNI’s <code class="docutils literal notranslate"><span class="pre">3dAutomask</span></code> after the contrast
+enhancement of 4).</p></li>
+<li><p>Calculate a final mask as the intersection of 4) and 6).</p></li>
+<li><p>Apply final mask on the enhanced reference.</p></li>
+</ol>
+</div></blockquote>
+<p>Step 1 can be skipped if the <code class="docutils literal notranslate"><span class="pre">pre_mask</span></code> argument is set to <code class="docutils literal notranslate"><span class="pre">True</span></code> and
+a tentative mask is passed in to the workflow throught the <code class="docutils literal notranslate"><span class="pre">pre_mask</span></code>
+Nipype input.</p>
+<dl>
+<dt>Workflow graph</dt><dd><div class="figure align-default">
+<img alt="../_images/niworkflows-func-util-2.png" src="../_images/niworkflows-func-util-2.png" />
+</div>
+<p>(<a class="reference external" href="../api/niworkflows-func-util-2.py">Source code</a>, <a class="reference external" href="../api/niworkflows-func-util-2.png">png</a>, <a class="reference external" href="../api/niworkflows-func-util-2.svg">svg</a>, <a class="reference external" href="../api/niworkflows-func-util-2.pdf">pdf</a>)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>brainmask_thresh</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>) – Lower threshold for the probabilistic brainmask to obtain
+the final binary mask (default: 0.5).</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Name of workflow (default: <code class="docutils literal notranslate"><span class="pre">enhance_and_skullstrip_bold_wf</span></code>)</p></li>
+<li><p><strong>omp_nthreads</strong> (<em>int</em>) – number of threads available to parallel nodes</p></li>
+<li><p><strong>pre_mask</strong> (<em>bool</em>) – Indicates whether the <code class="docutils literal notranslate"><span class="pre">pre_mask</span></code> input will be set (and thus, step 1
+should be skipped).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>str</em>) – BOLD image (single volume)</p></li>
+<li><p><strong>pre_mask</strong> (<em>bool</em>) – A tentative brain mask to initialize the workflow (requires <code class="docutils literal notranslate"><span class="pre">pre_mask</span></code>
+parameter set <code class="docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bias_corrected_file</strong> (<em>str</em>) – the <code class="docutils literal notranslate"><span class="pre">in_file</span></code> after <a class="reference external" href="https://hdl.handle.net/10380/3053">N4BiasFieldCorrection</a></p></li>
+<li><p><strong>skull_stripped_file</strong> (<em>str</em>) – the <code class="docutils literal notranslate"><span class="pre">bias_corrected_file</span></code> after skull-stripping</p></li>
+<li><p><strong>mask_file</strong> (<em>str</em>) – mask of the skull-stripped input file</p></li>
+<li><p><strong>out_report</strong> (<em>str</em>) – reportlet for the skull-stripping</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.func.util.init_skullstrip_bold_wf">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.func.util.</span></code><code class="sig-name descname"><span class="pre">init_skullstrip_bold_wf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'skullstrip_bold_wf'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/func/util.html#init_skullstrip_bold_wf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.func.util.init_skullstrip_bold_wf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply skull-stripping to a BOLD image.</p>
+<p>It is intended to be used on an image that has previously been
+bias-corrected with
+<a class="reference internal" href="#niworkflows.func.util.init_enhance_and_skullstrip_bold_wf" title="niworkflows.func.util.init_enhance_and_skullstrip_bold_wf"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_enhance_and_skullstrip_bold_wf()</span></code></a></p>
+<dl>
+<dt>Workflow Graph</dt><dd><div class="figure align-default">
+<img alt="../_images/niworkflows-func-util-3.png" src="../_images/niworkflows-func-util-3.png" />
+</div>
+<p>(<a class="reference external" href="../api/niworkflows-func-util-3.py">Source code</a>, <a class="reference external" href="../api/niworkflows-func-util-3.png">png</a>, <a class="reference external" href="../api/niworkflows-func-util-3.svg">svg</a>, <a class="reference external" href="../api/niworkflows-func-util-3.pdf">pdf</a>)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Inputs</dt>
+<dd class="field-odd"><p><strong>in_file</strong> (<em>str</em>) – BOLD image (single volume)</p>
+</dd>
+<dt class="field-even">Outputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>skull_stripped_file</strong> (<em>str</em>) – the <code class="docutils literal notranslate"><span class="pre">in_file</span></code> after skull-stripping</p></li>
+<li><p><strong>mask_file</strong> (<em>str</em>) – mask of the skull-stripped input file</p></li>
+<li><p><strong>out_report</strong> (<em>str</em>) – reportlet for the skull-stripping</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="niworkflows.func.html" class="btn btn-neutral float-left" title="niworkflows.func package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="niworkflows.interfaces.html" class="btn btn-neutral float-right" title="niworkflows.interfaces package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.2.9
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt id="v-tags">Tags</dt>
+        </dl>
+        <dl>
+            <dt id="v-branches">Branches</dt>
+        </dl>
+    </div>
+</div>
+
+
+<script src="../../js/rtd-versions.js"></script>
+
+</body>
+</html>

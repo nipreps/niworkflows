@@ -1,0 +1,7 @@
+niworkflows.func.util module
+============================
+
+.. automodule:: niworkflows.func.util
+   :members:
+   :undoc-members:
+   :show-inheritance:

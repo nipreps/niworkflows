@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.interfaces.surf &mdash; niworkflows 1.2.9 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.2.9
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Library API (application program interface)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>niworkflows.interfaces.surf</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><b>Warning:</b> This document is for an old version of niworkflows.</p>
+<h1>Source code for niworkflows.interfaces.surf</h1><div class="highlight"><pre>
+<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2021 The NiPreps Developers &lt;nipreps@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#</span>
+<span class="c1"># We support and encourage derived works from this project, please read</span>
+<span class="c1"># about our expectations at</span>
+<span class="c1">#</span>
+<span class="c1">#     https://www.nipreps.org/community/licensing/</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;Handling surfaces.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
+    <span class="n">DynamicTraitedSpec</span><span class="p">,</span>
+    <span class="n">SimpleInterface</span><span class="p">,</span>
+    <span class="n">CommandLine</span><span class="p">,</span>
+    <span class="n">CommandLineInputSpec</span><span class="p">,</span>
+    <span class="n">File</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
+    <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">InputMultiPath</span><span class="p">,</span>
+    <span class="n">OutputMultiPath</span><span class="p">,</span>
+    <span class="n">Undefined</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">SECONDARY_ANAT_STRUC</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;smoothwm&quot;</span><span class="p">:</span> <span class="s2">&quot;GrayWhite&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;pial&quot;</span><span class="p">:</span> <span class="s2">&quot;Pial&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;midthickness&quot;</span><span class="p">:</span> <span class="s2">&quot;GrayMid&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">_NormalizeSurfInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Freesurfer-generated GIFTI file&quot;</span><span class="p">)</span>
+    <span class="n">transform_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;FSL or LTA affine transform file&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_NormalizeSurfOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output file with re-centered GIFTI coordinates&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="NormalizeSurf"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.NormalizeSurf">[docs]</a><span class="k">class</span> <span class="nc">NormalizeSurf</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Normalize a FreeSurfer-generated GIFTI image.</span>
+
+<span class="sd">    FreeSurfer includes an offset to the center of the brain volume that is not</span>
+<span class="sd">    respected by all software packages.</span>
+<span class="sd">    Normalization involves adding this offset to the coordinates of all</span>
+<span class="sd">    vertices, and zeroing out that offset, to ensure consistent behavior</span>
+<span class="sd">    across software packages.</span>
+<span class="sd">    In particular, this normalization is consistent with the Human Connectome</span>
+<span class="sd">    Project pipeline (see `AlgorithmSurfaceApplyAffine`_ and</span>
+<span class="sd">    `FreeSurfer2CaretConvertAndRegisterNonlinear`_), although the the HCP</span>
+<span class="sd">    may not zero out the offset.</span>
+
+<span class="sd">    GIFTI files with ``midthickness``/``graymid`` in the name are also updated</span>
+<span class="sd">    to include the following metadata entries::</span>
+
+<span class="sd">        {</span>
+<span class="sd">            AnatomicalStructureSecondary: MidThickness,</span>
+<span class="sd">            GeometricType: Anatomical</span>
+<span class="sd">        }</span>
+
+<span class="sd">    This interface is intended to be applied uniformly to GIFTI surface files</span>
+<span class="sd">    generated from the ``?h.white``/``?h.smoothwm`` and ``?h.pial`` surfaces,</span>
+<span class="sd">    as well as externally-generated ``?h.midthickness``/``?h.graymid`` files.</span>
+<span class="sd">    In principle, this should apply safely to any other surface, although it is</span>
+<span class="sd">    less relevant to surfaces that don&#39;t describe an anatomical structure.</span>
+
+<span class="sd">    .. _AlgorithmSurfaceApplyAffine: https://github.com/Washington-University/workbench\</span>
+<span class="sd">/blob/1b79e56/src/Algorithms/AlgorithmSurfaceApplyAffine.cxx#L73-L91</span>
+
+<span class="sd">    .. _FreeSurfer2CaretConvertAndRegisterNonlinear: https://github.com/Washington-University/\</span>
+<span class="sd">Pipelines/blob/ae69b9a/PostFreeSurfer/scripts/FreeSurfer2CaretConvertAndRegisterNonlinear.sh\</span>
+<span class="sd">#L147-154</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_NormalizeSurfInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_NormalizeSurfOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">transform_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transform_file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isdefined</span><span class="p">(</span><span class="n">transform_file</span><span class="p">):</span>
+            <span class="n">transform_file</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalize_surfs</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">transform_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_Path2BIDSInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input GIFTI file&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_Path2BIDSOutputSpec</span><span class="p">(</span><span class="n">DynamicTraitedSpec</span><span class="p">):</span>
+    <span class="n">extension</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Path2BIDS"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.Path2BIDS">[docs]</a><span class="k">class</span> <span class="nc">Path2BIDS</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract BIDS entities from paths using a pattern.</span>
+
+<span class="sd">    Default pattern is given for Gifti surfaces.</span>
+
+<span class="sd">    &gt;&gt;&gt; Path2BIDS(in_file=&#39;_fix_surfs0/rh.pial.surf.gii&#39;).run().outputs</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+<span class="sd">    extension = .surf.gii</span>
+<span class="sd">    hemi = R</span>
+<span class="sd">    suffix = pial</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+
+<span class="sd">    &gt;&gt;&gt; Path2BIDS(in_file=&#39;_fix_surfs0/rh.pial.gii&#39;).run().outputs</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+<span class="sd">    extension = .gii</span>
+<span class="sd">    hemi = R</span>
+<span class="sd">    suffix = pial</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+
+<span class="sd">    &gt;&gt;&gt; Path2BIDS(in_file=&#39;_fix_surfs0/rh.smoothwm_converted.gii&#39;).run().outputs</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+<span class="sd">    extension = .gii</span>
+<span class="sd">    hemi = R</span>
+<span class="sd">    suffix = smoothwm</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+
+<span class="sd">    &gt;&gt;&gt; Path2BIDS(in_file=&#39;_fix_surfs0/rh.smoothwm_converted.func.gii&#39;).run().outputs</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+<span class="sd">    extension = .func.gii</span>
+<span class="sd">    hemi = R</span>
+<span class="sd">    suffix = smoothwm</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_Path2BIDSInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_Path2BIDSOutputSpec</span>
+    <span class="n">_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s2">&quot;(?P&lt;hemi&gt;[lr])h.(?P&lt;suffix&gt;(wm|smoothwm|pial|midthickness|&quot;</span>
+        <span class="sa">r</span><span class="s2">&quot;inflated|vinflated|sphere|flat))[\w\d_-]*(?P&lt;extprefix&gt;\.\w+)?&quot;</span>
+    <span class="p">)</span>
+    <span class="n">_excluded</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;extprefix&quot;</span><span class="p">,)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the interface.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pattern</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">()</span>
+        <span class="n">outputs</span><span class="o">.</span><span class="n">trait_set</span><span class="p">(</span>
+            <span class="n">trait_change_notify</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">{</span>
+                <span class="n">entity</span><span class="p">:</span> <span class="n">Undefined</span>
+                <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pattern</span><span class="o">.</span><span class="n">groupindex</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">entity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_excluded</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">outputs</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">in_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>
+        <span class="n">extension</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">in_file</span><span class="o">.</span><span class="n">suffixes</span><span class="p">[</span><span class="o">-</span><span class="p">((</span><span class="n">in_file</span><span class="o">.</span><span class="n">suffixes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.gz&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):])</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">in_file</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">extension</span><span class="p">)])</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;extension&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;extprefix&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="si">}{</span><span class="n">extension</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;hemi&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;hemi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;hemi&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_GiftiNameSourceInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input GIFTI file&quot;</span><span class="p">)</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span>
+        <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input file name pattern (must capture named group &quot;LR&quot;)&#39;</span>
+    <span class="p">)</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output file name template&quot;</span><span class="p">)</span>
+    <span class="n">template_kwargs</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;additional template keyword value pairs&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_GiftiNameSourceOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_name</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;(partial) filename formatted according to template&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="GiftiNameSource"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.GiftiNameSource">[docs]</a><span class="k">class</span> <span class="nc">GiftiNameSource</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct a new filename for a GIFTI file.</span>
+
+<span class="sd">    Construct a new filename based on an input filename, a matching pattern,</span>
+<span class="sd">    and a related template, with optionally additional keywords.</span>
+
+<span class="sd">    This interface is intended for use with GIFTI files, to generate names</span>
+<span class="sd">    conforming to Section 9.0 of the `GIFTI Standard`_.</span>
+
+<span class="sd">    Patterns are expected to have named groups, including one named &quot;LR&quot; that</span>
+<span class="sd">    matches &quot;l&quot; or &quot;r&quot;.</span>
+<span class="sd">    These groups must correspond to named format elements in the template.</span>
+
+<span class="sd">    .. testsetup::</span>
+
+<span class="sd">       &gt;&gt;&gt; open(&#39;lh.pial.gii&#39;, &#39;w&#39;).close()</span>
+<span class="sd">       &gt;&gt;&gt; open(&#39;rh.fsaverage.gii&#39;, &#39;w&#39;).close()</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; surf_namer = GiftiNameSource()</span>
+<span class="sd">    &gt;&gt;&gt; surf_namer.inputs.pattern = r&#39;(?P&lt;LR&gt;[lr])h.(?P&lt;surf&gt;\w+).gii&#39;</span>
+<span class="sd">    &gt;&gt;&gt; surf_namer.inputs.template = r&#39;{surf}.{LR}.surf&#39;</span>
+<span class="sd">    &gt;&gt;&gt; surf_namer.inputs.in_file = &#39;lh.pial.gii&#39;</span>
+<span class="sd">    &gt;&gt;&gt; res = surf_namer.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_name</span>
+<span class="sd">    &#39;pial.L.surf&#39;</span>
+
+<span class="sd">    &gt;&gt;&gt; func_namer = GiftiNameSource()</span>
+<span class="sd">    &gt;&gt;&gt; func_namer.inputs.pattern = r&#39;(?P&lt;LR&gt;[lr])h.(?P&lt;space&gt;\w+).gii&#39;</span>
+<span class="sd">    &gt;&gt;&gt; func_namer.inputs.template = r&#39;space-{space}.{LR}.func&#39;</span>
+<span class="sd">    &gt;&gt;&gt; func_namer.inputs.in_file = &#39;rh.fsaverage.gii&#39;</span>
+<span class="sd">    &gt;&gt;&gt; res = func_namer.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_name</span>
+<span class="sd">    &#39;space-fsaverage.R.func&#39;</span>
+
+<span class="sd">    &gt;&gt;&gt; namer = GiftiNameSource()</span>
+<span class="sd">    &gt;&gt;&gt; namer.inputs.pattern = r&#39;(?P&lt;LR&gt;[lr])h.(?P&lt;space&gt;\w+).gii&#39;</span>
+<span class="sd">    &gt;&gt;&gt; namer.inputs.template = r&#39;space-{space}_density-{density}_hemi-{LR}.func&#39;</span>
+<span class="sd">    &gt;&gt;&gt; namer.inputs.in_file = &#39;rh.fsaverage.gii&#39;</span>
+<span class="sd">    &gt;&gt;&gt; namer.inputs.template_kwargs = {&#39;density&#39;: &#39;10k&#39;}</span>
+<span class="sd">    &gt;&gt;&gt; res = namer.run()</span>
+<span class="sd">    &gt;&gt;&gt; res.outputs.out_name</span>
+<span class="sd">    &#39;space-fsaverage_density-10k_hemi-R.func&#39;</span>
+
+<span class="sd">    .. testcleanup::</span>
+
+<span class="sd">    &gt;&gt;&gt; import os</span>
+<span class="sd">    &gt;&gt;&gt; os.unlink(&#39;lh.pial.gii&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; os.unlink(&#39;rh.fsaverage.gii&#39;)</span>
+
+<span class="sd">    .. _GIFTI Standard: https://www.nitrc.org/frs/download.php/2871/GIFTI_Surface_Format.pdf</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_GiftiNameSourceInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_GiftiNameSourceOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">in_format</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">pattern</span><span class="p">)</span>
+        <span class="n">in_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">in_format</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()</span>
+        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;LR&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;LR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_kwargs</span><span class="p">:</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_kwargs</span><span class="p">)</span>
+        <span class="n">filefmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filefmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">info</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_GiftiSetAnatomicalStructureInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
+        <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;GIFTI file beginning with &quot;lh.&quot; or &quot;rh.&quot;&#39;</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_GiftiSetAnatomicalStructureOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output file with updated AnatomicalStructurePrimary entry&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="GiftiSetAnatomicalStructure"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.GiftiSetAnatomicalStructure">[docs]</a><span class="k">class</span> <span class="nc">GiftiSetAnatomicalStructure</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set AnatomicalStructurePrimary attribute of GIFTI image based on filename.</span>
+
+<span class="sd">    For files that begin with ``lh.`` or ``rh.``, update the metadata to</span>
+<span class="sd">    include::</span>
+
+<span class="sd">        {</span>
+<span class="sd">            AnatomicalStructurePrimary: (CortexLeft | CortexRight),</span>
+<span class="sd">        }</span>
+
+<span class="sd">    If ``AnatomicalStructurePrimary`` is already set, this function has no</span>
+<span class="sd">    effect.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_GiftiSetAnatomicalStructureInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_GiftiSetAnatomicalStructureOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">nvpair</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;AnatomicalStruturePrimary&quot;</span> <span class="k">for</span> <span class="n">nvpair</span> <span class="ow">in</span> <span class="n">img</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">out_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fname</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;lh.&quot;</span><span class="p">,</span> <span class="s2">&quot;rh.&quot;</span><span class="p">):</span>
+                <span class="n">asp</span> <span class="o">=</span> <span class="s2">&quot;CortexLeft&quot;</span> <span class="k">if</span> <span class="n">fname</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;l&quot;</span> <span class="k">else</span> <span class="s2">&quot;CortexRight&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;AnatomicalStructurePrimary cannot be derived from filename&quot;</span>
+                <span class="p">)</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                <span class="mi">0</span><span class="p">,</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiNVPairs</span><span class="p">(</span><span class="s2">&quot;AnatomicalStructurePrimary&quot;</span><span class="p">,</span> <span class="n">asp</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">out_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_GiftiToCSVInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;GIFTI file&quot;</span><span class="p">)</span>
+    <span class="n">itk_lps</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;flip XY axes&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_GiftiToCSVOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output csv file&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="GiftiToCSV"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.GiftiToCSV">[docs]</a><span class="k">class</span> <span class="nc">GiftiToCSV</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts GIfTI files to CSV to make them ammenable to use with</span>
+<span class="sd">    ``antsApplyTransformsToPoints``.&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_GiftiToCSVInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_GiftiToCSVOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">gii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">gii</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">itk_lps</span><span class="p">:</span>  <span class="c1"># ITK: flip X and Y around 0</span>
+            <span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="c1"># antsApplyTransformsToPoints requires 5 cols with headers</span>
+        <span class="n">csvdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">))))</span>
+
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="n">use_ext</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;points.csv&quot;</span>
+        <span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span>
+            <span class="n">out_file</span><span class="p">,</span>
+            <span class="n">csvdata</span><span class="p">,</span>
+            <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span>
+            <span class="n">header</span><span class="o">=</span><span class="s2">&quot;x,y,z,t,label,comment&quot;</span><span class="p">,</span>
+            <span class="n">fmt</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">%.5f</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_CSVToGiftiInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;CSV file&quot;</span><span class="p">)</span>
+    <span class="n">gii_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference GIfTI file&quot;</span><span class="p">)</span>
+    <span class="n">itk_lps</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;flip XY axes&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_CSVToGiftiOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output GIfTI file&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="CSVToGifti"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.CSVToGifti">[docs]</a><span class="k">class</span> <span class="nc">CSVToGifti</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts CSV files back to GIfTI, after moving vertices with</span>
+<span class="sd">    ``antsApplyTransformToPoints``.&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_CSVToGiftiInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_CSVToGiftiOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">gii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">gii_file</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">itk_lps</span><span class="p">:</span>  <span class="c1"># ITK: flip X and Y around 0</span>
+            <span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="n">gii</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">gii</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">gii_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.transformed&quot;</span>
+        <span class="p">)</span>
+        <span class="n">gii</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_SurfacesToPointCloudInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_files</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span>
+        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input GIfTI files&quot;</span>
+    <span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="s2">&quot;pointcloud.ply&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output file name&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_SurfacesToPointCloudOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output pointcloud in PLY format&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SurfacesToPointCloud"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.SurfacesToPointCloud">[docs]</a><span class="k">class</span> <span class="nc">SurfacesToPointCloud</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts multiple surfaces into a pointcloud with corresponding normals</span>
+<span class="sd">    to then apply Poisson reconstruction&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_SurfacesToPointCloudInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_SurfacesToPointCloudOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+        <span class="n">giis</span> <span class="o">=</span> <span class="p">[</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">]</span>
+        <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">giis</span><span class="p">])</span>
+        <span class="n">norms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">vertex_normals</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">giis</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+        <span class="n">pointcloud2ply</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">norms</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_PoissonReconInputSpec</span><span class="p">(</span><span class="n">CommandLineInputSpec</span><span class="p">):</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
+        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;--in </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input PLY pointcloud (vertices + normals)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;--out </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">keep_extension</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">],</span>
+        <span class="n">name_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_avg&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output PLY triangular mesh&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_PoissonReconOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output PLY triangular mesh&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PoissonRecon"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.PoissonRecon">[docs]</a><span class="k">class</span> <span class="nc">PoissonRecon</span><span class="p">(</span><span class="n">CommandLine</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Runs Poisson Reconstruction on a cloud of points + normals</span>
+<span class="sd">    given in PLY format.</span>
+<span class="sd">    See https://github.com/mkazhdan/PoissonRecon</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_PoissonReconInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_PoissonReconOutputSpec</span>
+    <span class="n">_cmd</span> <span class="o">=</span> <span class="s2">&quot;PoissonRecon&quot;</span></div>
+
+
+<span class="k">class</span> <span class="nc">_PLYtoGiftiInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input PLY file&quot;</span><span class="p">)</span>
+    <span class="n">surf_key</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference GIfTI file&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_PLYtoGiftiOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output GIfTI file&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PLYtoGifti"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.PLYtoGifti">[docs]</a><span class="k">class</span> <span class="nc">PLYtoGifti</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert surfaces from PLY to GIfTI&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_PLYtoGiftiInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_PLYtoGiftiOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+        <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;GeometricType&quot;</span><span class="p">:</span> <span class="s2">&quot;Anatomical&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomWidth&quot;</span><span class="p">:</span> <span class="s2">&quot;256&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomHeight&quot;</span><span class="p">:</span> <span class="s2">&quot;256&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomDepth&quot;</span><span class="p">:</span> <span class="s2">&quot;256&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomXsize&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomYsize&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomZsize&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomX_R&quot;</span><span class="p">:</span> <span class="s2">&quot;-1.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomX_A&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomX_S&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomY_R&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomY_A&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomY_S&quot;</span><span class="p">:</span> <span class="s2">&quot;-1.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomZ_R&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomZ_A&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomZ_S&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomC_R&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomC_A&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;VolGeomC_S&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;AnatomicalStructurePrimary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Cortex</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="s2">&quot;Left&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surf_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;lh&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;Right&quot;</span>
+        <span class="p">)</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;AnatomicalStructureSecondary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SECONDARY_ANAT_STRUC</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surf_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">]</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_average.gii&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surf_key</span>
+
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="o">/</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">ply2gii</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_UnzipJoinedSurfacesInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_files</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span>
+        <span class="n">InputMultiPath</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input GIfTI files&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_UnzipJoinedSurfacesOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_files</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span>
+        <span class="n">OutputMultiPath</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output pointcloud in PLY format&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">surf_keys</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;surface identifier keys&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="UnzipJoinedSurfaces"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.UnzipJoinedSurfaces">[docs]</a><span class="k">class</span> <span class="nc">UnzipJoinedSurfaces</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Unpack surfaces by identifier keys&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_UnzipJoinedSurfacesInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_UnzipJoinedSurfacesOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+        <span class="n">groups</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="n">in_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">it</span> <span class="k">for</span> <span class="n">items</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">in_files</span><span class="p">:</span>
+            <span class="n">bname</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">groups</span><span class="p">[</span><span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_files&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">sorted</span><span class="p">(</span><span class="n">els</span><span class="p">)</span> <span class="k">for</span> <span class="n">els</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;surf_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">groups</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<div class="viewcode-block" id="normalize_surfs"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.normalize_surfs">[docs]</a><span class="k">def</span> <span class="nf">normalize_surfs</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">transform_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Re-center GIFTI coordinates to fit align to native T1w space.</span>
+
+<span class="sd">    For midthickness surfaces, add MidThickness metadata</span>
+
+<span class="sd">    Coordinate update based on:</span>
+<span class="sd">    https://github.com/Washington-University/workbench/blob/1b79e56/src/Algorithms/AlgorithmSurfaceApplyAffine.cxx#L73-L91</span>
+<span class="sd">    and</span>
+<span class="sd">    https://github.com/Washington-University/Pipelines/blob/ae69b9a/PostFreeSurfer/scripts/FreeSurfer2CaretConvertAndRegisterNonlinear.sh#L147</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+    <span class="n">transform</span> <span class="o">=</span> <span class="n">load_transform</span><span class="p">(</span><span class="n">transform_file</span><span class="p">)</span>
+    <span class="n">pointset</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">get_arrays_from_intent</span><span class="p">(</span><span class="s2">&quot;NIFTI_INTENT_POINTSET&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">pointset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">c_ras_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;VolGeomC_R&quot;</span><span class="p">,</span> <span class="s2">&quot;VolGeomC_A&quot;</span><span class="p">,</span> <span class="s2">&quot;VolGeomC_S&quot;</span><span class="p">)</span>
+    <span class="n">ras</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="nb">float</span><span class="p">(</span><span class="n">pointset</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">])]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">c_ras_keys</span><span class="p">])</span>
+    <span class="n">ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">coords</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="c1"># Apply C_RAS translation to coordinates, then transform</span>
+    <span class="n">pointset</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">coords</span> <span class="o">+</span> <span class="n">ras</span><span class="p">,</span> <span class="n">ones</span><span class="p">)))[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+        <span class="n">coords</span><span class="o">.</span><span class="n">dtype</span>
+    <span class="p">)</span>
+
+    <span class="n">secondary</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiNVPairs</span><span class="p">(</span><span class="s2">&quot;AnatomicalStructureSecondary&quot;</span><span class="p">,</span> <span class="s2">&quot;MidThickness&quot;</span><span class="p">)</span>
+    <span class="n">geom_type</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiNVPairs</span><span class="p">(</span><span class="s2">&quot;GeometricType&quot;</span><span class="p">,</span> <span class="s2">&quot;Anatomical&quot;</span><span class="p">)</span>
+    <span class="n">has_ass</span> <span class="o">=</span> <span class="n">has_geo</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">nvpair</span> <span class="ow">in</span> <span class="n">pointset</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+        <span class="c1"># Remove C_RAS translation from metadata to avoid double-dipping in FreeSurfer</span>
+        <span class="k">if</span> <span class="n">nvpair</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">c_ras_keys</span><span class="p">:</span>
+            <span class="n">nvpair</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;0.000000&quot;</span>
+        <span class="c1"># Check for missing metadata</span>
+        <span class="k">elif</span> <span class="n">nvpair</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">secondary</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">has_ass</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">nvpair</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">geom_type</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">has_geo</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+    <span class="c1"># Update metadata for MidThickness/graymid surfaces</span>
+    <span class="k">if</span> <span class="s2">&quot;midthickness&quot;</span> <span class="ow">in</span> <span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;graymid&quot;</span> <span class="ow">in</span> <span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_ass</span><span class="p">:</span>
+            <span class="n">pointset</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">secondary</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_geo</span><span class="p">:</span>
+            <span class="n">pointset</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">geom_type</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">newpath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">newpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newpath</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+    <span class="n">img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_file</span></div>
+
+
+<div class="viewcode-block" id="load_transform"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.load_transform">[docs]</a><span class="k">def</span> <span class="nf">load_transform</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load affine transform from file</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fname : str or None</span>
+<span class="sd">        Filename of an LTA or FSL-style MAT transform file.</span>
+<span class="sd">        If ``None``, return an identity transform</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    affine : (4, 4) numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">fname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.mat&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.lta&quot;</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fobj</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fobj</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;1 4 4&quot;</span><span class="p">):</span>
+                    <span class="k">break</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">fobj</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown transform type; pass FSL (.mat) or LTA (.lta)&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="vertex_normals"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.vertex_normals">[docs]</a><span class="k">def</span> <span class="nf">vertex_normals</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculates the normals of a triangular mesh&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">normalize_v3</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Normalize a numpy array of 3 component vectors shape=(n,3) &quot;&quot;&quot;</span>
+        <span class="n">lens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">arr</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">arr</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">arr</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">arr</span> <span class="o">/=</span> <span class="n">lens</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+    <span class="n">tris</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="n">faces</span><span class="p">]</span>
+    <span class="n">facenorms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">tris</span><span class="p">[::,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">tris</span><span class="p">[::,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">tris</span><span class="p">[::,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">tris</span><span class="p">[::,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">normalize_v3</span><span class="p">(</span><span class="n">facenorms</span><span class="p">)</span>
+
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">vertices</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">norm</span><span class="p">[</span><span class="n">faces</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">facenorms</span>
+    <span class="n">norm</span><span class="p">[</span><span class="n">faces</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">facenorms</span>
+    <span class="n">norm</span><span class="p">[</span><span class="n">faces</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">facenorms</span>
+    <span class="n">normalize_v3</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">norm</span></div>
+
+
+<div class="viewcode-block" id="pointcloud2ply"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.pointcloud2ply">[docs]</a><span class="k">def</span> <span class="nf">pointcloud2ply</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts the file to PLY format&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+    <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+    <span class="kn">from</span> <span class="nn">pyntcloud</span> <span class="kn">import</span> <span class="n">PyntCloud</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">)))</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="s2">&quot;nx&quot;</span><span class="p">,</span> <span class="s2">&quot;ny&quot;</span><span class="p">,</span> <span class="s2">&quot;nz&quot;</span><span class="p">]</span>
+    <span class="n">cloud</span> <span class="o">=</span> <span class="n">PyntCloud</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">out_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;pointcloud.ply&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+    <span class="n">cloud</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out_file</span></div>
+
+
+<div class="viewcode-block" id="ply2gii"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.ply2gii">[docs]</a><span class="k">def</span> <span class="nf">ply2gii</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert from ply to GIfTI&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+    <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">eye</span>
+    <span class="kn">from</span> <span class="nn">nibabel.gifti</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">GiftiMetaData</span><span class="p">,</span>
+        <span class="n">GiftiCoordSystem</span><span class="p">,</span>
+        <span class="n">GiftiImage</span><span class="p">,</span>
+        <span class="n">GiftiDataArray</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">pyntcloud</span> <span class="kn">import</span> <span class="n">PyntCloud</span>
+
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+    <span class="n">surf</span> <span class="o">=</span> <span class="n">PyntCloud</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">in_file</span><span class="p">))</span>
+
+    <span class="c1"># Update centroid metadata</span>
+    <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="nb">zip</span><span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;SurfaceCenterX&quot;</span><span class="p">,</span> <span class="s2">&quot;SurfaceCenterY&quot;</span><span class="p">,</span> <span class="s2">&quot;SurfaceCenterZ&quot;</span><span class="p">),</span>
+            <span class="p">[</span><span class="s2">&quot;</span><span class="si">%.4f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">surf</span><span class="o">.</span><span class="n">centroid</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Prepare data arrays</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">GiftiDataArray</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">surf</span><span class="o">.</span><span class="n">xyz</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">),</span>
+            <span class="n">datatype</span><span class="o">=</span><span class="s2">&quot;NIFTI_TYPE_FLOAT32&quot;</span><span class="p">,</span>
+            <span class="n">intent</span><span class="o">=</span><span class="s2">&quot;NIFTI_INTENT_POINTSET&quot;</span><span class="p">,</span>
+            <span class="n">meta</span><span class="o">=</span><span class="n">GiftiMetaData</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">metadata</span><span class="p">),</span>
+            <span class="n">coordsys</span><span class="o">=</span><span class="n">GiftiCoordSystem</span><span class="p">(</span><span class="n">xform</span><span class="o">=</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">xformspace</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">GiftiDataArray</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">surf</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">datatype</span><span class="o">=</span><span class="s2">&quot;NIFTI_TYPE_INT32&quot;</span><span class="p">,</span>
+            <span class="n">intent</span><span class="o">=</span><span class="s2">&quot;NIFTI_INTENT_TRIANGLE&quot;</span><span class="p">,</span>
+            <span class="n">coordsys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">surfgii</span> <span class="o">=</span> <span class="n">GiftiImage</span><span class="p">(</span><span class="n">darrays</span><span class="o">=</span><span class="n">da</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">out_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+            <span class="n">in_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.gii&quot;</span><span class="p">,</span> <span class="n">use_ext</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">())</span>
+        <span class="p">)</span>
+
+    <span class="n">surfgii</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out_file</span></div>
+
+
+<div class="viewcode-block" id="get_gii_meta"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.get_gii_meta">[docs]</a><span class="k">def</span> <span class="nf">get_gii_meta</span><span class="p">(</span><span class="n">in_file</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">nibabel</span> <span class="kn">import</span> <span class="n">load</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">in_file</span> <span class="o">=</span> <span class="n">in_file</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">gii</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">gii</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">metadata</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.2.9
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../../../1.0.0/index.html">1.0.0</a></dd>
+            <dd><a href="../../../../1.0.0rc1/index.html">1.0.0rc1</a></dd>
+            <dd><a href="../../../../1.0.0rc2/index.html">1.0.0rc2</a></dd>
+            <dd><a href="../../../../1.0.1/index.html">1.0.1</a></dd>
+            <dd><a href="../../../../1.0.2/index.html">1.0.2</a></dd>
+            <dd><a href="../../../../1.0.3/index.html">1.0.3</a></dd>
+            <dd><a href="../../../../1.0.4/index.html">1.0.4</a></dd>
+            <dd><a href="../../../../1.1.0/index.html">1.1.0</a></dd>
+            <dd><a href="../../../../1.1.1/index.html">1.1.1</a></dd>
+            <dd><a href="../../../../1.1.10/index.html">1.1.10</a></dd>
+            <dd><a href="../../../../1.1.11/index.html">1.1.11</a></dd>
+            <dd><a href="../../../../1.1.12/index.html">1.1.12</a></dd>
+            <dd><a href="../../../../1.1.2/index.html">1.1.2</a></dd>
+            <dd><a href="../../../../1.1.3/index.html">1.1.3</a></dd>
+            <dd><a href="../../../../1.1.4/index.html">1.1.4</a></dd>
+            <dd><a href="../../../../1.1.5/index.html">1.1.5</a></dd>
+            <dd><a href="../../../../1.1.6/index.html">1.1.6</a></dd>
+            <dd><a href="../../../../1.1.7/index.html">1.1.7</a></dd>
+            <dd><a href="../../../../1.1.8/index.html">1.1.8</a></dd>
+            <dd><a href="../../../../1.1.9/index.html">1.1.9</a></dd>
+            <dd><a href="../../../../1.2.0/index.html">1.2.0</a></dd>
+            <dd><a href="../../../../1.2.0rc1/index.html">1.2.0rc1</a></dd>
+            <dd><a href="../../../../1.2.0rc2/index.html">1.2.0rc2</a></dd>
+            <dd><a href="../../../../1.2.0rc3/index.html">1.2.0rc3</a></dd>
+            <dd><a href="../../../../1.2.0rc4/index.html">1.2.0rc4</a></dd>
+            <dd><a href="../../../../1.2.0rc5/index.html">1.2.0rc5</a></dd>
+            <dd><a href="../../../../1.2.1/index.html">1.2.1</a></dd>
+            <dd><a href="../../../../1.2.2/index.html">1.2.2</a></dd>
+            <dd><a href="../../../../1.2.3/index.html">1.2.3</a></dd>
+            <dd><a href="../../../../1.2.4/index.html">1.2.4</a></dd>
+            <dd><a href="../../../../1.2.5/index.html">1.2.5</a></dd>
+            <dd><a href="../../../../1.2.6/index.html">1.2.6</a></dd>
+            <dd><a href="../../../../1.2.7/index.html">1.2.7</a></dd>
+            <dd><a href="../../../../1.2.8/index.html">1.2.8</a></dd>
+            <dd><a href="surf.html">1.2.9</a></dd>
+            <dd><a href="../../../../1.3.0/index.html">1.3.0</a></dd>
+            <dd><a href="../../../../1.3.0rc1/index.html">1.3.0rc1</a></dd>
+            <dd><a href="../../../../1.3.0rc2/index.html">1.3.0rc2</a></dd>
+            <dd><a href="../../../../1.3.0rc3/index.html">1.3.0rc3</a></dd>
+            <dd><a href="../../../../1.3.1/index.html">1.3.1</a></dd>
+            <dd><a href="../../../../1.3.2/index.html">1.3.2</a></dd>
+            <dd><a href="../../../../1.3.3/index.html">1.3.3</a></dd>
+            <dd><a href="../../../../1.3.4/index.html">1.3.4</a></dd>
+            <dd><a href="../../../../1.3.5/index.html">1.3.5</a></dd>
+            <dd><a href="../../../../1.4.0/index.html">1.4.0</a></dd>
+            <dd><a href="../../../../1.4.0rc0/index.html">1.4.0rc0</a></dd>
+            <dd><a href="../../../../1.4.0rc1/index.html">1.4.0rc1</a></dd>
+            <dd><a href="../../../../1.4.0rc2/index.html">1.4.0rc2</a></dd>
+            <dd><a href="../../../../1.4.0rc3/index.html">1.4.0rc3</a></dd>
+            <dd><a href="../../../../1.4.0rc4/index.html">1.4.0rc4</a></dd>
+            <dd><a href="../../../../1.4.0rc5/index.html">1.4.0rc5</a></dd>
+            <dd><a href="../../../../1.4.0rc6/index.html">1.4.0rc6</a></dd>
+            <dd><a href="../../../../1.2.9/index.html">1.2.9</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../../../enh_report-plot-axis/index.html">enh/report-plot-axis</a></dd>
+            <dd><a href="../../../../feat_infants-rodents/index.html">feat/infants-rodents</a></dd>
+            <dd><a href="../../../../maint_1.0.x/index.html">maint/1.0.x</a></dd>
+            <dd><a href="../../../../maint_1.1.x/index.html">maint/1.1.x</a></dd>
+            <dd><a href="../../../../maint_1.2.x/index.html">maint/1.2.x</a></dd>
+            <dd><a href="../../../../maint_1.3.x/index.html">maint/1.3.x</a></dd>
+            <dd><a href="../../../../master/index.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+niworkflows.interfaces package
+==============================
+
+.. automodule:: niworkflows.interfaces
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   niworkflows.interfaces.reportlets
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   niworkflows.interfaces.bids
+   niworkflows.interfaces.bold
+   niworkflows.interfaces.cifti
+   niworkflows.interfaces.confounds
+   niworkflows.interfaces.fixes
+   niworkflows.interfaces.freesurfer
+   niworkflows.interfaces.header
+   niworkflows.interfaces.images
+   niworkflows.interfaces.itk
+   niworkflows.interfaces.nibabel
+   niworkflows.interfaces.nilearn
+   niworkflows.interfaces.nitransforms
+   niworkflows.interfaces.norm
+   niworkflows.interfaces.patches
+   niworkflows.interfaces.plotting
+   niworkflows.interfaces.probmaps
+   niworkflows.interfaces.space
+   niworkflows.interfaces.surf
+   niworkflows.interfaces.utility

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.utils.misc module &mdash; niworkflows 1.1.12 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="niworkflows.utils.spaces module" href="niworkflows.utils.spaces.html" />
+    <link rel="prev" title="niworkflows.utils.images module" href="niworkflows.utils.images.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.1.12
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.anat.html">niworkflows.anat package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.func.html">niworkflows.func package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="niworkflows.utils.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.utils.bids.html">niworkflows.utils.bids module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.utils.images.html">niworkflows.utils.images module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">niworkflows.utils.misc module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.utils.spaces.html">niworkflows.utils.spaces module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.viz.html">niworkflows.viz package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
+          <li><a href="niworkflows.utils.html">niworkflows.utils package</a> &raquo;</li>
+      <li>niworkflows.utils.misc module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/niworkflows.utils.misc.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../../master/api/niworkflows.utils.misc.html"><b>Warning:</b> This document is for an old version of niworkflows. The main version is master.</a></p>
+<div class="section" id="module-niworkflows.utils.misc">
+<span id="niworkflows-utils-misc-module"></span><h1>niworkflows.utils.misc module<a class="headerlink" href="#module-niworkflows.utils.misc" title="Permalink to this headline">¶</a></h1>
+<p>Miscellaneous utilities.</p>
+<dl class="py function">
+<dt id="niworkflows.utils.misc.add_suffix">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></code><code class="sig-name descname"><span class="pre">add_suffix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#add_suffix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.add_suffix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrap nipype’s fname_presuffix to conveniently just add a prefix</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">add_suffix</span><span class="p">([</span>
+<span class="gp">... </span>    <span class="s1">&#39;/path/to/sub-045_ses-test_T1w.nii.gz&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;/path/to/sub-045_ses-retest_T1w.nii.gz&#39;</span><span class="p">],</span> <span class="s1">&#39;_test&#39;</span><span class="p">)</span>
+<span class="go">&#39;sub-045_ses-test_T1w_test.nii.gz&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.misc.clean_directory">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></code><code class="sig-name descname"><span class="pre">clean_directory</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#clean_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.clean_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears a directory of all contents.</p>
+<p>Returns <cite>True</cite> if no content remains. If any content cannot be removed, returns <cite>False</cite>.</p>
+<p class="rubric">Notes</p>
+<p>This function is not guaranteed to work across multiple threads or processes.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.misc.fix_multi_T1w_source_name">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></code><code class="sig-name descname"><span class="pre">fix_multi_T1w_source_name</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_files</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#fix_multi_T1w_source_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.fix_multi_T1w_source_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make up a generic source name when there are multiple T1s</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fix_multi_T1w_source_name</span><span class="p">([</span>
+<span class="gp">... </span>    <span class="s1">&#39;/path/to/sub-045_ses-test_T1w.nii.gz&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;/path/to/sub-045_ses-retest_T1w.nii.gz&#39;</span><span class="p">])</span>
+<span class="go">&#39;/path/to/sub-045_T1w.nii.gz&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.misc.get_template_specs">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></code><code class="sig-name descname"><span class="pre">get_template_specs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_template</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#get_template_specs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.get_template_specs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse template specifications</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_template_specs</span><span class="p">(</span><span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;T1w&#39;</span><span class="p">})[</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">{&#39;resolution&#39;: 1}</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_template_specs</span><span class="p">(</span><span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;res&#39;</span><span class="p">:</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;T1w&#39;</span><span class="p">})[</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">{&#39;resolution&#39;: &#39;2&#39;}</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">specs</span> <span class="o">=</span> <span class="n">get_template_specs</span><span class="p">(</span><span class="s1">&#39;MNIInfant&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;res&#39;</span><span class="p">:</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;cohort&#39;</span><span class="p">:</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span> <span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;T1w&#39;</span><span class="p">})[</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">specs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+<span class="go">[(&#39;cohort&#39;, &#39;10&#39;), (&#39;resolution&#39;, &#39;2&#39;)]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_template_specs</span><span class="p">(</span><span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                   <span class="p">{</span><span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;T1w&#39;</span><span class="p">,</span> <span class="s1">&#39;cohort&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})[</span><span class="mi">1</span><span class="p">]</span> 
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">RuntimeError</span>:
+<span class="gp">...</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_template_specs</span><span class="p">(</span><span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                   <span class="p">{</span><span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;T1w&#39;</span><span class="p">,</span> <span class="s1">&#39;res&#39;</span><span class="p">:</span> <span class="s1">&#39;1|2&#39;</span><span class="p">})[</span><span class="mi">1</span><span class="p">]</span> 
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">RuntimeError</span>:
+<span class="gp">...</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.misc.read_crashfile">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></code><code class="sig-name descname"><span class="pre">read_crashfile</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#read_crashfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.read_crashfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.misc.splitext">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></code><code class="sig-name descname"><span class="pre">splitext</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#splitext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.splitext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split filename in name and extension (.gz safe).</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">splitext</span><span class="p">(</span><span class="s1">&#39;some/file.nii.gz&#39;</span><span class="p">)</span>
+<span class="go">(&#39;file&#39;, &#39;.nii.gz&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">splitext</span><span class="p">(</span><span class="s1">&#39;some/other/file.nii&#39;</span><span class="p">)</span>
+<span class="go">(&#39;file&#39;, &#39;.nii&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">splitext</span><span class="p">(</span><span class="s1">&#39;otherext.tar.gz&#39;</span><span class="p">)</span>
+<span class="go">(&#39;otherext&#39;, &#39;.tar.gz&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">splitext</span><span class="p">(</span><span class="s1">&#39;text.txt&#39;</span><span class="p">)</span>
+<span class="go">(&#39;text&#39;, &#39;.txt&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">splitext</span><span class="p">(</span><span class="s1">&#39;some/figure.svg&#39;</span><span class="p">)</span>
+<span class="go">(&#39;figure&#39;, &#39;.svg&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">splitext</span><span class="p">(</span><span class="s1">&#39;some/figure.svg.gz&#39;</span><span class="p">)</span>
+<span class="go">(&#39;figure&#39;, &#39;.svg.gz&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">splitext</span><span class="p">(</span><span class="s1">&#39;some/sub-01_bold.func.gii&#39;</span><span class="p">)</span>
+<span class="go">(&#39;sub-01_bold.func&#39;, &#39;.gii&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="niworkflows.utils.images.html" class="btn btn-neutral float-left" title="niworkflows.utils.images module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="niworkflows.utils.spaces.html" class="btn btn-neutral float-right" title="niworkflows.utils.spaces module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.1.12
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt id="v-tags">Tags</dt>
+        </dl>
+        <dl>
+            <dt id="v-branches">Branches</dt>
+        </dl>
+    </div>
+</div>
+
+
+<script src="../../js/rtd-versions.js"></script>
+
+</body>
+</html>

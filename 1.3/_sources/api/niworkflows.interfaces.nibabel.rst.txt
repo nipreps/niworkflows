@@ -1,0 +1,7 @@
+niworkflows.interfaces.nibabel module
+=====================================
+
+.. automodule:: niworkflows.interfaces.nibabel
+   :members:
+   :undoc-members:
+   :show-inheritance:

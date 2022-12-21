@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.interfaces.confounds &mdash; niworkflows 1.2.9 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.2.9
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Library API (application program interface)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>niworkflows.interfaces.confounds</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><b>Warning:</b> This document is for an old version of niworkflows.</p>
+<h1>Source code for niworkflows.interfaces.confounds</h1><div class="highlight"><pre>
+<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2021 The NiPreps Developers &lt;nipreps@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#</span>
+<span class="c1"># We support and encourage derived works from this project, please read</span>
+<span class="c1"># about our expectations at</span>
+<span class="c1">#</span>
+<span class="c1">#     https://www.nipreps.org/community/licensing/</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;Select terms for a confound model, and compute any requisite expansions.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span><span class="p">,</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
+<span class="kn">from</span> <span class="nn">nipype.utils.misc</span> <span class="kn">import</span> <span class="n">normalize_mc_params</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">traits</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
+    <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
+    <span class="n">File</span><span class="p">,</span>
+    <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">SimpleInterface</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_NormalizeMotionParamsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the input parameters file&quot;</span><span class="p">)</span>
+    <span class="nb">format</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
+        <span class="s2">&quot;FSL&quot;</span><span class="p">,</span> <span class="s2">&quot;AFNI&quot;</span><span class="p">,</span> <span class="s2">&quot;FSFAST&quot;</span><span class="p">,</span> <span class="s2">&quot;NIPY&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output format&quot;</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_NormalizeMotionParamsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;written file path&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="NormalizeMotionParams"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.NormalizeMotionParams">[docs]</a><span class="k">class</span> <span class="nc">NormalizeMotionParams</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert input motion parameters into the designated convention.&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_NormalizeMotionParamsInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_NormalizeMotionParamsOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">mpars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>  <span class="c1"># mpars is N_t x 6</span>
+        <span class="n">mpars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span>
+            <span class="n">func1d</span><span class="o">=</span><span class="n">normalize_mc_params</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">arr</span><span class="o">=</span><span class="n">mpars</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">format</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="s2">&quot;motion_params.txt&quot;</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">],</span> <span class="n">mpars</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_ExpandModelInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">confounds_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
+        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;TSV containing confound time series for &quot;</span>
+        <span class="s2">&quot;expansion according to the specified formula.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">model_formula</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span>
+        <span class="s2">&quot;(dd1(rps + wm + csf + gsr))^^2 + others&quot;</span><span class="p">,</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">Formula for generating model expansions. By default, the</span>
+<span class="s2">32-parameter expansion will be generated. Note that any expressions</span>
+<span class="s2">to be expanded *must* be in parentheses, even if they include only</span>
+<span class="s2">a single variable (e.g., ``(x)^2``, not ``x^2``). Examples:</span>
+
+<span class="s2">* ``rps + wm + csf + gsr`` : 9-parameter model. ``rps`` denotes realignment</span>
+<span class="s2">  parameters, ``wm`` denotes mean white matter signal, ``csf`` denotes mean</span>
+<span class="s2">  cerebrospinal fluid signal, and ``gsr`` denotes mean global signal.</span>
+<span class="s2">* ``(dd1(rps + wm + csf + gsr))^^2`` : 36-parameter expansion.</span>
+<span class="s2">  ``rps + wm + csf + gsr`` denotes that realignment parameters and mean</span>
+<span class="s2">  WM, CSF, and global signals should be included. ``dd1`` denotes that</span>
+<span class="s2">  these signals should be augmented with their first temporal</span>
+<span class="s2">  derivatives. ``^^2`` denotes that the original signals and temporal</span>
+<span class="s2">  derivatives should be augmented with quadratic expansions.</span>
+<span class="s2">* ``(dd1(rps))^^2`` : 24-parameter expansion. ``rps`` denotes that</span>
+<span class="s2">  realignment parameters should be included. ``dd1`` and ``^^2`` denote</span>
+<span class="s2">  temporal derivative and quadratic expansions as above.</span>
+<span class="s2">* ``(dd1(rps + wm + csf + gsr))^^2 + others`` : generate all expansion</span>
+<span class="s2">  terms necessary for a 36-parameter model as above, and</span>
+<span class="s2">  concatenate those expansion terms to all other regressor columns</span>
+<span class="s2">  in the confounds file.</span>
+
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Output path&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_ExpandModelOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">confounds_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Output confounds file&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ExpandModel"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.ExpandModel">[docs]</a><span class="k">class</span> <span class="nc">ExpandModel</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Expand a confound model according to a specified formula.&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_ExpandModelInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_ExpandModelOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_file</span><span class="p">):</span>
+            <span class="n">out_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_file</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">confounds_file</span><span class="p">,</span>
+                <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_expansion.tsv&quot;</span><span class="p">,</span>
+                <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span>
+                <span class="n">use_ext</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">confounds_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">confounds_file</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">confounds_data</span> <span class="o">=</span> <span class="n">parse_formula</span><span class="p">(</span>
+            <span class="n">model_formula</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">model_formula</span><span class="p">,</span>
+            <span class="n">parent_data</span><span class="o">=</span><span class="n">confounds_data</span><span class="p">,</span>
+            <span class="n">unscramble</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">confounds_data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">na_rep</span><span class="o">=</span><span class="s2">&quot;n/a&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;confounds_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">_SpikeRegressorsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">confounds_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
+        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;TSV containing criterion time series (e.g., framewise &quot;</span>
+        <span class="s2">&quot;displacement, DVARS) to be used for creating spike regressors.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">fd_thresh</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
+        <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Minimum framewise displacement threshold for flagging a frame &quot;</span>
+        <span class="s2">&quot;as a spike.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">dvars_thresh</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
+        <span class="mf">1.5</span><span class="p">,</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Minimum standardised DVARS threshold for flagging a frame as &quot;</span> <span class="s2">&quot;a spike.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">header_prefix</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span>
+        <span class="s2">&quot;motion_outlier&quot;</span><span class="p">,</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Prefix for spikes in the output TSV header&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">lags</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Relative indices of lagging frames to flag for &quot;</span> <span class="s2">&quot;each flagged frame&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">minimum_contiguous</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Either</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Minimum number of contiguous volumes required to avoid &quot;</span>
+        <span class="s2">&quot;flagging as a spike&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">concatenate</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
+        <span class="kc">True</span><span class="p">,</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Indicates whether to concatenate spikes to existing confounds &quot;</span>
+        <span class="s2">&quot;or return spikes only&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">output_format</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
+        <span class="s2">&quot;spikes&quot;</span><span class="p">,</span> <span class="s2">&quot;mask&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Format of output (spikes or mask)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Output path&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_SpikeRegressorsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">confounds_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Output confounds file&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SpikeRegressors"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.SpikeRegressors">[docs]</a><span class="k">class</span> <span class="nc">SpikeRegressors</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate spike regressors.&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_SpikeRegressorsInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_SpikeRegressorsOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_file</span><span class="p">):</span>
+            <span class="n">out_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_file</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">confounds_file</span><span class="p">,</span>
+                <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_desc-motion_outliers.tsv&quot;</span><span class="p">,</span>
+                <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span>
+                <span class="n">use_ext</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">spike_criteria</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;framewise_displacement&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fd_thresh</span><span class="p">),</span>
+            <span class="s2">&quot;std_dvars&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dvars_thresh</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="n">confounds_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">confounds_file</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">confounds_data</span> <span class="o">=</span> <span class="n">spike_regressors</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">confounds_data</span><span class="p">,</span>
+            <span class="n">criteria</span><span class="o">=</span><span class="n">spike_criteria</span><span class="p">,</span>
+            <span class="n">header_prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">header_prefix</span><span class="p">,</span>
+            <span class="n">lags</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">lags</span><span class="p">,</span>
+            <span class="n">minimum_contiguous</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">minimum_contiguous</span><span class="p">,</span>
+            <span class="n">concatenate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">concatenate</span><span class="p">,</span>
+            <span class="n">output</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_format</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">confounds_data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">na_rep</span><span class="o">=</span><span class="s2">&quot;n/a&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;confounds_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<div class="viewcode-block" id="spike_regressors"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.spike_regressors">[docs]</a><span class="k">def</span> <span class="nf">spike_regressors</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">header_prefix</span><span class="o">=</span><span class="s2">&quot;motion_outlier&quot;</span><span class="p">,</span>
+    <span class="n">lags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">minimum_contiguous</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">concatenate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">output</span><span class="o">=</span><span class="s2">&quot;spikes&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add spike regressors to a confound/nuisance matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : :obj:`~pandas.DataFrame`</span>
+<span class="sd">        A tabulation of observations from which spike regressors should be</span>
+<span class="sd">        estimated.</span>
+<span class="sd">    criteria : :obj:`dict` of (:obj:`str`, ``&#39;&gt;&#39;`` or ``&#39;&lt;&#39;`` or :obj:`float`)</span>
+<span class="sd">        Criteria for generating a spike regressor. If, for a given frame, the</span>
+<span class="sd">        value of the variable corresponding to the key exceeds the threshold</span>
+<span class="sd">        indicated by the value, then a spike regressor is created for that</span>
+<span class="sd">        frame. By default, the strategy from [Power2014]_ is implemented: any</span>
+<span class="sd">        frames with FD greater than 0.5 or standardised DV greater than 1.5</span>
+<span class="sd">        are flagged for censoring.</span>
+<span class="sd">    header_prefix : :obj:`str`</span>
+<span class="sd">        The prefix used to indicate spike regressors in the output data table.</span>
+<span class="sd">    lags: :obj:`list` of :obj:`int`</span>
+<span class="sd">        A list indicating the frames to be censored relative to each flag.</span>
+<span class="sd">        For instance, ``[0]`` censors the flagged frame, while ``[0, 1]`` censors</span>
+<span class="sd">        both the flagged frame and the following frame.</span>
+<span class="sd">    minimum_contiguous : :obj:`int` or :obj:`None`</span>
+<span class="sd">        The minimum number of contiguous frames that must be unflagged for</span>
+<span class="sd">        spike regression. If any series of contiguous unflagged frames is</span>
+<span class="sd">        shorter than the specified minimum, then all of those frames will</span>
+<span class="sd">        additionally have spike regressors implemented.</span>
+<span class="sd">    concatenate : :obj:`bool`</span>
+<span class="sd">        Indicates whether the returned object should include only spikes</span>
+<span class="sd">        (if false) or all input time series and spikes (if true, default).</span>
+<span class="sd">    output : :obj:`str`</span>
+<span class="sd">        Indicates whether the output should be formatted as spike regressors</span>
+<span class="sd">        (&#39;spikes&#39;, a separate column for each outlier) or as a temporal mask</span>
+<span class="sd">        (&#39;mask&#39;, a single output column indicating the locations of outliers).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data : :obj:`~pandas.DataFrame`</span>
+<span class="sd">        The input DataFrame with a column for each spike regressor.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [Power2014] Power JD, et al. (2014)</span>
+<span class="sd">        Methods to detect, characterize, and remove motion artifact in resting</span>
+<span class="sd">        state fMRI. NeuroImage. doi:`10.1016/j.neuroimage.2013.08.048</span>
+<span class="sd">        &lt;https://doi.org/10.1016/j.neuroimage.2013.08.048&gt;`__.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">lags</span> <span class="o">=</span> <span class="n">lags</span> <span class="ow">or</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">criteria</span> <span class="o">=</span> <span class="n">criteria</span> <span class="ow">or</span> <span class="p">{</span>
+        <span class="s2">&quot;framewise_displacement&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+        <span class="s2">&quot;std_dvars&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">metric</span><span class="p">,</span> <span class="p">(</span><span class="n">criterion</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span> <span class="ow">in</span> <span class="n">criteria</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">criterion</span> <span class="o">==</span> <span class="s2">&quot;&lt;&quot;</span><span class="p">:</span>
+            <span class="n">mask</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">criterion</span> <span class="o">==</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">:</span>
+            <span class="n">mask</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">((</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">|</span> <span class="n">y</span><span class="p">),</span> <span class="n">mask</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">lag</span> <span class="ow">in</span> <span class="n">lags</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">m</span> <span class="o">+</span> <span class="n">lag</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">mask</span><span class="p">])</span> <span class="o">|</span> <span class="n">mask</span>
+
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">minimum_contiguous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">post_final</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">epoch_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">mask</span> <span class="o">|</span> <span class="nb">set</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">post_final</span><span class="p">])))</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">epoch_end</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">mask</span> <span class="o">|</span> <span class="nb">set</span><span class="p">([</span><span class="n">post_final</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">end</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">epoch_end</span><span class="p">,</span> <span class="n">epoch_length</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="n">minimum_contiguous</span><span class="p">:</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">length</span><span class="p">,</span> <span class="n">end</span><span class="p">))</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">output</span> <span class="o">==</span> <span class="s2">&quot;mask&quot;</span><span class="p">:</span>
+        <span class="n">spikes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">spikes</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">mask</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">spikes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">spikes</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">header_prefix</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">spikes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">mask</span><span class="p">)):</span>
+            <span class="n">spikes</span><span class="p">[</span><span class="n">m</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{:s}{:02d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">header_prefix</span><span class="p">,</span> <span class="n">vol</span><span class="p">)</span> <span class="k">for</span> <span class="n">vol</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">))]</span>
+        <span class="n">spikes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">spikes</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">concatenate</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">((</span><span class="n">data</span><span class="p">,</span> <span class="n">spikes</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">spikes</span></div>
+
+
+<div class="viewcode-block" id="temporal_derivatives"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.temporal_derivatives">[docs]</a><span class="k">def</span> <span class="nf">temporal_derivatives</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute temporal derivative terms by the method of backwards differences.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    order : :obj:`list` of :obj:`int`</span>
+<span class="sd">        A list of temporal derivative terms to include. For instance, ``[1, 2]``</span>
+<span class="sd">        indicates that the first and second derivative terms should be added.</span>
+<span class="sd">        To retain the original terms, ``0`` *must* be included in the list.</span>
+<span class="sd">    variables : :obj:`list` of :obj:`str`</span>
+<span class="sd">        List of variables for which temporal derivative terms should be</span>
+<span class="sd">        computed.</span>
+<span class="sd">    data : :obj:`~pandas.DataFrame`</span>
+<span class="sd">        Table of values of all observations of all variables.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    variables_deriv : :obj:`list`</span>
+<span class="sd">        A list of variables to include in the final data frame after adding</span>
+<span class="sd">        the specified derivative terms.</span>
+<span class="sd">    data_deriv : :obj:`~pandas.DataFrame`</span>
+<span class="sd">        Table of values of all observations of all variables, including any</span>
+<span class="sd">        specified derivative terms.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">variables_deriv</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="n">data_deriv</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+        <span class="n">data_deriv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">variables</span><span class="p">]</span>
+        <span class="n">variables_deriv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">variables</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">order</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+        <span class="n">variables_deriv</span><span class="p">[</span><span class="n">o</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_derivative</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">]</span>
+        <span class="n">data_deriv</span><span class="p">[</span><span class="n">o</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">variables</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">data_deriv</span><span class="p">[</span><span class="n">o</span><span class="p">][</span><span class="n">o</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">variables</span><span class="p">],</span> <span class="n">n</span><span class="o">=</span><span class="n">o</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">variables_deriv</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">((</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">),</span> <span class="n">variables_deriv</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">data_deriv</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="n">columns</span><span class="o">=</span><span class="n">variables_deriv</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="o">*</span><span class="n">data_deriv</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">variables_deriv</span><span class="p">,</span> <span class="n">data_deriv</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="exponential_terms"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.exponential_terms">[docs]</a><span class="k">def</span> <span class="nf">exponential_terms</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute exponential expansions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    order : :obj:`list` of :obj:`int`</span>
+<span class="sd">        A list of exponential terms to include. For instance, ``[1, 2]``</span>
+<span class="sd">        indicates that the first and second exponential terms should be added.</span>
+<span class="sd">        To retain the original terms, ``1`` *must* be included in the list.</span>
+<span class="sd">    variables : :obj:`list` of :obj:`str`</span>
+<span class="sd">        List of variables for which exponential terms should be computed.</span>
+<span class="sd">    data : :obj:`~pandas.DataFrame`</span>
+<span class="sd">        Table of values of all observations of all variables.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    variables_exp : :obj:`list`</span>
+<span class="sd">        A list of variables to include in the final data frame after adding</span>
+<span class="sd">        the specified exponential terms.</span>
+<span class="sd">    data_exp : :obj:`~pandas.DataFrame`</span>
+<span class="sd">        Table of values of all observations of all variables, including any</span>
+<span class="sd">        specified exponential terms.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">variables_exp</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="n">data_exp</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="k">if</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+        <span class="n">data_exp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">variables</span><span class="p">]</span>
+        <span class="n">variables_exp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">variables</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">order</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+        <span class="n">variables_exp</span><span class="p">[</span><span class="n">o</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_power</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">]</span>
+        <span class="n">data_exp</span><span class="p">[</span><span class="n">o</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">variables</span><span class="p">]</span> <span class="o">**</span> <span class="n">o</span>
+    <span class="n">variables_exp</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">((</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">),</span> <span class="n">variables_exp</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">data_exp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="n">columns</span><span class="o">=</span><span class="n">variables_exp</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="o">*</span><span class="n">data_exp</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">variables_exp</span><span class="p">,</span> <span class="n">data_exp</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_order_as_range</span><span class="p">(</span><span class="n">order</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a hyphenated string representing order for derivative or</span>
+<span class="sd">    exponential terms into a range object that can be passed as input to the</span>
+<span class="sd">    appropriate expansion function.&quot;&quot;&quot;</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">order</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">order</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">order</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">order</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="n">order</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">order</span>
+
+
+<span class="k">def</span> <span class="nf">_check_and_expand_exponential</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if the current operation specifies exponential expansion. ^^6</span>
+<span class="sd">    specifies all powers up to the 6th, ^5-6 the 5th and 6th powers, ^6 the</span>
+<span class="sd">    6th only.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\^\^[0-9]+$&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\^\^([0-9]+)$&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="o">*</span><span class="n">order</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">variables</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">exponential_terms</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\^[0-9]+[\-]?[0-9]*$&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\^([0-9]+[\-]?[0-9]*)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">_order_as_range</span><span class="p">(</span><span class="o">*</span><span class="n">order</span><span class="p">)</span>
+        <span class="n">variables</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">exponential_terms</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span>
+
+
+<span class="k">def</span> <span class="nf">_check_and_expand_derivative</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if the current operation specifies a temporal derivative. dd6x</span>
+<span class="sd">    specifies all derivatives up to the 6th, d5-6x the 5th and 6th, d6x the</span>
+<span class="sd">    6th only.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^dd[0-9]+&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^dd([0-9]+)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="o">*</span><span class="n">order</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">=</span> <span class="n">temporal_derivatives</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^d[0-9]+[\-]?[0-9]*&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^d([0-9]+[\-]?[0-9]*)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">_order_as_range</span><span class="p">(</span><span class="o">*</span><span class="n">order</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">=</span> <span class="n">temporal_derivatives</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span>
+
+
+<span class="k">def</span> <span class="nf">_check_and_expand_subformula</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">parent_data</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if the current operation contains a suboperation, and parse it</span>
+<span class="sd">    where appropriate.&quot;&quot;&quot;</span>
+    <span class="n">grouping_depth</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">expression</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">char</span> <span class="o">==</span> <span class="s2">&quot;(&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">grouping_depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">formula_delimiter</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">grouping_depth</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">char</span> <span class="o">==</span> <span class="s2">&quot;)&quot;</span><span class="p">:</span>
+            <span class="n">grouping_depth</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">grouping_depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">expr</span> <span class="o">=</span> <span class="n">expression</span><span class="p">[</span><span class="n">formula_delimiter</span><span class="p">:</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">parse_formula</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">parent_data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span>
+
+
+<div class="viewcode-block" id="parse_expression"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.parse_expression">[docs]</a><span class="k">def</span> <span class="nf">parse_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">parent_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse an expression in a model formula.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    expression : :obj:`str`</span>
+<span class="sd">        Formula expression: either a single variable or a variable group</span>
+<span class="sd">        paired with an operation (exponentiation or differentiation).</span>
+<span class="sd">    parent_data : :obj:`~pandas.DataFrame`</span>
+<span class="sd">        The source data for the model expansion.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    variables : :obj:`list`</span>
+<span class="sd">        A list of variables in the provided formula expression.</span>
+<span class="sd">    data: :obj:`~pandas.DataFrame`</span>
+<span class="sd">        A tabulation of all terms in the provided formula expression.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">variables</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">_check_and_expand_subformula</span><span class="p">(</span>
+        <span class="n">expression</span><span class="p">,</span> <span class="n">parent_data</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span>
+    <span class="p">)</span>
+    <span class="n">variables</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">_check_and_expand_exponential</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">variables</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">_check_and_expand_derivative</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="p">[</span><span class="n">expr</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">parent_data</span><span class="p">[</span><span class="n">expr</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_matches_from_data</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">variables</span><span class="p">):</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="s2">&quot; + &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variables</span> <span class="k">if</span> <span class="n">matches</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">v</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">matches</span>
+
+
+<span class="k">def</span> <span class="nf">_get_variables_from_formula</span><span class="p">(</span><span class="n">model_formula</span><span class="p">):</span>
+    <span class="n">symbols_to_clear</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot; &quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\(&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dd[0-9]+&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;d[0-9]+[\-]?[0-9]*&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\^\^[0-9]+&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\^[0-9]+[\-]?[0-9]*&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols_to_clear</span><span class="p">:</span>
+        <span class="n">model_formula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">model_formula</span><span class="p">)</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="n">model_formula</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">variables</span>
+
+
+<span class="k">def</span> <span class="nf">_expand_shorthand</span><span class="p">(</span><span class="n">model_formula</span><span class="p">,</span> <span class="n">variables</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Expand shorthand terms in the model formula.&quot;&quot;&quot;</span>
+    <span class="n">wm</span> <span class="o">=</span> <span class="s2">&quot;white_matter&quot;</span>
+    <span class="n">gsr</span> <span class="o">=</span> <span class="s2">&quot;global_signal&quot;</span>
+    <span class="n">rps</span> <span class="o">=</span> <span class="s2">&quot;trans_x + trans_y + trans_z + rot_x + rot_y + rot_z&quot;</span>
+    <span class="n">fd</span> <span class="o">=</span> <span class="s2">&quot;framewise_displacement&quot;</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">_get_matches_from_data</span><span class="p">(</span><span class="s2">&quot;a_comp_cor_[0-9]+&quot;</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
+    <span class="n">tcc</span> <span class="o">=</span> <span class="n">_get_matches_from_data</span><span class="p">(</span><span class="s2">&quot;t_comp_cor_[0-9]+&quot;</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
+    <span class="n">dv</span> <span class="o">=</span> <span class="n">_get_matches_from_data</span><span class="p">(</span><span class="s2">&quot;^std_dvars$&quot;</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
+    <span class="n">dvall</span> <span class="o">=</span> <span class="n">_get_matches_from_data</span><span class="p">(</span><span class="s2">&quot;.*dvars&quot;</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
+    <span class="n">nss</span> <span class="o">=</span> <span class="n">_get_matches_from_data</span><span class="p">(</span><span class="s2">&quot;non_steady_state_outlier[0-9]+&quot;</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
+    <span class="n">spikes</span> <span class="o">=</span> <span class="n">_get_matches_from_data</span><span class="p">(</span><span class="s2">&quot;motion_outlier[0-9]+&quot;</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
+
+    <span class="n">model_formula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;wm&quot;</span><span class="p">,</span> <span class="n">wm</span><span class="p">,</span> <span class="n">model_formula</span><span class="p">)</span>
+    <span class="n">model_formula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;gsr&quot;</span><span class="p">,</span> <span class="n">gsr</span><span class="p">,</span> <span class="n">model_formula</span><span class="p">)</span>
+    <span class="n">model_formula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;rps&quot;</span><span class="p">,</span> <span class="n">rps</span><span class="p">,</span> <span class="n">model_formula</span><span class="p">)</span>
+    <span class="n">model_formula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;fd&quot;</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">model_formula</span><span class="p">)</span>
+    <span class="n">model_formula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;acc&quot;</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">model_formula</span><span class="p">)</span>
+    <span class="n">model_formula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;tcc&quot;</span><span class="p">,</span> <span class="n">tcc</span><span class="p">,</span> <span class="n">model_formula</span><span class="p">)</span>
+    <span class="n">model_formula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;dv&quot;</span><span class="p">,</span> <span class="n">dv</span><span class="p">,</span> <span class="n">model_formula</span><span class="p">)</span>
+    <span class="n">model_formula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;dvall&quot;</span><span class="p">,</span> <span class="n">dvall</span><span class="p">,</span> <span class="n">model_formula</span><span class="p">)</span>
+    <span class="n">model_formula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;nss&quot;</span><span class="p">,</span> <span class="n">nss</span><span class="p">,</span> <span class="n">model_formula</span><span class="p">)</span>
+    <span class="n">model_formula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;spikes&quot;</span><span class="p">,</span> <span class="n">spikes</span><span class="p">,</span> <span class="n">model_formula</span><span class="p">)</span>
+
+    <span class="n">formula_variables</span> <span class="o">=</span> <span class="n">_get_variables_from_formula</span><span class="p">(</span><span class="n">model_formula</span><span class="p">)</span>
+    <span class="n">others</span> <span class="o">=</span> <span class="s2">&quot; + &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">formula_variables</span><span class="p">))</span>
+    <span class="n">model_formula</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;others&quot;</span><span class="p">,</span> <span class="n">others</span><span class="p">,</span> <span class="n">model_formula</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model_formula</span>
+
+
+<span class="k">def</span> <span class="nf">_unscramble_regressor_columns</span><span class="p">(</span><span class="n">parent_data</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reorder the columns of a confound matrix such that the columns are in</span>
+<span class="sd">    the same order as the input data with any expansion columns inserted</span>
+<span class="sd">    immediately after the originals.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_power[0-9]+&quot;</span><span class="p">,</span> <span class="s2">&quot;_derivative[0-9]+&quot;</span><span class="p">]</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">((</span><span class="n">c</span><span class="p">,</span> <span class="n">deque</span><span class="p">())</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">parent_data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">:</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="o">==</span> <span class="n">c</span><span class="p">:</span>
+            <span class="n">var</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">var</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">unscrambled</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">((</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">),</span> <span class="n">var</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[[</span><span class="o">*</span><span class="n">unscrambled</span><span class="p">]]</span>
+
+
+<div class="viewcode-block" id="parse_formula"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.parse_formula">[docs]</a><span class="k">def</span> <span class="nf">parse_formula</span><span class="p">(</span><span class="n">model_formula</span><span class="p">,</span> <span class="n">parent_data</span><span class="p">,</span> <span class="n">unscramble</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse a confound manipulation formula.</span>
+
+<span class="sd">    Recursively parse a model formula by breaking it into additive atoms</span>
+<span class="sd">    and tracking grouping symbol depth.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model_formula : :obj:`str`</span>
+<span class="sd">        Expression for the model formula, e.g.</span>
+<span class="sd">        ``(a + b)^^2 + dd1(c + (d + e)^3) + f``</span>
+<span class="sd">        Note that any expressions to be expanded *must* be in parentheses,</span>
+<span class="sd">        even if they include only a single variable</span>
+<span class="sd">        (e.g., ``(x)^2``, not ``x^2``).</span>
+<span class="sd">        Temporal derivative options:</span>
+
+<span class="sd">            * ``d6(variable)`` for the 6th temporal derivative</span>
+<span class="sd">            * ``dd6(variable)`` for all temporal derivatives up to the 6th</span>
+<span class="sd">            * ``d4-6(variable)`` for the 4th through 6th temporal derivatives</span>
+<span class="sd">            * ``0`` must be included in the temporal derivative range for the</span>
+<span class="sd">              original term to be returned when temporal derivatives are computed.</span>
+
+<span class="sd">        Exponential options:</span>
+
+<span class="sd">            * ``(variable)^6`` for the 6th power</span>
+<span class="sd">            * ``(variable)^^6`` for all powers up to the 6th</span>
+<span class="sd">            * ``(variable)^4-6`` for the 4th through 6th powers</span>
+<span class="sd">            * ``1`` must be included in the powers range for the original term to be</span>
+<span class="sd">              returned when exponential terms are computed.</span>
+
+<span class="sd">        Temporal derivatives and exponential terms are computed for all terms</span>
+<span class="sd">        in the grouping symbols that they adjoin.</span>
+<span class="sd">    parent_data : :obj:`~pandas.DataFrame`</span>
+<span class="sd">        A tabulation of all values usable in the model formula. Each additive</span>
+<span class="sd">        term in `model_formula` should correspond either to a variable in this</span>
+<span class="sd">        data frame or to instructions for operating on a variable (for</span>
+<span class="sd">        instance, computing temporal derivatives or exponential terms).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    variables : :obj:`list` of :obj:`str`</span>
+<span class="sd">        A list of variables included in the model parsed from the provided</span>
+<span class="sd">        formula.</span>
+<span class="sd">    data : :obj:`~pandas.DataFrame`</span>
+<span class="sd">        All values in the complete model.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">expr_delimiter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">grouping_depth</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">model_formula</span> <span class="o">=</span> <span class="n">_expand_shorthand</span><span class="p">(</span><span class="n">model_formula</span><span class="p">,</span> <span class="n">parent_data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model_formula</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">char</span> <span class="o">==</span> <span class="s2">&quot;(&quot;</span><span class="p">:</span>
+            <span class="n">grouping_depth</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">char</span> <span class="o">==</span> <span class="s2">&quot;)&quot;</span><span class="p">:</span>
+            <span class="n">grouping_depth</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">grouping_depth</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">char</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="n">model_formula</span><span class="p">[</span><span class="n">expr_delimiter</span><span class="p">:</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">variables</span><span class="p">[</span><span class="n">expression</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">expression</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">expr_delimiter</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">model_formula</span><span class="p">[</span><span class="n">expr_delimiter</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">variables</span><span class="p">[</span><span class="n">expression</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">data</span><span class="p">[</span><span class="n">expression</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">expression</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">variables</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">expression</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;(&quot;</span> <span class="ow">and</span> <span class="n">expression</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;)&quot;</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="n">expression</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">expression</span><span class="p">])</span> <span class="o">=</span> <span class="n">parse_formula</span><span class="p">(</span>
+                <span class="n">expression</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">parent_data</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="n">expression</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">expression</span><span class="p">])</span> <span class="o">=</span> <span class="n">parse_expression</span><span class="p">(</span>
+                <span class="n">expression</span><span class="p">,</span> <span class="n">parent_data</span>
+            <span class="p">)</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">reduce</span><span class="p">((</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">),</span> <span class="n">variables</span><span class="o">.</span><span class="n">values</span><span class="p">())))</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">((</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">unscramble</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">_unscramble_regressor_columns</span><span class="p">(</span><span class="n">parent_data</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.2.9
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Tags</dt>
+            <dd><a href="../../../../1.0.0/index.html">1.0.0</a></dd>
+            <dd><a href="../../../../1.0.0rc1/index.html">1.0.0rc1</a></dd>
+            <dd><a href="../../../../1.0.0rc2/index.html">1.0.0rc2</a></dd>
+            <dd><a href="../../../../1.0.1/index.html">1.0.1</a></dd>
+            <dd><a href="../../../../1.0.2/index.html">1.0.2</a></dd>
+            <dd><a href="../../../../1.0.3/index.html">1.0.3</a></dd>
+            <dd><a href="../../../../1.0.4/index.html">1.0.4</a></dd>
+            <dd><a href="../../../../1.1.0/index.html">1.1.0</a></dd>
+            <dd><a href="../../../../1.1.1/index.html">1.1.1</a></dd>
+            <dd><a href="../../../../1.1.10/index.html">1.1.10</a></dd>
+            <dd><a href="../../../../1.1.11/index.html">1.1.11</a></dd>
+            <dd><a href="../../../../1.1.12/index.html">1.1.12</a></dd>
+            <dd><a href="../../../../1.1.2/index.html">1.1.2</a></dd>
+            <dd><a href="../../../../1.1.3/index.html">1.1.3</a></dd>
+            <dd><a href="../../../../1.1.4/index.html">1.1.4</a></dd>
+            <dd><a href="../../../../1.1.5/index.html">1.1.5</a></dd>
+            <dd><a href="../../../../1.1.6/index.html">1.1.6</a></dd>
+            <dd><a href="../../../../1.1.7/index.html">1.1.7</a></dd>
+            <dd><a href="../../../../1.1.8/index.html">1.1.8</a></dd>
+            <dd><a href="../../../../1.1.9/index.html">1.1.9</a></dd>
+            <dd><a href="../../../../1.2.0/index.html">1.2.0</a></dd>
+            <dd><a href="../../../../1.2.0rc1/index.html">1.2.0rc1</a></dd>
+            <dd><a href="../../../../1.2.0rc2/index.html">1.2.0rc2</a></dd>
+            <dd><a href="../../../../1.2.0rc3/index.html">1.2.0rc3</a></dd>
+            <dd><a href="../../../../1.2.0rc4/index.html">1.2.0rc4</a></dd>
+            <dd><a href="../../../../1.2.0rc5/index.html">1.2.0rc5</a></dd>
+            <dd><a href="../../../../1.2.1/index.html">1.2.1</a></dd>
+            <dd><a href="../../../../1.2.2/index.html">1.2.2</a></dd>
+            <dd><a href="../../../../1.2.3/index.html">1.2.3</a></dd>
+            <dd><a href="../../../../1.2.4/index.html">1.2.4</a></dd>
+            <dd><a href="../../../../1.2.5/index.html">1.2.5</a></dd>
+            <dd><a href="../../../../1.2.6/index.html">1.2.6</a></dd>
+            <dd><a href="../../../../1.2.7/index.html">1.2.7</a></dd>
+            <dd><a href="../../../../1.2.8/index.html">1.2.8</a></dd>
+            <dd><a href="confounds.html">1.2.9</a></dd>
+            <dd><a href="../../../../1.3.0/index.html">1.3.0</a></dd>
+            <dd><a href="../../../../1.3.0rc1/index.html">1.3.0rc1</a></dd>
+            <dd><a href="../../../../1.3.0rc2/index.html">1.3.0rc2</a></dd>
+            <dd><a href="../../../../1.3.0rc3/index.html">1.3.0rc3</a></dd>
+            <dd><a href="../../../../1.3.1/index.html">1.3.1</a></dd>
+            <dd><a href="../../../../1.3.2/index.html">1.3.2</a></dd>
+            <dd><a href="../../../../1.3.3/index.html">1.3.3</a></dd>
+            <dd><a href="../../../../1.3.4/index.html">1.3.4</a></dd>
+            <dd><a href="../../../../1.3.5/index.html">1.3.5</a></dd>
+            <dd><a href="../../../../1.4.0/index.html">1.4.0</a></dd>
+            <dd><a href="../../../../1.4.0rc0/index.html">1.4.0rc0</a></dd>
+            <dd><a href="../../../../1.4.0rc1/index.html">1.4.0rc1</a></dd>
+            <dd><a href="../../../../1.4.0rc2/index.html">1.4.0rc2</a></dd>
+            <dd><a href="../../../../1.4.0rc3/index.html">1.4.0rc3</a></dd>
+            <dd><a href="../../../../1.4.0rc4/index.html">1.4.0rc4</a></dd>
+            <dd><a href="../../../../1.4.0rc5/index.html">1.4.0rc5</a></dd>
+            <dd><a href="../../../../1.4.0rc6/index.html">1.4.0rc6</a></dd>
+            <dd><a href="../../../../1.2.9/index.html">1.2.9</a></dd>
+        </dl>
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="../../../../enh_report-plot-axis/index.html">enh/report-plot-axis</a></dd>
+            <dd><a href="../../../../feat_infants-rodents/index.html">feat/infants-rodents</a></dd>
+            <dd><a href="../../../../maint_1.0.x/index.html">maint/1.0.x</a></dd>
+            <dd><a href="../../../../maint_1.1.x/index.html">maint/1.1.x</a></dd>
+            <dd><a href="../../../../maint_1.2.x/index.html">maint/1.2.x</a></dd>
+            <dd><a href="../../../../maint_1.3.x/index.html">maint/1.3.x</a></dd>
+            <dd><a href="../../../../master/index.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+<script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

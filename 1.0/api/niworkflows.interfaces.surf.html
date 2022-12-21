@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.interfaces.surf module &mdash; niworkflows 1.0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="niworkflows.interfaces.utility module" href="niworkflows.interfaces.utility.html" />
+    <link rel="prev" title="niworkflows.interfaces.segmentation module" href="niworkflows.interfaces.segmentation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.0.4
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.anat.html">niworkflows.anat package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.common.html">niworkflows.common package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.func.html">niworkflows.func package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="niworkflows.interfaces.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.ants.html">niworkflows.interfaces.ants module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.bids.html">niworkflows.interfaces.bids module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.confounds.html">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.images.html">niworkflows.interfaces.images module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.itk.html">niworkflows.interfaces.itk module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.masks.html">niworkflows.interfaces.masks module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.mni.html">niworkflows.interfaces.mni module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.nibabel.html">niworkflows.interfaces.nibabel module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.nilearn.html">niworkflows.interfaces.nilearn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.patches.html">niworkflows.interfaces.patches module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.plotting.html">niworkflows.interfaces.plotting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.registration.html">niworkflows.interfaces.registration module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.report_base.html">niworkflows.interfaces.report_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.segmentation.html">niworkflows.interfaces.segmentation module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">niworkflows.interfaces.surf module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.utils.html">niworkflows.interfaces.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.viz.html">niworkflows.viz package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
+          <li><a href="niworkflows.interfaces.html">niworkflows.interfaces package</a> &raquo;</li>
+      <li>niworkflows.interfaces.surf module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/niworkflows.interfaces.surf.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../../master/api/niworkflows.interfaces.surf.html"><b>Warning:</b> This document is for an old version of niworkflows. The main version is master.</a></p>
+<div class="section" id="module-niworkflows.interfaces.surf">
+<span id="niworkflows-interfaces-surf-module"></span><h1>niworkflows.interfaces.surf module<a class="headerlink" href="#module-niworkflows.interfaces.surf" title="Permalink to this headline">¶</a></h1>
+<p>Handling surfaces.</p>
+<dl class="py class">
+<dt id="niworkflows.interfaces.surf.CSVToGifti">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">CSVToGifti</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#CSVToGifti"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.CSVToGifti" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Converts CSV files back to GIfTI, after moving vertices with
+<code class="docutils literal notranslate"><span class="pre">antsApplyTransformToPoints</span></code>.</p>
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.CSVToGifti.input_spec">
+<code class="sig-name descname"><span class="pre">input_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.CSVToGifti.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._CSVToGiftiInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.CSVToGifti.output_spec">
+<code class="sig-name descname"><span class="pre">output_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.CSVToGifti.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._CSVToGiftiOutputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.surf.GiftiNameSource">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">GiftiNameSource</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#GiftiNameSource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.GiftiNameSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Construct a new filename for a GIFTI file.</p>
+<p>Construct a new filename based on an input filename, a matching pattern,
+and a related template, with optionally additional keywords.</p>
+<p>This interface is intended for use with GIFTI files, to generate names
+conforming to Section 9.0 of the <a class="reference external" href="https://www.nitrc.org/frs/download.php/2871/GIFTI_Surface_Format.pdf">GIFTI Standard</a>.</p>
+<p>Patterns are expected to have named groups, including one named “LR” that
+matches “l” or “r”.
+These groups must correspond to named format elements in the template.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">surf_namer</span> <span class="o">=</span> <span class="n">GiftiNameSource</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">surf_namer</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;(?P&lt;LR&gt;[lr])h.(?P&lt;surf&gt;\w+).gii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">surf_namer</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;</span><span class="si">{surf}</span><span class="s1">.</span><span class="si">{LR}</span><span class="s1">.surf&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">surf_namer</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s1">&#39;lh.pial.gii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">surf_namer</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_name</span>
+<span class="go">&#39;pial.L.surf&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">func_namer</span> <span class="o">=</span> <span class="n">GiftiNameSource</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">func_namer</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;(?P&lt;LR&gt;[lr])h.(?P&lt;space&gt;\w+).gii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">func_namer</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;space-</span><span class="si">{space}</span><span class="s1">.</span><span class="si">{LR}</span><span class="s1">.func&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">func_namer</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s1">&#39;rh.fsaverage.gii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">func_namer</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_name</span>
+<span class="go">&#39;space-fsaverage.R.func&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">namer</span> <span class="o">=</span> <span class="n">GiftiNameSource</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">namer</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;(?P&lt;LR&gt;[lr])h.(?P&lt;space&gt;\w+).gii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">namer</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;space-</span><span class="si">{space}</span><span class="s1">_density-</span><span class="si">{density}</span><span class="s1">_hemi-</span><span class="si">{LR}</span><span class="s1">.func&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">namer</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s1">&#39;rh.fsaverage.gii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">namer</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;density&#39;</span><span class="p">:</span> <span class="s1">&#39;10k&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">namer</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_name</span>
+<span class="go">&#39;space-fsaverage_density-10k_hemi-R.func&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="s1">&#39;lh.pial.gii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="s1">&#39;rh.fsaverage.gii&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.GiftiNameSource.input_spec">
+<code class="sig-name descname"><span class="pre">input_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.GiftiNameSource.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._GiftiNameSourceInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.GiftiNameSource.output_spec">
+<code class="sig-name descname"><span class="pre">output_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.GiftiNameSource.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._GiftiNameSourceOutputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.surf.GiftiSetAnatomicalStructure">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">GiftiSetAnatomicalStructure</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#GiftiSetAnatomicalStructure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.GiftiSetAnatomicalStructure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Set AnatomicalStructurePrimary attribute of GIFTI image based on filename.</p>
+<p>For files that begin with <code class="docutils literal notranslate"><span class="pre">lh.</span></code> or <code class="docutils literal notranslate"><span class="pre">rh.</span></code>, update the metadata to
+include:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="n">AnatomicalStructurePrimary</span><span class="p">:</span> <span class="p">(</span><span class="n">CortexLeft</span> <span class="o">|</span> <span class="n">CortexRight</span><span class="p">),</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">AnatomicalStructurePrimary</span></code> is already set, this function has no
+effect.</p>
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.GiftiSetAnatomicalStructure.input_spec">
+<code class="sig-name descname"><span class="pre">input_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.GiftiSetAnatomicalStructure.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._GiftiSetAnatomicalStructureInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.GiftiSetAnatomicalStructure.output_spec">
+<code class="sig-name descname"><span class="pre">output_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.GiftiSetAnatomicalStructure.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._GiftiSetAnatomicalStructureOutputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.surf.GiftiToCSV">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">GiftiToCSV</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#GiftiToCSV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.GiftiToCSV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Converts GIfTI files to CSV to make them ammenable to use with
+<code class="docutils literal notranslate"><span class="pre">antsApplyTransformsToPoints</span></code>.</p>
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.GiftiToCSV.input_spec">
+<code class="sig-name descname"><span class="pre">input_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.GiftiToCSV.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._GiftiToCSVInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.GiftiToCSV.output_spec">
+<code class="sig-name descname"><span class="pre">output_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.GiftiToCSV.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._GiftiToCSVOutputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.surf.NormalizeSurf">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">NormalizeSurf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#NormalizeSurf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.NormalizeSurf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Normalize a FreeSurfer-generated GIFTI image.</p>
+<p>FreeSurfer includes an offset to the center of the brain volume that is not
+respected by all software packages.
+Normalization involves adding this offset to the coordinates of all
+vertices, and zeroing out that offset, to ensure consistent behavior
+across software packages.
+In particular, this normalization is consistent with the Human Connectome
+Project pipeline (see <a class="reference external" href="https://github.com/Washington-University/workbench/blob/1b79e56/src/Algorithms/AlgorithmSurfaceApplyAffine.cxx#L73-L91">AlgorithmSurfaceApplyAffine</a> and
+<a class="reference external" href="https://github.com/Washington-University/Pipelines/blob/ae69b9a/PostFreeSurfer/scripts/FreeSurfer2CaretConvertAndRegisterNonlinear.sh#L147-154">FreeSurfer2CaretConvertAndRegisterNonlinear</a>), although the the HCP
+may not zero out the offset.</p>
+<p>GIFTI files with <code class="docutils literal notranslate"><span class="pre">midthickness</span></code>/<code class="docutils literal notranslate"><span class="pre">graymid</span></code> in the name are also updated
+to include the following metadata entries:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="n">AnatomicalStructureSecondary</span><span class="p">:</span> <span class="n">MidThickness</span><span class="p">,</span>
+    <span class="n">GeometricType</span><span class="p">:</span> <span class="n">Anatomical</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This interface is intended to be applied uniformly to GIFTI surface files
+generated from the <code class="docutils literal notranslate"><span class="pre">?h.white</span></code>/<code class="docutils literal notranslate"><span class="pre">?h.smoothwm</span></code> and <code class="docutils literal notranslate"><span class="pre">?h.pial</span></code> surfaces,
+as well as externally-generated <code class="docutils literal notranslate"><span class="pre">?h.midthickness</span></code>/<code class="docutils literal notranslate"><span class="pre">?h.graymid</span></code> files.
+In principle, this should apply safely to any other surface, although it is
+less relevant to surfaces that don’t describe an anatomical structure.</p>
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.NormalizeSurf.input_spec">
+<code class="sig-name descname"><span class="pre">input_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.NormalizeSurf.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._NormalizeSurfInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.NormalizeSurf.output_spec">
+<code class="sig-name descname"><span class="pre">output_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.NormalizeSurf.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._NormalizeSurfOutputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.surf.PLYtoGifti">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">PLYtoGifti</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#PLYtoGifti"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.PLYtoGifti" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Convert surfaces from PLY to GIfTI</p>
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.PLYtoGifti.input_spec">
+<code class="sig-name descname"><span class="pre">input_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.PLYtoGifti.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._PLYtoGiftiInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.PLYtoGifti.output_spec">
+<code class="sig-name descname"><span class="pre">output_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.PLYtoGifti.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._PLYtoGiftiOutputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.surf.Path2BIDS">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">Path2BIDS</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#Path2BIDS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.Path2BIDS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Extract BIDS entities from paths using a pattern.</p>
+<p>Default pattern is given for Gifti surfaces.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Path2BIDS</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s1">&#39;_fix_surfs0/rh.pial.surf.gii&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span><span class="o">.</span><span class="n">outputs</span>
+
+<span class="go">extension = .surf.gii</span>
+<span class="go">hemi = R</span>
+<span class="go">suffix = pial</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Path2BIDS</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s1">&#39;_fix_surfs0/rh.pial.gii&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span><span class="o">.</span><span class="n">outputs</span>
+
+<span class="go">extension = .gii</span>
+<span class="go">hemi = R</span>
+<span class="go">suffix = pial</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Path2BIDS</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s1">&#39;_fix_surfs0/rh.smoothwm_converted.gii&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span><span class="o">.</span><span class="n">outputs</span>
+
+<span class="go">extension = .gii</span>
+<span class="go">hemi = R</span>
+<span class="go">suffix = smoothwm</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Path2BIDS</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s1">&#39;_fix_surfs0/rh.smoothwm_converted.func.gii&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span><span class="o">.</span><span class="n">outputs</span>
+
+<span class="go">extension = .func.gii</span>
+<span class="go">hemi = R</span>
+<span class="go">suffix = smoothwm</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.Path2BIDS.input_spec">
+<code class="sig-name descname"><span class="pre">input_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.Path2BIDS.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._Path2BIDSInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.Path2BIDS.output_spec">
+<code class="sig-name descname"><span class="pre">output_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.Path2BIDS.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._Path2BIDSOutputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.surf.PoissonRecon">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">PoissonRecon</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminal_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#PoissonRecon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.PoissonRecon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.CommandLine</span></code></p>
+<p>Runs Poisson Reconstruction on a cloud of points + normals
+given in PLY format.
+See <a class="reference external" href="https://github.com/mkazhdan/PoissonRecon">https://github.com/mkazhdan/PoissonRecon</a></p>
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.PoissonRecon.input_spec">
+<code class="sig-name descname"><span class="pre">input_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.PoissonRecon.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._PoissonReconInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.PoissonRecon.output_spec">
+<code class="sig-name descname"><span class="pre">output_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.PoissonRecon.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._PoissonReconOutputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.surf.SurfacesToPointCloud">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">SurfacesToPointCloud</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#SurfacesToPointCloud"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.SurfacesToPointCloud" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Converts multiple surfaces into a pointcloud with corresponding normals
+to then apply Poisson reconstruction</p>
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.SurfacesToPointCloud.input_spec">
+<code class="sig-name descname"><span class="pre">input_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.SurfacesToPointCloud.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._SurfacesToPointCloudInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.SurfacesToPointCloud.output_spec">
+<code class="sig-name descname"><span class="pre">output_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.SurfacesToPointCloud.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._SurfacesToPointCloudOutputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="niworkflows.interfaces.surf.UnzipJoinedSurfaces">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">UnzipJoinedSurfaces</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#UnzipJoinedSurfaces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.UnzipJoinedSurfaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">nipype.interfaces.base.core.SimpleInterface</span></code></p>
+<p>Unpack surfaces by identifier keys</p>
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.UnzipJoinedSurfaces.input_spec">
+<code class="sig-name descname"><span class="pre">input_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.UnzipJoinedSurfaces.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._UnzipJoinedSurfacesInputSpec</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="niworkflows.interfaces.surf.UnzipJoinedSurfaces.output_spec">
+<code class="sig-name descname"><span class="pre">output_spec</span></code><a class="headerlink" href="#niworkflows.interfaces.surf.UnzipJoinedSurfaces.output_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.interfaces.surf._UnzipJoinedSurfacesOutputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.interfaces.surf.get_gii_meta">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">get_gii_meta</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#get_gii_meta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.get_gii_meta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.interfaces.surf.load_transform">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">load_transform</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#load_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.load_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load affine transform from file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fname</strong> (<em>str or None</em>) – Filename of an LTA or FSL-style MAT transform file.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, return an identity transform</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>affine</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(4, 4) numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.interfaces.surf.normalize_surfs">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">normalize_surfs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#normalize_surfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.normalize_surfs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Re-center GIFTI coordinates to fit align to native T1w space.</p>
+<p>For midthickness surfaces, add MidThickness metadata</p>
+<p>Coordinate update based on:
+<a class="reference external" href="https://github.com/Washington-University/workbench/blob/1b79e56/src/Algorithms/AlgorithmSurfaceApplyAffine.cxx#L73-L91">https://github.com/Washington-University/workbench/blob/1b79e56/src/Algorithms/AlgorithmSurfaceApplyAffine.cxx#L73-L91</a>
+and
+<a class="reference external" href="https://github.com/Washington-University/Pipelines/blob/ae69b9a/PostFreeSurfer/scripts/FreeSurfer2CaretConvertAndRegisterNonlinear.sh#L147">https://github.com/Washington-University/Pipelines/blob/ae69b9a/PostFreeSurfer/scripts/FreeSurfer2CaretConvertAndRegisterNonlinear.sh#L147</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.interfaces.surf.ply2gii">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">ply2gii</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#ply2gii"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.ply2gii" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert from ply to GIfTI</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.interfaces.surf.pointcloud2ply">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">pointcloud2ply</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#pointcloud2ply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.pointcloud2ply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the file to PLY format</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.interfaces.surf.vertex_normals">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.surf.</span></code><code class="sig-name descname"><span class="pre">vertex_normals</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/surf.html#vertex_normals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.surf.vertex_normals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the normals of a triangular mesh</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="niworkflows.interfaces.segmentation.html" class="btn btn-neutral float-left" title="niworkflows.interfaces.segmentation module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="niworkflows.interfaces.utility.html" class="btn btn-neutral float-right" title="niworkflows.interfaces.utility module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.0.4
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt id="v-tags">Tags</dt>
+        </dl>
+        <dl>
+            <dt id="v-branches">Branches</dt>
+        </dl>
+    </div>
+</div>
+
+
+<script src="../../js/rtd-versions.js"></script>
+
+</body>
+</html>

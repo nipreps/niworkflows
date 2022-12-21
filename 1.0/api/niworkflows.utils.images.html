@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>niworkflows.utils.images module &mdash; niworkflows 1.0.4 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="niworkflows.utils.misc module" href="niworkflows.utils.misc.html" />
+    <link rel="prev" title="niworkflows.utils.bids module" href="niworkflows.utils.bids.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> niworkflows
+          </a>
+              <div id="version-slug" class="version">
+                1.0.4
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Library API (application program interface)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.anat.html">niworkflows.anat package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.common.html">niworkflows.common package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.func.html">niworkflows.func package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="niworkflows.utils.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.utils.bids.html">niworkflows.utils.bids module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">niworkflows.utils.images module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.utils.misc.html">niworkflows.utils.misc module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.viz.html">niworkflows.viz package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new?</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">niworkflows</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">Library API (application program interface)</a> &raquo;</li>
+          <li><a href="niworkflows.utils.html">niworkflows.utils package</a> &raquo;</li>
+      <li>niworkflows.utils.images module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/niworkflows.utils.images.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+
+
+    
+    
+
+
+
+    <p class="scv-banner scv-sphinx_rtd_theme"><a href="../../master/api/niworkflows.utils.images.html"><b>Warning:</b> This document is for an old version of niworkflows. The main version is master.</a></p>
+<div class="section" id="module-niworkflows.utils.images">
+<span id="niworkflows-utils-images-module"></span><h1>niworkflows.utils.images module<a class="headerlink" href="#module-niworkflows.utils.images" title="Permalink to this headline">¶</a></h1>
+<p>Utilities to manipulate images.</p>
+<dl class="py function">
+<dt id="niworkflows.utils.images.demean">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></code><code class="sig-name descname"><span class="pre">demean</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#demean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.demean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Demean <code class="docutils literal notranslate"><span class="pre">in_file</span></code> within the mask defined by <code class="docutils literal notranslate"><span class="pre">in_mask</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.images.dseg_label">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></code><code class="sig-name descname"><span class="pre">dseg_label</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_seg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#dseg_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.dseg_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract a particular label from a discrete segmentation.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.images.nii_ones_like">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></code><code class="sig-name descname"><span class="pre">nii_ones_like</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#nii_ones_like"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.nii_ones_like" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a NIfTI file filled with <code class="docutils literal notranslate"><span class="pre">value</span></code>, matching properties of <code class="docutils literal notranslate"><span class="pre">in_file</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.images.overwrite_header">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></code><code class="sig-name descname"><span class="pre">overwrite_header</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#overwrite_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.overwrite_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rewrite file with only changes to the header</p>
+<p>The data block is copied without scaling, avoiding copies in memory.
+The header is checked against the target file to ensure that no changes
+to the size, offset or interpretation of the data block will result.</p>
+<p>This function will not respect calls to:</p>
+<ul class="simple">
+<li><p>img.header.set_slope_inter()</p></li>
+<li><p>img.header.set_data_shape()</p></li>
+<li><p>img.header.set_data_offset()</p></li>
+</ul>
+<p>These will all be determined by img.dataobj, which must be an
+ArrayProxy.</p>
+<p>If the qform or sform are updated, the
+<code class="docutils literal notranslate"><span class="pre">img.header.get_best_affine()</span></code> method must match <code class="docutils literal notranslate"><span class="pre">img.affine</span></code>,
+or your changes may be lost.</p>
+<p>The intended use of this method is for making small header fixups
+that do not change the data or affine, e.g.:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">nifti_fname</span><span class="p">,</span> <span class="n">mmap</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">img</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">set_qform</span><span class="p">(</span><span class="o">*</span><span class="n">img</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_sform</span><span class="p">(</span><span class="n">coded</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">img</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;descrip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;Modified with some extremely finicky tooling&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">overwrite_header</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">nifti_fname</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is a destructive operation, and the image object should be considered unusable
+after calling this function.</p>
+<p>This should only be called with an image loaded with <code class="docutils literal notranslate"><span class="pre">mmap=False</span></code>,
+or else you risk getting a <code class="docutils literal notranslate"><span class="pre">BusError</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.images.resample_by_spacing">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></code><code class="sig-name descname"><span class="pre">resample_by_spacing</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zooms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#resample_by_spacing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.resample_by_spacing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Regrid the input image to match the new zooms.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.images.rotate_affine">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></code><code class="sig-name descname"><span class="pre">rotate_affine</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#rotate_affine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.rotate_affine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rewrite the affine of a spatial image.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.images.rotation2canonical">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></code><code class="sig-name descname"><span class="pre">rotation2canonical</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#rotation2canonical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.rotation2canonical" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the rotation w.r.t. cardinal axes of input image.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.images.set_consumables">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></code><code class="sig-name descname"><span class="pre">set_consumables</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataobj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#set_consumables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.set_consumables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.images.unsafe_write_nifti_header_and_data">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></code><code class="sig-name descname"><span class="pre">unsafe_write_nifti_header_and_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#unsafe_write_nifti_header_and_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.unsafe_write_nifti_header_and_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write header and data without any consistency checks or data munging</p>
+<p>This is almost always a bad idea, and you should not use this function
+without a battery of tests for your specific use case.</p>
+<p>If you’re not using this for NIfTI files specifically, you’re playing
+with Fortran-ordered fire.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="niworkflows.utils.images.update_header_fields">
+<code class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></code><code class="sig-name descname"><span class="pre">update_header_fields</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#update_header_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.update_header_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adjust header fields</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="niworkflows.utils.bids.html" class="btn btn-neutral float-left" title="niworkflows.utils.bids module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="niworkflows.utils.misc.html" class="btn btn-neutral float-right" title="niworkflows.utils.misc module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Copyright 2021, The NiPreps Developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 1.0.4
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt id="v-tags">Tags</dt>
+        </dl>
+        <dl>
+            <dt id="v-branches">Branches</dt>
+        </dl>
+    </div>
+</div>
+
+
+<script src="../../js/rtd-versions.js"></script>
+
+</body>
+</html>
