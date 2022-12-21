@@ -97,19 +97,19 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - env-v1-{{ .Branch }}-
-            - env-v1-master-
-            - env-v1-
+            - env-v2-{{ .Branch }}-
+            - env-v2-master-
+            - env-v2-
       - run:
           name: Setup git-annex, DataLad & TemplateFlow
           command: |
-            conda install -y -c anaconda -c conda-forge git-annex datalad wget
-            python -m pip install --no-cache-dir -U datalad-osf
+            apk update && apk add --no-cache coreutils
+            conda install -y -c conda-forge python=*=*cpython datalad git wget
+            python -m pip install --no-cache-dir -U datalad-osf templateflow
             git config --global user.name 'NiPreps Bot'
             git config --global user.email 'nipreps@gmail.com'
-            python -m pip install --no-cache-dir -U templateflow
       - save_cache:
-          key: env-v1-{{ .Branch }}-{{ .BuildNum }}
+          key: env-v2-{{ .Branch }}-{{ .BuildNum }}
           paths:
             - /opt/conda
 
@@ -129,6 +129,15 @@ jobs:
             datalad get -J 2 -r -d ds000003/ ds000003/*
 
       - run:
+          name: Get test data from ds000030
+          command: |
+            if [[ ! -d ds000030 ]]; then
+              datalad install -r https://github.com/nipreps-data/ds000030.git
+            fi
+            datalad update -r --merge -d ds000030/
+            datalad get -J 2 -r -d ds000030/ ds000030/sub-10228/func/*
+
+      - run:
           name: Get BIDS test data stub
           command: |
             mkdir -p /tmp/data
@@ -143,6 +152,7 @@ jobs:
          key: data-v3-{{ .Branch }}-{{ epoch }}
          paths:
             - /tmp/data/ds000003
+            - /tmp/data/ds000030
             - /tmp/data/BIDS-examples-1-enh-ds054
       - run:
           name: Store FreeSurfer license file
