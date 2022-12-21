@@ -1,3 +1,13 @@
+1.3.9 (December 21, 2022)
+=========================
+Bug-fix release in the 1.3.x series.
+
+Minor maintenance.
+
+* FIX: Remove deprecated uses of ``np.bool`` for numpy 1.24 compatibility (#764)
+* CI: Update GitHub actions from master (#766)
+* CI: Update CircleCI from master (#765)
+
 1.3.8 (September 14, 2022)
 ==========================
 Bug-fix release in the 1.3.x series
