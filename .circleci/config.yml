@@ -18,6 +18,7 @@ jobs:
             - build-v1-{{ .Branch }}-{{ .Revision }}
             - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
+            - build-v1-maint/1.6.x-
             - build-v1-master-
             - build-v1-
           paths:
@@ -98,13 +99,14 @@ jobs:
       - restore_cache:
           keys:
             - env-v2-{{ .Branch }}-
+            - env-v2-maint/1.6.x-
             - env-v2-master-
             - env-v2-
       - run:
           name: Setup git-annex, DataLad & TemplateFlow
           command: |
             apk update && apk add --no-cache coreutils
-            conda install -y -c conda-forge datalad git wget
+            conda install -y -c conda-forge python=*=*cpython datalad git wget
             python -m pip install --no-cache-dir -U datalad-osf templateflow
             git config --global user.name 'NiPreps Bot'
             git config --global user.email 'nipreps@gmail.com'
@@ -117,6 +119,7 @@ jobs:
           keys:
             - data-v3-{{ .Branch }}-{{ epoch }}
             - data-v3-{{ .Branch }}-
+            - data-v3-maint/1.6.x-
             - data-v3-master-
             - data-v3-
       - run:
@@ -183,10 +186,6 @@ jobs:
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ .Revision }}
-            - build-v1--{{ .Revision }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-master-
-            - build-v1-
       - run:
           name: Docker authentication
           command: |
@@ -214,9 +213,6 @@ jobs:
       - restore_cache:
           keys:
             - data-v3-{{ .Branch }}-{{ epoch }}
-            - data-v3-{{ .Branch }}-
-            - data-v3-master-
-            - data-v3-
 
       - run:
           name: Run unit tests
@@ -335,10 +331,6 @@ jobs:
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ .Revision }}
-            - build-v1--{{ .Revision }}
-            - build-v1-{{ .Branch }}-
-            - build-v1-master-
-            - build-v1-
           paths:
             - /tmp/docker
             - /tmp/images
