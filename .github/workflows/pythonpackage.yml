@@ -5,7 +5,7 @@ name: Python package
 
 on:
   push:
-    branches: [ '*' ]
+    branches: [ '**' ]
     tags: [ '*' ]
   pull_request:
     branches: [ master, 'maint/*' ]
@@ -32,8 +32,7 @@ jobs:
           if [[ -z "$COMMIT_MSG" ]]; then
             COMMIT_MSG=$(git show -s --format=%s)
           fi
-          echo $COMMIT_MSG
-          echo "::set-output name=commit_message::$COMMIT_MSG"
+          echo commit_message=$COMMIT_MSG | tee -a $GITHUB_OUTPUT
         env:
           COMMIT_MSG: ${{ github.event.head_commit.message }}
 
@@ -114,14 +113,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9, "3.10"]
         install: [repo]
         include:
-          - python-version: 3.9
+          - python-version: "3.10"
             install: sdist
-          - python-version: 3.9
+          - python-version: "3.10"
             install: wheel
-          - python-version: 3.9
+          - python-version: "3.10"
             install: editable
 
     env:
@@ -255,8 +254,6 @@ jobs:
       name: Submit to CodeCov
 
   flake8:
-    needs: check_if_skip
-    if: "!contains(needs.check_if_skip.outputs.commit_message, '[skip ci]')"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
