@@ -18,7 +18,6 @@ jobs:
             - build-v1-{{ .Branch }}-{{ .Revision }}
             - build-v1--{{ .Revision }}
             - build-v1-{{ .Branch }}-
-            - build-v1-maint/1.7.x-
             - build-v1-master-
             - build-v1-
           paths:
@@ -99,7 +98,6 @@ jobs:
       - restore_cache:
           keys:
             - env-v2-{{ .Branch }}-
-            - env-v2-maint/1.7.x-
             - env-v2-master-
             - env-v2-
       - run:
@@ -119,7 +117,6 @@ jobs:
           keys:
             - data-v3-{{ .Branch }}-{{ epoch }}
             - data-v3-{{ .Branch }}-
-            - data-v3-maint/1.7.x-
             - data-v3-master-
             - data-v3-
       - run:
