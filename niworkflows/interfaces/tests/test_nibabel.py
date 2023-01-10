@@ -64,24 +64,24 @@ bad_affine[0, -1] = -1
 @pytest.mark.parametrize(
     "affine, data, roi_index, error, err_message",
     [
-        (np.eye(4), np.zeros((2, 2, 2, 2), dtype=int), [1, 0], None, None),
+        (np.eye(4), np.zeros((2, 2, 2, 2), dtype=np.uint16), [1, 0], None, None),
         (
             np.eye(4),
-            np.zeros((2, 2, 3, 2), dtype=int),
+            np.zeros((2, 2, 3, 2), dtype=np.uint16),
             [1, 0],
             True,
             "Mismatch in image shape",
         ),
         (
             bad_affine,
-            np.zeros((2, 2, 2, 2), dtype=int),
+            np.zeros((2, 2, 2, 2), dtype=np.uint16),
             [1, 0],
             True,
             "Mismatch in affine",
         ),
         (
             np.eye(4),
-            np.zeros((2, 2, 2, 2), dtype=int),
+            np.zeros((2, 2, 2, 2), dtype=np.uint16),
             [0, 0, 0],
             True,
             "Overlapping ROIs",
@@ -90,8 +90,8 @@ bad_affine[0, -1] = -1
 )
 def test_merge_rois(tmpdir, create_roi, affine, data, roi_index, error, err_message):
     tmpdir.chdir()
-    roi0 = create_roi(np.eye(4), np.zeros((2, 2, 2, 2), dtype=int), [0, 0])
-    roi1 = create_roi(np.eye(4), np.zeros((2, 2, 2, 2), dtype=int), [0, 1])
+    roi0 = create_roi(np.eye(4), np.zeros((2, 2, 2, 2), dtype=np.uint16), [0, 0])
+    roi1 = create_roi(np.eye(4), np.zeros((2, 2, 2, 2), dtype=np.uint16), [0, 1])
     test_roi = create_roi(affine, data, roi_index)
 
     merge = MergeROIs(in_files=[roi0, roi1, test_roi])
@@ -236,7 +236,7 @@ def test_MergeSeries_affines(tmp_path):
     os.chdir(str(tmp_path))
 
     files = ['img0.nii.gz', 'img1.nii.gz']
-    data = np.ones((10, 10, 10), dtype=int)
+    data = np.ones((10, 10, 10), dtype=np.uint16)
     aff = np.eye(4)
     nb.Nifti1Image(data, aff, None).to_filename(files[0])
     # slightly alter affine
@@ -251,7 +251,7 @@ def test_MergeSeries_affines(tmp_path):
 
 
 LABEL_MAPPINGS = {5: 1, 6: 1, 7: 2}
-LABEL_INPUT = np.arange(8).reshape(2, 2, 2)
+LABEL_INPUT = np.arange(8, dtype=np.uint16).reshape(2, 2, 2)
 LABEL_OUTPUT = np.asarray([0, 1, 2, 3, 4, 1, 1, 2]).reshape(2, 2, 2)
 
 
