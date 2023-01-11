@@ -399,6 +399,8 @@ workflows:
   build_test_deploy:
     jobs:
       - build:
+          context:
+            - nipreps-common
           filters:
             tags:
               only: /.*/
@@ -408,6 +410,8 @@ workflows:
               only: /.*/
 
       - test_package:
+          context:
+            - nipreps-common
           filters:
             branches:
               ignore:
@@ -416,6 +420,8 @@ workflows:
               only: /.*/
 
       - test_pytest:
+          context:
+            - nipreps-common
           requires:
             - build
             - get_data
@@ -428,6 +434,8 @@ workflows:
               only: /.*/
 
       - deploy_pypi:
+          context:
+            - nipreps-common
           requires:
             - test_pytest
             - test_package
@@ -439,6 +447,8 @@ workflows:
               only: /.*/
 
       - deploy_docker:
+          context:
+            - nipreps-common
           requires:
             - deploy_pypi
           filters:
