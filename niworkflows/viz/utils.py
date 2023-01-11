@@ -348,6 +348,9 @@ def plot_registration(
         plot_params = robust_set_limits(anat_nii.get_fdata().reshape(-1), plot_params)
 
     # FreeSurfer ribbon.mgz
+    if contour:
+        contour = _ensure_nii(contour)
+
     ribbon = contour is not None and np.array_equal(
         np.unique(contour.get_fdata()), [0, 2, 3, 41, 42]
     )
