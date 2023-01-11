@@ -37,7 +37,6 @@
     [0.1, 3.0, 0.0]
   ],
   "transforms": ["Rigid", "Affine", "SyN"],
-  "use_estimate_learning_rate_once": [true, true, true],
   "use_histogram_matching": [true, true, true],
   "winsorize_lower_quantile": 0.005,
   "winsorize_upper_quantile": 0.995,
