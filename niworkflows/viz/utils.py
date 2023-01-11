@@ -720,9 +720,3 @@ def plot_melodic_components(
         pad_inches=0.01,
     )
     fig.clf()
-
-
-def _ensure_nii(img: nb.spatialimages.SpatialImage) -> nb.Nifti1Image:
-    if not isinstance(img, nb.Nifti1Image):
-        img = nb.Nifti1Image(img.dataobj, img.affine, img.header)
-    return img
