@@ -73,7 +73,6 @@ ENV PATH="${AFNI_DIR}:$PATH" \
 RUN ${CONDA_PATH}/bin/conda install -c conda-forge -c anaconda \
                             gsl                                \
                             xorg-libxp                         \
-                            scipy=1.8                          \
     && ${CONDA_PATH}/bin/conda install -c sssdgc png \
     && sync \
     && ${CONDA_PATH}/bin/conda clean -afy; sync \
