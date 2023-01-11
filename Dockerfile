@@ -73,13 +73,15 @@ ENV PATH="${AFNI_DIR}:$PATH" \
 RUN ${CONDA_PATH}/bin/conda install -c conda-forge -c anaconda \
                             gsl                                \
                             xorg-libxp                         \
-    && ${CONDA_PATH}/bin/conda install -c sssdgc png \
     && sync \
     && ${CONDA_PATH}/bin/conda clean -afy; sync \
     && rm -rf ~/.conda ~/.cache/pip/*; sync \
     && ln -s ${CONDA_PATH}/lib/libgsl.so.25 /usr/lib/x86_64-linux-gnu/libgsl.so.19 \
     && ln -s ${CONDA_PATH}/lib/libgsl.so.25 /usr/lib/x86_64-linux-gnu/libgsl.so.0 \
     && ldconfig
+
+RUN GNUPGHOME=/tmp gpg --keyserver hkps://keyserver.ubuntu.com --no-default-keyring --keyring /usr/share/keyrings/linuxuprising.gpg --recv 0xEA8CACC073C3DB2A \
+    && echo "deb [signed-by=/usr/share/keyrings/linuxuprising.gpg] https://ppa.launchpadcontent.net/linuxuprising/libpng12/ubuntu focal main" > /etc/apt/sources.list.d/linuxuprising.list
 
 RUN apt-get update \
  && apt-get install -y -q --no-install-recommends     \
@@ -90,6 +92,7 @@ RUN apt-get update \
                     libglw1-mesa                      \
                     libgomp1                          \
                     libjpeg62                         \
+                    libpng12-0                        \
                     libnode-dev                       \
                     libssl-dev                        \
                     libudunits2-dev                   \
