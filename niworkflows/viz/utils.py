@@ -341,7 +341,8 @@ def plot_registration(
     if cuts is None:
         raise NotImplementedError  # TODO
 
-    anat_nii = _ensure_nii(anat_nii)
+    # nilearn 0.10.0 uses Nifti-specific methods
+    anat_nii = nb.Nifti1Image.from_image(anat_nii)
 
     out_files = []
     if estimate_brightness:
@@ -349,7 +350,7 @@ def plot_registration(
 
     # FreeSurfer ribbon.mgz
     if contour:
-        contour = _ensure_nii(contour)
+        contour = nb.Nifti1Image.from_image(anat_nii)
 
     ribbon = contour is not None and np.array_equal(
         np.unique(contour.get_fdata()), [0, 2, 3, 41, 42]
