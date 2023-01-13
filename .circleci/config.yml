@@ -210,6 +210,8 @@ jobs:
       - restore_cache:
           keys:
             - data-v3-{{ .Branch }}-{{ epoch }}
+            - data-v3-{{ .Branch }}-
+            - data-v3-master-
 
       - run:
           name: Run unit tests
