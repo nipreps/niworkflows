@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  docker: circleci/docker@1.6.0
+  docker: circleci/docker@2.2.0
 
 jobs:
   build:
@@ -159,7 +159,7 @@ jobs:
           command: |
             mkdir -p /tmp/fslicense
             cd /tmp/fslicense
-            echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IGxpY2Vuc2UudHh0Cg==" | base64 -d | sh
+            echo "${FS_LICENSE_CONTENT}" | base64 -d | sh
 
       - checkout:
           path: /tmp/src/niworkflows
@@ -407,6 +407,8 @@ workflows:
             tags:
               only: /.*/
       - get_data:
+          context:
+            - fs-license
           filters:
             tags:
               only: /.*/
