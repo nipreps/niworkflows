@@ -7,7 +7,7 @@ This release includes updates to the Docker image environment, and a fix for a p
   * CI: Update GitHub actions frdom master (#766)
   * CI: Drop set-output (#763)
   * FIX: Remove unused ANTs parameter that was removed in 2.4.1 (#771)
-  * FIX: Coerce ``MGHImage``s to ``Nifti1Image``s when plotting (#769)
+  * FIX: Coerce ``MGHImage`` to ``Nifti1Image`` when plotting (#769)
   * FIX: Create test label images with realistic dtypes (#767)
   * FIX: error for ``np.bool`` with ``numpy 1.24.0`` (#764)
   * MNT: Try bumping docker base to latest nipreps/miniconda (#773)
