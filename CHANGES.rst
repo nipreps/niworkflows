@@ -1,3 +1,19 @@
+1.7.1 (January 23, 2023)
+========================
+Patch release in the 1.7.x series.
+
+This release includes updates to the Docker image environment, and a fix for a plotting bug.
+
+  * CI: Update GitHub actions frdom master (#766)
+  * CI: Drop set-output (#763)
+  * FIX: Remove unused ANTs parameter that was removed in 2.4.1 (#771)
+  * FIX: Coerce ``MGHImage``s to ``Nifti1Image``s when plotting (#769)
+  * FIX: Create test label images with realistic dtypes (#767)
+  * FIX: error for ``np.bool`` with ``numpy 1.24.0`` (#764)
+  * MNT: Try bumping docker base to latest nipreps/miniconda (#773)
+  * MNT: Use org-level context (#770)
+  * REF: Store global variables as DerivativesDataSink attributes (#762)
+
 1.7.0 (November 29, 2022)
 =========================
 New feature release in the 1.7.x series. This series will support sMRIPrep 0.10,
