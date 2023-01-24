@@ -526,7 +526,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             setattr(self.inputs, k, inputs[k])
 
     def _run_interface(self, runtime):
-        from bids.layout import parse_file_entities
+        from bids.layout import parse_file_entities, Config
         from bids.layout.writing import build_path
         from bids.utils import listify
 
@@ -549,8 +549,16 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             self._metadata = meta
 
         # Initialize entities with those from the source file.
+        custom_config = Config(
+            name="custom",
+            entities=self._config_entities,
+            default_path_patterns=self._file_patterns,
+        )
         in_entities = [
-            parse_file_entities(str(relative_to_root(source_file)))
+            parse_file_entities(
+                str(relative_to_root(source_file)),
+                config=["bids", "derivatives", custom_config],
+            )
             for source_file in self.inputs.source_file
         ]
         out_entities = {k: v for k, v in in_entities[0].items()
