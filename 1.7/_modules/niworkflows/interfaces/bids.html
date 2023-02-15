@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
-        <title>niworkflows.interfaces.bids - niworkflows 1.7.0 documentation</title>
+        <title>niworkflows.interfaces.bids - niworkflows 1.7.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">niworkflows 1.7.0 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">niworkflows 1.7.2 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -145,14 +145,14 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
     <span class="sidebar-brand-text">niworkflows</span>
-    <span id="version-slug" class="sidebar-brand-text">1.7.0</span>
+    <span id="version-slug" class="sidebar-brand-text">1.7.2</span>
 </a>
 
 <!-- Versions dropdown -->
 <div id="version-menu" class="version-tree">
   <ul>
   <li class="toctree-l1 has-children">
-  <span class="sidebar-brand-text">1.7.0</span>
+  <span class="sidebar-brand-text">1.7.2</span>
   <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
   <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
   <ul id="v-tags"></ul>
@@ -779,12 +779,15 @@
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_DerivativesDataSinkOutputSpec</span>
     <span class="n">out_path_base</span> <span class="o">=</span> <span class="s2">"niworkflows"</span>
     <span class="n">_always_run</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">_allowed_entities</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">BIDS_DERIV_ENTITIES</span><span class="p">)</span>
+    <span class="n">_config_entities</span> <span class="o">=</span> <span class="n">BIDS_DERIV_ENTITIES</span>
+    <span class="n">_standard_spaces</span> <span class="o">=</span> <span class="n">STANDARD_SPACES</span>
+    <span class="n">_file_patterns</span> <span class="o">=</span> <span class="n">BIDS_DERIV_PATTERNS</span>
+    <span class="n">_default_dtypes</span> <span class="o">=</span> <span class="n">DEFAULT_DTYPES</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed_entities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_path_base</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">):</span>
         <span class="sd">"""Initialize the SimpleInterface and extend inputs with custom entities."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_allowed_entities</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">allowed_entities</span> <span class="ow">or</span> <span class="p">[])</span><span class="o">.</span><span class="n">union</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_allowed_entities</span>
+            <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config_entities</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">out_path_base</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">out_path_base</span> <span class="o">=</span> <span class="n">out_path_base</span>
@@ -866,7 +869,7 @@
         <span class="n">space</span> <span class="o">=</span> <span class="n">out_entities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"space"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">resolution</span><span class="p">:</span>
             <span class="c1"># Standard spaces</span>
-            <span class="k">if</span> <span class="n">space</span> <span class="ow">in</span> <span class="n">STANDARD_SPACES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">space</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_standard_spaces</span><span class="p">:</span>
                 <span class="n">res</span> <span class="o">=</span> <span class="n">_get_tf_resolution</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>  <span class="c1"># TODO: Nonstandard?</span>
                 <span class="n">res</span> <span class="o">=</span> <span class="s2">"Unknown"</span>
@@ -876,8 +879,8 @@
             <span class="n">out_entities</span><span class="p">[</span><span class="s2">"extension"</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_entities</span><span class="p">[</span><span class="s2">"extension"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># Insert custom (non-BIDS) entities from allowed_entities.</span>
-        <span class="n">custom_entities</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">out_entities</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">BIDS_DERIV_ENTITIES</span><span class="p">)</span>
-        <span class="n">patterns</span> <span class="o">=</span> <span class="n">BIDS_DERIV_PATTERNS</span>
+        <span class="n">custom_entities</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">out_entities</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config_entities</span><span class="p">)</span>
+        <span class="n">patterns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_patterns</span>
         <span class="k">if</span> <span class="n">custom_entities</span><span class="p">:</span>
             <span class="c1"># Example: f"{key}-{{{key}}}" -&gt; "task-{task}"</span>
             <span class="n">custom_pat</span> <span class="o">=</span> <span class="s2">"_"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">-</span><span class="se">{{</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="se">}}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">custom_entities</span><span class="p">))</span>
@@ -929,7 +932,7 @@
             <span class="n">is_nifti</span> <span class="o">=</span> <span class="n">out_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
                 <span class="p">(</span><span class="s2">".nii"</span><span class="p">,</span> <span class="s2">".nii.gz"</span><span class="p">)</span>
             <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">out_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">".dtseries.nii"</span><span class="p">,</span> <span class="s2">".dtseries.nii.gz"</span><span class="p">))</span>
-            <span class="n">data_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">data_dtype</span> <span class="ow">or</span> <span class="n">DEFAULT_DTYPES</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">suffix</span><span class="p">]</span>
+            <span class="n">data_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">data_dtype</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_dtypes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">suffix</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">is_nifti</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">check_hdr</span><span class="p">,</span> <span class="n">data_dtype</span><span class="p">)):</span>
                 <span class="n">nii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">orig_file</span><span class="p">)</span>
 
@@ -948,7 +951,7 @@
                     <span class="n">xcodes</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Derivative in its original scanner space</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">space</span><span class="p">:</span>
                         <span class="n">xcodes</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">space</span> <span class="ow">in</span> <span class="n">STANDARD_SPACES</span> <span class="k">else</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                            <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">space</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_standard_spaces</span> <span class="k">else</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
                         <span class="p">)</span>
 
                     <span class="n">curr_zooms</span> <span class="o">=</span> <span class="n">zooms</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">()</span>
@@ -1282,7 +1285,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2022, The NiPreps Developers
+                Copyright &#169; Copyright 2023, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
