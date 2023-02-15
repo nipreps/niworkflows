@@ -55,7 +55,7 @@ from ..utils.misc import _copy_any, unlink
 
 regz = re.compile(r"\.gz$")
 _pybids_spec = loads(Path(_pkgres("niworkflows", "data/nipreps.json")).read_text())
-BIDS_DERIV_ENTITIES = frozenset({e["name"] for e in _pybids_spec["entities"]})
+BIDS_DERIV_ENTITIES = _pybids_spec["entities"]
 BIDS_DERIV_PATTERNS = tuple(_pybids_spec["default_path_patterns"])
 
 STANDARD_SPACES = tf.api.templates()
@@ -498,7 +498,8 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
     output_spec = _DerivativesDataSinkOutputSpec
     out_path_base = "niworkflows"
     _always_run = True
-    _config_entities = BIDS_DERIV_ENTITIES
+    _config_entities = frozenset({e["name"] for e in BIDS_DERIV_ENTITIES})
+    _config_entities_dict = BIDS_DERIV_ENTITIES
     _standard_spaces = STANDARD_SPACES
     _file_patterns = BIDS_DERIV_PATTERNS
     _default_dtypes = DEFAULT_DTYPES
@@ -551,7 +552,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         # Initialize entities with those from the source file.
         custom_config = Config(
             name="custom",
-            entities=self._config_entities,
+            entities=self._config_entities_dict,
             default_path_patterns=self._file_patterns,
         )
         in_entities = [
