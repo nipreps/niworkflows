@@ -1,3 +1,13 @@
+1.7.3 (February 16, 2023)
+=========================
+Patch release in the 1.7.x series.
+
+This release fixes a minor bug in carpet plot generation and resolves remaining issues
+with using custom configurations in DerivativesDataSink.
+
+* ENH: Pass custom configuration into DerivativesDataSink entity parser (#777)
+* FIX: Avoid sorting carpetplot rows when decimated ROIs have one voxel (#780)
+
 1.7.2 (February 15, 2023)
 =========================
 Patch release in the 1.7.x series.
