@@ -227,6 +227,9 @@ def plot_carpet(
         from sklearn.cluster import ward_tree
 
         for seg_label, seg_idx in segments.items():
+            # In debugging cases, we might have ROIs too small to have enough rows to sort
+            if len(seg_idx) < 2:
+                continue
             roi_data = data[seg_idx]
             if isinstance(sort_rows, str) and sort_rows.lower() == "linkage":
                 linkage_matrix = linkage(
