@@ -63,6 +63,26 @@ reloading the report in your browser.</object>
 ]
 
 
+class Smallest:
+    """An object that always evaluates smaller than anything else, for sorting
+
+    >>> Smallest() < 1
+    True
+    >>> Smallest() < "epsilon"
+    True
+    >>> sorted([1, None, 2], key=lambda x: x if x is not None else Smallest())
+    [None, 1, 2]
+    """
+    def __lt__(self, other):
+        return not isinstance(other, Smallest)
+
+    def __eq__(self, other):
+        return isinstance(other, Smallest)
+
+    def __gt__(self, other):
+        return False
+
+
 class Element(object):
     """Just a basic component of a report"""
 
@@ -252,7 +272,7 @@ class Report:
     >>> robj.generate_report()
     0
     >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
-    36693
+    36713
 
     .. testcleanup::
 
@@ -483,7 +503,7 @@ class Report:
         # sort the value combinations alphabetically from the first entity to the last entity
         value_combos.sort(
             key=lambda entry: tuple(
-                str(value) if value is not None else "0" for value in entry
+                value if value is not None else Smallest() for value in entry
             )
         )
 
