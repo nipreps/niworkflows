@@ -32,6 +32,7 @@ from yaml import safe_load as load
 import matplotlib.pyplot as plt
 from bids.layout.writing import build_path
 from bids.layout import BIDSLayout
+from bids.layout.utils import PaddedInt
 
 import pytest
 
@@ -152,11 +153,11 @@ def test_report2(bids_sessions):
             [
                 (None, "faketask"),
                 (None, "faketask2"),
-                (1, "faketaskwithruns"),
-                (1, "mixedgamblestask"),
-                (2, "faketaskwithruns"),
-                (2, "mixedgamblestask"),
-                (3, "mixedgamblestask"),
+                (PaddedInt("01"), "faketaskwithruns"),
+                (PaddedInt("01"), "mixedgamblestask"),
+                (PaddedInt("02"), "faketaskwithruns"),
+                (PaddedInt("02"), "mixedgamblestask"),
+                (PaddedInt("03"), "mixedgamblestask"),
             ],
         ),
         ([""], [], []),
