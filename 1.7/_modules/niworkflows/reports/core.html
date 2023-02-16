@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
-        <title>niworkflows.reports.core - niworkflows 1.7.2 documentation</title>
+        <title>niworkflows.reports.core - niworkflows 1.7.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">niworkflows 1.7.2 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">niworkflows 1.7.3 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -145,14 +145,14 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
     <span class="sidebar-brand-text">niworkflows</span>
-    <span id="version-slug" class="sidebar-brand-text">1.7.2</span>
+    <span id="version-slug" class="sidebar-brand-text">1.7.3</span>
 </a>
 
 <!-- Versions dropdown -->
 <div id="version-menu" class="version-tree">
   <ul>
   <li class="toctree-l1 has-children">
-  <span class="sidebar-brand-text">1.7.2</span>
+  <span class="sidebar-brand-text">1.7.3</span>
   <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
   <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
   <ul id="v-tags"></ul>
@@ -344,6 +344,26 @@
 <span class="p">]</span>
 
 
+<div class="viewcode-block" id="Smallest"><a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.Smallest">[docs]</a><span class="k">class</span> <span class="nc">Smallest</span><span class="p">:</span>
+    <span class="sd">"""An object that always evaluates smaller than anything else, for sorting</span>
+
+<span class="sd">    &gt;&gt;&gt; Smallest() &lt; 1</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; Smallest() &lt; "epsilon"</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; sorted([1, None, 2], key=lambda x: x if x is not None else Smallest())</span>
+<span class="sd">    [None, 1, 2]</span>
+<span class="sd">    """</span>
+    <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Smallest</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Smallest</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
 <div class="viewcode-block" id="Element"><a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.Element">[docs]</a><span class="k">class</span> <span class="nc">Element</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">"""Just a basic component of a report"""</span>
 
@@ -533,7 +553,7 @@
 <span class="sd">    &gt;&gt;&gt; robj.generate_report()</span>
 <span class="sd">    0</span>
 <span class="sd">    &gt;&gt;&gt; len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())</span>
-<span class="sd">    36693</span>
+<span class="sd">    36713</span>
 
 <span class="sd">    .. testcleanup::</span>
 
@@ -764,7 +784,7 @@
         <span class="c1"># sort the value combinations alphabetically from the first entity to the last entity</span>
         <span class="n">value_combos</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
             <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">entry</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"0"</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">entry</span>
+                <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Smallest</span><span class="p">()</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">entry</span>
             <span class="p">)</span>
         <span class="p">)</span>
 

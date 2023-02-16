@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
-        <title>niworkflows.interfaces.bids - niworkflows 1.7.2 documentation</title>
+        <title>niworkflows.interfaces.bids - niworkflows 1.7.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">niworkflows 1.7.2 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">niworkflows 1.7.3 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -145,14 +145,14 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
     <span class="sidebar-brand-text">niworkflows</span>
-    <span id="version-slug" class="sidebar-brand-text">1.7.2</span>
+    <span id="version-slug" class="sidebar-brand-text">1.7.3</span>
 </a>
 
 <!-- Versions dropdown -->
 <div id="version-menu" class="version-tree">
   <ul>
   <li class="toctree-l1 has-children">
-  <span class="sidebar-brand-text">1.7.2</span>
+  <span class="sidebar-brand-text">1.7.3</span>
   <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
   <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
   <ul id="v-tags"></ul>
@@ -336,7 +336,7 @@
 
 <span class="n">regz</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\.gz$"</span><span class="p">)</span>
 <span class="n">_pybids_spec</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">_pkgres</span><span class="p">(</span><span class="s2">"niworkflows"</span><span class="p">,</span> <span class="s2">"data/nipreps.json"</span><span class="p">))</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-<span class="n">BIDS_DERIV_ENTITIES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">e</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">_pybids_spec</span><span class="p">[</span><span class="s2">"entities"</span><span class="p">]})</span>
+<span class="n">BIDS_DERIV_ENTITIES</span> <span class="o">=</span> <span class="n">_pybids_spec</span><span class="p">[</span><span class="s2">"entities"</span><span class="p">]</span>
 <span class="n">BIDS_DERIV_PATTERNS</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_pybids_spec</span><span class="p">[</span><span class="s2">"default_path_patterns"</span><span class="p">])</span>
 
 <span class="n">STANDARD_SPACES</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">templates</span><span class="p">()</span>
@@ -779,7 +779,8 @@
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_DerivativesDataSinkOutputSpec</span>
     <span class="n">out_path_base</span> <span class="o">=</span> <span class="s2">"niworkflows"</span>
     <span class="n">_always_run</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">_config_entities</span> <span class="o">=</span> <span class="n">BIDS_DERIV_ENTITIES</span>
+    <span class="n">_config_entities</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">e</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">BIDS_DERIV_ENTITIES</span><span class="p">})</span>
+    <span class="n">_config_entities_dict</span> <span class="o">=</span> <span class="n">BIDS_DERIV_ENTITIES</span>
     <span class="n">_standard_spaces</span> <span class="o">=</span> <span class="n">STANDARD_SPACES</span>
     <span class="n">_file_patterns</span> <span class="o">=</span> <span class="n">BIDS_DERIV_PATTERNS</span>
     <span class="n">_default_dtypes</span> <span class="o">=</span> <span class="n">DEFAULT_DTYPES</span>
@@ -807,7 +808,7 @@
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">inputs</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">bids.layout</span> <span class="kn">import</span> <span class="n">parse_file_entities</span>
+        <span class="kn">from</span> <span class="nn">bids.layout</span> <span class="kn">import</span> <span class="n">parse_file_entities</span><span class="p">,</span> <span class="n">Config</span>
         <span class="kn">from</span> <span class="nn">bids.layout.writing</span> <span class="kn">import</span> <span class="n">build_path</span>
         <span class="kn">from</span> <span class="nn">bids.utils</span> <span class="kn">import</span> <span class="n">listify</span>
 
@@ -830,8 +831,16 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">meta</span>
 
         <span class="c1"># Initialize entities with those from the source file.</span>
+        <span class="n">custom_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"custom"</span><span class="p">,</span>
+            <span class="n">entities</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config_entities_dict</span><span class="p">,</span>
+            <span class="n">default_path_patterns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_patterns</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">in_entities</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">parse_file_entities</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">relative_to_root</span><span class="p">(</span><span class="n">source_file</span><span class="p">)))</span>
+            <span class="n">parse_file_entities</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">relative_to_root</span><span class="p">(</span><span class="n">source_file</span><span class="p">)),</span>
+                <span class="n">config</span><span class="o">=</span><span class="p">[</span><span class="s2">"bids"</span><span class="p">,</span> <span class="s2">"derivatives"</span><span class="p">,</span> <span class="n">custom_config</span><span class="p">],</span>
+            <span class="p">)</span>
             <span class="k">for</span> <span class="n">source_file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span>
         <span class="p">]</span>
         <span class="n">out_entities</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">in_entities</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
