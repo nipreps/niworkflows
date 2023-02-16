@@ -34,7 +34,7 @@
     },
     {
       "name": "run",
-      "pattern": "[_/\\\\]+run-*(\\d+)",
+      "pattern": "[_/\\\\]+run-(\\d+)",
       "dtype": "int"
     },
     {
