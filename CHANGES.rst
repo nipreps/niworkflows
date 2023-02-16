@@ -1,3 +1,12 @@
+1.7.2 (February 15, 2023)
+=========================
+Patch release in the 1.7.x series.
+
+This release includes minor changes involving confound plotting.
+
+* FIX: Restore confound order in correlation plot (#779)
+* FIX: Handle plotting only one MELODIC component (#775)
+
 1.7.1 (January 23, 2023)
 ========================
 Patch release in the 1.7.x series.

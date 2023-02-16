@@ -227,6 +227,9 @@ def plot_carpet(
         from sklearn.cluster import ward_tree
 
         for seg_label, seg_idx in segments.items():
+            # In debugging cases, we might have ROIs too small to have enough rows to sort
+            if len(seg_idx) < 2:
+                continue
             roi_data = data[seg_idx]
             if isinstance(sort_rows, str) and sort_rows.lower() == "linkage":
                 linkage_matrix = linkage(
@@ -900,9 +903,9 @@ def confounds_correlation_plot(
     confounds_data = pd.read_table(confounds_file)
 
     if columns:
-        columns = set(columns)  # Drop duplicates
-        columns.add(reference)  # Make sure the reference is included
-        confounds_data = confounds_data[[el for el in columns]]
+        columns = dict.fromkeys(columns)  # Drop duplicates
+        columns[reference] = None  # Make sure the reference is included
+        confounds_data = confounds_data[list(columns)]
 
     confounds_data = confounds_data.loc[
         :, np.logical_not(np.isclose(confounds_data.var(skipna=True), 0))

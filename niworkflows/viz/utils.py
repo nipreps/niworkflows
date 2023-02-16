@@ -643,7 +643,11 @@ def plot_melodic_components(
         ax.axes.get_yaxis().set_visible(False)
 
     titlefmt = "C{id:d}{noise}: Tot. var. expl. {var:.2g}%".format
-    for i, img in enumerate(iter_img(os.path.join(melodic_dir, "melodic_IC.nii.gz"))):
+    ICs = nb.load(os.path.join(melodic_dir, "melodic_IC.nii.gz"))
+    # Ensure 4D
+    if ICs.ndim == 3:
+        ICs = ICs.slicer[..., None]
+    for i, img in enumerate(iter_img(ICs)):
 
         col = i % 2
         row = i // 2
