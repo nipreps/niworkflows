@@ -285,7 +285,7 @@ A list of prominent changes can be found below. (With thanks to Lea Waller for t
 * FIX: Ensure ``IntensityClip`` input is a 3D file (#621)
 * FIX: Limit memory usage in ``EstimateReferenceImage`` (#629)
 * FIX: Purge removed ``--disable`` flag from *svgo* call (#626)
-* FIX: Readd ``sbref_file`` input to reference volume interface (#624)
+* FIX: Re-add ``sbref_file`` input to reference volume interface (#624)
 * FIX: Update svgutils after breaking API changes (#620)
 * FIX: Address issues with ``RobustAverage`` global signal measurement (#607)
 * FIX: ``NonsteadyStatesDetector`` wrongly using Nipype's ``is_outlier`` (#605)
@@ -585,7 +585,7 @@ Bug-fix release in the 1.1.x series.
 
 This release includes some minor improvements to formatting of reports and derivative metadata.
 
-* FIX: Check fo valid qform before calculating change (#466) @effigies
+* FIX: Check for valid qform before calculating change (#466) @effigies
 * ENH: Display errors as summary/details elements (#464) @effigies
 * ENH: Add a pure-Python ApplyMask interface, based on NiBabel (#463) @oesteban
 * MAINT: Replace ``os`` operations with ``pathlib``, indent JSON sidecars (#467) @mgxd

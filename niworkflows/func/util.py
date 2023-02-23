@@ -315,7 +315,7 @@ def init_enhance_and_skullstrip_bold_wf(
       8. Apply final mask on the enhanced reference.
 
     Step 1 can be skipped if the ``pre_mask`` argument is set to ``True`` and
-    a tentative mask is passed in to the workflow throught the ``pre_mask``
+    a tentative mask is passed in to the workflow through the ``pre_mask``
     Nipype input.
 
 
