@@ -249,7 +249,7 @@ def test_generated_reportlets(bids_sessions, ordering):
     # get the number of figures in the output directory
     out_layout = BIDSLayout(out_dir, config="figures", validate=False)
     out_figs = len(out_layout.get())
-    # if ordering does not contain all the relevent entities
+    # if ordering does not contain all the relevant entities
     # then there should be fewer reportlets than expected
     if all(ent in ordering for ent in needed_entities):
         assert reportlets_num == expected_reportlets_num == out_figs

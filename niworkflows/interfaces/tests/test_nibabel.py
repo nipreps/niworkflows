@@ -287,7 +287,7 @@ def test_map_labels(tmpdir, data, mapping, tojson, expected):
 def create_save_img(ornt: str):
     data = np.random.rand(2, 2, 2)
     img = nb.Nifti1Image(data, affine=np.eye(4))
-    # img will alway be in RAS at the start
+    # img will always be in RAS at the start
     ras = nb.orientations.axcodes2ornt("RAS")
     if ornt != 'RAS':
         new = nb.orientations.axcodes2ornt(ornt)

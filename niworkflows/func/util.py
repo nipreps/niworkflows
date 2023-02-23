@@ -394,7 +394,7 @@ def init_enhance_and_skullstrip_bold_wf(
     first_dilate = pe.Node(BinaryDilation(radius=6), name="first_dilate")
     first_mask = pe.Node(ApplyMask(), name="first_mask")
 
-    # Use AFNI's unifize for T2 constrast & fix header
+    # Use AFNI's unifize for T2 contrast & fix header
     unifize = pe.Node(
         afni.Unifize(
             t2=True,

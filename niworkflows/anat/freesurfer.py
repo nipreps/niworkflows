@@ -45,7 +45,7 @@ def init_gifti_surface_wf(
     If midthickness (or graymid) surfaces do not exist, they are generated and
     saved to the subject directory as ``lh/rh.midthickness``.
     These, along with the gray/white matter boundary (``lh/rh.smoothwm``), pial
-    sufaces (``lh/rh.pial``) and inflated surfaces (``lh/rh.inflated``) are
+    surfaces (``lh/rh.pial``) and inflated surfaces (``lh/rh.inflated``) are
     converted to GIFTI files.
     Additionally, the vertex coordinates are :py:class:`recentered
     <smriprep.interfaces.NormalizeSurf>` to align with native T1w space.
