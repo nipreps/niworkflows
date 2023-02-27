@@ -29,7 +29,7 @@ jobs:
 
         # Remove forward slashes
         CURBRANCH=$( echo $CURBRANCH | sed 's+/+_+g' )
-        echo "Building branch/tag ${CURBRANCH:-<unkwown>}, from git ref <$GITHUB_REF>"
+        echo "Building branch/tag ${CURBRANCH:-<unknown>}, from git ref <$GITHUB_REF>"
         echo "CURBRANCH=${CURBRANCH}" >> ${GITHUB_ENV}
 
         # Pacify git if we were to commit something

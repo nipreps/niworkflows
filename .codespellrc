@@ -1,0 +1,5 @@
+[codespell]
+skip = .git,*.pdf,*.svg,viz-report.html
+# objekt - used in the code purposefully different from object
+# nd - import scipy.ndimage as nd
+ignore-words-list = objekt,nd
