@@ -218,7 +218,7 @@ def plot_carpet(
     n_dec = int((1.8 * data.shape[0]) // size[0])
     if n_dec > 1:
         segments = {
-            lab: idx[::n_dec] for lab, idx in segments.items()
+            lab: idx[::n_dec] for lab, idx in segments.items() if np.array(idx).shape >= (1,)
         }
 
     # Cluster segments (if argument enabled)
