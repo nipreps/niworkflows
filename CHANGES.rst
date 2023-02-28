@@ -1,3 +1,14 @@
+1.7.4 (February 28, 2023)
+=========================
+Patch release in the 1.7.x series.
+
+This release again fixes a minor bug in carpet plot generation and supports
+the upcoming Pandas release.
+
+* FIX: Check for empty segments in plot_carpet (#783)
+* FIX: Use keyword sep for pandas.read_csv (#781)
+* STY: Configure codespell and fix typos (#782)
+
 1.7.3 (February 16, 2023)
 =========================
 Patch release in the 1.7.x series.
