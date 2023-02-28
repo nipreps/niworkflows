@@ -184,7 +184,7 @@ jobs:
       uses: GabrielBB/xvfb-action@v1
       with:
         run: pytest -sv --no-xvfb --doctest-modules --cov niworkflows niworkflows
-    - uses: codecov/codecov-action@v2
+    - uses: codecov/codecov-action@v3
       name: Submit to CodeCov
 
   test-pre:
