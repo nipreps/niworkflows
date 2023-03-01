@@ -181,7 +181,7 @@ BOLD_PATH = "ds054/sub-100185/func/sub-100185_task-machinegame_run-01_bold.nii.g
             {"space": "fsLR", "density": "91k"},
             "sub-100185/func/sub-100185_task-machinegame_run-01_"
             "space-fsLR_den-91k_bold.dtseries.nii",
-            "53d9b486d08fec5a952f68fcbcddb38a72818d4c",
+            "f7b8755c6ad0d8dcdb60676331b52a23ce288b61",
         ),
         (
             BOLD_PATH,
@@ -269,7 +269,15 @@ def test_DerivativesDataSink_build_path(
     ds_inputs = []
     for input_file in input_files:
         fname = tmp_path / input_file
-        if fname.name.rstrip(".gz").endswith(".nii"):
+        if fname.name.endswith(".dtseries.nii"):
+            axes = (nb.cifti2.SeriesAxis(start=0, step=2, size=20),
+                    nb.cifti2.BrainModelAxis.from_mask(np.ones((5, 5, 5))))
+            hdr = nb.cifti2.cifti2_axes.to_header(axes)
+            cifti = nb.Cifti2Image(np.zeros(hdr.matrix.get_data_shape(), dtype=np.float32),
+                                   header=hdr)
+            cifti.nifti_header.set_intent("ConnDenseSeries")
+            cifti.to_filename(fname)
+        elif fname.name.rstrip(".gz").endswith(".nii"):
             hdr = nb.Nifti1Header()
             hdr.set_qform(np.eye(4), code=2)
             hdr.set_sform(np.eye(4), code=2)
@@ -278,7 +286,7 @@ def test_DerivativesDataSink_build_path(
             hdr.set_xyzt_units(*units)
             nb.Nifti1Image(np.zeros(size), np.eye(4), hdr).to_filename(fname)
         else:
-            (tmp_path / input_file).write_text("")
+            fname.write_text("")
 
         ds_inputs.append(str(fname))
 
@@ -334,10 +342,11 @@ def test_DerivativesDataSink_build_path(
         # Regression - some images were given nan scale factors
         if out.endswith(".nii") or out.endswith(".nii.gz"):
             img = nb.load(out)
-            with nb.openers.ImageOpener(out) as fobj:
-                hdr = img.header.from_fileobj(fobj)
-            assert not np.isnan(hdr["scl_slope"])
-            assert not np.isnan(hdr["scl_inter"])
+            if isinstance(img, nb.Nifti1Image):
+                with nb.openers.ImageOpener(out) as fobj:
+                    hdr = img.header.from_fileobj(fobj)
+                assert not np.isnan(hdr["scl_slope"])
+                assert not np.isnan(hdr["scl_inter"])
     for out, chksum in zip(output, checksum):
         assert sha1(Path(out).read_bytes()).hexdigest() == chksum
 
