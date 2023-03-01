@@ -21,6 +21,7 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Tests on BIDS compliance."""
+import sys
 import os
 from pathlib import Path
 import json
@@ -348,6 +349,10 @@ def test_DerivativesDataSink_build_path(
                 assert not np.isnan(hdr["scl_slope"])
                 assert not np.isnan(hdr["scl_inter"])
     for out, chksum in zip(output, checksum):
+        if chksum == "f7b8755c6ad0d8dcdb60676331b52a23ce288b61" and sys.version_info < (3, 8):
+            # Python 3.8 began preserving insertion order of attributes in XML
+            # Therefore we get a different checksum before/after
+            chksum = "a37ffb1188dd9a7b708de5b8daef46dac56ef8d4"
         assert sha1(Path(out).read_bytes()).hexdigest() == chksum
 
 
