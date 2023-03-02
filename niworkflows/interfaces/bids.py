@@ -22,6 +22,7 @@
 #
 """Interfaces for handling BIDS-like neuroimaging structures."""
 from collections import defaultdict
+from contextlib import suppress
 from json import dumps, loads
 from pathlib import Path
 import shutil
@@ -657,9 +658,10 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             # still None when it's time to write, just copy.
             new_data, new_header = None, None
 
-            is_nifti = out_file.name.endswith(
-                (".nii", ".nii.gz")
-            ) and not out_file.name.endswith((".dtseries.nii", ".dtseries.nii.gz"))
+            is_nifti = False
+            with suppress(nb.filebasedimages.ImageFileError):
+                is_nifti = isinstance(nb.load(orig_file), nb.Nifti1Image)
+
             data_dtype = self.inputs.data_dtype or self._default_dtypes[self.inputs.suffix]
             if is_nifti and any((self.inputs.check_hdr, data_dtype)):
                 nii = nb.load(orig_file)
