@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
-        <title>niworkflows.interfaces.bids - niworkflows 1.7.4+1.g97e19a19 documentation</title>
+        <title>niworkflows.interfaces.bids - niworkflows 1.7.4+6.gf23f07d8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">niworkflows 1.7.4+1.g97e19a19 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">niworkflows 1.7.4+6.gf23f07d8 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -303,6 +303,7 @@
 <span class="c1">#</span>
 <span class="sd">"""Interfaces for handling BIDS-like neuroimaging structures."""</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">suppress</span>
 <span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">dumps</span><span class="p">,</span> <span class="n">loads</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
@@ -938,9 +939,10 @@
             <span class="c1"># still None when it's time to write, just copy.</span>
             <span class="n">new_data</span><span class="p">,</span> <span class="n">new_header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
-            <span class="n">is_nifti</span> <span class="o">=</span> <span class="n">out_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
-                <span class="p">(</span><span class="s2">".nii"</span><span class="p">,</span> <span class="s2">".nii.gz"</span><span class="p">)</span>
-            <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">out_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">".dtseries.nii"</span><span class="p">,</span> <span class="s2">".dtseries.nii.gz"</span><span class="p">))</span>
+            <span class="n">is_nifti</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">with</span> <span class="n">suppress</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">filebasedimages</span><span class="o">.</span><span class="n">ImageFileError</span><span class="p">):</span>
+                <span class="n">is_nifti</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">orig_file</span><span class="p">),</span> <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">)</span>
+
             <span class="n">data_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">data_dtype</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_dtypes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">suffix</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">is_nifti</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">check_hdr</span><span class="p">,</span> <span class="n">data_dtype</span><span class="p">)):</span>
                 <span class="n">nii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">orig_file</span><span class="p">)</span>
