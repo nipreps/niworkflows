@@ -1,9 +1,14 @@
+1.7.6 (March 06, 2023)
+======================
+Patch release in the 1.7.x series.
+
+* FIX: Use correct image for contour plotting (#785)
+
 1.7.5 (March 06, 2023)
 ======================
 Patch release in the 1.7.x series.
 
 * FIX: Use a more reliable test of NIfTIness (#784)
-
 
 1.7.4 (February 28, 2023)
 =========================
