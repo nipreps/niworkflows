@@ -576,7 +576,10 @@ def plot_melodic_components(
                 "Repetition time units not specified - assuming seconds"
             )
 
-    from nilearn.input_data import NiftiMasker
+    try:
+        from nilearn.maskers import NiftiMasker
+    except ImportError:  # nilearn < 0.9
+        from nilearn.input_data import NiftiMasker
     from nilearn.plotting import cm
 
     if not report_mask:
