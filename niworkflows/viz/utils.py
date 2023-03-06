@@ -350,7 +350,7 @@ def plot_registration(
 
     # FreeSurfer ribbon.mgz
     if contour:
-        contour = nb.Nifti1Image.from_image(anat_nii)
+        contour = nb.Nifti1Image.from_image(contour)
 
     ribbon = contour is not None and np.array_equal(
         np.unique(contour.get_fdata()), [0, 2, 3, 41, 42]
