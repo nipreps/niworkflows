@@ -350,7 +350,7 @@ def plot_registration(
 
     # FreeSurfer ribbon.mgz
     if contour:
-        contour = nb.Nifti1Image.from_image(anat_nii)
+        contour = nb.Nifti1Image.from_image(contour)
 
     ribbon = contour is not None and np.array_equal(
         np.unique(contour.get_fdata()), [0, 2, 3, 41, 42]
@@ -576,7 +576,10 @@ def plot_melodic_components(
                 "Repetition time units not specified - assuming seconds"
             )
 
-    from nilearn.input_data import NiftiMasker
+    try:
+        from nilearn.maskers import NiftiMasker
+    except ImportError:  # nilearn < 0.9
+        from nilearn.input_data import NiftiMasker
     from nilearn.plotting import cm
 
     if not report_mask:
