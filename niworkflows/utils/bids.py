@@ -280,7 +280,7 @@ def get_metadata_for_nifti(in_file, bids_dir=None, validate=True):
     return _init_layout(in_file, bids_dir, validate).get_metadata(str(in_file))
 
 
-def _init_layout(in_file=None, bids_dir=None, validate=True):
+def _init_layout(in_file=None, bids_dir=None, validate=True, database_path=None):
     if isinstance(bids_dir, BIDSLayout):
         return bids_dir
 
@@ -294,7 +294,11 @@ def _init_layout(in_file=None, bids_dir=None, validate=True):
         if bids_dir is None:
             raise RuntimeError("Could not infer BIDS root")
 
-    layout = BIDSLayout(str(bids_dir), validate=validate)
+    layout = BIDSLayout(
+        str(bids_dir),
+        validate=validate,
+        database_path=database_path,
+    )
     return layout
 
 
