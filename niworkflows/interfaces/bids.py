@@ -84,6 +84,7 @@ class _BIDSBaseInputSpec(BaseInterfaceInputSpec):
         (None, Directory(exists=True)), usedefault=True, desc="optional bids directory"
     )
     bids_validate = traits.Bool(True, usedefault=True, desc="enable BIDS validator")
+    index_db = Directory(exists=True, desc="a PyBIDS layout cache directory")
 
 
 class _BIDSInfoInputSpec(_BIDSBaseInputSpec):
@@ -832,7 +833,13 @@ class ReadSidecarJSON(SimpleInterface):
     def _run_interface(self, runtime):
         self.layout = self.inputs.bids_dir or self.layout
         self.layout = _init_layout(
-            self.inputs.in_file, self.layout, self.inputs.bids_validate
+            self.inputs.in_file,
+            self.layout,
+            self.inputs.bids_validate,
+            database_path=(
+                self.inputs.index_db if isdefined(self.inputs.index_db)
+                else None
+            )
         )
 
         # Fill in BIDS entities of the output ("*_id")
