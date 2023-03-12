@@ -24,11 +24,6 @@ import templateflow
 # Could set NO_ET environment variable, but why?
 MOCKS = [
     "etelemetry",
-    "matplotlib",
-    "matplotlib.pyplot",
-    "matplotlib.cm",
-    "matplotlib.colors",
-    "matplotlib.colorbar",
 ]
 sys.modules.update({mod: mock.Mock() for mod in MOCKS})
 
@@ -69,6 +64,7 @@ extensions = [
 ]
 
 autodoc_mock_imports = [
+    "matplotlib",
     "nilearn",
     "nitime",
     "numpy",
