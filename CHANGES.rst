@@ -1,9 +1,14 @@
+1.7.7 (March 24, 2023)
+======================
+Patch release that optimizes BIDS metadata handling by reusing cached index databases.
+
+* ENH: Allow passing a ``database_path`` to create a ``BIDSLayout`` (#788)
+
 1.7.5 (March 06, 2023)
 ======================
 Patch release in the 1.7.x series.
 
 * FIX: Use a more reliable test of NIfTIness (#784)
-
 
 1.7.4 (February 28, 2023)
 =========================
