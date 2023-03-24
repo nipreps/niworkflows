@@ -1,3 +1,10 @@
+1.7.8 (March 24, 2023)
+======================
+Patch release in the 1.7.x series.
+
+This release combines the fixes in 1.7.6 and 1.7.7, which were accidentally separately
+branched from 1.7.5.
+
 1.7.7 (March 24, 2023)
 ======================
 Patch release that optimizes BIDS metadata handling by reusing cached index databases.
