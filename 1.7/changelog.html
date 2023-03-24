@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="niworkflows.workflows.epi.refmap module" href="api/niworkflows.workflows.epi.refmap.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
-        <title>What’s new? - niworkflows 1.7.6 documentation</title>
+        <title>What’s new? - niworkflows 1.7.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -124,7 +124,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">niworkflows 1.7.6 documentation</div></a>
+      <a href="index.html"><div class="brand">niworkflows 1.7.8 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,14 +146,14 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
     <span class="sidebar-brand-text">niworkflows</span>
-    <span id="version-slug" class="sidebar-brand-text">1.7.6</span>
+    <span id="version-slug" class="sidebar-brand-text">1.7.8</span>
 </a>
 
 <!-- Versions dropdown -->
 <div id="version-menu" class="version-tree">
   <ul>
   <li class="toctree-l1 has-children">
-  <span class="sidebar-brand-text">1.7.6</span>
+  <span class="sidebar-brand-text">1.7.8</span>
   <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
   <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
   <ul id="v-tags"></ul>
@@ -281,6 +281,19 @@
         <article role="main">
           <section id="what-s-new">
 <h1>What’s new?<a class="headerlink" href="#what-s-new" title="Permalink to this headline">#</a></h1>
+<section id="march-24-2023">
+<h2>1.7.8 (March 24, 2023)<a class="headerlink" href="#march-24-2023" title="Permalink to this headline">#</a></h2>
+<p>Patch release in the 1.7.x series.</p>
+<p>This release combines the fixes in 1.7.6 and 1.7.7, which were accidentally separately
+branched from 1.7.5.</p>
+</section>
+<section id="id1">
+<h2>1.7.7 (March 24, 2023)<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h2>
+<p>Patch release that optimizes BIDS metadata handling by reusing cached index databases.</p>
+<ul class="simple">
+<li><p>ENH: Allow passing a <code class="docutils literal notranslate"><span class="pre">database_path</span></code> to create a <code class="docutils literal notranslate"><span class="pre">BIDSLayout</span></code> (#788)</p></li>
+</ul>
+</section>
 <section id="march-06-2023">
 <h2>1.7.6 (March 06, 2023)<a class="headerlink" href="#march-06-2023" title="Permalink to this headline">#</a></h2>
 <p>Patch release in the 1.7.x series.</p>
@@ -288,8 +301,8 @@
 <li><p>FIX: Use correct image for contour plotting (#785)</p></li>
 </ul>
 </section>
-<section id="id1">
-<h2>1.7.5 (March 06, 2023)<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h2>
+<section id="id2">
+<h2>1.7.5 (March 06, 2023)<a class="headerlink" href="#id2" title="Permalink to this headline">#</a></h2>
 <p>Patch release in the 1.7.x series.</p>
 <ul class="simple">
 <li><p>FIX: Use a more reliable test of NIfTIness (#784)</p></li>
@@ -501,8 +514,8 @@ as well as an fMRIPrep bug-fix when reusing multi-echo anatomicals.</p>
 </ul>
 </div></blockquote>
 </section>
-<section id="id2">
-<h2>1.4.8 (April 08, 2022)<a class="headerlink" href="#id2" title="Permalink to this headline">#</a></h2>
+<section id="id3">
+<h2>1.4.8 (April 08, 2022)<a class="headerlink" href="#id3" title="Permalink to this headline">#</a></h2>
 <p>Bug-fix release in the 1.4.x series.</p>
 <p>This change enables a bug-fix in sdcflows where images with slightly
 different affines were unable to be concatenated for use with TOPUP.</p>
@@ -694,8 +707,8 @@ as <code class="docutils literal notranslate"><span class="pre">FLIRTRPT</span><
 <li><p>CI: Update CircleCI from master (#765)</p></li>
 </ul>
 </section>
-<section id="id3">
-<h2>1.3.8 (September 14, 2022)<a class="headerlink" href="#id3" title="Permalink to this headline">#</a></h2>
+<section id="id4">
+<h2>1.3.8 (September 14, 2022)<a class="headerlink" href="#id4" title="Permalink to this headline">#</a></h2>
 <p>Bug-fix release in the 1.3.x series</p>
 <p>Backports and minor maintenance.</p>
 <ul class="simple">
@@ -704,15 +717,15 @@ as <code class="docutils literal notranslate"><span class="pre">FLIRTRPT</span><
 <li><p>MNT: Update docs and GitHub actions config from master in LTS branch (#748)</p></li>
 </ul>
 </section>
-<section id="id4">
-<h2>1.3.7 (March 31, 2022)<a class="headerlink" href="#id4" title="Permalink to this headline">#</a></h2>
+<section id="id5">
+<h2>1.3.7 (March 31, 2022)<a class="headerlink" href="#id5" title="Permalink to this headline">#</a></h2>
 <p>Bug-fix release in the 1.3.x series</p>
 <ul class="simple">
 <li><p>FIX: Use copy function that does not preserve mtime when creating fsaverage directories (#703)</p></li>
 </ul>
 </section>
-<section id="id5">
-<h2>1.3.6 (March 09, 2022)<a class="headerlink" href="#id5" title="Permalink to this headline">#</a></h2>
+<section id="id6">
+<h2>1.3.6 (March 09, 2022)<a class="headerlink" href="#id6" title="Permalink to this headline">#</a></h2>
 <p>Bug-fix release in the 1.3.x series</p>
 <ul class="simple">
 <li><p>FIX: Set pixdim[4] to match RepetitionTime (#679)</p></li>
@@ -791,8 +804,8 @@ With thanks to Basile Pinsard for contributions.</p>
 <li><p>MAINT: Update to Python +3.6 (#541)</p></li>
 </ul>
 </section>
-<section id="id6">
-<h2>1.2.9 (September 11, 2020)<a class="headerlink" href="#id6" title="Permalink to this headline">#</a></h2>
+<section id="id7">
+<h2>1.2.9 (September 11, 2020)<a class="headerlink" href="#id7" title="Permalink to this headline">#</a></h2>
 <p>Bug-fix release in the 1.2.x series with very minor problems addressed.</p>
 <ul class="simple">
 <li><p>FIX: Reportlets would crash in edge condition (#566)</p></li>
@@ -856,8 +869,8 @@ With thanks to Franziskus Liem for contributions.</p>
 <li><p>FIX: Non-integer data coercion initialization</p></li>
 </ul>
 </section>
-<section id="id7">
-<h2>1.2.1 (May 26, 2020)<a class="headerlink" href="#id7" title="Permalink to this headline">#</a></h2>
+<section id="id8">
+<h2>1.2.1 (May 26, 2020)<a class="headerlink" href="#id8" title="Permalink to this headline">#</a></h2>
 <p>A bug-fix release in the 1.2.x series. This ensures consistency of datatype (dataobj, header)
 when casting to a new type in DerivativesDataSink.</p>
 <ul class="simple">
@@ -1000,8 +1013,8 @@ the contribution.</p>
 <li><p>FIX: <code class="docutils literal notranslate"><span class="pre">IntraModalMerge</span></code> - Undefined input name used in <code class="docutils literal notranslate"><span class="pre">_run_interface</span></code> (#442)</p></li>
 </ul>
 </section>
-<section id="id8">
-<h3>1.1.1 (December 17, 2019)<a class="headerlink" href="#id8" title="Permalink to this headline">#</a></h3>
+<section id="id9">
+<h3>1.1.1 (December 17, 2019)<a class="headerlink" href="#id9" title="Permalink to this headline">#</a></h3>
 <p>A bugfix release to support addressing <a class="reference external" href="https://github.com/nipreps/sdcflows/issues/77">nipreps/sdcflows#77</a>.
 With thanks to Alejandro De La Vega for contributions.</p>
 <ul class="simple">
@@ -1019,8 +1032,8 @@ With thanks to Alejandro De La Vega for contributions.</p>
 </ul>
 </section>
 </section>
-<section id="id9">
-<h2>1.0.x series<a class="headerlink" href="#id9" title="Permalink to this headline">#</a></h2>
+<section id="id10">
+<h2>1.0.x series<a class="headerlink" href="#id10" title="Permalink to this headline">#</a></h2>
 <section id="december-18-2019">
 <h3>1.0.3 (December 18, 2019)<a class="headerlink" href="#december-18-2019" title="Permalink to this headline">#</a></h3>
 <p>Hot-fix release in the 1.0.x series. Backported from 1.1.2.</p>
@@ -1029,8 +1042,8 @@ With thanks to Alejandro De La Vega for contributions.</p>
 <li><p>FIX: <code class="docutils literal notranslate"><span class="pre">IntraModalMerge</span></code> failed for dims (x, y, z, 1) (#441) @oesteban</p></li>
 </ul>
 </section>
-<section id="id10">
-<h3>1.0.2 (December 9, 2019)<a class="headerlink" href="#id10" title="Permalink to this headline">#</a></h3>
+<section id="id11">
+<h3>1.0.2 (December 9, 2019)<a class="headerlink" href="#id11" title="Permalink to this headline">#</a></h3>
 <p>Bug-fix release in the 1.0.x series.</p>
 <ul class="simple">
 <li><p>FIX: Permit dummy scans to be 0 (#438) @jdkent</p></li>
@@ -1062,8 +1075,8 @@ With thanks to Alejandro De La Vega for contributions.</p>
 </ul>
 </section>
 </section>
-<section id="id11">
-<h2>0.10.x series<a class="headerlink" href="#id11" title="Permalink to this headline">#</a></h2>
+<section id="id12">
+<h2>0.10.x series<a class="headerlink" href="#id12" title="Permalink to this headline">#</a></h2>
 <section id="october-8-2019">
 <h3>0.10.4 (October 8, 2019)<a class="headerlink" href="#october-8-2019" title="Permalink to this headline">#</a></h3>
 <p>Patch release with a few small bug fixes and improvements.</p>
@@ -1117,8 +1130,8 @@ We’ve also moved to a <code class="docutils literal notranslate"><span class="
 </ul>
 </section>
 </section>
-<section id="id12">
-<h2>0.9.x series<a class="headerlink" href="#id12" title="Permalink to this headline">#</a></h2>
+<section id="id13">
+<h2>0.9.x series<a class="headerlink" href="#id13" title="Permalink to this headline">#</a></h2>
 <section id="july-8-2019">
 <h3>0.9.6 (July 8, 2019)<a class="headerlink" href="#july-8-2019" title="Permalink to this headline">#</a></h3>
 <p>Minor improvements to support some of the requirements generated during the development of fMRIPrep-1.4.1.</p>
@@ -1136,8 +1149,8 @@ pediatric templates.</p>
 <li><p>ENH: Accept template specifications in <code class="docutils literal notranslate"><span class="pre">antsBrainExtraction</span></code> (#364) @oesteban</p></li>
 </ul>
 </section>
-<section id="id13">
-<h3>0.9.4 (June 5, 2019)<a class="headerlink" href="#id13" title="Permalink to this headline">#</a></h3>
+<section id="id14">
+<h3>0.9.4 (June 5, 2019)<a class="headerlink" href="#id14" title="Permalink to this headline">#</a></h3>
 <p>A housekeeping release, including bugfixes and minor enhancements.
 With thanks to William H. Thompson for contributions.</p>
 <ul class="simple">
@@ -1161,8 +1174,8 @@ With thanks to William H. Thompson for contributions.</p>
 <li><p>FIX: fields were being replaced in outputs call (b418733) @oesteban</p></li>
 </ul>
 </section>
-<section id="id14">
-<h3>0.9.2 (May 6, 2019)<a class="headerlink" href="#id14" title="Permalink to this headline">#</a></h3>
+<section id="id15">
+<h3>0.9.2 (May 6, 2019)<a class="headerlink" href="#id15" title="Permalink to this headline">#</a></h3>
 <p>Hotfix addressing x-form issues on our <code class="docutils literal notranslate"><span class="pre">antsBrainExtraction</span></code>’s interpretation.</p>
 <ul class="simple">
 <li><p>ENH: Ensure consistency of headers along brain extraction workflow (#359) @oesteban</p></li>
@@ -1177,8 +1190,8 @@ With thanks to William H. Thompson for contributions.</p>
 </ul>
 </div></blockquote>
 </section>
-<section id="id15">
-<h3>0.9.1 (May 3, 2019)<a class="headerlink" href="#id15" title="Permalink to this headline">#</a></h3>
+<section id="id16">
+<h3>0.9.1 (May 3, 2019)<a class="headerlink" href="#id16" title="Permalink to this headline">#</a></h3>
 <p>A hotfix release to allow new documentation building of fMRIPrep.</p>
 <blockquote>
 <div><ul class="simple">
@@ -1186,8 +1199,8 @@ With thanks to William H. Thompson for contributions.</p>
 </ul>
 </div></blockquote>
 </section>
-<section id="id16">
-<h3>0.9.0 (May 3, 2019)<a class="headerlink" href="#id16" title="Permalink to this headline">#</a></h3>
+<section id="id17">
+<h3>0.9.0 (May 3, 2019)<a class="headerlink" href="#id17" title="Permalink to this headline">#</a></h3>
 <p>A number of new features and bugfixes. This release includes a refactor of the
 reports generation system that attempts to better generalize to other BIDS-Apps.
 The new reports internally use pybids to find reportlets, and the configuration
@@ -1222,8 +1235,8 @@ some BIDS-related interfaces.</p>
 </div></blockquote>
 </section>
 </section>
-<section id="id17">
-<h2>0.8.x series<a class="headerlink" href="#id17" title="Permalink to this headline">#</a></h2>
+<section id="id18">
+<h2>0.8.x series<a class="headerlink" href="#id18" title="Permalink to this headline">#</a></h2>
 <section id="april-4-2019">
 <h3>0.8.2 (April 4, 2019)<a class="headerlink" href="#april-4-2019" title="Permalink to this headline">#</a></h3>
 <p>New release to go along with the upcoming MRIQC 0.15.0.</p>
@@ -1255,8 +1268,8 @@ some BIDS-related interfaces.</p>
 </div></blockquote>
 </section>
 </section>
-<section id="id18">
-<h2>0.7.x series<a class="headerlink" href="#id18" title="Permalink to this headline">#</a></h2>
+<section id="id19">
+<h2>0.7.x series<a class="headerlink" href="#id19" title="Permalink to this headline">#</a></h2>
 <section id="february-19-2019">
 <h3>0.7.2 (February 19, 2019)<a class="headerlink" href="#february-19-2019" title="Permalink to this headline">#</a></h3>
 <blockquote>
@@ -1322,8 +1335,8 @@ some BIDS-related interfaces.</p>
 </ul>
 </div></blockquote>
 </section>
-<section id="id19">
-<h3>0.5.4 (January 23, 2019)<a class="headerlink" href="#id19" title="Permalink to this headline">#</a></h3>
+<section id="id20">
+<h3>0.5.4 (January 23, 2019)<a class="headerlink" href="#id20" title="Permalink to this headline">#</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li><p>[HOTFIX] Fix <code class="docutils literal notranslate"><span class="pre">UnboundLocalError</span></code> in utils.bids (#285) @oesteban</p></li>
@@ -1496,102 +1509,102 @@ via Pypi.</p>
 <li><p>[TST] Migrate to CircleCI 2.0 (<a class="reference external" href="https://github.com/nipreps/niworkflows/pull/224">#224</a>)</p></li>
 </ul>
 </section>
-<section id="id24">
-<h3>0.3.3<a class="headerlink" href="#id24" title="Permalink to this headline">#</a></h3>
+<section id="id25">
+<h3>0.3.3<a class="headerlink" href="#id25" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[ENH] Added SanitizeImage interface (<a class="reference external" href="https://github.com/nipreps/niworkflows/pull/221">https://github.com/nipreps/niworkflows/pull/221</a>)</p></li>
 </ul>
 </section>
-<section id="id25">
-<h3>0.3.1<a class="headerlink" href="#id25" title="Permalink to this headline">#</a></h3>
+<section id="id26">
+<h3>0.3.1<a class="headerlink" href="#id26" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[FIX] broken normalization retries (<a class="reference external" href="https://github.com/nipreps/niworkflows/pull/220">https://github.com/nipreps/niworkflows/pull/220</a>)</p></li>
 </ul>
 </section>
-<section id="id26">
-<h3>0.3.0<a class="headerlink" href="#id26" title="Permalink to this headline">#</a></h3>
+<section id="id27">
+<h3>0.3.0<a class="headerlink" href="#id27" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[PIN] Nipype 1.0.0</p></li>
 </ul>
 </section>
-<section id="id27">
-<h3>0.2.8<a class="headerlink" href="#id27" title="Permalink to this headline">#</a></h3>
+<section id="id28">
+<h3>0.2.8<a class="headerlink" href="#id28" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[PIN] Pinning nipype to oesteban/nipype (including
 nipy/nipype#2383, nipy/nipype#2384, nipy/nipype#2376)</p></li>
 </ul>
 </section>
-<section id="id28">
-<h3>0.2.7<a class="headerlink" href="#id28" title="Permalink to this headline">#</a></h3>
+<section id="id29">
+<h3>0.2.7<a class="headerlink" href="#id29" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[PIN] Pinning nipype to nipy/nipype (including
 <a class="reference external" href="https://github.com/nipy/nipype/pull/2373">https://github.com/nipy/nipype/pull/2373</a>)</p></li>
 </ul>
 </section>
-<section id="id29">
-<h3>0.2.6<a class="headerlink" href="#id29" title="Permalink to this headline">#</a></h3>
+<section id="id30">
+<h3>0.2.6<a class="headerlink" href="#id30" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[PIN] Pinning nipype to oesteban/nipype (including
 <a class="reference external" href="https://github.com/nipy/nipype/pull/2368">https://github.com/nipy/nipype/pull/2368</a>)</p></li>
 </ul>
 </section>
-<section id="id30">
-<h3>0.2.5<a class="headerlink" href="#id30" title="Permalink to this headline">#</a></h3>
+<section id="id31">
+<h3>0.2.5<a class="headerlink" href="#id31" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[PIN] Pinning nipype to <a class="reference external" href="mailto:nipy/nipype%40master">nipy/nipype<span>@</span>master</a></p></li>
 </ul>
 </section>
-<section id="id31">
-<h3>0.2.4<a class="headerlink" href="#id31" title="Permalink to this headline">#</a></h3>
+<section id="id32">
+<h3>0.2.4<a class="headerlink" href="#id32" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[FIX] Regression of nipreps/fmriprep#868 - updated nipy/nipype#2325
 to fix it.</p></li>
 </ul>
 </section>
-<section id="id32">
-<h3>0.2.3<a class="headerlink" href="#id32" title="Permalink to this headline">#</a></h3>
+<section id="id33">
+<h3>0.2.3<a class="headerlink" href="#id33" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[PIN] Upgrade internal Nipype to current master + current nipy/nipype#2325</p></li>
 <li><p>[ENH] Thinner lines in tissue segmentation (#215)</p></li>
 <li><p>[ENH] Use nearest for coreg visualization (#214)</p></li>
 </ul>
 </section>
-<section id="id33">
-<h3>0.2.2<a class="headerlink" href="#id33" title="Permalink to this headline">#</a></h3>
+<section id="id34">
+<h3>0.2.2<a class="headerlink" href="#id34" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[PIN] Upgrade internal Nipype to current master + nipy/nipype#2325</p></li>
 </ul>
 </section>
-<section id="id34">
-<h3>0.2.1<a class="headerlink" href="#id34" title="Permalink to this headline">#</a></h3>
+<section id="id35">
+<h3>0.2.1<a class="headerlink" href="#id35" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[ENH] Add new ROIsPlot interface (#211)</p></li>
 <li><p>[PIN] Upgrade internal Nipype to current master.</p></li>
 </ul>
 </section>
-<section id="id35">
-<h3>0.2.0<a class="headerlink" href="#id35" title="Permalink to this headline">#</a></h3>
+<section id="id36">
+<h3>0.2.0<a class="headerlink" href="#id36" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[ENH] Generate SVGs only (#210)</p></li>
 <li><p>[PIN] Upgrade internal Nipype to master after the v0.14.0 release.</p></li>
 </ul>
 </section>
-<section id="id36">
-<h3>0.1.11<a class="headerlink" href="#id36" title="Permalink to this headline">#</a></h3>
+<section id="id37">
+<h3>0.1.11<a class="headerlink" href="#id37" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[ENH] Update internal Nipype including merging nipy/nipype#2285 before nipype itself does.</p></li>
 </ul>
 </section>
-<section id="id37">
-<h3>0.1.10<a class="headerlink" href="#id37" title="Permalink to this headline">#</a></h3>
+<section id="id38">
+<h3>0.1.10<a class="headerlink" href="#id38" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[ENH] Lower priority of “Affines do not match” warning (#209)</p></li>
 <li><p>[FIX] Increase tolerance in GenerateSamplingReference (#207)</p></li>
 <li><p>[ENH] Upgrade internal Nipype</p></li>
 </ul>
 </section>
-<section id="id38">
-<h3>0.1.9<a class="headerlink" href="#id38" title="Permalink to this headline">#</a></h3>
+<section id="id39">
+<h3>0.1.9<a class="headerlink" href="#id39" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[ENH] Display surface contours for MRICoregRPT if available (#204)</p></li>
 <li><p>[ENH] Crop BOLD sampling reference to reduce output file size (#205)</p></li>
@@ -1599,8 +1612,8 @@ to fix it.</p></li>
 <li><p>[ENH] Upgrade internal Nipype</p></li>
 </ul>
 </section>
-<section id="id39">
-<h3>0.1.8<a class="headerlink" href="#id39" title="Permalink to this headline">#</a></h3>
+<section id="id40">
+<h3>0.1.8<a class="headerlink" href="#id40" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[ENH] Add NKI template data grabber (#200)</p></li>
 <li><p>[ENH] Enable sbref to be passed to EstimateReferenceImage (#199)</p></li>
@@ -1608,15 +1621,15 @@ to fix it.</p></li>
 <li><p>[ENH] Upgrade internal Nipype</p></li>
 </ul>
 </section>
-<section id="id40">
-<h3>0.1.7<a class="headerlink" href="#id40" title="Permalink to this headline">#</a></h3>
+<section id="id41">
+<h3>0.1.7<a class="headerlink" href="#id41" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[ENH] Reporting interface for <cite>mri_coreg</cite></p></li>
 <li><p>[ENH] Upgrade internal Nipype</p></li>
 </ul>
 </section>
-<section id="id41">
-<h3>0.1.6<a class="headerlink" href="#id41" title="Permalink to this headline">#</a></h3>
+<section id="id42">
+<h3>0.1.6<a class="headerlink" href="#id42" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[ENH] Add BIDS example getters (#189)</p></li>
 <li><p>[ENH] Add NormalizeMotionParams interface (#190)</p></li>
@@ -1625,47 +1638,47 @@ to fix it.</p></li>
 <li><p>[ENH] Upgrade internal Nipype</p></li>
 </ul>
 </section>
-<section id="id42">
-<h3>0.1.5<a class="headerlink" href="#id42" title="Permalink to this headline">#</a></h3>
+<section id="id43">
+<h3>0.1.5<a class="headerlink" href="#id43" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[ENH] Do not enforce float precision for ANTs (#187)</p></li>
 <li><p>[ENH] Clear header extensions when making ref image (#188)</p></li>
 <li><p>[ENH] Upgrade internal Nipype</p></li>
 </ul>
 </section>
-<section id="id43">
-<h3>0.1.4<a class="headerlink" href="#id43" title="Permalink to this headline">#</a></h3>
-<ul class="simple">
-<li><p>[ENH] Upgrade internal Nipype</p></li>
-</ul>
-</section>
 <section id="id44">
-<h3>0.1.3<a class="headerlink" href="#id44" title="Permalink to this headline">#</a></h3>
+<h3>0.1.4<a class="headerlink" href="#id44" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[ENH] Upgrade internal Nipype</p></li>
 </ul>
 </section>
 <section id="id45">
-<h3>0.1.2<a class="headerlink" href="#id45" title="Permalink to this headline">#</a></h3>
+<h3>0.1.3<a class="headerlink" href="#id45" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
-<li><p>Hotfix release (updated manifest)</p></li>
+<li><p>[ENH] Upgrade internal Nipype</p></li>
 </ul>
 </section>
 <section id="id46">
-<h3>0.1.1<a class="headerlink" href="#id46" title="Permalink to this headline">#</a></h3>
+<h3>0.1.2<a class="headerlink" href="#id46" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>Hotfix release (updated manifest)</p></li>
 </ul>
 </section>
 <section id="id47">
-<h3>0.1.0<a class="headerlink" href="#id47" title="Permalink to this headline">#</a></h3>
+<h3>0.1.1<a class="headerlink" href="#id47" title="Permalink to this headline">#</a></h3>
+<ul class="simple">
+<li><p>Hotfix release (updated manifest)</p></li>
+</ul>
+</section>
+<section id="id48">
+<h3>0.1.0<a class="headerlink" href="#id48" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[ENH] Improve dependency management for users unable to use Docker/Singularity containers (#174)</p></li>
 <li><p>[DEP] Removed RobustMNINormalization <cite>testing</cite> input; use <cite>flavor-‘testing’</cite> instead (#172)</p></li>
 </ul>
 </section>
-<section id="id48">
-<h3>0.0.7<a class="headerlink" href="#id48" title="Permalink to this headline">#</a></h3>
+<section id="id49">
+<h3>0.0.7<a class="headerlink" href="#id49" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[ENH] Use AffineInitializer in RobustMNIRegistration (#169, #171)</p></li>
 <li><p>[ENH] Add CopyHeader interface (#168)</p></li>
@@ -1679,8 +1692,8 @@ to fix it.</p></li>
 <li><p>[ENH] Add MELODIC report interface (#134)</p></li>
 </ul>
 </section>
-<section id="id49">
-<h3>0.0.6<a class="headerlink" href="#id49" title="Permalink to this headline">#</a></h3>
+<section id="id50">
+<h3>0.0.6<a class="headerlink" href="#id50" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>[FIX] Python 2.7 issues and testing (#130, #135)</p></li>
 <li><p>[ENH] Compress surface segmentation reports (#133)</p></li>
@@ -1692,8 +1705,8 @@ to fix it.</p></li>
 <li><p>[ENH] Enable Lanczos interpolation (#122)</p></li>
 </ul>
 </section>
-<section id="id50">
-<h3>0.0.3<a class="headerlink" href="#id50" title="Permalink to this headline">#</a></h3>
+<section id="id51">
+<h3>0.0.3<a class="headerlink" href="#id51" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>Add parcellation derived from Harvard-Oxford template, to be
 used with the nonlinear-asym-09c template for the carpetplot</p></li>
@@ -1706,14 +1719,14 @@ used with the nonlinear-asym-09c template for the carpetplot</p></li>
 <li><p>Fixed installer, now compatible with python 3</p></li>
 </ul>
 </section>
-<section id="id51">
-<h3>0.0.2<a class="headerlink" href="#id51" title="Permalink to this headline">#</a></h3>
+<section id="id52">
+<h3>0.0.2<a class="headerlink" href="#id52" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>Added MRI reorient workflow (based on AFNI)</p></li>
 </ul>
 </section>
-<section id="id52">
-<h3>0.0.1<a class="headerlink" href="#id52" title="Permalink to this headline">#</a></h3>
+<section id="id53">
+<h3>0.0.1<a class="headerlink" href="#id53" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>Added skull-stripping workflow based on AFNI</p></li>
 <li><p>Rewritten most of the shablona-derived names and description files</p></li>
@@ -1773,8 +1786,10 @@ used with the nonlinear-asym-09c template for the carpetplot</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">What’s new?</a><ul>
+<li><a class="reference internal" href="#march-24-2023">1.7.8 (March 24, 2023)</a></li>
+<li><a class="reference internal" href="#id1">1.7.7 (March 24, 2023)</a></li>
 <li><a class="reference internal" href="#march-06-2023">1.7.6 (March 06, 2023)</a></li>
-<li><a class="reference internal" href="#id1">1.7.5 (March 06, 2023)</a></li>
+<li><a class="reference internal" href="#id2">1.7.5 (March 06, 2023)</a></li>
 <li><a class="reference internal" href="#february-28-2023">1.7.4 (February 28, 2023)</a></li>
 <li><a class="reference internal" href="#february-16-2023">1.7.3 (February 16, 2023)</a></li>
 <li><a class="reference internal" href="#february-15-2023">1.7.2 (February 15, 2023)</a></li>
@@ -1792,7 +1807,7 @@ used with the nonlinear-asym-09c template for the carpetplot</p></li>
 <li><a class="reference internal" href="#february-07-2022">1.5.0 (February 07, 2022)</a></li>
 <li><a class="reference internal" href="#september-14-2022">1.4.10 (September 14, 2022)</a></li>
 <li><a class="reference internal" href="#april-21-2022">1.4.9 (April 21, 2022)</a></li>
-<li><a class="reference internal" href="#id2">1.4.8 (April 08, 2022)</a></li>
+<li><a class="reference internal" href="#id3">1.4.8 (April 08, 2022)</a></li>
 <li><a class="reference internal" href="#march-31-2022">1.4.7 (March 31, 2022)</a></li>
 <li><a class="reference internal" href="#march-09-2022">1.4.6 (March 09, 2022)</a></li>
 <li><a class="reference internal" href="#december-13-2021">1.4.5 (December 13, 2021)</a></li>
@@ -1802,16 +1817,16 @@ used with the nonlinear-asym-09c template for the carpetplot</p></li>
 <li><a class="reference internal" href="#october-07-2021">1.4.1 (October 07, 2021)</a></li>
 <li><a class="reference internal" href="#september-1-2021">1.4.0 (September 1, 2021)</a></li>
 <li><a class="reference internal" href="#december-21-2022">1.3.9 (December 21, 2022)</a></li>
-<li><a class="reference internal" href="#id3">1.3.8 (September 14, 2022)</a></li>
-<li><a class="reference internal" href="#id4">1.3.7 (March 31, 2022)</a></li>
-<li><a class="reference internal" href="#id5">1.3.6 (March 09, 2022)</a></li>
+<li><a class="reference internal" href="#id4">1.3.8 (September 14, 2022)</a></li>
+<li><a class="reference internal" href="#id5">1.3.7 (March 31, 2022)</a></li>
+<li><a class="reference internal" href="#id6">1.3.6 (March 09, 2022)</a></li>
 <li><a class="reference internal" href="#october-01-2021">1.3.5 (October 01, 2021)</a></li>
 <li><a class="reference internal" href="#june-8-2021">1.3.4 (June 8, 2021)</a></li>
 <li><a class="reference internal" href="#april-15-2021">1.3.3 (April 15, 2021)</a></li>
 <li><a class="reference internal" href="#november-5-2020">1.3.2 (November 5, 2020)</a></li>
 <li><a class="reference internal" href="#september-22-2020">1.3.1 (September 22, 2020)</a></li>
 <li><a class="reference internal" href="#september-11-2020">1.3.0 (September 11, 2020)</a></li>
-<li><a class="reference internal" href="#id6">1.2.9 (September 11, 2020)</a></li>
+<li><a class="reference internal" href="#id7">1.2.9 (September 11, 2020)</a></li>
 <li><a class="reference internal" href="#september-03-2020">1.2.8 (September 03, 2020)</a></li>
 <li><a class="reference internal" href="#august-12-2020">1.2.7 (August 12, 2020)</a></li>
 <li><a class="reference internal" href="#june-09-2020">1.2.6 (June 09, 2020)</a></li>
@@ -1819,7 +1834,7 @@ used with the nonlinear-asym-09c template for the carpetplot</p></li>
 <li><a class="reference internal" href="#june-04-2020">1.2.4 (June 04, 2020)</a></li>
 <li><a class="reference internal" href="#may-27-2020">1.2.3 (May 27, 2020)</a></li>
 <li><a class="reference internal" href="#may-26-2020">1.2.2 (May 26, 2020)</a></li>
-<li><a class="reference internal" href="#id7">1.2.1 (May 26, 2020)</a></li>
+<li><a class="reference internal" href="#id8">1.2.1 (May 26, 2020)</a></li>
 <li><a class="reference internal" href="#may-21-2020">1.2.0 (May 21, 2020)</a></li>
 <li><a class="reference internal" href="#x-series">1.1.x series</a><ul>
 <li><a class="reference internal" href="#march-19-2020">1.1.12 (March 19, 2020)</a></li>
@@ -1833,18 +1848,18 @@ used with the nonlinear-asym-09c template for the carpetplot</p></li>
 <li><a class="reference internal" href="#january-28-2020">1.1.4 (January 28, 2020)</a></li>
 <li><a class="reference internal" href="#january-16-2020">1.1.3 (January 16, 2020)</a></li>
 <li><a class="reference internal" href="#december-17-2019">1.1.2 (December 17, 2019)</a></li>
-<li><a class="reference internal" href="#id8">1.1.1 (December 17, 2019)</a></li>
+<li><a class="reference internal" href="#id9">1.1.1 (December 17, 2019)</a></li>
 <li><a class="reference internal" href="#december-9-2019">1.1.0 (December 9, 2019)</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id9">1.0.x series</a><ul>
+<li><a class="reference internal" href="#id10">1.0.x series</a><ul>
 <li><a class="reference internal" href="#december-18-2019">1.0.3 (December 18, 2019)</a></li>
-<li><a class="reference internal" href="#id10">1.0.2 (December 9, 2019)</a></li>
+<li><a class="reference internal" href="#id11">1.0.2 (December 9, 2019)</a></li>
 <li><a class="reference internal" href="#november-27-2019">1.0.1 (November 27, 2019)</a></li>
 <li><a class="reference internal" href="#november-26-2019">1.0.0 (November 26, 2019)</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id11">0.10.x series</a><ul>
+<li><a class="reference internal" href="#id12">0.10.x series</a><ul>
 <li><a class="reference internal" href="#october-8-2019">0.10.4 (October 8, 2019)</a></li>
 <li><a class="reference internal" href="#september-9-2019">0.10.3 (September 9, 2019)</a></li>
 <li><a class="reference internal" href="#july-24-2019">0.10.2 (July 24, 2019)</a></li>
@@ -1852,25 +1867,25 @@ used with the nonlinear-asym-09c template for the carpetplot</p></li>
 <li><a class="reference internal" href="#july-12-2019">0.10.0 (July 12, 2019)</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id12">0.9.x series</a><ul>
+<li><a class="reference internal" href="#id13">0.9.x series</a><ul>
 <li><a class="reference internal" href="#july-8-2019">0.9.6 (July 8, 2019)</a></li>
 <li><a class="reference internal" href="#june-5-2019">0.9.5 (June 5, 2019)</a></li>
-<li><a class="reference internal" href="#id13">0.9.4 (June 5, 2019)</a></li>
+<li><a class="reference internal" href="#id14">0.9.4 (June 5, 2019)</a></li>
 <li><a class="reference internal" href="#may-15-2019">0.9.3 (May 15, 2019)</a></li>
 <li><a class="reference internal" href="#may-6-2019">0.9.2-1 (May 6, 2019)</a></li>
-<li><a class="reference internal" href="#id14">0.9.2 (May 6, 2019)</a></li>
+<li><a class="reference internal" href="#id15">0.9.2 (May 6, 2019)</a></li>
 <li><a class="reference internal" href="#may-3-2019">0.9.1-1 (May 3, 2019)</a></li>
-<li><a class="reference internal" href="#id15">0.9.1 (May 3, 2019)</a></li>
-<li><a class="reference internal" href="#id16">0.9.0 (May 3, 2019)</a></li>
+<li><a class="reference internal" href="#id16">0.9.1 (May 3, 2019)</a></li>
+<li><a class="reference internal" href="#id17">0.9.0 (May 3, 2019)</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id17">0.8.x series</a><ul>
+<li><a class="reference internal" href="#id18">0.8.x series</a><ul>
 <li><a class="reference internal" href="#april-4-2019">0.8.2 (April 4, 2019)</a></li>
 <li><a class="reference internal" href="#march-15-2019">0.8.1 (March 15, 2019)</a></li>
 <li><a class="reference internal" href="#march-05-2019">0.8.0 (March 05, 2019)</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id18">0.7.x series</a><ul>
+<li><a class="reference internal" href="#id19">0.7.x series</a><ul>
 <li><a class="reference internal" href="#february-19-2019">0.7.2 (February 19, 2019)</a></li>
 <li><a class="reference internal" href="#post1-february-12-2019">0.7.1.post1 (February 12, 2019)</a></li>
 <li><a class="reference internal" href="#february-07-2019">0.7.1 (February 07, 2019)</a></li>
@@ -1880,7 +1895,7 @@ used with the nonlinear-asym-09c template for the carpetplot</p></li>
 <li><a class="reference internal" href="#old-0-x-series">Old 0.x series</a><ul>
 <li><a class="reference internal" href="#january-23-2019">0.6.1 (January 23, 2019)</a></li>
 <li><a class="reference internal" href="#january-18-2019">0.6.0 (January 18, 2019)</a></li>
-<li><a class="reference internal" href="#id19">0.5.4 (January 23, 2019)</a></li>
+<li><a class="reference internal" href="#id20">0.5.4 (January 23, 2019)</a></li>
 <li><a class="reference internal" href="#january-08-2019">0.5.3 (January 08, 2019)</a></li>
 <li><a class="reference internal" href="#post5-december-14-2018">0.5.2.post5 (December 14, 2018)</a></li>
 <li><a class="reference internal" href="#post4-december-13-2018">0.5.2.post4 (December 13, 2018)</a></li>
@@ -1902,35 +1917,35 @@ used with the nonlinear-asym-09c template for the carpetplot</p></li>
 <li><a class="reference internal" href="#march-14-2018">0.3.6 (March 14, 2018)</a></li>
 <li><a class="reference internal" href="#february-28-2018">0.3.5 (February 28, 2018)</a></li>
 <li><a class="reference internal" href="#february-22-2018">0.3.4 (February 22, 2018)</a></li>
-<li><a class="reference internal" href="#id24">0.3.3</a></li>
-<li><a class="reference internal" href="#id25">0.3.1</a></li>
-<li><a class="reference internal" href="#id26">0.3.0</a></li>
-<li><a class="reference internal" href="#id27">0.2.8</a></li>
-<li><a class="reference internal" href="#id28">0.2.7</a></li>
-<li><a class="reference internal" href="#id29">0.2.6</a></li>
-<li><a class="reference internal" href="#id30">0.2.5</a></li>
-<li><a class="reference internal" href="#id31">0.2.4</a></li>
-<li><a class="reference internal" href="#id32">0.2.3</a></li>
-<li><a class="reference internal" href="#id33">0.2.2</a></li>
-<li><a class="reference internal" href="#id34">0.2.1</a></li>
-<li><a class="reference internal" href="#id35">0.2.0</a></li>
-<li><a class="reference internal" href="#id36">0.1.11</a></li>
-<li><a class="reference internal" href="#id37">0.1.10</a></li>
-<li><a class="reference internal" href="#id38">0.1.9</a></li>
-<li><a class="reference internal" href="#id39">0.1.8</a></li>
-<li><a class="reference internal" href="#id40">0.1.7</a></li>
-<li><a class="reference internal" href="#id41">0.1.6</a></li>
-<li><a class="reference internal" href="#id42">0.1.5</a></li>
-<li><a class="reference internal" href="#id43">0.1.4</a></li>
-<li><a class="reference internal" href="#id44">0.1.3</a></li>
-<li><a class="reference internal" href="#id45">0.1.2</a></li>
-<li><a class="reference internal" href="#id46">0.1.1</a></li>
-<li><a class="reference internal" href="#id47">0.1.0</a></li>
-<li><a class="reference internal" href="#id48">0.0.7</a></li>
-<li><a class="reference internal" href="#id49">0.0.6</a></li>
-<li><a class="reference internal" href="#id50">0.0.3</a></li>
-<li><a class="reference internal" href="#id51">0.0.2</a></li>
-<li><a class="reference internal" href="#id52">0.0.1</a></li>
+<li><a class="reference internal" href="#id25">0.3.3</a></li>
+<li><a class="reference internal" href="#id26">0.3.1</a></li>
+<li><a class="reference internal" href="#id27">0.3.0</a></li>
+<li><a class="reference internal" href="#id28">0.2.8</a></li>
+<li><a class="reference internal" href="#id29">0.2.7</a></li>
+<li><a class="reference internal" href="#id30">0.2.6</a></li>
+<li><a class="reference internal" href="#id31">0.2.5</a></li>
+<li><a class="reference internal" href="#id32">0.2.4</a></li>
+<li><a class="reference internal" href="#id33">0.2.3</a></li>
+<li><a class="reference internal" href="#id34">0.2.2</a></li>
+<li><a class="reference internal" href="#id35">0.2.1</a></li>
+<li><a class="reference internal" href="#id36">0.2.0</a></li>
+<li><a class="reference internal" href="#id37">0.1.11</a></li>
+<li><a class="reference internal" href="#id38">0.1.10</a></li>
+<li><a class="reference internal" href="#id39">0.1.9</a></li>
+<li><a class="reference internal" href="#id40">0.1.8</a></li>
+<li><a class="reference internal" href="#id41">0.1.7</a></li>
+<li><a class="reference internal" href="#id42">0.1.6</a></li>
+<li><a class="reference internal" href="#id43">0.1.5</a></li>
+<li><a class="reference internal" href="#id44">0.1.4</a></li>
+<li><a class="reference internal" href="#id45">0.1.3</a></li>
+<li><a class="reference internal" href="#id46">0.1.2</a></li>
+<li><a class="reference internal" href="#id47">0.1.1</a></li>
+<li><a class="reference internal" href="#id48">0.1.0</a></li>
+<li><a class="reference internal" href="#id49">0.0.7</a></li>
+<li><a class="reference internal" href="#id50">0.0.6</a></li>
+<li><a class="reference internal" href="#id51">0.0.3</a></li>
+<li><a class="reference internal" href="#id52">0.0.2</a></li>
+<li><a class="reference internal" href="#id53">0.0.1</a></li>
 </ul>
 </li>
 </ul>
