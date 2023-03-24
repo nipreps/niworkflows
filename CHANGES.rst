@@ -1,9 +1,27 @@
+1.7.8 (March 24, 2023)
+======================
+Patch release in the 1.7.x series.
+
+This release combines the fixes in 1.7.6 and 1.7.7, which were accidentally separately
+branched from 1.7.5.
+
+1.7.7 (March 24, 2023)
+======================
+Patch release that optimizes BIDS metadata handling by reusing cached index databases.
+
+* ENH: Allow passing a ``database_path`` to create a ``BIDSLayout`` (#788)
+
+1.7.6 (March 06, 2023)
+======================
+Patch release in the 1.7.x series.
+
+* FIX: Use correct image for contour plotting (#785)
+
 1.7.5 (March 06, 2023)
 ======================
 Patch release in the 1.7.x series.
 
 * FIX: Use a more reliable test of NIfTIness (#784)
-
 
 1.7.4 (February 28, 2023)
 =========================
