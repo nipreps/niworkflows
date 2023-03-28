@@ -192,7 +192,7 @@ jobs:
     - name: Run tests
       uses: GabrielBB/xvfb-action@v1
       with:
-        run: pytest -sv --no-xvfb --doctest-modules --cov niworkflows niworkflows
+        run: pytest -sv --no-xvfb --doctest-modules --cov niworkflows --pyargs niworkflows
     - uses: codecov/codecov-action@v3
       name: Submit to CodeCov
 
@@ -249,7 +249,7 @@ jobs:
     - name: Run tests
       uses: GabrielBB/xvfb-action@v1
       with:
-        run: pytest -sv --no-xvfb --doctest-modules --cov niworkflows niworkflows
+        run: pytest -sv --no-xvfb --doctest-modules --cov niworkflows --pyargs niworkflows
     - uses: codecov/codecov-action@v3
       name: Submit to CodeCov
 
