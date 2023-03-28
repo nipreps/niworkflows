@@ -277,11 +277,11 @@ jobs:
       - checkout
       - run:
           name: Install build depends
-          command: python -m pip install "setuptools>=40.8.0" "pip>=19" "twine<2.0" docutils
+          command: python -m pip install build twine
       - run:
           name: Build and check
           command: |
-            python setup.py sdist
+            python -m build
             python -m twine check dist/*
       - run:
           name: Validate version
@@ -301,12 +301,11 @@ jobs:
       - checkout
       - run:
           name: Install build depends
-          command: python -m pip install "setuptools>=40.8.0" "pip>=19" "twine<2.0" docutils
+          command: python -m pip install build twine
       - run:
           name: Build and check
           command: |
-            python setup.py check -r -s
-            python setup.py sdist
+            python -m build
             python -m twine check dist/*
       - run:
           name: Validate version
