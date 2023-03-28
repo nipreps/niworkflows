@@ -64,6 +64,12 @@ jobs:
 
       - checkout
       - run:
+          name: Install pipx
+          command: python -m pip install pipx
+      - run:
+          name: Display version
+          command: pipx run hatch version
+      - run:
           name: Build Docker image & push to registry
           no_output_timeout: 60m
           command: |
@@ -72,7 +78,7 @@ jobs:
                 -t niworkflows:latest \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
                 --build-arg VCS_REF=`git rev-parse --short HEAD` \
-                --build-arg VERSION=`python3 get_version.py` . \
+                --build-arg VERSION=`pipx run hatch version` . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
             docker tag niworkflows:latest localhost:5000/niworkflows
@@ -178,8 +184,8 @@ jobs:
       - attach_workspace:
           at: /tmp
       - run:
-          name: Get codecov
-          command: python -m pip install codecov
+          name: Install pipx
+          command: python -m pip install pipx
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ .Revision }}
@@ -235,7 +241,7 @@ jobs:
           name: Submit unit test coverage
           command: |
             cd /tmp/src/niworkflows
-            python -m codecov --file /tmp/tests/summaries/unittests.xml \
+            pipx run codecov --file /tmp/tests/summaries/unittests.xml \
                 --flags unittests -e CIRCLE_JOB
 
       - run:
@@ -255,7 +261,7 @@ jobs:
           name: Submit reportlet test coverage
           command: |
             cd /tmp/src/niworkflows
-            python -m codecov --file /tmp/tests/summaries/reportlets.xml \
+            pipx run codecov --file /tmp/tests/summaries/reportlets.xml \
                 --flags reportlettests -e CIRCLE_JOB
 
       - run:
@@ -276,17 +282,20 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install build depends
-          command: python -m pip install build twine
+          name: Install pipx
+          command: python -m pip install pipx
+      - run:
+          name: Display version
+          command: pipx run hatch version
       - run:
           name: Build and check
           command: |
-            python -m build
-            python -m twine check dist/*
+            pipx run build
+            pipx run twine check dist/*
       - run:
           name: Validate version
           command: |
-            THISVERSION=$( python get_version.py )
+            THISVERSION=$( pipx run hatch version )
             python -m pip install dist/*.tar.gz
             mkdir empty
             cd empty
@@ -300,17 +309,20 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install build depends
-          command: python -m pip install build twine
+          name: Install pipx
+          command: python -m pip install pipx
+      - run:
+          name: Display version
+          command: pipx run hatch version
       - run:
           name: Build and check
           command: |
-            python -m build
-            python -m twine check dist/*
+            pipx run build
+            pipx run twine check dist/*
       - run:
           name: Validate version
           command: |
-            THISVERSION=$( python3 get_version.py )
+            THISVERSION=$( pipx run hatch version )
             python -m pip install dist/*.tar.gz
             mkdir empty
             cd empty
@@ -319,7 +331,7 @@ jobs:
       - run:
           name: Upload to PyPi
           command: |
-            python -m twine upload dist/*
+            pipx run twine upload dist/*
 
   deploy_docker:
     machine:

@@ -132,6 +132,8 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Check version
+      run: pipx run hatch version
     - name: Load test data cache
       uses: actions/cache@v3
       id: stanford-crn
@@ -172,7 +174,7 @@ jobs:
         if [[ "$GITHUB_REF" == refs/tags/* ]]; then
           TAG=${GITHUB_REF##*/}
         fi
-        THISVERSION=$( python get_version.py )
+        THISVERSION=$( pipx run hatch version )
         THISVERSION=${TAG:-$THISVERSION}
         INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
         echo "VERSION: \"${THISVERSION}\""
@@ -211,6 +213,8 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Check version
+      run: pipx run hatch version
     - name: Load test data cache
       uses: actions/cache@v3
       id: stanford-crn
@@ -234,7 +238,7 @@ jobs:
         if [[ "$GITHUB_REF" == refs/tags/* ]]; then
           TAG=${GITHUB_REF##*/}
         fi
-        THISVERSION=$( python get_version.py )
+        THISVERSION=$( pipx run hatch version )
         THISVERSION=${TAG:-$THISVERSION}
         INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
         echo "VERSION: \"${THISVERSION}\""
