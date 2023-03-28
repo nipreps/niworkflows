@@ -1,9 +1,163 @@
 [build-system]
-# Keep synchronized with the minimum version to install in setup.py
-requires = ["setuptools >= 38.4.1", "wheel"]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "niworkflows"
+dynamic = ["version"]
+description = "NeuroImaging Workflows provides processing tools for magnetic resonance images of the brain."
+readme = "README.rst"
+license = {file = "LICENSE"}
+requires-python = ">= 3.7"
+authors = [
+    { name = "The NiPreps Developers", email = "nipreps@gmail.com" },
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+dependencies = [
+    "attrs",
+    "jinja2",
+    "looseversion",
+    "matplotlib >= 3.4.2",
+    "nibabel >= 3.0",
+    "nilearn >= 0.5.2",
+    "nipype >= 1.8.5",
+    "nitransforms >= 21.0.0",
+    "numpy",
+    "packaging",
+    "pandas",
+    "pybids >= 0.15.1",
+    "PyYAML",
+    "scikit-image",
+    "scipy",
+    "seaborn",
+    "svgutils >= 0.3.4",
+    "templateflow >= 0.7.2",
+    "traits < 6.4",
+    "transforms3d",
+]
+
+[project.optional-dependencies]
+all = [
+    "coverage >=5.2.1",
+    "flake8 >= 3.7.0",
+    "furo ~= 2021.10.09",
+    "pydot >= 1.2.3",
+    "pydotplus",
+    "pyntcloud",
+    "pytest >= 4.4",
+    "pytest-cov",
+    "pytest-env",
+    "pytest-xdist >= 1.28",
+    "pytest-xvfb",
+    "sphinx ~= 4.0",
+    "sphinxcontrib-apidoc",
+    "sphinxcontrib-napoleon",
+]
+doc = [
+    "furo ~= 2021.10.09",
+    "pydot >= 1.2.3",
+    "pydotplus",
+    "sphinx ~= 4.0",
+    "sphinxcontrib-apidoc",
+    "sphinxcontrib-napoleon",
+]
+docs = [
+    "furo ~= 2021.10.09",
+    "pydot >= 1.2.3",
+    "pydotplus",
+    "sphinx ~= 4.0",
+    "sphinxcontrib-apidoc",
+    "sphinxcontrib-napoleon",
+]
+pointclouds = [
+    "pyntcloud",
+]
+style = [
+    "flake8 >= 3.7.0",
+]
+tests = [
+    "coverage >=5.2.1",
+    "pytest >= 4.4",
+    "pytest-cov",
+    "pytest-env",
+    "pytest-xdist >= 1.28",
+    "pytest-xvfb",
+]
+
+[project.scripts]
+niworkflows-boldref = "niworkflows.cli.boldref:main"
+
+[project.urls]
+"Bug Tracker" = "https://github.com/nipreps/niworkflows/issues"
+Documentation = "https://www.nipreps.org/niworkflows"
+GitHub = "https://github.com/nipreps/niworkflows"
+Homepage = "https://www.nipreps.org"
+"Source Code" = "https://github.com/nipreps/niworkflows"
+Zenodo = "https://doi.org/10.5281/zenodo.2650331"
+
+#
+# Hatch configurations
+#
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.sdist]
+exclude = [".git_archival.txt"]  # No longer needed in sdist
+
+[tool.hatch.build.targets.wheel]
+packages = ["niworkflows"]
+exclude = [
+    "niworkflows/data/tests/work",  # Large test data directory
+]
+
+##  The following two sections configure setuptools_scm in the hatch way
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = {version_scheme = "release-branch-semver" }
+
+[tool.hatch.build.hooks.vcs]
+version-file = "niworkflows/_version.py"
 
 [tool.black]
 line-length = 99
 target-version = ['py37']
 skip-string-normalization = true
-extend-exclude = '_version.py|versioneer.py'
+extend-exclude = '_version.py'
+
+[tool.pytest.ini_options]
+norecursedirs = ".git"
+addopts = "-sv --doctest-modules"
+doctest_optionflags = "ALLOW_UNICODE NORMALIZE_WHITESPACE ELLIPSIS"
+env = """
+    PYTHONHASHSEED=0
+"""
+filterwarnings = """
+    ignore::DeprecationWarning
+"""
+junit_family = "xunit2"
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "*/tests/*",
+    "niworkflows/_version.py",
+    "niworkflows/conftest.py",
+]
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_lines = [
+    "raise NotImplementedError",
+    "warnings\\.warn",
+]

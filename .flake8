@@ -1,0 +1,12 @@
+[flake8]
+max-line-length = 99
+doctests = False
+ignore =
+    W503
+    E203
+exclude=
+    *build/,
+    */_version.py
+per-file-ignores =
+    **/__init__.py : F401
+    docs/conf.py : E265
