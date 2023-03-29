@@ -1,17 +1,52 @@
+# reusable anchors
+_machine_defaults: &machine_defaults
+  environment:
+    TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+    SCRATCH: "/scratch"
+  machine:
+    image: ubuntu-2204:current
+    docker_layer_caching: true
+  working_directory: /tmp/src/niworkflows
+  resource_class: large
+
+_python_defaults: &python_defaults
+  docker:
+    - image: cimg/python:3.10.9
+  working_directory: /tmp/src/niworkflows
+
+_docker_auth: &docker_auth
+  name: Docker authentication
+  command: |
+    if [[ -n $DOCKER_PAT ]]; then
+      echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
+    fi
+
+_setup_docker_registry: &setup_docker_registry
+  name: Set up Docker registry
+  command: |
+    if [[ -f /tmp/images/registry.tar.gz ]]; then
+      echo "Loading saved registry image"
+      docker load < /tmp/images/registry.tar.gz
+    else
+      echo "Pulling registry image from DockerHub"
+      docker pull registry:2
+    fi
+    docker run -d -p 5000:5000 --restart=always --name=registry \
+        -v /tmp/docker:/var/lib/registry registry:2
+
+_pull_from_registry: &pull_from_registry
+  name: Pull and tag image from local registry
+  command: |
+    docker pull localhost:5000/niworkflows
+    docker tag localhost:5000/niworkflows nipreps/niworkflows:latest
+
 version: 2.1
 orbs:
   docker: circleci/docker@2.2.0
 
 jobs:
   build:
-    machine:
-      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
-      # upgrade Docker version
-      image: ubuntu-2004:202104-01
-    working_directory: /tmp/src/niworkflows
-    environment:
-      TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-      SCRATCH: "/scratch"
+    <<: *machine_defaults
     steps:
       - restore_cache:
           keys:
@@ -23,44 +58,11 @@ jobs:
           paths:
             - /tmp/docker
             - /tmp/images
-      - run:
-          name: Docker authentication
-          command: |
-            if [[ -n $DOCKER_PAT ]]; then
-              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
-            fi
-      - run:
-          name: Set up Docker registry
-          command: |
-            if [[ -f /tmp/images/registry.tar.gz ]]; then
-              echo "Loading saved registry image"
-              docker load < /tmp/images/registry.tar.gz
-            else
-              echo "Pulling registry image from DockerHub"
-              docker pull registry:2
-              mkdir -p /tmp/images
-              docker save registry:2 | gzip > /tmp/images/registry.tar.gz
-            fi
-            docker run -d -p 5000:5000 --restart=always --name=registry \
-                -v /tmp/docker:/var/lib/registry registry:2
-      - run:
-          name: Pull existing images
-          command: |
-            set +e
-            docker pull localhost:5000/ubuntu
-            success=$?
-            set -e
-            if [[ "$success" = "0" ]]; then
-                echo "Pulling from local registry"
-                docker tag localhost:5000/ubuntu ubuntu:focal-20210416
-                docker pull localhost:5000/niworkflows
-                docker tag localhost:5000/niworkflows niworkflows:latest
-            else
-                echo "Pulling from Docker Hub"
-                docker pull ubuntu:focal-20210416
-                docker tag ubuntu:focal-20210416 localhost:5000/ubuntu
-                docker push localhost:5000/ubuntu
-            fi
+
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
 
       - checkout
       - run:
@@ -177,8 +179,7 @@ jobs:
             - src/
 
   test_pytest:
-    machine:
-      image: ubuntu-2004:202104-01
+    <<: *machine_defaults
     working_directory: /tmp/tests
     steps:
       - attach_workspace:
@@ -186,32 +187,14 @@ jobs:
       - run:
           name: Install pipx
           command: python -m pip install pipx
+
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ .Revision }}
-      - run:
-          name: Docker authentication
-          command: |
-            if [[ -n $DOCKER_PAT ]]; then
-              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
-            fi
-      - run:
-          name: Set up Docker registry
-          command: |
-            if [[ -f /tmp/images/registry.tar.gz ]]; then
-              echo "Loading saved registry image"
-              docker load < /tmp/images/registry.tar.gz
-            else
-              echo "Pulling registry image from DockerHub"
-              docker pull registry:2
-            fi
-            docker run -d -p 5000:5000 --restart=always --name=registry \
-                -v /tmp/docker:/var/lib/registry registry:2
-      - run:
-          name: Pull images from registry
-          command: |
-            docker pull localhost:5000/niworkflows
-            docker tag localhost:5000/niworkflows niworkflows:latest
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
 
       - restore_cache:
           keys:
@@ -276,9 +259,7 @@ jobs:
           path: /tmp/tests/summaries/
 
   test_package:
-    docker:
-      - image: cimg/python:3.9
-    working_directory: /tmp/src/niworkflows
+    <<: *python_defaults
     steps:
       - checkout
       - run:
@@ -303,9 +284,7 @@ jobs:
             test "${CIRCLE_TAG:-$THISVERSION}" == "$INSTALLED"
 
   deploy_pypi:
-    docker:
-      - image: cimg/python:3.9
-    working_directory: /tmp/src/niworkflows
+    <<: *python_defaults
     steps:
       - checkout
       - run:
@@ -334,8 +313,7 @@ jobs:
             pipx run twine upload dist/*
 
   deploy_docker:
-    machine:
-      image: ubuntu-2004:202104-01
+    <<: *machine_defaults
     working_directory: /tmp/src/
     steps:
       - restore_cache:
@@ -344,29 +322,10 @@ jobs:
           paths:
             - /tmp/docker
             - /tmp/images
-      - run:
-          name: Docker authentication
-          command: |
-            if [[ -n $DOCKER_PAT ]]; then
-              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
-            fi
-      - run:
-          name: Set up Docker registry
-          command: |
-            if [[ -f /tmp/images/registry.tar.gz ]]; then
-              echo "Loading saved registry image"
-              docker load < /tmp/images/registry.tar.gz
-            else
-              echo "Pulling registry image from DockerHub"
-              docker pull registry:2
-            fi
-            docker run -d -p 5000:5000 --restart=always --name=registry \
-                -v /tmp/docker:/var/lib/registry registry:2
-      - run:
-          name: Pull images from local registry
-          command: |
-            docker pull localhost:5000/niworkflows
-            docker tag localhost:5000/niworkflows nipreps/niworkflows:latest
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
       - run:
           name: Deploy to Docker Hub
           no_output_timeout: 40m
@@ -376,8 +335,7 @@ jobs:
             docker push nipreps/niworkflows:$CIRCLE_TAG
 
   build_docs:
-    docker:
-      - image: cimg/python:3.9
+    <<: *python_defaults
     environment:
       - FSLOUTPUTTYPE: NIFTI
       - SUBJECTS_DIR: /tmp/subjects
