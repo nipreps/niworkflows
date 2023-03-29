@@ -100,20 +100,18 @@ class Reportlet(Element):
 
     .. testsetup::
 
-    >>> cwd = os.getcwd()
-    >>> os.chdir(tmpdir)
+        >>> cwd = os.getcwd()
+        >>> os.chdir(tmpdir)
 
-    >>> from pkg_resources import resource_filename
-    >>> from shutil import copytree
-    >>> from bids.layout import BIDSLayout
-    >>> test_data_path = resource_filename('niworkflows', 'data/tests/work')
-    >>> testdir = Path(tmpdir)
-    >>> data_dir = copytree(test_data_path, str(testdir / 'work'))
-    >>> out_figs = testdir / 'out' / 'fmriprep'
-    >>> bl = BIDSLayout(str(testdir / 'work' / 'reportlets'),
-    ...                 config='figures', validate=False)
-
-    .. doctest::
+        >>> from shutil import copytree
+        >>> from bids.layout import BIDSLayout
+        >>> test_data_path = find_resource_or_skip('data/tests/work')
+        >>> testdir = Path(tmpdir)
+        >>> with importlib_resources.as_file(test_data_path) as source:
+        ...     data_dir = copytree(source, str(testdir / 'work'))
+        >>> out_figs = testdir / 'out' / 'fmriprep'
+        >>> bl = BIDSLayout(str(testdir / 'work' / 'reportlets'),
+        ...                 config='figures', validate=False)
 
     >>> bl.get(subject='01', desc='reconall') # doctest: +ELLIPSIS
     [<BIDSFile filename='.../fmriprep/sub-01/figures/sub-01_desc-reconall_T1w.svg'>]
@@ -169,7 +167,7 @@ class Reportlet(Element):
 
     .. testcleanup::
 
-    >>> os.chdir(cwd)
+        >>> os.chdir(cwd)
 
     """
 
@@ -251,18 +249,16 @@ class Report:
 
     .. testsetup::
 
-    >>> cwd = os.getcwd()
-    >>> os.chdir(tmpdir)
+        >>> cwd = os.getcwd()
+        >>> os.chdir(tmpdir)
 
-    >>> from pkg_resources import resource_filename
-    >>> from shutil import copytree
-    >>> from bids.layout import BIDSLayout
-    >>> test_data_path = resource_filename('niworkflows', 'data/tests/work')
-    >>> testdir = Path(tmpdir)
-    >>> data_dir = copytree(test_data_path, str(testdir / 'work'))
-    >>> out_figs = testdir / 'out' / 'fmriprep'
-
-    .. doctest::
+        >>> from shutil import copytree
+        >>> from bids.layout import BIDSLayout
+        >>> test_data_path = find_resource_or_skip('data/tests/work')
+        >>> testdir = Path(tmpdir)
+        >>> with importlib_resources.as_file(test_data_path) as source:
+        ...     data_dir = copytree(source, str(testdir / 'work'))
+        >>> out_figs = testdir / 'out' / 'fmriprep'
 
     >>> robj = Report(testdir / 'out', 'madeoutuuid', subject_id='01', packagename='fmriprep',
     ...               reportlets_dir=testdir / 'work' / 'reportlets')
@@ -276,7 +272,7 @@ class Report:
 
     .. testcleanup::
 
-    >>> os.chdir(cwd)
+        >>> os.chdir(cwd)
 
     """
 
@@ -523,17 +519,15 @@ def run_reports(
 
     .. testsetup::
 
-    >>> cwd = os.getcwd()
-    >>> os.chdir(tmpdir)
+        >>> cwd = os.getcwd()
+        >>> os.chdir(tmpdir)
 
-    >>> from pkg_resources import resource_filename
-    >>> from shutil import copytree
-    >>> test_data_path = resource_filename('niworkflows', 'data/tests/work')
-    >>> testdir = Path(tmpdir)
-    >>> data_dir = copytree(test_data_path, str(testdir / 'work'))
-    >>> (testdir / 'fmriprep').mkdir(parents=True, exist_ok=True)
-
-    .. doctest::
+        >>> from shutil import copytree
+        >>> test_data_path = find_resource_or_skip('data/tests/work')
+        >>> testdir = Path(tmpdir)
+        >>> with importlib_resources.as_file(test_data_path) as source:
+        ...     data_dir = copytree(source, str(testdir / 'work'))
+        >>> (testdir / 'fmriprep').mkdir(parents=True, exist_ok=True)
 
     >>> run_reports(testdir / 'out', '01', 'madeoutuuid', packagename='fmriprep',
     ...             reportlets_dir=testdir / 'work' / 'reportlets')
@@ -541,7 +535,7 @@ def run_reports(
 
     .. testcleanup::
 
-    >>> os.chdir(cwd)
+        >>> os.chdir(cwd)
 
     """
     return Report(

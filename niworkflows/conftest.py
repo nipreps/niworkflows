@@ -29,10 +29,21 @@ import nibabel as nb
 import pandas as pd
 import pytest
 import tempfile
-import pkg_resources
+
+try:
+    import importlib_resources
+except ImportError:
+    import importlib.resources as importlib_resources
 
 # disable ET
 os.environ['NO_ET'] = '1'
+
+
+def find_resource_or_skip(resource):
+    pathlike = importlib_resources.files("niworkflows") / resource
+    if not pathlike.exists():
+        pytest.skip(f"Missing resource {resource}; run this test from a source repository")
+    return pathlike
 
 
 @pytest.fixture(autouse=True)
@@ -46,13 +57,13 @@ def add_np(doctest_namespace):
     doctest_namespace["pd"] = pd
     doctest_namespace["os"] = os
     doctest_namespace["pytest"] = pytest
+    doctest_namespace["importlib_resources"] = importlib_resources
+    doctest_namespace["find_resource_or_skip"] = find_resource_or_skip
     doctest_namespace["Path"] = Path
     doctest_namespace["datadir"] = data_dir
     doctest_namespace["data_dir_canary"] = data_dir_canary
     doctest_namespace["bids_collect_data"] = collect_data
-    doctest_namespace["test_data"] = pkg_resources.resource_filename(
-        "niworkflows", "tests/data"
-    )
+    doctest_namespace["test_data"] = importlib_resources.files("niworkflows") / "tests" / "data"
 
     tmpdir = tempfile.TemporaryDirectory()
 
