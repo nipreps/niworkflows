@@ -67,7 +67,7 @@ jobs:
       - checkout
       - run:
           name: Install pipx
-          command: python -m pip install pipx
+          command: pip3 install pipx
       - run:
           name: Display version
           command: pipx run hatch version
@@ -186,7 +186,7 @@ jobs:
           at: /tmp
       - run:
           name: Install pipx
-          command: python -m pip install pipx
+          command: pip3 install pipx
 
       - restore_cache:
           keys:
@@ -264,7 +264,7 @@ jobs:
       - checkout
       - run:
           name: Install pipx
-          command: python -m pip install pipx
+          command: pip install pipx
       - run:
           name: Display version
           command: pipx run hatch version
@@ -289,7 +289,7 @@ jobs:
       - checkout
       - run:
           name: Install pipx
-          command: python -m pip install pipx
+          command: pip3 install pipx
       - run:
           name: Display version
           command: pipx run hatch version
