@@ -22,9 +22,7 @@
 #
 """ Testing module for niworkflows.reports.core """
 
-import os
 from pathlib import Path
-from pkg_resources import resource_filename as pkgrf
 import tempfile
 from itertools import product
 from yaml import safe_load as load
@@ -36,6 +34,11 @@ from bids.layout import BIDSLayout
 import pytest
 
 from ..core import Report
+
+try:
+    import importlib_resources
+except ImportError:
+    import importlib.resources as importlib_resources
 
 
 @pytest.fixture()
@@ -103,19 +106,23 @@ def bids_sessions(tmpdir_factory):
 
 
 @pytest.fixture()
-def test_report1():
-    test_data_path = pkgrf(
-        "niworkflows", os.path.join("data", "tests", "work", "reportlets")
-    )
-    out_dir = tempfile.mkdtemp()
+def example_workdir():
+    workdir = importlib_resources.files("niworkflows") / "data" / "tests" / "work"
+    if not workdir.exists():
+        pytest.skip("Missing example workdir; run this test from a source repository")
+    return workdir
 
-    return Report(
-        Path(out_dir),
-        "fakeuuid",
-        reportlets_dir=Path(test_data_path),
-        subject_id="01",
-        packagename="fmriprep",
-    )
+
+@pytest.fixture()
+def test_report1(tmp_path, example_workdir):
+    with importlib_resources.as_file(example_workdir) as workdir:
+        yield Report(
+            tmp_path,
+            "fakeuuid",
+            reportlets_dir=workdir / "reportlets",
+            subject_id="01",
+            packagename="fmriprep",
+        )
 
 
 @pytest.fixture()
@@ -235,8 +242,7 @@ def test_generated_reportlets(bids_sessions, ordering):
         subject_id="01",
         packagename="fmriprep",
     )
-    config = Path(pkgrf("niworkflows", "reports/default.yml"))
-    settings = load(config.read_text())
+    settings = load(importlib_resources.read_text("niworkflows.reports", "default.yml"))
     # change settings to only include some missing ordering
     settings["sections"][3]["ordering"] = ordering
     report.index(settings["sections"])
