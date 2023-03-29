@@ -47,31 +47,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-all = [
-    "coverage >=5.2.1",
-    "flake8 >= 3.7.0",
-    "furo ~= 2021.10.09",
-    "pydot >= 1.2.3",
-    "pydotplus",
-    "pyntcloud",
-    "pytest >= 4.4",
-    "pytest-cov",
-    "pytest-env",
-    "pytest-xdist >= 1.28",
-    "pytest-xvfb",
-    "sphinx ~= 4.0",
-    "sphinxcontrib-apidoc",
-    "sphinxcontrib-napoleon",
-]
 doc = [
-    "furo ~= 2021.10.09",
-    "pydot >= 1.2.3",
-    "pydotplus",
-    "sphinx ~= 4.0",
-    "sphinxcontrib-apidoc",
-    "sphinxcontrib-napoleon",
-]
-docs = [
     "furo ~= 2021.10.09",
     "pydot >= 1.2.3",
     "pydotplus",
@@ -89,10 +65,14 @@ tests = [
     "coverage >=5.2.1",
     "pytest >= 4.4",
     "pytest-cov",
+    "pytest-doctestplus",
     "pytest-env",
     "pytest-xdist >= 1.28",
     "pytest-xvfb",
 ]
+# Aliases
+all = ["niworkflows[doc,pointclouds,style,tests]"]
+docs = ["niworkflows[doc]"]
 
 [project.scripts]
 niworkflows-boldref = "niworkflows.cli.boldref:main"
