@@ -228,7 +228,7 @@ jobs:
           no_output_timeout: 2h
           command: |
             mkdir -p $PWD/artifacts $PWD/summaries
-            docker run -u $( id -u ):$( id -g ) -it --rm -w /src/niworkflows \
+            docker run -u $( id -u ):$( id -g ) --rm \
               -e COVERAGE_FILE=/tmp/summaries/.pytest.coverage \
               -e SAVE_CIRCLE_ARTIFACTS="/tmp/artifacts/" \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
@@ -239,7 +239,7 @@ jobs:
                      --cov niworkflows --cov-report xml:/tmp/summaries/unittests.xml \
                      --ignore=niworkflows/tests/ \
                      --ignore=niworkflows/func/tests/ \
-                     niworkflows/
+                     --pyargs niworkflows
 
       - run:
           name: Submit unit test coverage
@@ -252,7 +252,7 @@ jobs:
           name: Run reportlet tests
           no_output_timeout: 2h
           command: |
-            docker run -u $( id -u ):$( id -g ) -it --rm -w /src/niworkflows \
+            docker run -u $( id -u ):$( id -g ) --rm \
               -e COVERAGE_FILE=/tmp/summaries/.reportlets.coverage \
               -e SAVE_CIRCLE_ARTIFACTS="/tmp/artifacts/" \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
@@ -260,7 +260,7 @@ jobs:
               -v ${PWD}:/tmp niworkflows:latest \
               pytest -n auto --junit-xml=/tmp/summaries/reportlets.xml \
                      --cov niworkflows --cov-report xml:/tmp/summaries/reportlets.xml \
-                     niworkflows/tests/
+                     --pyargs niworkflows.tests
       - run:
           name: Submit reportlet test coverage
           command: |
