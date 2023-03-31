@@ -187,7 +187,7 @@ def _prepare_cifti(grayordinates: str) -> typing.Tuple[list, str, dict]:
     Examples
     --------
     >>> surface_labels, volume_labels, metadata = _prepare_cifti('91k')
-    >>> surface_labels  # doctest: +ELLIPSIS
+    >>> surface_labels  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
     ['.../tpl-fsLR_hemi-L_den-32k_desc-nomedialwall_dparc.label.gii', \
      '.../tpl-fsLR_hemi-R_den-32k_desc-nomedialwall_dparc.label.gii']
     >>> volume_labels  # doctest: +ELLIPSIS
