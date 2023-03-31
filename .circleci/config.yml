@@ -38,7 +38,7 @@ _pull_from_registry: &pull_from_registry
   name: Pull and tag image from local registry
   command: |
     docker pull localhost:5000/niworkflows
-    docker tag localhost:5000/niworkflows nipreps/niworkflows:latest
+    docker tag localhost:5000/niworkflows niworkflows:latest
 
 version: 2.1
 orbs:
@@ -62,7 +62,28 @@ jobs:
       - docker/install-docker-credential-helper
       - run: *docker_auth
       - run: *setup_docker_registry
-      - run: *pull_from_registry
+      - run:
+          name: Save docker registry
+          command: |
+            if [[ ! -f /tmp/images/registry.tar.gz ]]; then
+              mkdir -p /tmp/images
+              docker save registry:2 | gzip > /tmp/images/registry.tar.gz
+            fi
+      - run:
+          name: Pull niworkflows Docker image
+          command: |
+            set +e
+            docker pull localhost:5000/niworkflows
+            success=$?
+            set -e
+            if [[ "$success" = "0" ]]; then
+                echo "Pulled from local registry"
+                docker tag localhost:5000/niworkflows niworkflows:latest
+            else
+                echo "Pulling from Docker Hub"
+                docker pull nipreps/niworkflows:latest
+                docker tag nipreps/niworkflows:latest niworkflows:latest
+            fi
 
       - checkout
       - run:
