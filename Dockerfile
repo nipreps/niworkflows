@@ -169,6 +169,9 @@ WORKDIR /home/niworkflows
 ENV HOME="/home/niworkflows" \
     LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 
+COPY docker/fetch_templates.py /tmp/fetch_templates.py
+RUN python /tmp/fetch_templates.py
+
 # Unless otherwise specified each process should only use one thread - nipype
 # will handle parallelization
 ENV MKL_NUM_THREADS=1 \
