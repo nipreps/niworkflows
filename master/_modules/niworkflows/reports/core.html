@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
-        <title>niworkflows.reports.core - niworkflows 1.7.8+3.g71a946d4 documentation</title>
+        <title>niworkflows.reports.core - niworkflows 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">niworkflows 1.7.8+3.g71a946d4 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">niworkflows 0+unknown documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -145,14 +145,14 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
     <span class="sidebar-brand-text">niworkflows</span>
-    <span id="version-slug" class="sidebar-brand-text">1.7.8 (dev)</span>
+    <span id="version-slug" class="sidebar-brand-text">0 (dev)</span>
 </a>
 
 <!-- Versions dropdown -->
 <div id="version-menu" class="version-tree">
   <ul>
   <li class="toctree-l1 has-children">
-  <span class="sidebar-brand-text">1.7.8 (dev)</span>
+  <span class="sidebar-brand-text">0 (dev)</span>
   <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
   <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
   <ul id="v-tags"></ul>
@@ -381,20 +381,18 @@
 
 <span class="sd">    .. testsetup::</span>
 
-<span class="sd">    &gt;&gt;&gt; cwd = os.getcwd()</span>
-<span class="sd">    &gt;&gt;&gt; os.chdir(tmpdir)</span>
+<span class="sd">        &gt;&gt;&gt; cwd = os.getcwd()</span>
+<span class="sd">        &gt;&gt;&gt; os.chdir(tmpdir)</span>
 
-<span class="sd">    &gt;&gt;&gt; from pkg_resources import resource_filename</span>
-<span class="sd">    &gt;&gt;&gt; from shutil import copytree</span>
-<span class="sd">    &gt;&gt;&gt; from bids.layout import BIDSLayout</span>
-<span class="sd">    &gt;&gt;&gt; test_data_path = resource_filename('niworkflows', 'data/tests/work')</span>
-<span class="sd">    &gt;&gt;&gt; testdir = Path(tmpdir)</span>
-<span class="sd">    &gt;&gt;&gt; data_dir = copytree(test_data_path, str(testdir / 'work'))</span>
-<span class="sd">    &gt;&gt;&gt; out_figs = testdir / 'out' / 'fmriprep'</span>
-<span class="sd">    &gt;&gt;&gt; bl = BIDSLayout(str(testdir / 'work' / 'reportlets'),</span>
-<span class="sd">    ...                 config='figures', validate=False)</span>
-
-<span class="sd">    .. doctest::</span>
+<span class="sd">        &gt;&gt;&gt; from shutil import copytree</span>
+<span class="sd">        &gt;&gt;&gt; from bids.layout import BIDSLayout</span>
+<span class="sd">        &gt;&gt;&gt; test_data_path = find_resource_or_skip('data/tests/work')</span>
+<span class="sd">        &gt;&gt;&gt; testdir = Path(tmpdir)</span>
+<span class="sd">        &gt;&gt;&gt; with importlib_resources.as_file(test_data_path) as source:</span>
+<span class="sd">        ...     data_dir = copytree(source, str(testdir / 'work'))</span>
+<span class="sd">        &gt;&gt;&gt; out_figs = testdir / 'out' / 'fmriprep'</span>
+<span class="sd">        &gt;&gt;&gt; bl = BIDSLayout(str(testdir / 'work' / 'reportlets'),</span>
+<span class="sd">        ...                 config='figures', validate=False)</span>
 
 <span class="sd">    &gt;&gt;&gt; bl.get(subject='01', desc='reconall') # doctest: +ELLIPSIS</span>
 <span class="sd">    [&lt;BIDSFile filename='.../fmriprep/sub-01/figures/sub-01_desc-reconall_T1w.svg'&gt;]</span>
@@ -450,7 +448,7 @@
 
 <span class="sd">    .. testcleanup::</span>
 
-<span class="sd">    &gt;&gt;&gt; os.chdir(cwd)</span>
+<span class="sd">        &gt;&gt;&gt; os.chdir(cwd)</span>
 
 <span class="sd">    """</span>
 
@@ -532,18 +530,16 @@
 
 <span class="sd">    .. testsetup::</span>
 
-<span class="sd">    &gt;&gt;&gt; cwd = os.getcwd()</span>
-<span class="sd">    &gt;&gt;&gt; os.chdir(tmpdir)</span>
+<span class="sd">        &gt;&gt;&gt; cwd = os.getcwd()</span>
+<span class="sd">        &gt;&gt;&gt; os.chdir(tmpdir)</span>
 
-<span class="sd">    &gt;&gt;&gt; from pkg_resources import resource_filename</span>
-<span class="sd">    &gt;&gt;&gt; from shutil import copytree</span>
-<span class="sd">    &gt;&gt;&gt; from bids.layout import BIDSLayout</span>
-<span class="sd">    &gt;&gt;&gt; test_data_path = resource_filename('niworkflows', 'data/tests/work')</span>
-<span class="sd">    &gt;&gt;&gt; testdir = Path(tmpdir)</span>
-<span class="sd">    &gt;&gt;&gt; data_dir = copytree(test_data_path, str(testdir / 'work'))</span>
-<span class="sd">    &gt;&gt;&gt; out_figs = testdir / 'out' / 'fmriprep'</span>
-
-<span class="sd">    .. doctest::</span>
+<span class="sd">        &gt;&gt;&gt; from shutil import copytree</span>
+<span class="sd">        &gt;&gt;&gt; from bids.layout import BIDSLayout</span>
+<span class="sd">        &gt;&gt;&gt; test_data_path = find_resource_or_skip('data/tests/work')</span>
+<span class="sd">        &gt;&gt;&gt; testdir = Path(tmpdir)</span>
+<span class="sd">        &gt;&gt;&gt; with importlib_resources.as_file(test_data_path) as source:</span>
+<span class="sd">        ...     data_dir = copytree(source, str(testdir / 'work'))</span>
+<span class="sd">        &gt;&gt;&gt; out_figs = testdir / 'out' / 'fmriprep'</span>
 
 <span class="sd">    &gt;&gt;&gt; robj = Report(testdir / 'out', 'madeoutuuid', subject_id='01', packagename='fmriprep',</span>
 <span class="sd">    ...               reportlets_dir=testdir / 'work' / 'reportlets')</span>
@@ -557,7 +553,7 @@
 
 <span class="sd">    .. testcleanup::</span>
 
-<span class="sd">    &gt;&gt;&gt; os.chdir(cwd)</span>
+<span class="sd">        &gt;&gt;&gt; os.chdir(cwd)</span>
 
 <span class="sd">    """</span>
 
@@ -804,17 +800,15 @@
 
 <span class="sd">    .. testsetup::</span>
 
-<span class="sd">    &gt;&gt;&gt; cwd = os.getcwd()</span>
-<span class="sd">    &gt;&gt;&gt; os.chdir(tmpdir)</span>
+<span class="sd">        &gt;&gt;&gt; cwd = os.getcwd()</span>
+<span class="sd">        &gt;&gt;&gt; os.chdir(tmpdir)</span>
 
-<span class="sd">    &gt;&gt;&gt; from pkg_resources import resource_filename</span>
-<span class="sd">    &gt;&gt;&gt; from shutil import copytree</span>
-<span class="sd">    &gt;&gt;&gt; test_data_path = resource_filename('niworkflows', 'data/tests/work')</span>
-<span class="sd">    &gt;&gt;&gt; testdir = Path(tmpdir)</span>
-<span class="sd">    &gt;&gt;&gt; data_dir = copytree(test_data_path, str(testdir / 'work'))</span>
-<span class="sd">    &gt;&gt;&gt; (testdir / 'fmriprep').mkdir(parents=True, exist_ok=True)</span>
-
-<span class="sd">    .. doctest::</span>
+<span class="sd">        &gt;&gt;&gt; from shutil import copytree</span>
+<span class="sd">        &gt;&gt;&gt; test_data_path = find_resource_or_skip('data/tests/work')</span>
+<span class="sd">        &gt;&gt;&gt; testdir = Path(tmpdir)</span>
+<span class="sd">        &gt;&gt;&gt; with importlib_resources.as_file(test_data_path) as source:</span>
+<span class="sd">        ...     data_dir = copytree(source, str(testdir / 'work'))</span>
+<span class="sd">        &gt;&gt;&gt; (testdir / 'fmriprep').mkdir(parents=True, exist_ok=True)</span>
 
 <span class="sd">    &gt;&gt;&gt; run_reports(testdir / 'out', '01', 'madeoutuuid', packagename='fmriprep',</span>
 <span class="sd">    ...             reportlets_dir=testdir / 'work' / 'reportlets')</span>
@@ -822,7 +816,7 @@
 
 <span class="sd">    .. testcleanup::</span>
 
-<span class="sd">    &gt;&gt;&gt; os.chdir(cwd)</span>
+<span class="sd">        &gt;&gt;&gt; os.chdir(cwd)</span>
 
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">Report</span><span class="p">(</span>

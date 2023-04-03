@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.utils package" href="niworkflows.utils.html" /><link rel="prev" title="niworkflows.reports package" href="niworkflows.reports.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
-        <title>niworkflows.reports.core module - niworkflows 1.7.8+3.g71a946d4 documentation</title>
+        <title>niworkflows.reports.core module - niworkflows 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -124,7 +124,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">niworkflows 1.7.8+3.g71a946d4 documentation</div></a>
+      <a href="../index.html"><div class="brand">niworkflows 0+unknown documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,14 +146,14 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
     <span class="sidebar-brand-text">niworkflows</span>
-    <span id="version-slug" class="sidebar-brand-text">1.7.8 (dev)</span>
+    <span id="version-slug" class="sidebar-brand-text">0 (dev)</span>
 </a>
 
 <!-- Versions dropdown -->
 <div id="version-menu" class="version-tree">
   <ul>
   <li class="toctree-l1 has-children">
-  <span class="sidebar-brand-text">1.7.8 (dev)</span>
+  <span class="sidebar-brand-text">0 (dev)</span>
   <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
   <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
   <ul id="v-tags"></ul>
@@ -295,22 +295,6 @@
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The full report object. This object maintains a BIDSLayout to index
 all reportlets.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="kn">import</span> <span class="n">resource_filename</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">copytree</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">bids.layout</span> <span class="kn">import</span> <span class="n">BIDSLayout</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">test_data_path</span> <span class="o">=</span> <span class="n">resource_filename</span><span class="p">(</span><span class="s1">'niworkflows'</span><span class="p">,</span> <span class="s1">'data/tests/work'</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">testdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data_dir</span> <span class="o">=</span> <span class="n">copytree</span><span class="p">(</span><span class="n">test_data_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">testdir</span> <span class="o">/</span> <span class="s1">'work'</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">out_figs</span> <span class="o">=</span> <span class="n">testdir</span> <span class="o">/</span> <span class="s1">'out'</span> <span class="o">/</span> <span class="s1">'fmriprep'</span>
-</pre></div>
-</div>
-<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">robj</span> <span class="o">=</span> <span class="n">Report</span><span class="p">(</span><span class="n">testdir</span> <span class="o">/</span> <span class="s1">'out'</span><span class="p">,</span> <span class="s1">'madeoutuuid'</span><span class="p">,</span> <span class="n">subject_id</span><span class="o">=</span><span class="s1">'01'</span><span class="p">,</span> <span class="n">packagename</span><span class="o">=</span><span class="s1">'fmriprep'</span><span class="p">,</span>
 <span class="gp">... </span>              <span class="n">reportlets_dir</span><span class="o">=</span><span class="n">testdir</span> <span class="o">/</span> <span class="s1">'work'</span> <span class="o">/</span> <span class="s1">'reportlets'</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robj</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="s1">'01'</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">'reconall'</span><span class="p">)</span>  
@@ -321,9 +305,6 @@ all reportlets.</p>
 <span class="go">0</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">((</span><span class="n">testdir</span> <span class="o">/</span> <span class="s1">'out'</span> <span class="o">/</span> <span class="s1">'fmriprep'</span> <span class="o">/</span> <span class="s1">'sub-01.html'</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
 <span class="go">36713</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="py method">
@@ -350,24 +331,6 @@ all reportlets.</p>
 HTML fragment or a path to an SVG file, and possibly a caption. This is a
 factory class to generate Reportlets reusing the layout from a <code class="docutils literal notranslate"><span class="pre">Report</span></code>
 object.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="kn">import</span> <span class="n">resource_filename</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">copytree</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">bids.layout</span> <span class="kn">import</span> <span class="n">BIDSLayout</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">test_data_path</span> <span class="o">=</span> <span class="n">resource_filename</span><span class="p">(</span><span class="s1">'niworkflows'</span><span class="p">,</span> <span class="s1">'data/tests/work'</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">testdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data_dir</span> <span class="o">=</span> <span class="n">copytree</span><span class="p">(</span><span class="n">test_data_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">testdir</span> <span class="o">/</span> <span class="s1">'work'</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">out_figs</span> <span class="o">=</span> <span class="n">testdir</span> <span class="o">/</span> <span class="s1">'out'</span> <span class="o">/</span> <span class="s1">'fmriprep'</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bl</span> <span class="o">=</span> <span class="n">BIDSLayout</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">testdir</span> <span class="o">/</span> <span class="s1">'work'</span> <span class="o">/</span> <span class="s1">'reportlets'</span><span class="p">),</span>
-<span class="gp">... </span>                <span class="n">config</span><span class="o">=</span><span class="s1">'figures'</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bl</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="s1">'01'</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">'reconall'</span><span class="p">)</span> 
 <span class="go">[&lt;BIDSFile filename='.../fmriprep/sub-01/figures/sub-01_desc-reconall_T1w.svg'&gt;]</span>
 </pre></div>
@@ -431,9 +394,6 @@ object.</p>
 <span class="go">True</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
-</pre></div>
-</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="niworkflows.reports.core.Reportlet.is_empty">
 <span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/reports/core.html#Reportlet.is_empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.reports.core.Reportlet.is_empty" title="Permalink to this definition">#</a></dt>
@@ -468,27 +428,9 @@ object.</p>
 <dt class="sig sig-object py" id="niworkflows.reports.core.run_reports">
 <span class="sig-prename descclassname"><span class="pre">niworkflows.reports.core.</span></span><span class="sig-name descname"><span class="pre">run_reports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_uuid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reportlets_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packagename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/reports/core.html#run_reports"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.reports.core.run_reports" title="Permalink to this definition">#</a></dt>
 <dd><p>Run the reports.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="kn">import</span> <span class="n">resource_filename</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">copytree</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">test_data_path</span> <span class="o">=</span> <span class="n">resource_filename</span><span class="p">(</span><span class="s1">'niworkflows'</span><span class="p">,</span> <span class="s1">'data/tests/work'</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">testdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data_dir</span> <span class="o">=</span> <span class="n">copytree</span><span class="p">(</span><span class="n">test_data_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">testdir</span> <span class="o">/</span> <span class="s1">'work'</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">testdir</span> <span class="o">/</span> <span class="s1">'fmriprep'</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">run_reports</span><span class="p">(</span><span class="n">testdir</span> <span class="o">/</span> <span class="s1">'out'</span><span class="p">,</span> <span class="s1">'01'</span><span class="p">,</span> <span class="s1">'madeoutuuid'</span><span class="p">,</span> <span class="n">packagename</span><span class="o">=</span><span class="s1">'fmriprep'</span><span class="p">,</span>
 <span class="gp">... </span>            <span class="n">reportlets_dir</span><span class="o">=</span><span class="n">testdir</span> <span class="o">/</span> <span class="s1">'work'</span> <span class="o">/</span> <span class="s1">'reportlets'</span><span class="p">)</span>
 <span class="go">0</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

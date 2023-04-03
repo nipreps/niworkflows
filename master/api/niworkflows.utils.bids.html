@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.utils.connections module" href="niworkflows.utils.connections.html" /><link rel="prev" title="niworkflows.utils package" href="niworkflows.utils.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
-        <title>niworkflows.utils.bids module - niworkflows 1.7.8+3.g71a946d4 documentation</title>
+        <title>niworkflows.utils.bids module - niworkflows 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -124,7 +124,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">niworkflows 1.7.8+3.g71a946d4 documentation</div></a>
+      <a href="../index.html"><div class="brand">niworkflows 0+unknown documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,14 +146,14 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
     <span class="sidebar-brand-text">niworkflows</span>
-    <span id="version-slug" class="sidebar-brand-text">1.7.8 (dev)</span>
+    <span id="version-slug" class="sidebar-brand-text">0 (dev)</span>
 </a>
 
 <!-- Versions dropdown -->
 <div id="version-menu" class="version-tree">
   <ul>
   <li class="toctree-l1 has-children">
-  <span class="sidebar-brand-text">1.7.8 (dev)</span>
+  <span class="sidebar-brand-text">0 (dev)</span>
   <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
   <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
   <ul id="v-tags"></ul>
@@ -429,7 +429,7 @@ Requesting all subjects in a BIDS directory root:</p>
 <span class="gp">... </span>             <span class="s2">"sub-01_task-rest_echo-2_run-02_bold.nii.gz"</span><span class="p">,</span>
 <span class="gp">... </span>             <span class="s2">"sub-01_task-rest_echo-3_run-02_bold.nii.gz"</span><span class="p">,</span>
 <span class="gp">... </span>             <span class="s2">"sub-01_task-rest_run-03_bold.nii.gz"</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">group_multiecho</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group_multiecho</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">)</span>  
 <span class="go">['sub-01_task-rest_echo-1_run-01_bold.nii.gz',</span>
 <span class="go"> 'sub-01_task-rest_echo-2_run-01_bold.nii.gz',</span>
 <span class="go">['sub-01_task-rest_echo-1_run-02_bold.nii.gz',</span>
@@ -439,7 +439,7 @@ Requesting all subjects in a BIDS directory root:</p>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bold_sess</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"sub-01_task-rest_echo-3_run-01_bold.nii.gz"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">group_multiecho</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group_multiecho</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">)</span>  
 <span class="go">[['sub-01_task-rest_echo-1_run-01_bold.nii.gz',</span>
 <span class="go">  'sub-01_task-rest_echo-2_run-01_bold.nii.gz',</span>
 <span class="go">  'sub-01_task-rest_echo-3_run-01_bold.nii.gz'],</span>
@@ -455,7 +455,7 @@ Requesting all subjects in a BIDS directory root:</p>
 <span class="gp">... </span>              <span class="s2">"sub-01_task-beh_echo-2_run-02_bold.nii.gz"</span><span class="p">,</span>
 <span class="gp">... </span>              <span class="s2">"sub-01_task-beh_echo-3_run-02_bold.nii.gz"</span><span class="p">,</span>
 <span class="gp">... </span>              <span class="s2">"sub-01_task-beh_run-03_bold.nii.gz"</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">group_multiecho</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group_multiecho</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">)</span>  
 <span class="go">[['sub-01_task-rest_echo-1_run-01_bold.nii.gz',</span>
 <span class="go">  'sub-01_task-rest_echo-2_run-01_bold.nii.gz',</span>
 <span class="go">  'sub-01_task-rest_echo-3_run-01_bold.nii.gz'],</span>
