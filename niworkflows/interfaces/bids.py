@@ -368,7 +368,7 @@ class DerivativesDataSink(SimpleInterface):
     >>> dsink.inputs.custom = [1, 2]
     >>> dsink.inputs.compress = True
     >>> res = dsink.run()
-    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
     ['.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom-1_T1w.nii.gz',
      '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom-2_T1w.nii.gz']
 
@@ -379,7 +379,7 @@ class DerivativesDataSink(SimpleInterface):
     >>> dsink.inputs.custom1 = [1, 2]
     >>> dsink.inputs.custom2 = "b"
     >>> res = dsink.run()
-    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
     ['.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom1-1_custom2-b_T1w.nii',
      '.../niworkflows/sub-01/ses-retest/anat/sub-01_ses-retest_custom1-2_custom2-b_T1w.nii']
 

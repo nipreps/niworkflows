@@ -316,7 +316,7 @@ def group_multiecho(bold_sess):
     ...              "sub-01_task-rest_echo-2_run-02_bold.nii.gz",
     ...              "sub-01_task-rest_echo-3_run-02_bold.nii.gz",
     ...              "sub-01_task-rest_run-03_bold.nii.gz"]
-    >>> group_multiecho(bold_sess)
+    >>> group_multiecho(bold_sess)  # doctest: +NORMALIZE_WHITESPACE
     ['sub-01_task-rest_echo-1_run-01_bold.nii.gz',
      'sub-01_task-rest_echo-2_run-01_bold.nii.gz',
     ['sub-01_task-rest_echo-1_run-02_bold.nii.gz',
@@ -325,7 +325,7 @@ def group_multiecho(bold_sess):
      'sub-01_task-rest_run-03_bold.nii.gz']
 
     >>> bold_sess.insert(2, "sub-01_task-rest_echo-3_run-01_bold.nii.gz")
-    >>> group_multiecho(bold_sess)
+    >>> group_multiecho(bold_sess)  # doctest: +NORMALIZE_WHITESPACE
     [['sub-01_task-rest_echo-1_run-01_bold.nii.gz',
       'sub-01_task-rest_echo-2_run-01_bold.nii.gz',
       'sub-01_task-rest_echo-3_run-01_bold.nii.gz'],
@@ -340,7 +340,7 @@ def group_multiecho(bold_sess):
     ...               "sub-01_task-beh_echo-2_run-02_bold.nii.gz",
     ...               "sub-01_task-beh_echo-3_run-02_bold.nii.gz",
     ...               "sub-01_task-beh_run-03_bold.nii.gz"]
-    >>> group_multiecho(bold_sess)
+    >>> group_multiecho(bold_sess)  # doctest: +NORMALIZE_WHITESPACE
     [['sub-01_task-rest_echo-1_run-01_bold.nii.gz',
       'sub-01_task-rest_echo-2_run-01_bold.nii.gz',
       'sub-01_task-rest_echo-3_run-01_bold.nii.gz'],

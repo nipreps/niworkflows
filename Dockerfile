@@ -22,6 +22,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+FROM python:slim AS src
+RUN pip install build
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git
+COPY . /src/niworkflows
+RUN python -m build /src/niworkflows
+
 FROM nipreps/miniconda:py39_2209.01
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -162,18 +169,17 @@ WORKDIR /home/niworkflows
 ENV HOME="/home/niworkflows" \
     LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 
+COPY docker/fetch_templates.py /tmp/fetch_templates.py
+RUN python /tmp/fetch_templates.py
+
 # Unless otherwise specified each process should only use one thread - nipype
 # will handle parallelization
 ENV MKL_NUM_THREADS=1 \
     OMP_NUM_THREADS=1
 
-WORKDIR /src/niworkflows/
-COPY . /src/niworkflows/
-ARG VERSION
-RUN echo "${VERSION}" > /src/niworkflows/niworkflows/VERSION && \
-    echo "include niworkflows/VERSION" >> /src/niworkflows/MANIFEST.in && \
-    pip install --no-cache-dir -e .[all] && \
-    rm -rf $HOME/.cache/pip
+# Installing niworkflows
+COPY --from=src /src/niworkflows/dist/*.whl .
+RUN /opt/conda/bin/python -m pip install --no-cache-dir $( ls *.whl )[all]
 
 COPY docker/files/nipype.cfg /home/niworkflows/.nipype/nipype.cfg
 

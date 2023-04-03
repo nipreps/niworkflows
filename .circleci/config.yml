@@ -1,17 +1,52 @@
+# reusable anchors
+_machine_defaults: &machine_defaults
+  environment:
+    TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+    SCRATCH: "/scratch"
+  machine:
+    image: ubuntu-2204:current
+    docker_layer_caching: true
+  working_directory: /tmp/src/niworkflows
+  resource_class: large
+
+_python_defaults: &python_defaults
+  docker:
+    - image: cimg/python:3.10.9
+  working_directory: /tmp/src/niworkflows
+
+_docker_auth: &docker_auth
+  name: Docker authentication
+  command: |
+    if [[ -n $DOCKER_PAT ]]; then
+      echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
+    fi
+
+_setup_docker_registry: &setup_docker_registry
+  name: Set up Docker registry
+  command: |
+    if [[ -f /tmp/images/registry.tar.gz ]]; then
+      echo "Loading saved registry image"
+      docker load < /tmp/images/registry.tar.gz
+    else
+      echo "Pulling registry image from DockerHub"
+      docker pull registry:2
+    fi
+    docker run -d -p 5000:5000 --restart=always --name=registry \
+        -v /tmp/docker:/var/lib/registry registry:2
+
+_pull_from_registry: &pull_from_registry
+  name: Pull and tag image from local registry
+  command: |
+    docker pull localhost:5000/niworkflows
+    docker tag localhost:5000/niworkflows niworkflows:latest
+
 version: 2.1
 orbs:
   docker: circleci/docker@2.2.0
 
 jobs:
   build:
-    machine:
-      # https://discuss.circleci.com/t/linux-machine-executor-images-2021-april-q2-update/39928
-      # upgrade Docker version
-      image: ubuntu-2004:202104-01
-    working_directory: /tmp/src/niworkflows
-    environment:
-      TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-      SCRATCH: "/scratch"
+    <<: *machine_defaults
     steps:
       - restore_cache:
           keys:
@@ -23,46 +58,40 @@ jobs:
           paths:
             - /tmp/docker
             - /tmp/images
+
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
       - run:
-          name: Docker authentication
+          name: Save docker registry
           command: |
-            if [[ -n $DOCKER_PAT ]]; then
-              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
-            fi
-      - run:
-          name: Set up Docker registry
-          command: |
-            if [[ -f /tmp/images/registry.tar.gz ]]; then
-              echo "Loading saved registry image"
-              docker load < /tmp/images/registry.tar.gz
-            else
-              echo "Pulling registry image from DockerHub"
-              docker pull registry:2
+            if [[ ! -f /tmp/images/registry.tar.gz ]]; then
               mkdir -p /tmp/images
               docker save registry:2 | gzip > /tmp/images/registry.tar.gz
             fi
-            docker run -d -p 5000:5000 --restart=always --name=registry \
-                -v /tmp/docker:/var/lib/registry registry:2
       - run:
-          name: Pull existing images
+          name: Pull niworkflows Docker image
           command: |
             set +e
-            docker pull localhost:5000/ubuntu
+            docker pull localhost:5000/niworkflows
             success=$?
             set -e
             if [[ "$success" = "0" ]]; then
-                echo "Pulling from local registry"
-                docker tag localhost:5000/ubuntu ubuntu:focal-20210416
-                docker pull localhost:5000/niworkflows
+                echo "Pulled from local registry"
                 docker tag localhost:5000/niworkflows niworkflows:latest
             else
                 echo "Pulling from Docker Hub"
-                docker pull ubuntu:focal-20210416
-                docker tag ubuntu:focal-20210416 localhost:5000/ubuntu
-                docker push localhost:5000/ubuntu
+                docker pull nipreps/niworkflows:latest
+                docker tag nipreps/niworkflows:latest niworkflows:latest
             fi
 
       - checkout
+      - run:
+          name: Install pipx
+          command: pip3 install pipx
+      - run:
+          name: Display version
+          command: pipx run hatch version
       - run:
           name: Build Docker image & push to registry
           no_output_timeout: 60m
@@ -72,7 +101,7 @@ jobs:
                 -t niworkflows:latest \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
                 --build-arg VCS_REF=`git rev-parse --short HEAD` \
-                --build-arg VERSION=`python3 get_version.py` . \
+                --build-arg VERSION=`pipx run hatch version` . \
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
             docker tag niworkflows:latest localhost:5000/niworkflows
@@ -171,41 +200,22 @@ jobs:
             - src/
 
   test_pytest:
-    machine:
-      image: ubuntu-2004:202104-01
+    <<: *machine_defaults
     working_directory: /tmp/tests
     steps:
       - attach_workspace:
           at: /tmp
       - run:
-          name: Get codecov
-          command: python -m pip install codecov
+          name: Install pipx
+          command: pip3 install pipx
+
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ .Revision }}
-      - run:
-          name: Docker authentication
-          command: |
-            if [[ -n $DOCKER_PAT ]]; then
-              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
-            fi
-      - run:
-          name: Set up Docker registry
-          command: |
-            if [[ -f /tmp/images/registry.tar.gz ]]; then
-              echo "Loading saved registry image"
-              docker load < /tmp/images/registry.tar.gz
-            else
-              echo "Pulling registry image from DockerHub"
-              docker pull registry:2
-            fi
-            docker run -d -p 5000:5000 --restart=always --name=registry \
-                -v /tmp/docker:/var/lib/registry registry:2
-      - run:
-          name: Pull images from registry
-          command: |
-            docker pull localhost:5000/niworkflows
-            docker tag localhost:5000/niworkflows niworkflows:latest
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
 
       - restore_cache:
           keys:
@@ -218,7 +228,7 @@ jobs:
           no_output_timeout: 2h
           command: |
             mkdir -p $PWD/artifacts $PWD/summaries
-            docker run -u $( id -u ):$( id -g ) -it --rm -w /src/niworkflows \
+            docker run -u $( id -u ):$( id -g ) --rm \
               -e COVERAGE_FILE=/tmp/summaries/.pytest.coverage \
               -e SAVE_CIRCLE_ARTIFACTS="/tmp/artifacts/" \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
@@ -229,20 +239,20 @@ jobs:
                      --cov niworkflows --cov-report xml:/tmp/summaries/unittests.xml \
                      --ignore=niworkflows/tests/ \
                      --ignore=niworkflows/func/tests/ \
-                     niworkflows/
+                     --pyargs niworkflows
 
       - run:
           name: Submit unit test coverage
           command: |
             cd /tmp/src/niworkflows
-            python -m codecov --file /tmp/tests/summaries/unittests.xml \
+            pipx run codecov --file /tmp/tests/summaries/unittests.xml \
                 --flags unittests -e CIRCLE_JOB
 
       - run:
           name: Run reportlet tests
           no_output_timeout: 2h
           command: |
-            docker run -u $( id -u ):$( id -g ) -it --rm -w /src/niworkflows \
+            docker run -u $( id -u ):$( id -g ) --rm \
               -e COVERAGE_FILE=/tmp/summaries/.reportlets.coverage \
               -e SAVE_CIRCLE_ARTIFACTS="/tmp/artifacts/" \
               -e TEST_DATA_HOME=/data -v /tmp/data:/data \
@@ -250,12 +260,12 @@ jobs:
               -v ${PWD}:/tmp niworkflows:latest \
               pytest -n auto --junit-xml=/tmp/summaries/reportlets.xml \
                      --cov niworkflows --cov-report xml:/tmp/summaries/reportlets.xml \
-                     niworkflows/tests/
+                     --pyargs niworkflows.tests
       - run:
           name: Submit reportlet test coverage
           command: |
             cd /tmp/src/niworkflows
-            python -m codecov --file /tmp/tests/summaries/reportlets.xml \
+            pipx run codecov --file /tmp/tests/summaries/reportlets.xml \
                 --flags reportlettests -e CIRCLE_JOB
 
       - run:
@@ -270,23 +280,24 @@ jobs:
           path: /tmp/tests/summaries/
 
   test_package:
-    docker:
-      - image: cimg/python:3.9
-    working_directory: /tmp/src/niworkflows
+    <<: *python_defaults
     steps:
       - checkout
       - run:
-          name: Install build depends
-          command: python -m pip install build twine
+          name: Install pipx
+          command: pip install pipx
+      - run:
+          name: Display version
+          command: pipx run hatch version
       - run:
           name: Build and check
           command: |
-            python -m build
-            python -m twine check dist/*
+            pipx run build
+            pipx run twine check dist/*
       - run:
           name: Validate version
           command: |
-            THISVERSION=$( python get_version.py )
+            THISVERSION=$( pipx run hatch version )
             python -m pip install dist/*.tar.gz
             mkdir empty
             cd empty
@@ -294,23 +305,24 @@ jobs:
             test "${CIRCLE_TAG:-$THISVERSION}" == "$INSTALLED"
 
   deploy_pypi:
-    docker:
-      - image: cimg/python:3.9
-    working_directory: /tmp/src/niworkflows
+    <<: *python_defaults
     steps:
       - checkout
       - run:
-          name: Install build depends
-          command: python -m pip install build twine
+          name: Install pipx
+          command: pip3 install pipx
+      - run:
+          name: Display version
+          command: pipx run hatch version
       - run:
           name: Build and check
           command: |
-            python -m build
-            python -m twine check dist/*
+            pipx run build
+            pipx run twine check dist/*
       - run:
           name: Validate version
           command: |
-            THISVERSION=$( python3 get_version.py )
+            THISVERSION=$( pipx run hatch version )
             python -m pip install dist/*.tar.gz
             mkdir empty
             cd empty
@@ -319,11 +331,10 @@ jobs:
       - run:
           name: Upload to PyPi
           command: |
-            python -m twine upload dist/*
+            pipx run twine upload dist/*
 
   deploy_docker:
-    machine:
-      image: ubuntu-2004:202104-01
+    <<: *machine_defaults
     working_directory: /tmp/src/
     steps:
       - restore_cache:
@@ -332,29 +343,10 @@ jobs:
           paths:
             - /tmp/docker
             - /tmp/images
-      - run:
-          name: Docker authentication
-          command: |
-            if [[ -n $DOCKER_PAT ]]; then
-              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
-            fi
-      - run:
-          name: Set up Docker registry
-          command: |
-            if [[ -f /tmp/images/registry.tar.gz ]]; then
-              echo "Loading saved registry image"
-              docker load < /tmp/images/registry.tar.gz
-            else
-              echo "Pulling registry image from DockerHub"
-              docker pull registry:2
-            fi
-            docker run -d -p 5000:5000 --restart=always --name=registry \
-                -v /tmp/docker:/var/lib/registry registry:2
-      - run:
-          name: Pull images from local registry
-          command: |
-            docker pull localhost:5000/niworkflows
-            docker tag localhost:5000/niworkflows nipreps/niworkflows:latest
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
       - run:
           name: Deploy to Docker Hub
           no_output_timeout: 40m
@@ -364,8 +356,7 @@ jobs:
             docker push nipreps/niworkflows:$CIRCLE_TAG
 
   build_docs:
-    docker:
-      - image: cimg/python:3.9
+    <<: *python_defaults
     environment:
       - FSLOUTPUTTYPE: NIFTI
       - SUBJECTS_DIR: /tmp/subjects

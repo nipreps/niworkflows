@@ -1,42 +1,14 @@
 # python cache
-**/*.pyc
-**/__pycache__
-*.pyc
+__pycache__/**/*
 __pycache__
+*.pyc
 
 # python distribution
-.eggs/
-build/
-dist/
-docs/
-examples/
-niworkflows.egg-info/
-pip-wheel-metadata/
-src/
-
-# git
-**/.git
-.git/
-.github/
-.gitignore
-.gitattributes
-.gitmodules
-
-# ci
-.circleci/
-.travis.yml
-appveyor.yml
-circle.yml
-
-# testing
-.cache
-.codecov.yml
-.coveragerc
-.pep8speaks.yml
-.pytest_cache
-codecov.yml
-
-# other
-Makefile
-.zenodo.json
-
+build/**/*
+build
+dist/**/*
+dist
+fmriprep.egg-info/**/*
+fmriprep.egg-info
+.eggs/**/*
+.eggs

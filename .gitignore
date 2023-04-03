@@ -92,3 +92,5 @@ ENV/
 
 # vim
 *.swp
+
+_version.py

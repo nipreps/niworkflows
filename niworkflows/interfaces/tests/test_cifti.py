@@ -17,7 +17,7 @@ def cifti_data():
         volume_file = str(out / "volume.nii.gz")
         left_gii = str(out / "left.gii")
         right_gii = str(out / "right.gii")
-        surface_data = [nb.gifti.GiftiDataArray(np.ones(32492)) for _ in range(4)]
+        surface_data = [nb.gifti.GiftiDataArray(np.ones(32492, dtype='i4')) for _ in range(4)]
         vol = nb.Nifti1Image(np.ones((91, 109, 91, 4)), np.eye(4))
         gii = nb.GiftiImage(darrays=surface_data)
 
