@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "NeuroImaging Workflows provides processing tools for magnetic resonance images of the brain."
 readme = "README.rst"
 license = {file = "LICENSE"}
-requires-python = ">= 3.7"
+requires-python = ">= 3.8"
 authors = [
     { name = "The NiPreps Developers", email = "nipreps@gmail.com" },
 ]
@@ -16,10 +16,10 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 dependencies = [
