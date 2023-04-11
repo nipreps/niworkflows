@@ -196,8 +196,7 @@ def plot_carpet(
             "whole brain (voxels)": list(range(data.shape[0]))
         }
 
-    nsegments = len(segments)
-    if nsegments == 1:
+    if len(segments) == 1:
         legend = False
 
     if cmap is None:
@@ -256,7 +255,7 @@ def plot_carpet(
 
     # Define nested GridSpec
     gs = mgs.GridSpecFromSubplotSpec(
-        nsegments,
+        len(segments),
         1,
         subplot_spec=subplot,
         hspace=0.05,
@@ -294,7 +293,7 @@ def plot_carpet(
         ax.set_yticks([])
         ax.grid(False)
 
-        if i == (nsegments - 1):
+        if i == (len(segments) - 1):
             xlabel = "time-points (index)"
             xticklabels = (xticks * n_trs / data.shape[-1]).astype("uint32") + drop_trs
             if tr is not None:
@@ -318,7 +317,7 @@ def plot_carpet(
         if title and i == 0:
             ax.set_title(title)
 
-    if nsegments == 1:
+    if len(segments) == 1:
         ax.set_ylabel(label)
 
     if legend:
