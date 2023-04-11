@@ -1,3 +1,12 @@
+1.7.9 (April 11, 2023)
+======================
+Patch release in the 1.7.x series.
+
+This release contains a minor fix for degenerate cases that arise on very
+low resolution datasets, such as used for CI testing.
+
+* FIX: Use len(segments) to avoid nsegments becoming wrong (#795)
+
 1.7.8 (March 24, 2023)
 ======================
 Patch release in the 1.7.x series.
