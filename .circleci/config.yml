@@ -43,6 +43,7 @@ _pull_from_registry: &pull_from_registry
 version: 2.1
 orbs:
   docker: circleci/docker@2.2.0
+  codecov: codecov/codecov@3.2.4
 
 jobs:
   build:
@@ -144,7 +145,6 @@ jobs:
 
       - restore_cache:
           keys:
-            - data-v3-{{ .Branch }}-{{ epoch }}
             - data-v3-{{ .Branch }}-
             - data-v3-master-
             - data-v3-
@@ -205,10 +205,6 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Install pipx
-          command: pip3 install pipx
-
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ .Revision }}
@@ -219,7 +215,6 @@ jobs:
 
       - restore_cache:
           keys:
-            - data-v3-{{ .Branch }}-{{ epoch }}
             - data-v3-{{ .Branch }}-
             - data-v3-master-
 
@@ -241,12 +236,9 @@ jobs:
                      --ignore=niworkflows/func/tests/ \
                      --pyargs niworkflows
 
-      - run:
-          name: Submit unit test coverage
-          command: |
-            cd /tmp/src/niworkflows
-            pipx run codecov --file /tmp/tests/summaries/unittests.xml \
-                --flags unittests -e CIRCLE_JOB
+      - codecov/upload:
+          file: /tmp/tests/summaries/unittests.xml
+          flags: unittests
 
       - run:
           name: Run reportlet tests
@@ -261,12 +253,10 @@ jobs:
               pytest -n auto --junit-xml=/tmp/summaries/reportlets.xml \
                      --cov niworkflows --cov-report xml:/tmp/summaries/reportlets.xml \
                      --pyargs niworkflows.tests
-      - run:
-          name: Submit reportlet test coverage
-          command: |
-            cd /tmp/src/niworkflows
-            pipx run codecov --file /tmp/tests/summaries/reportlets.xml \
-                --flags reportlettests -e CIRCLE_JOB
+
+      - codecov/upload:
+          file: /tmp/tests/summaries/reportlets.xml
+          flags: reportlettests
 
       - run:
           name: Clean up tests directory
