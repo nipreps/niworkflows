@@ -151,7 +151,7 @@ COPY . /src/niworkflows/
 ARG VERSION
 RUN echo "${VERSION}" > /src/niworkflows/niworkflows/VERSION && \
     echo "include niworkflows/VERSION" >> /src/niworkflows/MANIFEST.in && \
-    pip install --no-cache-dir -e .[all] && \
+    pip install --no-cache-dir -r requirements.txt -e .[all] && \
     rm -rf $HOME/.cache/pip
 
 COPY docker/files/nipype.cfg /home/niworkflows/.nipype/nipype.cfg

@@ -1,0 +1,29 @@
+# Hints to pip-compile that combine the requirements in setup.cfg
+# and the environment pinned in fMRIPrep 20.2.x's docker/files/environment.yml
+#
+# Some dependencies need old versions of setuptools to resolve. The following environment
+# currently builds:
+#
+#  python==3.7 pip-tools setuptools<58
+#
+attrs
+jinja2
+h5py==3.5
+matplotlib==2.2.2
+nibabel >= 3.0.1
+nilearn == 0.7
+nipype >= 1.5.1, != 1.7.0
+nitransforms >= 20.0.0rc3,<20.2
+numpy==1.19
+packaging
+pandas==0.24
+pybids >= 0.11.1, < 0.15
+PyYAML
+scikit-image
+scikit-learn==0.21
+scipy==1.5
+seaborn==0.11.2
+svgutils == 0.3.1
+templateflow >= 0.6,<23
+traits==4.6.0
+transforms3d
