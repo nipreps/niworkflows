@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   docker: circleci/docker@1.6.0
+  codecov: codecov/codecov@3.2.4
 
 jobs:
   build:
@@ -222,9 +223,6 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Get codecov
-          command: python -m pip install codecov
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ .Revision }}
@@ -274,12 +272,9 @@ jobs:
                      --ignore=niworkflows/func/tests/ \
                      niworkflows/
 
-      - run:
-          name: Submit unit test coverage
-          command: |
-            cd /tmp/src/niworkflows
-            python -m codecov --file /tmp/tests/summaries/unittests.xml \
-                --flags unittests -e CIRCLE_JOB
+      - codecov/upload:
+          file: /tmp/tests/summaries/unittests.xml
+          flags: unittests
 
       - run:
           name: Run reportlet tests
@@ -294,12 +289,10 @@ jobs:
               pytest -n auto --junit-xml=/tmp/summaries/reportlets.xml \
                      --cov niworkflows --cov-report xml:/tmp/summaries/reportlets.xml \
                      niworkflows/tests/
-      - run:
-          name: Submit reportlet test coverage
-          command: |
-            cd /tmp/src/niworkflows
-            python -m codecov --file /tmp/tests/summaries/reportlets.xml \
-                --flags reportlettests -e CIRCLE_JOB
+
+      - codecov/upload:
+          file: /tmp/tests/summaries/reportlets.xml
+          flags: reportlettests
 
       - run:
           name: Clean up tests directory
@@ -417,16 +410,10 @@ jobs:
               -e COVERAGE_FILE=/tmp/masks/reports/.coverage \
               -v /tmp/masks/reports:/tmp/masks/reports \
               niworkflows:latest coverage xml -o coverage.xml
-      - run:
-          name: Get codecov
-          command: python -m pip install codecov
-      - run:
-          name: Submit masks test coverage
-          working_directory: /tmp/src/niworkflows
-          command: |
-            cp /tmp/masks/reports/coverage.xml .
-            sed -i "s+/src/niworkflows+/tmp/src/niworkflows+g" coverage.xml
-            python -m codecov --file coverage.xml --flags masks -e CIRCLE_JOB
+
+      - codecov/upload:
+          file: /tmp/tests/summaries/unittests.xml
+          flags: masks
 
   test_package:
     docker:
