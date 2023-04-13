@@ -956,7 +956,7 @@ def _tsv2json(
     drop_columns = drop_columns or []
     additional_metadata = additional_metadata or {}
     try:
-        tsv_data = pd.read_csv(in_tsv, "\t")
+        tsv_data = pd.read_csv(in_tsv, delimiter="\t")
     except pd.errors.EmptyDataError:
         tsv_data = pd.DataFrame()
     for k, v in additional_metadata.items():
