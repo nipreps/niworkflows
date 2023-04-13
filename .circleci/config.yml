@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  docker: circleci/docker@1.6.0
+  docker: circleci/docker@2.2.0
   codecov: codecov/codecov@3.2.4
 
 jobs:
@@ -25,6 +25,7 @@ jobs:
           paths:
             - /tmp/docker
             - /tmp/images
+      - docker/install-docker-credential-helper
       - run:
           name: Docker authentication
           command: |
@@ -225,6 +226,7 @@ jobs:
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-{{ .Revision }}
+      - docker/install-docker-credential-helper
       - run:
           name: Docker authentication
           command: |
@@ -332,6 +334,7 @@ jobs:
       - restore_cache:
           keys:
             - build-v1-{{ .Branch }}-
+      - docker/install-docker-credential-helper
       - run:
           name: Docker authentication
           command: |
@@ -477,6 +480,7 @@ jobs:
           paths:
             - /tmp/docker
             - /tmp/images
+      - docker/install-docker-credential-helper
       - run:
           name: Docker authentication
           command: |
