@@ -179,10 +179,10 @@ jobs:
           command: |
             cd /tmp/src/niworkflows
             set +e
-            test_masks="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[test[ _]?masks?\]' )$( echo $CIRCLE_BRANCH | grep -i -E '^masks?/' )"
+            test_masks="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[test[ _]?masks?\]' )$( echo $CIRCLE_BRANCH | grep -i -E '^(masks?|maint)/|^master$' )"
             set -e
-            if [[ "x${CIRCLE_TAG}" = "x" && "${CIRCLE_BRANCH}" != "master" && "x${test_masks}" = "x" ]]; then
-              echo "Not a tag or master branch, not a ``masks?/`` branch, no ``[test_masks]`` label in commit message"
+            if [[ "x${CIRCLE_TAG}" = "x" && "x${test_masks}" = "x" ]]; then
+              echo "Not a tag, master or maint branch, not a ``masks?/`` branch, no ``[test_masks]`` label in commit message"
               echo "Skipping download of test data for mask regressions."
               circleci step halt
             fi
@@ -319,11 +319,11 @@ jobs:
           command: |
             cd /tmp/src/niworkflows
             set +e
-            test_masks="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[test[ _]?masks?\]' )$( echo $CIRCLE_BRANCH | grep -i -E '^masks?/' )"
+            test_masks="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[test[ _]?masks?\]' )$( echo $CIRCLE_BRANCH | grep -i -E '^(masks?|maint)/|^master$' )"
             set -e
-            if [[ "x${CIRCLE_TAG}" = "x" && "${CIRCLE_BRANCH}" != "master" && "x${test_masks}" = "x" ]]; then
-              echo "Not a tag or master branch, not a ``masks?/`` branch, no ``[test_masks]`` label in commit message"
-              echo "Skipping download of test data for mask regressions."
+            if [[ "x${CIRCLE_TAG}" = "x" && "x${test_masks}" = "x" ]]; then
+              echo "Not a tag, master or maint branch, not a ``masks?/`` branch, no ``[test_masks]`` label in commit message"
+              echo "Skipping mask regressions."
               circleci step halt
             fi
 
