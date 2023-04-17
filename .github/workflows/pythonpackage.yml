@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   job_metadata:
+    if: github.repository == 'nipreps/niworkflows'
     runs-on: ubuntu-latest
     outputs:
       commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
@@ -49,6 +50,7 @@ jobs:
           echo version=$VERSION | tee -a $GITHUB_OUTPUT
 
   build:
+    if: github.repository == 'nipreps/niworkflows'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -70,6 +72,7 @@ jobs:
         path: dist/
 
   get_data:
+    if: github.repository == 'nipreps/niworkflows'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -246,6 +249,7 @@ jobs:
       name: Submit to CodeCov
 
   flake8:
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
