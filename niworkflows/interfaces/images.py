@@ -226,6 +226,9 @@ class _RobustAverageInputSpec(BaseInterfaceInputSpec):
         True, usedefault=True, desc="whether the output should be clipped below zero"
     )
     num_threads = traits.Int(desc="number of threads")
+    two_pass = traits.Bool(
+        True, usedefault=True, desc="whether two passes of correction is necessary"
+    )
 
 
 class _RobustAverageOutputSpec(TraitedSpec):
@@ -324,7 +327,7 @@ class RobustAverage(SimpleInterface):
             volreg = Volreg(
                 in_file=self._results["out_volumes"],
                 interp="Fourier",
-                args="-twopass",
+                args="-twopass" if self.inputs.two_pass else "",
                 zpad=4,
                 outputtype="NIFTI_GZ",
             )
