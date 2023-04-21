@@ -507,6 +507,9 @@
         <span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"whether the output should be clipped below zero"</span>
     <span class="p">)</span>
     <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">"number of threads"</span><span class="p">)</span>
+    <span class="n">two_pass</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
+        <span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"whether two passes of correction is necessary"</span>
+    <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_RobustAverageOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
@@ -605,7 +608,7 @@
             <span class="n">volreg</span> <span class="o">=</span> <span class="n">Volreg</span><span class="p">(</span>
                 <span class="n">in_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"out_volumes"</span><span class="p">],</span>
                 <span class="n">interp</span><span class="o">=</span><span class="s2">"Fourier"</span><span class="p">,</span>
-                <span class="n">args</span><span class="o">=</span><span class="s2">"-twopass"</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="s2">"-twopass"</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">two_pass</span> <span class="k">else</span> <span class="s2">""</span><span class="p">,</span>
                 <span class="n">zpad</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                 <span class="n">outputtype</span><span class="o">=</span><span class="s2">"NIFTI_GZ"</span><span class="p">,</span>
             <span class="p">)</span>
