@@ -62,7 +62,7 @@ def get_template_specs(in_template, template_spec=None, default_resolution=1):
     ...
 
     """
-    from templateflow.api import get as get_template
+    from templateflow.api import get as get_template, get_metadata
 
     # Massage spec (start creating if None)
     template_spec = template_spec or {}
@@ -71,6 +71,11 @@ def get_template_specs(in_template, template_spec=None, default_resolution=1):
     template_spec["resolution"] = template_spec.pop(
         "res", template_spec.get("resolution", default_resolution)
     )
+
+    metadata = get_metadata(in_template)
+    if "res" not in metadata and "resolution" not in metadata:
+        # template does not have any resolution fields
+        template_spec["resolution"] = None
 
     common_spec = {"resolution": template_spec["resolution"]}
     if "cohort" in template_spec:
