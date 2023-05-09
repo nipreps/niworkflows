@@ -429,6 +429,7 @@ class SpatialNormalization(BaseInterface):
                 self.inputs.template,
                 template_spec=template_spec,
                 default_resolution=default_resolution,
+                fallback=True,
             )
 
             # Set reference image

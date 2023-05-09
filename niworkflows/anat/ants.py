@@ -196,7 +196,7 @@ def init_brain_extraction_wf(
     template_spec["suffix"] = template_spec.get("suffix", bids_suffix)
 
     tpl_target_path, common_spec = get_template_specs(
-        in_template, template_spec=template_spec
+        in_template, template_spec=template_spec, fallback=True,
     )
 
     # Get probabilistic brain mask if available
