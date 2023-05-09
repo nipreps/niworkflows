@@ -22,6 +22,8 @@
 #
 """Miscellaneous utilities."""
 import os
+from typing import Optional
+import warnings
 
 
 __all__ = [
@@ -35,7 +37,12 @@ __all__ = [
 ]
 
 
-def get_template_specs(in_template, template_spec=None, default_resolution=1):
+def get_template_specs(
+    in_template: str,
+    template_spec: Optional[dict] = None,
+    default_resolution: int = 1,
+    fallback: bool = False
+):
     """
     Parse template specifications
 
@@ -61,8 +68,15 @@ def get_template_specs(in_template, template_spec=None, default_resolution=1):
     RuntimeError:
     ...
 
+    >>> get_template_specs('UNCInfant', {'suffix': 'T1w', 'res': 1})[1] # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    RuntimeError:
+    ...
+
+    >>> get_template_specs('UNCInfant', {'cohort': 1, 'suffix': 'T1w', 'res': 1}, fallback=True)[1]
+    {'resolution': None, 'cohort': 1}
     """
-    from templateflow.api import get as get_template, get_metadata
+    import templateflow.api as tf
 
     # Massage spec (start creating if None)
     template_spec = template_spec or {}
@@ -72,16 +86,26 @@ def get_template_specs(in_template, template_spec=None, default_resolution=1):
         "res", template_spec.get("resolution", default_resolution)
     )
 
-    metadata = get_metadata(in_template)
-    if "res" not in metadata and "resolution" not in metadata:
-        # template does not have any resolution fields
-        template_spec["resolution"] = None
+    # Verify resolution is valid
+    if fallback:
+        res = template_spec['resolution']
+        if res and not isinstance(res, list):
+            res = [int(res)]
+
+        available_resolutions = tf.TF_LAYOUT.get_resolutions(template=in_template)
+        if res and not set(res) & set(available_resolutions):
+            fallback_res = available_resolutions[0] if available_resolutions else None
+            warnings.warn(
+                f"Template {in_template} does not have resolution: {res}."
+                f"Falling back to resolution: {fallback_res}."
+            )
+            template_spec["resolution"] = fallback_res
 
     common_spec = {"resolution": template_spec["resolution"]}
     if "cohort" in template_spec:
         common_spec["cohort"] = template_spec["cohort"]
 
-    tpl_target_path = get_template(in_template, **template_spec)
+    tpl_target_path = tf.get(in_template, **template_spec)
     if not tpl_target_path:
         raise RuntimeError(
             """\
