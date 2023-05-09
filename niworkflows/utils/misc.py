@@ -68,12 +68,14 @@ def get_template_specs(
     RuntimeError:
     ...
 
-    >>> get_template_specs('UNCInfant', {'suffix': 'T1w', 'res': 1})[1] # doctest: +IGNORE_EXCEPTION_DETAIL
+    >>> get_template_specs('UNCInfant',
+    ...                    {'suffix': 'T1w', 'res': 1})[1] # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     RuntimeError:
     ...
 
-    >>> get_template_specs('UNCInfant', {'cohort': 1, 'suffix': 'T1w', 'res': 1}, fallback=True)[1]
+    >>> get_template_specs('UNCInfant',
+    ...                    {'cohort': 1, 'suffix': 'T1w', 'res': 1}, fallback=True)[1]
     {'resolution': None, 'cohort': 1}
     """
     import templateflow.api as tf
