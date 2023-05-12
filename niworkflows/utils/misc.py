@@ -91,11 +91,16 @@ def get_template_specs(
     # Verify resolution is valid
     if fallback:
         res = template_spec['resolution']
-        if res and not isinstance(res, list):
-            res = [int(res)]
+        if not isinstance(res, list):
+            try:
+                res = [int(res)]
+            except Exception:
+                res = None
+        if res is None:
+            res = []
 
         available_resolutions = tf.TF_LAYOUT.get_resolutions(template=in_template)
-        if res and not set(res) & set(available_resolutions):
+        if not (set(res) & set(available_resolutions)):
             fallback_res = available_resolutions[0] if available_resolutions else None
             warnings.warn(
                 f"Template {in_template} does not have resolution: {res}."
