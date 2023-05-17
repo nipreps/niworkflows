@@ -44,7 +44,7 @@ def init_gifti_surface_wf(
     This workflow prepares GIFTI surfaces from a FreeSurfer subjects directory
     If midthickness (or graymid) surfaces do not exist, they are generated and
     saved to the subject directory as ``lh/rh.midthickness``.
-    These, along with the gray/white matter boundary (``lh/rh.smoothwm``), pial
+    These, along with the gray/white matter boundary (``lh/rh.white``), pial
     surfaces (``lh/rh.pial``) and inflated surfaces (``lh/rh.inflated``) are
     converted to GIFTI files.
     Additionally, the vertex coordinates are :py:class:`recentered
@@ -137,11 +137,11 @@ def init_gifti_surface_wf(
         (inputnode, fsnative_2_t1_xfm, [("in_t1w", "target_file")]),
         (fssource, fsnative_2_t1_xfm, [("orig", "source_file")]),
         # Generate midthickness surfaces and save to FreeSurfer derivatives
-        (fssource, midthickness, [("smoothwm", "in_file"), ("graymid", "graymid")]),
+        (fssource, midthickness, [("white", "in_file"), ("graymid", "graymid")]),
         (midthickness, save_midthickness, [("out_file", "surf.@graymid")]),
         # Produce valid GIFTI surface files (dense mesh)
         (fssource, surface_list, [
-            ("smoothwm", "in1"), ("pial", "in2"), ("inflated", "in3"),
+            ("white", "in1"), ("pial", "in2"), ("inflated", "in3"),
         ]),
         (save_midthickness, surface_list, [("out_file", "in4")]),
         (surface_list, fs_2_gii, [("out", "in_file")]),

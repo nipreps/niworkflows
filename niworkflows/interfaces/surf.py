@@ -48,6 +48,7 @@ from nipype.interfaces.base import (
 
 SECONDARY_ANAT_STRUC = {
     "smoothwm": "GrayWhite",
+    "white": "GrayWhite",
     "pial": "Pial",
     "midthickness": "GrayMid",
 }
@@ -165,7 +166,7 @@ class Path2BIDS(SimpleInterface):
     input_spec = _Path2BIDSInputSpec
     output_spec = _Path2BIDSOutputSpec
     _pattern = re.compile(
-        r"(?P<hemi>[lr])h.(?P<suffix>(wm|smoothwm|pial|midthickness|"
+        r"(?P<hemi>[lr])h.(?P<suffix>(white|smoothwm|pial|midthickness|"
         r"inflated|vinflated|sphere|flat|sulc|curv|thickness))[\w\d_-]*(?P<extprefix>\.\w+)?"
     )
     _excluded = ("extprefix",)
