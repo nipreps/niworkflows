@@ -325,7 +325,7 @@
 <span class="sd">    This workflow prepares GIFTI surfaces from a FreeSurfer subjects directory</span>
 <span class="sd">    If midthickness (or graymid) surfaces do not exist, they are generated and</span>
 <span class="sd">    saved to the subject directory as ``lh/rh.midthickness``.</span>
-<span class="sd">    These, along with the gray/white matter boundary (``lh/rh.smoothwm``), pial</span>
+<span class="sd">    These, along with the gray/white matter boundary (``lh/rh.white``), pial</span>
 <span class="sd">    surfaces (``lh/rh.pial``) and inflated surfaces (``lh/rh.inflated``) are</span>
 <span class="sd">    converted to GIFTI files.</span>
 <span class="sd">    Additionally, the vertex coordinates are :py:class:`recentered</span>
@@ -418,11 +418,11 @@
         <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">fsnative_2_t1_xfm</span><span class="p">,</span> <span class="p">[(</span><span class="s2">"in_t1w"</span><span class="p">,</span> <span class="s2">"target_file"</span><span class="p">)]),</span>
         <span class="p">(</span><span class="n">fssource</span><span class="p">,</span> <span class="n">fsnative_2_t1_xfm</span><span class="p">,</span> <span class="p">[(</span><span class="s2">"orig"</span><span class="p">,</span> <span class="s2">"source_file"</span><span class="p">)]),</span>
         <span class="c1"># Generate midthickness surfaces and save to FreeSurfer derivatives</span>
-        <span class="p">(</span><span class="n">fssource</span><span class="p">,</span> <span class="n">midthickness</span><span class="p">,</span> <span class="p">[(</span><span class="s2">"smoothwm"</span><span class="p">,</span> <span class="s2">"in_file"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"graymid"</span><span class="p">,</span> <span class="s2">"graymid"</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">fssource</span><span class="p">,</span> <span class="n">midthickness</span><span class="p">,</span> <span class="p">[(</span><span class="s2">"white"</span><span class="p">,</span> <span class="s2">"in_file"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"graymid"</span><span class="p">,</span> <span class="s2">"graymid"</span><span class="p">)]),</span>
         <span class="p">(</span><span class="n">midthickness</span><span class="p">,</span> <span class="n">save_midthickness</span><span class="p">,</span> <span class="p">[(</span><span class="s2">"out_file"</span><span class="p">,</span> <span class="s2">"surf.@graymid"</span><span class="p">)]),</span>
         <span class="c1"># Produce valid GIFTI surface files (dense mesh)</span>
         <span class="p">(</span><span class="n">fssource</span><span class="p">,</span> <span class="n">surface_list</span><span class="p">,</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">"smoothwm"</span><span class="p">,</span> <span class="s2">"in1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"pial"</span><span class="p">,</span> <span class="s2">"in2"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"inflated"</span><span class="p">,</span> <span class="s2">"in3"</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">"white"</span><span class="p">,</span> <span class="s2">"in1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"pial"</span><span class="p">,</span> <span class="s2">"in2"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"inflated"</span><span class="p">,</span> <span class="s2">"in3"</span><span class="p">),</span>
         <span class="p">]),</span>
         <span class="p">(</span><span class="n">save_midthickness</span><span class="p">,</span> <span class="n">surface_list</span><span class="p">,</span> <span class="p">[(</span><span class="s2">"out_file"</span><span class="p">,</span> <span class="s2">"in4"</span><span class="p">)]),</span>
         <span class="p">(</span><span class="n">surface_list</span><span class="p">,</span> <span class="n">fs_2_gii</span><span class="p">,</span> <span class="p">[(</span><span class="s2">"out"</span><span class="p">,</span> <span class="s2">"in_file"</span><span class="p">)]),</span>

@@ -329,6 +329,7 @@
 
 <span class="n">SECONDARY_ANAT_STRUC</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">"smoothwm"</span><span class="p">:</span> <span class="s2">"GrayWhite"</span><span class="p">,</span>
+    <span class="s2">"white"</span><span class="p">:</span> <span class="s2">"GrayWhite"</span><span class="p">,</span>
     <span class="s2">"pial"</span><span class="p">:</span> <span class="s2">"Pial"</span><span class="p">,</span>
     <span class="s2">"midthickness"</span><span class="p">:</span> <span class="s2">"GrayMid"</span><span class="p">,</span>
 <span class="p">}</span>
@@ -446,7 +447,7 @@
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_Path2BIDSInputSpec</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_Path2BIDSOutputSpec</span>
     <span class="n">_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-        <span class="sa">r</span><span class="s2">"(?P&lt;hemi&gt;[lr])h.(?P&lt;suffix&gt;(wm|smoothwm|pial|midthickness|"</span>
+        <span class="sa">r</span><span class="s2">"(?P&lt;hemi&gt;[lr])h.(?P&lt;suffix&gt;(white|smoothwm|pial|midthickness|"</span>
         <span class="sa">r</span><span class="s2">"inflated|vinflated|sphere|flat|sulc|curv|thickness))[\w\d_-]*(?P&lt;extprefix&gt;\.\w+)?"</span>
     <span class="p">)</span>
     <span class="n">_excluded</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"extprefix"</span><span class="p">,)</span>
