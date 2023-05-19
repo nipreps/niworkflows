@@ -303,6 +303,8 @@
 <span class="c1">#</span>
 <span class="sd">"""Miscellaneous utilities."""</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -316,7 +318,12 @@
 <span class="p">]</span>
 
 
-<div class="viewcode-block" id="get_template_specs"><a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.get_template_specs">[docs]</a><span class="k">def</span> <span class="nf">get_template_specs</span><span class="p">(</span><span class="n">in_template</span><span class="p">,</span> <span class="n">template_spec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">default_resolution</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="get_template_specs"><a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.get_template_specs">[docs]</a><span class="k">def</span> <span class="nf">get_template_specs</span><span class="p">(</span>
+    <span class="n">in_template</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">template_spec</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default_resolution</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">fallback</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Parse template specifications</span>
 
@@ -342,8 +349,17 @@
 <span class="sd">    RuntimeError:</span>
 <span class="sd">    ...</span>
 
+<span class="sd">    &gt;&gt;&gt; get_template_specs('UNCInfant',</span>
+<span class="sd">    ...                    {'suffix': 'T1w', 'res': 1})[1] # doctest: +IGNORE_EXCEPTION_DETAIL</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    RuntimeError:</span>
+<span class="sd">    ...</span>
+
+<span class="sd">    &gt;&gt;&gt; get_template_specs('UNCInfant',</span>
+<span class="sd">    ...                    {'cohort': 1, 'suffix': 'T1w', 'res': 1}, fallback=True)[1]</span>
+<span class="sd">    {'resolution': None, 'cohort': 1}</span>
 <span class="sd">    """</span>
-    <span class="kn">from</span> <span class="nn">templateflow.api</span> <span class="kn">import</span> <span class="n">get</span> <span class="k">as</span> <span class="n">get_template</span>
+    <span class="kn">import</span> <span class="nn">templateflow.api</span> <span class="k">as</span> <span class="nn">tf</span>
 
     <span class="c1"># Massage spec (start creating if None)</span>
     <span class="n">template_spec</span> <span class="o">=</span> <span class="n">template_spec</span> <span class="ow">or</span> <span class="p">{}</span>
@@ -353,11 +369,31 @@
         <span class="s2">"res"</span><span class="p">,</span> <span class="n">template_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"resolution"</span><span class="p">,</span> <span class="n">default_resolution</span><span class="p">)</span>
     <span class="p">)</span>
 
+    <span class="c1"># Verify resolution is valid</span>
+    <span class="k">if</span> <span class="n">fallback</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">template_spec</span><span class="p">[</span><span class="s1">'resolution'</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">res</span><span class="p">)]</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">available_resolutions</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">TF_LAYOUT</span><span class="o">.</span><span class="n">get_resolutions</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">in_template</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">available_resolutions</span><span class="p">)):</span>
+            <span class="n">fallback_res</span> <span class="o">=</span> <span class="n">available_resolutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">available_resolutions</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Template </span><span class="si">{</span><span class="n">in_template</span><span class="si">}</span><span class="s2"> does not have resolution: </span><span class="si">{</span><span class="n">res</span><span class="si">}</span><span class="s2">."</span>
+                <span class="sa">f</span><span class="s2">"Falling back to resolution: </span><span class="si">{</span><span class="n">fallback_res</span><span class="si">}</span><span class="s2">."</span>
+            <span class="p">)</span>
+            <span class="n">template_spec</span><span class="p">[</span><span class="s2">"resolution"</span><span class="p">]</span> <span class="o">=</span> <span class="n">fallback_res</span>
+
     <span class="n">common_spec</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"resolution"</span><span class="p">:</span> <span class="n">template_spec</span><span class="p">[</span><span class="s2">"resolution"</span><span class="p">]}</span>
     <span class="k">if</span> <span class="s2">"cohort"</span> <span class="ow">in</span> <span class="n">template_spec</span><span class="p">:</span>
         <span class="n">common_spec</span><span class="p">[</span><span class="s2">"cohort"</span><span class="p">]</span> <span class="o">=</span> <span class="n">template_spec</span><span class="p">[</span><span class="s2">"cohort"</span><span class="p">]</span>
 
-    <span class="n">tpl_target_path</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span><span class="n">in_template</span><span class="p">,</span> <span class="o">**</span><span class="n">template_spec</span><span class="p">)</span>
+    <span class="n">tpl_target_path</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">in_template</span><span class="p">,</span> <span class="o">**</span><span class="n">template_spec</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">tpl_target_path</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
             <span class="sd">"""\</span>
