@@ -1,3 +1,26 @@
+1.8.0 (June 01, 2023)
+=====================
+New feature release in the 1.8.x series.
+
+This includes only bug-fixes, however the reselection of "white" surfaces
+as the default gray/white boundary instead of "smoothwm" justifies a minor
+release.
+
+* FIX: Add desc entity to all path patterns (#808)
+* FIX: Inspect if template has resolution instead of assuming (#803)
+* FIX: Add missing ``dir-{direction}`` pattern for data sinking DWI reportlets (#807)
+* FIX: Move from smoothwm to white (#806)
+* FIX: Add option to bypass twopass in AFNI RobustAverage (#801)
+* FIX: Use len(segments) to avoid nsegments becoming wrong (#795)
+* MNT: Add PendingDeprecationWarning to nireports modules (#810)
+* MNT: Configure dependabot to upgrade actions (#796)
+* MNT: Drop Python 3.7 support, test 3.11 (#793)
+* MNT: Update build system and CI invocations (#792)
+* CI: Do not run scheduled builds on forks (#800)
+* CI: Bump codespell-project/actions-codespell from 1 to 2 (#805)
+* CI: Bump actions/checkout from 2 to 3 (#797)
+* CI: Build and upload wheels (#791)
+
 1.7.9 (April 11, 2023)
 ======================
 Patch release in the 1.7.x series.
