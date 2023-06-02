@@ -1,0 +1,565 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.anat.coregistration module" href="niworkflows.anat.coregistration.html" /><link rel="prev" title="niworkflows.anat package" href="niworkflows.anat.html" />
+
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
+        <title>niworkflows.anat.ants module - niworkflows 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/version-switch.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">niworkflows 0+unknown documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+    <span class="sidebar-brand-text">niworkflows</span>
+    <span id="version-slug" class="sidebar-brand-text">0 (dev)</span>
+</a>
+
+<!-- Versions dropdown -->
+<div id="version-menu" class="version-tree">
+  <ul>
+  <li class="toctree-l1 has-children">
+  <span class="sidebar-brand-text">0 (dev)</span>
+  <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
+  <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
+  <ul id="v-tags"></ul>
+  </ul>
+</div><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../api.html">Library API (application program interface)</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="niworkflows.anat.html">niworkflows.anat package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">niworkflows.anat.ants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.coregistration.html">niworkflows.anat.coregistration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.freesurfer.html">niworkflows.anat.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.skullstrip.html">niworkflows.anat.skullstrip module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.cli.html">niworkflows.cli package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.cli.boldref.html">niworkflows.cli.boldref module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.engine.workflows.html">niworkflows.engine.workflows module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.func.html">niworkflows.func package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.func.util.html">niworkflows.func.util module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="niworkflows.interfaces.reportlets.html">niworkflows.interfaces.reportlets package</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.base.html">niworkflows.interfaces.reportlets.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.masks.html">niworkflows.interfaces.reportlets.masks module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.registration.html">niworkflows.interfaces.reportlets.registration module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.segmentation.html">niworkflows.interfaces.reportlets.segmentation module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.bids.html">niworkflows.interfaces.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.bold.html">niworkflows.interfaces.bold module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.confounds.html">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.header.html">niworkflows.interfaces.header module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.images.html">niworkflows.interfaces.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.itk.html">niworkflows.interfaces.itk module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.morphology.html">niworkflows.interfaces.morphology module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.nibabel.html">niworkflows.interfaces.nibabel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.nilearn.html">niworkflows.interfaces.nilearn module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.nitransforms.html">niworkflows.interfaces.nitransforms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.norm.html">niworkflows.interfaces.norm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.patches.html">niworkflows.interfaces.patches module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.plotting.html">niworkflows.interfaces.plotting module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.probmaps.html">niworkflows.interfaces.probmaps module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.reports.core.html">niworkflows.reports.core module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.bids.html">niworkflows.utils.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.connections.html">niworkflows.utils.connections module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.images.html">niworkflows.utils.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.misc.html">niworkflows.utils.misc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.spaces.html">niworkflows.utils.spaces module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.testing.html">niworkflows.utils.testing module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.timeseries.html">niworkflows.utils.timeseries module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.viz.html">niworkflows.viz package</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.viz.notebook.html">niworkflows.viz.notebook module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.viz.plots.html">niworkflows.viz.plots module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.viz.utils.html">niworkflows.viz.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.workflows.html">niworkflows.workflows package</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="niworkflows.workflows.epi.html">niworkflows.workflows.epi package</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.workflows.epi.refmap.html">niworkflows.workflows.epi.refmap module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new?</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-niworkflows.anat.ants">
+<span id="niworkflows-anat-ants-module"></span><h1>niworkflows.anat.ants module<a class="headerlink" href="#module-niworkflows.anat.ants" title="Permalink to this headline">#</a></h1>
+<p>Nipype translation of ANTs’ workflows.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="niworkflows.anat.ants.init_atropos_wf">
+<span class="sig-prename descclassname"><span class="pre">niworkflows.anat.ants.</span></span><span class="sig-name descname"><span class="pre">init_atropos_wf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'atropos_wf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_random_seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omp_nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mem_gb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_segmentation_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(3,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bspline_fitting_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wm_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/anat/ants.html#init_atropos_wf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.anat.ants.init_atropos_wf" title="Permalink to this definition">#</a></dt>
+<dd><p>Create an ANTs’ ATROPOS workflow for brain tissue segmentation.</p>
+<p>Re-interprets supersteps 6 and 7 of <code class="docutils literal notranslate"><span class="pre">antsBrainExtraction.sh</span></code>,
+which refine the mask previously computed with the spatial
+normalization to the template.
+The workflow also executes steps 8 and 9 of the brain extraction
+workflow.</p>
+<dl>
+<dt>Workflow Graph</dt><dd><figure class="align-default">
+<img alt="../_images/niworkflows-anat-ants-1.png" src="../_images/niworkflows-anat-ants-1.png"/>
+</figure>
+<p>(<a class="reference external" href="../api/niworkflows-anat-ants-1.py">Source code</a>, <a class="reference external" href="../api/niworkflows-anat-ants-1.png">png</a>, <a class="reference external" href="../api/niworkflows-anat-ants-1.svg">svg</a>, <a class="reference external" href="../api/niworkflows-anat-ants-1.pdf">pdf</a>)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str, optional</em>) – Workflow name (default: “atropos_wf”).</p></li>
+<li><p><strong>use_random_seed</strong> (<em>bool</em>) – Whether ATROPOS should generate a random seed based on the
+system’s clock</p></li>
+<li><p><strong>omp_nthreads</strong> (<em>int</em>) – Maximum number of threads an individual process may use</p></li>
+<li><p><strong>mem_gb</strong> (<em>float</em>) – Estimated peak memory consumption of the most hungry nodes
+in the workflow</p></li>
+<li><p><strong>padding</strong> (<em>int</em>) – Pad images with zeros before processing</p></li>
+<li><p><strong>in_segmentation_model</strong> (<em>tuple</em>) – A k-means segmentation is run to find gray or white matter
+around the edge of the initial brain mask warped from the
+template.
+This produces a segmentation image with <span class="math notranslate nohighlight">\($K$\)</span> classes,
+ordered by mean intensity in increasing order.
+With this option, you can control  <span class="math notranslate nohighlight">\($K$\)</span> and tell the script which
+classes represent CSF, gray and white matter.
+Format (K, csfLabel, gmLabel, wmLabel).
+Examples:
+<code class="docutils literal notranslate"><span class="pre">(3,1,2,3)</span></code> for T1 with K=3, CSF=1, GM=2, WM=3 (default),
+<code class="docutils literal notranslate"><span class="pre">(3,3,2,1)</span></code> for T2 with K=3, CSF=3, GM=2, WM=1,
+<code class="docutils literal notranslate"><span class="pre">(3,1,3,2)</span></code> for FLAIR with K=3, CSF=1 GM=3, WM=2,
+<code class="docutils literal notranslate"><span class="pre">(4,4,2,3)</span></code> uses K=4, CSF=4, GM=2, WM=3.</p></li>
+<li><p><strong>bspline_fitting_distance</strong> (<em>float</em>) – The size of the b-spline mesh grid elements, in mm (default: 200)</p></li>
+<li><p><strong>wm_prior</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>) – Whether the WM posterior obtained with ATROPOS should be regularized with a prior
+map (typically, mapped from the template). When <code class="docutils literal notranslate"><span class="pre">wm_prior</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> the input
+field <code class="docutils literal notranslate"><span class="pre">wm_prior</span></code> of the input node must be connected.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>in_files</strong> (<em>list</em>) – The original anatomical images passed in to the brain-extraction workflow.</p></li>
+<li><p><strong>in_corrected</strong> (<em>list</em>) – <abbr title="intensity non-uniformity">INU</abbr>-corrected files.</p></li>
+<li><p><strong>in_mask</strong> (<em>str</em>) – Brain mask calculated previously.</p></li>
+<li><p><strong>wm_prior</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Path to the WM prior probability map, aligned with the individual data.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Path of the corrected and brain-extracted result, using the ATROPOS refinement.</p></li>
+<li><p><strong>bias_corrected</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Path of the corrected and result, using the ATROPOS refinement.</p></li>
+<li><p><strong>bias_image</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Path of the estimated INU bias field, using the ATROPOS refinement.</p></li>
+<li><p><strong>out_mask</strong> (<em>str</em>) – Refined brain mask</p></li>
+<li><p><strong>out_segm</strong> (<em>str</em>) – Output segmentation</p></li>
+<li><p><strong>out_tpms</strong> (<em>str</em>) – Output <abbr title="tissue probability maps">TPMs</abbr></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="niworkflows.anat.ants.init_brain_extraction_wf">
+<span class="sig-prename descclassname"><span class="pre">niworkflows.anat.ants.</span></span><span class="sig-name descname"><span class="pre">init_brain_extraction_wf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'brain_extraction_wf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'OASIS30ANTs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_float</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_quality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'precise'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omp_nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mem_gb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'T1w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atropos_refine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atropos_use_random_seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atropos_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_laplacian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bspline_fitting_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/anat/ants.html#init_brain_extraction_wf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.anat.ants.init_brain_extraction_wf" title="Permalink to this definition">#</a></dt>
+<dd><p>Build a workflow for atlas-based brain extraction on anatomical MRI data.</p>
+<p>This is a Nipype implementation of atlas-based brain extraction inspired by
+the official ANTs’ <code class="docutils literal notranslate"><span class="pre">antsBrainExtraction.sh</span></code> workflow (only for 3D images).</p>
+<p>The workflow follows the following structure:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Step 1 performs several clerical tasks (preliminary INU correction,
+calculating the Laplacian of inputs, affine initialization) and the
+core spatial normalization.</p></li>
+<li><p>Maps the brain mask into target space using the normalization
+calculated in 1.</p></li>
+<li><p>Superstep 1b: binarization of the brain mask</p></li>
+<li><p>Maps the WM (white matter) probability map from the template, if such prior exists.
+Combines the BS (brainstem) probability map before mapping if the WM
+and BS are given separately (as it is the case for <code class="docutils literal notranslate"><span class="pre">OASIS30ANTs</span></code>.)</p></li>
+<li><p>Run a second N4 INU correction round, using the prior mapped into
+individual step in step 4 if available.</p></li>
+<li><p>Superstep 6: apply ATROPOS on the INU-corrected result of step 5, and
+massage its outputs</p></li>
+<li><p>Superstep 7: use results from 4 to refine the brain mask</p></li>
+<li><p>If exist, use priors from step 4, calculate the overlap of the posteriors
+estimated in step 4 to select that overlapping the most with the WM+BS
+prior from the template. Combine that posterior with the refined brain
+mask and pass it on to the next step.</p></li>
+<li><p>Apply a final N4 using the refined brain mask (or the map calculated in
+step 8 if priors were found) as weights map for the algorithm.</p></li>
+</ol>
+</div></blockquote>
+<dl>
+<dt>Workflow Graph</dt><dd><figure class="align-default">
+<img alt="../_images/niworkflows-anat-ants-2.png" src="../_images/niworkflows-anat-ants-2.png"/>
+</figure>
+<p>(<a class="reference external" href="../api/niworkflows-anat-ants-2.py">Source code</a>, <a class="reference external" href="../api/niworkflows-anat-ants-2.png">png</a>, <a class="reference external" href="../api/niworkflows-anat-ants-2.svg">svg</a>, <a class="reference external" href="../api/niworkflows-anat-ants-2.pdf">pdf</a>)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_template</strong> (<em>str</em>) – Name of the skull-stripping template (‘OASIS30ANTs’, ‘NKI’, or
+path).
+The brain template from which regions will be projected
+Anatomical template created using e.g. LPBA40 data set with
+<code class="docutils literal notranslate"><span class="pre">buildtemplateparallel.sh</span></code> in ANTs.
+The workflow will automatically search for a brain probability
+mask created using e.g. LPBA40 data set which have brain masks
+defined, and warped to anatomical template and
+averaged resulting in a probability image.</p></li>
+<li><p><strong>use_float</strong> (<em>bool</em>) – Whether single precision should be used</p></li>
+<li><p><strong>normalization_quality</strong> (<em>str</em>) – Use more precise or faster registration parameters
+(default: <code class="docutils literal notranslate"><span class="pre">precise</span></code>, other possible values: <code class="docutils literal notranslate"><span class="pre">testing</span></code>)</p></li>
+<li><p><strong>omp_nthreads</strong> (<em>int</em>) – Maximum number of threads an individual process may use</p></li>
+<li><p><strong>mem_gb</strong> (<em>float</em>) – Estimated peak memory consumption of the most hungry nodes
+in the workflow</p></li>
+<li><p><strong>bids_suffix</strong> (<em>str</em>) – Sequence type of the first input image. For a list of acceptable values
+see <a class="reference external" href="https://bids-specification.readthedocs.io/en/latest/04-modality-specific-files/01-magnetic-resonance-imaging-data.html#anatomy-imaging-data">https://bids-specification.readthedocs.io/en/latest/04-modality-specific-files/01-magnetic-resonance-imaging-data.html#anatomy-imaging-data</a></p></li>
+<li><p><strong>atropos_refine</strong> (<em>bool</em>) – Enables or disables the whole ATROPOS sub-workflow</p></li>
+<li><p><strong>atropos_use_random_seed</strong> (<em>bool</em>) – Whether ATROPOS should generate a random seed based on the
+system’s clock</p></li>
+<li><p><strong>atropos_model</strong> (<em>tuple or None</em>) – Allows to specify a particular segmentation model, overwriting
+the defaults based on <code class="docutils literal notranslate"><span class="pre">bids_suffix</span></code></p></li>
+<li><p><strong>use_laplacian</strong> (<em>bool</em>) – Enables or disables alignment of the Laplacian as an additional
+criterion for image registration quality (default: True)</p></li>
+<li><p><strong>bspline_fitting_distance</strong> (<em>float</em>) – The size of the b-spline mesh grid elements, in mm (default: 200)</p></li>
+<li><p><strong>name</strong> (<em>str, optional</em>) – Workflow name (default: antsBrainExtraction)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Inputs</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>in_files</strong> (<em>list</em>) – List of input anatomical images to be brain-extracted,
+typically T1-weighted.
+If a list of anatomical images is provided, subsequently
+specified images are used during the segmentation process.
+However, only the first image is used in the registration
+of priors.
+Our suggestion would be to specify the T1w as the first image.</p></li>
+<li><p><strong>in_mask</strong> (<em>list, optional</em>) – Mask used for registration to limit the metric
+computation to a specific region.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_file</strong> (<em>str</em>) – Skull-stripped and <abbr title="intensity non-uniformity">INU</abbr>-corrected <code class="docutils literal notranslate"><span class="pre">in_files</span></code></p></li>
+<li><p><strong>out_mask</strong> (<em>str</em>) – Calculated brain mask</p></li>
+<li><p><strong>bias_corrected</strong> (<em>str</em>) – The <code class="docutils literal notranslate"><span class="pre">in_files</span></code> input images, after <abbr title="intensity non-uniformity">INU</abbr>
+correction, before skull-stripping.</p></li>
+<li><p><strong>bias_image</strong> (<em>str</em>) – The <abbr title="intensity non-uniformity">INU</abbr> field estimated for each
+input in <code class="docutils literal notranslate"><span class="pre">in_files</span></code></p></li>
+<li><p><strong>out_segm</strong> (<em>str</em>) – Output segmentation by ATROPOS</p></li>
+<li><p><strong>out_tpms</strong> (<em>str</em>) – Output <abbr title="tissue probability maps">TPMs</abbr> by ATROPOS</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="niworkflows.anat.ants.init_n4_only_wf">
+<span class="sig-prename descclassname"><span class="pre">niworkflows.anat.ants.</span></span><span class="sig-name descname"><span class="pre">init_n4_only_wf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atropos_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atropos_refine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atropos_use_random_seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'T1w'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mem_gb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'n4_only_wf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omp_nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/anat/ants.html#init_n4_only_wf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.anat.ants.init_n4_only_wf" title="Permalink to this definition">#</a></dt>
+<dd><p>Build a workflow to sidetrack brain extraction on skull-stripped datasets.</p>
+<p>An alternative workflow to “init_brain_extraction_wf”, for anatomical
+images which have already been brain extracted.</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Creates brain mask assuming all zero voxels are outside the brain</p></li>
+<li><p>Applies N4 bias field correction</p></li>
+<li><p>(Optional) apply ATROPOS and massage its outputs</p></li>
+<li><p>Use results from 3 to refine N4 bias field correction</p></li>
+</ol>
+</div></blockquote>
+<dl>
+<dt>Workflow Graph</dt><dd><figure class="align-default">
+<img alt="../_images/niworkflows-anat-ants-3.png" src="../_images/niworkflows-anat-ants-3.png"/>
+</figure>
+<p>(<a class="reference external" href="../api/niworkflows-anat-ants-3.py">Source code</a>, <a class="reference external" href="../api/niworkflows-anat-ants-3.png">png</a>, <a class="reference external" href="../api/niworkflows-anat-ants-3.svg">svg</a>, <a class="reference external" href="../api/niworkflows-anat-ants-3.pdf">pdf</a>)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>omp_nthreads</strong> (<em>int</em>) – Maximum number of threads an individual process may use</p></li>
+<li><p><strong>mem_gb</strong> (<em>float</em>) – Estimated peak memory consumption of the most hungry nodes</p></li>
+<li><p><strong>bids_suffix</strong> (<em>str</em>) – Sequence type of the first input image. For a list of acceptable values see
+<a class="reference external" href="https://bids-specification.readthedocs.io/en/latest/04-modality-specific-files/01-magnetic-resonance-imaging-data.html#anatomy-imaging-data">https://bids-specification.readthedocs.io/en/latest/04-modality-specific-files/01-magnetic-resonance-imaging-data.html#anatomy-imaging-data</a></p></li>
+<li><p><strong>atropos_refine</strong> (<em>bool</em>) – Enables or disables the whole ATROPOS sub-workflow</p></li>
+<li><p><strong>atropos_use_random_seed</strong> (<em>bool</em>) – Whether ATROPOS should generate a random seed based on the
+system’s clock</p></li>
+<li><p><strong>atropos_model</strong> (<em>tuple or None</em>) – Allows to specify a particular segmentation model, overwriting
+the defaults based on <code class="docutils literal notranslate"><span class="pre">bids_suffix</span></code></p></li>
+<li><p><strong>name</strong> (<em>str, optional</em>) – Workflow name (default: <code class="docutils literal notranslate"><span class="pre">'n4_only_wf'</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Inputs</dt>
+<dd class="field-even"><p><strong>in_files</strong> – List of input anatomical images to be bias corrected,
+typically T1-weighted.
+If a list of anatomical images is provided, subsequently
+specified images are used during the segmentation process.
+However, only the first image is used in the registration
+of priors.
+Our suggestion would be to specify the T1w as the first image.</p>
+</dd>
+<dt class="field-odd">Outputs</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_file</strong> – <abbr title="intensity non-uniformity">INU</abbr>-corrected <code class="docutils literal notranslate"><span class="pre">in_files</span></code></p></li>
+<li><p><strong>out_mask</strong> – Calculated brain mask</p></li>
+<li><p><strong>bias_corrected</strong> – Same as “out_file”, provided for consistency with brain extraction</p></li>
+<li><p><strong>bias_image</strong> – The <abbr title="intensity non-uniformity">INU</abbr> field estimated for each
+input in <code class="docutils literal notranslate"><span class="pre">in_files</span></code></p></li>
+<li><p><strong>out_segm</strong> – Output segmentation by ATROPOS</p></li>
+<li><p><strong>out_tpms</strong> – Output <abbr title="tissue probability maps">TPMs</abbr> by ATROPOS</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="niworkflows.anat.coregistration.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">niworkflows.anat.coregistration module</div>
+              </div>
+              <svg><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="niworkflows.anat.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">niworkflows.anat package</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Copyright 2023, The NiPreps Developers
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/version-switch.js"></script>
+    </body>
+</html>
