@@ -558,6 +558,66 @@ class UnzipJoinedSurfaces(SimpleInterface):
         return runtime
 
 
+class CreateSurfaceROIInputSpec(TraitedSpec):
+    subject_id = traits.Str(desc='subject ID')
+    hemisphere = traits.Enum(
+        "L",
+        "R",
+        mandatory=True,
+        desc='hemisphere',
+    )
+    thickness_file = File(exists=True, mandatory=True, desc='input GIFTI file')
+
+
+class CreateSurfaceROIOutputSpec(TraitedSpec):
+    roi_file = File(desc='output GIFTI file')
+
+
+class CreateSurfaceROI(SimpleInterface):
+    """Prepare GIFTI shape file for use in cortical masking
+
+    Distilled from the FreeSurfer2CaretConvertAndRegisterNonlinear.sh script in
+    DCAN-HCP PostFreeSurfer scripts (as of commit 9291324). The relevant lines
+    are 277-290.
+    """
+
+    input_spec = CreateSurfaceROIInputSpec
+    output_spec = CreateSurfaceROIOutputSpec
+
+    def _run_interface(self, runtime):
+        subject, hemi = self.inputs.subject_id, self.inputs.hemisphere
+        if not isdefined(subject):
+            subject = 'sub-XYZ'
+        img = nb.GiftiImage.from_filename(self.inputs.thickness_file)
+        # wb_command -set-structure (L282)
+        img.meta["AnatomicalStructurePrimary"] = {'L': 'CortexLeft', 'R': 'CortexRight'}[hemi]
+        darray = img.darrays[0]
+        # wb_command -set-map-names (L284)
+        meta = darray.meta
+        meta['Name'] = f"{subject}_{hemi}_ROI"
+        # wb_command -metric-palette calls (L285, L289) have no effect on ROI files
+
+        # Compiling an odd sequence of math operations (L283, L288, L290) that work out to:
+        # wb_command -metric-math "abs(var * -1) > 0"
+        roi = np.abs(darray.data) > 0
+
+        darray = nb.gifti.GiftiDataArray(
+            roi,
+            intent=darray.intent,
+            datatype=darray.datatype,
+            encoding=darray.encoding,
+            endian=darray.endian,
+            coordsys=darray.coordsys,
+            ordering=darray.ind_ord,
+            meta=meta,
+        )
+
+        out_filename = os.path.join(runtime.cwd, f"{subject}.{hemi}.roi.native.shape.gii")
+        img.to_filename(out_filename)
+        self._results["roi_file"] = out_filename
+        return runtime
+
+
 def normalize_surfs(in_file, transform_file, newpath=None):
     """
     Re-center GIFTI coordinates to fit align to native T1w space.
