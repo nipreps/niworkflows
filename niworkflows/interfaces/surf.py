@@ -574,7 +574,12 @@ class CreateSurfaceROIOutputSpec(TraitedSpec):
 
 
 class CreateSurfaceROI(SimpleInterface):
-    """Prepare GIFTI shape file for use in"""
+    """Prepare GIFTI shape file for use in cortical masking
+
+    Distilled from the FreeSurfer2CaretConvertAndRegisterNonlinear.sh script in
+    DCAN-HCP PostFreeSurfer scripts (as of commit 9291324). The relevant lines
+    are 277-290.
+    """
 
     input_spec = CreateSurfaceROIInputSpec
     output_spec = CreateSurfaceROIOutputSpec
@@ -584,15 +589,15 @@ class CreateSurfaceROI(SimpleInterface):
         if not isdefined(subject):
             subject = 'sub-XYZ'
         img = nb.GiftiImage.from_filename(self.inputs.thickness_file)
-        # wb_command -set-structure
+        # wb_command -set-structure (L282)
         img.meta["AnatomicalStructurePrimary"] = {'L': 'CortexLeft', 'R': 'CortexRight'}[hemi]
         darray = img.darrays[0]
-        # wb_command -set-map-names
+        # wb_command -set-map-names (L284)
         meta = darray.meta
         meta['Name'] = f"{subject}_{hemi}_ROI"
-        # wb_command -metric-palette calls have no effect on ROI files
+        # wb_command -metric-palette calls (L285, L289) have no effect on ROI files
 
-        # Compiling an odd sequence of math operations that works out to:
+        # Compiling an odd sequence of math operations (L283, L288, L290) that work out to:
         # wb_command -metric-math "abs(var * -1) > 0"
         roi = np.abs(darray.data) > 0
 
