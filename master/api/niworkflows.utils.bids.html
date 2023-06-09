@@ -199,6 +199,7 @@
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.bold.html">niworkflows.interfaces.bold module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.confounds.html">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.conftest.html">niworkflows.interfaces.conftest module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.header.html">niworkflows.interfaces.header module</a></li>
@@ -215,6 +216,7 @@
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.workbench.html">niworkflows.interfaces.workbench module</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -296,12 +298,6 @@
 <dt class="sig sig-object py" id="niworkflows.utils.bids.check_pipeline_version">
 <span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">check_pipeline_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cvers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#check_pipeline_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.check_pipeline_version" title="Permalink to this definition">#</a></dt>
 <dd><p>Search for existing BIDS pipeline output and compares against current pipeline version.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">json</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"PipelineDescription"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"Version"</span><span class="p">:</span> <span class="s2">"1.1.1rc5"</span><span class="p">}}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">desc_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span> <span class="o">/</span> <span class="s1">'sample_dataset_description.json'</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">desc_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-</pre></div>
-</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -314,9 +310,7 @@
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">check_pipeline_version</span><span class="p">(</span><span class="s1">'1.1.1rc5'</span><span class="p">,</span> <span class="s1">'sample_dataset_description.json'</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
 <span class="go">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">check_pipeline_version</span><span class="p">(</span><span class="s1">'1.1.1rc5+129.gbe0e5158'</span><span class="p">,</span> <span class="s1">'sample_dataset_description.json'</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">check_pipeline_version</span><span class="p">(</span><span class="s1">'1.2'</span><span class="p">,</span> <span class="s1">'sample_dataset_description.json'</span><span class="p">)</span>  
+<span class="gp">&gt;&gt;&gt; </span><span class="n">check_pipeline_version</span><span class="p">(</span><span class="s1">'1.2'</span><span class="p">,</span> <span class="s1">'sample_dataset_description.json'</span><span class="p">)</span>  
 <span class="go">'Previous output generated ...'</span>
 </pre></div>
 </div>

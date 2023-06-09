@@ -197,6 +197,7 @@
 <li class="toctree-l3"><a class="reference internal" href="api/niworkflows.interfaces.bold.html">niworkflows.interfaces.bold module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/niworkflows.interfaces.confounds.html">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/niworkflows.interfaces.conftest.html">niworkflows.interfaces.conftest module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/niworkflows.interfaces.header.html">niworkflows.interfaces.header module</a></li>
@@ -213,6 +214,7 @@
 <li class="toctree-l3"><a class="reference internal" href="api/niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/niworkflows.interfaces.workbench.html">niworkflows.interfaces.workbench module</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="api/niworkflows.reports.html">niworkflows.reports package</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -386,10 +388,10 @@
 </li>
         <li><a href="api/niworkflows.viz.plots.html#niworkflows.viz.plots.compcor_variance_plot">compcor_variance_plot() (in module niworkflows.viz.plots)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/niworkflows.interfaces.plotting.html#niworkflows.interfaces.plotting.CompCorVariancePlot">CompCorVariancePlot (class in niworkflows.interfaces.plotting)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/niworkflows.viz.utils.html#niworkflows.viz.utils.compose_view">compose_view() (in module niworkflows.viz.utils)</a>
 </li>
         <li><a href="api/niworkflows.interfaces.nilearn.html#niworkflows.interfaces.nilearn.ComputeEPIMask">ComputeEPIMask (class in niworkflows.interfaces.nilearn)</a>
@@ -414,6 +416,8 @@
 </li>
         <li><a href="api/niworkflows.interfaces.norm.html#niworkflows.interfaces.norm.create_cfm">create_cfm() (in module niworkflows.interfaces.norm)</a>
 </li>
+        <li><a href="api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.CreateSurfaceROI">CreateSurfaceROI (class in niworkflows.interfaces.surf)</a>
+</li>
         <li><a href="api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.CSVToGifti">CSVToGifti (class in niworkflows.interfaces.surf)</a>
 </li>
         <li><a href="api/niworkflows.viz.utils.html#niworkflows.viz.utils.cuts_from_bbox">cuts_from_bbox() (in module niworkflows.viz.utils)</a>
@@ -426,16 +430,18 @@
   <h2>D</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/niworkflows.interfaces.conftest.html#niworkflows.interfaces.conftest.data_dir">data_dir() (in module niworkflows.interfaces.conftest)</a>
+</li>
         <li><a href="api/niworkflows.utils.images.html#niworkflows.utils.images.demean">demean() (in module niworkflows.utils.images)</a>
 </li>
         <li><a href="api/niworkflows.interfaces.nibabel.html#niworkflows.interfaces.nibabel.DemeanImage">DemeanImage (class in niworkflows.interfaces.nibabel)</a>
 </li>
         <li><a href="api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.DerivativesDataSink">DerivativesDataSink (class in niworkflows.interfaces.bids)</a>
 </li>
-        <li><a href="api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.detect_inputs">detect_inputs() (in module niworkflows.interfaces.freesurfer)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.detect_inputs">detect_inputs() (in module niworkflows.interfaces.freesurfer)</a>
+</li>
         <li><a href="api/niworkflows.interfaces.utility.html#niworkflows.interfaces.utility.DictMerge">DictMerge (class in niworkflows.interfaces.utility)</a>
 </li>
         <li><a href="api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.Reference.dim">dim (niworkflows.utils.spaces.Reference attribute)</a>
@@ -702,6 +708,16 @@
 </li>
         <li><a href="api/niworkflows.interfaces.nibabel.html#niworkflows.interfaces.nibabel.MergeSeries">MergeSeries (class in niworkflows.interfaces.nibabel)</a>
 </li>
+        <li><a href="api/niworkflows.interfaces.workbench.html#niworkflows.interfaces.workbench.MetricDilate">MetricDilate (class in niworkflows.interfaces.workbench)</a>
+</li>
+        <li><a href="api/niworkflows.interfaces.workbench.html#niworkflows.interfaces.workbench.MetricFillHoles">MetricFillHoles (class in niworkflows.interfaces.workbench)</a>
+</li>
+        <li><a href="api/niworkflows.interfaces.workbench.html#niworkflows.interfaces.workbench.MetricMask">MetricMask (class in niworkflows.interfaces.workbench)</a>
+</li>
+        <li><a href="api/niworkflows.interfaces.workbench.html#niworkflows.interfaces.workbench.MetricRemoveIslands">MetricRemoveIslands (class in niworkflows.interfaces.workbench)</a>
+</li>
+        <li><a href="api/niworkflows.interfaces.workbench.html#niworkflows.interfaces.workbench.MetricResample">MetricResample (class in niworkflows.interfaces.workbench)</a>
+</li>
         <li>
     module
 
@@ -739,6 +755,8 @@
           <li><a href="api/niworkflows.interfaces.cifti.html#module-niworkflows.interfaces.cifti">niworkflows.interfaces.cifti</a>
 </li>
           <li><a href="api/niworkflows.interfaces.confounds.html#module-niworkflows.interfaces.confounds">niworkflows.interfaces.confounds</a>
+</li>
+          <li><a href="api/niworkflows.interfaces.conftest.html#module-niworkflows.interfaces.conftest">niworkflows.interfaces.conftest</a>
 </li>
           <li><a href="api/niworkflows.interfaces.fixes.html#module-niworkflows.interfaces.fixes">niworkflows.interfaces.fixes</a>
 </li>
@@ -781,6 +799,8 @@
           <li><a href="api/niworkflows.interfaces.surf.html#module-niworkflows.interfaces.surf">niworkflows.interfaces.surf</a>
 </li>
           <li><a href="api/niworkflows.interfaces.utility.html#module-niworkflows.interfaces.utility">niworkflows.interfaces.utility</a>
+</li>
+          <li><a href="api/niworkflows.interfaces.workbench.html#module-niworkflows.interfaces.workbench">niworkflows.interfaces.workbench</a>
 </li>
           <li><a href="api/niworkflows.reports.html#module-niworkflows.reports">niworkflows.reports</a>
 </li>
@@ -955,6 +975,13 @@
 </li>
         </ul></li>
         <li>
+    niworkflows.interfaces.conftest
+
+        <ul>
+          <li><a href="api/niworkflows.interfaces.conftest.html#module-niworkflows.interfaces.conftest">module</a>
+</li>
+        </ul></li>
+        <li>
     niworkflows.interfaces.fixes
 
         <ul>
@@ -1104,6 +1131,13 @@
 </li>
         </ul></li>
         <li>
+    niworkflows.interfaces.workbench
+
+        <ul>
+          <li><a href="api/niworkflows.interfaces.workbench.html#module-niworkflows.interfaces.workbench">module</a>
+</li>
+        </ul></li>
+        <li>
     niworkflows.reports
 
         <ul>
@@ -1244,6 +1278,8 @@
   <h2>O</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/niworkflows.interfaces.workbench.html#niworkflows.interfaces.workbench.OpenMPCommandMixin">OpenMPCommandMixin (class in niworkflows.interfaces.workbench)</a>
+</li>
         <li><a href="api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.DerivativesDataSink.out_path_base">out_path_base (niworkflows.interfaces.bids.DerivativesDataSink attribute)</a>
 </li>
         <li><a href="api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.BIDSInfo.output_spec">output_spec (niworkflows.interfaces.bids.BIDSInfo attribute)</a>
@@ -1354,10 +1390,10 @@
 </li>
         <li><a href="api/niworkflows.interfaces.nibabel.html#niworkflows.interfaces.nibabel.reorient_file">reorient_file() (in module niworkflows.interfaces.nibabel)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/niworkflows.interfaces.nibabel.html#niworkflows.interfaces.nibabel.reorient_image">reorient_image() (in module niworkflows.interfaces.nibabel)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/niworkflows.interfaces.nibabel.html#niworkflows.interfaces.nibabel.ReorientImage">ReorientImage (class in niworkflows.interfaces.nibabel)</a>
 </li>
         <li><a href="api/niworkflows.reports.core.html#niworkflows.reports.core.Report">Report (class in niworkflows.reports.core)</a>
@@ -1383,6 +1419,8 @@
         <li><a href="api/niworkflows.utils.images.html#niworkflows.utils.images.rotate_affine">rotate_affine() (in module niworkflows.utils.images)</a>
 </li>
         <li><a href="api/niworkflows.utils.images.html#niworkflows.utils.images.rotation2canonical">rotation2canonical() (in module niworkflows.utils.images)</a>
+</li>
+        <li><a href="api/niworkflows.interfaces.workbench.html#niworkflows.interfaces.workbench.OpenMPCommandMixin.run">run() (niworkflows.interfaces.workbench.OpenMPCommandMixin method)</a>
 </li>
         <li><a href="api/niworkflows.reports.core.html#niworkflows.reports.core.run_reports">run_reports() (in module niworkflows.reports.core)</a>
 </li>
@@ -1512,11 +1550,13 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/niworkflows.interfaces.header.html#niworkflows.interfaces.header.ValidateImage">ValidateImage (class in niworkflows.interfaces.header)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.vertex_normals">vertex_normals() (in module niworkflows.interfaces.surf)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/niworkflows.engine.workflows.html#niworkflows.engine.workflows.LiterateWorkflow.visit_desc">visit_desc() (niworkflows.engine.workflows.LiterateWorkflow method)</a>
+</li>
+        <li><a href="api/niworkflows.interfaces.workbench.html#niworkflows.interfaces.workbench.VolumeToSurfaceMapping">VolumeToSurfaceMapping (class in niworkflows.interfaces.workbench)</a>
 </li>
     </ul></td>
   </tr></table>

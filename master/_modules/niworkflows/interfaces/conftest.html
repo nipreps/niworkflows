@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
-        <title>niworkflows.interfaces.morphology - niworkflows 0+unknown documentation</title>
+        <title>niworkflows.interfaces.conftest - niworkflows 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -280,124 +280,47 @@
           </label>
         </div>
         <article role="main">
-          <h1>Source code for niworkflows.interfaces.morphology</h1><div class="highlight"><pre>
-<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
-<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
-<span class="c1">#</span>
-<span class="c1"># Copyright 2022 The NiPreps Developers &lt;nipreps@gmail.com&gt;</span>
-<span class="c1">#</span>
-<span class="c1"># Licensed under the Apache License, Version 2.0 (the "License");</span>
-<span class="c1"># you may not use this file except in compliance with the License.</span>
-<span class="c1"># You may obtain a copy of the License at</span>
-<span class="c1">#</span>
-<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
-<span class="c1">#</span>
-<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
-<span class="c1"># distributed under the License is distributed on an "AS IS" BASIS,</span>
-<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
-<span class="c1"># See the License for the specific language governing permissions and</span>
-<span class="c1"># limitations under the License.</span>
-<span class="c1">#</span>
-<span class="c1"># We support and encourage derived works from this project, please read</span>
-<span class="c1"># about our expectations at</span>
-<span class="c1">#</span>
-<span class="c1">#     https://www.nipreps.org/community/licensing/</span>
-<span class="c1">#</span>
-<span class="sd">"""Mathematical morphology operations as nipype interfaces."""</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+          <h1>Source code for niworkflows.interfaces.conftest</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">copytree</span>
 
-<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">traits</span><span class="p">,</span>
-    <span class="n">TraitedSpec</span><span class="p">,</span>
-    <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
-    <span class="n">File</span><span class="p">,</span>
-    <span class="n">SimpleInterface</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">chdir</span> <span class="k">as</span> <span class="n">_chdir</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># PY310</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+
+    <span class="nd">@contextmanager</span>  <span class="c1"># type: ignore</span>
+    <span class="k">def</span> <span class="nf">_chdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">yield</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">_BinaryDilationInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"input mask"</span><span class="p">)</span>
-    <span class="n">radius</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"Radius of dilation"</span><span class="p">)</span>
+<div class="viewcode-block" id="data_dir"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.conftest.html#niworkflows.interfaces.conftest.data_dir">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">"module"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">data_dir</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"tests"</span> <span class="o">/</span> <span class="s2">"data"</span></div>
 
 
-<span class="k">class</span> <span class="nc">_BinaryDilationOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"dilated mask"</span><span class="p">)</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">autouse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_docdir</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+    <span class="c1"># Trigger ONLY for the doctests.</span>
+    <span class="n">doctest_plugin</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pluginmanager</span><span class="o">.</span><span class="n">getplugin</span><span class="p">(</span><span class="s2">"doctest"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">node</span><span class="p">,</span> <span class="n">doctest_plugin</span><span class="o">.</span><span class="n">DoctestItem</span><span class="p">):</span>
+        <span class="n">copytree</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"tests"</span> <span class="o">/</span> <span class="s2">"data"</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">dirs_exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
+        <span class="c1"># Chdir only for the duration of the test.</span>
+        <span class="k">with</span> <span class="n">_chdir</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
+            <span class="k">yield</span>
 
-<div class="viewcode-block" id="BinaryDilation"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.morphology.html#niworkflows.interfaces.morphology.BinaryDilation">[docs]</a><span class="k">class</span> <span class="nc">BinaryDilation</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
-    <span class="sd">"""Binary dilation of a mask."""</span>
-
-    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_BinaryDilationInputSpec</span>
-    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_BinaryDilationOutputSpec</span>
-
-    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-        <span class="c1"># Open files</span>
-        <span class="n">mask_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_mask</span><span class="p">)</span>
-        <span class="n">maskdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">(</span><span class="n">mask_img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span>
-
-        <span class="c1"># Obtain dilated brainmask</span>
-        <span class="n">dilated</span> <span class="o">=</span> <span class="n">image_binary_dilation</span><span class="p">(</span>
-            <span class="n">maskdata</span><span class="p">,</span>
-            <span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">out_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">((</span><span class="n">Path</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"dilated_mask.nii.gz"</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span>
-        <span class="n">out_img</span> <span class="o">=</span> <span class="n">mask_img</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">dilated</span><span class="p">,</span> <span class="n">mask_img</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">mask_img</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
-        <span class="n">out_img</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="s2">"uint8"</span><span class="p">)</span>
-        <span class="n">out_img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"out_mask"</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
-        <span class="k">return</span> <span class="n">runtime</span></div>
-
-
-<span class="k">class</span> <span class="nc">_BinarySubtractInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_base</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"input base mask"</span><span class="p">)</span>
-    <span class="n">in_subtract</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"input subtract mask"</span><span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">_BinarySubtractionOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"subtracted mask"</span><span class="p">)</span>
-
-
-<div class="viewcode-block" id="BinarySubtraction"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.morphology.html#niworkflows.interfaces.morphology.BinarySubtraction">[docs]</a><span class="k">class</span> <span class="nc">BinarySubtraction</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
-    <span class="sd">"""Binary subtraction of two masks."""</span>
-
-    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_BinarySubtractInputSpec</span>
-    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_BinarySubtractionOutputSpec</span>
-
-    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-        <span class="c1"># Subtract mask from base</span>
-        <span class="n">base_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_base</span><span class="p">)</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">(</span><span class="n">base_img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span>
-        <span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_subtract</span><span class="p">)</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="n">out_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">((</span><span class="n">Path</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"subtracted_mask.nii.gz"</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span>
-        <span class="n">out_img</span> <span class="o">=</span> <span class="n">base_img</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
-            <span class="n">data</span><span class="p">,</span>
-            <span class="n">base_img</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span>
-            <span class="n">base_img</span><span class="o">.</span><span class="n">header</span>
-        <span class="p">)</span>
-        <span class="n">out_img</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="s2">"uint8"</span><span class="p">)</span>
-        <span class="n">out_img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"out_mask"</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
-        <span class="k">return</span> <span class="n">runtime</span></div>
-
-
-<div class="viewcode-block" id="image_binary_dilation"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.morphology.html#niworkflows.interfaces.morphology.image_binary_dilation">[docs]</a><span class="k">def</span> <span class="nf">image_binary_dilation</span><span class="p">(</span><span class="n">in_mask</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="sd">"""</span>
-<span class="sd">    Dilate the input binary mask.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    in_mask: :obj:`numpy.ndarray`</span>
-<span class="sd">        A 3D binary array.</span>
-<span class="sd">    radius: :obj:`int`, optional</span>
-<span class="sd">        The radius of the ball-shaped footprint for dilation of the mask.</span>
-<span class="sd">    """</span>
-    <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">ndimage</span> <span class="k">as</span> <span class="n">ndi</span>
-    <span class="kn">from</span> <span class="nn">skimage.morphology</span> <span class="kn">import</span> <span class="n">ball</span>
-
-    <span class="k">return</span> <span class="n">ndi</span><span class="o">.</span><span class="n">binary_dilation</span><span class="p">(</span><span class="n">in_mask</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">),</span> <span class="n">ball</span><span class="p">(</span><span class="n">radius</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span></div>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For normal tests, we have to yield, since this is a yield-fixture.</span>
+        <span class="k">yield</span>
 </pre></div>
         </article>
       </div>

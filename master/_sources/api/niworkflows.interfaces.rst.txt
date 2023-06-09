@@ -24,6 +24,7 @@ Submodules
    niworkflows.interfaces.bold
    niworkflows.interfaces.cifti
    niworkflows.interfaces.confounds
+   niworkflows.interfaces.conftest
    niworkflows.interfaces.fixes
    niworkflows.interfaces.freesurfer
    niworkflows.interfaces.header
@@ -40,3 +41,4 @@ Submodules
    niworkflows.interfaces.space
    niworkflows.interfaces.surf
    niworkflows.interfaces.utility
+   niworkflows.interfaces.workbench

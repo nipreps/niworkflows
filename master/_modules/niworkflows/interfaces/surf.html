@@ -198,6 +198,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.bold.html">niworkflows.interfaces.bold module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.confounds.html">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.conftest.html">niworkflows.interfaces.conftest module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.header.html">niworkflows.interfaces.header module</a></li>
@@ -214,6 +215,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.workbench.html">niworkflows.interfaces.workbench module</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.reports.html">niworkflows.reports package</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -836,6 +838,66 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"out_files"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">sorted</span><span class="p">(</span><span class="n">els</span><span class="p">)</span> <span class="k">for</span> <span class="n">els</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"surf_keys"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">groups</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+<span class="k">class</span> <span class="nc">CreateSurfaceROIInputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">subject_id</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">'subject ID'</span><span class="p">)</span>
+    <span class="n">hemisphere</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
+        <span class="s2">"L"</span><span class="p">,</span>
+        <span class="s2">"R"</span><span class="p">,</span>
+        <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">'hemisphere'</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">thickness_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">'input GIFTI file'</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">CreateSurfaceROIOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">roi_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">'output GIFTI file'</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="CreateSurfaceROI"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.CreateSurfaceROI">[docs]</a><span class="k">class</span> <span class="nc">CreateSurfaceROI</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+    <span class="sd">"""Prepare GIFTI shape file for use in cortical masking</span>
+
+<span class="sd">    Distilled from the FreeSurfer2CaretConvertAndRegisterNonlinear.sh script in</span>
+<span class="sd">    DCAN-HCP PostFreeSurfer scripts (as of commit 9291324). The relevant lines</span>
+<span class="sd">    are 277-290.</span>
+<span class="sd">    """</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">CreateSurfaceROIInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">CreateSurfaceROIOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">subject</span><span class="p">,</span> <span class="n">hemi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">hemisphere</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isdefined</span><span class="p">(</span><span class="n">subject</span><span class="p">):</span>
+            <span class="n">subject</span> <span class="o">=</span> <span class="s1">'sub-XYZ'</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">GiftiImage</span><span class="o">.</span><span class="n">from_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">thickness_file</span><span class="p">)</span>
+        <span class="c1"># wb_command -set-structure (L282)</span>
+        <span class="n">img</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">"AnatomicalStructurePrimary"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'L'</span><span class="p">:</span> <span class="s1">'CortexLeft'</span><span class="p">,</span> <span class="s1">'R'</span><span class="p">:</span> <span class="s1">'CortexRight'</span><span class="p">}[</span><span class="n">hemi</span><span class="p">]</span>
+        <span class="n">darray</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># wb_command -set-map-names (L284)</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">darray</span><span class="o">.</span><span class="n">meta</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s1">'Name'</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">hemi</span><span class="si">}</span><span class="s2">_ROI"</span>
+        <span class="c1"># wb_command -metric-palette calls (L285, L289) have no effect on ROI files</span>
+
+        <span class="c1"># Compiling an odd sequence of math operations (L283, L288, L290) that work out to:</span>
+        <span class="c1"># wb_command -metric-math "abs(var * -1) &gt; 0"</span>
+        <span class="n">roi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">darray</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+        <span class="n">darray</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiDataArray</span><span class="p">(</span>
+            <span class="n">roi</span><span class="p">,</span>
+            <span class="n">intent</span><span class="o">=</span><span class="n">darray</span><span class="o">.</span><span class="n">intent</span><span class="p">,</span>
+            <span class="n">datatype</span><span class="o">=</span><span class="n">darray</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="n">darray</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span>
+            <span class="n">endian</span><span class="o">=</span><span class="n">darray</span><span class="o">.</span><span class="n">endian</span><span class="p">,</span>
+            <span class="n">coordsys</span><span class="o">=</span><span class="n">darray</span><span class="o">.</span><span class="n">coordsys</span><span class="p">,</span>
+            <span class="n">ordering</span><span class="o">=</span><span class="n">darray</span><span class="o">.</span><span class="n">ind_ord</span><span class="p">,</span>
+            <span class="n">meta</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">out_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">hemi</span><span class="si">}</span><span class="s2">.roi.native.shape.gii"</span><span class="p">)</span>
+        <span class="n">img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">"roi_file"</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_filename</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 

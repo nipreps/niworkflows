@@ -198,6 +198,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.bold.html">niworkflows.interfaces.bold module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.confounds.html">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.conftest.html">niworkflows.interfaces.conftest module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.header.html">niworkflows.interfaces.header module</a></li>
@@ -214,6 +215,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.workbench.html">niworkflows.interfaces.workbench module</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.reports.html">niworkflows.reports package</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -722,10 +724,10 @@
 
 <span class="sd">    .. testsetup::</span>
 
-<span class="sd">    &gt;&gt;&gt; import json</span>
-<span class="sd">    &gt;&gt;&gt; data = {"PipelineDescription": {"Version": "1.1.1rc5"}}</span>
-<span class="sd">    &gt;&gt;&gt; desc_file = Path(tmpdir) / 'sample_dataset_description.json'</span>
-<span class="sd">    &gt;&gt;&gt; _ = desc_file.write_text(json.dumps(data))</span>
+<span class="sd">        &gt;&gt;&gt; import json</span>
+<span class="sd">        &gt;&gt;&gt; data = {"PipelineDescription": {"Version": "1.1.1rc5"}}</span>
+<span class="sd">        &gt;&gt;&gt; desc_file = Path('sample_dataset_description.json')</span>
+<span class="sd">        &gt;&gt;&gt; _ = desc_file.write_text(json.dumps(data))</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -739,7 +741,6 @@
 <span class="sd">    &gt;&gt;&gt; check_pipeline_version('1.1.1rc5', 'sample_dataset_description.json') is None</span>
 <span class="sd">    True</span>
 <span class="sd">    &gt;&gt;&gt; check_pipeline_version('1.1.1rc5+129.gbe0e5158', 'sample_dataset_description.json')</span>
-
 <span class="sd">    &gt;&gt;&gt; check_pipeline_version('1.2', 'sample_dataset_description.json')  # doctest: +ELLIPSIS</span>
 <span class="sd">    'Previous output generated ...'</span>
 

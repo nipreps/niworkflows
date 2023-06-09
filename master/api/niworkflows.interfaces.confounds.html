@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.interfaces.fixes module" href="niworkflows.interfaces.fixes.html" /><link rel="prev" title="niworkflows.interfaces.cifti module" href="niworkflows.interfaces.cifti.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.interfaces.conftest module" href="niworkflows.interfaces.conftest.html" /><link rel="prev" title="niworkflows.interfaces.cifti module" href="niworkflows.interfaces.cifti.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
         <title>niworkflows.interfaces.confounds module - niworkflows 0+unknown documentation</title>
@@ -199,6 +199,7 @@
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.bold.html">niworkflows.interfaces.bold module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.conftest.html">niworkflows.interfaces.conftest module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.header.html">niworkflows.interfaces.header module</a></li>
@@ -215,6 +216,7 @@
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.workbench.html">niworkflows.interfaces.workbench module</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -390,14 +392,14 @@ in the confounds file.</p></li>
 indicates that the first and second exponential terms should be added.
 To retain the original terms, <code class="docutils literal notranslate"><span class="pre">1</span></code> <em>must</em> be included in the list.</p></li>
 <li><p><strong>variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – List of variables for which exponential terms should be computed.</p></li>
-<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+887.gbd58d5bdd9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables.</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+935.gedb2b83c68)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>variables_exp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>) – A list of variables to include in the final data frame after adding
 the specified exponential terms.</p></li>
-<li><p><strong>data_exp</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+887.gbd58d5bdd9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables, including any
+<li><p><strong>data_exp</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+935.gedb2b83c68)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables, including any
 specified exponential terms.</p></li>
 </ul>
 </p>
@@ -413,13 +415,13 @@ specified exponential terms.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expression</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Formula expression: either a single variable or a variable group
 paired with an operation (exponentiation or differentiation).</p></li>
-<li><p><strong>parent_data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+887.gbd58d5bdd9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – The source data for the model expansion.</p></li>
+<li><p><strong>parent_data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+935.gedb2b83c68)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – The source data for the model expansion.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>) – A list of variables in the provided formula expression.</p></li>
-<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+887.gbd58d5bdd9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – A tabulation of all terms in the provided formula expression.</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+935.gedb2b83c68)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – A tabulation of all terms in the provided formula expression.</p></li>
 </ul>
 </p>
 </dd>
@@ -462,7 +464,7 @@ returned when exponential terms are computed.</p></li>
 <p>Temporal derivatives and exponential terms are computed for all terms
 in the grouping symbols that they adjoin.</p>
 </li>
-<li><p><strong>parent_data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+887.gbd58d5bdd9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – A tabulation of all values usable in the model formula. Each additive
+<li><p><strong>parent_data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+935.gedb2b83c68)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – A tabulation of all values usable in the model formula. Each additive
 term in <cite>model_formula</cite> should correspond either to a variable in this
 data frame or to instructions for operating on a variable (for
 instance, computing temporal derivatives or exponential terms).</p></li>
@@ -472,7 +474,7 @@ instance, computing temporal derivatives or exponential terms).</p></li>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – A list of variables included in the model parsed from the provided
 formula.</p></li>
-<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+887.gbd58d5bdd9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – All values in the complete model.</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+935.gedb2b83c68)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – All values in the complete model.</p></li>
 </ul>
 </p>
 </dd>
@@ -485,7 +487,7 @@ formula.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+887.gbd58d5bdd9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – A tabulation of observations from which spike regressors should be
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+935.gedb2b83c68)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – A tabulation of observations from which spike regressors should be
 estimated.</p></li>
 <li><p><strong>criteria</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> of (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="docutils literal notranslate"><span class="pre">'&gt;'</span></code> or <code class="docutils literal notranslate"><span class="pre">'&lt;'</span></code> or <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>)) – Criteria for generating a spike regressor. If, for a given frame, the
 value of the variable corresponding to the key exceeds the threshold
@@ -512,7 +514,7 @@ additionally have spike regressors implemented.</p></li>
 <dd class="field-even"><p><strong>data</strong> – The input DataFrame with a column for each spike regressor.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+887.gbd58d5bdd9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+935.gedb2b83c68)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a></p>
 </dd>
 </dl>
 <p class="rubric">References</p>
@@ -536,14 +538,14 @@ indicates that the first and second derivative terms should be added.
 To retain the original terms, <code class="docutils literal notranslate"><span class="pre">0</span></code> <em>must</em> be included in the list.</p></li>
 <li><p><strong>variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – List of variables for which temporal derivative terms should be
 computed.</p></li>
-<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+887.gbd58d5bdd9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables.</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+935.gedb2b83c68)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>variables_deriv</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>) – A list of variables to include in the final data frame after adding
 the specified derivative terms.</p></li>
-<li><p><strong>data_deriv</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+887.gbd58d5bdd9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables, including any
+<li><p><strong>data_deriv</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.0.dev0+935.gedb2b83c68)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables, including any
 specified derivative terms.</p></li>
 </ul>
 </p>
@@ -557,12 +559,12 @@ specified derivative terms.</p></li>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="niworkflows.interfaces.fixes.html">
+          <a class="next-page" href="niworkflows.interfaces.conftest.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">niworkflows.interfaces.fixes module</div>
+                <div class="title">niworkflows.interfaces.conftest module</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
