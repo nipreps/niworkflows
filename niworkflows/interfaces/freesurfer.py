@@ -217,7 +217,7 @@ class FSDetectInputs(SimpleInterface):
         return runtime
 
 
-class TruncateLTA(object):
+class TruncateLTA:
     """
     Truncate long filenames in LTA files.
 
