@@ -48,7 +48,7 @@ class FASTRPT(nrb.SegmentationRC, fsl.FAST):
         if self.generate_report:
             self.inputs.segments = True
 
-        return super(FASTRPT, self)._run_interface(runtime)
+        return super()._run_interface(runtime)
 
     def _post_run_hook(self, runtime):
         """generates a report showing nine slices, three per axis, of an
@@ -70,7 +70,7 @@ class FASTRPT(nrb.SegmentationRC, fsl.FAST):
             outputs.tissue_class_files,
         )
 
-        return super(FASTRPT, self)._post_run_hook(runtime)
+        return super()._post_run_hook(runtime)
 
 
 class _ReconAllInputSpecRPT(
@@ -106,7 +106,7 @@ class ReconAllRPT(nrb.SurfaceSegmentationRC, freesurfer.preprocess.ReconAll):
             "Generating report for ReconAll (subject %s)", outputs.subject_id
         )
 
-        return super(ReconAllRPT, self)._post_run_hook(runtime)
+        return super()._post_run_hook(runtime)
 
 
 class _MELODICInputSpecRPT(nrb._SVGReportCapableInputSpec, fsl.model.MELODICInputSpec):
@@ -133,12 +133,12 @@ class MELODICRPT(fsl.MELODIC):
     _out_report = None
 
     def __init__(self, generate_report=False, **kwargs):
-        super(MELODICRPT, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.generate_report = generate_report
 
     def _post_run_hook(self, runtime):
         # Run _post_run_hook of super class
-        runtime = super(MELODICRPT, self)._post_run_hook(runtime)
+        runtime = super()._post_run_hook(runtime)
         # leave early if there's nothing to do
         if not self.generate_report:
             return runtime
@@ -171,7 +171,7 @@ class MELODICRPT(fsl.MELODIC):
 
     def _list_outputs(self):
         try:
-            outputs = super(MELODICRPT, self)._list_outputs()
+            outputs = super()._list_outputs()
         except NotImplementedError:
             outputs = {}
         if self._out_report is not None:
@@ -235,4 +235,4 @@ class ICA_AROMARPT(reporting.ReportCapableInterface, fsl.ICA_AROMA):
 
         NIWORKFLOWS_LOG.info("Generating report for ICA AROMA")
 
-        return super(ICA_AROMARPT, self)._post_run_hook(runtime)
+        return super()._post_run_hook(runtime)

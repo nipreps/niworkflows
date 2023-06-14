@@ -43,7 +43,7 @@ class LiterateWorkflow(pe.Workflow):
             path to workflow storage
 
         """
-        super(LiterateWorkflow, self).__init__(name, base_dir)
+        super().__init__(name, base_dir)
         self.__desc__ = None
         self.__postdesc__ = None
 
