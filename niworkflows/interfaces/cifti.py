@@ -339,30 +339,27 @@ def _create_cifti_image(
         else:
             model_type = "CIFTI_MODEL_TYPE_VOXELS"
             vox = []
-            ts = None
+            ts = []
             for label in labels:
-                ijk = np.nonzero(label_data == label)
-                if ijk[0].size == 0:  # skip label if nothing matches
+                # nonzero returns indices in row-major (C) order
+                # NIfTI uses column-major (Fortran) order, so HCP generates indices in F order
+                # Therefore flip the data and label the indices backwards
+                k, j, i = np.nonzero(label_data.T == label)
+                if k.size == 0:  # skip label if nothing matches
                     continue
-                ts = (
-                    bold_data[ijk]
-                    if ts is None
-                    else np.concatenate((ts, bold_data[ijk]))
-                )
-                vox += [
-                    [ijk[0][idx], ijk[1][idx], ijk[2][idx]] for idx in range(len(ts))
-                ]
+                ts.append(bold_data[i, j, k])
+                vox.append(np.stack([i, j, k]).T)
 
-            vox = ci.Cifti2VoxelIndicesIJK(vox)
+            vox_indices_ijk = ci.Cifti2VoxelIndicesIJK(np.concatenate(vox))
             bm = ci.Cifti2BrainModel(
                 index_offset=idx_offset,
-                index_count=len(vox),
+                index_count=len(vox_indices_ijk),
                 model_type=model_type,
                 brain_structure=structure,
-                voxel_indices_ijk=vox,
+                voxel_indices_ijk=vox_indices_ijk,
             )
-            idx_offset += len(vox)
-            bm_ts = np.column_stack((bm_ts, ts.T))
+            idx_offset += len(vox_indices_ijk)
+            bm_ts = np.column_stack((bm_ts, np.concatenate(ts).T))
         # add each brain structure to list
         brainmodels.append(bm)
 
