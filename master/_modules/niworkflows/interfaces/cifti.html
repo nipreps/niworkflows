@@ -622,30 +622,27 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">model_type</span> <span class="o">=</span> <span class="s2">"CIFTI_MODEL_TYPE_VOXELS"</span>
             <span class="n">vox</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">ts</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
-                <span class="n">ijk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">label_data</span> <span class="o">==</span> <span class="n">label</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">ijk</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># skip label if nothing matches</span>
+                <span class="c1"># nonzero returns indices in row-major (C) order</span>
+                <span class="c1"># NIfTI uses column-major (Fortran) order, so HCP generates indices in F order</span>
+                <span class="c1"># Therefore flip the data and label the indices backwards</span>
+                <span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">label_data</span><span class="o">.</span><span class="n">T</span> <span class="o">==</span> <span class="n">label</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># skip label if nothing matches</span>
                     <span class="k">continue</span>
-                <span class="n">ts</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">bold_data</span><span class="p">[</span><span class="n">ijk</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">ts</span> <span class="ow">is</span> <span class="kc">None</span>
-                    <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">ts</span><span class="p">,</span> <span class="n">bold_data</span><span class="p">[</span><span class="n">ijk</span><span class="p">]))</span>
-                <span class="p">)</span>
-                <span class="n">vox</span> <span class="o">+=</span> <span class="p">[</span>
-                    <span class="p">[</span><span class="n">ijk</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">idx</span><span class="p">],</span> <span class="n">ijk</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">idx</span><span class="p">],</span> <span class="n">ijk</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">idx</span><span class="p">]]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ts</span><span class="p">))</span>
-                <span class="p">]</span>
+                <span class="n">ts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bold_data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span>
+                <span class="n">vox</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
 
-            <span class="n">vox</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2VoxelIndicesIJK</span><span class="p">(</span><span class="n">vox</span><span class="p">)</span>
+            <span class="n">vox_indices_ijk</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2VoxelIndicesIJK</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">vox</span><span class="p">))</span>
             <span class="n">bm</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">Cifti2BrainModel</span><span class="p">(</span>
                 <span class="n">index_offset</span><span class="o">=</span><span class="n">idx_offset</span><span class="p">,</span>
-                <span class="n">index_count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">vox</span><span class="p">),</span>
+                <span class="n">index_count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">vox_indices_ijk</span><span class="p">),</span>
                 <span class="n">model_type</span><span class="o">=</span><span class="n">model_type</span><span class="p">,</span>
                 <span class="n">brain_structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
-                <span class="n">voxel_indices_ijk</span><span class="o">=</span><span class="n">vox</span><span class="p">,</span>
+                <span class="n">voxel_indices_ijk</span><span class="o">=</span><span class="n">vox_indices_ijk</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">idx_offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vox</span><span class="p">)</span>
-            <span class="n">bm_ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">bm_ts</span><span class="p">,</span> <span class="n">ts</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+            <span class="n">idx_offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vox_indices_ijk</span><span class="p">)</span>
+            <span class="n">bm_ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">bm_ts</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
         <span class="c1"># add each brain structure to list</span>
         <span class="n">brainmodels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bm</span><span class="p">)</span>
 
