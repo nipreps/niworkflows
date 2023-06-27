@@ -1,11 +1,12 @@
 import json
 from pathlib import Path
+from unittest import mock
 
 import nibabel as nb
 import numpy as np
 import pytest
 
-from ..cifti import GenerateCifti, CIFTI_STRUCT_WITH_LABELS
+from ..cifti import GenerateCifti, CIFTI_STRUCT_WITH_LABELS, _create_cifti_image
 
 
 @pytest.fixture(scope="module")
@@ -56,3 +57,34 @@ def test_GenerateCifti(tmpdir, cifti_data):
     assert 'SpatialReference' in metadata
     for key in ('VolumeReference', 'CIFTI_STRUCTURE_LEFT_CORTEX', 'CIFTI_STRUCTURE_RIGHT_CORTEX'):
         assert key in metadata['SpatialReference']
+
+
+def test__create_cifti_image(tmp_path):
+    bold_data = np.arange(8, dtype='f4').reshape((2, 2, 2, 1), order='F')
+    LAS = [[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+    bold_img = nb.Nifti1Image(bold_data, LAS)
+    label_img = nb.Nifti1Image(np.full((2, 2, 2), 16, 'u1'), LAS)
+
+    bold_file = tmp_path / 'bold.nii'
+    volume_label = tmp_path / 'label.nii'
+    bold_img.to_filename(bold_file)
+    label_img.to_filename(volume_label)
+
+    # Only add one structure to the CIFTI file
+    with mock.patch(
+        'niworkflows.interfaces.cifti.CIFTI_STRUCT_WITH_LABELS',
+        {'CIFTI_STRUCTURE_BRAIN_STEM': (16,)},
+    ):
+        dummy_fnames = ('', '')
+        cifti_file = _create_cifti_image(bold_file, volume_label, dummy_fnames, dummy_fnames, 2.0)
+
+    cimg = nb.load(cifti_file)
+    series, bm = [cimg.header.get_axis(i) for i in (0, 1)]
+    assert len(series) == 1  # Time
+    assert len(bm) == 8  # Voxel
+
+    # Maintaining Fortran ordering, data comes out as it went in
+    assert np.array_equal(cimg.get_fdata(), bold_data.reshape((1, 8), order='F'))
+
+    # Brain model voxels are indexed in Fortran order (fastest first)
+    assert np.array_equal(bm.voxel[:4], [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]])
