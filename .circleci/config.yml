@@ -341,8 +341,9 @@ jobs:
           name: Deploy to Docker Hub
           no_output_timeout: 40m
           command: |
+            docker tag niworkflows:latest nipreps/niworkflows:latest
+            docker tag niworkflows:latest nipreps/niworkflows:$CIRCLE_TAG
             docker push nipreps/niworkflows:latest
-            docker tag nipreps/niworkflows nipreps/niworkflows:$CIRCLE_TAG
             docker push nipreps/niworkflows:$CIRCLE_TAG
 
   build_docs:
