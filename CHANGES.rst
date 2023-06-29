@@ -1,3 +1,12 @@
+1.8.1 (June 29, 2023)
+=====================
+Patch release in the 1.8.x series.
+
+This release includes a fix to CIFTI volume structure indices, and adds additional Workbench interfaces.
+
+* ENH: Port GIFTI/CIFTI interfaces from fMRIPrep (#811)
+* FIX: Generate CIFTI volume structure indices in column-major order (#815)
+
 1.8.0 (June 01, 2023)
 =====================
 New feature release in the 1.8.x series.
