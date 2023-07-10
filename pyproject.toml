@@ -24,7 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "attrs",
-    "importlib_resources; python_version < '3.9'",
+    "importlib_resources >= 5.7; python_version < '3.11'",
     "jinja2",
     "looseversion",
     "matplotlib >= 3.4.2",
