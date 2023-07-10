@@ -48,10 +48,10 @@ dependencies = [
 
 [project.optional-dependencies]
 doc = [
-    "furo ~= 2021.10.09",
+    "furo",
     "pydot >= 1.2.3",
     "pydotplus",
-    "sphinx ~= 4.0",
+    "sphinx",
     "sphinxcontrib-apidoc",
     "sphinxcontrib-napoleon",
 ]

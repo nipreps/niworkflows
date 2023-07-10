@@ -7,6 +7,7 @@ Information on specific functions, classes, and methods.
 
    api/niworkflows.anat
    api/niworkflows.cli
+   api/niworkflows.data
    api/niworkflows.dwi
    api/niworkflows.engine
    api/niworkflows.func
