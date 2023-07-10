@@ -25,7 +25,6 @@
 # general purpose
 from collections import OrderedDict
 from multiprocessing import cpu_count
-from pkg_resources import resource_filename as pkgr_fn
 from warnings import warn
 
 # nipype
@@ -40,6 +39,7 @@ from nipype.interfaces.ants import (
     ThresholdImage,
 )
 
+from ..data import load as load_data
 from ..utils.misc import get_template_specs
 from ..utils.connections import pop_file as _pop
 
@@ -302,9 +302,7 @@ def init_brain_extraction_wf(
         else "antsBrainExtractionNoLaplacian_%s.json"
     )
     norm = pe.Node(
-        Registration(
-            from_file=pkgr_fn("niworkflows.data", settings_file % normalization_quality)
-        ),
+        Registration(from_file=load_data(settings_file % normalization_quality)),
         name="norm",
         n_procs=omp_nthreads,
         mem_gb=mem_gb,

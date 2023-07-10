@@ -30,6 +30,8 @@ import pandas as pd
 import pytest
 import tempfile
 
+from . import load_resource
+
 try:
     import importlib_resources
 except ImportError:
@@ -40,7 +42,7 @@ os.environ['NO_ET'] = '1'
 
 
 def find_resource_or_skip(resource):
-    pathlike = importlib_resources.files("niworkflows") / resource
+    pathlike = load_resource(resource)
     if not pathlike.exists():
         pytest.skip(f"Missing resource {resource}; run this test from a source repository")
     return pathlike
@@ -63,7 +65,7 @@ def add_np(doctest_namespace):
     doctest_namespace["datadir"] = data_dir
     doctest_namespace["data_dir_canary"] = data_dir_canary
     doctest_namespace["bids_collect_data"] = collect_data
-    doctest_namespace["test_data"] = importlib_resources.files("niworkflows") / "tests" / "data"
+    doctest_namespace["test_data"] = load_resource('tests/data')
 
     tmpdir = tempfile.TemporaryDirectory()
 

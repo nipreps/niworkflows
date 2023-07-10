@@ -26,18 +26,17 @@ import nibabel as nb
 from niworkflows import viz
 from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
 from niworkflows.interfaces.plotting import _get_tr
-from niworkflows.tests.conftest import datadir
+from niworkflows.tests.data import load_test_data
 
 
 def test_cifti_carpetplot():
     """Exercise extraction of timeseries from CIFTI2."""
     save_artifacts = os.getenv("SAVE_CIRCLE_ARTIFACTS", False)
 
-    cifti_file = os.path.join(
-        datadir,
-        "sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii",
+    cifti_file = load_test_data(
+        "sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii"
     )
-    data, segments = _cifti_timeseries(cifti_file)
+    data, segments = _cifti_timeseries(str(cifti_file))
     viz.plot_carpet(
         data,
         segments,
@@ -56,15 +55,13 @@ def test_nifti_carpetplot():
     """Exercise extraction of timeseries from CIFTI2."""
     save_artifacts = os.getenv("SAVE_CIRCLE_ARTIFACTS", False)
 
-    nifti_file = os.path.join(
-        datadir,
-        "sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz",
+    nifti_file = load_test_data(
+        "sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz"
     )
-    seg_file = os.path.join(
-        datadir,
-        "sub-ds205s03_task-functionallocalizer_run-01_bold_parc.nii.gz",
+    seg_file = load_test_data(
+        "sub-ds205s03_task-functionallocalizer_run-01_bold_parc.nii.gz"
     )
-    data, segments = _nifti_timeseries(nifti_file, seg_file)
+    data, segments = _nifti_timeseries(str(nifti_file), str(seg_file))
     viz.plot_carpet(
         data,
         segments,
