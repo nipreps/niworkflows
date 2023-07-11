@@ -22,13 +22,13 @@
 #
 """Utility workflows."""
 from packaging.version import parse as parseversion, Version
-from pkg_resources import resource_filename as pkgr_fn
 
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu, fsl, afni
 
 from templateflow.api import get as get_template
 
+from .. import data
 from ..engine.workflows import LiterateWorkflow as Workflow
 from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
@@ -452,9 +452,7 @@ def init_enhance_and_skullstrip_bold_wf(
 
         # Set up spatial normalization
         norm = pe.Node(
-            Registration(
-                from_file=pkgr_fn("niworkflows.data", "epi_atlasbased_brainmask.json")
-            ),
+            Registration(from_file=data.load("epi_atlasbased_brainmask.json")),
             name="norm",
             n_procs=omp_nthreads,
         )

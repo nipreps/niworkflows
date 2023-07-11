@@ -27,7 +27,6 @@ from json import dumps, loads
 from pathlib import Path
 import shutil
 import os
-from pkg_resources import resource_filename as _pkgres
 import re
 
 import nibabel as nb
@@ -50,12 +49,13 @@ from nipype.interfaces.base import (
 )
 from nipype.interfaces.io import add_traits
 import templateflow as tf
+from .. import data
 from ..utils.bids import _init_layout, relative_to_root
 from ..utils.images import set_consumables, unsafe_write_nifti_header_and_data
 from ..utils.misc import _copy_any, unlink
 
 regz = re.compile(r"\.gz$")
-_pybids_spec = loads(Path(_pkgres("niworkflows", "data/nipreps.json")).read_text())
+_pybids_spec = loads(data.load.readable("nipreps.json").read_text())
 BIDS_DERIV_ENTITIES = _pybids_spec["entities"]
 BIDS_DERIV_PATTERNS = tuple(_pybids_spec["default_path_patterns"])
 

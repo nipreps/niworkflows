@@ -4,6 +4,7 @@
 import logging
 
 from .__about__ import __packagename__, __copyright__, __credits__
+from .data import Loader
 try:
     from ._version import __version__
 except ImportError:  # pragma: no cover
@@ -16,6 +17,7 @@ __all__ = [
     "__copyright__",
     "__credits__",
     "NIWORKFLOWS_LOG",
+    "load_resource",
 ]
 
 NIWORKFLOWS_LOG = logging.getLogger(__packagename__)
@@ -27,3 +29,5 @@ try:
     matplotlib.use("Agg")
 except ImportError:
     pass
+
+load_resource = Loader(__package__)

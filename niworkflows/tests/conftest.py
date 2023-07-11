@@ -27,9 +27,9 @@ from datetime import datetime as dt
 import pytest
 from templateflow.api import get as get_template
 from niworkflows.testing import test_data_env, data_env_canary
+from niworkflows.tests.data import load_test_data
 
-filepath = os.path.dirname(os.path.realpath(__file__))
-datadir = os.path.realpath(os.path.join(filepath, "data"))
+datadir = load_test_data()
 
 
 def _run_interface_mock(objekt, runtime):

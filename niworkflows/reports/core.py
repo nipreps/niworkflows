@@ -30,14 +30,15 @@ from pathlib import Path
 import re
 from itertools import compress
 from collections import defaultdict
-from pkg_resources import resource_filename as pkgrf
 from bids.layout import BIDSLayout, add_config_paths
 import jinja2
 from nipype.utils.filemanip import copyfile
 
+from .. import data, load_resource
+
 # Add a new figures spec
 try:
-    add_config_paths(figures=pkgrf("niworkflows", "data/nipreps.json"))
+    add_config_paths(figures=data.load('nipreps.json'))
 except ValueError as e:
     if "Configuration 'figures' already exists" != str(e):
         raise
@@ -100,17 +101,13 @@ class Reportlet(Element):
 
     .. testsetup::
 
-        >>> cwd = os.getcwd()
-        >>> os.chdir(tmpdir)
-
         >>> from shutil import copytree
         >>> from bids.layout import BIDSLayout
-        >>> test_data_path = find_resource_or_skip('data/tests/work')
+        >>> source = find_resource_or_skip('data/tests/work')
         >>> testdir = Path(tmpdir)
-        >>> with importlib_resources.as_file(test_data_path) as source:
-        ...     data_dir = copytree(source, str(testdir / 'work'))
+        >>> _ = copytree(source, testdir / 'work')
         >>> out_figs = testdir / 'out' / 'fmriprep'
-        >>> bl = BIDSLayout(str(testdir / 'work' / 'reportlets'),
+        >>> bl = BIDSLayout(testdir / 'work' / 'reportlets',
         ...                 config='figures', validate=False)
 
     >>> bl.get(subject='01', desc='reconall') # doctest: +ELLIPSIS
@@ -164,10 +161,6 @@ class Reportlet(Element):
     ...     'caption': 'Some description {space}'})
     >>> r.is_empty()
     True
-
-    .. testcleanup::
-
-        >>> os.chdir(cwd)
 
     """
 
@@ -249,15 +242,11 @@ class Report:
 
     .. testsetup::
 
-        >>> cwd = os.getcwd()
-        >>> os.chdir(tmpdir)
-
         >>> from shutil import copytree
         >>> from bids.layout import BIDSLayout
-        >>> test_data_path = find_resource_or_skip('data/tests/work')
+        >>> source = find_resource_or_skip('data/tests/work')
         >>> testdir = Path(tmpdir)
-        >>> with importlib_resources.as_file(test_data_path) as source:
-        ...     data_dir = copytree(source, str(testdir / 'work'))
+        >>> _ = copytree(source, str(testdir / 'work'))
         >>> out_figs = testdir / 'out' / 'fmriprep'
 
     >>> robj = Report(testdir / 'out', 'madeoutuuid', subject_id='01', packagename='fmriprep',
@@ -269,10 +258,6 @@ class Report:
     0
     >>> len((testdir / 'out' / 'fmriprep' / 'sub-01.html').read_text())
     36713
-
-    .. testcleanup::
-
-        >>> os.chdir(cwd)
 
     """
 
@@ -303,8 +288,8 @@ class Report:
             self.out_filename = f"sub-{self.subject_id}.html"
 
         # Default template from niworkflows
-        self.template_path = Path(pkgrf("niworkflows", "reports/report.tpl"))
-        self._load_config(Path(config or pkgrf("niworkflows", "reports/default.yml")))
+        self.template_path = load_resource('reports') / 'report.tpl'
+        self._load_config(Path(config or load_resource('reports') / 'default.yml'))
         assert self.template_path.exists()
 
     def _load_config(self, config):
@@ -424,14 +409,12 @@ class Report:
                 .findall((logs_path / "CITATION.tex").read_text())[0]
                 .strip()
             )
+            bib = data.Loader(self.packagename).readable("data/boilerplate.bib")
             boilerplate.append(
                 (
                     boiler_idx,
                     "LaTeX",
-                    f"""<pre>{text}</pre>
-<h3>Bibliography</h3>
-<pre>{Path(pkgrf(self.packagename, 'data/boilerplate.bib')).read_text()}</pre>
-""",
+                    f"<pre>{text}</pre>\n<h3>Bibliography</h3>\n<pre>{bib.read_text()}</pre>\n",
                 )
             )
             boiler_idx += 1
@@ -519,23 +502,15 @@ def run_reports(
 
     .. testsetup::
 
-        >>> cwd = os.getcwd()
-        >>> os.chdir(tmpdir)
-
         >>> from shutil import copytree
-        >>> test_data_path = find_resource_or_skip('data/tests/work')
+        >>> source = find_resource_or_skip('data/tests/work')
         >>> testdir = Path(tmpdir)
-        >>> with importlib_resources.as_file(test_data_path) as source:
-        ...     data_dir = copytree(source, str(testdir / 'work'))
+        >>> _ = copytree(source, testdir / 'work')
         >>> (testdir / 'fmriprep').mkdir(parents=True, exist_ok=True)
 
     >>> run_reports(testdir / 'out', '01', 'madeoutuuid', packagename='fmriprep',
     ...             reportlets_dir=testdir / 'work' / 'reportlets')
     0
-
-    .. testcleanup::
-
-        >>> os.chdir(cwd)
 
     """
     return Report(

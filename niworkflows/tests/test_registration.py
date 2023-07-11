@@ -196,7 +196,7 @@ def test_SpatialNormalizationRPT_masked(monkeypatch, moving, reference_mask):
 
 def test_ANTSRegistrationRPT(monkeypatch, reference, moving):
     """ the SpatialNormalizationRPT report capable test """
-    import pkg_resources as pkgr
+    from niworkflows import data
 
     def _agg(objekt, runtime):
         outputs = objekt.output_spec()
@@ -214,8 +214,6 @@ def test_ANTSRegistrationRPT(monkeypatch, reference, moving):
         generate_report=True,
         moving_image=moving,
         fixed_image=reference,
-        from_file=pkgr.resource_filename(
-            "niworkflows.data", "t1w-mni_registration_testing_000.json"
-        ),
+        from_file=data.load("t1w-mni_registration_testing_000.json"),
     )
     _smoke_test_report(ants_rpt, "testANTSRegistrationRPT.svg")

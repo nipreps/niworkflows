@@ -203,9 +203,9 @@ def _read_pkl(path):
 def _read_txt(path):
     """Read a txt crashfile
 
-    >>> new_path = Path(__file__).resolve().parent.parent
-    >>> test_data_path = new_path / 'data' / 'tests'
-    >>> info = _read_txt(test_data_path / 'crashfile.txt')
+    >>> from niworkflows import data
+    >>> crashfile = data.load('tests/crashfile.txt')
+    >>> info = _read_txt(crashfile)
     >>> info['node']  # doctest: +ELLIPSIS
     '...func_preproc_task_machinegame_run_02_wf.carpetplot_wf.conf_plot'
     >>> info['traceback']  # doctest: +ELLIPSIS
@@ -366,15 +366,11 @@ def check_valid_fs_license():
     from pathlib import Path
     import subprocess as sp
     from tempfile import TemporaryDirectory
-    from pkg_resources import resource_filename
+    from .. import data
 
-    with TemporaryDirectory() as tmpdir:
+    with TemporaryDirectory() as tmpdir, data.load.as_path("sentinel.nii.gz") as sentinel:
         # quick FreeSurfer command
-        _cmd = (
-            "mri_convert",
-            resource_filename("niworkflows", "data/sentinel.nii.gz"),
-            str(Path(tmpdir) / "out.mgz"),
-        )
+        _cmd = ("mri_convert", str(sentinel), str(Path(tmpdir) / "out.mgz"))
         proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
     return proc.returncode == 0 and "ERROR:" not in proc.stdout.decode()
 
