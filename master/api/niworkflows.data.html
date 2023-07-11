@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.interfaces.probmaps module" href="niworkflows.interfaces.probmaps.html" /><link rel="prev" title="niworkflows.interfaces.patches module" href="niworkflows.interfaces.patches.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.dwi package" href="niworkflows.dwi.html" /><link rel="prev" title="niworkflows.cli.boldref module" href="niworkflows.cli.boldref.html" />
 
     <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
-        <title>niworkflows.interfaces.plotting module - niworkflows 0+unknown documentation</title>
+        <title>niworkflows.data package - niworkflows 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -178,7 +178,7 @@
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.cli.boldref.html">niworkflows.cli.boldref module</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="niworkflows.data.html">niworkflows.data package</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">niworkflows.data package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of niworkflows.engine package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.engine.workflows.html">niworkflows.engine.workflows module</a></li>
@@ -188,7 +188,7 @@
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.func.util.html">niworkflows.func.util module</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current has-children"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of niworkflows.interfaces package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of niworkflows.interfaces package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="niworkflows.interfaces.reportlets.html">niworkflows.interfaces.reportlets package</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of niworkflows.interfaces.reportlets package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.base.html">niworkflows.interfaces.reportlets.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.masks.html">niworkflows.interfaces.reportlets.masks module</a></li>
@@ -212,7 +212,7 @@
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.nitransforms.html">niworkflows.interfaces.nitransforms module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.norm.html">niworkflows.interfaces.norm module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.patches.html">niworkflows.interfaces.patches module</a></li>
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">niworkflows.interfaces.plotting module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.plotting.html">niworkflows.interfaces.plotting module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.probmaps.html">niworkflows.interfaces.probmaps module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
@@ -284,86 +284,175 @@
           </label>
         </div>
         <article role="main">
-          <section id="module-niworkflows.interfaces.plotting">
-<span id="niworkflows-interfaces-plotting-module"></span><h1>niworkflows.interfaces.plotting module<a class="headerlink" href="#module-niworkflows.interfaces.plotting" title="Permalink to this heading">#</a></h1>
-<p>Visualization tools.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="niworkflows.interfaces.plotting.CompCorVariancePlot">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.plotting.</span></span><span class="sig-name descname"><span class="pre">CompCorVariancePlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/plotting.html#CompCorVariancePlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.plotting.CompCorVariancePlot" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
-<p>Plot the number of components necessary to explain the specified levels of variance.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>metadata_files</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – List of files containing component metadata.</p>
-</dd>
-<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>metadata_sources</strong> (<em>a list of items which are a string</em>) – List of names of decompositions (e.g., aCompCor, tCompCor) yielding the arguments in <cite>metadata_files</cite>.</p></li>
-<li><p><strong>out_file</strong> (<em>a pathlike object or string representing a file or None</em>) – Path to save plot.
-(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
-<li><p><strong>variance_thresholds</strong> (<em>a tuple of the form: (a float, a float, a float)</em>) – Levels of explained variance to include in plot.
-(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">(0.5,</span> <span class="pre">0.7,</span> <span class="pre">0.9)</span></code>)</p></li>
+          <section id="module-niworkflows.data">
+<span id="niworkflows-data-package"></span><h1>niworkflows.data package<a class="headerlink" href="#module-niworkflows.data" title="Permalink to this heading">#</a></h1>
+<p>Niworkflows data files</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="niworkflows.data.load">
+<span class="sig-prename descclassname"><span class="pre">niworkflows.data.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">segments</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="headerlink" href="#niworkflows.data.load" title="Permalink to this definition">#</a></dt>
+<dd><p>Load package files relative to <code class="docutils literal notranslate"><span class="pre">niworkflows.data</span></code>.</p>
+<p>This package contains the following (top-level) files/directories:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">antsBrainExtractionNoLaplacian_precise.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">antsBrainExtractionNoLaplacian_testing.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">antsBrainExtraction_precise.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">antsBrainExtraction_testing.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">boldref-mni_registration_precise_000.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">boldref-mni_registration_precise_001.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">boldref-mni_registration_precise_002.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">boldref-mni_registration_testing_000.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">boldref-mni_registration_testing_001.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">boldref-mni_registration_testing_002.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">epi_atlasbased_brainmask.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">itkIdentityTransform.txt</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nipreps.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sentinel.nii.gz</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t1w-mni_registration_fast_000.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t1w-mni_registration_precise_000.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t1w-mni_registration_precise_001.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t1w-mni_registration_precise_002.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t1w-mni_registration_testing_000.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t1w-mni_registration_testing_001.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t1w-mni_registration_testing_002.json</span></code></p></li>
 </ul>
-</dd>
-<dt class="field-odd">Outputs<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Path to saved plot.</p>
-</dd>
-</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="niworkflows.data.load.readable">
+<span class="sig-prename descclassname"><span class="pre">load.</span></span><span class="sig-name descname"><span class="pre">readable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">segments</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Traversable</span></span></span><a class="headerlink" href="#niworkflows.data.load.readable" title="Permalink to this definition">#</a></dt>
+<dd><p>Provide read access to a resource through a Path-like interface.</p>
+<p>This file may or may not exist on the filesystem, and may be
+efficiently used for read operations, including directory traversal.</p>
+<p>This result is not cached or copied to the filesystem in cases where
+that would be necessary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="niworkflows.data.load.as_path">
+<span class="sig-prename descclassname"><span class="pre">load.</span></span><span class="sig-name descname"><span class="pre">as_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">segments</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/contextlib.html#contextlib.AbstractContextManager" title="(in Python v3.11)"><span class="pre">AbstractContextManager</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><span class="pre">Path</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#niworkflows.data.load.as_path" title="Permalink to this definition">#</a></dt>
+<dd><p>Ensure data is available as a <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>.</p>
+<p>This method generates a context manager that yields a Path when
+entered.</p>
+<p>This result is not cached, and any temporary files that are created
+are deleted when the context is exited.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="niworkflows.data.load.cached">
+<span class="sig-prename descclassname"><span class="pre">load.</span></span><span class="sig-name descname"><span class="pre">cached</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">segments</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><span class="pre">Path</span></a></span></span><a class="headerlink" href="#niworkflows.data.load.cached" title="Permalink to this definition">#</a></dt>
+<dd><p>Ensure data is available as a <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>.</p>
+<p>Any temporary files that are created remain available throughout
+the duration of the program, and are deleted when Python exits.</p>
+<p>Results are cached so that multiple calls do not unpack the same
+data multiple times, but the cache is sensitive to the specific
+argument(s) passed.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="niworkflows.interfaces.plotting.ConfoundsCorrelationPlot">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.plotting.</span></span><span class="sig-name descname"><span class="pre">ConfoundsCorrelationPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/plotting.html#ConfoundsCorrelationPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.plotting.ConfoundsCorrelationPlot" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
-<p>Plot the correlation among confound regressors.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>confounds_file</strong> (<em>a pathlike object or string representing an existing file</em>) – File containing confound regressors.</p>
-</dd>
-<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>columns</strong> (<em>a list of items which are a string</em>) – Filter out all regressors not found in this list.</p></li>
-<li><p><strong>max_dim</strong> (<em>an integer</em>) – Maximum number of regressors to include in plot. Regressors with highest magnitude of correlation with <cite>reference_column</cite> will be selected.
-(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">20</span></code>)</p></li>
-<li><p><strong>out_file</strong> (<em>a pathlike object or string representing a file or None</em>) – Path to save plot.
-(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
-<li><p><strong>reference_column</strong> (<em>a string</em>) – Column in the confound file for which all correlation magnitudes should be ranked and plotted.
-(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">global_signal</span></code>)</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Outputs<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Path to saved plot.</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="niworkflows.data.Loader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.data.</span></span><span class="sig-name descname"><span class="pre">Loader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">anchor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/data.html#Loader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.data.Loader" title="Permalink to this definition">#</a></dt>
+<dd><p>A loader for package files relative to a module</p>
+<p>This class wraps <a class="reference external" href="https://docs.python.org/3/library/importlib.resources.html#module-importlib.resources" title="(in Python v3.11)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">importlib.resources</span></code></a> to provide a getter
+function with an interpreter-lifetime scope. For typical packages
+it simply passes through filesystem paths as <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>
+objects. For zipped distributions, it will unpack the files into
+a temporary directory that is cleaned up on interpreter exit.</p>
+<p>This loader accepts a fully-qualified module name or a module
+object.</p>
+<p>Expected usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;Data package</span>
+
+<span class="sd">.. autofunction:: load_data</span>
+
+<span class="sd">.. automethod:: load_data.readable</span>
+
+<span class="sd">.. automethod:: load_data.as_path</span>
+
+<span class="sd">.. automethod:: load_data.cached</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">niworkflows.data</span> <span class="kn">import</span> <span class="n">Loader</span>
+
+<span class="n">load_data</span> <span class="o">=</span> <span class="n">Loader</span><span class="p">(</span><span class="n">__package__</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="#niworkflows.data.Loader" title="niworkflows.data.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loader</span></code></a> objects implement the <a class="reference external" href="https://docs.python.org/3/library/functions.html#callable" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">callable()</span></code></a> interface
+and generate a docstring, and are intended to be treated and documented
+as functions.</p>
+<p>For greater flexibility and improved readability over the <code class="docutils literal notranslate"><span class="pre">importlib.resources</span></code>
+interface, explicit methods are provided to access resources.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p>On-filesystem</p></td>
+<td><p>Lifetime</p></td>
+<td><p>Method</p></td>
+</tr>
+<tr class="row-even"><td><p><cite>True</cite></p></td>
+<td><p>Interpreter</p></td>
+<td><p><a class="reference internal" href="#niworkflows.data.Loader.cached" title="niworkflows.data.Loader.cached"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cached()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><cite>True</cite></p></td>
+<td><p><cite>with</cite> context</p></td>
+<td><p><a class="reference internal" href="#niworkflows.data.Loader.as_path" title="niworkflows.data.Loader.as_path"><code class="xref py py-meth docutils literal notranslate"><span class="pre">as_path()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><cite>False</cite></p></td>
+<td><p>n/a</p></td>
+<td><p><a class="reference internal" href="#niworkflows.data.Loader.readable" title="niworkflows.data.Loader.readable"><code class="xref py py-meth docutils literal notranslate"><span class="pre">readable()</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>It is also possible to use <code class="docutils literal notranslate"><span class="pre">Loader</span></code> directly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">niworkflows.data</span> <span class="kn">import</span> <span class="n">Loader</span>
+
+<span class="n">Loader</span><span class="p">(</span><span class="n">other_package</span><span class="p">)</span><span class="o">.</span><span class="n">readable</span><span class="p">(</span><span class="s1">&#39;data/resource.ext&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">Loader</span><span class="p">(</span><span class="n">other_package</span><span class="p">)</span><span class="o">.</span><span class="n">as_path</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pkgdata</span><span class="p">:</span>
+    <span class="c1"># Call function that requires full Path implementation</span>
+    <span class="n">func</span><span class="p">(</span><span class="n">pkgdata</span><span class="p">)</span>
+
+<span class="c1"># contrast to</span>
+
+<span class="kn">from</span> <span class="nn">importlib_resources</span> <span class="kn">import</span> <span class="n">files</span><span class="p">,</span> <span class="n">as_file</span>
+
+<span class="n">files</span><span class="p">(</span><span class="n">other_package</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s1">&#39;data/resource.ext&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">as_file</span><span class="p">(</span><span class="n">files</span><span class="p">(</span><span class="n">other_package</span><span class="p">)</span> <span class="o">/</span> <span class="s1">&#39;data&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pkgdata</span><span class="p">:</span>
+    <span class="n">func</span><span class="p">(</span><span class="n">pkgdata</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="niworkflows.data.Loader.readable">
+<span class="sig-name descname"><span class="pre">readable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">segments</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Traversable</span></span></span><a class="reference internal" href="../_modules/niworkflows/data.html#Loader.readable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.data.Loader.readable" title="Permalink to this definition">#</a></dt>
+<dd><p>Provide read access to a resource through a Path-like interface.</p>
+<p>This file may or may not exist on the filesystem, and may be
+efficiently used for read operations, including directory traversal.</p>
+<p>This result is not cached or copied to the filesystem in cases where
+that would be necessary.</p>
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="niworkflows.interfaces.plotting.FMRISummary">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.plotting.</span></span><span class="sig-name descname"><span class="pre">FMRISummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/plotting.html#FMRISummary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.plotting.FMRISummary" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
-<p>Prepare an fMRI summary plot for the report.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>in_func</strong> (<em>a pathlike object or string representing an existing file</em>)</p>
-</dd>
-<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>drop_trs</strong> (<em>an integer</em>) – Dummy scans.
-(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">0</span></code>)</p></li>
-<li><p><strong>dvars</strong> (<em>a pathlike object or string representing an existing file</em>)</p></li>
-<li><p><strong>fd</strong> (<em>a pathlike object or string representing an existing file</em>)</p></li>
-<li><p><strong>fd_thres</strong> (<em>a float</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">0.2</span></code>)</p></li>
-<li><p><strong>in_segm</strong> (<em>a pathlike object or string representing an existing file</em>)</p></li>
-<li><p><strong>in_spikes_bg</strong> (<em>a pathlike object or string representing an existing file</em>)</p></li>
-<li><p><strong>outliers</strong> (<em>a pathlike object or string representing an existing file</em>)</p></li>
-<li><p><strong>tr</strong> (<em>a float or None</em>) – The TR.
-(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Outputs<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Written file path.</p>
-</dd>
-</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="niworkflows.data.Loader.as_path">
+<span class="sig-name descname"><span class="pre">as_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">segments</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/contextlib.html#contextlib.AbstractContextManager" title="(in Python v3.11)"><span class="pre">AbstractContextManager</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><span class="pre">Path</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/niworkflows/data.html#Loader.as_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.data.Loader.as_path" title="Permalink to this definition">#</a></dt>
+<dd><p>Ensure data is available as a <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>.</p>
+<p>This method generates a context manager that yields a Path when
+entered.</p>
+<p>This result is not cached, and any temporary files that are created
+are deleted when the context is exited.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="niworkflows.data.Loader.cached">
+<span class="sig-name descname"><span class="pre">cached</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">segments</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><span class="pre">Path</span></a></span></span><a class="reference internal" href="../_modules/niworkflows/data.html#Loader.cached"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.data.Loader.cached" title="Permalink to this definition">#</a></dt>
+<dd><p>Ensure data is available as a <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>.</p>
+<p>Any temporary files that are created remain available throughout
+the duration of the program, and are deleted when Python exits.</p>
+<p>Results are cached so that multiple calls do not unpack the same
+data multiple times, but the cache is sensitive to the specific
+argument(s) passed.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -373,23 +462,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="niworkflows.interfaces.probmaps.html">
+          <a class="next-page" href="niworkflows.dwi.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">niworkflows.interfaces.probmaps module</div>
+                <div class="title">niworkflows.dwi package</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="niworkflows.interfaces.patches.html">
+          <a class="prev-page" href="niworkflows.cli.boldref.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">niworkflows.interfaces.patches module</div>
+                <div class="title">niworkflows.cli.boldref module</div>
                 
               </div>
             </a>
@@ -423,10 +512,19 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">niworkflows.interfaces.plotting module</a><ul>
-<li><a class="reference internal" href="#niworkflows.interfaces.plotting.CompCorVariancePlot"><code class="docutils literal notranslate"><span class="pre">CompCorVariancePlot</span></code></a></li>
-<li><a class="reference internal" href="#niworkflows.interfaces.plotting.ConfoundsCorrelationPlot"><code class="docutils literal notranslate"><span class="pre">ConfoundsCorrelationPlot</span></code></a></li>
-<li><a class="reference internal" href="#niworkflows.interfaces.plotting.FMRISummary"><code class="docutils literal notranslate"><span class="pre">FMRISummary</span></code></a></li>
+<li><a class="reference internal" href="#">niworkflows.data package</a><ul>
+<li><a class="reference internal" href="#niworkflows.data.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a><ul>
+<li><a class="reference internal" href="#niworkflows.data.load.readable"><code class="docutils literal notranslate"><span class="pre">load.readable()</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.data.load.as_path"><code class="docutils literal notranslate"><span class="pre">load.as_path()</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.data.load.cached"><code class="docutils literal notranslate"><span class="pre">load.cached()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#niworkflows.data.Loader"><code class="docutils literal notranslate"><span class="pre">Loader</span></code></a><ul>
+<li><a class="reference internal" href="#niworkflows.data.Loader.readable"><code class="docutils literal notranslate"><span class="pre">Loader.readable()</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.data.Loader.as_path"><code class="docutils literal notranslate"><span class="pre">Loader.as_path()</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.data.Loader.cached"><code class="docutils literal notranslate"><span class="pre">Loader.cached()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
