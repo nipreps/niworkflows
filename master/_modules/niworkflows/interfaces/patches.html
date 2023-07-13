@@ -325,7 +325,7 @@
         <span class="n">failures</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">runtime</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">RobustACompCor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
+                <span class="n">runtime</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
                 <span class="k">break</span>
             <span class="k">except</span> <span class="n">LinAlgError</span><span class="p">:</span>
                 <span class="n">failures</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -348,7 +348,7 @@
         <span class="n">failures</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">runtime</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">RobustTCompCor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
+                <span class="n">runtime</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
                 <span class="k">break</span>
             <span class="k">except</span> <span class="n">LinAlgError</span><span class="p">:</span>
                 <span class="n">failures</span> <span class="o">+=</span> <span class="mi">1</span>

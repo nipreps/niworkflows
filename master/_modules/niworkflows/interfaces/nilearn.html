@@ -526,10 +526,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_mask_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="s2">&quot;mask_file.nii.gz&quot;</span><span class="p">)</span>
 
         <span class="n">runtime</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ComputeEPIMask</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_list_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">outputs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ComputeEPIMask</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()</span>
         <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;mask_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask_file</span>
         <span class="k">return</span> <span class="n">outputs</span>
 
@@ -546,7 +546,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_mask_file</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ComputeEPIMask</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_enhance_t2_contrast</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>

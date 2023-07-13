@@ -441,7 +441,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Call constructor</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">KeySelect</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
 
         <span class="c1"># Handle and initiate fields</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">fields</span><span class="p">:</span>
@@ -507,7 +507,7 @@
         <span class="k">return</span> <span class="n">outputs</span>
 
     <span class="k">def</span> <span class="nf">_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">base</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">KeySelect</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_outputs</span><span class="p">()</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_outputs</span><span class="p">()</span>
         <span class="n">base</span> <span class="o">=</span> <span class="n">add_traits</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">base</span></div>
 

@@ -342,7 +342,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_report</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">BETRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;generates a report showing slices from each axis of an arbitrary</span>
@@ -359,7 +359,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_mask_file</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">BETRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
 <span class="k">class</span> <span class="nc">_BrainExtractionInputSpecRPT</span><span class="p">(</span>
@@ -402,7 +402,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_mask_file</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">BrainExtractionRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
 <span class="k">class</span> <span class="nc">_ACompCorInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">confounds</span><span class="o">.</span><span class="n">CompCorInputSpec</span><span class="p">):</span>
@@ -438,7 +438,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_mask_file</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ACompCorRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
 <span class="k">class</span> <span class="nc">_TCompCorInputSpecRPT</span><span class="p">(</span>
@@ -480,7 +480,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">high_variance_masks</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TCompCorRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
 <span class="k">class</span> <span class="nc">_SimpleShowMaskInputSpec</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">):</span>
@@ -497,7 +497,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_seg_files</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_file</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_masked</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">SimpleShowMaskRPT</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
 <span class="k">class</span> <span class="nc">_ROIsPlotInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">):</span>

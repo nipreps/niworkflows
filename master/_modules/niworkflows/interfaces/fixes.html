@@ -346,7 +346,7 @@
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">,</span> <span class="n">correct_return_codes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,)):</span>
         <span class="c1"># Run normally</span>
-        <span class="n">runtime</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FixHeaderApplyTransforms</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span>
+        <span class="n">runtime</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span>
             <span class="n">runtime</span><span class="p">,</span> <span class="n">correct_return_codes</span>
         <span class="p">)</span>
 
@@ -385,7 +385,7 @@
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">,</span> <span class="n">correct_return_codes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,)):</span>
         <span class="c1"># Run normally</span>
-        <span class="n">runtime</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FixHeaderRegistration</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span>
+        <span class="n">runtime</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span>
             <span class="n">runtime</span><span class="p">,</span> <span class="n">correct_return_codes</span>
         <span class="p">)</span>
 
@@ -428,12 +428,12 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a private property to keep the path to the right input.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_input_image</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_negative_values</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">FixN4BiasFieldCorrection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_format_arg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">trait_spec</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;input_image&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">trait_spec</span><span class="o">.</span><span class="n">argstr</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_image</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FixN4BiasFieldCorrection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_format_arg</span><span class="p">(</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format_arg</span><span class="p">(</span>
             <span class="n">name</span><span class="p">,</span> <span class="n">trait_spec</span><span class="p">,</span> <span class="n">value</span>
         <span class="p">)</span>
 
@@ -451,10 +451,10 @@
             <span class="n">newnii</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_image</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_negative_values</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FixN4BiasFieldCorrection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_parse_inputs</span><span class="p">(</span><span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_parse_inputs</span><span class="p">(</span><span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_list_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">outputs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FixN4BiasFieldCorrection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()</span>
         <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;negative_values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_negative_values</span>
         <span class="k">return</span> <span class="n">outputs</span></div>
 </pre></div>
