@@ -241,10 +241,10 @@ class ComputeEPIMask(nrb.SegmentationRC):
         self._mask_file = os.path.join(runtime.cwd, "mask_file.nii.gz")
 
         runtime.returncode = 0
-        return super(ComputeEPIMask, self)._run_interface(runtime)
+        return super()._run_interface(runtime)
 
     def _list_outputs(self):
-        outputs = super(ComputeEPIMask, self)._list_outputs()
+        outputs = super()._list_outputs()
         outputs["mask_file"] = self._mask_file
         return outputs
 
@@ -261,7 +261,7 @@ class ComputeEPIMask(nrb.SegmentationRC):
             self._mask_file,
         )
 
-        return super(ComputeEPIMask, self)._post_run_hook(runtime)
+        return super()._post_run_hook(runtime)
 
 
 def _enhance_t2_contrast(in_file, newpath=None, offset=0.5):

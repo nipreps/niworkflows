@@ -189,7 +189,7 @@ class ReportingInterface(reporting.ReportCapableInterface):
     output_spec = reporting.ReportCapableOutputSpec
 
     def __init__(self, generate_report=True, **kwargs):
-        super(ReportingInterface, self).__init__(
+        super().__init__(
             generate_report=generate_report, **kwargs
         )
 

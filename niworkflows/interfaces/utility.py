@@ -156,7 +156,7 @@ class KeySelect(BaseInterface):
 
         """
         # Call constructor
-        super(KeySelect, self).__init__(**inputs)
+        super().__init__(**inputs)
 
         # Handle and initiate fields
         if not fields:
@@ -222,7 +222,7 @@ class KeySelect(BaseInterface):
         return outputs
 
     def _outputs(self):
-        base = super(KeySelect, self)._outputs()
+        base = super()._outputs()
         base = add_traits(base, self._fields)
         return base
 

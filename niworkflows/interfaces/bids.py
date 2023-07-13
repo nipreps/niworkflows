@@ -253,7 +253,7 @@ class BIDSDataGrabber(SimpleInterface):
     def __init__(self, *args, **kwargs):
         anat_only = kwargs.pop("anat_only")
         anat_derivatives = kwargs.pop("anat_derivatives", None)
-        super(BIDSDataGrabber, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if anat_only is not None:
             self._require_funcs = not anat_only
         self._require_t1w = anat_derivatives is None
@@ -820,12 +820,12 @@ class ReadSidecarJSON(SimpleInterface):
     def __init__(self, fields=None, undef_fields=False, **inputs):
         from bids.utils import listify
 
-        super(ReadSidecarJSON, self).__init__(**inputs)
+        super().__init__(**inputs)
         self._fields = listify(fields or [])
         self._undef_fields = undef_fields
 
     def _outputs(self):
-        base = super(ReadSidecarJSON, self)._outputs()
+        base = super()._outputs()
         if self._fields:
             base = add_traits(base, self._fields)
         return base

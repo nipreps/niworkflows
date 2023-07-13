@@ -78,7 +78,7 @@ class SpatialNormalizationRPT(nrb.RegistrationRC, SpatialNormalization):
             self._moving_image,
         )
 
-        return super(SpatialNormalizationRPT, self)._post_run_hook(runtime)
+        return super()._post_run_hook(runtime)
 
 
 class _ANTSRegistrationInputSpecRPT(
@@ -106,7 +106,7 @@ class ANTSRegistrationRPT(nrb.RegistrationRC, Registration):
             self._moving_image,
         )
 
-        return super(ANTSRegistrationRPT, self)._post_run_hook(runtime)
+        return super()._post_run_hook(runtime)
 
 
 class _ANTSApplyTransformsInputSpecRPT(
@@ -134,7 +134,7 @@ class ANTSApplyTransformsRPT(nrb.RegistrationRC, ApplyTransforms):
             self._moving_image,
         )
 
-        return super(ANTSApplyTransformsRPT, self)._post_run_hook(runtime)
+        return super()._post_run_hook(runtime)
 
 
 class _ApplyTOPUPInputSpecRPT(
@@ -169,7 +169,7 @@ class ApplyTOPUPRPT(nrb.RegistrationRC, fsl.ApplyTOPUP):
             self._moving_image,
         )
 
-        return super(ApplyTOPUPRPT, self)._post_run_hook(runtime)
+        return super()._post_run_hook(runtime)
 
 
 class _FUGUEInputSpecRPT(nrb._SVGReportCapableInputSpec, fsl.preprocess.FUGUEInputSpec):
@@ -198,7 +198,7 @@ class FUGUERPT(nrb.RegistrationRC, fsl.FUGUE):
             self._moving_image,
         )
 
-        return super(FUGUERPT, self)._post_run_hook(runtime)
+        return super()._post_run_hook(runtime)
 
 
 class _FLIRTInputSpecRPT(nrb._SVGReportCapableInputSpec, fsl.preprocess.FLIRTInputSpec):
@@ -225,7 +225,7 @@ class FLIRTRPT(nrb.RegistrationRC, fsl.FLIRT):
             self._moving_image,
         )
 
-        return super(FLIRTRPT, self)._post_run_hook(runtime)
+        return super()._post_run_hook(runtime)
 
 
 class _ApplyXFMInputSpecRPT(
@@ -291,7 +291,7 @@ class BBRegisterRPT(nrb.RegistrationRC, fs.BBRegister):
             self._moving_image,
         )
 
-        return super(BBRegisterRPT, self)._post_run_hook(runtime)
+        return super()._post_run_hook(runtime)
 
 
 class _MRICoregInputSpecRPT(
@@ -342,7 +342,7 @@ class MRICoregRPT(nrb.RegistrationRC, fs.MRICoreg):
             self._moving_image,
         )
 
-        return super(MRICoregRPT, self)._post_run_hook(runtime)
+        return super()._post_run_hook(runtime)
 
 
 class _SimpleBeforeAfterInputSpecRPT(nrb._SVGReportCapableInputSpec):
@@ -373,7 +373,7 @@ class SimpleBeforeAfterRPT(nrb.RegistrationRC, nrb.ReportingInterface):
             self._moving_image,
         )
 
-        return super(SimpleBeforeAfterRPT, self)._post_run_hook(runtime)
+        return super()._post_run_hook(runtime)
 
 
 class _ResampleBeforeAfterInputSpecRPT(_SimpleBeforeAfterInputSpecRPT):
@@ -411,7 +411,7 @@ class ResampleBeforeAfterRPT(SimpleBeforeAfterRPT):
             self._moving_image,
         )
 
-        runtime = super(ResampleBeforeAfterRPT, self)._post_run_hook(runtime)
+        runtime = super()._post_run_hook(runtime)
         NIWORKFLOWS_LOG.info("Successfully created report (%s)", self._out_report)
         os.unlink(fname)
 

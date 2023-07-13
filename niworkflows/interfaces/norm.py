@@ -148,7 +148,7 @@ class SpatialNormalization(BaseInterface):
         self._reference_image = None
         self.retry = 1
         self.terminal_output = "file"
-        super(SpatialNormalization, self).__init__(**inputs)
+        super().__init__(**inputs)
 
     def _get_settings(self):
         """

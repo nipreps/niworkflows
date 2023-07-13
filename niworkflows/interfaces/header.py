@@ -67,14 +67,14 @@ class CopyXForm(SimpleInterface):
         if isinstance(self._fields, str):
             self._fields = [self._fields]
 
-        super(CopyXForm, self).__init__(**inputs)
+        super().__init__(**inputs)
 
         add_traits(self.inputs, self._fields)
         for f in set(self._fields).intersection(list(inputs.keys())):
             setattr(self.inputs, f, inputs[f])
 
     def _outputs(self):
-        base = super(CopyXForm, self)._outputs()
+        base = super()._outputs()
         if self._fields:
             fields = self._fields.copy()
             if "in_file" in fields:

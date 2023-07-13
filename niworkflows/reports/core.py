@@ -84,7 +84,7 @@ class Smallest:
         return False
 
 
-class Element(object):
+class Element:
     """Just a basic component of a report"""
 
     def __init__(self, name, title=None):
