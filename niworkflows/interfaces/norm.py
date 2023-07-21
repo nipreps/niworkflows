@@ -169,7 +169,9 @@ class SpatialNormalization(BaseInterface):
         data_dir = load_data()
         # Get a list of settings files that match the flavor.
         filenames = [
-            i for i in data_dir.iterdir() if i.startswith(filestart) and i.endswith(".json")
+            path.name
+            for path in data_dir.iterdir()
+            if path.name.startswith(filestart) and path.name.endswith(".json")
         ]
         # Return the settings files.
         return [str(data_dir / f) for f in sorted(filenames)]
