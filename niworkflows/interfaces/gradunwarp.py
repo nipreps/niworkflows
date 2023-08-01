@@ -21,18 +21,20 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """GradUnwarp interface."""
-import numpy as np
-from nipype import logging
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
     traits,
     TraitedSpec,
     BaseInterfaceInputSpec,
     File,
-    SimpleInterface,
-    OutputMultiObject,
-    InputMultiObject,
+    SimpleInterface
 )
+
+try:
+    import gradunwarp
+    has_gradunwarp = True
+except ImportError:
+    has_gradunwarp = False
 
 
 class _GradUnwarpInputSpec(BaseInterfaceInputSpec):
@@ -46,7 +48,11 @@ class _GradUnwarpInputSpec(BaseInterfaceInputSpec):
 
     fovmin = traits.Float(desc="the minimum extent of harmonics evaluation grid in meters")
     fovmax = traits.Float(desc="the maximum extent of harmonics evaluation grid in meters")
-    order = traits.Int(min=1, max=4, usedefault=True, desc="the order of interpolation(1..4) where 1 is linear - default")
+    order = traits.Int(
+        min=1, max=4,
+        usedefault=True,
+        desc="the order of interpolation(1..4) where 1 is linear - default")
+
 
 class _GradUnwarpOutputSpec(TraitedSpec):
     corrected_file = File(desc="input images corrected")
@@ -65,7 +71,8 @@ class GradUnwarp(SimpleInterface):
                 self.inputs.infile,
                 suffix='_gradunwarped',
                 newpath=runtime.cwd
-                )
+            )
+        print(self.inputs)
         gur = GradientUnwarpRunner(self.inputs)
         gur.run()
         gur.write()
@@ -75,5 +82,5 @@ class GradUnwarp(SimpleInterface):
         self._results["warp_file"] = fname_presuffix(
             "fullWarp_abs.nii.gz",
             newpath=runtime.cwd
-            )
+        )
         return runtime

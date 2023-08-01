@@ -27,6 +27,7 @@ from nipype.interfaces import utility as niu
 
 from ..engine.workflows import LiterateWorkflow as Workflow
 
+
 def init_gradunwarp_wf(
     name="gradunwarp_wf",
 ):
@@ -48,14 +49,20 @@ def init_gradunwarp_wf(
         name="outputnode",
     )
 
-    gradient_unwarp = pe.MapNode(GradUnwarp(), name="grad_unwarp")
+    gradient_unwarp = pe.MapNode(
+        GradUnwarp(),
+        name="grad_unwarp",
+        iterfield=["infile"]
+    )
+
     convert_warp = pe.MapNode(
         ConvertWarp(
             abswarp=True,
             out_relwarp=True,
         ),
-        name='convert_warp_abs2rel'
-        )
+        name='convert_warp_abs2rel',
+        iterfield=["reference", "warp1"]
+    )
 
     # fmt:off
     wf.connect([
@@ -64,15 +71,10 @@ def init_gradunwarp_wf(
             ("coeff_file", "coeffile"),
             ("grad_file", "gradfile"),
         ]),
-        (inputnode, convert_warp, [
-            ("in_file", "reference"),
-        ]),
-        (gradient_unwarp, convert_warp, [
-            ("warp_file", "warp1"),
-        ]),
-        (gradient_unwarp, output_node, [
-            ("corrected_file", "corrected_file")
-        ])
+        (inputnode, convert_warp, [("input_file", "reference")]),
+        (gradient_unwarp, convert_warp, [("warp_file", "warp1")]),
+        (gradient_unwarp, outputnode, [("corrected_file", "corrected_file")]),
+        (convert_warp, outputnode, [("out_file", "warp_file")])
     ])
     # fmt:on
 
