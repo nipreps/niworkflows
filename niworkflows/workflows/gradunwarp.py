@@ -64,6 +64,29 @@ def init_gradunwarp_wf(
         iterfield=["reference", "warp1"]
     )
 
+    def _warp_fsl2itk(in_warp):
+        import os
+        import nitransforms.io
+        from nipype.utils.filemanip import fname_presuffix
+        fsl_warp = nitransforms.io.fsl.FSLDisplacementsField.from_filename(in_warp)
+        itk_warp_data = fsl_warp.get_fdata().reshape(fsl_warp.shape[:3]+(1,3))
+        itk_warp_data[...,(0,1)] *= -1
+        itk_warp = fsl_warp.__class__(itk_warp_data, fsl_warp.affine)
+        itk_warp.header.set_intent("vector")
+        out_fname = fname_presuffix(in_warp, suffix="_itk", newpath=os.getcwd())
+        itk_warp.to_filename(out_fname)
+        return out_fname
+
+    warp_fsl2itk = pe.MapNode(
+        niu.Function(
+            function=_warp_fsl2itk,
+            output_names=["itk_warp"],
+            input_names=["in_warp"]
+        ),
+        iterfield=['in_warp'],
+        name="warp_fsl2itk"
+    )
+
     # fmt:off
     wf.connect([
         (inputnode, gradient_unwarp, [
@@ -74,7 +97,8 @@ def init_gradunwarp_wf(
         (inputnode, convert_warp, [("input_file", "reference")]),
         (gradient_unwarp, convert_warp, [("warp_file", "warp1")]),
         (gradient_unwarp, outputnode, [("corrected_file", "corrected_file")]),
-        (convert_warp, outputnode, [("out_file", "warp_file")])
+        (convert_warp, warp_fsl2itk, [("out_file", "in_warp")]),
+        (warp_fsl2itk, outputnode, [("itk_warp", "warp_file")])
     ])
     # fmt:on
 
