@@ -21,7 +21,7 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """GradUnwarp interface."""
-from nipype.utils.filemanip import fname_presuffix
+from pathlib import Path
 from nipype.interfaces.base import (
     traits,
     TraitedSpec,
