@@ -300,7 +300,7 @@ def test_DerivativesDataSink_build_path(
         **entities,
     )
 
-    if type(expectation) == type(Exception):
+    if type(expectation) is type(Exception):
         with pytest.raises(expectation):
             dds.run()
         return
