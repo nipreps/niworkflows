@@ -36,7 +36,7 @@ except ImportError:
     has_gradunwarp = False
 
 
-class _GradUnwarpInputSpec(BaseInterfaceInputSpec):
+class _GradUnwarpInputSpec(TraitedSpec):
     infile = File(exists=True, mandatory=True, desc="input image to be corrected")
     gradfile = File(exists=True, default=None, desc="gradient file")
     coeffile = File(exists=True, default=None, desc="coefficients file")
