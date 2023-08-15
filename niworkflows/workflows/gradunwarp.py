@@ -69,12 +69,8 @@ def init_gradunwarp_wf(
         import nitransforms.io
         from nipype.utils.filemanip import fname_presuffix
         fsl_warp = nitransforms.io.fsl.FSLDisplacementsField.from_filename(in_warp)
-        itk_warp_data = fsl_warp.get_fdata().reshape(fsl_warp.shape[:3]+(1,3))
-        itk_warp_data[...,(0,1)] *= -1
-        itk_warp = fsl_warp.__class__(itk_warp_data, fsl_warp.affine)
-        itk_warp.header.set_intent("vector")
         out_fname = fname_presuffix(in_warp, suffix="_itk", newpath=os.getcwd())
-        itk_warp.to_filename(out_fname)
+        nitransforms.io.itk.ITKDisplacementsField.to_filename(fsl_warp, out_fname)
         return out_fname
 
     warp_fsl2itk = pe.MapNode(
