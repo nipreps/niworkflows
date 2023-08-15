@@ -65,17 +65,9 @@ class GradUnwarp(SimpleInterface):
     def _run_interface(self, runtime):
 
         from gradunwarp.core.gradient_unwarp import GradientUnwarpRunner
-        if not self.inputs.outfile:
-            self.inputs.outfile = fname_presuffix(
-                self.inputs.infile,
-                suffix='_gradunwarped',
-                newpath=runtime.cwd
-            )
-        print(self.inputs)
         gur = GradientUnwarpRunner(self.inputs)
         gur.run()
         gur.write()
-        del gur
 
         cwd = Path(runtime.cwd)
         self._results["corrected_file"] = str(cwd / self.inputs.outfile)
