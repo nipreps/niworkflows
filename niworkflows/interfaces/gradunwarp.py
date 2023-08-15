@@ -25,7 +25,6 @@ from pathlib import Path
 from nipype.interfaces.base import (
     traits,
     TraitedSpec,
-    BaseInterfaceInputSpec,
     File,
     SimpleInterface
 )
