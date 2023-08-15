@@ -37,9 +37,7 @@ def test_gradunwarp(tmpdir, ds000030_dir, workdir, outdir):
         wf.base_dir = str(workdir)
 
     print(ds000030_dir)
-    wf.inputs.inputnode.input_file = [
-        str(f) for f in (ds000030_dir / "sub-10228" / "anat").glob("*_T1w.nii.gz")
-    ][0]
+    wf.inputs.inputnode.input_file = str(next(ds000030_dir.glob("sub-10228/anat/*_T1w.nii.gz")))
     wf.inputs.inputnode.grad_file = load_test_data('gradunwarp_coeffs.grad')
 
     wf.run()
