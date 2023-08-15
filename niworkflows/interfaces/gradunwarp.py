@@ -78,9 +78,7 @@ class GradUnwarp(SimpleInterface):
         gur.write()
         del gur
 
-        self._results["corrected_file"] = self.inputs.outfile
-        self._results["warp_file"] = fname_presuffix(
-            "fullWarp_abs.nii.gz",
-            newpath=runtime.cwd
-        )
+        cwd = Path(runtime.cwd)
+        self._results["corrected_file"] = str(cwd / self.inputs.outfile)
+        self._results["warp_file"] = str(cwd / "fullWarp_abs.nii.gz")
         return runtime
