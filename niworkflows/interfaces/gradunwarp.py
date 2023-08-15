@@ -34,7 +34,12 @@ class _GradUnwarpInputSpec(TraitedSpec):
     infile = File(exists=True, mandatory=True, desc="input image to be corrected")
     gradfile = File(exists=True, default=None, desc="gradient file")
     coeffile = File(exists=True, default=None, desc="coefficients file")
-    outfile = File(name_source=['in_file'], name_template=['%s_gradunwarped', keep_extension=True, desc="output corrected image")
+    outfile = File(
+        name_source=['in_file'],
+        name_template=['%s_gradunwarped'],
+        keep_extension=True,
+        desc="output corrected image"
+    )
     vendor = traits.Enum("siemens", "ge", usedefault=True, desc="scanner vendor")
     warp = traits.Bool(desc="warp a volume (as opposed to unwarping)")
     nojac = traits.Bool(desc="Do not perform Jacobian intensity correction")
