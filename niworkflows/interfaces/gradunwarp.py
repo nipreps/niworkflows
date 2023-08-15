@@ -29,12 +29,6 @@ from nipype.interfaces.base import (
     SimpleInterface
 )
 
-try:
-    import gradunwarp
-    has_gradunwarp = True
-except ImportError:
-    has_gradunwarp = False
-
 
 class _GradUnwarpInputSpec(TraitedSpec):
     infile = File(exists=True, mandatory=True, desc="input image to be corrected")
