@@ -838,9 +838,9 @@ def compcor_variance_plot(
 
         ax[m].set_yticks([])
         ax[m].set_yticklabels([])
-        for tick in ax[m].xaxis.get_major_ticks():
-            tick.label.set_fontsize("x-small")
-            tick.label.set_rotation("vertical")
+        for label in ax[m].xaxis.get_majorticklabels():
+            label.set_fontsize("x-small")
+            label.set_rotation("vertical")
         for side in ["top", "right", "left"]:
             ax[m].spines[side].set_color("none")
             ax[m].spines[side].set_visible(False)
@@ -934,10 +934,10 @@ def confounds_correlation_plot(
     sns.heatmap(corr, linewidths=0.5, cmap="coolwarm", center=0, square=True, ax=ax0)
     ax0.tick_params(axis="both", which="both", width=0)
 
-    for tick in ax0.xaxis.get_major_ticks():
-        tick.label.set_fontsize("small")
-    for tick in ax0.yaxis.get_major_ticks():
-        tick.label.set_fontsize("small")
+    for label in ax0.xaxis.get_majorticklabels():
+        label.set_fontsize("small")
+    for label in ax0.yaxis.get_majorticklabels():
+        label.set_fontsize("small")
     sns.barplot(
         data=gscorr,
         x="index",
@@ -953,11 +953,11 @@ def confounds_correlation_plot(
     ax1.tick_params(axis="x", which="both", width=0)
     ax1.tick_params(axis="y", which="both", width=5, length=5)
 
-    for tick in ax1.xaxis.get_major_ticks():
-        tick.label.set_fontsize("small")
-        tick.label.set_rotation("vertical")
-    for tick in ax1.yaxis.get_major_ticks():
-        tick.label.set_fontsize("small")
+    for label in ax1.xaxis.get_majorticklabels():
+        label.set_fontsize("small")
+        label.set_rotation("vertical")
+    for label in ax1.yaxis.get_majorticklabels():
+        label.set_fontsize("small")
     for side in ["top", "right", "left"]:
         ax1.spines[side].set_color("none")
         ax1.spines[side].set_visible(False)
