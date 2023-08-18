@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.utils.misc - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -322,7 +322,9 @@
 <span class="p">]</span>
 
 
-<div class="viewcode-block" id="get_template_specs"><a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.get_template_specs">[docs]</a><span class="k">def</span> <span class="nf">get_template_specs</span><span class="p">(</span>
+<div class="viewcode-block" id="get_template_specs">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.get_template_specs">[docs]</a>
+<span class="k">def</span> <span class="nf">get_template_specs</span><span class="p">(</span>
     <span class="n">in_template</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">template_spec</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">default_resolution</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -419,7 +421,10 @@
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">tpl_target_path</span><span class="p">),</span> <span class="n">common_spec</span></div>
 
 
-<div class="viewcode-block" id="fix_multi_T1w_source_name"><a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.fix_multi_T1w_source_name">[docs]</a><span class="k">def</span> <span class="nf">fix_multi_T1w_source_name</span><span class="p">(</span><span class="n">in_files</span><span class="p">):</span>
+
+<div class="viewcode-block" id="fix_multi_T1w_source_name">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.fix_multi_T1w_source_name">[docs]</a>
+<span class="k">def</span> <span class="nf">fix_multi_T1w_source_name</span><span class="p">(</span><span class="n">in_files</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make up a generic source name when there are multiple T1s</span>
 
@@ -446,7 +451,10 @@
     <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s2">&quot;sub-</span><span class="si">%s</span><span class="s2">_T1w.nii.gz&quot;</span> <span class="o">%</span> <span class="n">subject_label</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_suffix"><a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.add_suffix">[docs]</a><span class="k">def</span> <span class="nf">add_suffix</span><span class="p">(</span><span class="n">in_files</span><span class="p">,</span> <span class="n">suffix</span><span class="p">):</span>
+
+<div class="viewcode-block" id="add_suffix">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.add_suffix">[docs]</a>
+<span class="k">def</span> <span class="nf">add_suffix</span><span class="p">(</span><span class="n">in_files</span><span class="p">,</span> <span class="n">suffix</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrap nipype&#39;s fname_presuffix to conveniently just add a prefix</span>
 
@@ -462,12 +470,16 @@
     <span class="k">return</span> <span class="n">op</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fname_presuffix</span><span class="p">(</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">in_files</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="read_crashfile"><a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.read_crashfile">[docs]</a><span class="k">def</span> <span class="nf">read_crashfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+
+<div class="viewcode-block" id="read_crashfile">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.read_crashfile">[docs]</a>
+<span class="k">def</span> <span class="nf">read_crashfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.pklz&quot;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_read_pkl</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.txt&quot;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_read_txt</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;unknown crashfile format&quot;</span><span class="p">)</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_read_pkl</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
@@ -532,7 +544,9 @@
     <span class="k">return</span> <span class="n">data</span>
 
 
-<div class="viewcode-block" id="splitext"><a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.splitext">[docs]</a><span class="k">def</span> <span class="nf">splitext</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+<div class="viewcode-block" id="splitext">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.splitext">[docs]</a>
+<span class="k">def</span> <span class="nf">splitext</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Split filename in name and extension (.gz safe).</span>
 
@@ -559,6 +573,7 @@
     <span class="n">basename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     <span class="n">stem</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">basename</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;.gz&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">stem</span>
     <span class="k">return</span> <span class="n">stem</span><span class="p">,</span> <span class="n">basename</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">stem</span><span class="p">):]</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_copy_any</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">):</span>
@@ -591,7 +606,9 @@
     <span class="k">return</span> <span class="kc">True</span>
 
 
-<div class="viewcode-block" id="clean_directory"><a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.clean_directory">[docs]</a><span class="k">def</span> <span class="nf">clean_directory</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="clean_directory">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.clean_directory">[docs]</a>
+<span class="k">def</span> <span class="nf">clean_directory</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clears a directory of all contents.</span>
 
@@ -614,6 +631,7 @@
     <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="kc">True</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">pass_dummy_scans</span><span class="p">(</span><span class="n">algo_dummy_scans</span><span class="p">,</span> <span class="n">dummy_scans</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -704,10 +722,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/scripts/furo.js"></script>
-    <script src="../../../_static/js/version-switch.js"></script>
+</div><script src="../../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

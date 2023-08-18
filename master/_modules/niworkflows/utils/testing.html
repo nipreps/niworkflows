@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.utils.testing - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -289,7 +289,9 @@
 <span class="kn">import</span> <span class="nn">yaml</span>
 
 
-<div class="viewcode-block" id="generate_bids_skeleton"><a class="viewcode-back" href="../../../api/niworkflows.utils.testing.html#niworkflows.utils.testing.generate_bids_skeleton">[docs]</a><span class="k">def</span> <span class="nf">generate_bids_skeleton</span><span class="p">(</span><span class="n">target_path</span><span class="p">,</span> <span class="n">bids_config</span><span class="p">):</span>
+<div class="viewcode-block" id="generate_bids_skeleton">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.testing.html#niworkflows.utils.testing.generate_bids_skeleton">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_bids_skeleton</span><span class="p">(</span><span class="n">target_path</span><span class="p">,</span> <span class="n">bids_config</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a BIDS directory in dictionary form to a file structure.</span>
 
@@ -371,14 +373,21 @@
     <span class="k">return</span> <span class="n">_bids_dict</span></div>
 
 
-<div class="viewcode-block" id="to_json"><a class="viewcode-back" href="../../../api/niworkflows.utils.testing.html#niworkflows.utils.testing.to_json">[docs]</a><span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="to_json">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.testing.html#niworkflows.utils.testing.to_json">[docs]</a>
+<span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="n">filename</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">filename</span></div>
 
 
-<div class="viewcode-block" id="combine_entities"><a class="viewcode-back" href="../../../api/niworkflows.utils.testing.html#niworkflows.utils.testing.combine_entities">[docs]</a><span class="k">def</span> <span class="nf">combine_entities</span><span class="p">(</span><span class="o">**</span><span class="n">entities</span><span class="p">):</span>
+
+<div class="viewcode-block" id="combine_entities">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.testing.html#niworkflows.utils.testing.combine_entities">[docs]</a>
+<span class="k">def</span> <span class="nf">combine_entities</span><span class="p">(</span><span class="o">**</span><span class="n">entities</span><span class="p">):</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">lab</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">lab</span><span class="p">,</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">entities</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">entities</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -411,10 +420,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/scripts/furo.js"></script>
-    <script src="../../../_static/js/version-switch.js"></script>
+</div><script src="../../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

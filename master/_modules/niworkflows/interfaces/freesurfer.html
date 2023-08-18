@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.interfaces.freesurfer - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -329,7 +329,9 @@
 <span class="kn">from</span> <span class="nn">.reportlets.registration</span> <span class="kn">import</span> <span class="n">BBRegisterRPT</span><span class="p">,</span> <span class="n">MRICoregRPT</span>
 
 
-<div class="viewcode-block" id="StructuralReference"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.StructuralReference">[docs]</a><span class="k">class</span> <span class="nc">StructuralReference</span><span class="p">(</span><span class="n">fs</span><span class="o">.</span><span class="n">RobustTemplate</span><span class="p">):</span>
+<div class="viewcode-block" id="StructuralReference">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.StructuralReference">[docs]</a>
+<span class="k">class</span> <span class="nc">StructuralReference</span><span class="p">(</span><span class="n">fs</span><span class="o">.</span><span class="n">RobustTemplate</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Shortcut RobustTemplate with a copy of the source if a single volume is provided.</span>
 
@@ -383,11 +385,14 @@
         <span class="k">return</span> <span class="n">outputs</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_MakeMidthicknessInputSpec</span><span class="p">(</span><span class="n">fs</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">MRIsExpandInputSpec</span><span class="p">):</span>
     <span class="n">graymid</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Existing graymid/midthickness file&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="MakeMidthickness"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.MakeMidthickness">[docs]</a><span class="k">class</span> <span class="nc">MakeMidthickness</span><span class="p">(</span><span class="n">fs</span><span class="o">.</span><span class="n">MRIsExpand</span><span class="p">):</span>
+<div class="viewcode-block" id="MakeMidthickness">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.MakeMidthickness">[docs]</a>
+<span class="k">class</span> <span class="nc">MakeMidthickness</span><span class="p">(</span><span class="n">fs</span><span class="o">.</span><span class="n">MRIsExpand</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Variation on MRIsExpand that checks for an existing midthickness/graymid surface.</span>
 
@@ -427,6 +432,7 @@
         <span class="k">return</span> <span class="s2">&quot;cp </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()[</span><span class="s2">&quot;out_file&quot;</span><span class="p">])</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_FSInjectBrainExtractedInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
     <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;FreeSurfer SUBJECTS_DIR&quot;</span><span class="p">)</span>
     <span class="n">subject_id</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Subject ID&quot;</span><span class="p">)</span>
@@ -438,7 +444,9 @@
     <span class="n">subject_id</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Subject ID&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="FSInjectBrainExtracted"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.FSInjectBrainExtracted">[docs]</a><span class="k">class</span> <span class="nc">FSInjectBrainExtracted</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="FSInjectBrainExtracted">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.FSInjectBrainExtracted">[docs]</a>
+<span class="k">class</span> <span class="nc">FSInjectBrainExtracted</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_FSInjectBrainExtractedInputSpec</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FSInjectBrainExtractedOutputSpec</span>
     <span class="n">_always_run</span> <span class="o">=</span> <span class="kc">True</span>
@@ -450,6 +458,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;subjects_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subjects_dir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;subject_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subject_id</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
+
 
 
 <span class="k">class</span> <span class="nc">_FSDetectInputsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
@@ -474,7 +483,9 @@
     <span class="n">mris_inflate</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;mris_inflate argument&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="FSDetectInputs"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.FSDetectInputs">[docs]</a><span class="k">class</span> <span class="nc">FSDetectInputs</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="FSDetectInputs">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.FSDetectInputs">[docs]</a>
+<span class="k">class</span> <span class="nc">FSDetectInputs</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_FSDetectInputsInputSpec</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FSDetectInputsOutputSpec</span>
 
@@ -502,7 +513,10 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
-<div class="viewcode-block" id="TruncateLTA"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.TruncateLTA">[docs]</a><span class="k">class</span> <span class="nc">TruncateLTA</span><span class="p">:</span>
+
+<div class="viewcode-block" id="TruncateLTA">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.TruncateLTA">[docs]</a>
+<span class="k">class</span> <span class="nc">TruncateLTA</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Truncate long filenames in LTA files.</span>
 
@@ -536,7 +550,10 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
-<div class="viewcode-block" id="PatchedConcatenateLTA"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.PatchedConcatenateLTA">[docs]</a><span class="k">class</span> <span class="nc">PatchedConcatenateLTA</span><span class="p">(</span><span class="n">TruncateLTA</span><span class="p">,</span> <span class="n">ConcatenateLTA</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PatchedConcatenateLTA">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.PatchedConcatenateLTA">[docs]</a>
+<span class="k">class</span> <span class="nc">PatchedConcatenateLTA</span><span class="p">(</span><span class="n">TruncateLTA</span><span class="p">,</span> <span class="n">ConcatenateLTA</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A temporarily patched version of ``fs.ConcatenateLTA`` to recover from</span>
 <span class="sd">    `this bug &lt;https://www.mail-archive.com/freesurfer@nmr.mgh.harvard.edu/msg55520.html&gt;`_</span>
@@ -552,7 +569,10 @@
     <span class="n">lta_outputs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="PatchedLTAConvert"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.PatchedLTAConvert">[docs]</a><span class="k">class</span> <span class="nc">PatchedLTAConvert</span><span class="p">(</span><span class="n">TruncateLTA</span><span class="p">,</span> <span class="n">LTAConvert</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PatchedLTAConvert">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.PatchedLTAConvert">[docs]</a>
+<span class="k">class</span> <span class="nc">PatchedLTAConvert</span><span class="p">(</span><span class="n">TruncateLTA</span><span class="p">,</span> <span class="n">LTAConvert</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    LTAconvert is producing a lta file refer as out_lta</span>
 <span class="sd">    truncate filename through mixin TruncateLTA</span>
@@ -561,16 +581,26 @@
     <span class="n">lta_outputs</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;out_lta&quot;</span><span class="p">,)</span></div>
 
 
-<div class="viewcode-block" id="PatchedBBRegisterRPT"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.PatchedBBRegisterRPT">[docs]</a><span class="k">class</span> <span class="nc">PatchedBBRegisterRPT</span><span class="p">(</span><span class="n">TruncateLTA</span><span class="p">,</span> <span class="n">BBRegisterRPT</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PatchedBBRegisterRPT">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.PatchedBBRegisterRPT">[docs]</a>
+<span class="k">class</span> <span class="nc">PatchedBBRegisterRPT</span><span class="p">(</span><span class="n">TruncateLTA</span><span class="p">,</span> <span class="n">BBRegisterRPT</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="PatchedMRICoregRPT"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.PatchedMRICoregRPT">[docs]</a><span class="k">class</span> <span class="nc">PatchedMRICoregRPT</span><span class="p">(</span><span class="n">TruncateLTA</span><span class="p">,</span> <span class="n">MRICoregRPT</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PatchedMRICoregRPT">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.PatchedMRICoregRPT">[docs]</a>
+<span class="k">class</span> <span class="nc">PatchedMRICoregRPT</span><span class="p">(</span><span class="n">TruncateLTA</span><span class="p">,</span> <span class="n">MRICoregRPT</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="PatchedRobustRegister"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.PatchedRobustRegister">[docs]</a><span class="k">class</span> <span class="nc">PatchedRobustRegister</span><span class="p">(</span><span class="n">TruncateLTA</span><span class="p">,</span> <span class="n">RobustRegister</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PatchedRobustRegister">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.PatchedRobustRegister">[docs]</a>
+<span class="k">class</span> <span class="nc">PatchedRobustRegister</span><span class="p">(</span><span class="n">TruncateLTA</span><span class="p">,</span> <span class="n">RobustRegister</span><span class="p">):</span>
     <span class="n">lta_outputs</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;out_reg_file&quot;</span><span class="p">,</span> <span class="s2">&quot;half_source_xfm&quot;</span><span class="p">,</span> <span class="s2">&quot;half_targ_xfm&quot;</span><span class="p">)</span></div>
+
 
 
 <span class="k">class</span> <span class="nc">_RefineBrainMaskInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
@@ -591,7 +621,9 @@
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;new mask&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="RefineBrainMask"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.RefineBrainMask">[docs]</a><span class="k">class</span> <span class="nc">RefineBrainMask</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="RefineBrainMask">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.RefineBrainMask">[docs]</a>
+<span class="k">class</span> <span class="nc">RefineBrainMask</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Refine the brain mask implicit in the ``aseg.mgz``</span>
 <span class="sd">    file to include possibly missing gray-matter voxels</span>
@@ -623,6 +655,7 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_MedialNaNsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
     <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input surface file&quot;</span><span class="p">)</span>
     <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;FreeSurfer SUBJECTS_DIR&quot;</span><span class="p">)</span>
@@ -633,7 +666,9 @@
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the output surface file&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="MedialNaNs"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.MedialNaNs">[docs]</a><span class="k">class</span> <span class="nc">MedialNaNs</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="MedialNaNs">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.MedialNaNs">[docs]</a>
+<span class="k">class</span> <span class="nc">MedialNaNs</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert values on medial wall to NaNs.&quot;&quot;&quot;</span>
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_MedialNaNsInputSpec</span>
@@ -649,7 +684,10 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
-<div class="viewcode-block" id="fix_lta_length"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.fix_lta_length">[docs]</a><span class="k">def</span> <span class="nf">fix_lta_length</span><span class="p">(</span><span class="n">lta_file</span><span class="p">):</span>
+
+<div class="viewcode-block" id="fix_lta_length">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.fix_lta_length">[docs]</a>
+<span class="k">def</span> <span class="nf">fix_lta_length</span><span class="p">(</span><span class="n">lta_file</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fix the length of the filename field in an LTA file if too long.</span>
 
@@ -697,7 +735,10 @@
     <span class="k">return</span> <span class="n">fixed</span></div>
 
 
-<div class="viewcode-block" id="inject_skullstripped"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.inject_skullstripped">[docs]</a><span class="k">def</span> <span class="nf">inject_skullstripped</span><span class="p">(</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="n">subject_id</span><span class="p">,</span> <span class="n">skullstripped</span><span class="p">):</span>
+
+<div class="viewcode-block" id="inject_skullstripped">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.inject_skullstripped">[docs]</a>
+<span class="k">def</span> <span class="nf">inject_skullstripped</span><span class="p">(</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="n">subject_id</span><span class="p">,</span> <span class="n">skullstripped</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">resample_to_img</span><span class="p">,</span> <span class="n">new_img_like</span>
 
     <span class="n">mridir</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="n">subject_id</span><span class="p">,</span> <span class="s2">&quot;mri&quot;</span><span class="p">)</span>
@@ -721,7 +762,10 @@
     <span class="k">return</span> <span class="n">subjects_dir</span><span class="p">,</span> <span class="n">subject_id</span></div>
 
 
-<div class="viewcode-block" id="detect_inputs"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.detect_inputs">[docs]</a><span class="k">def</span> <span class="nf">detect_inputs</span><span class="p">(</span><span class="n">t1w_list</span><span class="p">,</span> <span class="n">t2w_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flair_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hires_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="detect_inputs">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.detect_inputs">[docs]</a>
+<span class="k">def</span> <span class="nf">detect_inputs</span><span class="p">(</span><span class="n">t1w_list</span><span class="p">,</span> <span class="n">t2w_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flair_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hires_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="n">t1w_list</span> <span class="o">=</span> <span class="n">filename_to_list</span><span class="p">(</span><span class="n">t1w_list</span><span class="p">)</span>
     <span class="n">t2w_list</span> <span class="o">=</span> <span class="n">filename_to_list</span><span class="p">(</span><span class="n">t2w_list</span><span class="p">)</span> <span class="k">if</span> <span class="n">t2w_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
     <span class="n">flair_list</span> <span class="o">=</span> <span class="n">filename_to_list</span><span class="p">(</span><span class="n">flair_list</span><span class="p">)</span> <span class="k">if</span> <span class="n">flair_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
@@ -744,7 +788,10 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">t2w</span><span class="p">,</span> <span class="n">flair</span><span class="p">,</span> <span class="n">hires</span><span class="p">,</span> <span class="n">mris_inflate</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="refine_aseg"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.refine_aseg">[docs]</a><span class="k">def</span> <span class="nf">refine_aseg</span><span class="p">(</span><span class="n">aseg</span><span class="p">,</span> <span class="n">ball_size</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+<div class="viewcode-block" id="refine_aseg">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.refine_aseg">[docs]</a>
+<span class="k">def</span> <span class="nf">refine_aseg</span><span class="p">(</span><span class="n">aseg</span><span class="p">,</span> <span class="n">ball_size</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Refine the ``aseg.mgz`` mask of Freesurfer.</span>
 
@@ -777,7 +824,10 @@
     <span class="k">return</span> <span class="n">newmask</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="grow_mask"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.grow_mask">[docs]</a><span class="k">def</span> <span class="nf">grow_mask</span><span class="p">(</span><span class="n">anat</span><span class="p">,</span> <span class="n">aseg</span><span class="p">,</span> <span class="n">ants_segs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ww</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">zval</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">bw</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+<div class="viewcode-block" id="grow_mask">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.grow_mask">[docs]</a>
+<span class="k">def</span> <span class="nf">grow_mask</span><span class="p">(</span><span class="n">anat</span><span class="p">,</span> <span class="n">aseg</span><span class="p">,</span> <span class="n">ants_segs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ww</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">zval</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">bw</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Grow mask including pixels that have a high likelihood.</span>
 
@@ -821,7 +871,10 @@
     <span class="k">return</span> <span class="n">refined</span></div>
 
 
-<div class="viewcode-block" id="medial_wall_to_nan"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.medial_wall_to_nan">[docs]</a><span class="k">def</span> <span class="nf">medial_wall_to_nan</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">subjects_dir</span><span class="p">,</span> <span class="n">den</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="medial_wall_to_nan">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.medial_wall_to_nan">[docs]</a>
+<span class="k">def</span> <span class="nf">medial_wall_to_nan</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">subjects_dir</span><span class="p">,</span> <span class="n">den</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert values on medial wall to NaNs.&quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">os</span>
     <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
@@ -859,7 +912,10 @@
     <span class="k">return</span> <span class="n">out_file</span></div>
 
 
-<div class="viewcode-block" id="mri_info"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.mri_info">[docs]</a><span class="k">def</span> <span class="nf">mri_info</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">argument</span><span class="p">):</span>
+
+<div class="viewcode-block" id="mri_info">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.mri_info">[docs]</a>
+<span class="k">def</span> <span class="nf">mri_info</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">argument</span><span class="p">):</span>
     <span class="kn">import</span> <span class="nn">subprocess</span> <span class="k">as</span> <span class="nn">sp</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -869,6 +925,7 @@
     <span class="n">mstring</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">mstring</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">result</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -901,10 +958,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/scripts/furo.js"></script>
-    <script src="../../../_static/js/version-switch.js"></script>
+</div><script src="../../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

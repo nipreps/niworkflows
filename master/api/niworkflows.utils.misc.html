@@ -5,12 +5,12 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.utils.spaces module" href="niworkflows.utils.spaces.html" /><link rel="prev" title="niworkflows.utils.images module" href="niworkflows.utils.images.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.utils.misc module - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -284,12 +284,12 @@
           </label>
         </div>
         <article role="main">
-          <section id="module-niworkflows.utils.misc">
-<span id="niworkflows-utils-misc-module"></span><h1>niworkflows.utils.misc module<a class="headerlink" href="#module-niworkflows.utils.misc" title="Permalink to this heading">#</a></h1>
-<p>Miscellaneous utilities.</p>
+          <section id="niworkflows-utils-misc-module">
+<h1>niworkflows.utils.misc module<a class="headerlink" href="#niworkflows-utils-misc-module" title="Link to this heading">#</a></h1>
+<p id="module-niworkflows.utils.misc">Miscellaneous utilities.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="niworkflows.utils.misc.add_suffix">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></span><span class="sig-name descname"><span class="pre">add_suffix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#add_suffix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.add_suffix" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></span><span class="sig-name descname"><span class="pre">add_suffix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#add_suffix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.add_suffix" title="Link to this definition">#</a></dt>
 <dd><p>Wrap nipype’s fname_presuffix to conveniently just add a prefix</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">add_suffix</span><span class="p">([</span>
 <span class="gp">... </span>    <span class="s1">&#39;/path/to/sub-045_ses-test_T1w.nii.gz&#39;</span><span class="p">,</span>
@@ -301,7 +301,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="niworkflows.utils.misc.clean_directory">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></span><span class="sig-name descname"><span class="pre">clean_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#clean_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.clean_directory" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></span><span class="sig-name descname"><span class="pre">clean_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#clean_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.clean_directory" title="Link to this definition">#</a></dt>
 <dd><p>Clears a directory of all contents.</p>
 <p>Returns <cite>True</cite> if no content remains. If any content cannot be removed, returns <cite>False</cite>.</p>
 <p class="rubric">Notes</p>
@@ -310,7 +310,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="niworkflows.utils.misc.fix_multi_T1w_source_name">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></span><span class="sig-name descname"><span class="pre">fix_multi_T1w_source_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_files</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#fix_multi_T1w_source_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.fix_multi_T1w_source_name" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></span><span class="sig-name descname"><span class="pre">fix_multi_T1w_source_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_files</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#fix_multi_T1w_source_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.fix_multi_T1w_source_name" title="Link to this definition">#</a></dt>
 <dd><p>Make up a generic source name when there are multiple T1s</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fix_multi_T1w_source_name</span><span class="p">([</span>
 <span class="gp">... </span>    <span class="s1">&#39;/path/to/sub-045_ses-test_T1w.nii.gz&#39;</span><span class="p">,</span>
@@ -327,7 +327,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="niworkflows.utils.misc.get_template_specs">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></span><span class="sig-name descname"><span class="pre">get_template_specs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_template</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#get_template_specs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.get_template_specs" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></span><span class="sig-name descname"><span class="pre">get_template_specs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_template</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#get_template_specs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.get_template_specs" title="Link to this definition">#</a></dt>
 <dd><p>Parse template specifications</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_template_specs</span><span class="p">(</span><span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;T1w&#39;</span><span class="p">})[</span><span class="mi">1</span><span class="p">]</span>
 <span class="go">{&#39;resolution&#39;: 1}</span>
@@ -372,12 +372,12 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="niworkflows.utils.misc.read_crashfile">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></span><span class="sig-name descname"><span class="pre">read_crashfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#read_crashfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.read_crashfile" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></span><span class="sig-name descname"><span class="pre">read_crashfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#read_crashfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.read_crashfile" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="niworkflows.utils.misc.splitext">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></span><span class="sig-name descname"><span class="pre">splitext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#splitext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.splitext" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.misc.</span></span><span class="sig-name descname"><span class="pre">splitext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/misc.html#splitext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.misc.splitext" title="Link to this definition">#</a></dt>
 <dd><p>Split filename in name and extension (.gz safe).</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">splitext</span><span class="p">(</span><span class="s1">&#39;some/file.nii.gz&#39;</span><span class="p">)</span>
@@ -473,10 +473,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
-    <script src="../_static/js/version-switch.js"></script>
+</div><script src="../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

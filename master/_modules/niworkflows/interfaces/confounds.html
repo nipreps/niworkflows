@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.interfaces.confounds - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -335,7 +335,9 @@
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;written file path&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="NormalizeMotionParams"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.NormalizeMotionParams">[docs]</a><span class="k">class</span> <span class="nc">NormalizeMotionParams</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="NormalizeMotionParams">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.NormalizeMotionParams">[docs]</a>
+<span class="k">class</span> <span class="nc">NormalizeMotionParams</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert input motion parameters into the designated convention.&quot;&quot;&quot;</span>
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_NormalizeMotionParamsInputSpec</span>
@@ -349,6 +351,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="s2">&quot;motion_params.txt&quot;</span><span class="p">)</span>
         <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">],</span> <span class="n">mpars</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
+
 
 
 <span class="k">class</span> <span class="nc">_ExpandModelInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
@@ -395,7 +398,9 @@
     <span class="n">confounds_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Output confounds file&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="ExpandModel"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.ExpandModel">[docs]</a><span class="k">class</span> <span class="nc">ExpandModel</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="ExpandModel">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.ExpandModel">[docs]</a>
+<span class="k">class</span> <span class="nc">ExpandModel</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Expand a confound model according to a specified formula.&quot;&quot;&quot;</span>
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_ExpandModelInputSpec</span>
@@ -421,6 +426,7 @@
         <span class="n">confounds_data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">na_rep</span><span class="o">=</span><span class="s2">&quot;n/a&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;confounds_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
+
 
 
 <span class="k">class</span> <span class="nc">_SpikeRegressorsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
@@ -475,7 +481,9 @@
     <span class="n">confounds_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Output confounds file&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="SpikeRegressors"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.SpikeRegressors">[docs]</a><span class="k">class</span> <span class="nc">SpikeRegressors</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="SpikeRegressors">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.SpikeRegressors">[docs]</a>
+<span class="k">class</span> <span class="nc">SpikeRegressors</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate spike regressors.&quot;&quot;&quot;</span>
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_SpikeRegressorsInputSpec</span>
@@ -512,7 +520,10 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
-<div class="viewcode-block" id="spike_regressors"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.spike_regressors">[docs]</a><span class="k">def</span> <span class="nf">spike_regressors</span><span class="p">(</span>
+
+<div class="viewcode-block" id="spike_regressors">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.spike_regressors">[docs]</a>
+<span class="k">def</span> <span class="nf">spike_regressors</span><span class="p">(</span>
     <span class="n">data</span><span class="p">,</span>
     <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">header_prefix</span><span class="o">=</span><span class="s2">&quot;motion_outlier&quot;</span><span class="p">,</span>
@@ -611,7 +622,10 @@
         <span class="k">return</span> <span class="n">spikes</span></div>
 
 
-<div class="viewcode-block" id="temporal_derivatives"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.temporal_derivatives">[docs]</a><span class="k">def</span> <span class="nf">temporal_derivatives</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="temporal_derivatives">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.temporal_derivatives">[docs]</a>
+<span class="k">def</span> <span class="nf">temporal_derivatives</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute temporal derivative terms by the method of backwards differences.</span>
 
@@ -655,7 +669,10 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">variables_deriv</span><span class="p">,</span> <span class="n">data_deriv</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="exponential_terms"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.exponential_terms">[docs]</a><span class="k">def</span> <span class="nf">exponential_terms</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="exponential_terms">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.exponential_terms">[docs]</a>
+<span class="k">def</span> <span class="nf">exponential_terms</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute exponential expansions.</span>
 
@@ -694,6 +711,7 @@
         <span class="n">columns</span><span class="o">=</span><span class="n">variables_exp</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="o">*</span><span class="n">data_exp</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">variables_exp</span><span class="p">,</span> <span class="n">data_exp</span><span class="p">)</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_order_as_range</span><span class="p">(</span><span class="n">order</span><span class="p">):</span>
@@ -754,7 +772,9 @@
     <span class="k">return</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span>
 
 
-<div class="viewcode-block" id="parse_expression"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.parse_expression">[docs]</a><span class="k">def</span> <span class="nf">parse_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">parent_data</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_expression">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.parse_expression">[docs]</a>
+<span class="k">def</span> <span class="nf">parse_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">parent_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parse an expression in a model formula.</span>
 
@@ -786,6 +806,7 @@
         <span class="n">variables</span> <span class="o">=</span> <span class="p">[</span><span class="n">expr</span><span class="p">]</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">parent_data</span><span class="p">[</span><span class="n">expr</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_get_matches_from_data</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">variables</span><span class="p">):</span>
@@ -859,7 +880,9 @@
     <span class="k">return</span> <span class="n">data</span><span class="p">[[</span><span class="o">*</span><span class="n">unscrambled</span><span class="p">]]</span>
 
 
-<div class="viewcode-block" id="parse_formula"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.parse_formula">[docs]</a><span class="k">def</span> <span class="nf">parse_formula</span><span class="p">(</span><span class="n">model_formula</span><span class="p">,</span> <span class="n">parent_data</span><span class="p">,</span> <span class="n">unscramble</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_formula">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.parse_formula">[docs]</a>
+<span class="k">def</span> <span class="nf">parse_formula</span><span class="p">(</span><span class="n">model_formula</span><span class="p">,</span> <span class="n">parent_data</span><span class="p">,</span> <span class="n">unscramble</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parse a confound manipulation formula.</span>
 
@@ -941,6 +964,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">_unscramble_regressor_columns</span><span class="p">(</span><span class="n">parent_data</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">variables</span><span class="p">,</span> <span class="n">data</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -973,10 +997,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/scripts/furo.js"></script>
-    <script src="../../../_static/js/version-switch.js"></script>
+</div><script src="../../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

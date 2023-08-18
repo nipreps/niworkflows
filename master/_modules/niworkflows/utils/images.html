@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.utils.images - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -311,7 +311,9 @@
 <span class="kn">from</span> <span class="nn">gzip</span> <span class="kn">import</span> <span class="n">GzipFile</span>
 
 
-<div class="viewcode-block" id="rotation2canonical"><a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.rotation2canonical">[docs]</a><span class="k">def</span> <span class="nf">rotation2canonical</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+<div class="viewcode-block" id="rotation2canonical">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.rotation2canonical">[docs]</a>
+<span class="k">def</span> <span class="nf">rotation2canonical</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the rotation w.r.t. cardinal axes of input image.&quot;&quot;&quot;</span>
     <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">as_closest_canonical</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
     <span class="n">newaff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">()[:</span><span class="mi">3</span><span class="p">])</span>
@@ -321,7 +323,10 @@
     <span class="k">return</span> <span class="n">r</span></div>
 
 
-<div class="viewcode-block" id="rotate_affine"><a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.rotate_affine">[docs]</a><span class="k">def</span> <span class="nf">rotate_affine</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="rotate_affine">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.rotate_affine">[docs]</a>
+<span class="k">def</span> <span class="nf">rotate_affine</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rewrite the affine of a spatial image.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">rot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">img</span>
@@ -332,7 +337,10 @@
     <span class="k">return</span> <span class="n">img</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">,</span> <span class="n">affine</span><span class="p">,</span> <span class="n">img</span><span class="o">.</span><span class="n">header</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="unsafe_write_nifti_header_and_data"><a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.unsafe_write_nifti_header_and_data">[docs]</a><span class="k">def</span> <span class="nf">unsafe_write_nifti_header_and_data</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="unsafe_write_nifti_header_and_data">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.unsafe_write_nifti_header_and_data">[docs]</a>
+<span class="k">def</span> <span class="nf">unsafe_write_nifti_header_and_data</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Write header and data without any consistency checks or data munging</span>
 
 <span class="sd">    This is almost always a bad idea, and you should not use this function</span>
@@ -353,9 +361,13 @@
             <span class="n">fobj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="set_consumables"><a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.set_consumables">[docs]</a><span class="k">def</span> <span class="nf">set_consumables</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">dataobj</span><span class="p">):</span>
+
+<div class="viewcode-block" id="set_consumables">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.set_consumables">[docs]</a>
+<span class="k">def</span> <span class="nf">set_consumables</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">dataobj</span><span class="p">):</span>
     <span class="n">header</span><span class="o">.</span><span class="n">set_slope_inter</span><span class="p">(</span><span class="n">dataobj</span><span class="o">.</span><span class="n">slope</span><span class="p">,</span> <span class="n">dataobj</span><span class="o">.</span><span class="n">inter</span><span class="p">)</span>
     <span class="n">header</span><span class="o">.</span><span class="n">set_data_offset</span><span class="p">(</span><span class="n">dataobj</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_copyxform</span><span class="p">(</span><span class="n">ref_image</span><span class="p">,</span> <span class="n">out_image</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -386,7 +398,9 @@
     <span class="n">newimg</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_image</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="overwrite_header"><a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.overwrite_header">[docs]</a><span class="k">def</span> <span class="nf">overwrite_header</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+<div class="viewcode-block" id="overwrite_header">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.overwrite_header">[docs]</a>
+<span class="k">def</span> <span class="nf">overwrite_header</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rewrite file with only changes to the header</span>
 
 <span class="sd">    The data block is copied without scaling, avoiding copies in memory.</span>
@@ -458,7 +472,10 @@
     <span class="n">unsafe_write_nifti_header_and_data</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="update_header_fields"><a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.update_header_fields">[docs]</a><span class="k">def</span> <span class="nf">update_header_fields</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="update_header_fields">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.update_header_fields">[docs]</a>
+<span class="k">def</span> <span class="nf">update_header_fields</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Adjust header fields &quot;&quot;&quot;</span>
     <span class="c1"># No-op</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">:</span>
@@ -469,7 +486,10 @@
     <span class="n">overwrite_header</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="dseg_label"><a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.dseg_label">[docs]</a><span class="k">def</span> <span class="nf">dseg_label</span><span class="p">(</span><span class="n">in_seg</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="dseg_label">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.dseg_label">[docs]</a>
+<span class="k">def</span> <span class="nf">dseg_label</span><span class="p">(</span><span class="n">in_seg</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract a particular label from a discrete segmentation.&quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
     <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
@@ -488,7 +508,10 @@
     <span class="k">return</span> <span class="n">out_file</span></div>
 
 
-<div class="viewcode-block" id="resample_by_spacing"><a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.resample_by_spacing">[docs]</a><span class="k">def</span> <span class="nf">resample_by_spacing</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">zooms</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="resample_by_spacing">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.resample_by_spacing">[docs]</a>
+<span class="k">def</span> <span class="nf">resample_by_spacing</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">zooms</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Regrid the input image to match the new zooms.&quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -575,7 +598,10 @@
     <span class="k">return</span> <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span><span class="n">resampled</span><span class="p">,</span> <span class="n">new_affine</span><span class="p">,</span> <span class="n">hdr</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="demean"><a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.demean">[docs]</a><span class="k">def</span> <span class="nf">demean</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">in_mask</span><span class="p">,</span> <span class="n">only_mask</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="demean">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.demean">[docs]</a>
+<span class="k">def</span> <span class="nf">demean</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">in_mask</span><span class="p">,</span> <span class="n">only_mask</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Demean ``in_file`` within the mask defined by ``in_mask``.&quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">os</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -594,7 +620,10 @@
     <span class="k">return</span> <span class="n">out_file</span></div>
 
 
-<div class="viewcode-block" id="nii_ones_like"><a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.nii_ones_like">[docs]</a><span class="k">def</span> <span class="nf">nii_ones_like</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="nii_ones_like">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.images.html#niworkflows.utils.images.nii_ones_like">[docs]</a>
+<span class="k">def</span> <span class="nf">nii_ones_like</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a NIfTI file filled with ``value``, matching properties of ``in_file``.&quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">os</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -609,6 +638,7 @@
     <span class="n">nii</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">out_file</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -641,10 +671,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/scripts/furo.js"></script>
-    <script src="../../../_static/js/version-switch.js"></script>
+</div><script src="../../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

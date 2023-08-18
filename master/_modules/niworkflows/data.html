@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.data - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -323,7 +323,9 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;load&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="Loader"><a class="viewcode-back" href="../../api/niworkflows.data.html#niworkflows.data.Loader">[docs]</a><span class="k">class</span> <span class="nc">Loader</span><span class="p">:</span>
+<div class="viewcode-block" id="Loader">
+<a class="viewcode-back" href="../../api/niworkflows.data.html#niworkflows.data.Loader">[docs]</a>
+<span class="k">class</span> <span class="nc">Loader</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A loader for package files relative to a module</span>
 
 <span class="sd">    This class wraps :mod:`importlib.resources` to provide a getter</span>
@@ -426,7 +428,9 @@
 
         <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">doclines</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Loader.readable"><a class="viewcode-back" href="../../api/niworkflows.data.html#niworkflows.data.Loader.readable">[docs]</a>    <span class="k">def</span> <span class="nf">readable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">segments</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Traversable</span><span class="p">:</span>
+<div class="viewcode-block" id="Loader.readable">
+<a class="viewcode-back" href="../../api/niworkflows.data.html#niworkflows.data.Loader.readable">[docs]</a>
+    <span class="k">def</span> <span class="nf">readable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">segments</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Traversable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Provide read access to a resource through a Path-like interface.</span>
 
 <span class="sd">        This file may or may not exist on the filesystem, and may be</span>
@@ -437,7 +441,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="o">*</span><span class="n">segments</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Loader.as_path"><a class="viewcode-back" href="../../api/niworkflows.data.html#niworkflows.data.Loader.as_path">[docs]</a>    <span class="k">def</span> <span class="nf">as_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">segments</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbstractContextManager</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="Loader.as_path">
+<a class="viewcode-back" href="../../api/niworkflows.data.html#niworkflows.data.Loader.as_path">[docs]</a>
+    <span class="k">def</span> <span class="nf">as_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">segments</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbstractContextManager</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensure data is available as a :class:`~pathlib.Path`.</span>
 
 <span class="sd">        This method generates a context manager that yields a Path when</span>
@@ -448,7 +455,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">as_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="o">*</span><span class="n">segments</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Loader.cached"><a class="viewcode-back" href="../../api/niworkflows.data.html#niworkflows.data.Loader.cached">[docs]</a>    <span class="nd">@cache</span>
+
+<div class="viewcode-block" id="Loader.cached">
+<a class="viewcode-back" href="../../api/niworkflows.data.html#niworkflows.data.Loader.cached">[docs]</a>
+    <span class="nd">@cache</span>
     <span class="k">def</span> <span class="nf">cached</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">segments</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensure data is available as a :class:`~pathlib.Path`.</span>
 
@@ -461,7 +471,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">as_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="o">*</span><span class="n">segments</span><span class="p">)))</span></div>
 
+
     <span class="fm">__call__</span> <span class="o">=</span> <span class="n">cached</span></div>
+
 
 
 <span class="n">load</span> <span class="o">=</span> <span class="n">Loader</span><span class="p">(</span><span class="n">__package__</span><span class="p">)</span>
@@ -497,10 +509,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
-    <script src="../../_static/scripts/furo.js"></script>
-    <script src="../../_static/js/version-switch.js"></script>
+</div><script src="../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

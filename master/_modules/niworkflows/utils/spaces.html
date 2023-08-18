@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.utils.spaces - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -340,7 +340,9 @@
 <span class="sd">&quot;&quot;&quot;A map of surface densities to legacy fsaverageX names.&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="Reference"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.Reference">[docs]</a><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="viewcode-block" id="Reference">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.Reference">[docs]</a>
+<span class="nd">@attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">Reference</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Represent a (non)standard space specification.</span>
@@ -546,7 +548,9 @@
             <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">())]</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="Reference.from_string"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.Reference.from_string">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Reference.from_string">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.Reference.from_string">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parse a string to generate the corresponding list of References.</span>
@@ -623,10 +627,14 @@
 
         <span class="n">allspecs</span> <span class="o">=</span> <span class="n">_expand_entities</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">(</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">allspecs</span><span class="p">]</span></div></div>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="p">(</span><span class="n">_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">allspecs</span><span class="p">]</span></div>
+</div>
 
 
-<div class="viewcode-block" id="SpatialReferences"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences">[docs]</a><span class="k">class</span> <span class="nc">SpatialReferences</span><span class="p">:</span>
+
+<div class="viewcode-block" id="SpatialReferences">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences">[docs]</a>
+<span class="k">class</span> <span class="nc">SpatialReferences</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Manage specifications of spatial references.</span>
 
@@ -738,7 +746,9 @@
     <span class="n">standard_spaces</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_tfapi</span><span class="o">.</span><span class="n">templates</span><span class="p">())</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;List of supported standard reference spaces.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SpatialReferences.check_space"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.check_space">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="SpatialReferences.check_space">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.check_space">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">check_space</span><span class="p">(</span><span class="n">space</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Build a :class:`Reference` object.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
@@ -758,6 +768,7 @@
 
             <span class="n">space</span> <span class="o">=</span> <span class="n">space</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">Reference</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spaces</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">checkpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -827,21 +838,32 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;References have not been cached&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached</span>
 
-<div class="viewcode-block" id="SpatialReferences.is_cached"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.is_cached">[docs]</a>    <span class="k">def</span> <span class="nf">is_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialReferences.is_cached">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.is_cached">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_cached</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="SpatialReferences.checkpoint"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.checkpoint">[docs]</a>    <span class="k">def</span> <span class="nf">checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SpatialReferences.checkpoint">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.checkpoint">[docs]</a>
+    <span class="k">def</span> <span class="nf">checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Cache and freeze current spaces to separate attribute.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_cached</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;References have already been cached&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cached</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">references</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SpatialReferences.add"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SpatialReferences.add">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.add">[docs]</a>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add one more space, without erroring if it exists.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_refs</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">check_space</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="SpatialReferences.append"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SpatialReferences.append">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.append">[docs]</a>
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Concatenate one more space.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_refs</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">check_space</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
@@ -849,14 +871,20 @@
 
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;space &quot;</span><span class="si">%s</span><span class="s1">&quot; already in spaces.&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="SpatialReferences.insert"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SpatialReferences.insert">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.insert">[docs]</a>
+    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Concatenate one more space.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_refs</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_space</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
         <span class="k">elif</span> <span class="n">error</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;space &quot;</span><span class="si">%s</span><span class="s1">&quot; already in spaces.&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="SpatialReferences.get_spaces"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.get_spaces">[docs]</a>    <span class="k">def</span> <span class="nf">get_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">standard</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nonstandard</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)):</span>
+
+<div class="viewcode-block" id="SpatialReferences.get_spaces">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.get_spaces">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">standard</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nonstandard</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return space names.</span>
 
@@ -906,7 +934,10 @@
                 <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">fullname</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span></div>
 
-<div class="viewcode-block" id="SpatialReferences.get_standard"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.get_standard">[docs]</a>    <span class="k">def</span> <span class="nf">get_standard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_spec</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)):</span>
+
+<div class="viewcode-block" id="SpatialReferences.get_standard">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.get_standard">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_standard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_spec</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return output spaces.</span>
 
@@ -930,7 +961,10 @@
             <span class="ow">and</span> <span class="p">(</span><span class="n">hasspec</span><span class="p">(</span><span class="s2">&quot;res&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">spec</span><span class="p">)</span> <span class="ow">or</span> <span class="n">hasspec</span><span class="p">(</span><span class="s2">&quot;den&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">spec</span><span class="p">))</span>
         <span class="p">]</span></div>
 
-<div class="viewcode-block" id="SpatialReferences.get_nonstandard"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.get_nonstandard">[docs]</a>    <span class="k">def</span> <span class="nf">get_nonstandard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_spec</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)):</span>
+
+<div class="viewcode-block" id="SpatialReferences.get_nonstandard">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.get_nonstandard">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_nonstandard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_spec</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return nonstandard spaces.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">full_spec</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">space</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">references</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="o">.</span><span class="n">standard</span> <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">dim</span> <span class="ow">in</span> <span class="n">dim</span><span class="p">]</span>
@@ -942,7 +976,10 @@
             <span class="ow">and</span> <span class="p">(</span><span class="n">hasspec</span><span class="p">(</span><span class="s2">&quot;res&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">spec</span><span class="p">)</span> <span class="ow">or</span> <span class="n">hasspec</span><span class="p">(</span><span class="s2">&quot;den&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">spec</span><span class="p">))</span>
         <span class="p">]</span></div>
 
-<div class="viewcode-block" id="SpatialReferences.get_fs_spaces"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.get_fs_spaces">[docs]</a>    <span class="k">def</span> <span class="nf">get_fs_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SpatialReferences.get_fs_spaces">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.SpatialReferences.get_fs_spaces">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_fs_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return FreeSurfer spaces.</span>
 
@@ -970,10 +1007,14 @@
             <span class="n">s</span><span class="o">.</span><span class="n">legacyname</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">space</span>
             <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">references</span>
             <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">legacyname</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">space</span> <span class="o">==</span> <span class="s2">&quot;fsnative&quot;</span>
-        <span class="p">]</span></div></div>
+        <span class="p">]</span></div>
+</div>
 
 
-<div class="viewcode-block" id="OutputReferencesAction"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.OutputReferencesAction">[docs]</a><span class="k">class</span> <span class="nc">OutputReferencesAction</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">):</span>
+
+<div class="viewcode-block" id="OutputReferencesAction">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.OutputReferencesAction">[docs]</a>
+<span class="k">class</span> <span class="nc">OutputReferencesAction</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse spatial references.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">option_string</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1000,7 +1041,10 @@
         <span class="nb">setattr</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="p">,</span> <span class="n">spaces</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="hasspec"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.hasspec">[docs]</a><span class="k">def</span> <span class="nf">hasspec</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">specs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="hasspec">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.hasspec">[docs]</a>
+<span class="k">def</span> <span class="nf">hasspec</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">specs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether any of the keys are in a dict.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
@@ -1008,7 +1052,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="format_reference"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.format_reference">[docs]</a><span class="k">def</span> <span class="nf">format_reference</span><span class="p">(</span><span class="n">in_tuple</span><span class="p">):</span>
+
+<div class="viewcode-block" id="format_reference">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.format_reference">[docs]</a>
+<span class="k">def</span> <span class="nf">format_reference</span><span class="p">(</span><span class="n">in_tuple</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Format a spatial reference given as a tuple.</span>
 
@@ -1027,7 +1074,10 @@
     <span class="k">return</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="reference2dict"><a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.reference2dict">[docs]</a><span class="k">def</span> <span class="nf">reference2dict</span><span class="p">(</span><span class="n">in_tuple</span><span class="p">):</span>
+
+<div class="viewcode-block" id="reference2dict">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.reference2dict">[docs]</a>
+<span class="k">def</span> <span class="nf">reference2dict</span><span class="p">(</span><span class="n">in_tuple</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Split a spatial reference given as a tuple into a dictionary.</span>
 
@@ -1054,6 +1104,7 @@
         <span class="p">}</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">retval</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_expand_entities</span><span class="p">(</span><span class="n">entities</span><span class="p">):</span>
@@ -1117,10 +1168,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/scripts/furo.js"></script>
-    <script src="../../../_static/js/version-switch.js"></script>
+</div><script src="../../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

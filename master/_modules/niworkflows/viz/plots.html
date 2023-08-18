@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.viz.plots - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -320,7 +320,9 @@
 <span class="n">DINA4_LANDSCAPE</span> <span class="o">=</span> <span class="p">(</span><span class="mf">11.69</span><span class="p">,</span> <span class="mf">8.27</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="fMRIPlot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.fMRIPlot">[docs]</a><span class="k">class</span> <span class="nc">fMRIPlot</span><span class="p">:</span>
+<div class="viewcode-block" id="fMRIPlot">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.fMRIPlot">[docs]</a>
+<span class="k">class</span> <span class="nc">fMRIPlot</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates the fMRI Summary Plot.&quot;&quot;&quot;</span>
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
@@ -377,7 +379,9 @@
             <span class="k">for</span> <span class="n">sp_file</span> <span class="ow">in</span> <span class="n">spikes_files</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">spikes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">sp_file</span><span class="p">),</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
 
-<div class="viewcode-block" id="fMRIPlot.plot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.fMRIPlot.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="fMRIPlot.plot">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.fMRIPlot.plot">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Main plotter&quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 
@@ -420,10 +424,14 @@
             <span class="n">drop_trs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nskip</span><span class="p">,</span>
             <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;paired&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">paired_carpet</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">figure</span></div></div>
+        <span class="k">return</span> <span class="n">figure</span></div>
+</div>
 
 
-<div class="viewcode-block" id="plot_carpet"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.plot_carpet">[docs]</a><span class="k">def</span> <span class="nf">plot_carpet</span><span class="p">(</span>
+
+<div class="viewcode-block" id="plot_carpet">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.plot_carpet">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_carpet</span><span class="p">(</span>
     <span class="n">data</span><span class="p">,</span>
     <span class="n">segments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -648,7 +656,10 @@
     <span class="k">return</span> <span class="n">gs</span></div>
 
 
-<div class="viewcode-block" id="spikesplot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.spikesplot">[docs]</a><span class="k">def</span> <span class="nf">spikesplot</span><span class="p">(</span>
+
+<div class="viewcode-block" id="spikesplot">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.spikesplot">[docs]</a>
+<span class="k">def</span> <span class="nf">spikesplot</span><span class="p">(</span>
     <span class="n">ts_z</span><span class="p">,</span>
     <span class="n">outer_gs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">tr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -802,7 +813,10 @@
     <span class="k">return</span> <span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="spikesplot_cb"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.spikesplot_cb">[docs]</a><span class="k">def</span> <span class="nf">spikesplot_cb</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="spikesplot_cb">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.spikesplot_cb">[docs]</a>
+<span class="k">def</span> <span class="nf">spikesplot_cb</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="c1"># Add colorbar</span>
     <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
@@ -822,7 +836,10 @@
     <span class="k">return</span> <span class="n">cax</span></div>
 
 
-<div class="viewcode-block" id="confoundplot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.confoundplot">[docs]</a><span class="k">def</span> <span class="nf">confoundplot</span><span class="p">(</span>
+
+<div class="viewcode-block" id="confoundplot">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.confoundplot">[docs]</a>
+<span class="k">def</span> <span class="nf">confoundplot</span><span class="p">(</span>
     <span class="n">tseries</span><span class="p">,</span>
     <span class="n">gs_ts</span><span class="p">,</span>
     <span class="n">gs_dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1004,7 +1021,10 @@
     <span class="k">return</span> <span class="n">ax_ts</span><span class="p">,</span> <span class="n">gs</span></div>
 
 
-<div class="viewcode-block" id="compcor_variance_plot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.compcor_variance_plot">[docs]</a><span class="k">def</span> <span class="nf">compcor_variance_plot</span><span class="p">(</span>
+
+<div class="viewcode-block" id="compcor_variance_plot">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.compcor_variance_plot">[docs]</a>
+<span class="k">def</span> <span class="nf">compcor_variance_plot</span><span class="p">(</span>
     <span class="n">metadata_files</span><span class="p">,</span>
     <span class="n">metadata_sources</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1123,9 +1143,9 @@
 
         <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
         <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([])</span>
-        <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
-            <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">&quot;x-small&quot;</span><span class="p">)</span>
-            <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="s2">&quot;vertical&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_majorticklabels</span><span class="p">():</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">&quot;x-small&quot;</span><span class="p">)</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="s2">&quot;vertical&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">side</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="s2">&quot;left&quot;</span><span class="p">]:</span>
             <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
             <span class="n">ax</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
@@ -1139,7 +1159,10 @@
     <span class="k">return</span> <span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="confounds_correlation_plot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.confounds_correlation_plot">[docs]</a><span class="k">def</span> <span class="nf">confounds_correlation_plot</span><span class="p">(</span>
+
+<div class="viewcode-block" id="confounds_correlation_plot">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.confounds_correlation_plot">[docs]</a>
+<span class="k">def</span> <span class="nf">confounds_correlation_plot</span><span class="p">(</span>
     <span class="n">confounds_file</span><span class="p">,</span>
     <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">figure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1219,10 +1242,10 @@
     <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">corr</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;coolwarm&quot;</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">square</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax0</span><span class="p">)</span>
     <span class="n">ax0</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax0</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
-        <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">&quot;small&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax0</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
-        <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">&quot;small&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">ax0</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_majorticklabels</span><span class="p">():</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">&quot;small&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">ax0</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">get_majorticklabels</span><span class="p">():</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">&quot;small&quot;</span><span class="p">)</span>
     <span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span>
         <span class="n">data</span><span class="o">=</span><span class="n">gscorr</span><span class="p">,</span>
         <span class="n">x</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">,</span>
@@ -1238,11 +1261,11 @@
     <span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax1</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
-        <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">&quot;small&quot;</span><span class="p">)</span>
-        <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="s2">&quot;vertical&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax1</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
-        <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">&quot;small&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">ax1</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_majorticklabels</span><span class="p">():</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">&quot;small&quot;</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="s2">&quot;vertical&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">ax1</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">get_majorticklabels</span><span class="p">():</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="s2">&quot;small&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">side</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="s2">&quot;left&quot;</span><span class="p">]:</span>
         <span class="n">ax1</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
         <span class="n">ax1</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">side</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
@@ -1256,7 +1279,10 @@
     <span class="k">return</span> <span class="p">[</span><span class="n">ax0</span><span class="p">,</span> <span class="n">ax1</span><span class="p">],</span> <span class="n">gs</span></div>
 
 
-<div class="viewcode-block" id="cifti_surfaces_plot"><a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.cifti_surfaces_plot">[docs]</a><span class="k">def</span> <span class="nf">cifti_surfaces_plot</span><span class="p">(</span>
+
+<div class="viewcode-block" id="cifti_surfaces_plot">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.plots.html#niworkflows.viz.cifti_surfaces_plot">[docs]</a>
+<span class="k">def</span> <span class="nf">cifti_surfaces_plot</span><span class="p">(</span>
     <span class="n">in_cifti</span><span class="p">,</span>
     <span class="n">density</span><span class="o">=</span><span class="s2">&quot;32k&quot;</span><span class="p">,</span>
     <span class="n">surface_type</span><span class="o">=</span><span class="s2">&quot;inflated&quot;</span><span class="p">,</span>
@@ -1388,6 +1414,7 @@
     <span class="k">return</span> <span class="n">figure</span></div>
 
 
+
 <span class="k">def</span> <span class="nf">_concat_brain_struct_data</span><span class="p">(</span><span class="n">structs</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="n">concat_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">struct</span> <span class="ow">in</span> <span class="n">structs</span><span class="p">:</span>
@@ -1441,10 +1468,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/scripts/furo.js"></script>
-    <script src="../../../_static/js/version-switch.js"></script>
+</div><script src="../../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

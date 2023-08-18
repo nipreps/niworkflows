@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.interfaces.bids - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -386,7 +386,9 @@
     <span class="n">suffix</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="BIDSInfo"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.BIDSInfo">[docs]</a><span class="k">class</span> <span class="nc">BIDSInfo</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="BIDSInfo">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.BIDSInfo">[docs]</a>
+<span class="k">class</span> <span class="nc">BIDSInfo</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract BIDS entities from a BIDS-conforming path.</span>
 
@@ -496,6 +498,7 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_BIDSDataGrabberInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
     <span class="n">subject_data</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">Str</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span>
     <span class="n">subject_id</span> <span class="o">=</span> <span class="n">Str</span><span class="p">()</span>
@@ -512,7 +515,9 @@
     <span class="n">flair</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output FLAIR images&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="BIDSDataGrabber"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.BIDSDataGrabber">[docs]</a><span class="k">class</span> <span class="nc">BIDSDataGrabber</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="BIDSDataGrabber">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.BIDSDataGrabber">[docs]</a>
+<span class="k">class</span> <span class="nc">BIDSDataGrabber</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Collect files from a BIDS directory structure.</span>
 
@@ -570,6 +575,7 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_DerivativesDataSinkInputSpec</span><span class="p">(</span><span class="n">DynamicTraitedSpec</span><span class="p">,</span> <span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
     <span class="n">base_directory</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Directory</span><span class="p">(</span>
         <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Path to the base directory for storing data.&quot;</span>
@@ -609,7 +615,9 @@
     <span class="n">fixed_hdr</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;whether derivative header was fixed&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="DerivativesDataSink"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.DerivativesDataSink">[docs]</a><span class="k">class</span> <span class="nc">DerivativesDataSink</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="DerivativesDataSink">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.DerivativesDataSink">[docs]</a>
+<span class="k">class</span> <span class="nc">DerivativesDataSink</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Store derivative files.</span>
 
@@ -1045,6 +1053,7 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_ReadSidecarJSONInputSpec</span><span class="p">(</span><span class="n">_BIDSBaseInputSpec</span><span class="p">):</span>
     <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the input nifti file&quot;</span><span class="p">)</span>
 
@@ -1053,7 +1062,9 @@
     <span class="n">out_dict</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Dict</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="ReadSidecarJSON"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.ReadSidecarJSON">[docs]</a><span class="k">class</span> <span class="nc">ReadSidecarJSON</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="ReadSidecarJSON">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.ReadSidecarJSON">[docs]</a>
+<span class="k">class</span> <span class="nc">ReadSidecarJSON</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read JSON sidecar files of a BIDS tree.</span>
 
@@ -1149,6 +1160,7 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_BIDSFreeSurferDirInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
     <span class="n">derivatives</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;BIDS derivatives directory&quot;</span>
@@ -1174,7 +1186,9 @@
     <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Directory</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;FreeSurfer subjects directory&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="BIDSFreeSurferDir"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.BIDSFreeSurferDir">[docs]</a><span class="k">class</span> <span class="nc">BIDSFreeSurferDir</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="BIDSFreeSurferDir">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.BIDSFreeSurferDir">[docs]</a>
+<span class="k">class</span> <span class="nc">BIDSFreeSurferDir</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Prepare a FreeSurfer subjects directory for use in a BIDS context.</span>
 
@@ -1262,6 +1276,7 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
+
 <span class="k">def</span> <span class="nf">_get_tf_resolution</span><span class="p">(</span><span class="n">space</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Query templateflow template information to elaborate on template resolution.</span>
@@ -1327,10 +1342,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/scripts/furo.js"></script>
-    <script src="../../../_static/js/version-switch.js"></script>
+</div><script src="../../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

@@ -5,12 +5,12 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.utils.connections module" href="niworkflows.utils.connections.html" /><link rel="prev" title="niworkflows.utils package" href="niworkflows.utils.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.utils.bids module - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -284,24 +284,24 @@
           </label>
         </div>
         <article role="main">
-          <section id="module-niworkflows.utils.bids">
-<span id="niworkflows-utils-bids-module"></span><h1>niworkflows.utils.bids module<a class="headerlink" href="#module-niworkflows.utils.bids" title="Permalink to this heading">#</a></h1>
-<p>Helpers for handling BIDS-like neuroimaging structures.</p>
+          <section id="niworkflows-utils-bids-module">
+<h1>niworkflows.utils.bids module<a class="headerlink" href="#niworkflows-utils-bids-module" title="Link to this heading">#</a></h1>
+<p id="module-niworkflows.utils.bids">Helpers for handling BIDS-like neuroimaging structures.</p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="niworkflows.utils.bids.BIDSError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">BIDSError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_root</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#BIDSError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.BIDSError" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">BIDSError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_root</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#BIDSError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.BIDSError" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a></p>
 </dd></dl>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="niworkflows.utils.bids.BIDSWarning">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">BIDSWarning</span></span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#BIDSWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.BIDSWarning" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">BIDSWarning</span></span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#BIDSWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.BIDSWarning" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeWarning" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="niworkflows.utils.bids.check_pipeline_version">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">check_pipeline_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cvers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#check_pipeline_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.check_pipeline_version" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">check_pipeline_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cvers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#check_pipeline_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.check_pipeline_version" title="Link to this definition">#</a></dt>
 <dd><p>Search for existing BIDS pipeline output and compares against current pipeline version.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -331,12 +331,12 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="niworkflows.utils.bids.collect_data">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">collect_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bids_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">participant_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Query.OPTIONAL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#collect_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.collect_data" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">collect_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bids_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">participant_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Query.OPTIONAL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">echo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#collect_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.collect_data" title="Link to this definition">#</a></dt>
 <dd><p>Uses pybids to retrieve the input data for a given participant</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bids_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://bids-standard.github.io/pybids/generated/bids.layout.BIDSLayout.html#bids.layout.BIDSLayout" title="(in PyBIDS v0.16.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bids.layout.BIDSLayout</span></code></a>) – The BIDS directory</p></li>
+<li><p><strong>bids_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://bids-standard.github.io/pybids/generated/bids.layout.BIDSLayout.html#bids.layout.BIDSLayout" title="(in PyBIDS v0.16.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bids.layout.BIDSLayout</span></code></a>) – The BIDS directory</p></li>
 <li><p><strong>participant_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – The participant identifier</p></li>
 <li><p><strong>session_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, None, or <code class="xref py py-obj docutils literal notranslate"><span class="pre">bids.layout.Query</span></code>) – The session identifier. By default, all sessions will be used.</p></li>
 <li><p><strong>task</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> or None) – The task identifier (for BOLD queries)</p></li>
@@ -370,7 +370,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="niworkflows.utils.bids.collect_participants">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">collect_participants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bids_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">participant_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#collect_participants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.collect_participants" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">collect_participants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bids_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">participant_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#collect_participants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.collect_participants" title="Link to this definition">#</a></dt>
 <dd><p>List the participants under the BIDS root and checks that participants
 designated with the participant_label argument exist in that folder.
 Returns the list of participants to be finally processed.
@@ -408,7 +408,7 @@ Requesting all subjects in a BIDS directory root:</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="niworkflows.utils.bids.get_metadata_for_nifti">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">get_metadata_for_nifti</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#get_metadata_for_nifti"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.get_metadata_for_nifti" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">get_metadata_for_nifti</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bids_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#get_metadata_for_nifti"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.get_metadata_for_nifti" title="Link to this definition">#</a></dt>
 <dd><p>Fetch metadata for a given NIfTI file.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">get_metadata_for_nifti</span><span class="p">(</span>
@@ -422,7 +422,7 @@ Requesting all subjects in a BIDS directory root:</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="niworkflows.utils.bids.group_multiecho">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">group_multiecho</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bold_sess</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#group_multiecho"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.group_multiecho" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">group_multiecho</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bold_sess</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#group_multiecho"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.group_multiecho" title="Link to this definition">#</a></dt>
 <dd><p>Multiplex multi-echo EPIs into arrays.</p>
 <p>Dual-echo is a special case of multi-echo, which is treated as single-echo data.</p>
 <p class="rubric">Examples</p>
@@ -501,7 +501,7 @@ Requesting all subjects in a BIDS directory root:</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="niworkflows.utils.bids.relative_to_root">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">relative_to_root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#relative_to_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.relative_to_root" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.bids.</span></span><span class="sig-name descname"><span class="pre">relative_to_root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/bids.html#relative_to_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.bids.relative_to_root" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the BIDS root folder given one file path’s.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">relative_to_root</span><span class="p">(</span>
@@ -605,10 +605,10 @@ Requesting all subjects in a BIDS directory root:</p>
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
-    <script src="../_static/js/version-switch.js"></script>
+</div><script src="../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

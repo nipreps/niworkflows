@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.interfaces.reportlets.registration - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -317,7 +317,8 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.mixins</span> <span class="kn">import</span> <span class="n">reporting</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">freesurfer</span> <span class="k">as</span> <span class="n">fs</span>
-<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span><span class="p">,</span> <span class="n">ants</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.ants</span> <span class="kn">import</span> <span class="n">registration</span><span class="p">,</span> <span class="n">resampling</span>
 
 <span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">NIWORKFLOWS_LOG</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">base</span> <span class="k">as</span> <span class="n">nrb</span>
@@ -344,7 +345,9 @@
     <span class="k">pass</span>
 
 
-<div class="viewcode-block" id="SpatialNormalizationRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.SpatialNormalizationRPT">[docs]</a><span class="k">class</span> <span class="nc">SpatialNormalizationRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">SpatialNormalization</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialNormalizationRPT">
+<a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.SpatialNormalizationRPT">[docs]</a>
+<span class="k">class</span> <span class="nc">SpatialNormalizationRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">SpatialNormalization</span><span class="p">):</span>
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_SpatialNormalizationInputSpecRPT</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_SpatialNormalizationOutputSpecRPT</span>
 
@@ -366,19 +369,22 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_ANTSRegistrationInputSpecRPT</span><span class="p">(</span>
-    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">ants</span><span class="o">.</span><span class="n">registration</span><span class="o">.</span><span class="n">RegistrationInputSpec</span>
+    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">registration</span><span class="o">.</span><span class="n">RegistrationInputSpec</span>
 <span class="p">):</span>
     <span class="k">pass</span>
 
 
 <span class="k">class</span> <span class="nc">_ANTSRegistrationOutputSpecRPT</span><span class="p">(</span>
-    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">ants</span><span class="o">.</span><span class="n">registration</span><span class="o">.</span><span class="n">RegistrationOutputSpec</span>
+    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">registration</span><span class="o">.</span><span class="n">RegistrationOutputSpec</span>
 <span class="p">):</span>
     <span class="k">pass</span>
 
 
-<div class="viewcode-block" id="ANTSRegistrationRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ANTSRegistrationRPT">[docs]</a><span class="k">class</span> <span class="nc">ANTSRegistrationRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">Registration</span><span class="p">):</span>
+<div class="viewcode-block" id="ANTSRegistrationRPT">
+<a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ANTSRegistrationRPT">[docs]</a>
+<span class="k">class</span> <span class="nc">ANTSRegistrationRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">Registration</span><span class="p">):</span>
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_ANTSRegistrationInputSpecRPT</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_ANTSRegistrationOutputSpecRPT</span>
 
@@ -394,19 +400,22 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_ANTSApplyTransformsInputSpecRPT</span><span class="p">(</span>
-    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">ants</span><span class="o">.</span><span class="n">resampling</span><span class="o">.</span><span class="n">ApplyTransformsInputSpec</span>
+    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">resampling</span><span class="o">.</span><span class="n">ApplyTransformsInputSpec</span>
 <span class="p">):</span>
     <span class="k">pass</span>
 
 
 <span class="k">class</span> <span class="nc">_ANTSApplyTransformsOutputSpecRPT</span><span class="p">(</span>
-    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">ants</span><span class="o">.</span><span class="n">resampling</span><span class="o">.</span><span class="n">ApplyTransformsOutputSpec</span>
+    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">resampling</span><span class="o">.</span><span class="n">ApplyTransformsOutputSpec</span>
 <span class="p">):</span>
     <span class="k">pass</span>
 
 
-<div class="viewcode-block" id="ANTSApplyTransformsRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ANTSApplyTransformsRPT">[docs]</a><span class="k">class</span> <span class="nc">ANTSApplyTransformsRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">ApplyTransforms</span><span class="p">):</span>
+<div class="viewcode-block" id="ANTSApplyTransformsRPT">
+<a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ANTSApplyTransformsRPT">[docs]</a>
+<span class="k">class</span> <span class="nc">ANTSApplyTransformsRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">ApplyTransforms</span><span class="p">):</span>
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_ANTSApplyTransformsInputSpecRPT</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_ANTSApplyTransformsOutputSpecRPT</span>
 
@@ -422,6 +431,7 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_ApplyTOPUPInputSpecRPT</span><span class="p">(</span>
     <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">epi</span><span class="o">.</span><span class="n">ApplyTOPUPInputSpec</span>
 <span class="p">):</span>
@@ -434,7 +444,9 @@
     <span class="k">pass</span>
 
 
-<div class="viewcode-block" id="ApplyTOPUPRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ApplyTOPUPRPT">[docs]</a><span class="k">class</span> <span class="nc">ApplyTOPUPRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">ApplyTOPUP</span><span class="p">):</span>
+<div class="viewcode-block" id="ApplyTOPUPRPT">
+<a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ApplyTOPUPRPT">[docs]</a>
+<span class="k">class</span> <span class="nc">ApplyTOPUPRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">ApplyTOPUP</span><span class="p">):</span>
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_ApplyTOPUPInputSpecRPT</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_ApplyTOPUPOutputSpecRPT</span>
 
@@ -457,6 +469,7 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_FUGUEInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">FUGUEInputSpec</span><span class="p">):</span>
     <span class="n">wm_seg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-wmseg </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference white matter segmentation mask&quot;</span><span class="p">)</span>
 
@@ -467,7 +480,9 @@
     <span class="k">pass</span>
 
 
-<div class="viewcode-block" id="FUGUERPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.FUGUERPT">[docs]</a><span class="k">class</span> <span class="nc">FUGUERPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FUGUE</span><span class="p">):</span>
+<div class="viewcode-block" id="FUGUERPT">
+<a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.FUGUERPT">[docs]</a>
+<span class="k">class</span> <span class="nc">FUGUERPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FUGUE</span><span class="p">):</span>
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_FUGUEInputSpecRPT</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FUGUEOutputSpecRPT</span>
 
@@ -486,6 +501,7 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_FLIRTInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">FLIRTInputSpec</span><span class="p">):</span>
     <span class="k">pass</span>
 
@@ -496,7 +512,9 @@
     <span class="k">pass</span>
 
 
-<div class="viewcode-block" id="FLIRTRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.FLIRTRPT">[docs]</a><span class="k">class</span> <span class="nc">FLIRTRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FLIRT</span><span class="p">):</span>
+<div class="viewcode-block" id="FLIRTRPT">
+<a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.FLIRTRPT">[docs]</a>
+<span class="k">class</span> <span class="nc">FLIRTRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FLIRT</span><span class="p">):</span>
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_FLIRTInputSpecRPT</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FLIRTOutputSpecRPT</span>
 
@@ -513,15 +531,19 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_ApplyXFMInputSpecRPT</span><span class="p">(</span>
     <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">ApplyXFMInputSpec</span>
 <span class="p">):</span>
     <span class="k">pass</span>
 
 
-<div class="viewcode-block" id="ApplyXFMRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ApplyXFMRPT">[docs]</a><span class="k">class</span> <span class="nc">ApplyXFMRPT</span><span class="p">(</span><span class="n">FLIRTRPT</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">ApplyXFM</span><span class="p">):</span>
+<div class="viewcode-block" id="ApplyXFMRPT">
+<a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ApplyXFMRPT">[docs]</a>
+<span class="k">class</span> <span class="nc">ApplyXFMRPT</span><span class="p">(</span><span class="n">FLIRTRPT</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">ApplyXFM</span><span class="p">):</span>
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_ApplyXFMInputSpecRPT</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FLIRTOutputSpecRPT</span></div>
+
 
 
 <span class="k">if</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s2">&quot;0.0.0&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">fs</span><span class="o">.</span><span class="n">Info</span><span class="o">.</span><span class="n">looseversion</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s2">&quot;6.0.0&quot;</span><span class="p">):</span>
@@ -549,7 +571,9 @@
     <span class="k">pass</span>
 
 
-<div class="viewcode-block" id="BBRegisterRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.BBRegisterRPT">[docs]</a><span class="k">class</span> <span class="nc">BBRegisterRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fs</span><span class="o">.</span><span class="n">BBRegister</span><span class="p">):</span>
+<div class="viewcode-block" id="BBRegisterRPT">
+<a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.BBRegisterRPT">[docs]</a>
+<span class="k">class</span> <span class="nc">BBRegisterRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fs</span><span class="o">.</span><span class="n">BBRegister</span><span class="p">):</span>
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_BBRegisterInputSpecRPT</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_BBRegisterOutputSpecRPT</span>
 
@@ -579,6 +603,7 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_MRICoregInputSpecRPT</span><span class="p">(</span>
     <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fs</span><span class="o">.</span><span class="n">registration</span><span class="o">.</span><span class="n">MRICoregInputSpec</span>
 <span class="p">):</span>
@@ -591,7 +616,9 @@
     <span class="k">pass</span>
 
 
-<div class="viewcode-block" id="MRICoregRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.MRICoregRPT">[docs]</a><span class="k">class</span> <span class="nc">MRICoregRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fs</span><span class="o">.</span><span class="n">MRICoreg</span><span class="p">):</span>
+<div class="viewcode-block" id="MRICoregRPT">
+<a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.MRICoregRPT">[docs]</a>
+<span class="k">class</span> <span class="nc">MRICoregRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">fs</span><span class="o">.</span><span class="n">MRICoreg</span><span class="p">):</span>
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_MRICoregInputSpecRPT</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_MRICoregOutputSpecRPT</span>
 
@@ -630,6 +657,7 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_SimpleBeforeAfterInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">):</span>
     <span class="n">before</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;file before&quot;</span><span class="p">)</span>
     <span class="n">after</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;file after&quot;</span><span class="p">)</span>
@@ -641,7 +669,9 @@
     <span class="p">)</span>
 
 
-<div class="viewcode-block" id="SimpleBeforeAfterRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.SimpleBeforeAfterRPT">[docs]</a><span class="k">class</span> <span class="nc">SimpleBeforeAfterRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">nrb</span><span class="o">.</span><span class="n">ReportingInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="SimpleBeforeAfterRPT">
+<a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.SimpleBeforeAfterRPT">[docs]</a>
+<span class="k">class</span> <span class="nc">SimpleBeforeAfterRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">RegistrationRC</span><span class="p">,</span> <span class="n">nrb</span><span class="o">.</span><span class="n">ReportingInterface</span><span class="p">):</span>
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_SimpleBeforeAfterInputSpecRPT</span>
 
     <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
@@ -661,11 +691,14 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_ResampleBeforeAfterInputSpecRPT</span><span class="p">(</span><span class="n">_SimpleBeforeAfterInputSpecRPT</span><span class="p">):</span>
     <span class="n">base</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s2">&quot;before&quot;</span><span class="p">,</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="ResampleBeforeAfterRPT"><a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ResampleBeforeAfterRPT">[docs]</a><span class="k">class</span> <span class="nc">ResampleBeforeAfterRPT</span><span class="p">(</span><span class="n">SimpleBeforeAfterRPT</span><span class="p">):</span>
+<div class="viewcode-block" id="ResampleBeforeAfterRPT">
+<a class="viewcode-back" href="../../../../api/niworkflows.interfaces.reportlets.registration.html#niworkflows.interfaces.reportlets.registration.ResampleBeforeAfterRPT">[docs]</a>
+<span class="k">class</span> <span class="nc">ResampleBeforeAfterRPT</span><span class="p">(</span><span class="n">SimpleBeforeAfterRPT</span><span class="p">):</span>
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_ResampleBeforeAfterInputSpecRPT</span>
 
     <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
@@ -701,6 +734,7 @@
         <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -733,10 +767,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../../_static/scripts/furo.js"></script>
-    <script src="../../../../_static/js/version-switch.js"></script>
+</div><script src="../../../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

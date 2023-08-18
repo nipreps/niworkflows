@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.utils.bids - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -315,7 +315,9 @@
 <span class="kn">from</span> <span class="nn">packaging.version</span> <span class="kn">import</span> <span class="n">Version</span>
 
 
-<div class="viewcode-block" id="BIDSError"><a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.BIDSError">[docs]</a><span class="k">class</span> <span class="nc">BIDSError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+<div class="viewcode-block" id="BIDSError">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.BIDSError">[docs]</a>
+<span class="k">class</span> <span class="nc">BIDSError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">bids_root</span><span class="p">):</span>
         <span class="n">indent</span> <span class="o">=</span> <span class="mi">10</span>
         <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{sep}</span><span class="s1"> BIDS root folder: &quot;</span><span class="si">{bids_root}</span><span class="s1">&quot; </span><span class="si">{sep}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -331,11 +333,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">bids_root</span> <span class="o">=</span> <span class="n">bids_root</span></div>
 
 
-<div class="viewcode-block" id="BIDSWarning"><a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.BIDSWarning">[docs]</a><span class="k">class</span> <span class="nc">BIDSWarning</span><span class="p">(</span><span class="ne">RuntimeWarning</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BIDSWarning">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.BIDSWarning">[docs]</a>
+<span class="k">class</span> <span class="nc">BIDSWarning</span><span class="p">(</span><span class="ne">RuntimeWarning</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="collect_participants"><a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.collect_participants">[docs]</a><span class="k">def</span> <span class="nf">collect_participants</span><span class="p">(</span>
+
+<div class="viewcode-block" id="collect_participants">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.collect_participants">[docs]</a>
+<span class="k">def</span> <span class="nf">collect_participants</span><span class="p">(</span>
     <span class="n">bids_dir</span><span class="p">,</span> <span class="n">participant_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bids_validate</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -432,7 +440,10 @@
     <span class="k">return</span> <span class="n">found_label</span></div>
 
 
-<div class="viewcode-block" id="collect_data"><a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.collect_data">[docs]</a><span class="k">def</span> <span class="nf">collect_data</span><span class="p">(</span>
+
+<div class="viewcode-block" id="collect_data">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.collect_data">[docs]</a>
+<span class="k">def</span> <span class="nf">collect_data</span><span class="p">(</span>
     <span class="n">bids_dir</span><span class="p">,</span>
     <span class="n">participant_label</span><span class="p">,</span>
     <span class="n">session_id</span><span class="o">=</span><span class="n">Query</span><span class="o">.</span><span class="n">OPTIONAL</span><span class="p">,</span>
@@ -545,7 +556,10 @@
     <span class="k">return</span> <span class="n">subj_data</span><span class="p">,</span> <span class="n">layout</span></div>
 
 
-<div class="viewcode-block" id="get_metadata_for_nifti"><a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.get_metadata_for_nifti">[docs]</a><span class="k">def</span> <span class="nf">get_metadata_for_nifti</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">bids_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_metadata_for_nifti">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.get_metadata_for_nifti">[docs]</a>
+<span class="k">def</span> <span class="nf">get_metadata_for_nifti</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">bids_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fetch metadata for a given NIfTI file.</span>
 
@@ -563,6 +577,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_init_layout</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">bids_dir</span><span class="p">,</span> <span class="n">validate</span><span class="p">)</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">in_file</span><span class="p">))</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_init_layout</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bids_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">database_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -587,7 +602,9 @@
     <span class="k">return</span> <span class="n">layout</span>
 
 
-<div class="viewcode-block" id="group_multiecho"><a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.group_multiecho">[docs]</a><span class="k">def</span> <span class="nf">group_multiecho</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">):</span>
+<div class="viewcode-block" id="group_multiecho">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.group_multiecho">[docs]</a>
+<span class="k">def</span> <span class="nf">group_multiecho</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Multiplex multi-echo EPIs into arrays.</span>
 
@@ -680,7 +697,10 @@
     <span class="k">return</span> <span class="n">ses_uids</span></div>
 
 
-<div class="viewcode-block" id="relative_to_root"><a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.relative_to_root">[docs]</a><span class="k">def</span> <span class="nf">relative_to_root</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+
+<div class="viewcode-block" id="relative_to_root">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.relative_to_root">[docs]</a>
+<span class="k">def</span> <span class="nf">relative_to_root</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the BIDS root folder given one file path&#39;s.</span>
 
@@ -720,7 +740,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="check_pipeline_version"><a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.check_pipeline_version">[docs]</a><span class="k">def</span> <span class="nf">check_pipeline_version</span><span class="p">(</span><span class="n">cvers</span><span class="p">,</span> <span class="n">data_desc</span><span class="p">):</span>
+
+<div class="viewcode-block" id="check_pipeline_version">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.check_pipeline_version">[docs]</a>
+<span class="k">def</span> <span class="nf">check_pipeline_version</span><span class="p">(</span><span class="n">cvers</span><span class="p">,</span> <span class="n">data_desc</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Search for existing BIDS pipeline output and compares against current pipeline version.</span>
 
@@ -760,6 +783,7 @@
     <span class="n">dvers</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PipelineDescription&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Version&quot;</span><span class="p">,</span> <span class="s2">&quot;0+unknown&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">Version</span><span class="p">(</span><span class="n">cvers</span><span class="p">)</span><span class="o">.</span><span class="n">public</span> <span class="o">!=</span> <span class="n">Version</span><span class="p">(</span><span class="n">dvers</span><span class="p">)</span><span class="o">.</span><span class="n">public</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;Previous output generated by version </span><span class="si">{}</span><span class="s2"> found.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dvers</span><span class="p">)</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -792,10 +816,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/scripts/furo.js"></script>
-    <script src="../../../_static/js/version-switch.js"></script>
+</div><script src="../../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

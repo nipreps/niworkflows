@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.interfaces.images - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -358,7 +358,9 @@
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dec</span><span class="o">=</span><span class="s2">&quot;the regridded file&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="RegridToZooms"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.RegridToZooms">[docs]</a><span class="k">class</span> <span class="nc">RegridToZooms</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="RegridToZooms">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.RegridToZooms">[docs]</a>
+<span class="k">class</span> <span class="nc">RegridToZooms</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Change the resolution of an image (regrid).&quot;&quot;&quot;</span>
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_RegridToZoomsInputSpec</span>
@@ -380,6 +382,7 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_IntraModalMergeInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
     <span class="n">in_files</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input files&quot;</span><span class="p">)</span>
     <span class="n">in_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input mask for grand mean scaling&quot;</span><span class="p">)</span>
@@ -396,7 +399,9 @@
     <span class="n">out_movpar</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output movement parameters&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="IntraModalMerge"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.IntraModalMerge">[docs]</a><span class="k">class</span> <span class="nc">IntraModalMerge</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="IntraModalMerge">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.IntraModalMerge">[docs]</a>
+<span class="k">class</span> <span class="nc">IntraModalMerge</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate an average of the inputs.</span>
 
@@ -493,6 +498,7 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_RobustAverageInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
     <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -526,7 +532,9 @@
     <span class="n">out_hmc_volumes</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;head-motion correction volumes&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="RobustAverage"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.RobustAverage">[docs]</a><span class="k">class</span> <span class="nc">RobustAverage</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="RobustAverage">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.RobustAverage">[docs]</a>
+<span class="k">class</span> <span class="nc">RobustAverage</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Robustly estimate an average of the input.&quot;&quot;&quot;</span>
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_RobustAverageInputSpec</span>
@@ -648,6 +656,7 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
+
 <span class="n">CONFORMATION_TEMPLATE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\t\t</span><span class="s2">&lt;h3 class=&quot;elem-title&quot;&gt;Anatomical Conformation&lt;/h3&gt;</span>
 <span class="se">\t\t</span><span class="s2">&lt;ul class=&quot;elem-desc&quot;&gt;</span>
 <span class="se">\t\t\t</span><span class="s2">&lt;li&gt;Input T1w images: </span><span class="si">{n_t1w}</span><span class="s2">&lt;/li&gt;</span>
@@ -682,7 +691,9 @@
     <span class="n">out_report</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;conformation report&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="TemplateDimensions"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.TemplateDimensions">[docs]</a><span class="k">class</span> <span class="nc">TemplateDimensions</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="TemplateDimensions">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.TemplateDimensions">[docs]</a>
+<span class="k">class</span> <span class="nc">TemplateDimensions</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds template target dimensions for a series of T1w images, filtering low-resolution images,</span>
 <span class="sd">    if necessary.</span>
@@ -758,6 +769,7 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_ConformInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
     <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Input image&quot;</span><span class="p">)</span>
     <span class="n">target_zooms</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Tuple</span><span class="p">(</span>
@@ -773,7 +785,9 @@
     <span class="n">transform</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Conformation transform (voxel-to-voxel)&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Conform"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.Conform">[docs]</a><span class="k">class</span> <span class="nc">Conform</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="Conform">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.Conform">[docs]</a>
+<span class="k">class</span> <span class="nc">Conform</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Conform a series of T1w images to enable merging.</span>
 
@@ -879,14 +893,20 @@
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
-<div class="viewcode-block" id="reorient"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.reorient">[docs]</a><span class="k">def</span> <span class="nf">reorient</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="reorient">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.reorient">[docs]</a>
+<span class="k">def</span> <span class="nf">reorient</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reorient Nifti files to RAS.&quot;&quot;&quot;</span>
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_ras&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">)</span>
     <span class="n">nb</span><span class="o">.</span><span class="n">as_closest_canonical</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">))</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out_file</span></div>
 
 
-<div class="viewcode-block" id="normalize_xform"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.normalize_xform">[docs]</a><span class="k">def</span> <span class="nf">normalize_xform</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+
+<div class="viewcode-block" id="normalize_xform">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.normalize_xform">[docs]</a>
+<span class="k">def</span> <span class="nf">normalize_xform</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set identical, valid qform and sform matrices in an image.</span>
 
@@ -924,6 +944,7 @@
     <span class="n">new_img</span><span class="o">.</span><span class="n">set_sform</span><span class="p">(</span><span class="n">xform</span><span class="p">,</span> <span class="n">xform_code</span><span class="p">)</span>
     <span class="n">new_img</span><span class="o">.</span><span class="n">set_qform</span><span class="p">(</span><span class="n">xform</span><span class="p">,</span> <span class="n">xform_code</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">new_img</span></div>
+
 
 
 <span class="k">class</span> <span class="nc">_SignalExtractionInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
@@ -971,7 +992,9 @@
     <span class="p">)</span>
 
 
-<div class="viewcode-block" id="SignalExtraction"><a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.SignalExtraction">[docs]</a><span class="k">class</span> <span class="nc">SignalExtraction</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<div class="viewcode-block" id="SignalExtraction">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.SignalExtraction">[docs]</a>
+<span class="k">class</span> <span class="nc">SignalExtraction</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract mean signals from a time series within a set of ROIs.</span>
 
@@ -1024,6 +1047,7 @@
         <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">],</span> <span class="n">output</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="sa">b</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -1056,10 +1080,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/scripts/furo.js"></script>
-    <script src="../../../_static/js/version-switch.js"></script>
+</div><script src="../../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>

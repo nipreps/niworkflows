@@ -4,12 +4,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.0.1 and Furo 2023.05.20 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.17 -->
         <title>niworkflows.viz.utils - niworkflows 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=e6660623a769aa55fea372102b9bf3151b292993" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css?v=45d66e8a" />
     
     
 
@@ -326,14 +326,19 @@
 <span class="n">SVGNS</span> <span class="o">=</span> <span class="s2">&quot;http://www.w3.org/2000/svg&quot;</span>
 
 
-<div class="viewcode-block" id="robust_set_limits"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.robust_set_limits">[docs]</a><span class="k">def</span> <span class="nf">robust_set_limits</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">plot_params</span><span class="p">,</span> <span class="n">percentiles</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mf">99.8</span><span class="p">)):</span>
+<div class="viewcode-block" id="robust_set_limits">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.robust_set_limits">[docs]</a>
+<span class="k">def</span> <span class="nf">robust_set_limits</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">plot_params</span><span class="p">,</span> <span class="n">percentiles</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mf">99.8</span><span class="p">)):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set (vmax, vmin) based on percentiles of the data.&quot;&quot;&quot;</span>
     <span class="n">plot_params</span><span class="p">[</span><span class="s2">&quot;vmin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plot_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vmin&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">percentiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
     <span class="n">plot_params</span><span class="p">[</span><span class="s2">&quot;vmax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plot_params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vmax&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">percentiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
     <span class="k">return</span> <span class="n">plot_params</span></div>
 
 
-<div class="viewcode-block" id="svg_compress"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.svg_compress">[docs]</a><span class="k">def</span> <span class="nf">svg_compress</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="svg_compress">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.svg_compress">[docs]</a>
+<span class="k">def</span> <span class="nf">svg_compress</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a blob SVG from a matplotlib figure, may perform compression.&quot;&quot;&quot;</span>
     <span class="c1"># Check availability of svgo and cwebp</span>
     <span class="n">has_compress</span> <span class="o">=</span> <span class="nb">all</span><span class="p">((</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;svgo&quot;</span><span class="p">),</span> <span class="n">which</span><span class="p">(</span><span class="s2">&quot;cwebp&quot;</span><span class="p">)))</span>
@@ -409,7 +414,10 @@
     <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">image_svg</span><span class="p">)</span>  <span class="c1"># straight up giant string</span></div>
 
 
-<div class="viewcode-block" id="svg2str"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.svg2str">[docs]</a><span class="k">def</span> <span class="nf">svg2str</span><span class="p">(</span><span class="n">display_object</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+
+<div class="viewcode-block" id="svg2str">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.svg2str">[docs]</a>
+<span class="k">def</span> <span class="nf">svg2str</span><span class="p">(</span><span class="n">display_object</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Serialize a nilearn display object to string.&quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
 
@@ -420,7 +428,10 @@
     <span class="k">return</span> <span class="n">image_buf</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="extract_svg"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.extract_svg">[docs]</a><span class="k">def</span> <span class="nf">extract_svg</span><span class="p">(</span><span class="n">display_object</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="extract_svg">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.extract_svg">[docs]</a>
+<span class="k">def</span> <span class="nf">extract_svg</span><span class="p">(</span><span class="n">display_object</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove the preamble of the svg files generated with nilearn.&quot;&quot;&quot;</span>
     <span class="n">image_svg</span> <span class="o">=</span> <span class="n">svg2str</span><span class="p">(</span><span class="n">display_object</span><span class="p">,</span> <span class="n">dpi</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">compress</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">compress</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
@@ -442,7 +453,10 @@
     <span class="k">return</span> <span class="n">image_svg</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="cuts_from_bbox"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.cuts_from_bbox">[docs]</a><span class="k">def</span> <span class="nf">cuts_from_bbox</span><span class="p">(</span><span class="n">mask_nii</span><span class="p">,</span> <span class="n">cuts</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+
+<div class="viewcode-block" id="cuts_from_bbox">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.cuts_from_bbox">[docs]</a>
+<span class="k">def</span> <span class="nf">cuts_from_bbox</span><span class="p">(</span><span class="n">mask_nii</span><span class="p">,</span> <span class="n">cuts</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Find equi-spaced cuts for presenting images.&quot;&quot;&quot;</span>
     <span class="n">mask_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">mask_nii</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
 
@@ -486,6 +500,7 @@
     <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">ras_coords</span><span class="p">,</span> <span class="mi">3</span><span class="p">))}</span></div>
 
 
+
 <span class="k">def</span> <span class="nf">_3d_in_file</span><span class="p">(</span><span class="n">in_file</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; if self.inputs.in_file is 3d, return it.</span>
 <span class="sd">    if 4d, pick an arbitrary volume and return that.</span>
@@ -508,7 +523,9 @@
     <span class="k">return</span> <span class="n">nlimage</span><span class="o">.</span><span class="n">index_img</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="plot_segs"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.plot_segs">[docs]</a><span class="k">def</span> <span class="nf">plot_segs</span><span class="p">(</span>
+<div class="viewcode-block" id="plot_segs">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.plot_segs">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_segs</span><span class="p">(</span>
     <span class="n">image_nii</span><span class="p">,</span>
     <span class="n">seg_niis</span><span class="p">,</span>
     <span class="n">out_file</span><span class="p">,</span>
@@ -563,6 +580,7 @@
     <span class="k">return</span> <span class="n">out_files</span></div>
 
 
+
 <span class="k">def</span> <span class="nf">_plot_anat_with_contours</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">segs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_params</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">nilearn.plotting</span> <span class="kn">import</span> <span class="n">plot_anat</span>
 
@@ -600,7 +618,9 @@
     <span class="k">return</span> <span class="n">svg</span>
 
 
-<div class="viewcode-block" id="plot_registration"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.plot_registration">[docs]</a><span class="k">def</span> <span class="nf">plot_registration</span><span class="p">(</span>
+<div class="viewcode-block" id="plot_registration">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.plot_registration">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_registration</span><span class="p">(</span>
     <span class="n">anat_nii</span><span class="p">,</span>
     <span class="n">div_id</span><span class="p">,</span>
     <span class="n">plot_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -683,11 +703,15 @@
     <span class="k">return</span> <span class="n">out_files</span></div>
 
 
-<div class="viewcode-block" id="compose_view"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.compose_view">[docs]</a><span class="k">def</span> <span class="nf">compose_view</span><span class="p">(</span><span class="n">bg_svgs</span><span class="p">,</span> <span class="n">fg_svgs</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="s2">&quot;report.svg&quot;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="compose_view">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.compose_view">[docs]</a>
+<span class="k">def</span> <span class="nf">compose_view</span><span class="p">(</span><span class="n">bg_svgs</span><span class="p">,</span> <span class="n">fg_svgs</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="s2">&quot;report.svg&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compose the input svgs into one standalone svg with CSS flickering animation.&quot;&quot;&quot;</span>
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
     <span class="n">out_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_compose_view</span><span class="p">(</span><span class="n">bg_svgs</span><span class="p">,</span> <span class="n">fg_svgs</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">ref</span><span class="p">)))</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_compose_view</span><span class="p">(</span><span class="n">bg_svgs</span><span class="p">,</span> <span class="n">fg_svgs</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
@@ -768,7 +792,9 @@
     <span class="k">return</span> <span class="n">svg</span>
 
 
-<div class="viewcode-block" id="transform_to_2d"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.transform_to_2d">[docs]</a><span class="k">def</span> <span class="nf">transform_to_2d</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">max_axis</span><span class="p">):</span>
+<div class="viewcode-block" id="transform_to_2d">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.transform_to_2d">[docs]</a>
+<span class="k">def</span> <span class="nf">transform_to_2d</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">max_axis</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Projects 3d data cube along one axis using maximum intensity with</span>
 <span class="sd">    preservation of the signs. Adapted from nilearn.</span>
@@ -792,7 +818,10 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">maximum_intensity_data</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="plot_melodic_components"><a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.plot_melodic_components">[docs]</a><span class="k">def</span> <span class="nf">plot_melodic_components</span><span class="p">(</span>
+
+<div class="viewcode-block" id="plot_melodic_components">
+<a class="viewcode-back" href="../../../api/niworkflows.viz.utils.html#niworkflows.viz.utils.plot_melodic_components">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_melodic_components</span><span class="p">(</span>
     <span class="n">melodic_dir</span><span class="p">,</span>
     <span class="n">in_file</span><span class="p">,</span>
     <span class="n">tr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -983,9 +1012,9 @@
         <span class="n">ax2</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">(</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
         <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax2</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
-            <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
-            <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">color_time</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">ax2</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_majorticklabels</span><span class="p">():</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">color_time</span><span class="p">)</span>
 
         <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
             <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">:],</span>
@@ -997,9 +1026,9 @@
         <span class="n">ax3</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">ax3</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">(</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
         <span class="n">ax3</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax3</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
-            <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
-            <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">color_power</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">ax3</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_majorticklabels</span><span class="p">():</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">color_power</span><span class="p">)</span>
         <span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
@@ -1012,6 +1041,7 @@
         <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -1044,10 +1074,10 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/scripts/furo.js"></script>
-    <script src="../../../_static/js/version-switch.js"></script>
+</div><script src="../../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>
