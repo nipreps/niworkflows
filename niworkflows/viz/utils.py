@@ -698,9 +698,9 @@ def plot_melodic_components(
         ax2.autoscale_view("tight")
         ax2.tick_params(axis="both", which="major", pad=0)
         sns.despine(left=True, bottom=True)
-        for tick in ax2.xaxis.get_major_ticks():
-            tick.label.set_fontsize(6)
-            tick.label.set_color(color_time)
+        for label in ax2.xaxis.get_majorticklabels():
+            label.set_fontsize(6)
+            label.set_color(color_time)
 
         ax3.plot(
             f[0:],
@@ -712,9 +712,9 @@ def plot_melodic_components(
         ax3.axes.get_yaxis().set_visible(False)
         ax3.autoscale_view("tight")
         ax3.tick_params(axis="both", which="major", pad=0)
-        for tick in ax3.xaxis.get_major_ticks():
-            tick.label.set_fontsize(6)
-            tick.label.set_color(color_power)
+        for label in ax3.xaxis.get_majorticklabels():
+            label.set_fontsize(6)
+            label.set_color(color_power)
         sns.despine(left=True, bottom=True)
 
     plt.subplots_adjust(hspace=0.5)
