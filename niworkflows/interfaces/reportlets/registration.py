@@ -32,7 +32,8 @@ from nipype.interfaces.base import (
 )
 from nipype.interfaces.mixins import reporting
 from nipype.interfaces import freesurfer as fs
-from nipype.interfaces import fsl, ants
+from nipype.interfaces import fsl
+from nipype.interfaces.ants import registration, resampling
 
 from ... import NIWORKFLOWS_LOG
 from . import base as nrb
@@ -82,13 +83,13 @@ class SpatialNormalizationRPT(nrb.RegistrationRC, SpatialNormalization):
 
 
 class _ANTSRegistrationInputSpecRPT(
-    nrb._SVGReportCapableInputSpec, ants.registration.RegistrationInputSpec
+    nrb._SVGReportCapableInputSpec, registration.RegistrationInputSpec
 ):
     pass
 
 
 class _ANTSRegistrationOutputSpecRPT(
-    reporting.ReportCapableOutputSpec, ants.registration.RegistrationOutputSpec
+    reporting.ReportCapableOutputSpec, registration.RegistrationOutputSpec
 ):
     pass
 
@@ -110,13 +111,13 @@ class ANTSRegistrationRPT(nrb.RegistrationRC, Registration):
 
 
 class _ANTSApplyTransformsInputSpecRPT(
-    nrb._SVGReportCapableInputSpec, ants.resampling.ApplyTransformsInputSpec
+    nrb._SVGReportCapableInputSpec, resampling.ApplyTransformsInputSpec
 ):
     pass
 
 
 class _ANTSApplyTransformsOutputSpecRPT(
-    reporting.ReportCapableOutputSpec, ants.resampling.ApplyTransformsOutputSpec
+    reporting.ReportCapableOutputSpec, resampling.ApplyTransformsOutputSpec
 ):
     pass
 
