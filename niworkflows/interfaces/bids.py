@@ -74,7 +74,7 @@ DEFAULT_DTYPES = defaultdict(
         ("mask", "uint8"),
         ("dseg", "int16"),
         ("probseg", "float32"),
-        ("boldref", "source"),
+        ("boldref", "float32"),
     ),
 )
 
