@@ -277,7 +277,7 @@ class BIDSDataGrabber(SimpleInterface):
                 )
             )
 
-        for imtype in ["bold", "t2w", "flair", "fmap", "sbref", "roi"]:
+        for imtype in ["bold", "t2w", "flair", "fmap", "sbref", "roi", "pet"]:
             if not bids_dict[imtype]:
                 LOGGER.info(
                     'No "%s" images found for sub-%s', imtype, self.inputs.subject_id
