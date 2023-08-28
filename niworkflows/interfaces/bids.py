@@ -225,6 +225,7 @@ class _BIDSDataGrabberOutputSpec(TraitedSpec):
     roi = OutputMultiObject(desc="output ROI images")
     t2w = OutputMultiObject(desc="output T2w images")
     flair = OutputMultiObject(desc="output FLAIR images")
+    pet = OutputMultiObject(desc="output PET images")
 
 
 class BIDSDataGrabber(SimpleInterface):
@@ -276,7 +277,7 @@ class BIDSDataGrabber(SimpleInterface):
                 )
             )
 
-        for imtype in ["bold", "t2w", "flair", "fmap", "sbref", "roi"]:
+        for imtype in ["bold", "t2w", "flair", "fmap", "sbref", "roi", "pet"]:
             if not bids_dict[imtype]:
                 LOGGER.info(
                     'No "%s" images found for sub-%s', imtype, self.inputs.subject_id
