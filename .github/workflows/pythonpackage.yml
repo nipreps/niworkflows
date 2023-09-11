@@ -25,7 +25,7 @@ jobs:
       version: ${{ steps.show_version.outputs.version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Print head git commit message
@@ -53,7 +53,7 @@ jobs:
     if: github.repository == 'nipreps/niworkflows'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Set up Python 3
@@ -136,7 +136,7 @@ jobs:
       INSTALL_TYPE: ${{ matrix.install }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       if: matrix.install == 'repo' || matrix.install == 'editable'
       with:
         fetch-depth: 0
@@ -210,7 +210,7 @@ jobs:
     steps:
     - name: Debug commit message
       run: echo "${{ needs.job_metadata.outputs.commit_message }}"
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Set up Python ${{ matrix.python-version }}
@@ -252,7 +252,7 @@ jobs:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python 3
       uses: actions/setup-python@v4
       with:
