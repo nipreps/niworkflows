@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ssh-key: "${{ secrets.NIPREPS_DEPLOY }}"
         fetch-depth: 0
