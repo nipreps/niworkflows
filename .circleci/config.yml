@@ -287,7 +287,7 @@ jobs:
       - run:
           name: Validate version
           command: |
-            THISVERSION=$( pipx run hatch version )
+            THISVERSION=$( python3 get_version.py )
             python -m pip install dist/*.tar.gz
             mkdir empty
             cd empty
@@ -309,15 +309,6 @@ jobs:
           command: |
             pipx run build
             pipx run twine check dist/*
-      - run:
-          name: Validate version
-          command: |
-            THISVERSION=$( pipx run hatch version )
-            python -m pip install dist/*.tar.gz
-            mkdir empty
-            cd empty
-            INSTALLED=$( python -c 'import niworkflows; print(niworkflows.__version__)' )
-            test "${CIRCLE_TAG:-$THISVERSION}" == "$INSTALLED"
       - run:
           name: Upload to PyPi
           command: |

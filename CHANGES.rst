@@ -434,6 +434,16 @@ A list of prominent changes can be found below. (With thanks to Lea Waller for t
     * ``NormalizeMotionParams`` now under ``confounds``.
     * ``FMRISummary``, ``CompCorVariancePlot``, ``ConfoundsCorrelationPlot`` from ``plotting``
 
+1.3.10 (September 16, 2023)
+===========================
+Bug-fix release in the 1.3.x series.
+
+Minor maintenance.
+
+* FIX: Compatibility with matplotlib 3.8.0 (#825)
+* FIX: Remove unused ANTs parameter that was removed in 2.4.1 (#772)
+* MNT: Create a requirements.txt to keep the LTS branch buildable (#798)
+
 1.3.9 (December 21, 2022)
 =========================
 Bug-fix release in the 1.3.x series.
