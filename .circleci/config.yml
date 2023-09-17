@@ -423,17 +423,17 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install build depends
-          command: python -m pip install "setuptools>=40.8.0" "pip>=19" "twine<2.0" docutils
+          name: Install pipx
+          command: python -m pip install pipx
       - run:
           name: Build and check
           command: |
-            python setup.py sdist
-            python -m twine check dist/*
+            pipx run build
+            pipx run twine check dist/*
       - run:
           name: Validate version
           command: |
-            THISVERSION=$( python get_version.py )
+            THISVERSION=$( python3 get_version.py )
             python -m pip install dist/*.tar.gz
             mkdir empty
             cd empty
@@ -447,27 +447,17 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install build depends
-          command: python -m pip install "setuptools>=40.8.0" "pip>=19" "twine<2.0" docutils
+          name: Install pipx
+          command: python -m pip install pipx
       - run:
           name: Build and check
           command: |
-            python setup.py check -r -s
-            python setup.py sdist
-            python -m twine check dist/*
-      - run:
-          name: Validate version
-          command: |
-            THISVERSION=$( python3 get_version.py )
-            python -m pip install dist/*.tar.gz
-            mkdir empty
-            cd empty
-            INSTALLED=$( python -c 'import niworkflows; print(niworkflows.__version__)' )
-            test "${CIRCLE_TAG:-$THISVERSION}" == "$INSTALLED"
+            pipx run build
+            pipx run twine check dist/*
       - run:
           name: Upload to PyPi
           command: |
-            python -m twine upload dist/*
+            pipx run twine upload dist/*
 
   deploy_docker:
     machine:
