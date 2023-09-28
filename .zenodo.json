@@ -104,7 +104,7 @@
   "license": "Apache-2.0",
   "related_identifiers": [
     {
-      "identifier": "http://fmriprep.org",
+      "identifier": "https://fmriprep.org",
       "relation": "isPartOf",
       "scheme": "url"
     },

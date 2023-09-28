@@ -1,5 +1,5 @@
-.. _Nipype: http://nipype.readthedocs.io/en/latest/
-.. _BIDS: http://bids.neuroimaging.io
+.. _Nipype: https://nipype.readthedocs.io/en/latest/
+.. _BIDS: https://bids.neuroimaging.io
 .. _`BIDS Derivatives`: https://docs.google.com/document/d/17ebopupQxuRwp7U7TFvS6BH03ALJOgGHufxK8ToAvyI
 .. _`BIDS Derivatives RC1`: https://docs.google.com/document/d/17ebopupQxuRwp7U7TFvS6BH03ALJOgGHufxK8ToAvyI
 .. _Installation: installation.html
