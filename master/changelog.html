@@ -286,6 +286,26 @@
         <article role="main">
           <section id="what-s-new">
 <h1>What’s new?<a class="headerlink" href="#what-s-new" title="Link to this heading">#</a></h1>
+<section id="october-12-2023">
+<h2>1.9.0 (October 12, 2023)<a class="headerlink" href="#october-12-2023" title="Link to this heading">#</a></h2>
+<p>New feature release in the 1.9.x series.</p>
+<p>This release should be mostly compatible with 1.8.x.
+The most significant addition is the <a class="reference internal" href="api/niworkflows.data.html#niworkflows.data.Loader" title="niworkflows.data.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">niworkflows.data.Loader</span></code></a>,
+which provides some wrapping around <a class="reference external" href="https://docs.python.org/3/library/importlib.resources.html#module-importlib.resources" title="(in Python v3.12)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">importlib.resources</span></code></a> to make
+accessing resources more convenient.</p>
+<ul class="simple">
+<li><p>FIX: Build config and CI (#826)</p></li>
+<li><p>FIX: Compatibility with matplotlib 3.8.0 (#825)</p></li>
+<li><p>FIX: Save boldrefs as float32 (#821)</p></li>
+<li><p>FIX: Replace deprecated Matplotlib functionality (#820)</p></li>
+<li><p>FIX: Test names of paths when calling path.iterdir() (#818)</p></li>
+<li><p>ENH: Add PET support to niworkflows (#823)</p></li>
+<li><p>ENH: Add data loader class, install at root and data modules (#816)</p></li>
+<li><p>MNT: Pyupgrade suggestions (#817)</p></li>
+<li><p>MNT: update vendored docs files (#813)</p></li>
+<li><p>CI: Bump actions/checkout from 3 to 4 (#824)</p></li>
+</ul>
+</section>
 <section id="june-29-2023">
 <h2>1.8.1 (June 29, 2023)<a class="headerlink" href="#june-29-2023" title="Link to this heading">#</a></h2>
 <p>Patch release in the 1.8.x series.</p>
@@ -1840,6 +1860,7 @@ used with the nonlinear-asym-09c template for the carpetplot</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">What’s new?</a><ul>
+<li><a class="reference internal" href="#october-12-2023">1.9.0 (October 12, 2023)</a></li>
 <li><a class="reference internal" href="#june-29-2023">1.8.1 (June 29, 2023)</a></li>
 <li><a class="reference internal" href="#june-01-2023">1.8.0 (June 01, 2023)</a></li>
 <li><a class="reference internal" href="#april-11-2023">1.7.9 (April 11, 2023)</a></li>
