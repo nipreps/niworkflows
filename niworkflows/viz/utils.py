@@ -586,9 +586,10 @@ def plot_melodic_components(
     else:
         mask_img = nb.load(report_mask)
 
-    mask_sl = []
-    for j in range(3):
-        mask_sl.append(transform_to_2d(mask_img.get_fdata(), j))
+    mask_sl = [
+        transform_to_2d(mask_img.get_fdata(), j)
+        for j in range(3)
+    ]
 
     timeseries = np.loadtxt(os.path.join(melodic_dir, "melodic_mix"))
     power = np.loadtxt(os.path.join(melodic_dir, "melodic_FTmix"))
