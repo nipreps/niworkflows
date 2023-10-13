@@ -23,7 +23,7 @@
 """ py.test configuration file """
 import os
 from pathlib import Path
-from datetime import datetime as dt
+import datetime as dt
 import pytest
 from templateflow.api import get as get_template
 from niworkflows.testing import test_data_env, data_env_canary
@@ -34,7 +34,7 @@ datadir = load_test_data()
 
 def _run_interface_mock(objekt, runtime):
     runtime.returncode = 0
-    runtime.endTime = dt.isoformat(dt.utcnow())
+    runtime.endTime = dt.datetime.isoformat(dt.datetime.now(dt.timezone.utc))
 
     objekt._out_report = os.path.abspath(objekt.inputs.out_report)
     objekt._post_run_hook(runtime)
