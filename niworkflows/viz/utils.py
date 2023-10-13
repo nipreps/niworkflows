@@ -212,10 +212,7 @@ def _3d_in_file(in_file):
 
     in_file = filemanip.filename_to_list(in_file)[0]
 
-    try:
-        in_file = nb.load(in_file)
-    except AttributeError:
-        in_file = in_file
+    in_file = nb.load(in_file)
 
     if len(in_file.shape) == 3:
         return in_file
