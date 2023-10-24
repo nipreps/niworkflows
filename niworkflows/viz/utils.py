@@ -212,10 +212,7 @@ def _3d_in_file(in_file):
 
     in_file = filemanip.filename_to_list(in_file)[0]
 
-    try:
-        in_file = nb.load(in_file)
-    except AttributeError:
-        in_file = in_file
+    in_file = nb.load(in_file)
 
     if len(in_file.shape) == 3:
         return in_file
@@ -589,9 +586,10 @@ def plot_melodic_components(
     else:
         mask_img = nb.load(report_mask)
 
-    mask_sl = []
-    for j in range(3):
-        mask_sl.append(transform_to_2d(mask_img.get_fdata(), j))
+    mask_sl = [
+        transform_to_2d(mask_img.get_fdata(), j)
+        for j in range(3)
+    ]
 
     timeseries = np.loadtxt(os.path.join(melodic_dir, "melodic_mix"))
     power = np.loadtxt(os.path.join(melodic_dir, "melodic_FTmix"))
