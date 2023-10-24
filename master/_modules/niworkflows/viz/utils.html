@@ -512,10 +512,7 @@
 
     <span class="n">in_file</span> <span class="o">=</span> <span class="n">filemanip</span><span class="o">.</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">in_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">in_file</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-        <span class="n">in_file</span> <span class="o">=</span> <span class="n">in_file</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_file</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">in_file</span>
@@ -903,9 +900,10 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">mask_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">report_mask</span><span class="p">)</span>
 
-    <span class="n">mask_sl</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-        <span class="n">mask_sl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">transform_to_2d</span><span class="p">(</span><span class="n">mask_img</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(),</span> <span class="n">j</span><span class="p">))</span>
+    <span class="n">mask_sl</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">transform_to_2d</span><span class="p">(</span><span class="n">mask_img</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(),</span> <span class="n">j</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="p">]</span>
 
     <span class="n">timeseries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">melodic_dir</span><span class="p">,</span> <span class="s2">&quot;melodic_mix&quot;</span><span class="p">))</span>
     <span class="n">power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">melodic_dir</span><span class="p">,</span> <span class="s2">&quot;melodic_FTmix&quot;</span><span class="p">))</span>
