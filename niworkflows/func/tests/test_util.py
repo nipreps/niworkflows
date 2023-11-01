@@ -160,8 +160,10 @@ def test_masking(input_fname, expected_fname):
         (epi_reference_wf, enhance_and_skullstrip_bold_wf, [
             ("outputnode.epi_ref_file", "inputnode.in_file")
         ]),
+        (epi_reference_wf, mask_diff_plot, [
+            ("outputnode.epi_ref_file", "in_file"),
+        ]),
         (enhance_and_skullstrip_bold_wf, mask_diff_plot, [
-            ("outputnode.bias_corrected_file", "in_file"),
             ("outputnode.mask_file", "in_rois"),
         ]),
     ])
@@ -181,4 +183,12 @@ def test_masking(input_fname, expected_fname):
         copy=True,
     )
 
+    post_merge = [node for node in res.nodes if node.name.endswith("post_merge")][
+        0
+    ]
+    copyfile(
+        post_merge.result.outputs.out,
+        str(mask_dir / Path(expected_fname).name.replace("_bold_mask.nii", "_boldref.nii")),
+        copy=True,
+    )
     assert overlap > 0.95, input_fname
