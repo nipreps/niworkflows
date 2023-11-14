@@ -263,7 +263,7 @@ def collect_data(
 
     # Special case: multi-echo BOLD, grouping echos
     if (
-        group_me
+        group_echos
         and "bold" in subj_data
         and any(["_echo-" in bold for bold in subj_data["bold"]])
     ):
