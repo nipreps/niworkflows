@@ -167,7 +167,7 @@ def collect_data(
     session_id=None,
     task=None,
     echo=None,
-    group_me=True,
+    group_echos=True,
     bids_validate=True,
     bids_filters=None,
     queries=None,
