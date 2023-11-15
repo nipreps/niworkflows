@@ -226,6 +226,7 @@ class _BIDSDataGrabberOutputSpec(TraitedSpec):
     t2w = OutputMultiObject(desc="output T2w images")
     flair = OutputMultiObject(desc="output FLAIR images")
     pet = OutputMultiObject(desc="output PET images")
+    dwi = OutputMultiObject(desc="output DWI images")
 
 
 class BIDSDataGrabber(SimpleInterface):

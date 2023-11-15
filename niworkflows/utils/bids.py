@@ -30,6 +30,19 @@ from bids.layout import Query
 from packaging.version import Version
 
 
+DEFAULT_BIDS_QUERIES = {
+    "bold": {"datatype": "func", "suffix": "bold", "part": ["mag", None]},
+    "dwi": {"suffix": "dwi"},
+    "flair": {"datatype": "anat", "suffix": "FLAIR", "part": ["mag", None]},
+    "fmap": {"datatype": "fmap"},
+    "pet": {"suffix": "pet"},
+    "roi": {"datatype": "anat", "suffix": "roi"},
+    "sbref": {"datatype": "func", "suffix": "sbref", "part": ["mag", None]},
+    "t1w": {"datatype": "anat", "suffix": "T1w", "part": ["mag", None]},
+    "t2w": {"datatype": "anat", "suffix": "T2w", "part": ["mag", None]},
+}
+
+
 class BIDSError(ValueError):
     def __init__(self, message, bids_root):
         indent = 10
@@ -151,11 +164,13 @@ def collect_participants(
 def collect_data(
     bids_dir,
     participant_label,
-    session_id=Query.OPTIONAL,
+    session_id=None,
     task=None,
     echo=None,
+    group_echos=True,
     bids_validate=True,
     bids_filters=None,
+    queries=None,
 ):
     """
     Uses pybids to retrieve the input data for a given participant
@@ -223,19 +238,10 @@ def collect_data(
         'return_type': 'file',
         'subject': participant_label,
         'extension': ['.nii', '.nii.gz'],
-        'session': session_id,
+        'session': session_id or Query.OPTIONAL,
     }
 
-    queries = {
-        "fmap": {"datatype": "fmap"},
-        "bold": {"datatype": "func", "suffix": "bold", "part": ["mag", None]},
-        "sbref": {"datatype": "func", "suffix": "sbref", "part": ["mag", None]},
-        "flair": {"datatype": "anat", "suffix": "FLAIR", "part": ["mag", None]},
-        "t2w": {"datatype": "anat", "suffix": "T2w", "part": ["mag", None]},
-        "t1w": {"datatype": "anat", "suffix": "T1w", "part": ["mag", None]},
-        "roi": {"datatype": "anat", "suffix": "roi"},
-        "pet": {"suffix": "pet"}
-    }
+    queries = queries or DEFAULT_BIDS_QUERIES
     bids_filters = bids_filters or {}
     for acq, entities in bids_filters.items():
         queries[acq].update(entities)
@@ -256,7 +262,11 @@ def collect_data(
     }
 
     # Special case: multi-echo BOLD, grouping echos
-    if any(["_echo-" in bold for bold in subj_data["bold"]]):
+    if (
+        group_echos
+        and "bold" in subj_data
+        and any(["_echo-" in bold for bold in subj_data["bold"]])
+    ):
         subj_data["bold"] = group_multiecho(subj_data["bold"])
 
     return subj_data, layout
