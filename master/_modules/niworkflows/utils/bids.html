@@ -315,6 +315,19 @@
 <span class="kn">from</span> <span class="nn">packaging.version</span> <span class="kn">import</span> <span class="n">Version</span>
 
 
+<span class="n">DEFAULT_BIDS_QUERIES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;bold&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;func&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
+    <span class="s2">&quot;dwi&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;dwi&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;flair&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;anat&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;FLAIR&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
+    <span class="s2">&quot;fmap&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;fmap&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;pet&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;pet&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;roi&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;anat&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;roi&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;sbref&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;func&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;sbref&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
+    <span class="s2">&quot;t1w&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;anat&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;T1w&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
+    <span class="s2">&quot;t2w&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;anat&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;T2w&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
+<span class="p">}</span>
+
+
 <div class="viewcode-block" id="BIDSError">
 <a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.BIDSError">[docs]</a>
 <span class="k">class</span> <span class="nc">BIDSError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
@@ -447,11 +460,13 @@
 <span class="k">def</span> <span class="nf">collect_data</span><span class="p">(</span>
     <span class="n">bids_dir</span><span class="p">,</span>
     <span class="n">participant_label</span><span class="p">,</span>
-    <span class="n">session_id</span><span class="o">=</span><span class="n">Query</span><span class="o">.</span><span class="n">OPTIONAL</span><span class="p">,</span>
+    <span class="n">session_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">task</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">echo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">group_echos</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">bids_validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">bids_filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">queries</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Uses pybids to retrieve the input data for a given participant</span>
@@ -519,19 +534,10 @@
         <span class="s1">&#39;return_type&#39;</span><span class="p">:</span> <span class="s1">&#39;file&#39;</span><span class="p">,</span>
         <span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="n">participant_label</span><span class="p">,</span>
         <span class="s1">&#39;extension&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;.nii&#39;</span><span class="p">,</span> <span class="s1">&#39;.nii.gz&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;session&#39;</span><span class="p">:</span> <span class="n">session_id</span><span class="p">,</span>
+        <span class="s1">&#39;session&#39;</span><span class="p">:</span> <span class="n">session_id</span> <span class="ow">or</span> <span class="n">Query</span><span class="o">.</span><span class="n">OPTIONAL</span><span class="p">,</span>
     <span class="p">}</span>
 
-    <span class="n">queries</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;fmap&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;fmap&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;bold&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;func&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
-        <span class="s2">&quot;sbref&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;func&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;sbref&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
-        <span class="s2">&quot;flair&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;anat&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;FLAIR&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
-        <span class="s2">&quot;t2w&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;anat&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;T2w&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
-        <span class="s2">&quot;t1w&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;anat&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;T1w&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
-        <span class="s2">&quot;roi&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;anat&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;roi&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;pet&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;pet&quot;</span><span class="p">}</span>
-    <span class="p">}</span>
+    <span class="n">queries</span> <span class="o">=</span> <span class="n">queries</span> <span class="ow">or</span> <span class="n">DEFAULT_BIDS_QUERIES</span>
     <span class="n">bids_filters</span> <span class="o">=</span> <span class="n">bids_filters</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">acq</span><span class="p">,</span> <span class="n">entities</span> <span class="ow">in</span> <span class="n">bids_filters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">queries</span><span class="p">[</span><span class="n">acq</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">entities</span><span class="p">)</span>
@@ -552,7 +558,11 @@
     <span class="p">}</span>
 
     <span class="c1"># Special case: multi-echo BOLD, grouping echos</span>
-    <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="s2">&quot;_echo-&quot;</span> <span class="ow">in</span> <span class="n">bold</span> <span class="k">for</span> <span class="n">bold</span> <span class="ow">in</span> <span class="n">subj_data</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">]]):</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">group_echos</span>
+        <span class="ow">and</span> <span class="s2">&quot;bold&quot;</span> <span class="ow">in</span> <span class="n">subj_data</span>
+        <span class="ow">and</span> <span class="nb">any</span><span class="p">([</span><span class="s2">&quot;_echo-&quot;</span> <span class="ow">in</span> <span class="n">bold</span> <span class="k">for</span> <span class="n">bold</span> <span class="ow">in</span> <span class="n">subj_data</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">]])</span>
+    <span class="p">):</span>
         <span class="n">subj_data</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_multiecho</span><span class="p">(</span><span class="n">subj_data</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">subj_data</span><span class="p">,</span> <span class="n">layout</span></div>
