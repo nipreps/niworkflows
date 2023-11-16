@@ -11,12 +11,7 @@ from collections.abc import Callable, Mapping
 import copy
 import sys
 
-
-# TODO: Remove try-except when support for Python 3.7 is dropped
-try:
-    from functools import cached_property
-except ImportError:  # cached_property added in Python 3.8
-    cached_property = property
+from functools import cached_property
 
 
 def strip_blank_lines(l):
@@ -408,7 +403,7 @@ class NumpyDocString(Mapping):
             msg = "Docstring contains a Receives section but not Yields."
             raise ValueError(msg)
 
-        for (section, content) in sections:
+        for section, content in sections:
             if not section.startswith(".."):
                 section = (s.capitalize() for s in section.split(" "))
                 section = " ".join(section)
@@ -631,7 +626,6 @@ class ObjDoc(NumpyDocString):
 
 
 class ClassDoc(NumpyDocString):
-
     extra_public_methods = ["__call__"]
 
     def __init__(self, cls, doc=None, modulename="", func_doc=FunctionDoc, config=None):
@@ -728,7 +722,15 @@ class ClassDoc(NumpyDocString):
         return True
 
 
-def get_doc_object(obj, what=None, doc=None, config=None):
+def get_doc_object(
+    obj,
+    what=None,
+    doc=None,
+    config=None,
+    class_doc=ClassDoc,
+    func_doc=FunctionDoc,
+    obj_doc=ObjDoc,
+):
     if what is None:
         if inspect.isclass(obj):
             what = "class"
@@ -742,10 +744,10 @@ def get_doc_object(obj, what=None, doc=None, config=None):
         config = {}
 
     if what == "class":
-        return ClassDoc(obj, func_doc=FunctionDoc, doc=doc, config=config)
+        return class_doc(obj, func_doc=func_doc, doc=doc, config=config)
     elif what in ("function", "method"):
-        return FunctionDoc(obj, doc=doc, config=config)
+        return func_doc(obj, doc=doc, config=config)
     else:
         if doc is None:
             doc = pydoc.getdoc(obj)
-        return ObjDoc(obj, doc, config=config)
+        return obj_doc(obj, doc, config=config)
