@@ -310,17 +310,22 @@
 <span class="kn">from</span> <span class="nn">mimetypes</span> <span class="kn">import</span> <span class="n">guess_type</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
 
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">import</span> <span class="nn">nitransforms</span> <span class="k">as</span> <span class="nn">nt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
-<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">traits</span><span class="p">,</span>
-    <span class="n">TraitedSpec</span><span class="p">,</span>
     <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
     <span class="n">File</span><span class="p">,</span>
     <span class="n">InputMultiObject</span><span class="p">,</span>
     <span class="n">OutputMultiObject</span><span class="p">,</span>
     <span class="n">SimpleInterface</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
+    <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
+
 <span class="kn">from</span> <span class="nn">.fixes</span> <span class="kn">import</span> <span class="n">_FixTraitApplyTransformsInputSpec</span>
 
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;nipype.interface&quot;</span><span class="p">)</span>
@@ -330,13 +335,9 @@
     <span class="n">in_files</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
         <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;list of MAT files from MCFLIRT&quot;</span>
     <span class="p">)</span>
-    <span class="n">in_reference</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input image for spatial reference&quot;</span>
-    <span class="p">)</span>
+    <span class="n">in_reference</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input image for spatial reference&quot;</span><span class="p">)</span>
     <span class="n">in_source</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input image for spatial source&quot;</span><span class="p">)</span>
-    <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span>
-        <span class="mi">1</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nohash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;number of parallel processes&quot;</span>
-    <span class="p">)</span>
+    <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="n">nohash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;number of parallel processes&quot;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_MCFLIRT2ITKOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
@@ -352,53 +353,22 @@
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_MCFLIRT2ITKOutputSpec</span>
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-        <span class="n">num_threads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span>
-        <span class="k">if</span> <span class="n">num_threads</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">num_threads</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span><span class="p">):</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Multithreading is deprecated. Remove the num_threads input.&quot;</span><span class="p">)</span>
 
-        <span class="k">with</span> <span class="n">TemporaryDirectory</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;tmp-&quot;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp_folder</span><span class="p">:</span>
-            <span class="c1"># Inputs are ready to run in parallel</span>
-            <span class="k">if</span> <span class="n">num_threads</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">num_threads</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_source</span><span class="p">)</span>
+        <span class="n">reference</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_reference</span><span class="p">)</span>
+        <span class="n">affines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">nt</span><span class="o">.</span><span class="n">linear</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;fsl&#39;</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="n">reference</span><span class="p">,</span> <span class="n">moving</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">mat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span>
+        <span class="p">]</span>
 
-                <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">num_threads</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
-                    <span class="n">itk_outs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-                        <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
-                            <span class="n">_mat2itk</span><span class="p">,</span>
-                            <span class="p">[</span>
-                                <span class="p">(</span>
-                                    <span class="n">in_mat</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_reference</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_source</span><span class="p">,</span>
-                                    <span class="n">i</span><span class="p">,</span>
-                                    <span class="n">tmp_folder</span><span class="p">,</span>
-                                <span class="p">)</span>
-                                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">in_mat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">)</span>
-                            <span class="p">],</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">itk_outs</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">_mat2itk</span><span class="p">(</span>
-                        <span class="p">(</span>
-                            <span class="n">in_mat</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_reference</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_source</span><span class="p">,</span>
-                            <span class="n">i</span><span class="p">,</span>
-                            <span class="n">tmp_folder</span><span class="p">,</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span>
-                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">in_mat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">)</span>
-                <span class="p">]</span>
-
-        <span class="c1"># Compose the collated ITK transform file and write</span>
-        <span class="n">tfms</span> <span class="o">=</span> <span class="s2">&quot;#Insight Transform File V1.0</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">el</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">itk_outs</span><span class="p">)]</span>
+        <span class="n">affarray</span> <span class="o">=</span> <span class="n">nt</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">itk</span><span class="o">.</span><span class="n">ITKLinearTransformArray</span><span class="o">.</span><span class="n">from_ras</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">matrix</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">affines</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="s2">&quot;mat2itk.txt&quot;</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">],</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tfms</span><span class="p">)</span>
+        <span class="n">affarray</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
 
@@ -495,30 +465,6 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">-------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">el</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">out_files</span><span class="p">]),</span> <span class="n">file</span><span class="o">=</span><span class="n">cmdfile</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
-
-
-<span class="k">def</span> <span class="nf">_mat2itk</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">nipype.interfaces.c3</span> <span class="kn">import</span> <span class="n">C3dAffineTool</span>
-    <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
-
-    <span class="n">in_file</span><span class="p">,</span> <span class="n">in_ref</span><span class="p">,</span> <span class="n">in_src</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">newpath</span> <span class="o">=</span> <span class="n">args</span>
-    <span class="c1"># Generate a temporal file name</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_itk-</span><span class="si">%05d</span><span class="s2">.txt&quot;</span> <span class="o">%</span> <span class="n">index</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">)</span>
-
-    <span class="c1"># Run c3d_affine_tool</span>
-    <span class="n">C3dAffineTool</span><span class="p">(</span>
-        <span class="n">transform_file</span><span class="o">=</span><span class="n">in_file</span><span class="p">,</span>
-        <span class="n">reference_file</span><span class="o">=</span><span class="n">in_ref</span><span class="p">,</span>
-        <span class="n">source_file</span><span class="o">=</span><span class="n">in_src</span><span class="p">,</span>
-        <span class="n">fsl2ras</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">itk_transform</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span>
-        <span class="n">resource_monitor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-    <span class="n">transform</span> <span class="o">=</span> <span class="s2">&quot;#Transform </span><span class="si">%d</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">index</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">itkfh</span><span class="p">:</span>
-        <span class="n">transform</span> <span class="o">+=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">itkfh</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[</span><span class="mi">2</span><span class="p">:])</span>
-
-    <span class="k">return</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_applytfms</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
