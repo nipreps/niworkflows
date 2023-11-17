@@ -25,17 +25,22 @@ import os
 from mimetypes import guess_type
 from tempfile import TemporaryDirectory
 
+import nibabel as nb
+import nitransforms as nt
+import numpy as np
 from nipype import logging
-from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    traits,
-    TraitedSpec,
     BaseInterfaceInputSpec,
     File,
     InputMultiObject,
     OutputMultiObject,
     SimpleInterface,
+    TraitedSpec,
+    isdefined,
+    traits,
 )
+from nipype.utils.filemanip import fname_presuffix
+
 from .fixes import _FixTraitApplyTransformsInputSpec
 
 LOGGER = logging.getLogger("nipype.interface")
@@ -45,13 +50,9 @@ class _MCFLIRT2ITKInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiObject(
         File(exists=True), mandatory=True, desc="list of MAT files from MCFLIRT"
     )
-    in_reference = File(
-        exists=True, mandatory=True, desc="input image for spatial reference"
-    )
+    in_reference = File(exists=True, mandatory=True, desc="input image for spatial reference")
     in_source = File(exists=True, mandatory=True, desc="input image for spatial source")
-    num_threads = traits.Int(
-        1, usedefault=True, nohash=True, desc="number of parallel processes"
-    )
+    num_threads = traits.Int(nohash=True, desc="number of parallel processes")
 
 
 class _MCFLIRT2ITKOutputSpec(TraitedSpec):
@@ -65,53 +66,22 @@ class MCFLIRT2ITK(SimpleInterface):
     output_spec = _MCFLIRT2ITKOutputSpec
 
     def _run_interface(self, runtime):
-        num_threads = self.inputs.num_threads
-        if num_threads < 1:
-            num_threads = None
+        if isdefined(self.inputs.num_threads):
+            LOGGER.warning("Multithreading is deprecated. Remove the num_threads input.")
 
-        with TemporaryDirectory(prefix="tmp-", dir=runtime.cwd) as tmp_folder:
-            # Inputs are ready to run in parallel
-            if num_threads is None or num_threads > 1:
-                from concurrent.futures import ThreadPoolExecutor
+        source = nb.load(self.inputs.in_source)
+        reference = nb.load(self.inputs.in_reference)
+        affines = [
+            nt.linear.load(mat, fmt='fsl', reference=reference, moving=source)
+            for mat in self.inputs.in_files
+        ]
 
-                with ThreadPoolExecutor(max_workers=num_threads) as pool:
-                    itk_outs = list(
-                        pool.map(
-                            _mat2itk,
-                            [
-                                (
-                                    in_mat,
-                                    self.inputs.in_reference,
-                                    self.inputs.in_source,
-                                    i,
-                                    tmp_folder,
-                                )
-                                for i, in_mat in enumerate(self.inputs.in_files)
-                            ],
-                        )
-                    )
-            else:
-                itk_outs = [
-                    _mat2itk(
-                        (
-                            in_mat,
-                            self.inputs.in_reference,
-                            self.inputs.in_source,
-                            i,
-                            tmp_folder,
-                        )
-                    )
-                    for i, in_mat in enumerate(self.inputs.in_files)
-                ]
-
-        # Compose the collated ITK transform file and write
-        tfms = "#Insight Transform File V1.0\n" + "".join(
-            [el[1] for el in sorted(itk_outs)]
+        affarray = nt.io.itk.ITKLinearTransformArray.from_ras(
+            np.stack([a.matrix for a in affines], axis=0),
         )
 
         self._results["out_file"] = os.path.join(runtime.cwd, "mat2itk.txt")
-        with open(self._results["out_file"], "w") as f:
-            f.write(tfms)
+        affarray.to_filename(self._results["out_file"])
 
         return runtime
 
@@ -204,30 +174,6 @@ class MultiApplyTransforms(SimpleInterface):
             with open(self._results["log_cmdline"], "w") as cmdfile:
                 print("\n-------\n".join([el[1] for el in out_files]), file=cmdfile)
         return runtime
-
-
-def _mat2itk(args):
-    from nipype.interfaces.c3 import C3dAffineTool
-    from nipype.utils.filemanip import fname_presuffix
-
-    in_file, in_ref, in_src, index, newpath = args
-    # Generate a temporal file name
-    out_file = fname_presuffix(in_file, suffix="_itk-%05d.txt" % index, newpath=newpath)
-
-    # Run c3d_affine_tool
-    C3dAffineTool(
-        transform_file=in_file,
-        reference_file=in_ref,
-        source_file=in_src,
-        fsl2ras=True,
-        itk_transform=out_file,
-        resource_monitor=False,
-    ).run()
-    transform = "#Transform %d\n" % index
-    with open(out_file) as itkfh:
-        transform += "".join(itkfh.readlines()[2:])
-
-    return (index, transform)
 
 
 def _applytfms(args):
