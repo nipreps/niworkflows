@@ -20,6 +20,7 @@
 #
 #     https://www.nipreps.org/community/licensing/
 #
+import re
 from pathlib import Path
 
 import numpy as np
@@ -80,21 +81,23 @@ def test_MCFLIRT2ITK(tmp_path):
     assert out_file.exists()
     lines = out_file.read_text().splitlines()
 
-    assert lines[:3] == [
+    assert lines[:2] == [
         "#Insight Transform File V1.0",
         "#Transform 0",
-        "Transform: MatrixOffsetTransformBase_double_3_3",
     ]
+    assert re.match(
+        r"Transform: (MatrixOffsetTransformBase|AffineTransform)_(float|double)_3_3",
+        lines[2],
+    )
     assert lines[3].startswith("Parameters: ")
-    assert lines[4:7] == [
-        "FixedParameters: 0 0 0",
-        "#Transform 1",
-        "Transform: MatrixOffsetTransformBase_double_3_3",
-    ]
-    assert lines[7].startswith("Parameters: ")
+    assert lines[4] == "FixedParameters: 0 0 0"
+    offset = 1 if lines[5] == "" else 0
+    assert lines[5 + offset] == "#Transform 1"
+    assert lines[6 + offset] == lines[2]
+    assert lines[7 + offset].startswith("Parameters: ")
 
     params0 = np.array([float(p) for p in lines[3].split(" ")[1:]])
-    params1 = np.array([float(p) for p in lines[7].split(" ")[1:]])
+    params1 = np.array([float(p) for p in lines[7 + offset].split(" ")[1:]])
     # Empirically determined
     assert np.allclose(
         params0,
