@@ -8,3 +8,4 @@ pytest
 sphinx
 sphinxcontrib-apidoc
 templateflow
+nitransforms
