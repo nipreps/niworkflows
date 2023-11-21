@@ -201,13 +201,13 @@ class KeySelect(BaseInterface):
         if name in self._fields:
             if isinstance(new, str) or len(new) < 1:
                 raise ValueError(
-                    'Trying to set an invalid value (%s) for input "%s"' % (new, name)
+                    f'Trying to set an invalid value ({new}) for input "{name}"'
                 )
 
             if len(new) != len(self.inputs.keys):
                 raise ValueError(
-                    'Length of value (%s) for input field "%s" does not match '
-                    "the length of the indexing list." % (new, name)
+                    f'Length of value ({new}) for input field "{name}" '
+                    "does not match the length of the indexing list."
                 )
 
     def _run_interface(self, runtime):
