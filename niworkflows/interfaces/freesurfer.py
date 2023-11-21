@@ -552,7 +552,7 @@ def medial_wall_to_nan(in_file, subjects_dir, den=None, newpath=None):
     if target_subject.startswith("fsaverage"):
         cortex = nb.freesurfer.read_label(
             os.path.join(
-                subjects_dir, target_subject, "label", "{}.cortex.label".format(fn[:2])
+                subjects_dir, target_subject, "label", f"{fn[:2]}.cortex.label"
             )
         )
         medial = np.delete(np.arange(len(func.darrays[0].data)), cortex)
@@ -578,7 +578,7 @@ def mri_info(fname, argument):
     import subprocess as sp
     import numpy as np
 
-    cmd_info = "mri_info --%s %s" % (argument, fname)
+    cmd_info = f"mri_info --{argument} {fname}"
     proc = sp.Popen(cmd_info, stdout=sp.PIPE, shell=True)
     data = bytearray(proc.stdout.read())
     mstring = np.fromstring(data.decode("utf-8"), sep="\n")

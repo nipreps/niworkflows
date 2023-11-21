@@ -35,8 +35,8 @@ def test_copy_gzip(tmpdir):
     check_call(["gzip", "-N", str(filepath)])
     assert not filepath.exists()
 
-    gzpath1 = "%s/%s" % (tmpdir, "name1.txt.gz")
-    gzpath2 = "%s/%s" % (tmpdir, "name2.txt.gz")
+    gzpath1 = f"{tmpdir}/name1.txt.gz"
+    gzpath2 = f"{tmpdir}/name2.txt.gz"
     _copy_any(gzpath1, gzpath2)
     assert Path(gzpath2).exists()
     check_call(["gunzip", "-N", "-f", gzpath2])
