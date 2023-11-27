@@ -106,7 +106,7 @@ def init_epi_reference_wf(
     n_dummy_scans : :obj:`list` of :obj:`int`
         Number of nonsteady states at the beginning of each run (only BOLD with
         ``auto_bold_nss=True``)
-    validate_report : :obj:`str`
+    validation_report : :obj:`str`
         HTML reportlet(s) indicating whether the input files had a valid affine
 
     See Also
