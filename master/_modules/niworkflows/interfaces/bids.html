@@ -515,6 +515,7 @@
     <span class="n">flair</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output FLAIR images&quot;</span><span class="p">)</span>
     <span class="n">pet</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output PET images&quot;</span><span class="p">)</span>
     <span class="n">dwi</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output DWI images&quot;</span><span class="p">)</span>
+    <span class="n">asl</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output ASL images&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="BIDSDataGrabber">
@@ -568,7 +569,7 @@
                 <span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">imtype</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="s2">&quot;t2w&quot;</span><span class="p">,</span> <span class="s2">&quot;flair&quot;</span><span class="p">,</span> <span class="s2">&quot;fmap&quot;</span><span class="p">,</span> <span class="s2">&quot;sbref&quot;</span><span class="p">,</span> <span class="s2">&quot;roi&quot;</span><span class="p">,</span> <span class="s2">&quot;pet&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">imtype</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="s2">&quot;t2w&quot;</span><span class="p">,</span> <span class="s2">&quot;flair&quot;</span><span class="p">,</span> <span class="s2">&quot;fmap&quot;</span><span class="p">,</span> <span class="s2">&quot;sbref&quot;</span><span class="p">,</span> <span class="s2">&quot;roi&quot;</span><span class="p">,</span> <span class="s2">&quot;pet&quot;</span><span class="p">,</span> <span class="s2">&quot;asl&quot;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">bids_dict</span><span class="p">[</span><span class="n">imtype</span><span class="p">]:</span>
                 <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                     <span class="s1">&#39;No &quot;</span><span class="si">%s</span><span class="s1">&quot; images found for sub-</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">imtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span>
