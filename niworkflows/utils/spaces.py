@@ -38,6 +38,7 @@ NONSTANDARD_REFERENCES = [
     "session",
     "individual",
     "dwi",
+    "asl",
 ]
 """List of supported nonstandard reference spaces."""
 
