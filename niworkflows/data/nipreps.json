@@ -83,7 +83,7 @@
     },
     {
       "name": "fmap",
-      "pattern": "(phasediff|magnitude[1-2]|phase[1-2]|fieldmap|epi|m0scan)\\.nii"
+      "pattern": "(phasediff|magnitude[1-2]|phase[1-2]|fieldmap|epi)\\.nii"
     },
     {
       "name": "datatype",
