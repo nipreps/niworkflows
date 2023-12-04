@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.utils.misc module" href="niworkflows.utils.misc.html" /><link rel="prev" title="niworkflows.utils.debug module" href="niworkflows.utils.debug.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.utils.images module" href="niworkflows.utils.images.html" /><link rel="prev" title="niworkflows.utils.connections module" href="niworkflows.utils.connections.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>niworkflows.utils.images module - niworkflows 0+unknown documentation</title>
+        <title>niworkflows.utils.debug module - niworkflows 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -227,8 +227,8 @@
 <li class="toctree-l2 current has-children"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of niworkflows.utils package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.bids.html">niworkflows.utils.bids module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.connections.html">niworkflows.utils.connections module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.debug.html">niworkflows.utils.debug module</a></li>
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">niworkflows.utils.images module</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">niworkflows.utils.debug module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.images.html">niworkflows.utils.images module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.misc.html">niworkflows.utils.misc module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.spaces.html">niworkflows.utils.spaces module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.testing.html">niworkflows.utils.testing module</a></li>
@@ -285,97 +285,20 @@
           </label>
         </div>
         <article role="main">
-          <section id="module-niworkflows.utils.images">
-<span id="niworkflows-utils-images-module"></span><h1>niworkflows.utils.images module<a class="headerlink" href="#module-niworkflows.utils.images" title="Link to this heading">#</a></h1>
-<p>Utilities to manipulate images.</p>
+          <section id="module-niworkflows.utils.debug">
+<span id="niworkflows-utils-debug-module"></span><h1>niworkflows.utils.debug module<a class="headerlink" href="#module-niworkflows.utils.debug" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="niworkflows.utils.images.demean">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></span><span class="sig-name descname"><span class="pre">demean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#demean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.demean" title="Link to this definition">#</a></dt>
-<dd><p>Demean <code class="docutils literal notranslate"><span class="pre">in_file</span></code> within the mask defined by <code class="docutils literal notranslate"><span class="pre">in_mask</span></code>.</p>
+<dt class="sig sig-object py" id="niworkflows.utils.debug.is_interactive">
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.debug.</span></span><span class="sig-name descname"><span class="pre">is_interactive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/debug.html#is_interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.debug.is_interactive" title="Link to this definition">#</a></dt>
+<dd><p>Return True if all in/outs are tty</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="niworkflows.utils.images.dseg_label">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></span><span class="sig-name descname"><span class="pre">dseg_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_seg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#dseg_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.dseg_label" title="Link to this definition">#</a></dt>
-<dd><p>Extract a particular label from a discrete segmentation.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="niworkflows.utils.images.nii_ones_like">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></span><span class="sig-name descname"><span class="pre">nii_ones_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#nii_ones_like"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.nii_ones_like" title="Link to this definition">#</a></dt>
-<dd><p>Create a NIfTI file filled with <code class="docutils literal notranslate"><span class="pre">value</span></code>, matching properties of <code class="docutils literal notranslate"><span class="pre">in_file</span></code>.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="niworkflows.utils.images.overwrite_header">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></span><span class="sig-name descname"><span class="pre">overwrite_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#overwrite_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.overwrite_header" title="Link to this definition">#</a></dt>
-<dd><p>Rewrite file with only changes to the header</p>
-<p>The data block is copied without scaling, avoiding copies in memory.
-The header is checked against the target file to ensure that no changes
-to the size, offset or interpretation of the data block will result.</p>
-<p>This function will not respect calls to:</p>
-<ul class="simple">
-<li><p>img.header.set_slope_inter()</p></li>
-<li><p>img.header.set_data_shape()</p></li>
-<li><p>img.header.set_data_offset()</p></li>
-</ul>
-<p>These will all be determined by img.dataobj, which must be an
-ArrayProxy.</p>
-<p>If the qform or sform are updated, the
-<code class="docutils literal notranslate"><span class="pre">img.header.get_best_affine()</span></code> method must match <code class="docutils literal notranslate"><span class="pre">img.affine</span></code>,
-or your changes may be lost.</p>
-<p>The intended use of this method is for making small header fixups
-that do not change the data or affine, e.g.:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">nifti_fname</span><span class="p">,</span> <span class="n">mmap</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">img</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">set_qform</span><span class="p">(</span><span class="o">*</span><span class="n">img</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_sform</span><span class="p">(</span><span class="n">coded</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">img</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;descrip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;Modified with some extremely finicky tooling&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">overwrite_header</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">nifti_fname</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>This is a destructive operation, and the image object should be considered unusable
-after calling this function.</p>
-<p>This should only be called with an image loaded with <code class="docutils literal notranslate"><span class="pre">mmap=False</span></code>,
-or else you risk getting a <code class="docutils literal notranslate"><span class="pre">BusError</span></code>.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="niworkflows.utils.images.resample_by_spacing">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></span><span class="sig-name descname"><span class="pre">resample_by_spacing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zooms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#resample_by_spacing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.resample_by_spacing" title="Link to this definition">#</a></dt>
-<dd><p>Regrid the input image to match the new zooms.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="niworkflows.utils.images.rotate_affine">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></span><span class="sig-name descname"><span class="pre">rotate_affine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#rotate_affine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.rotate_affine" title="Link to this definition">#</a></dt>
-<dd><p>Rewrite the affine of a spatial image.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="niworkflows.utils.images.rotation2canonical">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></span><span class="sig-name descname"><span class="pre">rotation2canonical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#rotation2canonical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.rotation2canonical" title="Link to this definition">#</a></dt>
-<dd><p>Calculate the rotation w.r.t. cardinal axes of input image.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="niworkflows.utils.images.set_consumables">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></span><span class="sig-name descname"><span class="pre">set_consumables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataobj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#set_consumables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.set_consumables" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="niworkflows.utils.images.unsafe_write_nifti_header_and_data">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></span><span class="sig-name descname"><span class="pre">unsafe_write_nifti_header_and_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#unsafe_write_nifti_header_and_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.unsafe_write_nifti_header_and_data" title="Link to this definition">#</a></dt>
-<dd><p>Write header and data without any consistency checks or data munging</p>
-<p>This is almost always a bad idea, and you should not use this function
-without a battery of tests for your specific use case.</p>
-<p>If you’re not using this for NIfTI files specifically, you’re playing
-with Fortran-ordered fire.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="niworkflows.utils.images.update_header_fields">
-<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.images.</span></span><span class="sig-name descname"><span class="pre">update_header_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/images.html#update_header_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.images.update_header_fields" title="Link to this definition">#</a></dt>
-<dd><p>Adjust header fields</p>
+<dt class="sig sig-object py" id="niworkflows.utils.debug.setup_exceptionhook">
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.debug.</span></span><span class="sig-name descname"><span class="pre">setup_exceptionhook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipython</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/utils/debug.html#setup_exceptionhook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.utils.debug.setup_exceptionhook" title="Link to this definition">#</a></dt>
+<dd><p>Overloads default sys.excepthook with our exceptionhook handler.
+If interactive, our exceptionhook handler will invoke
+pdb.post_mortem; if not interactive, then invokes default handler.</p>
 </dd></dl>
 
 </section>
@@ -385,23 +308,23 @@ with Fortran-ordered fire.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="niworkflows.utils.misc.html">
+          <a class="next-page" href="niworkflows.utils.images.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">niworkflows.utils.misc module</div>
+                <div class="title">niworkflows.utils.images module</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="niworkflows.utils.debug.html">
+          <a class="prev-page" href="niworkflows.utils.connections.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">niworkflows.utils.debug module</div>
+                <div class="title">niworkflows.utils.connections module</div>
                 
               </div>
             </a>
@@ -435,17 +358,9 @@ with Fortran-ordered fire.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">niworkflows.utils.images module</a><ul>
-<li><a class="reference internal" href="#niworkflows.utils.images.demean"><code class="docutils literal notranslate"><span class="pre">demean()</span></code></a></li>
-<li><a class="reference internal" href="#niworkflows.utils.images.dseg_label"><code class="docutils literal notranslate"><span class="pre">dseg_label()</span></code></a></li>
-<li><a class="reference internal" href="#niworkflows.utils.images.nii_ones_like"><code class="docutils literal notranslate"><span class="pre">nii_ones_like()</span></code></a></li>
-<li><a class="reference internal" href="#niworkflows.utils.images.overwrite_header"><code class="docutils literal notranslate"><span class="pre">overwrite_header()</span></code></a></li>
-<li><a class="reference internal" href="#niworkflows.utils.images.resample_by_spacing"><code class="docutils literal notranslate"><span class="pre">resample_by_spacing()</span></code></a></li>
-<li><a class="reference internal" href="#niworkflows.utils.images.rotate_affine"><code class="docutils literal notranslate"><span class="pre">rotate_affine()</span></code></a></li>
-<li><a class="reference internal" href="#niworkflows.utils.images.rotation2canonical"><code class="docutils literal notranslate"><span class="pre">rotation2canonical()</span></code></a></li>
-<li><a class="reference internal" href="#niworkflows.utils.images.set_consumables"><code class="docutils literal notranslate"><span class="pre">set_consumables()</span></code></a></li>
-<li><a class="reference internal" href="#niworkflows.utils.images.unsafe_write_nifti_header_and_data"><code class="docutils literal notranslate"><span class="pre">unsafe_write_nifti_header_and_data()</span></code></a></li>
-<li><a class="reference internal" href="#niworkflows.utils.images.update_header_fields"><code class="docutils literal notranslate"><span class="pre">update_header_fields()</span></code></a></li>
+<li><a class="reference internal" href="#">niworkflows.utils.debug module</a><ul>
+<li><a class="reference internal" href="#niworkflows.utils.debug.is_interactive"><code class="docutils literal notranslate"><span class="pre">is_interactive()</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.utils.debug.setup_exceptionhook"><code class="docutils literal notranslate"><span class="pre">setup_exceptionhook()</span></code></a></li>
 </ul>
 </li>
 </ul>

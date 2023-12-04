@@ -14,6 +14,7 @@ Submodules
 
    niworkflows.utils.bids
    niworkflows.utils.connections
+   niworkflows.utils.debug
    niworkflows.utils.images
    niworkflows.utils.misc
    niworkflows.utils.spaces
