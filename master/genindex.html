@@ -179,6 +179,7 @@
 <li class="toctree-l2"><a class="reference internal" href="api/niworkflows.data.html">niworkflows.data package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/niworkflows.dwi.html">niworkflows.dwi package</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="api/niworkflows.engine.html">niworkflows.engine package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of niworkflows.engine package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/niworkflows.engine.plugin.html">niworkflows.engine.plugin module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/niworkflows.engine.workflows.html">niworkflows.engine.workflows module</a></li>
 </ul>
 </li>
@@ -453,15 +454,17 @@
 </li>
         <li><a href="api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.DerivativesDataSink">DerivativesDataSink (class in niworkflows.interfaces.bids)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.detect_inputs">detect_inputs() (in module niworkflows.interfaces.freesurfer)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/niworkflows.interfaces.utility.html#niworkflows.interfaces.utility.DictMerge">DictMerge (class in niworkflows.interfaces.utility)</a>
 </li>
         <li><a href="api/niworkflows.utils.spaces.html#niworkflows.utils.spaces.Reference.dim">dim (niworkflows.utils.spaces.Reference attribute)</a>
 </li>
         <li><a href="api/niworkflows.viz.notebook.html#niworkflows.viz.notebook.display">display() (in module niworkflows.viz.notebook)</a>
+</li>
+        <li><a href="api/niworkflows.engine.plugin.html#niworkflows.engine.plugin.DistributedPluginBase">DistributedPluginBase (class in niworkflows.engine.plugin)</a>
 </li>
         <li><a href="api/niworkflows.utils.images.html#niworkflows.utils.images.dseg_label">dseg_label() (in module niworkflows.utils.images)</a>
 </li>
@@ -763,6 +766,8 @@
 </li>
           <li><a href="api/niworkflows.engine.html#module-niworkflows.engine">niworkflows.engine</a>
 </li>
+          <li><a href="api/niworkflows.engine.plugin.html#module-niworkflows.engine.plugin">niworkflows.engine.plugin</a>
+</li>
           <li><a href="api/niworkflows.engine.workflows.html#module-niworkflows.engine.workflows">niworkflows.engine.workflows</a>
 </li>
           <li><a href="api/niworkflows.func.html#module-niworkflows.func">niworkflows.func</a>
@@ -870,6 +875,8 @@
 </li>
         <li><a href="api/niworkflows.interfaces.itk.html#niworkflows.interfaces.itk.MultiApplyTransforms">MultiApplyTransforms (class in niworkflows.interfaces.itk)</a>
 </li>
+        <li><a href="api/niworkflows.engine.plugin.html#niworkflows.engine.plugin.MultiProcPlugin">MultiProcPlugin (class in niworkflows.engine.plugin)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
@@ -948,6 +955,13 @@
 
         <ul>
           <li><a href="api/niworkflows.engine.html#module-niworkflows.engine">module</a>
+</li>
+        </ul></li>
+        <li>
+    niworkflows.engine.plugin
+
+        <ul>
+          <li><a href="api/niworkflows.engine.plugin.html#module-niworkflows.engine.plugin">module</a>
 </li>
         </ul></li>
         <li>
@@ -1381,6 +1395,8 @@
 </li>
         <li><a href="api/niworkflows.viz.utils.html#niworkflows.viz.utils.plot_segs">plot_segs() (in module niworkflows.viz.utils)</a>
 </li>
+        <li><a href="api/niworkflows.engine.plugin.html#niworkflows.engine.plugin.PluginBase">PluginBase (class in niworkflows.engine.plugin)</a>
+</li>
         <li><a href="api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.ply2gii">ply2gii() (in module niworkflows.interfaces.surf)</a>
 </li>
         <li><a href="api/niworkflows.interfaces.surf.html#niworkflows.interfaces.surf.PLYtoGifti">PLYtoGifti (class in niworkflows.interfaces.surf)</a>
@@ -1435,10 +1451,10 @@
 </li>
         <li><a href="api/niworkflows.interfaces.nibabel.html#niworkflows.interfaces.nibabel.reorient_file">reorient_file() (in module niworkflows.interfaces.nibabel)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/niworkflows.interfaces.nibabel.html#niworkflows.interfaces.nibabel.reorient_image">reorient_image() (in module niworkflows.interfaces.nibabel)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/niworkflows.interfaces.nibabel.html#niworkflows.interfaces.nibabel.ReorientImage">ReorientImage (class in niworkflows.interfaces.nibabel)</a>
 </li>
         <li><a href="api/niworkflows.reports.core.html#niworkflows.reports.core.Report">Report (class in niworkflows.reports.core)</a>
@@ -1465,7 +1481,15 @@
 </li>
         <li><a href="api/niworkflows.utils.images.html#niworkflows.utils.images.rotation2canonical">rotation2canonical() (in module niworkflows.utils.images)</a>
 </li>
-        <li><a href="api/niworkflows.interfaces.workbench.html#niworkflows.interfaces.workbench.OpenMPCommandMixin.run">run() (niworkflows.interfaces.workbench.OpenMPCommandMixin method)</a>
+        <li><a href="api/niworkflows.engine.plugin.html#niworkflows.engine.plugin.DistributedPluginBase.run">run() (niworkflows.engine.plugin.DistributedPluginBase method)</a>
+
+        <ul>
+          <li><a href="api/niworkflows.engine.plugin.html#niworkflows.engine.plugin.PluginBase.run">(niworkflows.engine.plugin.PluginBase method)</a>
+</li>
+          <li><a href="api/niworkflows.interfaces.workbench.html#niworkflows.interfaces.workbench.OpenMPCommandMixin.run">(niworkflows.interfaces.workbench.OpenMPCommandMixin method)</a>
+</li>
+        </ul></li>
+        <li><a href="api/niworkflows.engine.plugin.html#niworkflows.engine.plugin.run_node">run_node() (in module niworkflows.engine.plugin)</a>
 </li>
         <li><a href="api/niworkflows.reports.core.html#niworkflows.reports.core.run_reports">run_reports() (in module niworkflows.reports.core)</a>
 </li>

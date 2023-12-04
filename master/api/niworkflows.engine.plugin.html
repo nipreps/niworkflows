@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.workflows.epi package" href="niworkflows.workflows.epi.html" /><link rel="prev" title="niworkflows.viz.utils module" href="niworkflows.viz.utils.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.engine.workflows module" href="niworkflows.engine.workflows.html" /><link rel="prev" title="niworkflows.engine package" href="niworkflows.engine.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>niworkflows.workflows package - niworkflows 0+unknown documentation</title>
+        <title>niworkflows.engine.plugin module - niworkflows 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -180,8 +180,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="niworkflows.data.html">niworkflows.data package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of niworkflows.engine package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="niworkflows.engine.plugin.html">niworkflows.engine.plugin module</a></li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of niworkflows.engine package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">niworkflows.engine.plugin module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.engine.workflows.html">niworkflows.engine.workflows module</a></li>
 </ul>
 </li>
@@ -242,7 +242,7 @@
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.viz.utils.html">niworkflows.viz.utils module</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">niworkflows.workflows package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of niworkflows.workflows package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.workflows.html">niworkflows.workflows package</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of niworkflows.workflows package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="niworkflows.workflows.epi.html">niworkflows.workflows.epi package</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of niworkflows.workflows.epi package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="niworkflows.workflows.epi.refmap.html">niworkflows.workflows.epi.refmap module</a></li>
 </ul>
@@ -286,16 +286,113 @@
           </label>
         </div>
         <article role="main">
-          <section id="module-niworkflows.workflows">
-<span id="niworkflows-workflows-package"></span><h1>niworkflows.workflows package<a class="headerlink" href="#module-niworkflows.workflows" title="Link to this heading">#</a></h1>
-<section id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">#</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="niworkflows.workflows.epi.html">niworkflows.workflows.epi package</a></li>
+          <section id="module-niworkflows.engine.plugin">
+<span id="niworkflows-engine-plugin-module"></span><h1>niworkflows.engine.plugin module<a class="headerlink" href="#module-niworkflows.engine.plugin" title="Link to this heading">#</a></h1>
+<p>A lightweight NiPype MultiProc execution plugin.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.engine.plugin.DistributedPluginBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.engine.plugin.</span></span><span class="sig-name descname"><span class="pre">DistributedPluginBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/engine/plugin.html#DistributedPluginBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.engine.plugin.DistributedPluginBase" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#niworkflows.engine.plugin.PluginBase" title="niworkflows.engine.plugin.PluginBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PluginBase</span></code></a></p>
+<p>Execute workflow with a distribution engine.</p>
+<p>Combinations of <code class="docutils literal notranslate"><span class="pre">proc_done</span></code> and <code class="docutils literal notranslate"><span class="pre">proc_pending</span></code>:
++————+—————+——————————–+
+| proc_done  | proc_pending  | outcome                        |
++============+===============+================================+
+| True       | False         | Process is finished            |
++————+—————+——————————–+
+| True       | True          | Process is currently being run |
++————+—————+——————————–+
+| False      | False         | Process is queued              |
++————+—————+——————————–+
+| False      | True          | INVALID COMBINATION            |
++————+—————+——————————–+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>procs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>) – list (N) of underlying interface elements to be processed</p></li>
+<li><p><strong>proc_done</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>) – a boolean numpy array (N,) signifying whether a process has been
+submitted for execution</p></li>
+<li><p><strong>proc_pending</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>) – a boolean numpy array (N,) signifying whether a
+process is currently running.</p></li>
+<li><p><strong>depidx</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.matrix.html#numpy.matrix" title="(in NumPy v1.26)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.matrix</span></code></a>) – a boolean matrix (NxN) storing the dependency structure across
+processes. Process dependencies are derived from each column.</p></li>
 </ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="niworkflows.engine.plugin.DistributedPluginBase.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updatehash</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/engine/plugin.html#DistributedPluginBase.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.engine.plugin.DistributedPluginBase.run" title="Link to this definition">#</a></dt>
+<dd><p>Execute a pre-defined pipeline using distributed approaches.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.engine.plugin.MultiProcPlugin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.engine.plugin.</span></span><span class="sig-name descname"><span class="pre">MultiProcPlugin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plugin_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/engine/plugin.html#MultiProcPlugin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.engine.plugin.MultiProcPlugin" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#niworkflows.engine.plugin.DistributedPluginBase" title="niworkflows.engine.plugin.DistributedPluginBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DistributedPluginBase</span></code></a></p>
+<p>A lightweight re-implementation of NiPype’s MultiProc plugin.</p>
+<p>Execute workflow with multiprocessing, not sending more jobs at once
+than the system can support.
+The plugin_args input to run can be used to control the multiprocessing
+execution and defining the maximum amount of memory and threads that
+should be used. When those parameters are not specified,
+the number of threads and memory of the system is used.
+System consuming nodes should be tagged:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">memory_consuming_node</span><span class="o">.</span><span class="n">mem_gb</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">thread_consuming_node</span><span class="o">.</span><span class="n">n_procs</span> <span class="o">=</span> <span class="mi">16</span>
+</pre></div>
 </div>
-</section>
+<p>The default number of threads and memory are set at node
+creation, and are 1 and 0.25GB respectively.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.engine.plugin.PluginBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.engine.plugin.</span></span><span class="sig-name descname"><span class="pre">PluginBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plugin_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/engine/plugin.html#PluginBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.engine.plugin.PluginBase" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Base class for plugins.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="niworkflows.engine.plugin.PluginBase.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updatehash</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/engine/plugin.html#PluginBase.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.engine.plugin.PluginBase.run" title="Link to this definition">#</a></dt>
+<dd><p>Instruct the plugin to execute the workflow graph.</p>
+<p>The core plugin member that should be implemented by
+all plugins.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graph</strong> – a networkx, flattened <abbr title="Directed Acyclic Graph">DAG</abbr>
+to be executed</p></li>
+<li><p><strong>config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code>) – a nipype.config object</p></li>
+<li><p><strong>updatehash</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>) – whether cached nodes with stale hash should be just updated.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="niworkflows.engine.plugin.run_node">
+<span class="sig-prename descclassname"><span class="pre">niworkflows.engine.plugin.</span></span><span class="sig-name descname"><span class="pre">run_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updatehash</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taskid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/engine/plugin.html#run_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.engine.plugin.run_node" title="Link to this definition">#</a></dt>
+<dd><p>Execute node.run(), catch and log any errors and get a result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node</strong> (<em>nipype Node instance</em>) – the node to run</p></li>
+<li><p><strong>updatehash</strong> (<em>boolean</em>) – flag for updating hash</p></li>
+<li><p><strong>taskid</strong> (<em>int</em>) – an identifier for this task</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – dictionary containing the node runtime results and stats</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
         </article>
@@ -303,23 +400,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="niworkflows.workflows.epi.html">
+          <a class="next-page" href="niworkflows.engine.workflows.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">niworkflows.workflows.epi package</div>
+                <div class="title">niworkflows.engine.workflows module</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="niworkflows.viz.utils.html">
+          <a class="prev-page" href="niworkflows.engine.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">niworkflows.viz.utils module</div>
+                <div class="title">niworkflows.engine package</div>
                 
               </div>
             </a>
@@ -353,8 +450,17 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">niworkflows.workflows package</a><ul>
-<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#">niworkflows.engine.plugin module</a><ul>
+<li><a class="reference internal" href="#niworkflows.engine.plugin.DistributedPluginBase"><code class="docutils literal notranslate"><span class="pre">DistributedPluginBase</span></code></a><ul>
+<li><a class="reference internal" href="#niworkflows.engine.plugin.DistributedPluginBase.run"><code class="docutils literal notranslate"><span class="pre">DistributedPluginBase.run()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#niworkflows.engine.plugin.MultiProcPlugin"><code class="docutils literal notranslate"><span class="pre">MultiProcPlugin</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.engine.plugin.PluginBase"><code class="docutils literal notranslate"><span class="pre">PluginBase</span></code></a><ul>
+<li><a class="reference internal" href="#niworkflows.engine.plugin.PluginBase.run"><code class="docutils literal notranslate"><span class="pre">PluginBase.run()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#niworkflows.engine.plugin.run_node"><code class="docutils literal notranslate"><span class="pre">run_node()</span></code></a></li>
 </ul>
 </li>
 </ul>

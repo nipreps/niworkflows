@@ -12,4 +12,5 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
+   niworkflows.engine.plugin
    niworkflows.engine.workflows
