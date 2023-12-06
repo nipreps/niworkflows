@@ -195,6 +195,12 @@ class _ConfoundsCorrelationPlotInputSpec(BaseInterfaceInputSpec):
         "correlation with `reference_column` will be "
         "selected.",
     )
+    ignore_initial_volumes = traits.Int(
+        0,
+        usedefault=True,
+        desc="Number of non-steady-state volumes at the beginning of the scan "
+        "to ignore.",
+    )
 
 
 class _ConfoundsCorrelationPlotOutputSpec(TraitedSpec):
@@ -223,6 +229,7 @@ class ConfoundsCorrelationPlot(SimpleInterface):
             max_dim=self.inputs.max_dim,
             output_file=self._results["out_file"],
             reference=self.inputs.reference_column,
+            ignore_initial_volumes=self.inputs.ignore_initial_volumes,
         )
         return runtime
 
