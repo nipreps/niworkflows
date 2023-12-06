@@ -325,6 +325,8 @@
 <dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>columns</strong> (<em>a list of items which are a string</em>) – Filter out all regressors not found in this list.</p></li>
+<li><p><strong>ignore_initial_volumes</strong> (<em>an integer</em>) – Number of non-steady-state volumes at the beginning of the scan to ignore.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">0</span></code>)</p></li>
 <li><p><strong>max_dim</strong> (<em>an integer</em>) – Maximum number of regressors to include in plot. Regressors with highest magnitude of correlation with <cite>reference_column</cite> will be selected.
 (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">20</span></code>)</p></li>
 <li><p><strong>out_file</strong> (<em>a pathlike object or string representing a file or None</em>) – Path to save plot.

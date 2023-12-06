@@ -488,6 +488,12 @@
         <span class="s2">&quot;correlation with `reference_column` will be &quot;</span>
         <span class="s2">&quot;selected.&quot;</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">ignore_initial_volumes</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span>
+        <span class="mi">0</span><span class="p">,</span>
+        <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Number of non-steady-state volumes at the beginning of the scan &quot;</span>
+        <span class="s2">&quot;to ignore.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_ConfoundsCorrelationPlotOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
@@ -518,6 +524,7 @@
             <span class="n">max_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">max_dim</span><span class="p">,</span>
             <span class="n">output_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">],</span>
             <span class="n">reference</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_column</span><span class="p">,</span>
+            <span class="n">ignore_initial_volumes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">ignore_initial_volumes</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 

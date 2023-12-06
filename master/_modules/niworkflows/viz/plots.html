@@ -1171,6 +1171,7 @@
     <span class="n">max_dim</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
     <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">reference</span><span class="o">=</span><span class="s2">&quot;global_signal&quot;</span><span class="p">,</span>
+    <span class="n">ignore_initial_volumes</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a bar plot with the correlation of confounds.</span>
@@ -1199,6 +1200,8 @@
 <span class="sd">        of each confound regressor with a reference column. By default, this</span>
 <span class="sd">        is the global signal (so that collinearities with the global signal</span>
 <span class="sd">        can readily be assessed).</span>
+<span class="sd">    ignore_initial_volumes : :obj:`int`</span>
+<span class="sd">        Number of non-steady-state volumes at the beginning of the scan to ignore.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
