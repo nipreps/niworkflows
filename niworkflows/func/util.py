@@ -35,7 +35,7 @@ from ..interfaces.fixes import (
     FixHeaderApplyTransforms as ApplyTransforms,
     FixN4BiasFieldCorrection as N4BiasFieldCorrection,
 )
-from ..interfaces.header import CopyXForm, ValidateImage, MatchHeader
+from ..interfaces.header import CopyHeader, CopyXForm, ValidateImage
 from ..interfaces.reportlets.masks import SimpleShowMaskRPT
 from ..utils.connections import listify
 from ..utils.misc import pass_dummy_scans as _pass_dummy_scans
@@ -473,11 +473,11 @@ def init_enhance_and_skullstrip_bold_wf(
             name="map_brainmask",
         )
         # Ensure mask's header matches reference's
-        check_hdr = pe.Node(MatchHeader(), name="check_hdr", run_without_submitting=True)
+        fix_header = pe.Node(CopyHeader(), name="fix_header", run_without_submitting=True)
 
         # fmt: off
         workflow.connect([
-            (inputnode, check_hdr, [("in_file", "reference")]),
+            (inputnode, fix_header, [("in_file", "hdr_file")]),
             (inputnode, init_aff, [("in_file", "moving_image")]),
             (inputnode, map_brainmask, [("in_file", "reference_image")]),
             (inputnode, norm, [("in_file", "moving_image")]),
@@ -486,8 +486,8 @@ def init_enhance_and_skullstrip_bold_wf(
                 ("reverse_invert_flags", "invert_transform_flags"),
                 ("reverse_transforms", "transforms"),
             ]),
-            (map_brainmask, check_hdr, [("output_image", "in_file")]),
-            (check_hdr, n4_correct, [("out_file", "weight_image")]),
+            (map_brainmask, fix_header, [("output_image", "in_file")]),
+            (fix_header, n4_correct, [("out_file", "weight_image")]),
         ])
         # fmt: on
     else:
