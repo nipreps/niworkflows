@@ -910,7 +910,8 @@ def confounds_correlation_plot(
         confounds_data = confounds_data[list(columns)]
 
     confounds_data = confounds_data.loc[
-        :, np.logical_not(np.isclose(confounds_data.var(skipna=True), 0))
+        ignore_initial_volumes:,
+        np.logical_not(np.isclose(confounds_data.var(skipna=True), 0)),
     ]
     corr = confounds_data.corr()
 
