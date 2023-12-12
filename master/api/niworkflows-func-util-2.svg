@@ -15,15 +15,15 @@
 <ellipse fill="none" stroke="black" cx="346.61" cy="-1098" rx="94.78" ry="18"/>
 <text text-anchor="middle" x="346.61" y="-1094.3" font-family="Times,serif" font-size="14.00">inputnode (utility)</text>
 </g>
-<!-- check_hdr (header) -->
+<!-- fix_header (header) -->
 <g id="node2" class="node">
-<title>check_hdr (header)</title>
-<ellipse fill="none" stroke="black" cx="441.61" cy="-810" rx="99.38" ry="18"/>
-<text text-anchor="middle" x="441.61" y="-806.3" font-family="Times,serif" font-size="14.00">check_hdr (header)</text>
+<title>fix_header (header)</title>
+<ellipse fill="none" stroke="black" cx="441.61" cy="-810" rx="100.98" ry="18"/>
+<text text-anchor="middle" x="441.61" y="-806.3" font-family="Times,serif" font-size="14.00">fix_header (header)</text>
 </g>
-<!-- inputnode (utility)&#45;&gt;check_hdr (header) -->
+<!-- inputnode (utility)&#45;&gt;fix_header (header) -->
 <g id="edge1" class="edge">
-<title>inputnode (utility)&#45;&gt;check_hdr (header)</title>
+<title>inputnode (utility)&#45;&gt;fix_header (header)</title>
 <path fill="none" stroke="black" d="M343.33,-1079.76C336.54,-1039.06 324.76,-935.08 365.61,-864 373.09,-850.97 385.24,-840.39 397.65,-832.21"/>
 <polygon fill="black" stroke="black" points="399.54,-835.15 406.22,-826.93 395.87,-829.19 399.54,-835.15"/>
 </g>
@@ -72,8 +72,8 @@
 <!-- inputnode (utility)&#45;&gt;n4_correct (fixes) -->
 <g id="edge5" class="edge">
 <title>inputnode (utility)&#45;&gt;n4_correct (fixes)</title>
-<path fill="none" stroke="black" d="M338.92,-1079.91C327.81,-1053.62 308.61,-1001.45 308.61,-955 308.61,-955 308.61,-955 308.61,-881 308.61,-839.91 307.32,-823.58 333.61,-792 346.46,-776.55 364.91,-765.23 382.94,-757.11"/>
-<polygon fill="black" stroke="black" points="384.44,-760.28 392.29,-753.16 381.72,-753.83 384.44,-760.28"/>
+<path fill="none" stroke="black" d="M338.92,-1079.91C327.81,-1053.62 308.61,-1001.45 308.61,-955 308.61,-955 308.61,-955 308.61,-881 308.61,-840.14 305.68,-823.58 331.61,-792 344.43,-776.37 362.97,-765.03 381.18,-756.96"/>
+<polygon fill="black" stroke="black" points="382.75,-760.09 390.65,-753.02 380.07,-753.63 382.75,-760.09"/>
 </g>
 <!-- fixhdr_unifize (header) -->
 <g id="node7" class="node">
@@ -99,9 +99,9 @@
 <path fill="none" stroke="black" d="M330.49,-1080.19C308.18,-1055.09 270.61,-1005.33 270.61,-955 270.61,-955 270.61,-955 270.61,-593 270.61,-527.78 310.44,-334.18 325.73,-262.28"/>
 <polygon fill="black" stroke="black" points="329.22,-262.71 327.88,-252.2 322.37,-261.25 329.22,-262.71"/>
 </g>
-<!-- check_hdr (header)&#45;&gt;n4_correct (fixes) -->
+<!-- fix_header (header)&#45;&gt;n4_correct (fixes) -->
 <g id="edge8" class="edge">
-<title>check_hdr (header)&#45;&gt;n4_correct (fixes)</title>
+<title>fix_header (header)&#45;&gt;n4_correct (fixes)</title>
 <path fill="none" stroke="black" d="M441.61,-791.7C441.61,-783.98 441.61,-774.71 441.61,-766.11"/>
 <polygon fill="black" stroke="black" points="445.11,-766.1 441.61,-756.1 438.11,-766.1 445.11,-766.1"/>
 </g>
@@ -111,9 +111,9 @@
 <path fill="none" stroke="black" d="M484.61,-1007.7C484.61,-999.98 484.61,-990.71 484.61,-982.11"/>
 <polygon fill="black" stroke="black" points="488.11,-982.1 484.61,-972.1 481.11,-982.1 488.11,-982.1"/>
 </g>
-<!-- map_brainmask (fixes)&#45;&gt;check_hdr (header) -->
+<!-- map_brainmask (fixes)&#45;&gt;fix_header (header) -->
 <g id="edge10" class="edge">
-<title>map_brainmask (fixes)&#45;&gt;check_hdr (header)</title>
+<title>map_brainmask (fixes)&#45;&gt;fix_header (header)</title>
 <path fill="none" stroke="black" d="M477.99,-864.05C472.35,-855.84 465.46,-845.79 459.2,-836.66"/>
 <polygon fill="black" stroke="black" points="461.99,-834.54 453.45,-828.28 456.22,-838.5 461.99,-834.54"/>
 </g>
