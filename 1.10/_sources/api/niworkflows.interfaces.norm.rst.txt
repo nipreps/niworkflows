@@ -1,0 +1,7 @@
+niworkflows.interfaces.norm module
+==================================
+
+.. automodule:: niworkflows.interfaces.norm
+   :members:
+   :undoc-members:
+   :show-inheritance:

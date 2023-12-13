@@ -1,0 +1,805 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.reports package" href="niworkflows.reports.html" /><link rel="prev" title="niworkflows.interfaces.utility module" href="niworkflows.interfaces.utility.html" />
+
+    <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
+        <title>niworkflows.interfaces.workbench module - niworkflows 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/version-switch.css?v=45d66e8a" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">niworkflows 0+unknown documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+    <span class="sidebar-brand-text">niworkflows</span>
+    <span id="version-slug" class="sidebar-brand-text">0 (dev)</span>
+</a>
+
+<!-- Versions dropdown -->
+<div id="version-menu" class="version-tree">
+  <ul>
+  <li class="toctree-l1 has-children">
+  <span class="sidebar-brand-text">0 (dev)</span>
+  <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
+  <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
+  <ul id="v-tags"></ul>
+  </ul>
+</div><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../api.html">Library API (application program interface)</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Library API (application program interface)</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.anat.html">niworkflows.anat package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of niworkflows.anat package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.ants.html">niworkflows.anat.ants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.coregistration.html">niworkflows.anat.coregistration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.freesurfer.html">niworkflows.anat.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.skullstrip.html">niworkflows.anat.skullstrip module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.cli.html">niworkflows.cli package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of niworkflows.cli package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.cli.boldref.html">niworkflows.cli.boldref module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.data.html">niworkflows.data package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of niworkflows.engine package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.engine.plugin.html">niworkflows.engine.plugin module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.engine.workflows.html">niworkflows.engine.workflows module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.func.html">niworkflows.func package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of niworkflows.func package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.func.util.html">niworkflows.func.util module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of niworkflows.interfaces package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="niworkflows.interfaces.reportlets.html">niworkflows.interfaces.reportlets package</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of niworkflows.interfaces.reportlets package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.base.html">niworkflows.interfaces.reportlets.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.masks.html">niworkflows.interfaces.reportlets.masks module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.registration.html">niworkflows.interfaces.reportlets.registration module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.segmentation.html">niworkflows.interfaces.reportlets.segmentation module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.bids.html">niworkflows.interfaces.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.bold.html">niworkflows.interfaces.bold module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.confounds.html">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.conftest.html">niworkflows.interfaces.conftest module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.header.html">niworkflows.interfaces.header module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.images.html">niworkflows.interfaces.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.itk.html">niworkflows.interfaces.itk module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.morphology.html">niworkflows.interfaces.morphology module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.nibabel.html">niworkflows.interfaces.nibabel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.nilearn.html">niworkflows.interfaces.nilearn module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.nitransforms.html">niworkflows.interfaces.nitransforms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.norm.html">niworkflows.interfaces.norm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.patches.html">niworkflows.interfaces.patches module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.plotting.html">niworkflows.interfaces.plotting module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.probmaps.html">niworkflows.interfaces.probmaps module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">niworkflows.interfaces.workbench module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of niworkflows.reports package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.reports.core.html">niworkflows.reports.core module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of niworkflows.utils package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.bids.html">niworkflows.utils.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.connections.html">niworkflows.utils.connections module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.debug.html">niworkflows.utils.debug module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.images.html">niworkflows.utils.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.misc.html">niworkflows.utils.misc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.spaces.html">niworkflows.utils.spaces module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.testing.html">niworkflows.utils.testing module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.timeseries.html">niworkflows.utils.timeseries module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.viz.html">niworkflows.viz package</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of niworkflows.viz package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.viz.notebook.html">niworkflows.viz.notebook module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.viz.plots.html">niworkflows.viz.plots module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.viz.utils.html">niworkflows.viz.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.workflows.html">niworkflows.workflows package</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of niworkflows.workflows package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="niworkflows.workflows.epi.html">niworkflows.workflows.epi package</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of niworkflows.workflows.epi package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.workflows.epi.refmap.html">niworkflows.workflows.epi.refmap module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new?</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-niworkflows.interfaces.workbench">
+<span id="niworkflows-interfaces-workbench-module"></span><h1>niworkflows.interfaces.workbench module<a class="headerlink" href="#module-niworkflows.interfaces.workbench" title="Link to this heading">#</a></h1>
+<p>This module provides interfaces for workbench surface commands.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.workbench.MetricDilate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.workbench.</span></span><span class="sig-name descname"><span class="pre">MetricDilate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/workbench.html#MetricDilate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.workbench.MetricDilate" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">WBCommand</span></code>, <a class="reference internal" href="#niworkflows.interfaces.workbench.OpenMPCommandMixin" title="niworkflows.interfaces.workbench.OpenMPCommandMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">OpenMPCommandMixin</span></code></a></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">wb_command</span> <span class="pre">-metric-dilate</span></code>.</p>
+<p>Dilate a metric file on a surface.</p>
+<p>For all data values designated as bad, if they neighbor a good value or
+are within the specified distance of a good value in the same kind of
+model, replace the value with a distance weighted average of nearby good
+values, otherwise set the value to zero.  If -nearest is specified, it
+will use the value from the closest good value within range instead of a
+weighted average.  When the input file contains label data, nearest
+dilation is used on the surface, and weighted popularity is used in the
+volume.</p>
+<p>The -corrected-areas options are intended for dilating on group average
+surfaces, but it is only an approximate correction for the reduction of
+structure in a group average surface.</p>
+<p>If -bad-vertex-roi is specified, all values, including those with
+value zero, are good, except for locations with a positive value in the
+ROI.  If it is not specified, only values equal to zero are bad.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distance</strong> (<em>a float</em>) – Distance in mm to dilate.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%f</span></code> (position: 2).</p></li>
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – The metric to dilate.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 0).</p></li>
+<li><p><strong>surf_file</strong> (<em>a pathlike object or string representing an existing file</em>) – The surface to compute on.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>bad_vertex_roi_file</strong> (<em>a pathlike object or string representing a file</em>) – Metric file, positive values denote vertices to have their values replaced.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-bad-vertex-roi</span> <span class="pre">%s</span></code> (position: 4).</p></li>
+<li><p><strong>column</strong> (<em>an integer</em>) – The column number.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-column</span> <span class="pre">%d</span></code> (position: 6).</p></li>
+<li><p><strong>corrected_areas</strong> (<em>a pathlike object or string representing a file</em>) – Vertex areas to use instead of computing them from the surface.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-corrected-areas</span> <span class="pre">%s</span></code> (position: 10).</p></li>
+<li><p><strong>data_roi_file</strong> (<em>a pathlike object or string representing a file</em>) – Metric file, positive values denote vertices that have data.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-data-roi</span> <span class="pre">%s</span></code> (position: 5).</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>exponent</strong> (<em>a float</em>) – Exponent n to use in (area / (distance ^ n)) as the weighting function (default 6).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-exponent</span> <span class="pre">%f</span></code> (position: 9).</p></li>
+<li><p><strong>legacy_cutoff</strong> (<em>a boolean</em>) – Use the v1.3.2 method of choosing how many vertices to use when calculating the dilated value with weighted method.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-legacy-cutoff</span></code> (position: 11).</p></li>
+<li><p><strong>linear</strong> (<em>a boolean</em>) – Fill in values with linear interpolation along strongest gradient.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-linear</span></code> (position: 8).</p></li>
+<li><p><strong>nearest</strong> (<em>a boolean</em>) – Use the nearest good value instead of a weighted average.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-nearest</span></code> (position: 7).</p></li>
+<li><p><strong>num_threads</strong> (<em>an integer</em>) – Allows for specifying more threads.</p></li>
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – Output - the output metric.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 3).</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Output file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.workbench.MetricFillHoles">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.workbench.</span></span><span class="sig-name descname"><span class="pre">MetricFillHoles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminal_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_cmdline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/workbench.html#MetricFillHoles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.workbench.MetricFillHoles" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">WBCommand</span></code></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">wb_command</span> <span class="pre">-metric-fill-holes</span></code>.</p>
+<p>Fill holes in an ROI metric.</p>
+<p>Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">niworkflows.interfaces.workbench</span> <span class="kn">import</span> <span class="n">MetricFillHoles</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fill_holes</span> <span class="o">=</span> <span class="n">MetricFillHoles</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fill_holes</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surface_file</span> <span class="o">=</span> <span class="s1">&#39;lh.midthickness.surf.gii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fill_holes</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric_file</span> <span class="o">=</span> <span class="s1">&#39;lh.roi.shape.gii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fill_holes</span><span class="o">.</span><span class="n">cmdline</span>  
+<span class="go">&#39;wb_command -metric-fill-holes lh.midthickness.surf.gii lh.roi.shape.gii     lh.roi.shape_filled.shape.gii&#39;</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Input ROI metric.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 2).</p></li>
+<li><p><strong>surface_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Surface to use for neighbor information.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>corrected_areas</strong> (<em>a pathlike object or string representing an existing file</em>) – Vertex areas to use instead of computing them from the surface.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-corrected-areas</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – Output ROI metric.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 3).</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – Output ROI metric.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.workbench.MetricMask">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.workbench.</span></span><span class="sig-name descname"><span class="pre">MetricMask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminal_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_cmdline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/workbench.html#MetricMask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.workbench.MetricMask" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">WBCommand</span></code></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">wb_command</span> <span class="pre">-metric-mask</span></code>.</p>
+<p>Mask a metric file.</p>
+<p>Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">niworkflows.interfaces.workbench</span> <span class="kn">import</span> <span class="n">MetricMask</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metric_mask</span> <span class="o">=</span> <span class="n">MetricMask</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metric_mask</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s1">&#39;lh.bold.func.gii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metric_mask</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="s1">&#39;lh.roi.shape.gii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metric_mask</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;wb_command -metric-mask lh.bold.func.gii lh.roi.shape.gii lh.bold.func_masked.func.gii&#39;</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Input metric file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 1).</p></li>
+<li><p><strong>mask</strong> (<em>a pathlike object or string representing an existing file</em>) – Mask metric file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 2).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>column</strong> (<em>an integer or a string</em>) – Select a single column by number or name.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-column</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – Output metric file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 3).</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – Output metric file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.workbench.MetricRemoveIslands">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.workbench.</span></span><span class="sig-name descname"><span class="pre">MetricRemoveIslands</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terminal_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_cmdline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/workbench.html#MetricRemoveIslands"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.workbench.MetricRemoveIslands" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">WBCommand</span></code></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">wb_command</span> <span class="pre">-metric-remove-islands</span></code>.</p>
+<p>Remove islands in an ROI metric.</p>
+<p>Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">niworkflows.interfaces.workbench</span> <span class="kn">import</span> <span class="n">MetricRemoveIslands</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">remove_islands</span> <span class="o">=</span> <span class="n">MetricRemoveIslands</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">remove_islands</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surface_file</span> <span class="o">=</span> <span class="s1">&#39;lh.midthickness.surf.gii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">remove_islands</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric_file</span> <span class="o">=</span> <span class="s1">&#39;lh.roi.shape.gii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">remove_islands</span><span class="o">.</span><span class="n">cmdline</span>  
+<span class="go">&#39;wb_command -metric-remove-islands lh.midthickness.surf.gii     lh.roi.shape.gii lh.roi.shape_noislands.shape.gii&#39;</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Input ROI metric.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 2).</p></li>
+<li><p><strong>surface_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Surface to use for neighbor information.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>corrected_areas</strong> (<em>a pathlike object or string representing an existing file</em>) – Vertex areas to use instead of computing them from the surface.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-corrected-areas</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – Output ROI metric.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 3).</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – Output ROI metric.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.workbench.MetricResample">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.workbench.</span></span><span class="sig-name descname"><span class="pre">MetricResample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/workbench.html#MetricResample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.workbench.MetricResample" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">WBCommand</span></code>, <a class="reference internal" href="#niworkflows.interfaces.workbench.OpenMPCommandMixin" title="niworkflows.interfaces.workbench.OpenMPCommandMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">OpenMPCommandMixin</span></code></a></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">wb_command</span> <span class="pre">-metric-resample</span></code>.</p>
+<p>Resample a metric file to a different mesh.</p>
+<p>Resamples a metric file, given two spherical surfaces that are in
+register.  If <code class="docutils literal notranslate"><span class="pre">ADAP_BARY_AREA</span></code> is used, exactly one of -area-surfs or
+<code class="docutils literal notranslate"><span class="pre">-area-metrics</span></code> must be specified.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">ADAP_BARY_AREA</span></code> method is recommended for ordinary metric data,
+because it should use all data while downsampling, unlike <code class="docutils literal notranslate"><span class="pre">BARYCENTRIC</span></code>.
+The recommended areas option for most data is individual midthicknesses
+for individual data, and averaged vertex area metrics from individual
+midthicknesses for group average data.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">-current-roi</span></code> option only masks the input, the output may be slightly
+dilated in comparison, consider using <code class="docutils literal notranslate"><span class="pre">-metric-mask</span></code> on the output when
+using <code class="docutils literal notranslate"><span class="pre">-current-roi</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">-largest</span> <span class="pre">option</span></code> results in nearest vertex behavior when used with
+<code class="docutils literal notranslate"><span class="pre">BARYCENTRIC</span></code>.  When resampling a binary metric, consider thresholding at
+0.5 after resampling rather than using <code class="docutils literal notranslate"><span class="pre">-largest</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_sphere</strong> (<em>a pathlike object or string representing an existing file</em>) – A sphere surface with the mesh that the metric is currently on.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 1).</p></li>
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – The metric file to resample.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 0).</p></li>
+<li><p><strong>method</strong> (<em>‘ADAP_BARY_AREA’ or ‘BARYCENTRIC’</em>) – The method name - ADAP_BARY_AREA method is recommended for ordinary metric data, because it should use all data while downsampling, unlike BARYCENTRIC. If ADAP_BARY_AREA is used, exactly one of area_surfs or area_metrics must be specified.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 3).</p></li>
+<li><p><strong>new_sphere</strong> (<em>a pathlike object or string representing an existing file</em>) – A sphere surface that is in register with &lt;current-sphere&gt; and has the desired output mesh.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 2).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>area_metrics</strong> (<em>a boolean</em>) – Specify vertex area metrics to do area correction based on.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-area-metrics</span></code> (position: 5).
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">area_surfs</span></code>.</p></li>
+<li><p><strong>area_surfs</strong> (<em>a boolean</em>) – Specify surfaces to do vertex area correction based on.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-area-surfs</span></code> (position: 5).
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">area_metrics</span></code>.</p></li>
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>current_area</strong> (<em>a pathlike object or string representing an existing file</em>) – A relevant anatomical surface with &lt;current-sphere&gt; mesh OR a metric file with vertex areas for &lt;current-sphere&gt; mesh.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 6).</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>largest</strong> (<em>a boolean</em>) – Use only the value of the vertex with the largest weight.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-largest</span></code> (position: 10).</p></li>
+<li><p><strong>new_area</strong> (<em>a pathlike object or string representing an existing file</em>) – A relevant anatomical surface with &lt;current-sphere&gt; mesh OR a metric file with vertex areas for &lt;current-sphere&gt; mesh.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 7).</p></li>
+<li><p><strong>num_threads</strong> (<em>an integer</em>) – Allows for specifying more threads.</p></li>
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – The output metric.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 4).</p></li>
+<li><p><strong>roi_metric</strong> (<em>a pathlike object or string representing an existing file</em>) – Input roi on the current mesh used to exclude non-data vertices.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-current-roi</span> <span class="pre">%s</span></code> (position: 8).</p></li>
+<li><p><strong>valid_roi_out</strong> (<em>a boolean</em>) – Output the ROI of vertices that got data from valid source vertices.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-valid-roi-out</span></code> (position: 9).</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – The output metric.</p></li>
+<li><p><strong>roi_file</strong> (<em>a pathlike object or string representing a file</em>) – ROI of vertices that got data from valid source vertices.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.workbench.OpenMPCommandMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.workbench.</span></span><span class="sig-name descname"><span class="pre">OpenMPCommandMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/workbench.html#OpenMPCommandMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.workbench.OpenMPCommandMixin" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">CommandLine</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>num_threads</strong> (<em>an integer</em>) – Allows for specifying more threads.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="niworkflows.interfaces.workbench.OpenMPCommandMixin.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/workbench.html#OpenMPCommandMixin.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.workbench.OpenMPCommandMixin.run" title="Link to this definition">#</a></dt>
+<dd><p>Execute this interface.</p>
+<p>This interface will not raise an exception if runtime.returncode is
+non-zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cwd</strong> (<em>specify a folder where the interface should be run</em>)</p></li>
+<li><p><strong>inputs</strong> (<em>allows the interface settings to be updated</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>results</strong> – A copy of the instance that was executed, provenance information and,
+if successful, results</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://nipype.readthedocs.io/en/latest/api/generated/nipype.interfaces.base.support.html#nipype.interfaces.base.support.InterfaceResult" title="(in nipype v1.8.7.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nipype.interfaces.base.support.InterfaceResult</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.workbench.VolumeToSurfaceMapping">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.workbench.</span></span><span class="sig-name descname"><span class="pre">VolumeToSurfaceMapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/workbench.html#VolumeToSurfaceMapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.workbench.VolumeToSurfaceMapping" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">WBCommand</span></code>, <a class="reference internal" href="#niworkflows.interfaces.workbench.OpenMPCommandMixin" title="niworkflows.interfaces.workbench.OpenMPCommandMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">OpenMPCommandMixin</span></code></a></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">wb_command</span> <span class="pre">-volume-to-surface-mapping</span></code>.</p>
+<p>Map a volume to a surface using one of several methods.</p>
+<p>From <a class="reference external" href="https://humanconnectome.org/software/workbench-command/-volume-to-surface-mapping">https://humanconnectome.org/software/workbench-command/-volume-to-surface-mapping</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">You</span> <span class="n">must</span> <span class="n">specify</span> <span class="n">exactly</span> <span class="n">one</span> <span class="n">mapping</span> <span class="n">method</span><span class="o">.</span>  <span class="n">Enclosing</span> <span class="n">voxel</span> <span class="n">uses</span> <span class="n">the</span>
+<span class="n">value</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">voxel</span> <span class="n">the</span> <span class="n">vertex</span> <span class="n">lies</span> <span class="n">inside</span><span class="p">,</span> <span class="k">while</span> <span class="n">trilinear</span> <span class="n">does</span> <span class="n">a</span> <span class="mi">3</span><span class="n">D</span>
+<span class="n">linear</span> <span class="n">interpolation</span> <span class="n">based</span> <span class="n">on</span> <span class="n">the</span> <span class="n">voxels</span> <span class="n">immediately</span> <span class="n">on</span> <span class="n">each</span> <span class="n">side</span> <span class="n">of</span> <span class="n">the</span>
+<span class="n">vertex</span><span class="s1">&#39;s position.</span>
+
+<span class="n">The</span> <span class="n">ribbon</span> <span class="n">mapping</span> <span class="n">method</span> <span class="n">constructs</span> <span class="n">a</span> <span class="n">polyhedron</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">vertex</span><span class="s1">&#39;s</span>
+<span class="n">neighbors</span> <span class="n">on</span> <span class="n">each</span> <span class="n">surface</span><span class="p">,</span> <span class="ow">and</span> <span class="n">estimates</span> <span class="n">the</span> <span class="n">amount</span> <span class="n">of</span> <span class="n">this</span> <span class="n">polyhedron</span><span class="s1">&#39;s</span>
+<span class="n">volume</span> <span class="n">that</span> <span class="n">falls</span> <span class="n">inside</span> <span class="nb">any</span> <span class="n">nearby</span> <span class="n">voxels</span><span class="p">,</span> <span class="n">to</span> <span class="n">use</span> <span class="k">as</span> <span class="n">the</span> <span class="n">weights</span> <span class="k">for</span>
+<span class="n">sampling</span><span class="o">.</span>  <span class="n">If</span> <span class="o">-</span><span class="n">thin</span><span class="o">-</span><span class="n">columns</span> <span class="ow">is</span> <span class="n">specified</span><span class="p">,</span> <span class="n">the</span> <span class="n">polyhedron</span> <span class="n">uses</span> <span class="n">the</span> <span class="n">edge</span>
+<span class="n">midpoints</span> <span class="ow">and</span> <span class="n">triangle</span> <span class="n">centroids</span><span class="p">,</span> <span class="n">so</span> <span class="n">that</span> <span class="n">neighboring</span> <span class="n">vertices</span> <span class="n">do</span> <span class="ow">not</span>
+<span class="n">have</span> <span class="n">overlapping</span> <span class="n">polyhedra</span><span class="o">.</span>  <span class="n">This</span> <span class="n">may</span> <span class="n">require</span> <span class="n">increasing</span> <span class="o">-</span><span class="n">voxel</span><span class="o">-</span><span class="n">subdiv</span> <span class="n">to</span>
+<span class="n">get</span> <span class="n">enough</span> <span class="n">samples</span> <span class="ow">in</span> <span class="n">each</span> <span class="n">voxel</span> <span class="n">to</span> <span class="n">reliably</span> <span class="n">land</span> <span class="n">inside</span> <span class="n">these</span> <span class="n">smaller</span>
+<span class="n">polyhedra</span><span class="o">.</span>  <span class="n">The</span> <span class="n">volume</span> <span class="n">ROI</span> <span class="ow">is</span> <span class="n">useful</span> <span class="n">to</span> <span class="n">exclude</span> <span class="n">partial</span> <span class="n">volume</span> <span class="n">effects</span> <span class="n">of</span>
+<span class="n">voxels</span> <span class="n">the</span> <span class="n">surfaces</span> <span class="k">pass</span> <span class="n">through</span><span class="p">,</span> <span class="ow">and</span> <span class="n">will</span> <span class="n">cause</span> <span class="n">the</span> <span class="n">mapping</span> <span class="n">to</span> <span class="n">ignore</span>
+<span class="n">voxels</span> <span class="n">that</span> <span class="n">don</span><span class="s1">&#39;t have a positive value in the mask.  The subdivision</span>
+<span class="n">number</span> <span class="n">specifies</span> <span class="n">how</span> <span class="n">it</span> <span class="n">approximates</span> <span class="n">the</span> <span class="n">amount</span> <span class="n">of</span> <span class="n">the</span> <span class="n">volume</span> <span class="n">the</span>
+<span class="n">polyhedron</span> <span class="n">intersects</span><span class="p">,</span> <span class="n">by</span> <span class="n">splitting</span> <span class="n">each</span> <span class="n">voxel</span> <span class="n">into</span> <span class="n">NxNxN</span> <span class="n">pieces</span><span class="p">,</span> <span class="ow">and</span>
+<span class="n">checking</span> <span class="n">whether</span> <span class="n">the</span> <span class="n">center</span> <span class="n">of</span> <span class="n">each</span> <span class="n">piece</span> <span class="ow">is</span> <span class="n">inside</span> <span class="n">the</span> <span class="n">polyhedron</span><span class="o">.</span>  <span class="n">If</span>
+<span class="n">you</span> <span class="n">have</span> <span class="n">very</span> <span class="n">large</span> <span class="n">voxels</span><span class="p">,</span> <span class="n">consider</span> <span class="n">increasing</span> <span class="n">this</span> <span class="k">if</span> <span class="n">you</span> <span class="n">get</span> <span class="n">zeros</span> <span class="ow">in</span>
+<span class="n">your</span> <span class="n">output</span><span class="o">.</span>  <span class="n">The</span> <span class="o">-</span><span class="n">gaussian</span> <span class="n">option</span> <span class="n">makes</span> <span class="n">it</span> <span class="n">act</span> <span class="n">more</span> <span class="n">like</span> <span class="n">the</span> <span class="n">myelin</span>
+<span class="n">method</span><span class="p">,</span> <span class="n">where</span> <span class="n">the</span> <span class="n">distance</span> <span class="n">of</span> <span class="n">a</span> <span class="n">voxel</span> <span class="kn">from</span> <span class="o">&lt;</span><span class="n">surface</span><span class="o">&gt;</span> <span class="ow">is</span> <span class="n">used</span> <span class="n">to</span>
+<span class="n">downweight</span> <span class="n">the</span> <span class="n">voxel</span><span class="o">.</span>  <span class="n">The</span> <span class="o">-</span><span class="n">interpolate</span> <span class="n">suboption</span><span class="p">,</span> <span class="n">instead</span> <span class="n">of</span> <span class="n">doing</span> <span class="n">a</span>
+<span class="n">weighted</span> <span class="n">average</span> <span class="n">of</span> <span class="n">voxels</span><span class="p">,</span> <span class="n">interpolates</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">volume</span> <span class="n">at</span> <span class="n">the</span>
+<span class="n">subdivided</span> <span class="n">points</span> <span class="n">inside</span> <span class="n">the</span> <span class="n">ribbon</span><span class="o">.</span>  <span class="n">If</span> <span class="n">using</span> <span class="n">both</span> <span class="o">-</span><span class="n">interpolate</span> <span class="ow">and</span> <span class="n">the</span>
+<span class="o">-</span><span class="n">weighted</span> <span class="n">suboption</span> <span class="n">to</span> <span class="o">-</span><span class="n">volume</span><span class="o">-</span><span class="n">roi</span><span class="p">,</span> <span class="n">the</span> <span class="n">roi</span> <span class="n">volume</span> <span class="n">weights</span> <span class="n">are</span> <span class="n">linearly</span>
+<span class="n">interpolated</span><span class="p">,</span> <span class="n">unless</span> <span class="n">the</span> <span class="o">-</span><span class="n">interpolate</span> <span class="n">method</span> <span class="ow">is</span> <span class="n">ENCLOSING_VOXEL</span><span class="p">,</span> <span class="ow">in</span> <span class="n">which</span>
+<span class="k">case</span> <span class="n">ENCLOSING_VOXEL</span> <span class="ow">is</span> <span class="n">also</span> <span class="n">used</span> <span class="k">for</span> <span class="n">sampling</span> <span class="n">the</span> <span class="n">roi</span> <span class="n">volume</span> <span class="n">weights</span><span class="o">.</span>
+
+<span class="n">The</span> <span class="n">myelin</span> <span class="n">style</span> <span class="n">method</span> <span class="n">uses</span> <span class="n">part</span> <span class="n">of</span> <span class="n">the</span> <span class="n">caret5</span> <span class="n">myelin</span> <span class="n">mapping</span> <span class="n">command</span> <span class="n">to</span>
+<span class="n">do</span> <span class="n">the</span> <span class="n">mapping</span><span class="p">:</span> <span class="k">for</span> <span class="n">each</span> <span class="n">surface</span> <span class="n">vertex</span><span class="p">,</span> <span class="n">take</span> <span class="nb">all</span> <span class="n">voxels</span> <span class="n">that</span> <span class="n">are</span> <span class="ow">in</span> <span class="n">a</span>
+<span class="n">cylinder</span> <span class="k">with</span> <span class="n">radius</span> <span class="ow">and</span> <span class="n">height</span> <span class="n">equal</span> <span class="n">to</span> <span class="n">cortical</span> <span class="n">thickness</span><span class="p">,</span> <span class="n">centered</span> <span class="n">on</span>
+<span class="n">the</span> <span class="n">vertex</span> <span class="ow">and</span> <span class="n">aligned</span> <span class="k">with</span> <span class="n">the</span> <span class="n">surface</span> <span class="n">normal</span><span class="p">,</span> <span class="ow">and</span> <span class="n">that</span> <span class="n">are</span> <span class="n">also</span> <span class="n">within</span>
+<span class="n">the</span> <span class="n">ribbon</span> <span class="n">ROI</span><span class="p">,</span> <span class="ow">and</span> <span class="n">apply</span> <span class="n">a</span> <span class="n">gaussian</span> <span class="n">kernel</span> <span class="k">with</span> <span class="n">the</span> <span class="n">specified</span> <span class="n">sigma</span> <span class="n">to</span>
+<span class="n">them</span> <span class="n">to</span> <span class="n">get</span> <span class="n">the</span> <span class="n">weights</span> <span class="n">to</span> <span class="n">use</span><span class="o">.</span>  <span class="n">The</span> <span class="o">-</span><span class="n">legacy</span><span class="o">-</span><span class="n">bug</span> <span class="n">flag</span> <span class="n">reverts</span> <span class="n">to</span> <span class="n">the</span>
+<span class="n">unintended</span> <span class="n">behavior</span> <span class="n">present</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">initial</span> <span class="n">implementation</span> <span class="n">up</span> <span class="n">to</span> <span class="ow">and</span>
+<span class="n">including</span> <span class="n">v1</span><span class="mf">.2.3</span><span class="p">,</span> <span class="n">which</span> <span class="n">had</span> <span class="n">only</span> <span class="n">the</span> <span class="n">tangential</span> <span class="n">cutoff</span> <span class="ow">and</span> <span class="n">a</span> <span class="n">bounding</span> <span class="n">box</span>
+<span class="n">intended</span> <span class="n">to</span> <span class="n">be</span> <span class="n">larger</span> <span class="n">than</span> <span class="n">where</span> <span class="n">the</span> <span class="n">cylinder</span> <span class="n">cutoff</span> <span class="n">should</span> <span class="n">have</span> <span class="n">been</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Examples:
+&gt;&gt;&gt; from niworkflows.interfaces.workbench import VolumeToSurfaceMapping
+&gt;&gt;&gt; vol2surf = VolumeToSurfaceMapping()
+&gt;&gt;&gt; vol2surf.inputs.volume_file = ‘bold.nii.gz’
+&gt;&gt;&gt; vol2surf.inputs.surface_file = ‘lh.midthickness.surf.gii’
+&gt;&gt;&gt; vol2surf.inputs.method = ‘ribbon-constrained’
+&gt;&gt;&gt; vol2surf.inputs.inner_surface = ‘lh.white.surf.gii’
+&gt;&gt;&gt; vol2surf.inputs.outer_surface = ‘lh.pial.surf.gii’
+&gt;&gt;&gt; vol2surf.cmdline  # doctest: +NORMALIZE_WHITESPACE
+‘wb_command -volume-to-surface-mapping bold.nii.gz lh.midthickness.surf.gii     lh.midthickness.surf_mapped.func.gii -ribbon-constrained lh.white.surf.gii lh.pial.surf.gii’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>surface_file</strong> (<em>a pathlike object or string representing an existing file</em>) – The surface to map the data onto.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 2).</p></li>
+<li><p><strong>volume_file</strong> (<em>a pathlike object or string representing an existing file</em>) – The volume to map data from.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>bad_vertices_out</strong> (<em>a pathlike object or string representing a file</em>) – Output an ROI of which vertices didn’t intersect any valid voxels.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-bad-vertices-out</span> <span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">ribbon_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>, <code class="docutils literal notranslate"><span class="pre">legacy_bug</span></code>.</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>gaussian</strong> (<em>a float</em>) – Reduce weight to voxels that aren’t near &lt;surface&gt; [-ribbon-constrained].
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-gaussian</span> <span class="pre">%g</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">ribbon_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>, <code class="docutils literal notranslate"><span class="pre">legacy_bug</span></code>.</p></li>
+<li><p><strong>inner_surface</strong> (<em>a pathlike object or string representing an existing file</em>) – The inner surface of the ribbon [-ribbon-constrained].
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 5).
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">ribbon_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>, <code class="docutils literal notranslate"><span class="pre">legacy_bug</span></code>.</p></li>
+<li><p><strong>interpolate</strong> (<em>‘CUBIC’ or ‘TRILINEAR’ or ‘ENCLOSING_VOXEL’</em>) – Instead of a weighted average of voxels, interpolate at subpoints inside the ribbon [-ribbon-constrained].
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-interpolate</span> <span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">ribbon_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>, <code class="docutils literal notranslate"><span class="pre">legacy_bug</span></code>.</p></li>
+<li><p><strong>legacy_bug</strong> (<em>a boolean</em>) – Use the old bug in the myelin-style algorithm [-myelin-style].
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-legacy-bug</span></code> (position: 8).
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">inner_surface</span></code>, <code class="docutils literal notranslate"><span class="pre">outer_surface</span></code>, <code class="docutils literal notranslate"><span class="pre">volume_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">weighted</span></code>, <code class="docutils literal notranslate"><span class="pre">voxel_subdiv</span></code>, <code class="docutils literal notranslate"><span class="pre">gaussian</span></code>, <code class="docutils literal notranslate"><span class="pre">interpolate</span></code>, <code class="docutils literal notranslate"><span class="pre">bad_vertices_out</span></code>, <code class="docutils literal notranslate"><span class="pre">output_weights</span></code>, <code class="docutils literal notranslate"><span class="pre">output_weights_text</span></code>.</p></li>
+<li><p><strong>method</strong> (<em>‘trilinear’ or ‘enclosing’ or ‘cubic’ or ‘ribbon-constrained’ or ‘myelin-style’</em>) – The interpolation method to use.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-%s</span></code> (position: 4).</p></li>
+<li><p><strong>num_threads</strong> (<em>an integer</em>) – Allows for specifying more threads.</p></li>
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – The output metric file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 3).</p></li>
+<li><p><strong>outer_surface</strong> (<em>a pathlike object or string representing an existing file</em>) – The outer surface of the ribbon [-ribbon-constrained].
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 6).
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">ribbon_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>, <code class="docutils literal notranslate"><span class="pre">legacy_bug</span></code>.</p></li>
+<li><p><strong>output_weights</strong> (<em>an integer</em>) – Write the voxel weights for a vertex to a volume file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-output-weights</span> <span class="pre">%(0)d</span> <span class="pre">output_weights.nii.gz</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">ribbon_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>, <code class="docutils literal notranslate"><span class="pre">legacy_bug</span></code>.</p></li>
+<li><p><strong>output_weights_text</strong> (<em>a string or os.PathLike object</em>) – Write the voxel weights for all vertices to a text file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-output-weights-text</span> <span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">ribbon_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>, <code class="docutils literal notranslate"><span class="pre">legacy_bug</span></code>.</p></li>
+<li><p><strong>ribbon_roi</strong> (<em>a pathlike object or string representing an existing file</em>) – An roi volume of the cortical ribbon for this hemisphere [-myelin-style].
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 5).
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">inner_surface</span></code>, <code class="docutils literal notranslate"><span class="pre">outer_surface</span></code>, <code class="docutils literal notranslate"><span class="pre">volume_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">weighted</span></code>, <code class="docutils literal notranslate"><span class="pre">voxel_subdiv</span></code>, <code class="docutils literal notranslate"><span class="pre">gaussian</span></code>, <code class="docutils literal notranslate"><span class="pre">interpolate</span></code>, <code class="docutils literal notranslate"><span class="pre">bad_vertices_out</span></code>, <code class="docutils literal notranslate"><span class="pre">output_weights</span></code>, <code class="docutils literal notranslate"><span class="pre">output_weights_text</span></code>.</p></li>
+<li><p><strong>sigma</strong> (<em>a float</em>) – Gaussian kernel in mm for weighting voxels within range [-myelin-style].
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%g</span></code> (position: 7).
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">inner_surface</span></code>, <code class="docutils literal notranslate"><span class="pre">outer_surface</span></code>, <code class="docutils literal notranslate"><span class="pre">volume_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">weighted</span></code>, <code class="docutils literal notranslate"><span class="pre">voxel_subdiv</span></code>, <code class="docutils literal notranslate"><span class="pre">gaussian</span></code>, <code class="docutils literal notranslate"><span class="pre">interpolate</span></code>, <code class="docutils literal notranslate"><span class="pre">bad_vertices_out</span></code>, <code class="docutils literal notranslate"><span class="pre">output_weights</span></code>, <code class="docutils literal notranslate"><span class="pre">output_weights_text</span></code>.</p></li>
+<li><p><strong>subvol_select</strong> (<em>an integer</em>) – Select a single subvolume to map.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-subvol-select</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>thickness</strong> (<em>a pathlike object or string representing an existing file</em>) – The thickness metric file for this hemisphere [-myelin-style].
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code> (position: 6).
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">inner_surface</span></code>, <code class="docutils literal notranslate"><span class="pre">outer_surface</span></code>, <code class="docutils literal notranslate"><span class="pre">volume_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">weighted</span></code>, <code class="docutils literal notranslate"><span class="pre">voxel_subdiv</span></code>, <code class="docutils literal notranslate"><span class="pre">gaussian</span></code>, <code class="docutils literal notranslate"><span class="pre">interpolate</span></code>, <code class="docutils literal notranslate"><span class="pre">bad_vertices_out</span></code>, <code class="docutils literal notranslate"><span class="pre">output_weights</span></code>, <code class="docutils literal notranslate"><span class="pre">output_weights_text</span></code>.</p></li>
+<li><p><strong>thin_columns</strong> (<em>a boolean</em>) – Use non-overlapping polyhedra [-ribbon-constrained].
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-thin-columns</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">ribbon_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>, <code class="docutils literal notranslate"><span class="pre">legacy_bug</span></code>.</p></li>
+<li><p><strong>volume_roi</strong> (<em>a pathlike object or string representing an existing file</em>) – Use a volume roi [-ribbon-constrained].
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-volume-roi</span> <span class="pre">%s</span></code> (position: 7).
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">ribbon_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>, <code class="docutils literal notranslate"><span class="pre">legacy_bug</span></code>.</p></li>
+<li><p><strong>voxel_subdiv</strong> (<em>an integer</em>) – Voxel divisions while estimating voxel weights [-ribbon-constrained].
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-voxel-subdiv</span> <span class="pre">%d</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">ribbon_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>, <code class="docutils literal notranslate"><span class="pre">legacy_bug</span></code>.</p></li>
+<li><p><strong>weighted</strong> (<em>a boolean</em>) – Treat the roi values as weightings rather than binary [-ribbon-constrained].
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-weighted</span></code> (position: 8).
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">ribbon_roi</span></code>, <code class="docutils literal notranslate"><span class="pre">thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">sigma</span></code>, <code class="docutils literal notranslate"><span class="pre">legacy_bug</span></code>.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">volume_roi</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bad_vertices_file</strong> (<em>a pathlike object or string representing a file</em>) – The output metric file of vertices that have no data.</p></li>
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – The output metric file.</p></li>
+<li><p><strong>weights_file</strong> (<em>a pathlike object or string representing a file</em>) – Volume to write the weights to.</p></li>
+<li><p><strong>weights_text_file</strong> (<em>a pathlike object or string representing a file</em>) – The output text filename.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="niworkflows.reports.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">niworkflows.reports package</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="niworkflows.interfaces.utility.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">niworkflows.interfaces.utility module</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Copyright 2023, The NiPreps Developers
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">niworkflows.interfaces.workbench module</a><ul>
+<li><a class="reference internal" href="#niworkflows.interfaces.workbench.MetricDilate"><code class="docutils literal notranslate"><span class="pre">MetricDilate</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.workbench.MetricFillHoles"><code class="docutils literal notranslate"><span class="pre">MetricFillHoles</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.workbench.MetricMask"><code class="docutils literal notranslate"><span class="pre">MetricMask</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.workbench.MetricRemoveIslands"><code class="docutils literal notranslate"><span class="pre">MetricRemoveIslands</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.workbench.MetricResample"><code class="docutils literal notranslate"><span class="pre">MetricResample</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.workbench.OpenMPCommandMixin"><code class="docutils literal notranslate"><span class="pre">OpenMPCommandMixin</span></code></a><ul>
+<li><a class="reference internal" href="#niworkflows.interfaces.workbench.OpenMPCommandMixin.run"><code class="docutils literal notranslate"><span class="pre">OpenMPCommandMixin.run()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#niworkflows.interfaces.workbench.VolumeToSurfaceMapping"><code class="docutils literal notranslate"><span class="pre">VolumeToSurfaceMapping</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../_static/js/version-switch.js?v=b7149f84"></script>
+    </body>
+</html>

@@ -1,0 +1,7 @@
+niworkflows.interfaces.probmaps module
+======================================
+
+.. automodule:: niworkflows.interfaces.probmaps
+   :members:
+   :undoc-members:
+   :show-inheritance:
