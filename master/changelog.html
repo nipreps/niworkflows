@@ -288,6 +288,31 @@
         <article role="main">
           <section id="what-s-new">
 <h1>What’s new?<a class="headerlink" href="#what-s-new" title="Link to this heading">#</a></h1>
+<section id="december-13-2023">
+<h2>1.10.0 (December 13, 2023)<a class="headerlink" href="#december-13-2023" title="Link to this heading">#</a></h2>
+<p>New feature release in the 1.10.x series.</p>
+<p>This release has several improvements targeting ASLPrep and MRIQC, particularly
+around BIDS tooling and workflow plugins.
+We also drop our use of Convert3D in favor of nitransforms, allowing downstream
+projects to remove this non-Python dependency as needed.</p>
+<p>Some fixes change workflow structure, so please test before upgrading.</p>
+<ul class="simple">
+<li><p>FIX: Copy header to ensure mask is really aligned (#844)</p></li>
+<li><p>FIX: Correctly use <code class="docutils literal notranslate"><span class="pre">ignore_initial_volumes</span></code> in <code class="docutils literal notranslate"><span class="pre">ConfoundsCorrelationPlot</span></code> (#846)</p></li>
+<li><p>FIX: Add DWI to the default queries of BIDS querying (#833)</p></li>
+<li><p>ENH: Add <code class="docutils literal notranslate"><span class="pre">ignore_initial_volumes</span></code> param to <code class="docutils literal notranslate"><span class="pre">ConfoundsCorrelationPlot</span></code> (#843)</p></li>
+<li><p>ENH: Add MRIQC’s custom multiproc runner that allows passing the pool (#841)</p></li>
+<li><p>ENH: Upstream debugging hook from MRIQC (#842)</p></li>
+<li><p>ENH: Add ASL support in BIDS utilities (#839)</p></li>
+<li><p>ENH: Add hemi entity to transform path patterns (#832)</p></li>
+<li><p>RF: Replace Convert3d with nitransforms in MCFLIRT2ITK (#835)</p></li>
+<li><p>DOC: fix typo in refmap.py (#837)</p></li>
+<li><p>STY: Assorted refurb suggestions (#831)</p></li>
+<li><p>MNT: <a class="reference external" href="http://">http://</a> → <a class="reference external" href="https://">https://</a> (#828)</p></li>
+<li><p>CI: Bump actions/setup-python from 4 to 5 (#845)</p></li>
+<li><p>CI: Bump conda-incubator/setup-miniconda from 2 to 3 (#840)</p></li>
+</ul>
+</section>
 <section id="october-12-2023">
 <h2>1.9.0 (October 12, 2023)<a class="headerlink" href="#october-12-2023" title="Link to this heading">#</a></h2>
 <p>New feature release in the 1.9.x series.</p>
@@ -1862,6 +1887,7 @@ used with the nonlinear-asym-09c template for the carpetplot</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">What’s new?</a><ul>
+<li><a class="reference internal" href="#december-13-2023">1.10.0 (December 13, 2023)</a></li>
 <li><a class="reference internal" href="#october-12-2023">1.9.0 (October 12, 2023)</a></li>
 <li><a class="reference internal" href="#june-29-2023">1.8.1 (June 29, 2023)</a></li>
 <li><a class="reference internal" href="#june-01-2023">1.8.0 (June 01, 2023)</a></li>
