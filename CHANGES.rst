@@ -1,3 +1,29 @@
+1.10.0 (December 13, 2023)
+==========================
+New feature release in the 1.10.x series.
+
+This release has several improvements targeting ASLPrep and MRIQC, particularly
+around BIDS tooling and workflow plugins.
+We also drop our use of Convert3D in favor of nitransforms, allowing downstream
+projects to remove this non-Python dependency as needed.
+
+Some fixes change workflow structure, so please test before upgrading.
+
+* FIX: Copy header to ensure mask is really aligned (#844)
+* FIX: Correctly use ``ignore_initial_volumes`` in ``ConfoundsCorrelationPlot`` (#846)
+* FIX: Add DWI to the default queries of BIDS querying (#833)
+* ENH: Add ``ignore_initial_volumes`` param to ``ConfoundsCorrelationPlot`` (#843)
+* ENH: Add MRIQC's custom multiproc runner that allows passing the pool (#841)
+* ENH: Upstream debugging hook from MRIQC (#842)
+* ENH: Add ASL support in BIDS utilities (#839)
+* ENH: Add hemi entity to transform path patterns (#832)
+* RF: Replace Convert3d with nitransforms in MCFLIRT2ITK (#835)
+* DOC: fix typo in refmap.py (#837)
+* STY: Assorted refurb suggestions (#831)
+* MNT: http:// → https:// (#828)
+* CI: Bump actions/setup-python from 4 to 5 (#845)
+* CI: Bump conda-incubator/setup-miniconda from 2 to 3 (#840)
+
 1.9.0 (October 12, 2023)
 ========================
 New feature release in the 1.9.x series.
