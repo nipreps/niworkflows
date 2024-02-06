@@ -192,6 +192,8 @@ jobs:
       run: pytest -sv --doctest-modules --cov niworkflows --pyargs niworkflows
     - uses: codecov/codecov-action@v4
       name: Submit to CodeCov
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
 
   test-pre:
     needs: [get_data, job_metadata]
@@ -246,6 +248,8 @@ jobs:
     - name: Run tests
       run: pytest -sv --doctest-modules --cov niworkflows --pyargs niworkflows
     - uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
       name: Submit to CodeCov
 
   flake8:
