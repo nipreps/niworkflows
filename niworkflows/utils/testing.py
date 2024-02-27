@@ -74,14 +74,17 @@ def generate_bids_skeleton(target_path, bids_config):
 
                 for bids_file in files:
                     metadata = bids_file.pop("metadata", None)
+                    extension = bids_file.pop("extension", ".nii.gz")
                     suffix = bids_file.pop("suffix")
                     entities = combine_entities(**bids_file)
-                    nii_file = modality_path / f"{bids_prefix}{entities}_{suffix}.nii.gz"
-                    nii_file.touch()
+                    data_file = modality_path / f"{bids_prefix}{entities}_{suffix}{extension}"
+                    data_file.touch()
 
                     if metadata is not None:
-                        nii_metadata = nii_file.parent / nii_file.name.replace("nii.gz", "json")
-                        to_json(nii_metadata, metadata)
+                        out_metadata = data_file.parent / data_file.name.replace(
+                            extension, ".json"
+                        )
+                        to_json(out_metadata, metadata)
 
     return _bids_dict
 
