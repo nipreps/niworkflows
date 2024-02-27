@@ -363,14 +363,17 @@
 
                 <span class="k">for</span> <span class="n">bids_file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
                     <span class="n">metadata</span> <span class="o">=</span> <span class="n">bids_file</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="n">extension</span> <span class="o">=</span> <span class="n">bids_file</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;extension&quot;</span><span class="p">,</span> <span class="s2">&quot;.nii.gz&quot;</span><span class="p">)</span>
                     <span class="n">suffix</span> <span class="o">=</span> <span class="n">bids_file</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;suffix&quot;</span><span class="p">)</span>
                     <span class="n">entities</span> <span class="o">=</span> <span class="n">combine_entities</span><span class="p">(</span><span class="o">**</span><span class="n">bids_file</span><span class="p">)</span>
-                    <span class="n">nii_file</span> <span class="o">=</span> <span class="n">modality_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bids_prefix</span><span class="si">}{</span><span class="n">entities</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">.nii.gz&quot;</span>
-                    <span class="n">nii_file</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+                    <span class="n">data_file</span> <span class="o">=</span> <span class="n">modality_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bids_prefix</span><span class="si">}{</span><span class="n">entities</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}{</span><span class="n">extension</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">data_file</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
 
                     <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">nii_metadata</span> <span class="o">=</span> <span class="n">nii_file</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">nii_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;nii.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span>
-                        <span class="n">to_json</span><span class="p">(</span><span class="n">nii_metadata</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
+                        <span class="n">out_metadata</span> <span class="o">=</span> <span class="n">data_file</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">data_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                            <span class="n">extension</span><span class="p">,</span> <span class="s2">&quot;.json&quot;</span>
+                        <span class="p">)</span>
+                        <span class="n">to_json</span><span class="p">(</span><span class="n">out_metadata</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">_bids_dict</span></div>
 
