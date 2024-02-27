@@ -81,7 +81,9 @@ def generate_bids_skeleton(target_path, bids_config):
                     data_file.touch()
 
                     if metadata is not None:
-                        out_metadata = data_file.parent / data_file.name.replace(extension, ".json")
+                        out_metadata = data_file.parent / data_file.name.replace(
+                            extension, ".json"
+                        )
                         to_json(out_metadata, metadata)
 
     return _bids_dict
