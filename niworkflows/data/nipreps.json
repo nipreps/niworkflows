@@ -71,7 +71,7 @@
     },
     {
       "name": "space",
-      "pattern": "[_/\\\\]+space-([a-zA-Z0-9]+)"
+      "pattern": "[_/\\\\]+space-([a-zA-Z0-9\\+]+)"
     },
     {
       "name": "suffix",
@@ -115,15 +115,15 @@
     },
     {
       "name": "from",
-      "pattern": "(?:^|_)from-([a-zA-Z0-9]+).*xfm"
+      "pattern": "(?:^|_)from-([a-zA-Z0-9\\+]+).*xfm"
     },
     {
       "name": "to",
-      "pattern": "(?:^|_)to-([a-zA-Z0-9]+).*xfm"
+      "pattern": "(?:^|_)to-([a-zA-Z0-9\\+]+).*xfm"
     },
     {
       "name": "mode",
-      "pattern": "(?:^|_)mode-(image|points)xfm"
+      "pattern": "(?:^|_)mode-(image|points).*xfm"
     },
     {
       "name": "hemi",
