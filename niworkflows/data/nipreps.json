@@ -71,7 +71,7 @@
     },
     {
       "name": "space",
-      "pattern": "[_/\\\\]+space-([a-zA-Z0-9]+)"
+      "pattern": "[_/\\\\]+space-([a-zA-Z0-9\\+]+)"
     },
     {
       "name": "suffix",
