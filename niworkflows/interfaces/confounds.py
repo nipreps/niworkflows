@@ -154,7 +154,7 @@ class _SpikeRegressorsInputSpec(BaseInterfaceInputSpec):
     dvars_thresh = traits.Float(
         1.5,
         usedefault=True,
-        desc="Minimum standardised DVARS threshold for flagging a frame as " "a spike.",
+        desc="Minimum standardised DVARS threshold for flagging a frame as a spike.",
     )
     header_prefix = traits.Str(
         "motion_outlier",
@@ -165,7 +165,7 @@ class _SpikeRegressorsInputSpec(BaseInterfaceInputSpec):
         traits.Int,
         value=[0],
         usedefault=True,
-        desc="Relative indices of lagging frames to flag for " "each flagged frame",
+        desc="Relative indices of lagging frames to flag for each flagged frame",
     )
     minimum_contiguous = traits.Either(
         None,
