@@ -400,6 +400,6 @@ def _create_cifti_image(
     img.set_data_dtype(bold_img.get_data_dtype())
     img.nifti_header.set_intent("NIFTI_INTENT_CONNECTIVITY_DENSE_SERIES")
 
-    out_file = "{}.dtseries.nii".format(split_filename(bold_file)[1])
+    out_file = f"{split_filename(bold_file)[1]}.dtseries.nii"
     ci.save(img, out_file)
     return Path.cwd() / out_file
