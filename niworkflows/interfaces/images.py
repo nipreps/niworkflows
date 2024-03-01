@@ -672,7 +672,7 @@ class _SignalExtractionInputSpec(BaseInterfaceInputSpec):
         "signals.tsv",
         usedefault=True,
         exists=False,
-        desc="The name of the file to output to. " "signals.tsv by default",
+        desc="The name of the file to output to. signals.tsv by default",
     )
 
 

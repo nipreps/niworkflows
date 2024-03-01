@@ -445,12 +445,12 @@ class _TSV2JSONInputSpec(BaseInterfaceInputSpec):
         None,
         traits.List(),
         usedefault=True,
-        desc="List of columns in the TSV to be " "dropped from the JSON.",
+        desc="List of columns in the TSV to be dropped from the JSON.",
     )
     enforce_case = traits.Bool(
         True,
         usedefault=True,
-        desc="Enforce snake case for top-level keys " "and camel case for nested keys",
+        desc="Enforce snake case for top-level keys and camel case for nested keys",
     )
 
 
