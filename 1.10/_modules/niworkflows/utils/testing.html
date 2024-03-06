@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
+    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
         <title>niworkflows.utils.testing - niworkflows 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
@@ -363,14 +363,17 @@
 
                 <span class="k">for</span> <span class="n">bids_file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
                     <span class="n">metadata</span> <span class="o">=</span> <span class="n">bids_file</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="n">extension</span> <span class="o">=</span> <span class="n">bids_file</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;extension&quot;</span><span class="p">,</span> <span class="s2">&quot;.nii.gz&quot;</span><span class="p">)</span>
                     <span class="n">suffix</span> <span class="o">=</span> <span class="n">bids_file</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;suffix&quot;</span><span class="p">)</span>
                     <span class="n">entities</span> <span class="o">=</span> <span class="n">combine_entities</span><span class="p">(</span><span class="o">**</span><span class="n">bids_file</span><span class="p">)</span>
-                    <span class="n">nii_file</span> <span class="o">=</span> <span class="n">modality_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bids_prefix</span><span class="si">}{</span><span class="n">entities</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">.nii.gz&quot;</span>
-                    <span class="n">nii_file</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+                    <span class="n">data_file</span> <span class="o">=</span> <span class="n">modality_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bids_prefix</span><span class="si">}{</span><span class="n">entities</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}{</span><span class="n">extension</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">data_file</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
 
                     <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">nii_metadata</span> <span class="o">=</span> <span class="n">nii_file</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">nii_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;nii.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span>
-                        <span class="n">to_json</span><span class="p">(</span><span class="n">nii_metadata</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
+                        <span class="n">out_metadata</span> <span class="o">=</span> <span class="n">data_file</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">data_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                            <span class="n">extension</span><span class="p">,</span> <span class="s2">&quot;.json&quot;</span>
+                        <span class="p">)</span>
+                        <span class="n">to_json</span><span class="p">(</span><span class="n">out_metadata</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">_bids_dict</span></div>
 
@@ -402,7 +405,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2023, The NiPreps Developers
+                Copyright &#169; Copyright 2024, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
