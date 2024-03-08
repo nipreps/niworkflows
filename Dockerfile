@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2022 The NiPreps Developers
+# Copyright (c) The NiPreps Developers
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 # Ubuntu 22.04 LTS - Jammy
-ARG BASE_IMAGE=ubuntu:jammy-20230308
+ARG BASE_IMAGE=ubuntu:jammy-20240125
 
 #
 # Build wheel
@@ -42,7 +42,7 @@ RUN python -m build /src
 # Utilities for downloading packages
 FROM ${BASE_IMAGE} as downloader
 # Bump the date to current to refresh curl/certificates/etc
-RUN echo "2023.12.12"
+RUN echo "2024.03.08"
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
                     binutils \
@@ -61,7 +61,7 @@ RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.3.2/frees
 # AFNI
 FROM downloader as afni
 # Bump the date to current to update AFNI
-RUN echo "2023.07.20"
+RUN echo "2024.03.08"
 RUN mkdir -p /opt/afni-latest \
     && curl -fsSL --retry 5 https://afni.nimh.nih.gov/pub/dist/tgz/linux_openmp_64.tgz \
     | tar -xz -C /opt/afni-latest --strip-components 1 \
@@ -81,9 +81,16 @@ RUN mkdir -p /opt/afni-latest \
 
 # Micromamba
 FROM downloader as micromamba
+
+# Install a C compiler to build extensions when needed.
+# traits<6.4 wheels are not available for Python 3.11+, but build easily.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends build-essential && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 WORKDIR /
 # Bump the date to current to force update micromamba
-RUN echo "2023.04.05"
+RUN echo "2024.03.08"
 RUN curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
 
 ENV MAMBA_ROOT_PREFIX="/opt/conda"
