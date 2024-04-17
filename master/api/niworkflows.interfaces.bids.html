@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.interfaces.bold module" href="niworkflows.interfaces.bold.html" /><link rel="prev" title="niworkflows.interfaces.reportlets.segmentation module" href="niworkflows.interfaces.reportlets.segmentation.html" />
 
-    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
+    <!-- Generated with Sphinx 7.3.5 and Furo 2024.01.29 -->
         <title>niworkflows.interfaces.bids module - niworkflows 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
@@ -287,11 +287,11 @@
         </div>
         <article role="main">
           <section id="module-niworkflows.interfaces.bids">
-<span id="niworkflows-interfaces-bids-module"></span><h1>niworkflows.interfaces.bids module<a class="headerlink" href="#module-niworkflows.interfaces.bids" title="Link to this heading">#</a></h1>
+<span id="niworkflows-interfaces-bids-module"></span><h1>niworkflows.interfaces.bids module<a class="headerlink" href="#module-niworkflows.interfaces.bids" title="Link to this heading">¶</a></h1>
 <p>Interfaces for handling BIDS-like neuroimaging structures.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="niworkflows.interfaces.bids.BIDSDataGrabber">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">BIDSDataGrabber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#BIDSDataGrabber"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.BIDSDataGrabber" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">BIDSDataGrabber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#BIDSDataGrabber"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.BIDSDataGrabber" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
 <p>Collect files from a BIDS directory structure.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bids_src</span> <span class="o">=</span> <span class="n">BIDSDataGrabber</span><span class="p">(</span><span class="n">anat_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -331,7 +331,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="niworkflows.interfaces.bids.BIDSFreeSurferDir">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">BIDSFreeSurferDir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#BIDSFreeSurferDir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.BIDSFreeSurferDir" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">BIDSFreeSurferDir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#BIDSFreeSurferDir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.BIDSFreeSurferDir" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
 <p>Prepare a FreeSurfer subjects directory for use in a BIDS context.</p>
 <p>Constructs a subjects directory path, creating if necessary, and copies
@@ -370,7 +370,7 @@ other FreeSurfer interfaces.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="niworkflows.interfaces.bids.BIDSInfo">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">BIDSInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#BIDSInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.BIDSInfo" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">BIDSInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#BIDSInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.BIDSInfo" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
 <p>Extract BIDS entities from a BIDS-conforming path.</p>
 <p>This interface uses only the basename, not the path, to determine the
@@ -474,7 +474,7 @@ subject, session, task, run, acquisition or reconstruction.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="niworkflows.interfaces.bids.BIDSInfo.output_spec">
-<span class="sig-name descname"><span class="pre">output_spec</span></span><a class="headerlink" href="#niworkflows.interfaces.bids.BIDSInfo.output_spec" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">output_spec</span></span><a class="headerlink" href="#niworkflows.interfaces.bids.BIDSInfo.output_spec" title="Link to this definition">¶</a></dt>
 <dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">_BIDSInfoOutputSpec</span></code></p>
 </dd></dl>
 
@@ -482,7 +482,7 @@ subject, session, task, run, acquisition or reconstruction.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="niworkflows.interfaces.bids.DerivativesDataSink">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">DerivativesDataSink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allowed_entities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#DerivativesDataSink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.DerivativesDataSink" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">DerivativesDataSink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allowed_entities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#DerivativesDataSink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.DerivativesDataSink" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
 <p>Store derivative files.</p>
 <p>Saves the <code class="docutils literal notranslate"><span class="pre">in_file</span></code> into a BIDS-Derivatives folder provided
@@ -688,14 +688,14 @@ a single image, the session entity is removed automatically.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="niworkflows.interfaces.bids.DerivativesDataSink.out_path_base">
-<span class="sig-name descname"><span class="pre">out_path_base</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'niworkflows'</span></em><a class="headerlink" href="#niworkflows.interfaces.bids.DerivativesDataSink.out_path_base" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">out_path_base</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'niworkflows'</span></em><a class="headerlink" href="#niworkflows.interfaces.bids.DerivativesDataSink.out_path_base" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="niworkflows.interfaces.bids.ReadSidecarJSON">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">ReadSidecarJSON</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#ReadSidecarJSON"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.ReadSidecarJSON" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">ReadSidecarJSON</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#ReadSidecarJSON"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.ReadSidecarJSON" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
 <p>Read JSON sidecar files of a BIDS tree.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fmap</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datadir</span> <span class="o">/</span> <span class="s1">&#39;ds054&#39;</span> <span class="o">/</span> <span class="s1">&#39;sub-100185&#39;</span> <span class="o">/</span> <span class="s1">&#39;fmap&#39;</span> <span class="o">/</span>
@@ -762,12 +762,12 @@ a single image, the session entity is removed automatically.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="niworkflows.interfaces.bids.ReadSidecarJSON.layout">
-<span class="sig-name descname"><span class="pre">layout</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#niworkflows.interfaces.bids.ReadSidecarJSON.layout" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">layout</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#niworkflows.interfaces.bids.ReadSidecarJSON.layout" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="niworkflows.interfaces.bids.ReadSidecarJSON.output_spec">
-<span class="sig-name descname"><span class="pre">output_spec</span></span><a class="headerlink" href="#niworkflows.interfaces.bids.ReadSidecarJSON.output_spec" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">output_spec</span></span><a class="headerlink" href="#niworkflows.interfaces.bids.ReadSidecarJSON.output_spec" title="Link to this definition">¶</a></dt>
 <dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">_ReadSidecarJSONOutputSpec</span></code></p>
 </dd></dl>
 
@@ -858,7 +858,7 @@ a single image, the session entity is removed automatically.</p>
     </aside>
   </div>
 </div><script src="../_static/documentation_options.js?v=27db1736"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script src="../_static/js/version-switch.js?v=b7149f84"></script>
