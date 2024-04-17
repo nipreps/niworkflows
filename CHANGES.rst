@@ -1,3 +1,10 @@
+1.10.1 (March 06, 2024)
+=======================
+Bug-fix release in the 1.10.x series
+
+* ENH: Allow alternative ``extensions`` when creating a BIDS skeleton (#858)
+* ENH: Parsing for ``space+cohort`` structure (#857)
+
 1.10.0 (December 13, 2023)
 ==========================
 New feature release in the 1.10.x series.
