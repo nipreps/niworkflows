@@ -16,6 +16,7 @@ It will:
 .. [1] https://github.com/numpy/numpydoc
 
 """
+
 from copy import deepcopy
 import re
 import pydoc
@@ -24,17 +25,17 @@ from collections.abc import Callable
 import hashlib
 import itertools
 
-from docutils.nodes import citation, Text, section, comment, reference
+from docutils.nodes import citation, Text, section, comment, reference, inline
 import sphinx
 from sphinx.addnodes import pending_xref, desc_content
 from sphinx.util import logging
 from sphinx.errors import ExtensionError
 
-if sphinx.__version__ < "4.2":
-    raise RuntimeError("Sphinx 4.2 or newer is required")
+if sphinx.__version__ < "5":
+    raise RuntimeError("Sphinx 5 or newer is required")
 
 from .docscrape_sphinx import get_doc_object
-from .validate import validate, ERROR_MSGS
+from .validate import validate, ERROR_MSGS, get_validation_checks
 from .xref import DEFAULT_LINKS
 from . import __version__
 
@@ -149,6 +150,10 @@ def clean_backrefs(app, doc, docname):
     for ref in _traverse_or_findall(doc, reference, descend=True):
         for id_ in ref["ids"]:
             known_ref_ids.add(id_)
+    # some extensions produce backrefs to inline elements
+    for ref in _traverse_or_findall(doc, inline, descend=True):
+        for id_ in ref["ids"]:
+            known_ref_ids.add(id_)
     for citation_node in _traverse_or_findall(doc, citation, descend=True):
         # remove backrefs to non-existent refs
         citation_node["backrefs"] = [
@@ -207,7 +212,19 @@ def mangle_docstrings(app, what, name, obj, options, lines):
                 # TODO: Currently, all validation checks are run and only those
                 # selected via config are reported. It would be more efficient to
                 # only run the selected checks.
-                errors = validate(doc)["errors"]
+                report = validate(doc)
+                errors = [
+                    err
+                    for err in report["errors"]
+                    if not (
+                        (
+                            overrides := app.config.numpydoc_validation_overrides.get(
+                                err[0]
+                            )
+                        )
+                        and re.search(overrides, report["docstring"])
+                    )
+                ]
                 if {err[0] for err in errors} & app.config.numpydoc_validation_checks:
                     msg = (
                         f"[numpydoc] Validation warnings while processing "
@@ -285,6 +302,7 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_config_value("numpydoc_xref_ignore", set(), True)
     app.add_config_value("numpydoc_validation_checks", set(), True)
     app.add_config_value("numpydoc_validation_exclude", set(), False)
+    app.add_config_value("numpydoc_validation_overrides", dict(), False)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
@@ -310,17 +328,9 @@ def update_config(app, config=None):
 
     # Processing to determine whether numpydoc_validation_checks is treated
     # as a blocklist or allowlist
-    valid_error_codes = set(ERROR_MSGS.keys())
-    if "all" in config.numpydoc_validation_checks:
-        block = deepcopy(config.numpydoc_validation_checks)
-        config.numpydoc_validation_checks = valid_error_codes - block
-    # Ensure that the validation check set contains only valid error codes
-    invalid_error_codes = config.numpydoc_validation_checks - valid_error_codes
-    if invalid_error_codes:
-        raise ValueError(
-            f"Unrecognized validation code(s) in numpydoc_validation_checks "
-            f"config value: {invalid_error_codes}"
-        )
+    config.numpydoc_validation_checks = get_validation_checks(
+        config.numpydoc_validation_checks
+    )
 
     # Generate the regexp for docstrings to ignore during validation
     if isinstance(config.numpydoc_validation_exclude, str):
@@ -334,6 +344,11 @@ def update_config(app, config=None):
             r"|".join(exp for exp in config.numpydoc_validation_exclude)
         )
         config.numpydoc_validation_excluder = exclude_expr
+
+    for check, patterns in config.numpydoc_validation_overrides.items():
+        config.numpydoc_validation_overrides[check] = re.compile(
+            r"|".join(exp for exp in patterns)
+        )
 
 
 # ------------------------------------------------------------------------------
