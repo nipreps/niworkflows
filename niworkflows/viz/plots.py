@@ -691,7 +691,7 @@ def confoundplot(
     if cutoff is None:
         cutoff = []
 
-    for i, thr in enumerate(cutoff):
+    for thr in cutoff:
         ax_ts.plot((0, ntsteps - 1), [thr] * 2, linewidth=0.2, color="dimgray")
 
         ax_ts.annotate(
