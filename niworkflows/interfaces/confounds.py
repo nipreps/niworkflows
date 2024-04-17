@@ -24,6 +24,7 @@
 import os
 import re
 import numpy as np
+import operator
 import pandas as pd
 from functools import reduce
 from collections import deque, OrderedDict
@@ -295,7 +296,7 @@ def spike_regressors(
             mask[metric] = set(np.where(data[metric] < threshold)[0])
         elif criterion == ">":
             mask[metric] = set(np.where(data[metric] > threshold)[0])
-    mask = reduce((lambda x, y: x | y), mask.values())
+    mask = reduce(operator.or_, mask.values())
 
     for lag in lags:
         mask = set([m + lag for m in mask]) | mask
@@ -362,7 +363,7 @@ def temporal_derivatives(order, variables, data):
         variables_deriv[o] = ["{}_derivative{}".format(v, o) for v in variables]
         data_deriv[o] = np.tile(np.nan, data[variables].shape)
         data_deriv[o][o:, :] = np.diff(data[variables], n=o, axis=0)
-    variables_deriv = reduce((lambda x, y: x + y), variables_deriv.values())
+    variables_deriv = reduce(operator.add, variables_deriv.values())
     data_deriv = pd.DataFrame(
         columns=variables_deriv, data=np.concatenate([*data_deriv.values()], axis=1)
     )
@@ -404,7 +405,7 @@ def exponential_terms(order, variables, data):
     for o in order:
         variables_exp[o] = ["{}_power{}".format(v, o) for v in variables]
         data_exp[o] = data[variables] ** o
-    variables_exp = reduce((lambda x, y: x + y), variables_exp.values())
+    variables_exp = reduce(operator.add, variables_exp.values())
     data_exp = pd.DataFrame(
         columns=variables_exp, data=np.concatenate([*data_exp.values()], axis=1)
     )
@@ -570,7 +571,7 @@ def _unscramble_regressor_columns(parent_data, data):
             var[col].appendleft(c)
         else:
             var[col].append(c)
-    unscrambled = reduce((lambda x, y: x + y), var.values())
+    unscrambled = reduce(operator.add, var.values())
     return data[[*unscrambled]]
 
 
@@ -649,7 +650,7 @@ def parse_formula(model_formula, parent_data, unscramble=False):
             (variables[expression], data[expression]) = parse_expression(
                 expression, parent_data
             )
-    variables = list(set(reduce((lambda x, y: x + y), variables.values())))
+    variables = list(set(reduce(operator.add, variables.values())))
     data = pd.concat((data.values()), axis=1)
 
     if unscramble:
