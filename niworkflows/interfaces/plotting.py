@@ -120,7 +120,7 @@ class _CompCorVariancePlotInputSpec(BaseInterfaceInputSpec):
     metadata_files = traits.List(
         File(exists=True),
         mandatory=True,
-        desc="List of files containing component " "metadata",
+        desc="List of files containing component metadata",
     )
     metadata_sources = traits.List(
         traits.Str,
@@ -133,7 +133,7 @@ class _CompCorVariancePlotInputSpec(BaseInterfaceInputSpec):
         traits.Float(0.7),
         traits.Float(0.9),
         usedefault=True,
-        desc="Levels of explained variance to include in " "plot",
+        desc="Levels of explained variance to include in plot",
     )
     out_file = traits.Either(
         None, File, value=None, usedefault=True, desc="Path to save plot"

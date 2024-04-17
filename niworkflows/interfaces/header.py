@@ -382,7 +382,7 @@ class _SanitizeImageInputSpec(BaseInterfaceInputSpec):
     max_32bit = traits.Bool(
         False,
         usedefault=True,
-        desc="cast data to float32 if higher " "precision is encountered",
+        desc="cast data to float32 if higher precision is encountered",
     )
 
 
