@@ -27,6 +27,7 @@ import nibabel as nb
 import pandas as pd
 
 import matplotlib.pyplot as plt
+from matplotlib import colormaps
 from matplotlib import gridspec as mgs
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
@@ -200,9 +201,9 @@ def plot_carpet(
         legend = False
 
     if cmap is None:
-        colors = cm.get_cmap("tab10").colors
+        colors = colormaps["tab10"].colors
     elif cmap == "paired":
-        colors = list(cm.get_cmap("Paired").colors)
+        colors = list(colormaps["Paired"].colors)
         colors[0], colors[1] = colors[1], colors[0]
         colors[2], colors[7] = colors[7], colors[2]
 
@@ -397,7 +398,7 @@ def spikesplot(
     ntsteps = ts_z.shape[1]
 
     # Load a colormap
-    my_cmap = cm.get_cmap(cmap)
+    my_cmap = colormaps[cmap]
     norm = Normalize(vmin=0, vmax=float(nslices - 1))
     colors = [my_cmap(norm(sl)) for sl in range(nslices)]
 
@@ -525,7 +526,7 @@ def spikesplot_cb(position, cmap="viridis", fig=None):
     cax = fig.add_axes(position)
     cb = ColorbarBase(
         cax,
-        cmap=cm.get_cmap(cmap),
+        cmap=colormaps[cmap],
         spacing="proportional",
         orientation="horizontal",
         drawedges=False,
