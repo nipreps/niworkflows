@@ -71,7 +71,7 @@ def listify(value):
     """
     from pathlib import Path
     from nipype.interfaces.base import isdefined
-    if not isdefined(value) or isinstance(value, type(None)):
+    if not isdefined(value) or value is None:
         return value
     if isinstance(value, (str, bytes, Path)):
         return [str(value)]
