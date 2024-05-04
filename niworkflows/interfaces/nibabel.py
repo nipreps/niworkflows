@@ -234,7 +234,7 @@ class MergeSeries(SimpleInterface):
                 continue
             else:
                 raise ValueError(
-                    "Input image has an incorrect number of dimensions" f" ({ndim})."
+                    f"Input image has an incorrect number of dimensions ({ndim})."
                 )
 
         img_4d = nb.concat_images(
