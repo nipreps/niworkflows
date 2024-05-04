@@ -566,7 +566,7 @@ def plot_melodic_components(
                 tr = tr / 1000000.0
             elif units[-1] != "sec":
                 NIWORKFLOWS_LOG.warning(
-                    "Unknown repetition time units " "specified - assuming seconds"
+                    "Unknown repetition time units specified - assuming seconds"
                 )
         else:
             NIWORKFLOWS_LOG.warning(
