@@ -29,6 +29,13 @@ from nipype.interfaces.base import (
     SimpleInterface
 )
 
+has_gradunwarp = False
+try:
+    from gradunwarp.core.gradient_unwarp import GradientUnwarpRunner
+    has_gradunwarp = True
+except ImportError:
+    pass
+
 
 class _GradUnwarpInputSpec(TraitedSpec):
     infile = File(exists=True, mandatory=True, desc="input image to be corrected")
@@ -63,7 +70,9 @@ class GradUnwarp(SimpleInterface):
 
     def _run_interface(self, runtime):
 
-        from gradunwarp.core.gradient_unwarp import GradientUnwarpRunner
+        if not has_gradunwarp:
+            raise RuntimeError('missing gradunwarp dependency')
+
         gur = GradientUnwarpRunner(self.inputs)
         gur.run()
         gur.write()

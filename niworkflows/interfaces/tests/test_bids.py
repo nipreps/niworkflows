@@ -300,11 +300,7 @@ def test_DerivativesDataSink_build_path(
         **entities,
     )
 
-<<<<<<< HEAD
     if isinstance(expectation, type):
-=======
-    if type(expectation) is type(Exception):
->>>>>>> 601d1d1f (fix flake8 tests)
         with pytest.raises(expectation):
             dds.run()
         return
