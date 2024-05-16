@@ -42,4 +42,4 @@ data_dir_canary, needs_data_dir = create_canary(
 has_fsl = fsl.Info.version() is not None
 has_freesurfer = fs.Info.version() is not None
 has_afni = afni.Info.version() is not None
-has_gradunwarp = gradunwarp.has_gradunwarp
+has_gradunwarp = gradunwarp.GradUnwarp.version()

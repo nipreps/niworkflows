@@ -29,24 +29,11 @@ from nipype.interfaces.base import (
     SimpleInterface
 )
 
-has_gradunwarp = False
-try:
-    from gradunwarp.core.gradient_unwarp import GradientUnwarpRunner
-    has_gradunwarp = True
-except ImportError:
-    pass
-
-
 class _GradUnwarpInputSpec(TraitedSpec):
     infile = File(exists=True, mandatory=True, desc="input image to be corrected")
     gradfile = File(exists=True, default=None, desc="gradient file")
     coeffile = File(exists=True, default=None, desc="coefficients file")
-    outfile = File(
-        name_source=['in_file'],
-        name_template=['%s_gradunwarped'],
-        keep_extension=True,
-        desc="output corrected image"
-    )
+    outfile = File("gradunwarped.nii.gz", mandatory=True, usedefault=True, desc="output corrected image")
     vendor = traits.Enum("siemens", "ge", usedefault=True, desc="scanner vendor")
     warp = traits.Bool(desc="warp a volume (as opposed to unwarping)")
     nojac = traits.Bool(desc="Do not perform Jacobian intensity correction")
@@ -68,11 +55,18 @@ class GradUnwarp(SimpleInterface):
     input_spec = _GradUnwarpInputSpec
     output_spec = _GradUnwarpOutputSpec
 
+    def version():
+        try:
+            import gradunwarp
+        except ImportError:
+            return
+        return gradunwarp.__version__
+
     def _run_interface(self, runtime):
 
-        if not has_gradunwarp:
+        if not GradUnwarp.version():
             raise RuntimeError('missing gradunwarp dependency')
-
+        from gradunwarp.core.gradient_unwarp import GradientUnwarpRunner
         gur = GradientUnwarpRunner(self.inputs)
         gur.run()
         gur.write()
