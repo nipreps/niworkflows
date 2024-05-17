@@ -46,7 +46,7 @@ dependencies = [
     "templateflow >= 0.7.2",
     "traits < 6.4",
     "transforms3d",
-    "gradunwarp@https://github.com/bpinsard/gradunwarp/archive/refs/heads/master.zip",
+    "gradunwarp@https://github.com/nipreps/gradunwarp/archive/refs/heads/master.zip",
 ]
 
 [project.optional-dependencies]
