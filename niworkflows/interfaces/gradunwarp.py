@@ -29,11 +29,17 @@ from nipype.interfaces.base import (
     SimpleInterface
 )
 
+
 class _GradUnwarpInputSpec(TraitedSpec):
     infile = File(exists=True, mandatory=True, desc="input image to be corrected")
     gradfile = File(exists=True, default=None, desc="gradient file")
     coeffile = File(exists=True, default=None, desc="coefficients file")
-    outfile = File("gradunwarped.nii.gz", mandatory=True, usedefault=True, desc="output corrected image")
+    outfile = File(
+        "gradunwarped.nii.gz",
+        mandatory=True,
+        usedefault=True,
+        desc="output corrected image"
+    )
     vendor = traits.Enum("siemens", "ge", usedefault=True, desc="scanner vendor")
     warp = traits.Bool(desc="warp a volume (as opposed to unwarping)")
     nojac = traits.Bool(desc="Do not perform Jacobian intensity correction")

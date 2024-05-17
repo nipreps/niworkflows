@@ -33,7 +33,7 @@ dependencies = [
     "nilearn >= 0.5.2",
     "nipype >= 1.8.5",
 #    "nitransforms >= 21.0.0",
-    "nitransforms@https://github.com/bpinsard/nitransforms/archive/refs/heads/enh/output_displacement_field.zip",
+    "nitransforms@https://github.com/nipy/nitransforms/archive/refs/heads/master.zip",
     "numpy",
     "packaging",
     "pandas",
