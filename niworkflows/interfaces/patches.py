@@ -27,6 +27,8 @@ from time import sleep
 
 from numpy.linalg.linalg import LinAlgError
 from nipype.algorithms import confounds as nac
+from nipype.interfaces import io as nio
+from nipype.interfaces.base import File
 
 
 class RobustACompCor(nac.ACompCor):
@@ -73,3 +75,15 @@ class RobustTCompCor(nac.TCompCor):
                 sleep(randint(start + 4, start + 10))
 
         return runtime
+
+
+class _FSSourceOutputSpec(nio.FSSourceOutputSpec):
+    T2 = File(desc='Intensity normalized whole-head volume', loc='mri')
+
+
+class FreeSurferSource(nio.FreeSurferSource):
+    """
+    Patch to allow grabbing the T2 volume, if available
+    """
+
+    output_spec = _FSSourceOutputSpec
