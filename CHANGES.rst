@@ -7,7 +7,7 @@ Bug-fix release in the 1.10.x series
 * STY: Remove extraneous quotes (#859)
 * STY: Apply assorted ruff/refurb rules (#867)
 * MNT: update vendored docs files (#834)
-* MNT: Fix deprectation error in CI (#866)
+* MNT: Fix deprecation error in CI (#866)
 
 1.10.1 (March 06, 2024)
 =======================
