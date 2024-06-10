@@ -1,3 +1,14 @@
+1.10.2 (June 10, 2024)
+======================
+Bug-fix release in the 1.10.x series
+
+* ENH: Modify FSSource to output T2 (#868)
+* STY: Apply ruff/flake8-implicit-str-concat rule ISC001 (#870)
+* STY: Remove extraneous quotes (#859)
+* STY: Apply assorted ruff/refurb rules (#867)
+* MNT: update vendored docs files (#834)
+* MNT: Fix deprectation error in CI (#866)
+
 1.10.1 (March 06, 2024)
 =======================
 Bug-fix release in the 1.10.x series
