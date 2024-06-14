@@ -68,7 +68,7 @@ class FixHeaderApplyTransforms(ApplyTransforms):
         _copyxform(
             self.inputs.reference_image,
             os.path.abspath(self._gen_filename("output_image")),
-            message="%s (niworkflows v%s)" % (self.__class__.__name__, __version__),
+            message=f"{self.__class__.__name__} (niworkflows v{__version__})",
         )
         return runtime
 
@@ -110,7 +110,7 @@ class FixHeaderRegistration(Registration):
             _copyxform(
                 self.inputs.fixed_image[0],
                 os.path.abspath(out_file),
-                message="%s (niworkflows v%s)" % (self.__class__.__name__, __version__),
+                message=f"{self.__class__.__name__} (niworkflows v{__version__})",
             )
 
         # Inverse transform
@@ -119,7 +119,7 @@ class FixHeaderRegistration(Registration):
             _copyxform(
                 self.inputs.moving_image[0],
                 os.path.abspath(out_file),
-                message="%s (niworkflows v%s)" % (self.__class__.__name__, __version__),
+                message=f"{self.__class__.__name__} (niworkflows v{__version__})",
             )
 
         return runtime

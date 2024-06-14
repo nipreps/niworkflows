@@ -115,20 +115,17 @@ def get_template_specs(
     tpl_target_path = tf.get(in_template, **template_spec)
     if not tpl_target_path:
         raise RuntimeError(
-            """\
-Could not find template "{0}" with specs={1}. Please revise your template \
-argument.""".format(
-                in_template, template_spec
-            )
+            f"""\
+Could not find template "{in_template}" with specs={template_spec}. \
+Please revise your template argument."""
         )
 
     if isinstance(tpl_target_path, list):
+        tpl_target_path = ", ".join([str(p) for p in tpl_target_path])
         raise RuntimeError(
-            """\
-The available template modifiers ({0}) did not select a unique template \
-(got "{1}"). Please revise your template argument.""".format(
-                template_spec, ", ".join([str(p) for p in tpl_target_path])
-            )
+            f"""\
+The available template modifiers ({template_spec}) did not select a unique \
+template (got "{tpl_target_path}"). Please revise your template argument."""
         )
 
     return str(tpl_target_path), common_spec
