@@ -22,7 +22,6 @@
 #
 """A lightweight NiPype MultiProc execution plugin."""
 
-# Import packages
 import os
 import sys
 from copy import deepcopy
@@ -31,6 +30,8 @@ import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor
 from traceback import format_exception
 import gc
+
+from nipype.utils.misc import str2bool
 
 
 # Run node
@@ -239,8 +240,6 @@ class DistributedPluginBase(PluginBase):
         raise NotImplementedError
 
     def _clean_queue(self, jobid, graph, result=None):
-        from mriqc import config
-
         if self._status_callback:
             self._status_callback(self.procs[jobid], "exception")
         if result is None:
@@ -250,7 +249,7 @@ class DistributedPluginBase(PluginBase):
             }
 
         crashfile = self._report_crash(self.procs[jobid], result=result)
-        if config.nipype.stop_on_first_crash:
+        if str2bool(self._config["execution"]["stop_on_first_crash"]):
             raise RuntimeError("".join(result["traceback"]))
         if jobid in self.mapnodesubids:
             # remove current jobid
@@ -292,9 +291,7 @@ class DistributedPluginBase(PluginBase):
         return False
 
     def _local_hash_check(self, jobid, graph):
-        from mriqc import config
-
-        if not config.nipype.local_hash_check:
+        if not str2bool(self.procs[jobid].config["execution"]["local_hash_check"]):
             return False
 
         try:
@@ -368,9 +365,8 @@ class DistributedPluginBase(PluginBase):
         """Remove directories whose outputs have already been used up."""
         import numpy as np
         from shutil import rmtree
-        from mriqc import config
 
-        if config.nipype.remove_node_directories:
+        if str2bool(self._config["execution"]["remove_node_directories"]):
             indices = np.nonzero((self.refidx.sum(axis=1) == 0).__array__())[0]
             for idx in indices:
                 if idx in self.mapnodesubids:
@@ -413,8 +409,6 @@ class MultiProcPlugin(DistributedPluginBase):
             A Nipype-compatible dictionary of settings.
 
         """
-        from mriqc import config
-
         super().__init__(plugin_args=plugin_args)
         self._taskresult = {}
         self._task_obj = {}
@@ -423,6 +417,24 @@ class MultiProcPlugin(DistributedPluginBase):
         # Cache current working directory and make sure we
         # change to it when workers are set up
         self._cwd = os.getcwd()
+
+        # Retrieve a nipreps-style configuration object
+        try:
+            config = plugin_args["app_config"]
+        except (KeyError, TypeError):
+            from types import SimpleNamespace
+            from nipype.utils.profiler import get_system_total_memory_gb
+
+            config = SimpleNamespace(
+                environment=SimpleNamespace(
+                    # Nipype default
+                    total_memory=get_system_total_memory_gb()
+                ),
+                # concurrent.futures default
+                _process_initializer=None,
+                # Just needs to exist
+                file_path=None,
+            )
 
         # Read in options or set defaults.
         self.processors = self.plugin_args.get("n_procs", mp.cpu_count())
