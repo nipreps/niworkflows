@@ -78,11 +78,15 @@ def test_plugin_args_noconfig(workflow, caplog):
     )
 
 
-def test_plugin_app_config(workflow, caplog):
+def test_plugin_app_config(workflow, caplog, capsys):
     """Test the plugin works with a nipreps-style configuration."""
+
+    def init_print():
+        print("Custom init")
+
     app_config = SimpleNamespace(
         environment=SimpleNamespace(total_memory_gb=1),
-        _process_initializer=lambda x: None,
+        _process_initializer=init_print(),
         file_path='/does/not/need/to/exist/for/testing',
     )
     caplog.set_level(logging.CRITICAL, logger="nipype.workflow")
@@ -90,3 +94,6 @@ def test_plugin_app_config(workflow, caplog):
         plugin=MultiProcPlugin(),
         plugin_args={"n_procs": 2, "app_config": app_config},
     )
+
+    captured = capsys.readouterr()
+    assert "Custom init" in captured.out
