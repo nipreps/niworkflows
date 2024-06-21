@@ -367,7 +367,6 @@
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;A lightweight NiPype MultiProc execution plugin.&quot;&quot;&quot;</span>
 
-<span class="c1"># Import packages</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
@@ -376,6 +375,8 @@
 <span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
 <span class="kn">from</span> <span class="nn">traceback</span> <span class="kn">import</span> <span class="n">format_exception</span>
 <span class="kn">import</span> <span class="nn">gc</span>
+
+<span class="kn">from</span> <span class="nn">nipype.utils.misc</span> <span class="kn">import</span> <span class="n">str2bool</span>
 
 
 <span class="c1"># Run node</span>
@@ -598,8 +599,6 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
     <span class="k">def</span> <span class="nf">_clean_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jobid</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">mriqc</span> <span class="kn">import</span> <span class="n">config</span>
-
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_callback</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_status_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">],</span> <span class="s2">&quot;exception&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -609,7 +608,7 @@
             <span class="p">}</span>
 
         <span class="n">crashfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_report_crash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">],</span> <span class="n">result</span><span class="o">=</span><span class="n">result</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">nipype</span><span class="o">.</span><span class="n">stop_on_first_crash</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">str2bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s2">&quot;execution&quot;</span><span class="p">][</span><span class="s2">&quot;stop_on_first_crash&quot;</span><span class="p">]):</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;traceback&quot;</span><span class="p">]))</span>
         <span class="k">if</span> <span class="n">jobid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapnodesubids</span><span class="p">:</span>
             <span class="c1"># remove current jobid</span>
@@ -651,9 +650,7 @@
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">_local_hash_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jobid</span><span class="p">,</span> <span class="n">graph</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">mriqc</span> <span class="kn">import</span> <span class="n">config</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">nipype</span><span class="o">.</span><span class="n">local_hash_check</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">str2bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;execution&quot;</span><span class="p">][</span><span class="s2">&quot;local_hash_check&quot;</span><span class="p">]):</span>
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -727,9 +724,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove directories whose outputs have already been used up.&quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
         <span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">rmtree</span>
-        <span class="kn">from</span> <span class="nn">mriqc</span> <span class="kn">import</span> <span class="n">config</span>
 
-        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">nipype</span><span class="o">.</span><span class="n">remove_node_directories</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">str2bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s2">&quot;execution&quot;</span><span class="p">][</span><span class="s2">&quot;remove_node_directories&quot;</span><span class="p">]):</span>
             <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">refidx</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">__array__</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapnodesubids</span><span class="p">:</span>
@@ -775,8 +771,6 @@
 <span class="sd">            A Nipype-compatible dictionary of settings.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">mriqc</span> <span class="kn">import</span> <span class="n">config</span>
-
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">plugin_args</span><span class="o">=</span><span class="n">plugin_args</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_taskresult</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_obj</span> <span class="o">=</span> <span class="p">{}</span>
@@ -785,6 +779,24 @@
         <span class="c1"># Cache current working directory and make sure we</span>
         <span class="c1"># change to it when workers are set up</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+        <span class="c1"># Retrieve a nipreps-style configuration object</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">plugin_args</span><span class="p">[</span><span class="s2">&quot;app_config&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">SimpleNamespace</span>
+            <span class="kn">from</span> <span class="nn">nipype.utils.profiler</span> <span class="kn">import</span> <span class="n">get_system_total_memory_gb</span>
+
+            <span class="n">config</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span>
+                <span class="n">environment</span><span class="o">=</span><span class="n">SimpleNamespace</span><span class="p">(</span>
+                    <span class="c1"># Nipype default</span>
+                    <span class="n">total_memory</span><span class="o">=</span><span class="n">get_system_total_memory_gb</span><span class="p">()</span>
+                <span class="p">),</span>
+                <span class="c1"># concurrent.futures default</span>
+                <span class="n">_process_initializer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="c1"># Just needs to exist</span>
+                <span class="n">file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># Read in options or set defaults.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">processors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;n_procs&quot;</span><span class="p">,</span> <span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())</span>
