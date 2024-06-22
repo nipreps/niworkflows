@@ -724,6 +724,8 @@ def _advanced_clip(
 
     hdr = img.header.copy()
     hdr.set_data_dtype(dtype)
+    hdr["cal_max"] = data.max()
+
     img.__class__(data, img.affine, hdr).to_filename(out_file)
 
     return str(out_file)
