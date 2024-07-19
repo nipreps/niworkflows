@@ -75,7 +75,7 @@ def test_plugin_args_noconfig(workflow, caplog):
     workflow.run(plugin=MultiProcPlugin(plugin_args={"n_procs": 2, "memory_gb": 0.1}))
 
 
-def touch_file(file_path):
+def touch_file(file_path: str) -> None:
     """Module-level functions play more nicely with multiprocessing."""
     with open(file_path, "w") as f:
         f.write("flag")
@@ -89,7 +89,7 @@ def test_plugin_app_config(tmp_path, workflow, caplog):
     app_config = SimpleNamespace(
         environment=SimpleNamespace(total_memory=1),
         _process_initializer=touch_file,
-        file_path=init_flag,
+        file_path=str(init_flag),
     )
     caplog.set_level(logging.INFO, logger="nipype.workflow")
     workflow.run(
