@@ -22,6 +22,7 @@
 #
 """Test images module."""
 import time
+from pathlib import Path
 import numpy as np
 import nibabel as nb
 from nipype.pipeline import engine as pe
@@ -179,3 +180,38 @@ def test_RobustAverage(tmpdir, shape):
 
     assert out_file.shape == (10, 10, 10)
     assert np.allclose(out_file.get_fdata(), 1.0)
+
+
+def test_TemplateDimensions(tmp_path):
+    """Exercise the various types of inputs."""
+    shapes = [
+        (10, 10, 10),
+        (11, 11, 11),
+    ]
+    zooms = [
+        (1, 1, 1),
+        (0.9, 0.9, 0.9),
+    ]
+
+    for i, (shape, zoom) in enumerate(zip(shapes, zooms)):
+        img = nb.Nifti1Image(np.ones(shape, dtype="float32"), np.eye(4))
+        img.header.set_zooms(zoom)
+        img.to_filename(tmp_path / f"test{i}.nii")
+
+    anat_list = [str(tmp_path / f"test{i}.nii") for i in range(2)]
+    td = im.TemplateDimensions(anat_list=anat_list)
+    res = td.run()
+
+    report = Path(res.outputs.out_report).read_text()
+    assert "Input T1w images: 2" in report
+    assert "Output dimensions: 11x11x11" in report
+    assert "Output voxel size: 0.9mm x 0.9mm x 0.9mm" in report
+    assert "Discarded images: 0" in report
+
+    assert res.outputs.t1w_valid_list == anat_list
+    assert res.outputs.anat_valid_list == anat_list
+    assert np.allclose(res.outputs.target_zooms, (0.9, 0.9, 0.9))
+    assert res.outputs.target_shape == (11, 11, 11)
+
+    with pytest.warns(UserWarning, match="t1w_list .* is deprecated"):
+        im.TemplateDimensions(t1w_list=anat_list)
