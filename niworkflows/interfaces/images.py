@@ -380,10 +380,11 @@ DISCARD_TEMPLATE = """\t\t\t\t<li><abbr title="{path}">{basename}</abbr></li>"""
 class _TemplateDimensionsInputSpec(BaseInterfaceInputSpec):
     anat_type = traits.Enum("T1w", "T2w", usedefault=True, desc="Anatomical image type")
     anat_list = InputMultiObject(
-        File(exists=True), xor="t1w_list", desc="input anatomical images"
+        File(exists=True), xor=["t1w_list"], desc="input anatomical images"
     )
     t1w_list = InputMultiObject(
-        xor="anat_list",
+        File(exists=True),
+        xor=["anat_list"],
         deprecated="1.14.0",
         new_name="anat_list",
     )
@@ -393,7 +394,7 @@ class _TemplateDimensionsInputSpec(BaseInterfaceInputSpec):
 
 
 class _TemplateDimensionsOutputSpec(TraitedSpec):
-    t1w_valid_list = OutputMultiObject(exists=True, deprecated="1.14.0", desc="valid T1w images")
+    t1w_valid_list = OutputMultiObject(exists=True, desc="valid T1w images")
     anat_valid_list = OutputMultiObject(exists=True, desc="valid anatomical images")
     target_zooms = traits.Tuple(
         traits.Float, traits.Float, traits.Float, desc="Target zoom information"
