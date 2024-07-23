@@ -168,9 +168,25 @@ class Reference:
         if self.space.startswith("fs"):
             object.__setattr__(self, "dim", 2)
 
+        if "volspace" in self.spec:
+            volspace = self.spec["volspace"]
+            if (self.space in self._standard_spaces) and (volspace not in self._standard_spaces):
+                raise ValueError(
+                    f"Surface space ({self.space}) is a standard space, "
+                    f"but volume space ({volspace}) is not. "
+                    "Mixing standard and non-standard spaces is not currently allowed."
+                )
+            elif (self.space not in self._standard_spaces) and (volspace in self._standard_spaces):
+                raise ValueError(
+                    f"Surface space ({self.space}) is a non-standard space, "
+                    f"but volume space ({volspace}) is a standard space. "
+                    "Mixing standard and non-standard spaces is not currently allowed."
+                )
+
         if self.space in self._standard_spaces:
             object.__setattr__(self, "standard", True)
 
+        # Check that cohort is handled appropriately
         _cohorts = ["%s" % t for t in _tfapi.TF_LAYOUT.get_cohorts(template=self.space)]
         if "cohort" in self.spec:
             if not _cohorts:
@@ -191,6 +207,30 @@ class Reference:
                 "Set a valid cohort selector from: %s." % (self.space, _cohorts)
             )
 
+        # Check that cohort is handled appropriately for the volume template if necessary
+        if "volspace" in self.spec:
+            _cohorts = [
+                "%s" % t for t in _tfapi.TF_LAYOUT.get_cohorts(template=self.spec["volspace"])
+            ]
+            if "volcohort" in self.spec:
+                if not _cohorts:
+                    raise ValueError(
+                        'standard space "%s" does not accept a cohort '
+                        "specification." % self.spec["volspace"]
+                    )
+
+                if str(self.spec["volcohort"]) not in _cohorts:
+                    raise ValueError(
+                        'standard space "%s" does not contain any cohort '
+                        'named "%s".' % (self.spec["volspace"], self.spec["volcohort"])
+                    )
+            elif _cohorts:
+                _cohorts = ", ".join(['"cohort-%s"' % c for c in _cohorts])
+                raise ValueError(
+                    'standard space "%s" is not fully defined.\n'
+                    "Set a valid cohort selector from: %s." % (self.spec["volspace"], _cohorts)
+                )
+
     @property
     def fullname(self):
         """
@@ -205,9 +245,17 @@ class Reference:
         'MNIPediatricAsym:cohort-1'
 
         """
-        if "cohort" not in self.spec:
-            return self.space
-        return "%s:cohort-%s" % (self.space, self.spec["cohort"])
+        name = self.space
+
+        if "cohort" in self.spec:
+            name += f":cohort-{self.spec['cohort']}"
+
+        if "volspace" in self.spec:
+            name += f"::{self.spec['volspace']}"
+            if "volcohort" in self.spec:
+                name += f":cohort-{self.spec['volcohort']}"
+
+        return name
 
     @property
     def legacyname(self):
@@ -330,12 +378,36 @@ class Reference:
          Reference(space='MNIPediatricAsym', spec={'cohort': '6', 'res': '2'}),
          Reference(space='MNIPediatricAsym', spec={'cohort': '6', 'res': 'iso1.6mm'})]
 
+        >>> Reference.from_string(
+        ...     "dhcpAsym:cohort-42:den-32k::dhcpVol:cohort-44:res-2"
+        ... )  # doctest: +NORMALIZE_WHITESPACE
+        [Reference(space='dhcpAsym', spec={'cohort': '42', 'den': '32k', 'volspace': 'dhcpVol',
+        'volcohort': '44', 'res': '2'})]
+
         """
+        volume_value = None
+        if "::" in value:
+            # CIFTI definition with both surface and volume spaces defined
+            value, volume_value = value.split("::")
+            # We treat the surface space definition as the "primary" space
+            _args = value.split(":")
+
         _args = value.split(":")
         spec = defaultdict(list, {})
         for modifier in _args[1:]:
             mitems = modifier.split("-", 1)
             spec[mitems[0]].append(len(mitems) == 1 or mitems[1])
+
+        if volume_value:
+            # Tack on the volume space definition to the surface space definition
+            volume_args = volume_value.split(":")
+            # There are two special entities to prevent overloading: volspace and volcohort
+            spec["volspace"] = [volume_args[0]]
+            for modifier in volume_args[1:]:
+                mitems = modifier.split("-", 1)
+                if mitems[0] == "cohort":
+                    mitems[0] = "volcohort"
+                spec[mitems[0]].append(len(mitems) == 1 or mitems[1])
 
         allspecs = _expand_entities(spec)
 
