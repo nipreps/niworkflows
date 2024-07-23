@@ -82,6 +82,10 @@ def parser():
             ),
         ),
         (("MNI152NLin6Asym", "func"), ("MNI152NLin6Asym:res-native", "func")),
+        (
+            ("dhcpAsym:cohort-42:den-32k::dhcpVol:cohort-44:res-2",),
+            ("dhcpAsym:cohort-42:den-32k:volspace-dhcpVol:volcohort-44:res-2",),
+        ),
     ],
 )
 def test_space_action(parser, spaces, expected):
