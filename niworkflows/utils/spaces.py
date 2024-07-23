@@ -148,6 +148,8 @@ class Reference:
     """The dictionary of specs."""
     standard = attr.ib(default=False, repr=False, type=bool)
     """Whether this space is standard or not."""
+    cifti = attr.ib(default=False, repr=False, type=bool)
+    """Whether this space is a CIFTI space or not."""
     dim = attr.ib(default=3, repr=False, type=int)
     """Dimensionality of the sampling manifold."""
 
@@ -165,6 +167,7 @@ class Reference:
                 spec["den"] = FSAVERAGE_DENSITY[space]
                 object.__setattr__(self, "spec", spec)
 
+        # XXX: This won't cover dhcpAsym, dhcpSym, or onavg
         if self.space.startswith("fs"):
             object.__setattr__(self, "dim", 2)
 
@@ -185,6 +188,9 @@ class Reference:
 
         if self.space in self._standard_spaces:
             object.__setattr__(self, "standard", True)
+
+        if "volspace" in self.spec:
+            object.__setattr__(self, "cifti", True)
 
         # Check that cohort is handled appropriately
         _cohorts = ["%s" % t for t in _tfapi.TF_LAYOUT.get_cohorts(template=self.space)]
