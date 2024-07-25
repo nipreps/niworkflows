@@ -4,11 +4,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
+    <!-- Generated with Sphinx 7.4.7 and Furo 2024.07.18 -->
         <title>niworkflows.interfaces.images - niworkflows 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=387cc868" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=613ab9ff" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=302659d7" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css?v=45d66e8a" />
     
     
@@ -88,19 +88,6 @@
       <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
     </svg>
   </symbol>
-  <symbol id="svg-sun-half" viewBox="0 0 24 24">
-    <title>Auto light/dark mode</title>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M13 12h5" />
-      <path d="M13 15h4" />
-      <path d="M13 18h1" />
-      <path d="M13 9h4" />
-      <path d="M13 6h1" />
-    </svg>
-  </symbol>
   <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
     <title>Auto light/dark, in light mode</title>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -141,7 +128,7 @@
       <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
       <path d="M13.5 6.5l4 4" />
       <path d="M20 21l2 -2l-2 -2" />
-      <path d="M17 17l-2 2l2 2" /
+      <path d="M17 17l-2 2l2 2" />
     </svg>
   </symbol>
   <symbol id="svg-eye" viewBox="0 0 24 24">
@@ -719,7 +706,7 @@
 
 <span class="n">CONFORMATION_TEMPLATE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\t\t</span><span class="s2">&lt;h3 class=&quot;elem-title&quot;&gt;Anatomical Conformation&lt;/h3&gt;</span>
 <span class="se">\t\t</span><span class="s2">&lt;ul class=&quot;elem-desc&quot;&gt;</span>
-<span class="se">\t\t\t</span><span class="s2">&lt;li&gt;Input T1w images: </span><span class="si">{n_t1w}</span><span class="s2">&lt;/li&gt;</span>
+<span class="se">\t\t\t</span><span class="s2">&lt;li&gt;Input </span><span class="si">{anat}</span><span class="s2"> images: </span><span class="si">{n_anat}</span><span class="s2">&lt;/li&gt;</span>
 <span class="se">\t\t\t</span><span class="s2">&lt;li&gt;Output orientation: RAS&lt;/li&gt;</span>
 <span class="se">\t\t\t</span><span class="s2">&lt;li&gt;Output dimensions: </span><span class="si">{dims}</span><span class="s2">&lt;/li&gt;</span>
 <span class="se">\t\t\t</span><span class="s2">&lt;li&gt;Output voxel size: </span><span class="si">{zooms}</span><span class="s2">&lt;/li&gt;</span>
@@ -732,8 +719,15 @@
 
 
 <span class="k">class</span> <span class="nc">_TemplateDimensionsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">anat_type</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s2">&quot;T1w&quot;</span><span class="p">,</span> <span class="s2">&quot;T2w&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Anatomical image type&quot;</span><span class="p">)</span>
+    <span class="n">anat_list</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
+        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;t1w_list&quot;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input anatomical images&quot;</span>
+    <span class="p">)</span>
     <span class="n">t1w_list</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
-        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input T1w images&quot;</span>
+        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;anat_list&quot;</span><span class="p">],</span>
+        <span class="n">deprecated</span><span class="o">=</span><span class="s2">&quot;1.14.0&quot;</span><span class="p">,</span>
+        <span class="n">new_name</span><span class="o">=</span><span class="s2">&quot;anat_list&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">max_scale</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
         <span class="mf">3.0</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Maximum scaling factor in images to accept&quot;</span>
@@ -742,6 +736,7 @@
 
 <span class="k">class</span> <span class="nc">_TemplateDimensionsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
     <span class="n">t1w_valid_list</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;valid T1w images&quot;</span><span class="p">)</span>
+    <span class="n">anat_valid_list</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;valid anatomical images&quot;</span><span class="p">)</span>
     <span class="n">target_zooms</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Tuple</span><span class="p">(</span>
         <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Target zoom information&quot;</span>
     <span class="p">)</span>
@@ -755,8 +750,8 @@
 <a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.TemplateDimensions">[docs]</a>
 <span class="k">class</span> <span class="nc">TemplateDimensions</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Finds template target dimensions for a series of T1w images, filtering low-resolution images,</span>
-<span class="sd">    if necessary.</span>
+<span class="sd">    Finds template target dimensions for a series of anatomical images, filtering low-resolution</span>
+<span class="sd">    images, if necessary.</span>
 
 <span class="sd">    Along each axis, the minimum voxel size (zoom) and the maximum number of voxels (shape) are</span>
 <span class="sd">    found across images.</span>
@@ -782,7 +777,8 @@
         <span class="p">)</span>
         <span class="n">zoom_fmt</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:.02g}</span><span class="s2">mm x </span><span class="si">{:.02g}</span><span class="s2">mm x </span><span class="si">{:.02g}</span><span class="s2">mm&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">zooms</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">CONFORMATION_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="n">n_t1w</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t1w_list</span><span class="p">),</span>
+            <span class="n">anat</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">anat_type</span><span class="p">,</span>
+            <span class="n">n_anat</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">anat_list</span><span class="p">),</span>
             <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">dims</span><span class="p">)),</span>
             <span class="n">zooms</span><span class="o">=</span><span class="n">zoom_fmt</span><span class="p">,</span>
             <span class="n">n_discards</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">discards</span><span class="p">),</span>
@@ -791,7 +787,10 @@
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
         <span class="c1"># Load images, orient as RAS, collect shape and zoom data</span>
-        <span class="n">in_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t1w_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">anat_list</span><span class="p">:</span>  <span class="c1"># Deprecate: 1.14.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">anat_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t1w_list</span>
+
+        <span class="n">in_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">anat_list</span><span class="p">)</span>
         <span class="n">orig_imgs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">)(</span><span class="n">in_names</span><span class="p">)</span>
         <span class="n">reoriented</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">as_closest_canonical</span><span class="p">)(</span><span class="n">orig_imgs</span><span class="p">)</span>
         <span class="n">all_zooms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">img</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">()[:</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">reoriented</span><span class="p">])</span>
@@ -808,7 +807,8 @@
 
         <span class="c1"># Ignore dropped images</span>
         <span class="n">valid_fnames</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">in_names</span><span class="p">[</span><span class="n">valid</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;t1w_valid_list&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">valid_fnames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;anat_valid_list&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">valid_fnames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;t1w_valid_list&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">valid_fnames</span>  <span class="c1"># Deprecate: 1.14.0</span>
 
         <span class="c1"># Set target shape information</span>
         <span class="n">target_zooms</span> <span class="o">=</span> <span class="n">all_zooms</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -1143,7 +1143,7 @@
 </div><script src="../../../_static/documentation_options.js?v=27db1736"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../../../_static/scripts/furo.js?v=4e2eecee"></script>
+    <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
     <script src="../../../_static/js/version-switch.js?v=b7149f84"></script>
     </body>
 </html>
