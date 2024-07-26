@@ -750,6 +750,16 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the plugin.</span>
 
+<span class="sd">        If passed a nipreps-style configuration object in `plugin_args[&quot;app_config&quot;]`,</span>
+<span class="sd">        the following fields must be present:</span>
+
+<span class="sd">        app_config.environment.total_memory : :obj:`float`</span>
+<span class="sd">            Memory available to the workflow in gigabytes.</span>
+<span class="sd">        app_config._process_initializer : :obj:`callable`</span>
+<span class="sd">            A function that accepts a file path and returns None, to be run in each worker.</span>
+<span class="sd">        app_config.file_path : :obj:`str`</span>
+<span class="sd">            The path to a file that will be passed to the initializer.</span>
+
 <span class="sd">        Arguments</span>
 <span class="sd">        ---------</span>
 <span class="sd">        pool : :obj:`~concurrent.futures.Executor`</span>
