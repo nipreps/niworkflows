@@ -401,6 +401,16 @@ class MultiProcPlugin(DistributedPluginBase):
         """
         Initialize the plugin.
 
+        If passed a nipreps-style configuration object in `plugin_args["app_config"]`,
+        the following fields must be present:
+
+        app_config.environment.total_memory : :obj:`float`
+            Memory available to the workflow in gigabytes.
+        app_config._process_initializer : :obj:`callable`
+            A function that accepts a file path and returns None, to be run in each worker.
+        app_config.file_path : :obj:`str`
+            The path to a file that will be passed to the initializer.
+
         Arguments
         ---------
         pool : :obj:`~concurrent.futures.Executor`
