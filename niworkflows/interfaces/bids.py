@@ -28,6 +28,7 @@ from pathlib import Path
 import shutil
 import os
 import re
+import sys
 
 import nibabel as nb
 import numpy as np
@@ -62,6 +63,15 @@ BIDS_DERIV_PATTERNS = tuple(_pybids_spec["default_path_patterns"])
 
 STANDARD_SPACES = tf.api.templates()
 LOGGER = logging.getLogger("nipype.interface")
+
+
+if sys.version_info < (3, 10):  # PY39
+    builtin_zip = zip
+
+    def zip(*args, strict=False):
+        if strict and any(len(args[0]) != len(arg) for arg in args):
+            raise ValueError("strict_zip() requires all arguments to have the same length")
+        return builtin_zip(*args)
 
 
 def _none():
