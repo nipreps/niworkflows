@@ -325,7 +325,7 @@ class PrepareDerivative(SimpleInterface):
     Prepare derivative files and metadata.
 
     Collects entities from source files and inputs, filters them for allowed entities,
-    and passes to the out_entities output.
+    and constructs a relative path within a BIDS dataset.
 
     For each file, the interface will determine if any changes to the file contents
     are needed, including:
