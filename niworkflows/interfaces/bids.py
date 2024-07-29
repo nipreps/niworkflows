@@ -773,7 +773,7 @@ class SaveDerivative(SimpleInterface):
 
             if self.inputs.metadata:
                 sidecar = out_file.parent / f"{out_file.name.split('.', 1)[0]}.json"
-                unlink(sidecar, missing_ok=True)
+                sidecar.unlink(missing_ok=True)
                 sidecar.write_text(dumps(self.inputs.metadata, indent=2))
                 self._results["out_meta"].append(str(sidecar))
             self._results["out_file"].append(str(out_file))
