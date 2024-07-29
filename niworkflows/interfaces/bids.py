@@ -630,7 +630,9 @@ class PrepareDerivative(SimpleInterface):
 
             new_compression = False
             if is_nifti:
-                new_compression = os.fspath(orig_file).endswith(".gz") ^ os.fspath(dest_file).endswith(".gz")
+                new_compression = (
+                    os.fspath(orig_file).endswith(".gz") ^ os.fspath(dest_file).endswith(".gz")
+                )
 
             data_dtype = self.inputs.data_dtype or self._default_dtypes[self.inputs.suffix]
             if is_nifti and any((self.inputs.check_hdr, data_dtype)):
@@ -680,7 +682,8 @@ class PrepareDerivative(SimpleInterface):
                     orig_dtype = nii.get_data_dtype()
                     if orig_dtype != data_dtype:
                         LOGGER.warning(
-                            f"Changing {Path(dest_file).name} dtype from {orig_dtype} to {data_dtype}"
+                            f"Changing {Path(dest_file).name} dtype "
+                            f"from {orig_dtype} to {data_dtype}"
                         )
                         # coerce dataobj to new data dtype
                         if np.issubdtype(data_dtype, np.integer):
@@ -733,6 +736,7 @@ class _SaveDerivativeInputSpec(TraitedSpec):
     relative_path = InputMultiObject(
         traits.Str, desc="path to the file relative to the base directory"
     )
+
 
 class _SaveDerivativeOutputSpec(TraitedSpec):
     out_file = OutputMultiObject(File, desc="written file path")
