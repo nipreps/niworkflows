@@ -282,8 +282,8 @@ def _copy_any(src, dst):
     from shutil import copyfileobj
     from nipype.utils.filemanip import copyfile
 
-    src_isgz = src.endswith(".gz")
-    dst_isgz = dst.endswith(".gz")
+    src_isgz = os.fspath(src).endswith(".gz")
+    dst_isgz = os.fspath(dst).endswith(".gz")
     if not src_isgz and not dst_isgz:
         copyfile(src, dst, copy=True, use_hardlink=True)
         return False  # Make sure we do not reuse the hardlink later
