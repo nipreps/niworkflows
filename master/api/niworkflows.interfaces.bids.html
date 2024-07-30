@@ -744,6 +744,200 @@ a single image, the session entity is removed automatically.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.bids.PrepareDerivative">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">PrepareDerivative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allowed_entities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#PrepareDerivative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.PrepareDerivative" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
+<p>Prepare derivative files and metadata.</p>
+<p>Collects entities from source files and inputs, filters them for allowed entities,
+and constructs a relative path within a BIDS dataset.</p>
+<p>For each file, the interface will determine if any changes to the file contents
+are needed, including:</p>
+<ul class="simple">
+<li><p>Compression (or decompression) of the file</p></li>
+<li><p>Coercion of the data type</p></li>
+<li><p>Fixing the NIfTI header
+- Align qform and sform affines and codes
+- Set zooms and units</p></li>
+</ul>
+<p>If the input file needs to be modified, the interface will write a new file
+and return the path to it. If no changes are needed, the interface will return
+the path to the input file.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmpdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmpfile</span> <span class="o">=</span> <span class="n">tmpdir</span> <span class="o">/</span> <span class="s1">&#39;a_temp_file.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmpfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># &quot;touch&quot; the file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t1w_source</span> <span class="o">=</span> <span class="n">bids_collect_data</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="nb">str</span><span class="p">(</span><span class="n">datadir</span> <span class="o">/</span> <span class="s1">&#39;ds114&#39;</span><span class="p">),</span> <span class="s1">&#39;01&#39;</span><span class="p">,</span> <span class="n">bids_validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;t1w&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span> <span class="o">=</span> <span class="n">PrepareDerivative</span><span class="p">(</span><span class="n">check_hdr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span> <span class="o">=</span> <span class="n">t1w_source</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="s1">&#39;denoised&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">compress</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">prep</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_file</span>  
+<span class="go">&#39;.../a_temp_file.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_path</span>  
+<span class="go">&#39;sub-01/ses-retest/anat/sub-01_ses-retest_desc-denoised_T1w.nii&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tmpfile</span> <span class="o">=</span> <span class="n">tmpdir</span> <span class="o">/</span> <span class="s1">&#39;a_temp_file.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tmpfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># &quot;touch&quot; the file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span> <span class="o">=</span> <span class="n">PrepareDerivative</span><span class="p">(</span><span class="n">check_hdr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allowed_entities</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;custom&quot;</span><span class="p">,))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span> <span class="o">=</span> <span class="n">t1w_source</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">custom</span> <span class="o">=</span> <span class="s1">&#39;noise&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">prep</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_file</span>  
+<span class="go">&#39;.../a_temp_file.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_path</span>  
+<span class="go">&#39;sub-01/ses-retest/anat/sub-01_ses-retest_custom-noise_T1w.nii&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span> <span class="o">=</span> <span class="n">PrepareDerivative</span><span class="p">(</span><span class="n">check_hdr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allowed_entities</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;custom&quot;</span><span class="p">,))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span> <span class="o">=</span> <span class="n">t1w_source</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">custom</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">compress</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">prep</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_file</span>  
+<span class="go">[&#39;.../a_temp_file.nii&#39;, &#39;.../a_temp_file.nii&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_path</span>  
+<span class="go">[&#39;sub-01/ses-retest/anat/sub-01_ses-retest_custom-1_T1w.nii.gz&#39;,</span>
+<span class="go"> &#39;sub-01/ses-retest/anat/sub-01_ses-retest_custom-2_T1w.nii.gz&#39;]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span> <span class="o">=</span> <span class="n">PrepareDerivative</span><span class="p">(</span><span class="n">check_hdr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allowed_entities</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;custom1&quot;</span><span class="p">,</span> <span class="s2">&quot;custom2&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)]</span> <span class="o">*</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span> <span class="o">=</span> <span class="n">t1w_source</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">custom1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">custom2</span> <span class="o">=</span> <span class="s2">&quot;b&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">prep</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_file</span>  
+<span class="go">[&#39;.../a_temp_file.nii&#39;, &#39;.../a_temp_file.nii&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_path</span>  
+<span class="go">[&#39;sub-01/ses-retest/anat/sub-01_ses-retest_custom1-1_custom2-b_T1w.nii&#39;,</span>
+<span class="go"> &#39;sub-01/ses-retest/anat/sub-01_ses-retest_custom1-2_custom2-b_T1w.nii&#39;]</span>
+</pre></div>
+</div>
+<p>When multiple source files are passed, only common entities are passed down.
+For example, if two T1w images from different sessions are used to generate
+a single image, the session entity is removed automatically.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bids_dir</span> <span class="o">=</span> <span class="n">tmpdir</span> <span class="o">/</span> <span class="s1">&#39;bidsroot&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">multi_source</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="n">bids_dir</span> <span class="o">/</span> <span class="s1">&#39;sub-02/ses-A/anat/sub-02_ses-A_T1w.nii.gz&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">bids_dir</span> <span class="o">/</span> <span class="s1">&#39;sub-02/ses-B/anat/sub-02_ses-B_T1w.nii.gz&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">source_file</span> <span class="ow">in</span> <span class="n">multi_source</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">source_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">_</span> <span class="o">=</span> <span class="n">source_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span> <span class="o">=</span> <span class="n">PrepareDerivative</span><span class="p">(</span><span class="n">check_hdr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">multi_source</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="s1">&#39;preproc&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">prep</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_path</span>  
+<span class="go">&#39;sub-02/anat/sub-02_desc-preproc_T1w.nii&#39;</span>
+</pre></div>
+</div>
+<p>If, on the other hand, only one is used, the session is preserved:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">multi_source</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">prep</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_path</span>  
+<span class="go">&#39;sub-02/ses-A/anat/sub-02_ses-A_desc-preproc_T1w.nii&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bids_dir</span> <span class="o">=</span> <span class="n">tmpdir</span> <span class="o">/</span> <span class="s1">&#39;bidsroot&#39;</span> <span class="o">/</span> <span class="s1">&#39;sub-02&#39;</span> <span class="o">/</span> <span class="s1">&#39;ses-noanat&#39;</span> <span class="o">/</span> <span class="s1">&#39;func&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bids_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tricky_source</span> <span class="o">=</span> <span class="n">bids_dir</span> <span class="o">/</span> <span class="s1">&#39;sub-02_ses-noanat_task-rest_run-01_bold.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tricky_source</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span> <span class="o">=</span> <span class="n">PrepareDerivative</span><span class="p">(</span><span class="n">check_hdr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tricky_source</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="s1">&#39;preproc&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">prep</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_path</span>  
+<span class="go">&#39;sub-02/ses-noanat/func/sub-02_ses-noanat_task-rest_run-01_desc-preproc_bold.nii&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bids_dir</span> <span class="o">=</span> <span class="n">tmpdir</span> <span class="o">/</span> <span class="s1">&#39;bidsroot&#39;</span> <span class="o">/</span> <span class="s1">&#39;sub-02&#39;</span> <span class="o">/</span> <span class="s1">&#39;ses-noanat&#39;</span> <span class="o">/</span> <span class="s1">&#39;func&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bids_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tricky_source</span> <span class="o">=</span> <span class="n">bids_dir</span> <span class="o">/</span> <span class="s1">&#39;sub-02_ses-noanat_task-rest_run-01_bold.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tricky_source</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span> <span class="o">=</span> <span class="n">PrepareDerivative</span><span class="p">(</span><span class="n">check_hdr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tricky_source</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="s1">&#39;preproc&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">RepetitionTime</span> <span class="o">=</span> <span class="mf">0.75</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">prep</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_meta</span>  
+<span class="go">{&#39;RepetitionTime&#39;: 0.75}</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bids_dir</span> <span class="o">=</span> <span class="n">tmpdir</span> <span class="o">/</span> <span class="s1">&#39;bidsroot&#39;</span> <span class="o">/</span> <span class="s1">&#39;sub-02&#39;</span> <span class="o">/</span> <span class="s1">&#39;ses-noanat&#39;</span> <span class="o">/</span> <span class="s1">&#39;func&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bids_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tricky_source</span> <span class="o">=</span> <span class="n">bids_dir</span> <span class="o">/</span> <span class="s1">&#39;sub-02_ses-noanat_task-rest_run-01_bold.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tricky_source</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span> <span class="o">=</span> <span class="n">PrepareDerivative</span><span class="p">(</span><span class="n">check_hdr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">SkullStripped</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tricky_source</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="s1">&#39;preproc&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">space</span> <span class="o">=</span> <span class="s1">&#39;MNI152NLin6Asym&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="s1">&#39;01&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">RepetitionTime</span> <span class="o">=</span> <span class="mf">0.75</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">prep</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_meta</span>  
+<span class="go">{&#39;SkullStripped&#39;: True,</span>
+<span class="go"> &#39;RepetitionTime&#39;: 0.75,</span>
+<span class="go"> &#39;Resolution&#39;: &#39;Template MNI152NLin6Asym (1.0x1.0x1.0 mm^3)...&#39;}</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bids_dir</span> <span class="o">=</span> <span class="n">tmpdir</span> <span class="o">/</span> <span class="s1">&#39;bidsroot&#39;</span> <span class="o">/</span> <span class="s1">&#39;sub-02&#39;</span> <span class="o">/</span> <span class="s1">&#39;ses-noanat&#39;</span> <span class="o">/</span> <span class="s1">&#39;func&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bids_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tricky_source</span> <span class="o">=</span> <span class="n">bids_dir</span> <span class="o">/</span> <span class="s1">&#39;sub-02_ses-noanat_task-rest_run-01_bold.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tricky_source</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span> <span class="o">=</span> <span class="n">PrepareDerivative</span><span class="p">(</span><span class="n">check_hdr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">SkullStripped</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tricky_source</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="s1">&#39;preproc&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="s1">&#39;native&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">space</span> <span class="o">=</span> <span class="s1">&#39;MNI152NLin6Asym&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">RepetitionTime</span> <span class="o">=</span> <span class="mf">0.75</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">meta_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;RepetitionTime&#39;</span><span class="p">:</span> <span class="mf">1.75</span><span class="p">,</span> <span class="s1">&#39;SkullStripped&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="s1">&#39;val&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">prep</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_meta</span>  
+<span class="go">{&#39;RepetitionTime&#39;: 0.75, &#39;SkullStripped&#39;: True, &#39;Z&#39;: &#39;val&#39;}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – The object to be saved.</p></li>
+<li><p><strong>source_file</strong> (<em>a list of items which are a pathlike object or string representing a file</em>) – The source file(s) to extract entities from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>check_hdr</strong> (<em>a boolean</em>) – Fix headers of NIfTI outputs.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>compress</strong> (<em>a list of items which are a boolean or None</em>) – Whether <code class="docutils literal notranslate"><span class="pre">in_file</span></code> should be compressed (True), uncompressed (False) or left unmodified (None, default).
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">[]</span></code>)</p></li>
+<li><p><strong>data_dtype</strong> (<em>a string</em>) – NumPy datatype to coerce NIfTI data to, or <cite>source</cite> to match the input file dtype.</p></li>
+<li><p><strong>dismiss_entities</strong> (<em>a list of items which are a string or None</em>) – A list entities that will not be propagated from the source file.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">[]</span></code>)</p></li>
+<li><p><strong>meta_dict</strong> (<em>a dictionary with keys which are a value of class ‘str’ and with values which are any value</em>) – An input dictionary containing metadata.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fixed_hdr</strong> (<em>a list of items which are a boolean</em>) – Whether derivative header was fixed.</p></li>
+<li><p><strong>out_file</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Derivative file path.</p></li>
+<li><p><strong>out_meta</strong> (<em>a dictionary with keys which are a value of class ‘str’ and with values which are any value</em>) – Derivative metadata.</p></li>
+<li><p><strong>out_path</strong> (<em>a list of items which are a string</em>) – Relative path in target directory.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="niworkflows.interfaces.bids.ReadSidecarJSON">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">ReadSidecarJSON</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undef_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#ReadSidecarJSON"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.ReadSidecarJSON" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
@@ -823,6 +1017,38 @@ a single image, the session entity is removed automatically.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.bids.SaveDerivative">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">SaveDerivative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#SaveDerivative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.SaveDerivative" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
+<p>Save a prepared derivative file.</p>
+<p>This interface is intended to be used after the PrepareDerivative interface.
+Its main purpose is to copy data to the output directory if an identical copy
+is not already present.</p>
+<p>This ensures that changes to the output directory metadata (e.g., mtime) do not
+trigger unnecessary recomputations in the workflow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_directory</strong> (<em>a pathlike object or string representing an existing directory</em>) – Path to the base directory for storing data.</p></li>
+<li><p><strong>in_file</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – The object to be saved.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>metadata</strong> (<em>a dictionary with keys which are a value of class ‘str’ and with values which are any value</em>) – Metadata to be saved alongside the file.</p></li>
+<li><p><strong>relative_path</strong> (<em>a list of items which are a string</em>) – Path to the file relative to the base directory.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_file</strong> (<em>a list of items which are a pathlike object or string representing a file</em>) – Written file path.</p></li>
+<li><p><strong>out_meta</strong> (<em>a list of items which are a pathlike object or string representing a file</em>) – Written JSON sidecar path.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
         </article>
@@ -891,11 +1117,13 @@ a single image, the session entity is removed automatically.</p>
 <li><a class="reference internal" href="#niworkflows.interfaces.bids.DerivativesDataSink.out_path_base"><code class="docutils literal notranslate"><span class="pre">DerivativesDataSink.out_path_base</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#niworkflows.interfaces.bids.PrepareDerivative"><code class="docutils literal notranslate"><span class="pre">PrepareDerivative</span></code></a></li>
 <li><a class="reference internal" href="#niworkflows.interfaces.bids.ReadSidecarJSON"><code class="docutils literal notranslate"><span class="pre">ReadSidecarJSON</span></code></a><ul>
 <li><a class="reference internal" href="#niworkflows.interfaces.bids.ReadSidecarJSON.layout"><code class="docutils literal notranslate"><span class="pre">ReadSidecarJSON.layout</span></code></a></li>
 <li><a class="reference internal" href="#niworkflows.interfaces.bids.ReadSidecarJSON.output_spec"><code class="docutils literal notranslate"><span class="pre">ReadSidecarJSON.output_spec</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#niworkflows.interfaces.bids.SaveDerivative"><code class="docutils literal notranslate"><span class="pre">SaveDerivative</span></code></a></li>
 </ul>
 </li>
 </ul>
