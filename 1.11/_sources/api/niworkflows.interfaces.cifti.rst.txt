@@ -1,0 +1,7 @@
+niworkflows.interfaces.cifti module
+===================================
+
+.. automodule:: niworkflows.interfaces.cifti
+   :members:
+   :undoc-members:
+   :show-inheritance:
