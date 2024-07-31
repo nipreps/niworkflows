@@ -3,8 +3,9 @@
 """NeuroImaging Workflows (NIWorkflows) is a selection of image processing workflows."""
 import logging
 
+from acres import Loader
+
 from .__about__ import __packagename__, __copyright__, __credits__
-from .data import Loader
 try:
     from ._version import __version__
 except ImportError:  # pragma: no cover
