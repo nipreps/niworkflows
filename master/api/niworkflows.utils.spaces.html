@@ -352,6 +352,12 @@
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="niworkflows.utils.spaces.NONSTANDARD_2D_REFERENCES">
+<span class="sig-prename descclassname"><span class="pre">niworkflows.utils.spaces.</span></span><span class="sig-name descname"><span class="pre">NONSTANDARD_2D_REFERENCES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['fsnative']</span></em><a class="headerlink" href="#niworkflows.utils.spaces.NONSTANDARD_2D_REFERENCES" title="Link to this definition">¶</a></dt>
+<dd><p>List of supported nonstandard 2D reference spaces.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="niworkflows.utils.spaces.NONSTANDARD_REFERENCES">
 <span class="sig-prename descclassname"><span class="pre">niworkflows.utils.spaces.</span></span><span class="sig-name descname"><span class="pre">NONSTANDARD_REFERENCES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['T1w',</span> <span class="pre">'T2w',</span> <span class="pre">'anat',</span> <span class="pre">'fsnative',</span> <span class="pre">'func',</span> <span class="pre">'run',</span> <span class="pre">'sbref',</span> <span class="pre">'session',</span> <span class="pre">'individual',</span> <span class="pre">'dwi',</span> <span class="pre">'asl']</span></em><a class="headerlink" href="#niworkflows.utils.spaces.NONSTANDARD_REFERENCES" title="Link to this definition">¶</a></dt>
 <dd><p>List of supported nonstandard reference spaces.</p>
@@ -434,6 +440,17 @@
 <span class="go">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Reference</span><span class="p">(</span><span class="s1">&#39;MNIPediatricAsym&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;cohort&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span><span class="o">.</span><span class="n">standard</span>
 <span class="go">True</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Check dim property</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Reference</span><span class="p">(</span><span class="s1">&#39;func&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">dim</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Reference</span><span class="p">(</span><span class="s1">&#39;MNI152NLin6Asym&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">dim</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Reference</span><span class="p">(</span><span class="s1">&#39;fsnative&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">dim</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Reference</span><span class="p">(</span><span class="s1">&#39;onavg&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">dim</span>
+<span class="go">2</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Equality/inequality checks</span>
@@ -961,6 +978,7 @@ have density or resolution set).</p></li>
 <li><a class="reference internal" href="#">niworkflows.utils.spaces module</a><ul>
 <li><a class="reference internal" href="#niworkflows.utils.spaces.FSAVERAGE_DENSITY"><code class="docutils literal notranslate"><span class="pre">FSAVERAGE_DENSITY</span></code></a></li>
 <li><a class="reference internal" href="#niworkflows.utils.spaces.FSAVERAGE_LEGACY"><code class="docutils literal notranslate"><span class="pre">FSAVERAGE_LEGACY</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.utils.spaces.NONSTANDARD_2D_REFERENCES"><code class="docutils literal notranslate"><span class="pre">NONSTANDARD_2D_REFERENCES</span></code></a></li>
 <li><a class="reference internal" href="#niworkflows.utils.spaces.NONSTANDARD_REFERENCES"><code class="docutils literal notranslate"><span class="pre">NONSTANDARD_REFERENCES</span></code></a></li>
 <li><a class="reference internal" href="#niworkflows.utils.spaces.OutputReferencesAction"><code class="docutils literal notranslate"><span class="pre">OutputReferencesAction</span></code></a></li>
 <li><a class="reference internal" href="#niworkflows.utils.spaces.Reference"><code class="docutils literal notranslate"><span class="pre">Reference</span></code></a><ul>
