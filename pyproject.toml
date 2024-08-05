@@ -24,6 +24,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 dependencies = [
+    "acres",
     "attrs",
     "importlib_resources >= 5.7; python_version < '3.11'",
     "jinja2",

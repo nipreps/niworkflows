@@ -365,7 +365,7 @@ class RobustAverage(SimpleInterface):
 
 CONFORMATION_TEMPLATE = """\t\t<h3 class="elem-title">Anatomical Conformation</h3>
 \t\t<ul class="elem-desc">
-\t\t\t<li>Input T1w images: {n_t1w}</li>
+\t\t\t<li>Input {anat} images: {n_anat}</li>
 \t\t\t<li>Output orientation: RAS</li>
 \t\t\t<li>Output dimensions: {dims}</li>
 \t\t\t<li>Output voxel size: {zooms}</li>
@@ -378,8 +378,15 @@ DISCARD_TEMPLATE = """\t\t\t\t<li><abbr title="{path}">{basename}</abbr></li>"""
 
 
 class _TemplateDimensionsInputSpec(BaseInterfaceInputSpec):
+    anat_type = traits.Enum("T1w", "T2w", usedefault=True, desc="Anatomical image type")
+    anat_list = InputMultiObject(
+        File(exists=True), xor=["t1w_list"], desc="input anatomical images"
+    )
     t1w_list = InputMultiObject(
-        File(exists=True), mandatory=True, desc="input T1w images"
+        File(exists=True),
+        xor=["anat_list"],
+        deprecated="1.14.0",
+        new_name="anat_list",
     )
     max_scale = traits.Float(
         3.0, usedefault=True, desc="Maximum scaling factor in images to accept"
@@ -388,6 +395,7 @@ class _TemplateDimensionsInputSpec(BaseInterfaceInputSpec):
 
 class _TemplateDimensionsOutputSpec(TraitedSpec):
     t1w_valid_list = OutputMultiObject(exists=True, desc="valid T1w images")
+    anat_valid_list = OutputMultiObject(exists=True, desc="valid anatomical images")
     target_zooms = traits.Tuple(
         traits.Float, traits.Float, traits.Float, desc="Target zoom information"
     )
@@ -399,8 +407,8 @@ class _TemplateDimensionsOutputSpec(TraitedSpec):
 
 class TemplateDimensions(SimpleInterface):
     """
-    Finds template target dimensions for a series of T1w images, filtering low-resolution images,
-    if necessary.
+    Finds template target dimensions for a series of anatomical images, filtering low-resolution
+    images, if necessary.
 
     Along each axis, the minimum voxel size (zoom) and the maximum number of voxels (shape) are
     found across images.
@@ -426,7 +434,8 @@ class TemplateDimensions(SimpleInterface):
         )
         zoom_fmt = "{:.02g}mm x {:.02g}mm x {:.02g}mm".format(*zooms)
         return CONFORMATION_TEMPLATE.format(
-            n_t1w=len(self.inputs.t1w_list),
+            anat=self.inputs.anat_type,
+            n_anat=len(self.inputs.anat_list),
             dims="x".join(map(str, dims)),
             zooms=zoom_fmt,
             n_discards=len(discards),
@@ -435,7 +444,10 @@ class TemplateDimensions(SimpleInterface):
 
     def _run_interface(self, runtime):
         # Load images, orient as RAS, collect shape and zoom data
-        in_names = np.array(self.inputs.t1w_list)
+        if not self.inputs.anat_list:  # Deprecate: 1.14.0
+            self.inputs.anat_list = self.inputs.t1w_list
+
+        in_names = np.array(self.inputs.anat_list)
         orig_imgs = np.vectorize(nb.load)(in_names)
         reoriented = np.vectorize(nb.as_closest_canonical)(orig_imgs)
         all_zooms = np.array([img.header.get_zooms()[:3] for img in reoriented])
@@ -452,7 +464,8 @@ class TemplateDimensions(SimpleInterface):
 
         # Ignore dropped images
         valid_fnames = np.atleast_1d(in_names[valid]).tolist()
-        self._results["t1w_valid_list"] = valid_fnames
+        self._results["anat_valid_list"] = valid_fnames
+        self._results["t1w_valid_list"] = valid_fnames  # Deprecate: 1.14.0
 
         # Set target shape information
         target_zooms = all_zooms[valid].min(axis=0)

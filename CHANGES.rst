@@ -1,3 +1,22 @@
+1.11.0 (July 31, 2024)
+======================
+New minor release to start the 1.11.x series.
+
+The major changes include:
+- a deprecation to T1w-only based template processing
+- addition of a new dependency ``acres`` for accessing package data
+
+However, this is still backwards compatible with the 1.10.x series.
+
+* MAINT: Depend on acres for data access
+* ENH: Add PrepareDerivative/SaveDerivative interfaces (#885)
+* ENH: Make template dimensions support T2w as well (#879)
+* ENH: Modify FSSource to output T2 (#868)
+* FIX: Set cal_max in the NIfTI header for visualization after ``IntensityClip`` (#878)
+* FIX: Remove accidental MRIQC dependency, allow app config to be passed to workflow plugin (#876)
+* TEST: Fix plugin invocation, use an initializer that can be verified (#880)
+
+
 1.10.2 (June 10, 2024)
 ======================
 Bug-fix release in the 1.10.x series

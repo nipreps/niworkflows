@@ -2,6 +2,6 @@
 
 .. autofunction:: load_test_data
 """
-from ....data import Loader
+from acres import Loader
 
 load_test_data = Loader(__package__)
