@@ -42,6 +42,8 @@ NONSTANDARD_REFERENCES = [
 ]
 """List of supported nonstandard reference spaces."""
 
+NONSTANDARD_2D_REFERENCES = ["fsnative"]
+"""List of supported nonstandard 2D reference spaces."""
 
 FSAVERAGE_DENSITY = {
     "fsaverage3": "642",
@@ -138,6 +140,7 @@ class Reference:
     """
 
     _standard_spaces = tuple(_tfapi.templates())
+    _spaces_2d = tuple(_tfapi.templates(suffix="sphere"))
 
     space = attr.ib(default=None, type=str)
     """Name designating this space."""
@@ -165,7 +168,7 @@ class Reference:
                 spec["den"] = FSAVERAGE_DENSITY[space]
                 object.__setattr__(self, "spec", spec)
 
-        if self.space.startswith("fs"):
+        if (self.space in self._spaces_2d) or (self.space in NONSTANDARD_2D_REFERENCES):
             object.__setattr__(self, "dim", 2)
 
         if self.space in self._standard_spaces:
