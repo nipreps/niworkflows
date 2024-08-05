@@ -119,6 +119,16 @@ class Reference:
     >>> Reference('MNIPediatricAsym', {'cohort': 1}).standard
     True
 
+    >>> # Check dim property
+    >>> Reference('func').dim
+    3
+    >>> Reference('MNI152NLin6Asym').dim
+    3
+    >>> Reference('fsnative').dim
+    2
+    >>> Reference('onavg').dim
+    2
+
     >>> # Equality/inequality checks
     >>> Reference('func') == Reference('func')
     True
