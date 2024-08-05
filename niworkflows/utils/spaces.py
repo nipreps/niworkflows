@@ -171,6 +171,12 @@ class Reference:
         if self.space.startswith("fs"):
             object.__setattr__(self, "dim", 2)
 
+        if self.space in self._standard_spaces:
+            object.__setattr__(self, "standard", True)
+
+        if "volspace" in self.spec:
+            object.__setattr__(self, "cifti", True)
+
         if "volspace" in self.spec:
             volspace = self.spec["volspace"]
             if (self.space in self._standard_spaces) and (volspace not in self._standard_spaces):
@@ -185,12 +191,6 @@ class Reference:
                     f"but volume space ({volspace}) is a standard space. "
                     "Mixing standard and non-standard spaces is not currently allowed."
                 )
-
-        if self.space in self._standard_spaces:
-            object.__setattr__(self, "standard", True)
-
-        if "volspace" in self.spec:
-            object.__setattr__(self, "cifti", True)
 
         # Check that cohort is handled appropriately
         _cohorts = ["%s" % t for t in _tfapi.TF_LAYOUT.get_cohorts(template=self.space)]
