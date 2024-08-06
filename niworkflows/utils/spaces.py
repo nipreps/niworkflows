@@ -400,7 +400,7 @@ class Reference:
         ...     "dhcpAsym:cohort-42:den-32k::dhcpVol:cohort-44:res-2"
         ... )  # doctest: +NORMALIZE_WHITESPACE
         [Reference(space='dhcpAsym', spec={'cohort': '42', 'den': '32k', 'volspace': 'dhcpVol',
-        'volcohort': '44', 'res': '2'})]
+        'volcohort': '44', 'volres': '2'})]
 
         """
         volume_value = None
@@ -423,9 +423,7 @@ class Reference:
             spec["volspace"] = [volume_args[0]]
             for modifier in volume_args[1:]:
                 mitems = modifier.split("-", 1)
-                if mitems[0] == "cohort":
-                    mitems[0] = "volcohort"
-                spec[mitems[0]].append(len(mitems) == 1 or mitems[1])
+                spec[f"vol{mitems[0]}"].append(len(mitems) == 1 or mitems[1])
 
         allspecs = _expand_entities(spec)
 
@@ -662,9 +660,8 @@ class SpatialReferences:
         elif error is True:
             raise ValueError('space "%s" already in spaces.' % str(value))
 
-    def get_spaces(self, standard=True, nonstandard=True, dim=(2, 3)):
-        """
-        Return space names.
+    def get_spaces(self, standard=True, nonstandard=True, dim=(2, 3), cifti=(True, False)):
+        """Return space names.
 
         Parameters
         ----------
@@ -674,6 +671,8 @@ class SpatialReferences:
             Return nonstandard spaces.
         dim : :obj:`tuple`, optional
             Desired dimensions of the standard spaces (default is ``(2, 3)``)
+        cifti : :obj:`tuple`, optional
+            Desired CIFTI status of the standard spaces (default is ``(True, False)``).
 
         Examples
         --------
@@ -708,13 +707,13 @@ class SpatialReferences:
                 s.fullname not in out
                 and (s.standard is standard or s.standard is not nonstandard)
                 and s.dim in dim
+                and s.cifti in cifti
             ):
                 out.append(s.fullname)
         return out
 
-    def get_standard(self, full_spec=False, dim=(2, 3)):
-        """
-        Return output spaces.
+    def get_standard(self, full_spec=False, dim=(2, 3), cifti=(True, False)):
+        """Return standard output spaces.
 
         Parameters
         ----------
@@ -723,30 +722,39 @@ class SpatialReferences:
             have density or resolution set).
         dim : :obj:`tuple`, optional
             Desired dimensions of the standard spaces (default is ``(2, 3)``)
-
+        cifti : :obj:`tuple`, optional
+            Desired CIFTI status of the standard spaces (default is ``(True, False)``).
         """
+        out = [s for s in self.references if s.standard]
+        out = [s for s in out if s.dim in dim]
+        out = [s for s in out if s.cifti in cifti]
         if not full_spec:
-            return [s for s in self.references if s.standard and s.dim in dim]
+            return out
 
-        return [
-            s
-            for s in self.references
-            if s.standard
-            and s.dim in dim
-            and (hasspec("res", s.spec) or hasspec("den", s.spec))
-        ]
+        out = [s for s in out if hasspec("res", s.spec) or hasspec("den", s.spec)]
+        return out
 
-    def get_nonstandard(self, full_spec=False, dim=(2, 3)):
-        """Return nonstandard spaces."""
+    def get_nonstandard(self, full_spec=False, dim=(2, 3), cifti=(True, False)):
+        """Return nonstandard output spaces.
+
+        Parameters
+        ----------
+        full_spec : :obj:`bool`
+            Return only fully-specified standard references (i.e., they must either
+            have density or resolution set).
+        dim : :obj:`tuple`, optional
+            Desired dimensions of the standard spaces (default is ``(2, 3)``)
+        cifti : :obj:`tuple`, optional
+            Desired CIFTI status of the standard spaces (default is ``(True, False)``).
+        """
+        out = [s for s in self.references if not s.standard]
+        out = [s for s in out if s.dim in dim]
+        out = [s for s in out if s.cifti in cifti]
         if not full_spec:
-            return [s.space for s in self.references if not s.standard and s.dim in dim]
-        return [
-            s.space
-            for s in self.references
-            if not s.standard
-            and s.dim in dim
-            and (hasspec("res", s.spec) or hasspec("den", s.spec))
-        ]
+            return out
+
+        out = [s for s in out if hasspec("res", s.spec) or hasspec("den", s.spec)]
+        return out
 
     def get_fs_spaces(self):
         """
