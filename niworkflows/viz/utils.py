@@ -269,7 +269,7 @@ def plot_segs(
             image_nii, segs=seg_niis, compress=compress, **plot_params
         )
         # Find and replace the figure_1 id.
-        svg = svg.replace("figure_1", "segmentation-%s-%s" % (d, uuid4()), 1)
+        svg = svg.replace("figure_1", f"segmentation-{d}-{uuid4()}", 1)
         out_files.append(fromstring(svg))
 
     return out_files
@@ -389,7 +389,7 @@ def plot_registration(
         display.close()
 
         # Find and replace the figure_1 id.
-        svg = svg.replace("figure_1", "%s-%s-%s" % (div_id, mode, uuid4()), 1)
+        svg = svg.replace("figure_1", f"{div_id}-{mode}-{uuid4()}", 1)
         out_files.append(fromstring(svg))
 
     return out_files
@@ -631,7 +631,7 @@ def plot_melodic_components(
         if noise_components.size == n_components:
             ncomps = "ALL"
         ax.annotate(
-            "WARNING: {} components were classified as noise".format(ncomps),
+            f"WARNING: {ncomps} components were classified as noise",
             xy=(0.0, 0.5),
             xycoords="axes fraction",
             xytext=(0.01, 0.5),

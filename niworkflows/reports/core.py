@@ -303,7 +303,7 @@ class Report:
             self.out_dir = self.out_dir / self.packagename
 
         if self.subject_id is not None:
-            self.root = self.root / "sub-{}".format(self.subject_id)
+            self.root = self.root / f"sub-{self.subject_id}"
 
         if "template_path" in settings:
             self.template_path = config.parent / settings["template_path"]
@@ -371,7 +371,7 @@ class Report:
 
         # Populate errors section
         error_dir = (
-            self.out_dir / "sub-{}".format(self.subject_id) / "log" / self.run_uuid
+            self.out_dir / f"sub-{self.subject_id}" / "log" / self.run_uuid
         )
         if error_dir.is_dir():
             from ..utils.misc import read_crashfile

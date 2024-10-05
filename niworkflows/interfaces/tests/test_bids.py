@@ -707,7 +707,7 @@ def test_ReadSidecarJSON_connection(testdata_dir, field):
     "derivatives, subjects_dir",
     [
         (os.getenv("FREESURFER_HOME"), "subjects"),
-        ("/tmp", "%s/%s" % (os.getenv("FREESURFER_HOME"), "subjects")),
+        ("/tmp", "{}/{}".format((os.getenv("FREESURFER_HOME"), "subjects"))),
     ],
 )
 def test_fsdir_noaction(derivatives, subjects_dir):
