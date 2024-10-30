@@ -161,20 +161,11 @@ class SpatialNormalization(BaseInterface):
             NIWORKFLOWS_LOG.info("User-defined settings, overriding defaults")
             return self.inputs.settings
 
-        # Define a prefix for output files based on the modality of the moving image.
-        filestart = "{}-mni_registration_{}_".format(
-            self.inputs.moving.lower(), self.inputs.flavor
-        )
-
         data_dir = load_data()
         # Get a list of settings files that match the flavor.
-        filenames = [
-            path.name
-            for path in data_dir.iterdir()
-            if path.name.startswith(filestart) and path.name.endswith(".json")
-        ]
-        # Return the settings files.
-        return [str(data_dir / f) for f in sorted(filenames)]
+        return sorted([str(path) for path in data_dir.glob(
+            f"{self.inputs.moving.lower()}-mni_registration_{self.inputs.flavor}_*.json"
+        )])
 
     def _run_interface(self, runtime):
         # Get a list of settings files.
