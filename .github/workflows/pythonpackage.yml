@@ -161,7 +161,7 @@ jobs:
           templateflow-v0-
     - name: Fetch packages
       if: matrix.install == 'sdist' || matrix.install == 'wheel'
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4.1.7
       with:
         name: dist
         path: dist/
