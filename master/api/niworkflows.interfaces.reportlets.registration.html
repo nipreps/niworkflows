@@ -372,9 +372,9 @@ Maps to a command-line argument: <code class="code docutils literal notranslate"
 (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
 <li><p><strong>input_image_type</strong> (<em>0 or 1 or 2 or 3</em>) – Option specifying the input image type of scalar (default), vector, tensor, or time series.
 Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--input-image-type</span> <span class="pre">%d</span></code>.</p></li>
-<li><p><strong>interpolation</strong> (<em>‘Linear’ or ‘NearestNeighbor’ or ‘CosineWindowedSinc’ or ‘WelchWindowedSinc’ or ‘HammingWindowedSinc’ or ‘LanczosWindowedSinc’ or ‘MultiLabel’ or ‘Gaussian’ or ‘BSpline’</em>) – Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.
+<li><p><strong>interpolation</strong> (<em>‘Linear’ or ‘NearestNeighbor’ or ‘CosineWindowedSinc’ or ‘WelchWindowedSinc’ or ‘HammingWindowedSinc’ or ‘LanczosWindowedSinc’ or ‘MultiLabel’ or ‘Gaussian’ or ‘BSpline’ or ‘GenericLabel’</em>) – Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.
 (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">Linear</span></code>)</p></li>
-<li><p><strong>interpolation_parameters</strong> (<em>a tuple of the form: (an integer) or a tuple of the form: (a float, a float)</em>)</p></li>
+<li><p><strong>interpolation_parameters</strong> (<em>a tuple of the form: (an integer) or a tuple of the form: (a float, a float) or a tuple of the form: (a string)</em>)</p></li>
 <li><p><strong>invert_transform_flags</strong> (<em>a list of items which are a boolean</em>)</p></li>
 <li><p><strong>num_threads</strong> (<em>an integer</em>) – Number of ITK threads to use.
 (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">1</span></code>)</p></li>
@@ -572,7 +572,7 @@ Maps to a command-line argument: <code class="code docutils literal notranslate"
 Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--out=%s</span></code>.</p></li>
 <li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
 (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
-<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’</em>) – FSL output type.</p></li>
+<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’ or ‘GIFTI’</em>) – FSL output type.</p></li>
 <li><p><strong>wm_seg</strong> (<em>a pathlike object or string representing a file</em>) – Reference white matter segmentation mask.
 Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-wmseg</span> <span class="pre">%s</span></code>.</p></li>
 </ul>
@@ -670,7 +670,7 @@ Maps to a command-line argument: <code class="code docutils literal notranslate"
 Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-omat</span> <span class="pre">%s</span></code> (position: 3).</p></li>
 <li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
 (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
-<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’</em>) – FSL output type.</p></li>
+<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’ or ‘GIFTI’</em>) – FSL output type.</p></li>
 <li><p><strong>padding_size</strong> (<em>an integer</em>) – For applyxfm: interpolates outside image by size.
 Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-paddingsize</span> <span class="pre">%d</span></code>.</p></li>
 <li><p><strong>pedir</strong> (<em>an integer</em>) – Phase encode direction of EPI - 1/2/3=x/y/z &amp; -1/-2/-3=-x/-y/-z.
@@ -874,7 +874,7 @@ Maps to a command-line argument: <code class="code docutils literal notranslate"
 Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-omat</span> <span class="pre">%s</span></code> (position: 3).</p></li>
 <li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
 (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
-<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’</em>) – FSL output type.</p></li>
+<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’ or ‘GIFTI’</em>) – FSL output type.</p></li>
 <li><p><strong>padding_size</strong> (<em>an integer</em>) – For applyxfm: interpolates outside image by size.
 Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-paddingsize</span> <span class="pre">%d</span></code>.</p></li>
 <li><p><strong>pedir</strong> (<em>an integer</em>) – Phase encode direction of EPI - 1/2/3=x/y/z &amp; -1/-2/-3=-x/-y/-z.
@@ -971,7 +971,7 @@ Maps to a command-line argument: <code class="code docutils literal notranslate"
 Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--nokspace</span></code>.</p></li>
 <li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
 (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
-<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’</em>) – FSL output type.</p></li>
+<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’ or ‘GIFTI’</em>) – FSL output type.</p></li>
 <li><p><strong>pava</strong> (<em>a boolean</em>) – Apply monotonic enforcement via PAVA.
 Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--pava</span></code>.</p></li>
 <li><p><strong>phase_conjugate</strong> (<em>a boolean</em>) – Apply phase conjugate method of unwarping.
