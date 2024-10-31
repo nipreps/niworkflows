@@ -31,6 +31,7 @@ import numpy as np
 import nibabel as nb
 import pytest
 from nipype.interfaces.base import Undefined
+from packaging.version import Version
 
 from .. import bids as bintfs
 from niworkflows.testing import needs_data_dir
@@ -211,7 +212,7 @@ def connect_and_run_save(prep_result, save):
             {"space": "fsLR", "density": "91k"},
             "sub-100185/func/sub-100185_task-machinegame_run-01_"
             "space-fsLR_den-91k_bold.dtseries.nii",
-            "f7b8755c6ad0d8dcdb60676331b52a23ce288b61",
+            "335f1394ce90b58bbf27026b6eeec4d2124c11da",
         ),
         (
             BOLD_PATH,
@@ -374,10 +375,15 @@ def test_DerivativesDataSink_build_path(
                 assert not np.isnan(hdr["scl_slope"])
                 assert not np.isnan(hdr["scl_inter"])
     for out, chksum in zip(output, checksum):
-        if chksum == "f7b8755c6ad0d8dcdb60676331b52a23ce288b61" and sys.version_info < (3, 8):
-            # Python 3.8 began preserving insertion order of attributes in XML
-            # Therefore we get a different checksum before/after
-            chksum = "a37ffb1188dd9a7b708de5b8daef46dac56ef8d4"
+        if chksum == "335f1394ce90b58bbf27026b6eeec4d2124c11da":
+            if sys.version_info < (3, 8):
+                # Python 3.8 began preserving insertion order of attributes in XML
+                # Therefore we get a different checksum before/after
+                chksum = "a37ffb1188dd9a7b708de5b8daef46dac56ef8d4"
+            elif Version(nb.__version__) < Version('5.3'):
+                # Nibabel 5.3 avoids unnecessary roundtrips for Cifti2Headers
+                # Older versions transformed a `SeriesStep="2"` into `SeriesStep="2.0"`
+                chksum = "f7b8755c6ad0d8dcdb60676331b52a23ce288b61"
         assert sha1(Path(out).read_bytes()).hexdigest() == chksum
 
 
