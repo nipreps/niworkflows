@@ -122,14 +122,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
         install: [repo]
         include:
-          - python-version: "3.11"
+          - python-version: "3.12"
             install: sdist
-          - python-version: "3.11"
+          - python-version: "3.12"
             install: wheel
-          - python-version: "3.11"
+          - python-version: "3.12"
             install: editable
 
     env:
@@ -201,7 +201,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        # Only run --pre tests on Python versions within SPEC0 support
+        python-version: ["3.11", "3.12"]
         install: [repo]
         pip-flags: ['--pre']
 
