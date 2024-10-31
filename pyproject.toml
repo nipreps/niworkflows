@@ -43,7 +43,6 @@ dependencies = [
     "seaborn",
     "svgutils >= 0.3.4",
     "templateflow >= 0.7.2",
-    "traits < 6.4",
     "transforms3d",
 ]
 
