@@ -251,8 +251,7 @@ class AddTSVHeader(SimpleInterface):
     >>> addheader.inputs.in_file = 'data.tsv'
     >>> addheader.inputs.columns = ['a', 'b', 'c', 'd', 'e']
     >>> res = addheader.run()
-    >>> df = pd.read_csv(res.outputs.out_file, delim_whitespace=True,
-    ...                  index_col=None)
+    >>> df = pd.read_csv(res.outputs.out_file, sep='\s+', index_col=None)
     >>> df.columns.ravel().tolist()
     ['a', 'b', 'c', 'd', 'e']
 
@@ -311,7 +310,7 @@ class JoinTSVColumns(SimpleInterface):
     >>> join.inputs.in_file = 'data.tsv'
     >>> join.inputs.join_file = 'add.tsv'
     >>> res = join.run()
-    >>> df = pd.read_csv(res.outputs.out_file, delim_whitespace=True,
+    >>> df = pd.read_csv(res.outputs.out_file, sep='\s+',
     ...                  index_col=None, dtype=float, header=None)
     >>> df.columns.ravel().tolist() == list(range(5))
     True
@@ -328,8 +327,7 @@ class JoinTSVColumns(SimpleInterface):
     >>> res = join.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
     '...data_joined.tsv'
-    >>> df = pd.read_csv(res.outputs.out_file, delim_whitespace=True,
-    ...                  index_col=None)
+    >>> df = pd.read_csv(res.outputs.out_file, sep='\s+', index_col=None)
     >>> df.columns.ravel().tolist()
     ['a', 'b', 'c', 'd', 'e']
 
@@ -342,8 +340,7 @@ class JoinTSVColumns(SimpleInterface):
     >>> join.inputs.side = 'left'
     >>> join.inputs.columns = ['a', 'b', 'c', 'd', 'e']
     >>> res = join.run()
-    >>> df = pd.read_csv(res.outputs.out_file, delim_whitespace=True,
-    ...                  index_col=None)
+    >>> df = pd.read_csv(res.outputs.out_file, sep='\s+', index_col=None)
     >>> df.columns.ravel().tolist()
     ['a', 'b', 'c', 'd', 'e']
 
