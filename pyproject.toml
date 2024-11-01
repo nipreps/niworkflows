@@ -32,7 +32,8 @@ dependencies = [
     "nibabel >= 3.0",
     "nilearn >= 0.5.2",
     "nipype >= 1.8.5",
-    "nitransforms >= 21.0.0",
+#    "nitransforms >= 21.0.0",
+    "nitransforms@https://github.com/nipy/nitransforms/archive/refs/heads/master.zip",
     "numpy",
     "packaging",
     "pandas",
@@ -44,6 +45,7 @@ dependencies = [
     "svgutils >= 0.3.4",
     "templateflow >= 0.7.2",
     "transforms3d",
+    "gradunwarp@https://github.com/nipreps/gradunwarp/archive/refs/heads/master.zip",
 ]
 
 [project.optional-dependencies]
