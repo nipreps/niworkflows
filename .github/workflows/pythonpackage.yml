@@ -1,7 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
-name: Python package
+name: Tox
 
 on:
   push:
@@ -13,8 +10,11 @@ on:
     - cron: '0 0 * * *'
 
 concurrency:
-  group: python-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   job_metadata:
@@ -123,135 +123,62 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
-        install: [repo]
+        dependencies: [latest, pre]
         include:
-          - python-version: "3.12"
-            install: sdist
-          - python-version: "3.12"
-            install: wheel
-          - python-version: "3.12"
-            install: editable
+          - python-version: "3.9"
+            dependencies: min
 
     env:
-      INSTALL_TYPE: ${{ matrix.install }}
+      DEPENDS: ${{ matrix.dependencies }}
 
     steps:
-    - uses: actions/checkout@v4
-      if: matrix.install == 'repo' || matrix.install == 'editable'
-      with:
-        fetch-depth: 0
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Load test data cache
-      uses: actions/cache@v4
-      id: stanford-crn
-      with:
-        path: ~/.cache/stanford-crn/
-        key: data-v0-${{ github.ref_name }}-${{ github.sha }}
-    - name: Load TemplateFlow cache
-      uses: actions/cache@v4
-      id: templateflow
-      with:
-        path: ~/.cache/templateflow
-        key: templateflow-v0-${{ github.ref_name }}-${{ strategy.job-index }}-${{ github.sha }}
-        restore-keys: |
-          templateflow-v0-${{ github.ref_name }}-
-          templateflow-v0-
-    - name: Fetch packages
-      if: matrix.install == 'sdist' || matrix.install == 'wheel'
-      uses: actions/download-artifact@v3
-      with:
-        name: dist
-        path: dist/
-    - name: Select archive
-      run: |
-        if [ "$INSTALL_TYPE" = "sdist" ]; then
-          ARCHIVE=$( ls dist/*.tar.gz )
-        elif [ "$INSTALL_TYPE" = "wheel" ]; then
-          ARCHIVE=$( ls dist/*.whl )
-        elif [ "$INSTALL_TYPE" = "repo" ]; then
-          ARCHIVE="."
-        elif [ "$INSTALL_TYPE" = "editable" ]; then
-          ARCHIVE="-e ."
-        fi
-        echo "ARCHIVE=$ARCHIVE" | tee -a $GITHUB_ENV
-    - name: Install package
-      run: python -m pip install $ARCHIVE
-    - name: Check version
-      run: |
-        INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
-        echo "INSTALLED: \"${INSTALLED_VERSION}\""
-        test "${INSTALLED_VERSION}" = "${VERSION}"
-      env:
-        VERSION: ${{ needs.job_metadata.outputs.version }}
-    - name: Install test dependencies
-      run: python -m pip install "niworkflows[tests]"
-    - name: Run tests
-      run: pytest -sv --doctest-modules --cov niworkflows --pyargs niworkflows
-    - uses: codecov/codecov-action@v4
-      name: Submit to CodeCov
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-
-  test-pre:
-    needs: [get_data, job_metadata]
-    if: ${{ !contains(needs.job_metadata.outputs.commit_message, '[skip pre]') }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # Only run --pre tests on Python versions within SPEC0 support
-        python-version: ["3.11", "3.12"]
-        install: [repo]
-        pip-flags: ['--pre']
-
-    env:
-      INSTALL_TYPE: ${{ matrix.install }}
-      PIP_FLAGS: ${{ matrix.pip-flags }}
-
-    steps:
-    - name: Debug commit message
-      run: echo "${{ needs.job_metadata.outputs.commit_message }}"
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Load test data cache
-      uses: actions/cache@v4
-      id: stanford-crn
-      with:
-        path: ~/.cache/stanford-crn/
-        key: data-v0-${{ github.ref_name }}-${{ github.sha }}
-    - name: Load TemplateFlow cache
-      uses: actions/cache@v4
-      id: templateflow
-      with:
-        path: ~/.cache/templateflow
-        key: templateflow-v0-${{ github.ref_name }}-${{ strategy.job-index }}-${{ github.sha }}
-        restore-keys: |
-          templateflow-v0-${{ github.ref_name }}-
-          templateflow-v0-
-    - name: Install package
-      run: python -m pip install $PIP_FLAGS .
-    - name: Check version
-      run: |
-        INSTALLED_VERSION=$(python -c 'import niworkflows; print(niworkflows.__version__, end="")')
-        echo "INSTALLED: \"${INSTALLED_VERSION}\""
-        test "${INSTALLED_VERSION}" = "${VERSION}"
-      env:
-        VERSION: ${{ needs.job_metadata.outputs.version }}
-    - name: Install test dependencies
-      run: python -m pip install $PIP_FLAGS "niworkflows[tests]"
-    - name: Run tests
-      run: pytest -sv --doctest-modules --cov niworkflows --pyargs niworkflows
-    - uses: codecov/codecov-action@v4
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-      name: Submit to CodeCov
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v3
+      - name: Load test data cache
+        uses: actions/cache@v4
+        id: stanford-crn
+        with:
+          path: ~/.cache/stanford-crn/
+          key: data-v0-${{ github.ref_name }}-${{ github.sha }}
+      - name: Load TemplateFlow cache
+        uses: actions/cache@v4
+        id: templateflow
+        with:
+          path: ~/.cache/templateflow
+          key: templateflow-v0-${{ github.ref_name }}-${{ strategy.job-index }}-${{ github.sha }}
+          restore-keys: |
+            templateflow-v0-${{ github.ref_name }}-
+            templateflow-v0-
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/templateflow
+          key: templateflow-v1
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y --no-install-recommends graphviz
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Install tox
+        run: |
+          uv tool install tox --with=tox-uv --with=tox-gh-actions
+      - name: Show tox config
+        run: tox c
+      - name: Run tox
+        run: tox -v --exit-and-dump-after 1200
+      - uses: codecov/codecov-action@v4
+        with:
+          file: coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+        if: ${{ always() }}
 
   flake8:
     if: github.event_name != 'schedule'
