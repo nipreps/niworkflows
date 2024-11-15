@@ -22,9 +22,10 @@
 #
 """Utilities to manipulate images."""
 
+from gzip import GzipFile
+
 import nibabel as nb
 import numpy as np
-from gzip import GzipFile
 
 
 def rotation2canonical(img):
@@ -188,6 +189,7 @@ def update_header_fields(fname, **kwargs):
 def dseg_label(in_seg, label, newpath=None):
     """Extract a particular label from a discrete segmentation."""
     from pathlib import Path
+
     import nibabel as nb
     import numpy as np
     from nipype.utils.filemanip import fname_presuffix
@@ -207,8 +209,9 @@ def dseg_label(in_seg, label, newpath=None):
 def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
     """Regrid the input image to match the new zooms."""
     from pathlib import Path
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
     from scipy.ndimage import map_coordinates
 
     if isinstance(in_file, (str, Path)):
@@ -295,8 +298,9 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
 def demean(in_file, in_mask, only_mask=False, newpath=None):
     """Demean ``in_file`` within the mask defined by ``in_mask``."""
     import os
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
     from nipype.utils.filemanip import fname_presuffix
 
     out_file = fname_presuffix(in_file, suffix='_demeaned', newpath=os.getcwd())
@@ -314,8 +318,9 @@ def demean(in_file, in_mask, only_mask=False, newpath=None):
 def nii_ones_like(in_file, value, dtype, newpath=None):
     """Create a NIfTI file filled with ``value``, matching properties of ``in_file``."""
     import os
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
 
     nii = nb.load(in_file)
     data = np.ones(nii.shape, dtype=float) * value

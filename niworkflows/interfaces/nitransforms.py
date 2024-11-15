@@ -23,14 +23,15 @@
 """Wrappers of NiTransforms."""
 
 from pathlib import Path
+
 from nipype.interfaces.base import (
-    TraitedSpec,
     BaseInterfaceInputSpec,
     File,
-    SimpleInterface,
     InputMultiObject,
-    traits,
+    SimpleInterface,
+    TraitedSpec,
     isdefined,
+    traits,
 )
 
 XFM_FMT = {
@@ -90,8 +91,8 @@ class ConcatenateXFMs(SimpleInterface):
 
 def concatenate_xfms(in_files, out_file, out_inv=None, reference=None, moving=None, fmt='itk'):
     """Concatenate linear transforms."""
-    from nitransforms.manip import TransformChain
     from nitransforms.linear import load as load_affine
+    from nitransforms.manip import TransformChain
 
     xfm = TransformChain(
         [load_affine(f, fmt=XFM_FMT[Path(f).suffix]) for f in in_files]

@@ -23,10 +23,10 @@
 """Interfaces for handling spaces."""
 
 from nipype.interfaces.base import (
-    traits,
-    TraitedSpec,
     BaseInterfaceInputSpec,
     SimpleInterface,
+    TraitedSpec,
+    traits,
 )
 
 

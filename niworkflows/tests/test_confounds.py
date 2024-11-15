@@ -24,9 +24,11 @@
 
 import os
 from shutil import copy
+
 import numpy as np
 import pandas as pd
 from nipype.pipeline import engine as pe
+
 from ..interfaces.confounds import ExpandModel, SpikeRegressors
 from ..interfaces.plotting import CompCorVariancePlot, ConfoundsCorrelationPlot
 from .conftest import datadir

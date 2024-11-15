@@ -24,28 +24,26 @@
 
 import os
 import re
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
-import numpy as np
 import nibabel as nb
-
-from nipype.utils.filemanip import fname_presuffix
+import numpy as np
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
-    TraitedSpec,
-    DynamicTraitedSpec,
-    SimpleInterface,
     CommandLine,
     CommandLineInputSpec,
+    DynamicTraitedSpec,
     File,
-    traits,
-    isdefined,
     InputMultiPath,
     OutputMultiPath,
+    SimpleInterface,
+    TraitedSpec,
     Undefined,
+    isdefined,
+    traits,
 )
-
+from nipype.utils.filemanip import fname_presuffix
 
 SECONDARY_ANAT_STRUC = {
     'smoothwm': 'GrayWhite',
@@ -709,6 +707,7 @@ def vertex_normals(vertices, faces):
 def pointcloud2ply(vertices, normals, out_file=None):
     """Converts the file to PLY format"""
     from pathlib import Path
+
     import pandas as pd
     from pyntcloud import PyntCloud
 
@@ -726,13 +725,14 @@ def pointcloud2ply(vertices, normals, out_file=None):
 def ply2gii(in_file, metadata, out_file=None):
     """Convert from ply to GIfTI"""
     from pathlib import Path
-    from numpy import eye
+
     from nibabel.gifti import (
-        GiftiMetaData,
         GiftiCoordSystem,
-        GiftiImage,
         GiftiDataArray,
+        GiftiImage,
+        GiftiMetaData,
     )
+    from numpy import eye
     from pyntcloud import PyntCloud
 
     in_file = Path(in_file)

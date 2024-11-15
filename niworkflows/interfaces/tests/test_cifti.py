@@ -6,7 +6,7 @@ import nibabel as nb
 import numpy as np
 import pytest
 
-from ..cifti import GenerateCifti, CIFTI_STRUCT_WITH_LABELS, _create_cifti_image
+from ..cifti import CIFTI_STRUCT_WITH_LABELS, GenerateCifti, _create_cifti_image
 
 
 @pytest.fixture(scope='module')
@@ -79,7 +79,7 @@ def test__create_cifti_image(tmp_path):
         cifti_file = _create_cifti_image(bold_file, volume_label, dummy_fnames, dummy_fnames, 2.0)
 
     cimg = nb.load(cifti_file)
-    series, bm = [cimg.header.get_axis(i) for i in (0, 1)]
+    series, bm = (cimg.header.get_axis(i) for i in (0, 1))
     assert len(series) == 1  # Time
     assert len(bm) == 8  # Voxel
 

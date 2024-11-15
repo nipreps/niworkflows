@@ -24,9 +24,10 @@
 
 import os
 
+from nipype.interfaces import freesurfer, fsl
 from nipype.interfaces.base import File, isdefined
-from nipype.interfaces import fsl, freesurfer
 from nipype.interfaces.mixins import reporting
+
 from ... import NIWORKFLOWS_LOG
 from . import base as nrb
 

@@ -22,8 +22,10 @@
 #
 """Test the LiterateWorkflow."""
 
+from nipype.interfaces import afni
+from nipype.interfaces import utility as niu
 from nipype.pipeline.engine import Node
-from nipype.interfaces import afni, utility as niu
+
 from ..workflows import LiterateWorkflow as Workflow
 
 
@@ -56,7 +58,7 @@ def test_boilerplate():
 
     # fmt: off
     workflow.connect([
-        (inputnode, inner, [("in_file", "inputnode.in_file")]),
+        (inputnode, inner, [('in_file', 'inputnode.in_file')]),
     ])
     # fmt: on
 

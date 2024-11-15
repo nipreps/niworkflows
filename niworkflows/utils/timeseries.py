@@ -22,8 +22,8 @@
 #
 """Extracting signals from NIfTI and CIFTI2 files."""
 
-import numpy as np
 import nibabel as nb
+import numpy as np
 
 
 def _cifti_timeseries(dataset):

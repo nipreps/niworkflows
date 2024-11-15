@@ -22,21 +22,19 @@
 #
 """Utilities."""
 
-import numpy as np
 import nibabel as nb
-
+import numpy as np
 from nipype import logging
-from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    traits,
-    isdefined,
+    BaseInterfaceInputSpec,
     File,
     InputMultiPath,
-    TraitedSpec,
-    BaseInterfaceInputSpec,
     SimpleInterface,
+    TraitedSpec,
+    isdefined,
+    traits,
 )
-
+from nipype.utils.filemanip import fname_presuffix
 
 LOG = logging.getLogger('nipype.interface')
 

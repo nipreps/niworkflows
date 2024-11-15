@@ -22,21 +22,21 @@
 #
 """Tests on BIDS compliance."""
 
-import sys
-import os
-from pathlib import Path
 import json
+import os
+import sys
 from hashlib import sha1
+from pathlib import Path
 
-import numpy as np
 import nibabel as nb
+import numpy as np
 import pytest
 from nipype.interfaces.base import Undefined
 from packaging.version import Version
 
-from .. import bids as bintfs
 from niworkflows.testing import needs_data_dir
 
+from .. import bids as bintfs
 
 XFORM_CODES = {
     'MNI152Lin': 4,
@@ -690,8 +690,9 @@ def test_ReadSidecarJSON_connection(testdata_dir, field):
     """
     This test prevents regressions of #333
     """
-    from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
+    from nipype.pipeline import engine as pe
+
     from ..bids import ReadSidecarJSON
 
     reg_fields = ['RepetitionTime']

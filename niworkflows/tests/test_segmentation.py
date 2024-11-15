@@ -25,18 +25,19 @@
 import os
 from shutil import copy
 from tempfile import TemporaryDirectory
+
 import pytest
+from nipype.pipeline import engine as pe
 from templateflow.api import get as get_template
 
-from nipype.pipeline import engine as pe
-from ..interfaces.reportlets.segmentation import FASTRPT, ReconAllRPT
 from ..interfaces.reportlets.masks import (
     BETRPT,
     BrainExtractionRPT,
-    SimpleShowMaskRPT,
     ROIsPlot,
+    SimpleShowMaskRPT,
 )
-from ..testing import has_fsl, has_freesurfer
+from ..interfaces.reportlets.segmentation import FASTRPT, ReconAllRPT
+from ..testing import has_freesurfer, has_fsl
 from .conftest import _run_interface_mock, datadir
 
 

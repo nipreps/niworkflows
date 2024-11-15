@@ -22,36 +22,36 @@
 #
 """Interfaces for handling BIDS-like neuroimaging structures."""
 
+import os
+import re
+import shutil
+import sys
 from collections import defaultdict
 from contextlib import suppress
 from json import dumps, loads
 from pathlib import Path
-import shutil
-import os
-import re
-import sys
 
 import nibabel as nb
 import numpy as np
-
+import templateflow as tf
 from nipype import logging
 from nipype.interfaces.base import (
-    traits,
-    isdefined,
-    Undefined,
-    TraitedSpec,
     BaseInterfaceInputSpec,
+    Directory,
     DynamicTraitedSpec,
     File,
-    Directory,
     InputMultiObject,
     OutputMultiObject,
-    Str,
     SimpleInterface,
+    Str,
+    TraitedSpec,
+    Undefined,
+    isdefined,
+    traits,
 )
 from nipype.interfaces.io import add_traits
 from nipype.utils.filemanip import hash_infile
-import templateflow as tf
+
 from .. import data
 from ..utils.bids import _init_layout, relative_to_root
 from ..utils.images import set_consumables, unsafe_write_nifti_header_and_data
@@ -280,12 +280,12 @@ class BIDSDataGrabber(SimpleInterface):
 
         if self._require_t1w and not bids_dict['t1w']:
             raise FileNotFoundError(
-                'No T1w images found for subject sub-{}'.format(self.inputs.subject_id)
+                f'No T1w images found for subject sub-{self.inputs.subject_id}'
             )
 
         if self._require_funcs and not bids_dict['bold']:
             raise FileNotFoundError(
-                'No functional images found for subject sub-{}'.format(self.inputs.subject_id)
+                f'No functional images found for subject sub-{self.inputs.subject_id}'
             )
 
         for imtype in ['bold', 't2w', 'flair', 'fmap', 'sbref', 'roi', 'pet', 'asl']:
@@ -515,7 +515,7 @@ class PrepareDerivative(SimpleInterface):
             setattr(self.inputs, k, inputs[k])
 
     def _run_interface(self, runtime):
-        from bids.layout import parse_file_entities, Config
+        from bids.layout import Config, parse_file_entities
         from bids.layout.writing import build_path
         from bids.utils import listify
 
@@ -1022,7 +1022,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
             setattr(self.inputs, k, inputs[k])
 
     def _run_interface(self, runtime):
-        from bids.layout import parse_file_entities, Config
+        from bids.layout import Config, parse_file_entities
         from bids.layout.writing import build_path
         from bids.utils import listify
 

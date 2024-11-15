@@ -22,12 +22,14 @@
 #
 """py.test configuration file"""
 
+import datetime as dt
 import os
 from pathlib import Path
-import datetime as dt
+
 import pytest
 from templateflow.api import get as get_template
-from niworkflows.testing import test_data_env, data_env_canary
+
+from niworkflows.testing import data_env_canary, test_data_env
 from niworkflows.tests.data import load_test_data
 
 datadir = load_test_data()

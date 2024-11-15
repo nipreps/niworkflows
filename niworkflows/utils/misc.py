@@ -23,9 +23,8 @@
 """Miscellaneous utilities."""
 
 import os
-from typing import Optional
 import warnings
-
+from typing import Optional
 
 __all__ = [
     'get_template_specs',
@@ -116,9 +115,9 @@ def get_template_specs(
     tpl_target_path = tf.get(in_template, **template_spec)
     if not tpl_target_path:
         raise RuntimeError(
-            """\
-Could not find template "{0}" with specs={1}. Please revise your template \
-argument.""".format(in_template, template_spec)
+            f"""\
+Could not find template "{in_template}" with specs={template_spec}. Please revise your template \
+argument."""
         )
 
     if isinstance(tpl_target_path, list):
@@ -149,6 +148,7 @@ def fix_multi_T1w_source_name(in_files):
 
     """
     import os
+
     from nipype.utils.filemanip import filename_to_list
 
     in_file = filename_to_list(in_files)[0]
@@ -171,7 +171,8 @@ def add_suffix(in_files, suffix):
 
     """
     import os.path as op
-    from nipype.utils.filemanip import fname_presuffix, filename_to_list
+
+    from nipype.utils.filemanip import filename_to_list, fname_presuffix
 
     return op.basename(fname_presuffix(filename_to_list(in_files)[0], suffix=suffix))
 
@@ -276,9 +277,10 @@ def splitext(fname):
 
 
 def _copy_any(src, dst):
-    import os
     import gzip
+    import os
     from shutil import copyfileobj
+
     from nipype.utils.filemanip import copyfile
 
     src_isgz = os.fspath(src).endswith('.gz')
@@ -316,8 +318,8 @@ def clean_directory(path):
     This function is not guaranteed to work across multiple threads or processes.
 
     """
-    from pathlib import Path
     import shutil
+    from pathlib import Path
 
     try:
         for f in Path(path).iterdir():
@@ -362,9 +364,10 @@ def check_valid_fs_license():
         FreeSurfer successfully executed (valid license)
 
     """
-    from pathlib import Path
     import subprocess as sp
+    from pathlib import Path
     from tempfile import TemporaryDirectory
+
     from .. import data
 
     with TemporaryDirectory() as tmpdir, data.load.as_path('sentinel.nii.gz') as sentinel:

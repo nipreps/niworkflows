@@ -24,14 +24,16 @@
 
 import time
 from pathlib import Path
-import numpy as np
+
 import nibabel as nb
-from nipype.pipeline import engine as pe
-from nipype.interfaces import nilearn as nl
+import numpy as np
 import pytest
+from nipype.interfaces import nilearn as nl
+from nipype.pipeline import engine as pe
+
+from niworkflows.testing import has_afni
 
 from .. import images as im
-from niworkflows.testing import has_afni
 
 
 @pytest.mark.parametrize(

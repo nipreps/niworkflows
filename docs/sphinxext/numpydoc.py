@@ -17,27 +17,26 @@ It will:
 
 """
 
-from copy import deepcopy
-import re
-import pydoc
-import inspect
-from collections.abc import Callable
 import hashlib
+import inspect
 import itertools
+import pydoc
+import re
+from collections.abc import Callable
+from copy import deepcopy
 
-from docutils.nodes import citation, Text, section, comment, reference, inline
 import sphinx
-from sphinx.addnodes import pending_xref, desc_content
+from docutils.nodes import Text, citation, comment, inline, reference, section
+from sphinx.addnodes import desc_content, pending_xref
 from sphinx.util import logging
-from sphinx.errors import ExtensionError
 
 if sphinx.__version__ < '5':
     raise RuntimeError('Sphinx 5 or newer is required')
 
-from .docscrape_sphinx import get_doc_object
-from .validate import validate, ERROR_MSGS, get_validation_checks
-from .xref import DEFAULT_LINKS
 from . import __version__
+from .docscrape_sphinx import get_doc_object
+from .validate import get_validation_checks, validate
+from .xref import DEFAULT_LINKS
 
 logger = logging.getLogger(__name__)
 

@@ -22,27 +22,26 @@
 #
 """Handling connectivity: combines FreeSurfer surfaces with subcortical volumes."""
 
-from pathlib import Path
 import json
 import typing
 import warnings
+from pathlib import Path
 
 import nibabel as nb
-from nibabel import cifti2 as ci
 import numpy as np
+import templateflow.api as tf
+from nibabel import cifti2 as ci
 from nilearn.image import resample_to_img
-from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
-    TraitedSpec,
     File,
-    traits,
     SimpleInterface,
+    TraitedSpec,
+    traits,
 )
-import templateflow.api as tf
+from nipype.utils.filemanip import split_filename
 
 from niworkflows.interfaces.nibabel import reorient_image
-
 
 CIFTI_STRUCT_WITH_LABELS = {  # CITFI structures with corresponding labels
     # SURFACES
@@ -385,6 +384,6 @@ def _create_cifti_image(
     img.set_data_dtype(bold_img.get_data_dtype())
     img.nifti_header.set_intent('NIFTI_INTENT_CONNECTIVITY_DENSE_SERIES')
 
-    out_file = '{}.dtseries.nii'.format(split_filename(bold_file)[1])
+    out_file = f'{split_filename(bold_file)[1]}.dtseries.nii'
     ci.save(img, out_file)
     return Path.cwd() / out_file

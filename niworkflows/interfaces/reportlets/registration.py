@@ -25,28 +25,30 @@
 import os
 
 from looseversion import LooseVersion
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import (
-    traits,
-    isdefined,
-    File,
-)
-from nipype.interfaces.mixins import reporting
 from nipype.interfaces import freesurfer as fs
 from nipype.interfaces import fsl
 from nipype.interfaces.ants import registration, resampling
+from nipype.interfaces.base import (
+    File,
+    isdefined,
+    traits,
+)
+from nipype.interfaces.mixins import reporting
+from nipype.utils.filemanip import fname_presuffix
 
 from ... import NIWORKFLOWS_LOG
-from . import base as nrb
-from ..norm import (
-    _SpatialNormalizationInputSpec,
-    _SpatialNormalizationOutputSpec,
-    SpatialNormalization,
-)
 from ..fixes import (
     FixHeaderApplyTransforms as ApplyTransforms,
+)
+from ..fixes import (
     FixHeaderRegistration as Registration,
 )
+from ..norm import (
+    SpatialNormalization,
+    _SpatialNormalizationInputSpec,
+    _SpatialNormalizationOutputSpec,
+)
+from . import base as nrb
 
 
 class _SpatialNormalizationInputSpecRPT(

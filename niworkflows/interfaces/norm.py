@@ -22,27 +22,25 @@
 #
 """A robust ANTs T1-to-MNI registration workflow with fallback retry."""
 
+from multiprocessing import cpu_count
 from os import path as op
 
-from multiprocessing import cpu_count
-from packaging.version import Version
 import numpy as np
-
-from nipype.interfaces.ants.registration import RegistrationOutputSpec
 from nipype.interfaces.ants import AffineInitializer
+from nipype.interfaces.ants.registration import RegistrationOutputSpec
 from nipype.interfaces.base import (
-    traits,
-    isdefined,
     BaseInterface,
     BaseInterfaceInputSpec,
     File,
+    isdefined,
+    traits,
 )
-
+from packaging.version import Version
 from templateflow.api import get as get_template
+
 from .. import NIWORKFLOWS_LOG, __version__
 from ..data import load as load_data
 from .fixes import FixHeaderRegistration as Registration
-
 
 niworkflows_version = Version(__version__)
 
@@ -471,8 +469,9 @@ def mask(in_file, mask_file, new_name):
     image space and have the same dimensions.
 
     """
-    import nibabel as nb
     import os
+
+    import nibabel as nb
 
     # Load the input image
     in_nii = nb.load(in_file)
@@ -516,8 +515,9 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
 
     """
     import os
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
     from nipype.utils.filemanip import fname_presuffix
 
     if out_path is None:

@@ -23,12 +23,13 @@
 """Utilities tests"""
 
 import os
-from templateflow.api import get as get_template
-from niworkflows.interfaces.reportlets.masks import SimpleShowMaskRPT
-from nipype.pipeline import engine as pe
+from shutil import which
 
 import pytest
-from shutil import which
+from nipype.pipeline import engine as pe
+from templateflow.api import get as get_template
+
+from niworkflows.interfaces.reportlets.masks import SimpleShowMaskRPT
 
 
 @pytest.mark.skipif(

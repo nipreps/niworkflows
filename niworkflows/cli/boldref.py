@@ -27,8 +27,7 @@ import os
 
 def get_parser():
     """Build parser object."""
-    from argparse import ArgumentParser
-    from argparse import RawTextHelpFormatter, RawDescriptionHelpFormatter
+    from argparse import ArgumentParser, RawDescriptionHelpFormatter, RawTextHelpFormatter
 
     parser = ArgumentParser(
         description="""NiWorkflows Utilities""", formatter_class=RawTextHelpFormatter
@@ -72,6 +71,7 @@ intensity nonuniformity correction, robust averaging, etc.)""",
 def main(args=None):
     """Entry point."""
     from nipype.utils.filemanip import hash_infile
+
     from ..func.util import init_bold_reference_wf
 
     opts = get_parser().parse_args(args=args)

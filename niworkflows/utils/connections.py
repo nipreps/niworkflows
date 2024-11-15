@@ -70,6 +70,7 @@ def listify(value):
 
     """
     from pathlib import Path
+
     from nipype.interfaces.base import isdefined
 
     if not isdefined(value) or value is None:

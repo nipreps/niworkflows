@@ -27,8 +27,6 @@ from collections import OrderedDict
 from multiprocessing import cpu_count
 from warnings import warn
 
-# nipype
-from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces.ants import (
     AI,
@@ -39,18 +37,22 @@ from nipype.interfaces.ants import (
     ThresholdImage,
 )
 
+# nipype
+from nipype.pipeline import engine as pe
+
 from ..data import load as load_data
-from ..utils.misc import get_template_specs
-from ..utils.connections import pop_file as _pop
+from ..interfaces.fixes import (
+    FixHeaderApplyTransforms as ApplyTransforms,
+)
 
 # niworkflows
 from ..interfaces.fixes import (
     FixHeaderRegistration as Registration,
-    FixHeaderApplyTransforms as ApplyTransforms,
 )
-from ..interfaces.nibabel import ApplyMask, RegridToZooms
 from ..interfaces.header import CopyXForm
-
+from ..interfaces.nibabel import ApplyMask, RegridToZooms
+from ..utils.connections import pop_file as _pop
+from ..utils.misc import get_template_specs
 
 ATROPOS_MODELS = {
     'T1w': OrderedDict([('nclasses', 3), ('csf', 1), ('gm', 2), ('wm', 3)]),
@@ -185,7 +187,8 @@ def init_brain_extraction_wf(
         Output :abbr:`TPMs (tissue probability maps)` by ATROPOS
 
     """
-    from packaging.version import parse as parseversion, Version
+    from packaging.version import Version
+    from packaging.version import parse as parseversion
     from templateflow.api import get as get_template
 
     wf = pe.Workflow(name)
@@ -359,28 +362,28 @@ def init_brain_extraction_wf(
 
     # fmt: off
     wf.connect([
-        (inputnode, trunc, [("in_files", "op1")]),
-        (inputnode, inu_n4_final, [("in_files", "input_image")]),
-        (inputnode, init_aff, [("in_mask", "fixed_image_mask")]),
-        (inputnode, norm, [("in_mask", fixed_mask_trait)]),
-        (inputnode, map_brainmask, [(("in_files", _pop), "reference_image")]),
-        (trunc, inu_n4, [("output_image", "input_image")]),
-        (inu_n4, res_target, [(("output_image", _pop), "in_file")]),
-        (res_tmpl, init_aff, [("out_file", "fixed_image")]),
-        (res_target, init_aff, [("out_file", "moving_image")]),
-        (init_aff, norm, [("output_transform", "initial_moving_transform")]),
+        (inputnode, trunc, [('in_files', 'op1')]),
+        (inputnode, inu_n4_final, [('in_files', 'input_image')]),
+        (inputnode, init_aff, [('in_mask', 'fixed_image_mask')]),
+        (inputnode, norm, [('in_mask', fixed_mask_trait)]),
+        (inputnode, map_brainmask, [(('in_files', _pop), 'reference_image')]),
+        (trunc, inu_n4, [('output_image', 'input_image')]),
+        (inu_n4, res_target, [(('output_image', _pop), 'in_file')]),
+        (res_tmpl, init_aff, [('out_file', 'fixed_image')]),
+        (res_target, init_aff, [('out_file', 'moving_image')]),
+        (init_aff, norm, [('output_transform', 'initial_moving_transform')]),
         (norm, map_brainmask, [
-            ("reverse_transforms", "transforms"),
-            ("reverse_invert_flags", "invert_transform_flags"),
+            ('reverse_transforms', 'transforms'),
+            ('reverse_invert_flags', 'invert_transform_flags'),
         ]),
-        (map_brainmask, thr_brainmask, [("output_image", "input_image")]),
-        (map_brainmask, inu_n4_final, [("output_image", "weight_image")]),
-        (inu_n4_final, apply_mask, [("output_image", "in_file")]),
-        (thr_brainmask, apply_mask, [("output_image", "in_mask")]),
-        (thr_brainmask, outputnode, [("output_image", "out_mask")]),
-        (inu_n4_final, outputnode, [("output_image", "bias_corrected"),
-                                    ("bias_image", "bias_image")]),
-        (apply_mask, outputnode, [("out_file", "out_file")]),
+        (map_brainmask, thr_brainmask, [('output_image', 'input_image')]),
+        (map_brainmask, inu_n4_final, [('output_image', 'weight_image')]),
+        (inu_n4_final, apply_mask, [('output_image', 'in_file')]),
+        (thr_brainmask, apply_mask, [('output_image', 'in_mask')]),
+        (thr_brainmask, outputnode, [('output_image', 'out_mask')]),
+        (inu_n4_final, outputnode, [('output_image', 'bias_corrected'),
+                                    ('bias_image', 'bias_image')]),
+        (apply_mask, outputnode, [('out_file', 'out_file')]),
     ])
     # fmt: on
 
@@ -400,22 +403,22 @@ def init_brain_extraction_wf(
             full_wm.inputs.op2 = str(bstem_tpm)
             # fmt: off
             wf.connect([
-                (full_wm, map_wmmask, [("out", "input_image")])
+                (full_wm, map_wmmask, [('out', 'input_image')])
             ])
             # fmt: on
         else:
             map_wmmask.inputs.input_image = str(wm_tpm)
         # fmt: off
         wf.disconnect([
-            (map_brainmask, inu_n4_final, [("output_image", "weight_image")]),
+            (map_brainmask, inu_n4_final, [('output_image', 'weight_image')]),
         ])
         wf.connect([
-            (inputnode, map_wmmask, [(("in_files", _pop), "reference_image")]),
+            (inputnode, map_wmmask, [(('in_files', _pop), 'reference_image')]),
             (norm, map_wmmask, [
-                ("reverse_transforms", "transforms"),
-                ("reverse_invert_flags", "invert_transform_flags"),
+                ('reverse_transforms', 'transforms'),
+                ('reverse_invert_flags', 'invert_transform_flags'),
             ]),
-            (map_wmmask, inu_n4_final, [("output_image", "weight_image")]),
+            (map_wmmask, inu_n4_final, [('output_image', 'weight_image')]),
         ])
         # fmt: on
 
@@ -434,12 +437,12 @@ def init_brain_extraction_wf(
         mrg_target = pe.Node(niu.Merge(2), name='mrg_target')
         # fmt: off
         wf.connect([
-            (inu_n4, lap_target, [(("output_image", _pop), "op1")]),
-            (lap_tmpl, mrg_tmpl, [("output_image", "in2")]),
-            (inu_n4, mrg_target, [("output_image", "in1")]),
-            (lap_target, mrg_target, [("output_image", "in2")]),
-            (mrg_tmpl, norm, [("out", "fixed_image")]),
-            (mrg_target, norm, [("out", "moving_image")]),
+            (inu_n4, lap_target, [(('output_image', _pop), 'op1')]),
+            (lap_tmpl, mrg_tmpl, [('output_image', 'in2')]),
+            (inu_n4, mrg_target, [('output_image', 'in1')]),
+            (lap_target, mrg_target, [('output_image', 'in2')]),
+            (mrg_tmpl, norm, [('out', 'fixed_image')]),
+            (mrg_target, norm, [('out', 'moving_image')]),
         ])
         # fmt: on
 
@@ -447,7 +450,7 @@ def init_brain_extraction_wf(
         norm.inputs.fixed_image = tpl_target_path
         # fmt: off
         wf.connect([
-            (inu_n4, norm, [(("output_image", _pop), "moving_image")]),
+            (inu_n4, norm, [(('output_image', _pop), 'moving_image')]),
         ])
         # fmt: on
 
@@ -464,29 +467,29 @@ def init_brain_extraction_wf(
 
         # fmt: off
         wf.disconnect([
-            (thr_brainmask, outputnode, [("output_image", "out_mask")]),
-            (inu_n4_final, outputnode, [("output_image", "bias_corrected"),
-                                        ("bias_image", "bias_image")]),
-            (apply_mask, outputnode, [("out_file", "out_file")]),
+            (thr_brainmask, outputnode, [('output_image', 'out_mask')]),
+            (inu_n4_final, outputnode, [('output_image', 'bias_corrected'),
+                                        ('bias_image', 'bias_image')]),
+            (apply_mask, outputnode, [('out_file', 'out_file')]),
         ])
         wf.connect([
-            (inputnode, atropos_wf, [("in_files", "inputnode.in_files")]),
-            (inu_n4_final, atropos_wf, [("output_image", "inputnode.in_corrected")]),
-            (thr_brainmask, atropos_wf, [("output_image", "inputnode.in_mask")]),
+            (inputnode, atropos_wf, [('in_files', 'inputnode.in_files')]),
+            (inu_n4_final, atropos_wf, [('output_image', 'inputnode.in_corrected')]),
+            (thr_brainmask, atropos_wf, [('output_image', 'inputnode.in_mask')]),
             (atropos_wf, outputnode, [
-                ("outputnode.out_file", "out_file"),
-                ("outputnode.bias_corrected", "bias_corrected"),
-                ("outputnode.bias_image", "bias_image"),
-                ("outputnode.out_mask", "out_mask"),
-                ("outputnode.out_segm", "out_segm"),
-                ("outputnode.out_tpms", "out_tpms"),
+                ('outputnode.out_file', 'out_file'),
+                ('outputnode.bias_corrected', 'bias_corrected'),
+                ('outputnode.bias_image', 'bias_image'),
+                ('outputnode.out_mask', 'out_mask'),
+                ('outputnode.out_segm', 'out_segm'),
+                ('outputnode.out_tpms', 'out_tpms'),
             ]),
         ])
         # fmt: on
         if wm_tpm:
             # fmt: off
             wf.connect([
-                (map_wmmask, atropos_wf, [("output_image", "inputnode.wm_prior")]),
+                (map_wmmask, atropos_wf, [('output_image', 'inputnode.wm_prior')]),
             ])
             # fmt: on
     return wf
@@ -762,65 +765,65 @@ def init_atropos_wf(
 
     # fmt: off
     wf.connect([
-        (inputnode, dil_brainmask, [("in_mask", "op1")]),
-        (inputnode, copy_xform, [(("in_files", _pop), "hdr_file")]),
-        (inputnode, copy_xform_wm, [(("in_files", _pop), "hdr_file")]),
-        (inputnode, pad_mask, [("in_mask", "op1")]),
-        (inputnode, atropos, [("in_corrected", "intensity_images")]),
-        (inputnode, inu_n4_final, [("in_files", "input_image")]),
-        (inputnode, msk_conform, [(("in_files", _pop), "in_reference")]),
-        (dil_brainmask, get_brainmask, [("output_image", "op1")]),
-        (get_brainmask, atropos, [("output_image", "mask_image")]),
-        (atropos, pad_segm, [("classified_image", "op1")]),
-        (pad_segm, sel_labels, [("output_image", "in_segm")]),
-        (sel_labels, get_wm, [("out_wm", "op1")]),
-        (sel_labels, get_gm, [("out_gm", "op1")]),
-        (get_gm, fill_gm, [("output_image", "op1")]),
-        (get_gm, mult_gm, [("output_image", "first_input")]),
-        (fill_gm, mult_gm, [("output_image", "second_input")]),
-        (get_wm, relabel_wm, [("output_image", "first_input")]),
-        (sel_labels, me_csf, [("out_csf", "op1")]),
-        (mult_gm, add_gm, [("output_product_image", "op1")]),
-        (me_csf, add_gm, [("output_image", "op2")]),
-        (add_gm, relabel_gm, [("output_image", "first_input")]),
-        (relabel_wm, add_gm_wm, [("output_product_image", "op1")]),
-        (relabel_gm, add_gm_wm, [("output_product_image", "op2")]),
-        (add_gm_wm, sel_labels2, [("output_image", "in_segm")]),
-        (sel_labels2, add_7, [("out_wm", "op1"), ("out_gm", "op2")]),
-        (add_7, me_7, [("output_image", "op1")]),
-        (me_7, comp_7, [("output_image", "op1")]),
-        (comp_7, md_7, [("output_image", "op1")]),
-        (md_7, fill_7, [("output_image", "op1")]),
-        (fill_7, add_7_2, [("output_image", "op1")]),
-        (pad_mask, add_7_2, [("output_image", "op2")]),
-        (add_7_2, md_7_2, [("output_image", "op1")]),
-        (md_7_2, me_7_2, [("output_image", "op1")]),
-        (me_7_2, depad_mask, [("output_image", "op1")]),
-        (add_gm_wm, depad_segm, [("output_image", "op1")]),
-        (relabel_wm, depad_wm, [("output_product_image", "op1")]),
-        (relabel_gm, depad_gm, [("output_product_image", "op1")]),
-        (sel_labels, depad_csf, [("out_csf", "op1")]),
-        (depad_csf, merge_tpms, [("output_image", "in1")]),
-        (depad_gm, merge_tpms, [("output_image", "in2")]),
-        (depad_wm, merge_tpms, [("output_image", "in3")]),
-        (depad_mask, msk_conform, [("output_image", "in_mask")]),
-        (msk_conform, copy_xform, [("out", "out_mask")]),
-        (depad_segm, copy_xform, [("output_image", "out_segm")]),
-        (merge_tpms, copy_xform, [("out", "out_tpms")]),
-        (atropos, sel_wm, [("posteriors", "inlist")]),
-        (sel_wm, copy_xform_wm, [("out", "wm_map")]),
-        (copy_xform_wm, inu_n4_final, [("wm_map", "weight_image")]),
-        (inu_n4_final, copy_xform, [("output_image", "bias_corrected"),
-                                    ("bias_image", "bias_image")]),
-        (copy_xform, apply_mask, [("bias_corrected", "in_file"),
-                                  ("out_mask", "in_mask")]),
-        (apply_mask, outputnode, [("out_file", "out_file")]),
+        (inputnode, dil_brainmask, [('in_mask', 'op1')]),
+        (inputnode, copy_xform, [(('in_files', _pop), 'hdr_file')]),
+        (inputnode, copy_xform_wm, [(('in_files', _pop), 'hdr_file')]),
+        (inputnode, pad_mask, [('in_mask', 'op1')]),
+        (inputnode, atropos, [('in_corrected', 'intensity_images')]),
+        (inputnode, inu_n4_final, [('in_files', 'input_image')]),
+        (inputnode, msk_conform, [(('in_files', _pop), 'in_reference')]),
+        (dil_brainmask, get_brainmask, [('output_image', 'op1')]),
+        (get_brainmask, atropos, [('output_image', 'mask_image')]),
+        (atropos, pad_segm, [('classified_image', 'op1')]),
+        (pad_segm, sel_labels, [('output_image', 'in_segm')]),
+        (sel_labels, get_wm, [('out_wm', 'op1')]),
+        (sel_labels, get_gm, [('out_gm', 'op1')]),
+        (get_gm, fill_gm, [('output_image', 'op1')]),
+        (get_gm, mult_gm, [('output_image', 'first_input')]),
+        (fill_gm, mult_gm, [('output_image', 'second_input')]),
+        (get_wm, relabel_wm, [('output_image', 'first_input')]),
+        (sel_labels, me_csf, [('out_csf', 'op1')]),
+        (mult_gm, add_gm, [('output_product_image', 'op1')]),
+        (me_csf, add_gm, [('output_image', 'op2')]),
+        (add_gm, relabel_gm, [('output_image', 'first_input')]),
+        (relabel_wm, add_gm_wm, [('output_product_image', 'op1')]),
+        (relabel_gm, add_gm_wm, [('output_product_image', 'op2')]),
+        (add_gm_wm, sel_labels2, [('output_image', 'in_segm')]),
+        (sel_labels2, add_7, [('out_wm', 'op1'), ('out_gm', 'op2')]),
+        (add_7, me_7, [('output_image', 'op1')]),
+        (me_7, comp_7, [('output_image', 'op1')]),
+        (comp_7, md_7, [('output_image', 'op1')]),
+        (md_7, fill_7, [('output_image', 'op1')]),
+        (fill_7, add_7_2, [('output_image', 'op1')]),
+        (pad_mask, add_7_2, [('output_image', 'op2')]),
+        (add_7_2, md_7_2, [('output_image', 'op1')]),
+        (md_7_2, me_7_2, [('output_image', 'op1')]),
+        (me_7_2, depad_mask, [('output_image', 'op1')]),
+        (add_gm_wm, depad_segm, [('output_image', 'op1')]),
+        (relabel_wm, depad_wm, [('output_product_image', 'op1')]),
+        (relabel_gm, depad_gm, [('output_product_image', 'op1')]),
+        (sel_labels, depad_csf, [('out_csf', 'op1')]),
+        (depad_csf, merge_tpms, [('output_image', 'in1')]),
+        (depad_gm, merge_tpms, [('output_image', 'in2')]),
+        (depad_wm, merge_tpms, [('output_image', 'in3')]),
+        (depad_mask, msk_conform, [('output_image', 'in_mask')]),
+        (msk_conform, copy_xform, [('out', 'out_mask')]),
+        (depad_segm, copy_xform, [('output_image', 'out_segm')]),
+        (merge_tpms, copy_xform, [('out', 'out_tpms')]),
+        (atropos, sel_wm, [('posteriors', 'inlist')]),
+        (sel_wm, copy_xform_wm, [('out', 'wm_map')]),
+        (copy_xform_wm, inu_n4_final, [('wm_map', 'weight_image')]),
+        (inu_n4_final, copy_xform, [('output_image', 'bias_corrected'),
+                                    ('bias_image', 'bias_image')]),
+        (copy_xform, apply_mask, [('bias_corrected', 'in_file'),
+                                  ('out_mask', 'in_mask')]),
+        (apply_mask, outputnode, [('out_file', 'out_file')]),
         (copy_xform, outputnode, [
-            ("bias_corrected", "bias_corrected"),
-            ("bias_image", "bias_image"),
-            ("out_mask", "out_mask"),
-            ("out_segm", "out_segm"),
-            ("out_tpms", "out_tpms"),
+            ('bias_corrected', 'bias_corrected'),
+            ('bias_image', 'bias_image'),
+            ('out_mask', 'out_mask'),
+            ('out_segm', 'out_segm'),
+            ('out_tpms', 'out_tpms'),
         ]),
     ])
     # fmt: on
@@ -844,18 +847,18 @@ def init_atropos_wf(
 
         # fmt: off
         wf.disconnect([
-            (copy_xform_wm, inu_n4_final, [("wm_map", "weight_image")]),
+            (copy_xform_wm, inu_n4_final, [('wm_map', 'weight_image')]),
         ])
         wf.connect([
-            (inputnode, apply_wm_prior, [("in_mask", "in_mask"),
-                                         ("wm_prior", "op2")]),
-            (inputnode, match_wm, [("wm_prior", "value")]),
-            (atropos, match_wm, [("posteriors", "reference")]),
-            (atropos, overlap, [("posteriors", "in_ref")]),
-            (match_wm, overlap, [("out", "in_tst")]),
-            (overlap, sel_wm, [(("class_fdi", _argmax), "index")]),
-            (copy_xform_wm, apply_wm_prior, [("wm_map", "op1")]),
-            (apply_wm_prior, inu_n4_final, [("out", "weight_image")]),
+            (inputnode, apply_wm_prior, [('in_mask', 'in_mask'),
+                                         ('wm_prior', 'op2')]),
+            (inputnode, match_wm, [('wm_prior', 'value')]),
+            (atropos, match_wm, [('posteriors', 'reference')]),
+            (atropos, overlap, [('posteriors', 'in_ref')]),
+            (match_wm, overlap, [('out', 'in_tst')]),
+            (overlap, sel_wm, [(('class_fdi', _argmax), 'index')]),
+            (copy_xform_wm, apply_wm_prior, [('wm_map', 'op1')]),
+            (apply_wm_prior, inu_n4_final, [('out', 'weight_image')]),
         ])
         # fmt: on
     return wf
@@ -988,12 +991,12 @@ def init_n4_only_wf(
 
     # fmt: off
     wf.connect([
-        (inputnode, inu_n4_final, [("in_files", "input_image")]),
-        (inputnode, thr_brainmask, [(("in_files", _pop), "in_file")]),
-        (thr_brainmask, outputnode, [("out_mask", "out_mask")]),
-        (inu_n4_final, outputnode, [("output_image", "out_file"),
-                                    ("output_image", "bias_corrected"),
-                                    ("bias_image", "bias_image")]),
+        (inputnode, inu_n4_final, [('in_files', 'input_image')]),
+        (inputnode, thr_brainmask, [(('in_files', _pop), 'in_file')]),
+        (thr_brainmask, outputnode, [('out_mask', 'out_mask')]),
+        (inu_n4_final, outputnode, [('output_image', 'out_file'),
+                                    ('output_image', 'bias_corrected'),
+                                    ('bias_image', 'bias_image')]),
     ])
     # fmt: on
 
@@ -1009,20 +1012,20 @@ def init_n4_only_wf(
 
         # fmt: off
         wf.disconnect([
-            (inu_n4_final, outputnode, [("output_image", "out_file"),
-                                        ("output_image", "bias_corrected"),
-                                        ("bias_image", "bias_image")]),
+            (inu_n4_final, outputnode, [('output_image', 'out_file'),
+                                        ('output_image', 'bias_corrected'),
+                                        ('bias_image', 'bias_image')]),
         ])
         wf.connect([
-            (inputnode, atropos_wf, [("in_files", "inputnode.in_files")]),
-            (inu_n4_final, atropos_wf, [("output_image", "inputnode.in_corrected")]),
-            (thr_brainmask, atropos_wf, [("out_mask", "inputnode.in_mask")]),
+            (inputnode, atropos_wf, [('in_files', 'inputnode.in_files')]),
+            (inu_n4_final, atropos_wf, [('output_image', 'inputnode.in_corrected')]),
+            (thr_brainmask, atropos_wf, [('out_mask', 'inputnode.in_mask')]),
             (atropos_wf, outputnode, [
-                ("outputnode.out_file", "out_file"),
-                ("outputnode.bias_corrected", "bias_corrected"),
-                ("outputnode.bias_image", "bias_image"),
-                ("outputnode.out_segm", "out_segm"),
-                ("outputnode.out_tpms", "out_tpms"),
+                ('outputnode.out_file', 'out_file'),
+                ('outputnode.bias_corrected', 'bias_corrected'),
+                ('outputnode.bias_image', 'bias_image'),
+                ('outputnode.out_segm', 'out_segm'),
+                ('outputnode.out_tpms', 'out_tpms'),
             ]),
         ])
         # fmt: on
@@ -1032,8 +1035,9 @@ def init_n4_only_wf(
 
 def _select_labels(in_segm, labels):
     from os import getcwd
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
     from nipype.utils.filemanip import fname_presuffix
 
     out_files = []
@@ -1053,8 +1057,9 @@ def _select_labels(in_segm, labels):
 def _conform_mask(in_mask, in_reference):
     """Ensures the mask headers make sense and match those of the T1w"""
     from pathlib import Path
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
     from nipype.utils.filemanip import fname_presuffix
 
     ref = nb.load(in_reference)

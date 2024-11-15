@@ -22,10 +22,11 @@
 #
 """Test morphology module."""
 
-from pathlib import Path
 import shutil
-import numpy as np
+from pathlib import Path
+
 import nibabel as nb
+import numpy as np
 
 from niworkflows.interfaces.morphology import (
     BinaryDilation,

@@ -22,15 +22,15 @@
 #
 """Utilities for BOLD fMRI imaging."""
 
-import numpy as np
 import nibabel as nb
+import numpy as np
 from nipype import logging
 from nipype.interfaces.base import (
-    traits,
-    TraitedSpec,
     BaseInterfaceInputSpec,
-    SimpleInterface,
     File,
+    SimpleInterface,
+    TraitedSpec,
+    traits,
 )
 
 LOGGER = logging.getLogger('nipype.interface')

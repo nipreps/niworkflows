@@ -27,8 +27,10 @@ import shutil
 from unittest import mock
 
 import pytest
-from ..misc import pass_dummy_scans, check_valid_fs_license
+
 from niworkflows.testing import has_freesurfer
+
+from ..misc import check_valid_fs_license, pass_dummy_scans
 
 
 @pytest.mark.parametrize(

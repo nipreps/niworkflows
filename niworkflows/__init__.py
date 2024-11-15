@@ -6,7 +6,7 @@ import logging
 
 from acres import Loader
 
-from .__about__ import __packagename__, __copyright__, __credits__
+from .__about__ import __copyright__, __credits__, __packagename__
 
 try:
     from ._version import __version__

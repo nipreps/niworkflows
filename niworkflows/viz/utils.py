@@ -22,22 +22,21 @@
 #
 """Helper tools for visualization purposes."""
 
+import base64
+import re
+import subprocess
+from io import StringIO
 from pathlib import Path
 from shutil import which
 from tempfile import TemporaryDirectory
-import subprocess
-import base64
-import re
 from uuid import uuid4
-from io import StringIO
 
-import numpy as np
 import nibabel as nb
-
+import numpy as np
 from nipype.utils import filemanip
-from .. import NIWORKFLOWS_LOG
-from ..utils.images import rotation2canonical, rotate_affine
 
+from .. import NIWORKFLOWS_LOG
+from ..utils.images import rotate_affine, rotation2canonical
 
 SVGNS = 'http://www.w3.org/2000/svg'
 
@@ -239,8 +238,8 @@ def plot_segs(
     coordinates. plot_params will be passed on to nilearn plot_* functions. If
     seg_niis is a list of size one, it behaves as if it was plotting the mask.
     """
-    from svgutils.transform import fromstring
     from nilearn import image as nlimage
+    from svgutils.transform import fromstring
 
     plot_params = {} if plot_params is None else plot_params
 
@@ -326,9 +325,9 @@ def plot_registration(
     Plots the foreground and background views
     Default order is: axial, coronal, sagittal
     """
-    from svgutils.transform import fromstring
-    from nilearn.plotting import plot_anat
     from nilearn import image as nlimage
+    from nilearn.plotting import plot_anat
+    from svgutils.transform import fromstring
 
     plot_params = {} if plot_params is None else plot_params
 
@@ -402,7 +401,7 @@ def compose_view(bg_svgs, fg_svgs, ref=0, out_file='report.svg'):
 
 def _compose_view(bg_svgs, fg_svgs, ref=0):
     from svgutils.compose import Unit
-    from svgutils.transform import SVGFigure, GroupElement
+    from svgutils.transform import GroupElement, SVGFigure
 
     if fg_svgs is None:
         fg_svgs = []
@@ -543,13 +542,14 @@ def plot_melodic_components(
         is printed at the top.
 
     """
-    from nilearn.image import index_img, iter_img
+    import os
+
     import nibabel as nb
     import numpy as np
     import pylab as plt
     import seaborn as sns
     from matplotlib.gridspec import GridSpec
-    import os
+    from nilearn.image import index_img, iter_img
 
     sns.set_style('white')
     current_palette = sns.color_palette()
@@ -622,7 +622,7 @@ def plot_melodic_components(
         if noise_components.size == n_components:
             ncomps = 'ALL'
         ax.annotate(
-            'WARNING: {} components were classified as noise'.format(ncomps),
+            f'WARNING: {ncomps} components were classified as noise',
             xy=(0.0, 0.5),
             xycoords='axes fraction',
             xytext=(0.01, 0.5),

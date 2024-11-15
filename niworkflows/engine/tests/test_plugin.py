@@ -2,8 +2,8 @@ import logging
 from types import SimpleNamespace
 
 import pytest
-from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
+from nipype.pipeline import engine as pe
 
 from ..plugin import MultiProcPlugin
 

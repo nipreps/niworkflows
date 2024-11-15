@@ -22,14 +22,14 @@
 #
 """A lightweight NiPype MultiProc execution plugin."""
 
+import gc
+import multiprocessing as mp
 import os
 import sys
+from concurrent.futures import ProcessPoolExecutor
 from copy import deepcopy
 from time import sleep, time
-import multiprocessing as mp
-from concurrent.futures import ProcessPoolExecutor
 from traceback import format_exception
-import gc
 
 from nipype.utils.misc import str2bool
 
@@ -363,8 +363,9 @@ class DistributedPluginBase(PluginBase):
 
     def _remove_node_dirs(self):
         """Remove directories whose outputs have already been used up."""
-        import numpy as np
         from shutil import rmtree
+
+        import numpy as np
 
         if str2bool(self._config['execution']['remove_node_directories']):
             indices = np.nonzero((self.refidx.sum(axis=1) == 0).__array__())[0]
@@ -433,6 +434,7 @@ class MultiProcPlugin(DistributedPluginBase):
             config = plugin_args['app_config']
         except (KeyError, TypeError):
             from types import SimpleNamespace
+
             from nipype.utils.profiler import get_system_total_memory_gb
 
             config = SimpleNamespace(

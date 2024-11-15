@@ -22,23 +22,23 @@
 #
 """Visualization tools."""
 
-import numpy as np
 import nibabel as nb
-
-from nipype.utils.filemanip import fname_presuffix
+import numpy as np
 from nipype.interfaces.base import (
-    File,
     BaseInterfaceInputSpec,
-    TraitedSpec,
+    File,
     SimpleInterface,
-    traits,
+    TraitedSpec,
     isdefined,
+    traits,
 )
+from nipype.utils.filemanip import fname_presuffix
+
 from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
 from niworkflows.viz.plots import (
-    fMRIPlot,
     compcor_variance_plot,
     confounds_correlation_plot,
+    fMRIPlot,
 )
 
 

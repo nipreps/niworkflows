@@ -12,11 +12,11 @@
 #
 import os
 import sys
-from unittest import mock
 import tempfile
+from unittest import mock
 
-from packaging.version import Version
 import templateflow
+from packaging.version import Version
 
 # Prevent etelemetry from loading at all
 # Could set NO_ET environment variable, but why?
@@ -36,7 +36,7 @@ tffiledesc, tffilename = tempfile.mkstemp()
 os.close(tffiledesc)
 templateflow.api.get = mock.MagicMock(return_value=tffilename)
 
-from niworkflows import __version__, __copyright__, __packagename__
+from niworkflows import __copyright__, __packagename__, __version__
 
 sys.path.append(os.path.abspath('sphinxext'))
 

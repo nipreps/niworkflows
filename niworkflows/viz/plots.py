@@ -22,16 +22,15 @@
 #
 """Plotting tools shared across MRIQC and fMRIPrep."""
 
-import numpy as np
-import nibabel as nb
-import pandas as pd
-
+import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+import nibabel as nb
+import numpy as np
+import pandas as pd
 from matplotlib import colormaps
 from matplotlib import gridspec as mgs
-import matplotlib.cm as cm
-from matplotlib.colors import Normalize
 from matplotlib.colorbar import ColorbarBase
+from matplotlib.colors import Normalize
 
 DINA4_LANDSCAPE = (11.69, 8.27)
 
@@ -222,7 +221,7 @@ def plot_carpet(
 
     # Cluster segments (if argument enabled)
     if sort_rows:
-        from scipy.cluster.hierarchy import linkage, dendrogram
+        from scipy.cluster.hierarchy import dendrogram, linkage
         from sklearn.cluster import ward_tree
 
         for seg_label, seg_idx in segments.items():
@@ -757,7 +756,7 @@ def compcor_variance_plot(
         if len(metadata_files) == 1:
             metadata_sources = ['CompCor']
         else:
-            metadata_sources = ['Decomposition {:d}'.format(i) for i in range(len(metadata_files))]
+            metadata_sources = [f'Decomposition {i:d}' for i in range(len(metadata_files))]
     for file, source in zip(metadata_files, metadata_sources):
         metadata[source] = pd.read_csv(str(file), sep=r'\s+')
         metadata[source]['source'] = source
@@ -791,10 +790,10 @@ def compcor_variance_plot(
     for m, (source, mask) in enumerate(decompositions):
         components = metadata[(metadata['mask'] == mask) & (metadata['source'] == source)]
         if len([m for s, m in decompositions if s == source]) > 1:
-            title_mask = ' ({} mask)'.format(mask)
+            title_mask = f' ({mask} mask)'
         else:
             title_mask = ''
-        fig_title = '{}{}'.format(source, title_mask)
+        fig_title = f'{source}{title_mask}'
 
         ax[m].plot(
             np.arange(components.shape[0] + 1),
@@ -815,18 +814,18 @@ def compcor_variance_plot(
                 + 1
             )
             ax[m].axhline(y=100 * thr, color='lightgrey', linewidth=0.25)
-            ax[m].axvline(x=varexp[thr], color='C{}'.format(i), linewidth=2, linestyle=':')
+            ax[m].axvline(x=varexp[thr], color=f'C{i}', linewidth=2, linestyle=':')
             ax[m].text(
                 0,
                 100 * thr,
-                '{:.0f}'.format(100 * thr),
+                f'{100 * thr:.0f}',
                 fontsize='x-small',
                 bbox=bbox_txt,
             )
             ax[m].text(
                 varexp[thr][0],
                 25,
-                '{} components explain\n{:.0f}% of variance'.format(varexp[thr][0], 100 * thr),
+                f'{varexp[thr][0]} components explain\n{100 * thr:.0f}% of variance',
                 rotation=90,
                 horizontalalignment='center',
                 fontsize='xx-small',
@@ -954,7 +953,7 @@ def confounds_correlation_plot(
     )
 
     ax1.set_xlabel('Confound time series')
-    ax1.set_ylabel('Magnitude of correlation with {}'.format(reference))
+    ax1.set_ylabel(f'Magnitude of correlation with {reference}')
     ax1.tick_params(axis='x', which='both', width=0)
     ax1.tick_params(axis='y', which='both', width=5, length=5)
 

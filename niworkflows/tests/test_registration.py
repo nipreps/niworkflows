@@ -24,20 +24,21 @@
 
 import os
 from shutil import copy
-import pytest
 from tempfile import TemporaryDirectory
 
+import pytest
 from nipype.pipeline import engine as pe
+
 from ..interfaces.reportlets.registration import (
     FLIRTRPT,
-    SpatialNormalizationRPT,
     ANTSRegistrationRPT,
+    ApplyXFMRPT,
     BBRegisterRPT,
     MRICoregRPT,
-    ApplyXFMRPT,
     SimpleBeforeAfterRPT,
+    SpatialNormalizationRPT,
 )
-from ..testing import has_fsl, has_freesurfer
+from ..testing import has_freesurfer, has_fsl
 from .conftest import _run_interface_mock, datadir
 
 

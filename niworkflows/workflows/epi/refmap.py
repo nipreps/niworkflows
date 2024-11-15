@@ -22,11 +22,10 @@
 #
 """Workflow for the generation of EPI (echo-planar imaging) references."""
 
-from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
+from nipype.pipeline import engine as pe
 
 from ...engine.workflows import LiterateWorkflow as Workflow
-
 
 DEFAULT_MEMORY_MIN_GB = 0.01
 
@@ -116,13 +115,13 @@ def init_epi_reference_wf(
 
     """
     from nipype.interfaces.ants import N4BiasFieldCorrection
-    from ...utils.connections import listify
 
     from ...interfaces.bold import NonsteadyStatesDetector
     from ...interfaces.freesurfer import StructuralReference
     from ...interfaces.header import ValidateImage
     from ...interfaces.images import RobustAverage
     from ...interfaces.nibabel import IntensityClip
+    from ...utils.connections import listify
 
     wf = Workflow(name=name)
 
@@ -188,22 +187,22 @@ def init_epi_reference_wf(
 
     # fmt:off
     wf.connect([
-        (inputnode, validate_nii, [(("in_files", listify), "in_file")]),
-        (validate_nii, per_run_avgs, [("out_file", "in_file")]),
-        (per_run_avgs, clip_avgs, [("out_file", "in_file")]),
-        (clip_avgs, n4_avgs, [("out_file", "input_image")]),
-        (n4_avgs, clip_bg_noise, [("output_image", "in_file")]),
+        (inputnode, validate_nii, [(('in_files', listify), 'in_file')]),
+        (validate_nii, per_run_avgs, [('out_file', 'in_file')]),
+        (per_run_avgs, clip_avgs, [('out_file', 'in_file')]),
+        (clip_avgs, n4_avgs, [('out_file', 'input_image')]),
+        (n4_avgs, clip_bg_noise, [('output_image', 'in_file')]),
         (clip_bg_noise, epi_merge, [
-            ("out_file", "in_files"),
-            (("out_file", _set_threads, omp_nthreads), "num_threads"),
+            ('out_file', 'in_files'),
+            (('out_file', _set_threads, omp_nthreads), 'num_threads'),
         ]),
-        (epi_merge, post_merge, [("out_file", "in_file"),
-                                 ("transform_outputs", "in_xfms")]),
-        (post_merge, outputnode, [("out", "epi_ref_file")]),
-        (epi_merge, outputnode, [("transform_outputs", "xfm_files")]),
-        (per_run_avgs, outputnode, [("out_drift", "drift_factors")]),
-        (n4_avgs, outputnode, [("output_image", "per_run_ref_files")]),
-        (validate_nii, outputnode, [("out_report", "validation_report")]),
+        (epi_merge, post_merge, [('out_file', 'in_file'),
+                                 ('transform_outputs', 'in_xfms')]),
+        (post_merge, outputnode, [('out', 'epi_ref_file')]),
+        (epi_merge, outputnode, [('transform_outputs', 'xfm_files')]),
+        (per_run_avgs, outputnode, [('out_drift', 'drift_factors')]),
+        (n4_avgs, outputnode, [('output_image', 'per_run_ref_files')]),
+        (validate_nii, outputnode, [('out_report', 'validation_report')]),
     ])
     # fmt:on
 
@@ -213,9 +212,9 @@ def init_epi_reference_wf(
         )
         # fmt:off
         wf.connect([
-            (validate_nii, select_volumes, [("out_file", "in_file")]),
-            (select_volumes, per_run_avgs, [("t_mask", "t_mask")]),
-            (select_volumes, outputnode, [("n_dummy", "n_dummy")])
+            (validate_nii, select_volumes, [('out_file', 'in_file')]),
+            (select_volumes, per_run_avgs, [('t_mask', 't_mask')]),
+            (select_volumes, outputnode, [('n_dummy', 'n_dummy')])
         ])
         # fmt:on
     else:
@@ -248,7 +247,9 @@ def _post_merge(in_file, in_xfms):
         raise RuntimeError('Output format and number of transforms do not match')
 
     from pathlib import Path
+
     import nibabel as nb
+
     from niworkflows.interfaces.nibabel import _advanced_clip
 
     out_file = Path() / Path(in_file).name.replace('.mgz', '.nii.gz')

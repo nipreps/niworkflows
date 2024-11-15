@@ -22,25 +22,28 @@
 #
 """Utility workflows."""
 
-from packaging.version import parse as parseversion, Version
-
+from nipype.interfaces import afni, fsl
+from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
-from nipype.interfaces import utility as niu, fsl, afni
-
+from packaging.version import Version
+from packaging.version import parse as parseversion
 from templateflow.api import get as get_template
 
 from .. import data
 from ..engine.workflows import LiterateWorkflow as Workflow
 from ..interfaces.fixes import (
-    FixHeaderRegistration as Registration,
     FixHeaderApplyTransforms as ApplyTransforms,
+)
+from ..interfaces.fixes import (
+    FixHeaderRegistration as Registration,
+)
+from ..interfaces.fixes import (
     FixN4BiasFieldCorrection as N4BiasFieldCorrection,
 )
 from ..interfaces.header import CopyHeader, CopyXForm, ValidateImage
 from ..interfaces.reportlets.masks import SimpleShowMaskRPT
 from ..utils.connections import listify
 from ..utils.misc import pass_dummy_scans as _pass_dummy_scans
-
 
 DEFAULT_MEMORY_MIN_GB = 0.01
 
@@ -141,9 +144,9 @@ def init_bold_reference_wf(
         * :py:func:`~niworkflows.func.util.init_enhance_and_skullstrip_wf`
 
     """
-    from ..utils.connections import pop_file as _pop
     from ..interfaces.bold import NonsteadyStatesDetector
     from ..interfaces.images import RobustAverage
+    from ..utils.connections import pop_file as _pop
 
     workflow = Workflow(name=name)
     workflow.__desc__ = f"""\
@@ -203,22 +206,22 @@ methodology of *fMRIPrep*.
 
     # fmt: off
     workflow.connect([
-        (inputnode, val_bold, [(("bold_file", listify), "in_file")]),
-        (inputnode, get_dummy, [(("bold_file", _pop), "in_file")]),
-        (inputnode, enhance_and_skullstrip_bold_wf, [("bold_mask", "inputnode.pre_mask")]),
-        (inputnode, calc_dummy_scans, [("dummy_scans", "dummy_scans")]),
-        (gen_avg, enhance_and_skullstrip_bold_wf, [("out_file", "inputnode.in_file")]),
-        (get_dummy, calc_dummy_scans, [("n_dummy", "algo_dummy_scans")]),
-        (calc_dummy_scans, outputnode, [("skip_vols_num", "skip_vols")]),
-        (gen_avg, outputnode, [("out_file", "raw_ref_image")]),
-        (get_dummy, outputnode, [("n_dummy", "algo_dummy_scans")]),
-        (val_bold, outputnode, [(("out_file", _pop), "bold_file"),
-                                ("out_file", "all_bold_files"),
-                                (("out_report", _pop), "validation_report")]),
+        (inputnode, val_bold, [(('bold_file', listify), 'in_file')]),
+        (inputnode, get_dummy, [(('bold_file', _pop), 'in_file')]),
+        (inputnode, enhance_and_skullstrip_bold_wf, [('bold_mask', 'inputnode.pre_mask')]),
+        (inputnode, calc_dummy_scans, [('dummy_scans', 'dummy_scans')]),
+        (gen_avg, enhance_and_skullstrip_bold_wf, [('out_file', 'inputnode.in_file')]),
+        (get_dummy, calc_dummy_scans, [('n_dummy', 'algo_dummy_scans')]),
+        (calc_dummy_scans, outputnode, [('skip_vols_num', 'skip_vols')]),
+        (gen_avg, outputnode, [('out_file', 'raw_ref_image')]),
+        (get_dummy, outputnode, [('n_dummy', 'algo_dummy_scans')]),
+        (val_bold, outputnode, [(('out_file', _pop), 'bold_file'),
+                                ('out_file', 'all_bold_files'),
+                                (('out_report', _pop), 'validation_report')]),
         (enhance_and_skullstrip_bold_wf, outputnode, [
-            ("outputnode.bias_corrected_file", "ref_image"),
-            ("outputnode.mask_file", "bold_mask"),
-            ("outputnode.skull_stripped_file", "ref_image_brain"),
+            ('outputnode.bias_corrected_file', 'ref_image'),
+            ('outputnode.mask_file', 'bold_mask'),
+            ('outputnode.skull_stripped_file', 'ref_image_brain'),
         ]),
     ])
     # fmt: on
@@ -228,8 +231,8 @@ methodology of *fMRIPrep*.
         # fmt: off
         workflow.connect([
             (enhance_and_skullstrip_bold_wf, mask_reportlet, [
-                ("outputnode.bias_corrected_file", "background_file"),
-                ("outputnode.mask_file", "mask_file"),
+                ('outputnode.bias_corrected_file', 'background_file'),
+                ('outputnode.mask_file', 'mask_file'),
             ]),
         ])
         # fmt: on
@@ -237,8 +240,8 @@ methodology of *fMRIPrep*.
     if not sbref_files:
         # fmt: off
         workflow.connect([
-            (val_bold, gen_avg, [(("out_file", _pop), "in_file")]),  # pop first echo of ME-EPI
-            (get_dummy, gen_avg, [("t_mask", "t_mask")]),
+            (val_bold, gen_avg, [(('out_file', _pop), 'in_file')]),  # pop first echo of ME-EPI
+            (get_dummy, gen_avg, [('t_mask', 't_mask')]),
         ])
         # fmt: on
         return workflow
@@ -261,9 +264,9 @@ methodology of *fMRIPrep*.
 
     # fmt: off
     workflow.connect([
-        (inputnode, val_sbref, [(("sbref_file", listify), "in_file")]),
-        (val_sbref, merge_sbrefs, [("out_file", "in_files")]),
-        (merge_sbrefs, gen_avg, [("out_file", "in_file")]),
+        (inputnode, val_sbref, [(('sbref_file', listify), 'in_file')]),
+        (val_sbref, merge_sbrefs, [('out_file', 'in_files')]),
+        (merge_sbrefs, gen_avg, [('out_file', 'in_file')]),
     ])
     # fmt: on
 
@@ -466,46 +469,46 @@ def init_enhance_and_skullstrip_bold_wf(
 
         # fmt: off
         workflow.connect([
-            (inputnode, fix_header, [("in_file", "hdr_file")]),
-            (inputnode, init_aff, [("in_file", "moving_image")]),
-            (inputnode, map_brainmask, [("in_file", "reference_image")]),
-            (inputnode, norm, [("in_file", "moving_image")]),
-            (init_aff, norm, [("output_transform", "initial_moving_transform")]),
+            (inputnode, fix_header, [('in_file', 'hdr_file')]),
+            (inputnode, init_aff, [('in_file', 'moving_image')]),
+            (inputnode, map_brainmask, [('in_file', 'reference_image')]),
+            (inputnode, norm, [('in_file', 'moving_image')]),
+            (init_aff, norm, [('output_transform', 'initial_moving_transform')]),
             (norm, map_brainmask, [
-                ("reverse_invert_flags", "invert_transform_flags"),
-                ("reverse_transforms", "transforms"),
+                ('reverse_invert_flags', 'invert_transform_flags'),
+                ('reverse_transforms', 'transforms'),
             ]),
-            (map_brainmask, fix_header, [("output_image", "in_file")]),
-            (fix_header, n4_correct, [("out_file", "weight_image")]),
+            (map_brainmask, fix_header, [('output_image', 'in_file')]),
+            (fix_header, n4_correct, [('out_file', 'weight_image')]),
         ])
         # fmt: on
     else:
         # fmt: off
         workflow.connect([
-            (inputnode, n4_correct, [("pre_mask", "weight_image")]),
+            (inputnode, n4_correct, [('pre_mask', 'weight_image')]),
         ])
         # fmt: on
 
     # fmt: off
     workflow.connect([
-        (inputnode, n4_correct, [("in_file", "input_image")]),
-        (inputnode, fixhdr_unifize, [("in_file", "hdr_file")]),
-        (inputnode, fixhdr_skullstrip2, [("in_file", "hdr_file")]),
-        (n4_correct, skullstrip_first_pass, [("output_image", "in_file")]),
-        (skullstrip_first_pass, first_dilate, [("mask_file", "in_file")]),
-        (first_dilate, first_mask, [("out_file", "in_mask")]),
-        (skullstrip_first_pass, first_mask, [("out_file", "in_file")]),
-        (first_mask, unifize, [("out_file", "in_file")]),
-        (unifize, fixhdr_unifize, [("out_file", "in_file")]),
-        (fixhdr_unifize, skullstrip_second_pass, [("out_file", "in_file")]),
-        (skullstrip_first_pass, combine_masks, [("mask_file", "in_file")]),
-        (skullstrip_second_pass, fixhdr_skullstrip2, [("out_file", "in_file")]),
-        (fixhdr_skullstrip2, combine_masks, [("out_file", "operand_file")]),
-        (fixhdr_unifize, apply_mask, [("out_file", "in_file")]),
-        (combine_masks, apply_mask, [("out_file", "in_mask")]),
-        (combine_masks, outputnode, [("out_file", "mask_file")]),
-        (apply_mask, outputnode, [("out_file", "skull_stripped_file")]),
-        (n4_correct, outputnode, [("output_image", "bias_corrected_file")]),
+        (inputnode, n4_correct, [('in_file', 'input_image')]),
+        (inputnode, fixhdr_unifize, [('in_file', 'hdr_file')]),
+        (inputnode, fixhdr_skullstrip2, [('in_file', 'hdr_file')]),
+        (n4_correct, skullstrip_first_pass, [('output_image', 'in_file')]),
+        (skullstrip_first_pass, first_dilate, [('mask_file', 'in_file')]),
+        (first_dilate, first_mask, [('out_file', 'in_mask')]),
+        (skullstrip_first_pass, first_mask, [('out_file', 'in_file')]),
+        (first_mask, unifize, [('out_file', 'in_file')]),
+        (unifize, fixhdr_unifize, [('out_file', 'in_file')]),
+        (fixhdr_unifize, skullstrip_second_pass, [('out_file', 'in_file')]),
+        (skullstrip_first_pass, combine_masks, [('mask_file', 'in_file')]),
+        (skullstrip_second_pass, fixhdr_skullstrip2, [('out_file', 'in_file')]),
+        (fixhdr_skullstrip2, combine_masks, [('out_file', 'operand_file')]),
+        (fixhdr_unifize, apply_mask, [('out_file', 'in_file')]),
+        (combine_masks, apply_mask, [('out_file', 'in_mask')]),
+        (combine_masks, outputnode, [('out_file', 'mask_file')]),
+        (apply_mask, outputnode, [('out_file', 'skull_stripped_file')]),
+        (n4_correct, outputnode, [('output_image', 'bias_corrected_file')]),
     ])
     # fmt: on
 
@@ -562,19 +565,19 @@ def init_skullstrip_bold_wf(name='skullstrip_bold_wf'):
 
     # fmt: off
     workflow.connect([
-        (inputnode, skullstrip_first_pass, [("in_file", "in_file")]),
-        (skullstrip_first_pass, skullstrip_second_pass, [("out_file", "in_file")]),
-        (skullstrip_first_pass, combine_masks, [("mask_file", "in_file")]),
-        (skullstrip_second_pass, combine_masks, [("out_file", "operand_file")]),
-        (combine_masks, outputnode, [("out_file", "mask_file")]),
+        (inputnode, skullstrip_first_pass, [('in_file', 'in_file')]),
+        (skullstrip_first_pass, skullstrip_second_pass, [('out_file', 'in_file')]),
+        (skullstrip_first_pass, combine_masks, [('mask_file', 'in_file')]),
+        (skullstrip_second_pass, combine_masks, [('out_file', 'operand_file')]),
+        (combine_masks, outputnode, [('out_file', 'mask_file')]),
         # Masked file
-        (inputnode, apply_mask, [("in_file", "in_file")]),
-        (combine_masks, apply_mask, [("out_file", "in_mask")]),
-        (apply_mask, outputnode, [("out_file", "skull_stripped_file")]),
+        (inputnode, apply_mask, [('in_file', 'in_file')]),
+        (combine_masks, apply_mask, [('out_file', 'in_mask')]),
+        (apply_mask, outputnode, [('out_file', 'skull_stripped_file')]),
         # Reportlet
-        (inputnode, mask_reportlet, [("in_file", "background_file")]),
-        (combine_masks, mask_reportlet, [("out_file", "mask_file")]),
-        (mask_reportlet, outputnode, [("out_report", "out_report")]),
+        (inputnode, mask_reportlet, [('in_file', 'background_file')]),
+        (combine_masks, mask_reportlet, [('out_file', 'mask_file')]),
+        (mask_reportlet, outputnode, [('out_report', 'out_report')]),
     ])
     # fmt: on
 

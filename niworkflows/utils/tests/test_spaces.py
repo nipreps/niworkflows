@@ -23,7 +23,8 @@
 """Test spaces."""
 
 import pytest
-from ..spaces import Reference, SpatialReferences, OutputReferencesAction
+
+from ..spaces import OutputReferencesAction, Reference, SpatialReferences
 
 
 @pytest.fixture

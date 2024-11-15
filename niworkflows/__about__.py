@@ -30,7 +30,7 @@ as well as for open-source software distribution.
 from datetime import datetime
 
 __packagename__ = 'niworkflows'
-__copyright__ = 'Copyright {}, The NiPreps Developers'.format(datetime.now().year)
+__copyright__ = f'Copyright {datetime.now().year}, The NiPreps Developers'
 __credits__ = [
     'Oscar Esteban',
     'Ross Blair',

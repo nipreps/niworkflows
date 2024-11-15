@@ -22,13 +22,13 @@
 #
 import nibabel as nb
 import numpy as np
-
 import pytest
+
 from ..images import (
-    update_header_fields,
-    overwrite_header,
     dseg_label,
+    overwrite_header,
     resample_by_spacing,
+    update_header_fields,
 )
 
 

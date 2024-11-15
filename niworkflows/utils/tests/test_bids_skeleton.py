@@ -1,10 +1,9 @@
+import json
+
 import pytest
 from bids import BIDSLayout
 
-import json
-
 from ..testing import generate_bids_skeleton
-
 
 bids_dir_sessions = {
     'dataset_description': {'Name': 'sample', 'BIDSVersion': '1.6.0'},

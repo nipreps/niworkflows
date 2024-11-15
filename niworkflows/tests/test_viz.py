@@ -25,17 +25,18 @@
 import os
 from pathlib import Path
 
-import numpy as np
 import nibabel as nb
+import numpy as np
 import pandas as pd
 import pytest
 
+from niworkflows.interfaces.plotting import _get_tr
+from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
+from niworkflows.viz.plots import fMRIPlot
+
+from .. import viz
 from .conftest import datadir
 from .generate_data import _create_dtseries_cifti
-from .. import viz
-from niworkflows.viz.plots import fMRIPlot
-from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
-from niworkflows.interfaces.plotting import _get_tr
 
 
 @pytest.mark.parametrize('tr', (None, 0.7))

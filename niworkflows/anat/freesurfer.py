@@ -23,13 +23,16 @@
 """FreeSurfer-related workflows."""
 
 from os import getenv
-from nipype.pipeline import engine as pe
-from nipype.interfaces import utility as niu
-from nipype.interfaces import io as nio
+
 from nipype.interfaces import freesurfer as fs
+from nipype.interfaces import io as nio
+from nipype.interfaces import utility as niu
+from nipype.pipeline import engine as pe
 
 from ..interfaces.freesurfer import (
     MakeMidthickness,
+)
+from ..interfaces.freesurfer import (
     PatchedRobustRegister as RobustRegister,
 )
 from ..interfaces.surf import NormalizeSurf
@@ -125,25 +128,25 @@ def init_gifti_surface_wf(name='gifti_surface_wf', subjects_dir=getenv('SUBJECTS
 
     # fmt: off
     workflow.connect([
-        (inputnode, fssource, [("subject_id", "subject_id")]),
-        (inputnode, save_midthickness, [("subject_id", "container")]),
+        (inputnode, fssource, [('subject_id', 'subject_id')]),
+        (inputnode, save_midthickness, [('subject_id', 'container')]),
         # Generate fsnative-to-T1w transform
-        (inputnode, fsnative_2_t1_xfm, [("in_t1w", "target_file")]),
-        (fssource, fsnative_2_t1_xfm, [("orig", "source_file")]),
+        (inputnode, fsnative_2_t1_xfm, [('in_t1w', 'target_file')]),
+        (fssource, fsnative_2_t1_xfm, [('orig', 'source_file')]),
         # Generate midthickness surfaces and save to FreeSurfer derivatives
-        (fssource, midthickness, [("white", "in_file"), ("graymid", "graymid")]),
-        (midthickness, save_midthickness, [("out_file", "surf.@graymid")]),
+        (fssource, midthickness, [('white', 'in_file'), ('graymid', 'graymid')]),
+        (midthickness, save_midthickness, [('out_file', 'surf.@graymid')]),
         # Produce valid GIFTI surface files (dense mesh)
         (fssource, surface_list, [
-            ("white", "in1"), ("pial", "in2"), ("inflated", "in3"),
+            ('white', 'in1'), ('pial', 'in2'), ('inflated', 'in3'),
         ]),
-        (save_midthickness, surface_list, [("out_file", "in4")]),
-        (surface_list, fs_2_gii, [("out", "in_file")]),
-        (fs_2_gii, fix_surfs, [("converted", "in_file")]),
-        (fsnative_2_t1_xfm, fix_surfs, [("out_reg_file", "transform_file")]),
-        (fsnative_2_t1_xfm, outputnode, [("out_reg_file", "fsnative_to_t1w_xfm")]),
-        (fix_surfs, outputnode, [("out_file", "surf_norm")]),
-        (fs_2_gii, outputnode, [("converted", "surfaces")]),
+        (save_midthickness, surface_list, [('out_file', 'in4')]),
+        (surface_list, fs_2_gii, [('out', 'in_file')]),
+        (fs_2_gii, fix_surfs, [('converted', 'in_file')]),
+        (fsnative_2_t1_xfm, fix_surfs, [('out_reg_file', 'transform_file')]),
+        (fsnative_2_t1_xfm, outputnode, [('out_reg_file', 'fsnative_to_t1w_xfm')]),
+        (fix_surfs, outputnode, [('out_file', 'surf_norm')]),
+        (fs_2_gii, outputnode, [('converted', 'surfaces')]),
     ])
     # fmt: on
 

@@ -24,23 +24,24 @@
 
 import os.path as op
 from pathlib import Path
+
 import nibabel as nb
 import numpy as np
-
-from nipype.utils.filemanip import copyfile, filename_to_list, fname_presuffix
-from nipype.interfaces.base import (
-    isdefined,
-    InputMultiPath,
-    BaseInterfaceInputSpec,
-    TraitedSpec,
-    File,
-    traits,
-    Directory,
-)
 from nipype.interfaces import freesurfer as fs
-from nipype.interfaces.base import SimpleInterface
+from nipype.interfaces.base import (
+    BaseInterfaceInputSpec,
+    Directory,
+    File,
+    InputMultiPath,
+    SimpleInterface,
+    TraitedSpec,
+    isdefined,
+    traits,
+)
 from nipype.interfaces.freesurfer.preprocess import ConcatenateLTA, RobustRegister
 from nipype.interfaces.freesurfer.utils import LTAConvert
+from nipype.utils.filemanip import copyfile, filename_to_list, fname_presuffix
+
 from .reportlets.registration import BBRegisterRPT, MRICoregRPT
 
 
@@ -401,7 +402,7 @@ def fix_lta_length(lta_file):
 
 
 def inject_skullstripped(subjects_dir, subject_id, skullstripped):
-    from nilearn.image import resample_to_img, new_img_like
+    from nilearn.image import new_img_like, resample_to_img
 
     mridir = op.join(subjects_dir, subject_id, 'mri')
     t1 = op.join(mridir, 'T1.mgz')
@@ -462,8 +463,8 @@ def refine_aseg(aseg, ball_size=4):
          cerebral brain is segmented out).
 
     """
-    from skimage import morphology as sim
     from scipy.ndimage.morphology import binary_fill_holes
+    from skimage import morphology as sim
 
     # Read aseg data
     bmask = aseg.copy()
@@ -525,6 +526,7 @@ def grow_mask(anat, aseg, ants_segs=None, ww=7, zval=2.0, bw=4):
 def medial_wall_to_nan(in_file, subjects_dir, den=None, newpath=None):
     """Convert values on medial wall to NaNs."""
     import os
+
     import nibabel as nb
     import numpy as np
     import templateflow.api as tf
@@ -537,7 +539,7 @@ def medial_wall_to_nan(in_file, subjects_dir, den=None, newpath=None):
     func = nb.load(in_file)
     if target_subject.startswith('fsaverage'):
         cortex = nb.freesurfer.read_label(
-            os.path.join(subjects_dir, target_subject, 'label', '{}.cortex.label'.format(fn[:2]))
+            os.path.join(subjects_dir, target_subject, 'label', f'{fn[:2]}.cortex.label')
         )
         medial = np.delete(np.arange(len(func.darrays[0].data)), cortex)
     elif target_subject == 'fslr' and den is not None:
@@ -560,6 +562,7 @@ def medial_wall_to_nan(in_file, subjects_dir, den=None, newpath=None):
 
 def mri_info(fname, argument):
     import subprocess as sp
+
     import numpy as np
 
     cmd_info = 'mri_info --%s %s' % (argument, fname)

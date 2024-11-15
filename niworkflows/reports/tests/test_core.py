@@ -22,22 +22,21 @@
 #
 """Testing module for niworkflows.reports.core"""
 
-from pathlib import Path
 import tempfile
 from itertools import product
-from yaml import safe_load as load
+from pathlib import Path
 
 import matplotlib.pyplot as plt
-from bids.layout.writing import build_path
-from bids.layout import BIDSLayout
-
 import pytest
+from bids.layout import BIDSLayout
+from bids.layout.writing import build_path
+from yaml import safe_load as load
 
 from ... import load_resource
 from ..core import Report
 
 
-@pytest.fixture()
+@pytest.fixture
 def bids_sessions(tmpdir_factory):
     f, _ = plt.subplots()
     svg_dir = tmpdir_factory.mktemp('work') / 'fmriprep'
@@ -101,19 +100,19 @@ def bids_sessions(tmpdir_factory):
     return svg_dir.dirname
 
 
-@pytest.fixture()
+@pytest.fixture
 def example_workdir():
     from ... import data
 
     workdir = data.load('tests/work')
     if not workdir.is_dir():
         pytest.skip('Missing example workdir; run this test from a source repository')
-    yield workdir
+    return workdir
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_report1(tmp_path, example_workdir):
-    yield Report(
+    return Report(
         tmp_path,
         'fakeuuid',
         reportlets_dir=example_workdir / 'reportlets',
@@ -122,9 +121,9 @@ def test_report1(tmp_path, example_workdir):
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_report2(tmp_path, bids_sessions):
-    yield Report(
+    return Report(
         tmp_path,
         'fakeuuid',
         reportlets_dir=Path(bids_sessions),

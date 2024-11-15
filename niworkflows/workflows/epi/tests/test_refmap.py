@@ -24,8 +24,9 @@
 
 import os
 import unittest
-from ..refmap import init_epi_reference_wf
+
 from ....testing import has_afni
+from ..refmap import init_epi_reference_wf
 
 
 @unittest.skipUnless(has_afni, 'Needs AFNI')

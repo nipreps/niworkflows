@@ -23,21 +23,22 @@
 """Utilities based on nilearn."""
 
 import os
+
 import nibabel as nb
 import numpy as np
-
 from nipype import logging
-from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    traits,
-    isdefined,
-    TraitedSpec,
     BaseInterfaceInputSpec,
     File,
     InputMultiPath,
     SimpleInterface,
+    TraitedSpec,
+    isdefined,
+    traits,
 )
 from nipype.interfaces.mixins import reporting
+from nipype.utils.filemanip import fname_presuffix
+
 from .reportlets import base as nrb
 
 try:
@@ -76,9 +77,9 @@ class MaskEPI(SimpleInterface):
     output_spec = _MaskEPIOutputSpec
 
     def _run_interface(self, runtime):
-        from skimage import morphology as sim
-        from scipy.ndimage.morphology import binary_fill_holes
         from nilearn.masking import compute_epi_mask
+        from scipy.ndimage.morphology import binary_fill_holes
+        from skimage import morphology as sim
 
         in_files = self.inputs.in_files
 
@@ -193,8 +194,8 @@ class ComputeEPIMask(nrb.SegmentationRC):
     output_spec = _ComputeEPIMaskOutputSpec
 
     def _run_interface(self, runtime):
-        from scipy.ndimage.morphology import binary_dilation
         from nilearn.masking import compute_epi_mask
+        from scipy.ndimage.morphology import binary_dilation
 
         orig_file_nii = nb.load(self.inputs.in_file)
         in_file_data = orig_file_nii.get_fdata()

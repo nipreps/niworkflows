@@ -25,24 +25,24 @@
 import os
 import shutil
 from textwrap import indent
-import numpy as np
-import nibabel as nb
-import transforms3d
 
+import nibabel as nb
+import numpy as np
+import transforms3d
 from nipype import logging
-from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    traits,
-    File,
-    TraitedSpec,
     BaseInterfaceInputSpec,
-    SimpleInterface,
     DynamicTraitedSpec,
+    File,
+    SimpleInterface,
+    TraitedSpec,
+    traits,
 )
 from nipype.interfaces.io import add_traits
-from ..utils.images import _copyxform
-from .. import __version__
+from nipype.utils.filemanip import fname_presuffix
 
+from .. import __version__
+from ..utils.images import _copyxform
 
 LOGGER = logging.getLogger('nipype.interface')
 

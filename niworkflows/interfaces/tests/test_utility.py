@@ -23,7 +23,9 @@
 """KeySelect tests."""
 
 from pathlib import Path
+
 import pytest
+
 from ..utility import KeySelect, _tsv2json
 
 
@@ -37,7 +39,7 @@ def test_KeySelect():
 
 
 def test_tsv2json(tmp_path):
-    Path.write_bytes(tmp_path / 'empty.tsv', bytes())
+    Path.write_bytes(tmp_path / 'empty.tsv', b'')
     res = _tsv2json(tmp_path / 'empty.tsv', None, 'any_column')
     assert res == {}
     res = _tsv2json(tmp_path / 'empty.tsv', None, 'any_column', additional_metadata={'a': 'b'})

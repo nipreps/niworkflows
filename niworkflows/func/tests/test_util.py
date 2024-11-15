@@ -22,19 +22,18 @@
 #
 """Testing module for fmriprep.workflows.bold.util."""
 
-import pytest
 import os
 from pathlib import Path
 from shutil import which
 
 import numpy as np
-from nipype.pipeline import engine as pe
-from nipype.utils.filemanip import fname_presuffix, copyfile
+import pytest
 from nilearn.image import load_img
+from nipype.pipeline import engine as pe
+from nipype.utils.filemanip import copyfile, fname_presuffix
 
 from ...interfaces.reportlets.masks import ROIsPlot
 from ...workflows.epi.refmap import init_epi_reference_wf
-
 from ..util import init_enhance_and_skullstrip_bold_wf
 
 datapath = os.getenv('FMRIPREP_REGRESSION_SOURCE')
@@ -147,22 +146,22 @@ def test_masking(input_fname, expected_fname):
     # fmt:off
     wf.connect([
         (epi_reference_wf, enhance_and_skullstrip_bold_wf, [
-            ("outputnode.epi_ref_file", "inputnode.in_file")
+            ('outputnode.epi_ref_file', 'inputnode.in_file')
         ]),
         (enhance_and_skullstrip_bold_wf, mask_diff_plot, [
-            ("outputnode.bias_corrected_file", "in_file"),
-            ("outputnode.mask_file", "in_rois"),
+            ('outputnode.bias_corrected_file', 'in_file'),
+            ('outputnode.mask_file', 'in_rois'),
         ]),
     ])
 
-    res = wf.run(plugin="MultiProc")
+    res = wf.run(plugin='MultiProc')
 
-    combine_masks = [node for node in res.nodes if node.name.endswith("combine_masks")][
+    combine_masks = [node for node in res.nodes if node.name.endswith('combine_masks')][
         0
     ]
     overlap = symmetric_overlap(expected_fname, combine_masks.result.outputs.out_file)
 
-    mask_dir = reports_dir / "fmriprep_bold_mask" / dsname
+    mask_dir = reports_dir / 'fmriprep_bold_mask' / dsname
     mask_dir.mkdir(parents=True, exist_ok=True)
     copyfile(
         combine_masks.result.outputs.out_file,

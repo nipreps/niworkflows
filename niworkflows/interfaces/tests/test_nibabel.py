@@ -24,20 +24,21 @@
 
 import json
 import os
-from pathlib import Path
 import uuid
-import numpy as np
+from pathlib import Path
+
 import nibabel as nb
+import numpy as np
 import pytest
 
 from ..nibabel import (
-    Binarize,
     ApplyMask,
-    SplitSeries,
-    MergeSeries,
-    MergeROIs,
+    Binarize,
     MapLabels,
+    MergeROIs,
+    MergeSeries,
     ReorientImage,
+    SplitSeries,
 )
 
 

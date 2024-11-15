@@ -23,15 +23,15 @@
 """Mathematical morphology operations as nipype interfaces."""
 
 from pathlib import Path
-import numpy as np
-import nibabel as nb
 
+import nibabel as nb
+import numpy as np
 from nipype.interfaces.base import (
-    traits,
-    TraitedSpec,
     BaseInterfaceInputSpec,
     File,
     SimpleInterface,
+    TraitedSpec,
+    traits,
 )
 
 

@@ -23,18 +23,21 @@
 import os
 
 import nibabel as nb
-
-from nipype.interfaces.base import traits, InputMultiObject, File
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.ants.resampling import ApplyTransforms, ApplyTransformsInputSpec
 from nipype.interfaces.ants.registration import (
     Registration,
+)
+from nipype.interfaces.ants.registration import (
     RegistrationInputSpec as _RegistrationInputSpec,
 )
+from nipype.interfaces.ants.resampling import ApplyTransforms, ApplyTransformsInputSpec
 from nipype.interfaces.ants.segmentation import (
     N4BiasFieldCorrection as VanillaN4,
+)
+from nipype.interfaces.ants.segmentation import (
     N4BiasFieldCorrectionOutputSpec as VanillaN4OutputSpec,
 )
+from nipype.interfaces.base import File, InputMultiObject, traits
+from nipype.utils.filemanip import fname_presuffix
 
 from .. import __version__
 from ..utils.images import _copyxform

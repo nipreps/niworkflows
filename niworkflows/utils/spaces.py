@@ -23,9 +23,10 @@
 """Utilities for tracking and filtering spaces."""
 
 import argparse
-import attr
 from collections import defaultdict
 from itertools import product
+
+import attr
 from templateflow import api as _tfapi
 
 NONSTANDARD_REFERENCES = [

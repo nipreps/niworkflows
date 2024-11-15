@@ -25,19 +25,19 @@
 from pathlib import Path
 from warnings import warn
 
-import numpy as np
 import nibabel as nb
+import numpy as np
 from nipype import logging
-from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    traits,
-    TraitedSpec,
     BaseInterfaceInputSpec,
     File,
-    SimpleInterface,
-    OutputMultiObject,
     InputMultiObject,
+    OutputMultiObject,
+    SimpleInterface,
+    TraitedSpec,
+    traits,
 )
+from nipype.utils.filemanip import fname_presuffix
 
 IFLOGGER = logging.getLogger('nipype.interface')
 
@@ -673,6 +673,7 @@ def _advanced_clip(
 
     """
     from pathlib import Path
+
     import nibabel as nb
     import numpy as np
     from scipy import ndimage
@@ -715,11 +716,12 @@ def _advanced_clip(
 def _dilate(in_file, radius=3, iterations=1, newpath=None):
     """Dilate (binary) input mask."""
     from pathlib import Path
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
+    from nipype.utils.filemanip import fname_presuffix
     from scipy import ndimage
     from skimage.morphology import ball
-    from nipype.utils.filemanip import fname_presuffix
 
     mask = nb.load(in_file)
     newdata = ndimage.binary_dilation(
@@ -746,6 +748,7 @@ def _merge_rois(in_files, newpath=None):
     If any of these checks fail, an ``AssertionError`` will be raised.
     """
     from pathlib import Path
+
     import nibabel as nb
     import numpy as np
 
@@ -775,6 +778,7 @@ def _merge_rois(in_files, newpath=None):
 
 def _remap_labels(in_file, mapping, newpath=None):
     from pathlib import Path
+
     import nibabel as nb
     import numpy as np
 

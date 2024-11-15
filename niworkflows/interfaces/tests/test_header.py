@@ -22,13 +22,14 @@
 #
 """Exercise interface.header."""
 
-import numpy as np
-import nibabel as nb
-from nipype.pipeline import engine as pe
-from .. import header
 from pathlib import Path
 
+import nibabel as nb
+import numpy as np
 import pytest
+from nipype.pipeline import engine as pe
+
+from .. import header
 
 
 @pytest.mark.parametrize(

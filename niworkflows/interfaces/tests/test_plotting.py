@@ -23,11 +23,13 @@
 """Tests plotting interfaces."""
 
 import os
+
 import nibabel as nb
+
 from niworkflows import viz
-from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
 from niworkflows.interfaces.plotting import _get_tr
 from niworkflows.tests.data import load_test_data
+from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
 
 
 def test_cifti_carpetplot():

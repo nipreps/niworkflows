@@ -22,25 +22,25 @@
 #
 """Interfaces under evaluation before upstreaming to nipype.interfaces.utility."""
 
-import numpy as np
-import re
 import json
+import re
 from collections import OrderedDict
 
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.io import add_traits
+import numpy as np
 from nipype.interfaces.base import (
     BaseInterface,
     BaseInterfaceInputSpec,
     DynamicTraitedSpec,
     File,
     InputMultiObject,
-    isdefined,
     SimpleInterface,
     Str,
     TraitedSpec,
+    isdefined,
     traits,
 )
+from nipype.interfaces.io import add_traits
+from nipype.utils.filemanip import fname_presuffix
 
 
 class _KeySelectInputSpec(DynamicTraitedSpec):
@@ -527,10 +527,10 @@ def _tsv2json(
     re_to_snake = r'(^.+?|.*?)((?<![_A-Z])[A-Z]|(?<![_0-9])[0-9]+)'
 
     def snake(match):
-        return '{}_{}'.format(match.group(1).lower(), match.group(2).lower())
+        return f'{match.group(1).lower()}_{match.group(2).lower()}'
 
     def camel(match):
-        return '{}{}'.format(match.group(1), match.group(2).upper())
+        return f'{match.group(1)}{match.group(2).upper()}'
 
     # from fmriprep
     def less_breakable(a_string):

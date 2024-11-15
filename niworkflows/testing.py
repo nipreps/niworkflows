@@ -1,8 +1,10 @@
-import pytest
-from functools import wraps
 import os
+from functools import wraps
 from pathlib import Path
-from nipype.interfaces import fsl, freesurfer as fs, afni
+
+import pytest
+from nipype.interfaces import afni, fsl
+from nipype.interfaces import freesurfer as fs
 
 test_data_env = os.getenv('TEST_DATA_HOME', str(Path.home() / '.cache' / 'stanford-crn'))
 test_output_dir = os.getenv('TEST_OUTPUT_DIR')

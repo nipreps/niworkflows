@@ -21,8 +21,10 @@
 #     https://www.nipreps.org/community/licensing/
 #
 from pathlib import Path
-import numpy as np
+
 import nibabel as nb
+import numpy as np
+
 from ..freesurfer import FSInjectBrainExtracted
 
 

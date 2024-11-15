@@ -22,23 +22,24 @@
 #
 """Select terms for a confound model, and compute any requisite expansions."""
 
+import operator
 import os
 import re
-import numpy as np
-import operator
-import pandas as pd
+from collections import OrderedDict, deque
 from functools import reduce
-from collections import deque, OrderedDict
-from nipype.utils.filemanip import fname_presuffix
-from nipype.utils.misc import normalize_mc_params
+
+import numpy as np
+import pandas as pd
 from nipype.interfaces.base import (
-    traits,
-    TraitedSpec,
     BaseInterfaceInputSpec,
     File,
-    isdefined,
     SimpleInterface,
+    TraitedSpec,
+    isdefined,
+    traits,
 )
+from nipype.utils.filemanip import fname_presuffix
+from nipype.utils.misc import normalize_mc_params
 
 
 class _NormalizeMotionParamsInputSpec(BaseInterfaceInputSpec):
@@ -316,7 +317,7 @@ def spike_regressors(
         spikes = np.zeros((max(indices) + 1, len(mask)))
         for i, m in enumerate(sorted(mask)):
             spikes[m, i] = 1
-        header = ['{:s}{:02d}'.format(header_prefix, vol) for vol in range(len(mask))]
+        header = [f'{header_prefix:s}{vol:02d}' for vol in range(len(mask))]
         spikes = pd.DataFrame(data=spikes, columns=header)
     if concatenate:
         return pd.concat((data, spikes), axis=1)
@@ -357,7 +358,7 @@ def temporal_derivatives(order, variables, data):
         variables_deriv[0] = variables
         order = set(order) - set([0])
     for o in order:
-        variables_deriv[o] = ['{}_derivative{}'.format(v, o) for v in variables]
+        variables_deriv[o] = [f'{v}_derivative{o}' for v in variables]
         data_deriv[o] = np.tile(np.nan, data[variables].shape)
         data_deriv[o][o:, :] = np.diff(data[variables], n=o, axis=0)
     variables_deriv = reduce(operator.add, variables_deriv.values())
@@ -400,7 +401,7 @@ def exponential_terms(order, variables, data):
         variables_exp[1] = variables
         order = set(order) - set([1])
     for o in order:
-        variables_exp[o] = ['{}_power{}'.format(v, o) for v in variables]
+        variables_exp[o] = [f'{v}_power{o}' for v in variables]
         data_exp[o] = data[variables] ** o
     variables_exp = reduce(operator.add, variables_exp.values())
     data_exp = pd.DataFrame(

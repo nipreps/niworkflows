@@ -23,13 +23,14 @@
 """py.test configuration"""
 
 import os
-from sys import version_info
+import tempfile
 from pathlib import Path
-import numpy as np
+from sys import version_info
+
 import nibabel as nb
+import numpy as np
 import pandas as pd
 import pytest
-import tempfile
 
 from . import load_resource
 
@@ -59,8 +60,8 @@ def legacy_printoptions():
 
 @pytest.fixture(autouse=True)
 def add_np(doctest_namespace):
-    from .utils.bids import collect_data
     from .testing import data_dir, data_dir_canary
+    from .utils.bids import collect_data
 
     doctest_namespace['PY_VERSION'] = version_info
     doctest_namespace['np'] = np
@@ -103,7 +104,7 @@ def testdata_dir():
 
 @pytest.fixture
 def ds000030_dir():
-    from .testing import test_data_env, data_env_canary
+    from .testing import data_env_canary, test_data_env
 
     data_env_canary()
     return Path(test_data_env) / 'ds000030'
