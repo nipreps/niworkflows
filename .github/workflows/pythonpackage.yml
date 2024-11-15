@@ -17,38 +17,6 @@ permissions:
   contents: read
 
 jobs:
-  job_metadata:
-    if: github.repository == 'nipreps/niworkflows'
-    runs-on: ubuntu-latest
-    outputs:
-      commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
-      version: ${{ steps.show_version.outputs.version }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Print head git commit message
-        id: get_commit_message
-        run: |
-          if [[ -z "$COMMIT_MSG" ]]; then
-            COMMIT_MSG=$(git show -s --format=%s $REF)
-          fi
-          echo commit_message=$COMMIT_MSG | tee -a $GITHUB_OUTPUT
-        env:
-          COMMIT_MSG: ${{ github.event.head_commit.message }}
-          REF: ${{ github.event.pull_request.head.sha }}
-      - name: Detect version
-        id: show_version
-        run: |
-          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF##*/}
-          else
-            pipx run hatch version  # Once to avoid output of initial setup
-            VERSION=$( pipx run hatch version )
-          fi
-          echo version=$VERSION | tee -a $GITHUB_OUTPUT
-
   build:
     if: github.repository == 'nipreps/niworkflows'
     runs-on: ubuntu-latest
@@ -118,7 +86,7 @@ jobs:
         datalad get -J 2 -r ds000003 ds000030/sub-10228/func
 
   test:
-    needs: [build, get_data, job_metadata]
+    needs: [get_data]
     runs-on: ubuntu-latest
     strategy:
       matrix:
