@@ -16,6 +16,10 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # Force tox and pytest to use color
+  FORCE_COLOR: true
+
 jobs:
   build:
     if: github.repository == 'nipreps/niworkflows'
