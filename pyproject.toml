@@ -109,11 +109,53 @@ raw-options = {version_scheme = "release-branch-semver" }
 [tool.hatch.build.hooks.vcs]
 version-file = "niworkflows/_version.py"
 
+# Disable black
 [tool.black]
+exclude = ".*"
+
+[tool.ruff]
 line-length = 99
-target-version = ['py37']
-skip-string-normalization = true
-extend-exclude = '_version.py'
+
+[tool.ruff.lint]
+extend-select = [
+  "F",
+  "E",
+  "W",
+  "I",
+  "UP",
+  "YTT",
+  "S",
+  "BLE",
+  "B",
+  "A",
+  # "CPY",
+  "C4",
+  "DTZ",
+  "T10",
+  # "EM",
+  "EXE",
+  "FA",
+  "ISC",
+  "ICN",
+  "PT",
+  "Q",
+]
+ignore = [
+  "S311",  # We are not using random for cryptographic purposes
+  "ISC001",
+  "S603",
+]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+
+[tool.ruff.lint.extend-per-file-ignores]
+"*/test_*.py" = ["S101"]
+"docs/conf.py" = ["A001"]
+"docs/sphinxext/github_link.py" = ["BLE001"]
+
+[tool.ruff.format]
+quote-style = "single"
 
 [tool.pytest.ini_options]
 minversion = "6"
