@@ -24,26 +24,26 @@ classifiers = [
 ]
 dependencies = [
     "acres",
-    "attrs",
+    "attrs >=20.1",
     "importlib_resources >= 5.7; python_version < '3.11'",
-    "jinja2",
+    "jinja2 >=3",
     "looseversion",
-    "matplotlib >= 3.4.2",
+    "matplotlib >= 3.5",
     "nibabel >= 3.0",
-    "nilearn >= 0.5.2",
+    "nilearn >= 0.8",
     "nipype >= 1.8.5",
-    "nitransforms >= 21.0.0",
-    "numpy",
+    "nitransforms >= 22.0.0",
+    "numpy >= 1.20",
     "packaging",
-    "pandas",
+    "pandas >= 1.2",
     "pybids >= 0.15.1",
-    "PyYAML",
-    "scikit-image",
-    "scipy",
-    "seaborn",
+    "PyYAML >= 5.4",
+    "scikit-image >= 0.18",
+    "scipy >= 1.8",
+    "seaborn >= 0.11",
     "svgutils >= 0.3.4",
-    "templateflow >= 0.7.2",
-    "transforms3d",
+    "templateflow >= 23.1",
+    "transforms3d >= 0.4",
 ]
 
 [project.optional-dependencies]
@@ -62,12 +62,12 @@ style = [
     "flake8 >= 3.7.0",
 ]
 tests = [
-    "coverage >=5.2.1",
-    "pytest >= 4.4",
-    "pytest-cov",
+    "coverage[toml] >=5.2.1",
+    "pytest >= 6",
+    "pytest-cov >= 2.11",
     "pytest-env",
-    "pytest-xdist >= 1.28",
-    "pytest-xvfb",
+    "pytest-xdist >= 2.5",
+    "pytest-xvfb >= 2",
 ]
 # Aliases
 all = ["niworkflows[doc,pointclouds,style,tests]"]
@@ -116,23 +116,31 @@ skip-string-normalization = true
 extend-exclude = '_version.py'
 
 [tool.pytest.ini_options]
-norecursedirs = ".git"
-addopts = "-sv --doctest-modules"
+minversion = "6"
+testpaths = ["niworkflows"]
+log_cli_level = "INFO"
+xfail_strict = true
+norecursedirs = [".git"]
+addopts = [
+  "-svx",
+  "-ra",
+  "--strict-config",
+  "--strict-markers",
+  "--doctest-modules",
+  # Config pytest-cov
+  "--cov=niworkflows",
+  "--cov-report=xml",
+  "--cov-config=pyproject.toml",
+]
 doctest_optionflags = "ALLOW_UNICODE NORMALIZE_WHITESPACE ELLIPSIS"
-env = """
-    PYTHONHASHSEED=0
-"""
-filterwarnings = """
-    ignore::DeprecationWarning
-"""
+env = "PYTHONHASHSEED=0"
+filterwarnings = ["ignore::DeprecationWarning"]
 junit_family = "xunit2"
 
 [tool.coverage.run]
 branch = true
 omit = [
-    "*/tests/*",
-    "niworkflows/_version.py",
-    "niworkflows/conftest.py",
+    "*/_version.py",
 ]
 
 [tool.coverage.report]
@@ -140,4 +148,10 @@ omit = [
 exclude_lines = [
     "raise NotImplementedError",
     "warnings\\.warn",
+]
+
+[tool.coverage.paths]
+source = [
+  "niworkflows",
+  "**/site-packages/niworkflows"
 ]
