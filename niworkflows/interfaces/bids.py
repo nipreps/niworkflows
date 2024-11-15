@@ -21,6 +21,7 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Interfaces for handling BIDS-like neuroimaging structures."""
+
 from collections import defaultdict
 from contextlib import suppress
 from json import dumps, loads
@@ -56,13 +57,13 @@ from ..utils.bids import _init_layout, relative_to_root
 from ..utils.images import set_consumables, unsafe_write_nifti_header_and_data
 from ..utils.misc import _copy_any, unlink
 
-regz = re.compile(r"\.gz$")
-_pybids_spec = loads(data.load.readable("nipreps.json").read_text())
-BIDS_DERIV_ENTITIES = _pybids_spec["entities"]
-BIDS_DERIV_PATTERNS = tuple(_pybids_spec["default_path_patterns"])
+regz = re.compile(r'\.gz$')
+_pybids_spec = loads(data.load.readable('nipreps.json').read_text())
+BIDS_DERIV_ENTITIES = _pybids_spec['entities']
+BIDS_DERIV_PATTERNS = tuple(_pybids_spec['default_path_patterns'])
 
 STANDARD_SPACES = tf.api.templates()
-LOGGER = logging.getLogger("nipype.interface")
+LOGGER = logging.getLogger('nipype.interface')
 
 
 if sys.version_info < (3, 10):  # PY39
@@ -70,7 +71,7 @@ if sys.version_info < (3, 10):  # PY39
 
     def zip(*args, strict=False):
         if strict and any(len(args[0]) != len(arg) for arg in args):
-            raise ValueError("strict_zip() requires all arguments to have the same length")
+            raise ValueError('strict_zip() requires all arguments to have the same length')
         return builtin_zip(*args)
 
 
@@ -82,24 +83,24 @@ def _none():
 DEFAULT_DTYPES = defaultdict(
     _none,
     (
-        ("mask", "uint8"),
-        ("dseg", "int16"),
-        ("probseg", "float32"),
-        ("boldref", "float32"),
+        ('mask', 'uint8'),
+        ('dseg', 'int16'),
+        ('probseg', 'float32'),
+        ('boldref', 'float32'),
     ),
 )
 
 
 class _BIDSBaseInputSpec(BaseInterfaceInputSpec):
     bids_dir = traits.Either(
-        (None, Directory(exists=True)), usedefault=True, desc="optional bids directory"
+        (None, Directory(exists=True)), usedefault=True, desc='optional bids directory'
     )
-    bids_validate = traits.Bool(True, usedefault=True, desc="enable BIDS validator")
-    index_db = Directory(exists=True, desc="a PyBIDS layout cache directory")
+    bids_validate = traits.Bool(True, usedefault=True, desc='enable BIDS validator')
+    index_db = Directory(exists=True, desc='a PyBIDS layout cache directory')
 
 
 class _BIDSInfoInputSpec(_BIDSBaseInputSpec):
-    in_file = File(mandatory=True, desc="input file, part of a BIDS tree")
+    in_file = File(mandatory=True, desc='input file, part of a BIDS tree')
 
 
 class _BIDSInfoOutputSpec(DynamicTraitedSpec):
@@ -216,8 +217,7 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
                 pass
         params = parse_file_entities(in_file)
         self._results = {
-            key: params.get(key, Undefined)
-            for key in _BIDSInfoOutputSpec().get().keys()
+            key: params.get(key, Undefined) for key in _BIDSInfoOutputSpec().get().keys()
         }
         return runtime
 
@@ -228,17 +228,17 @@ class _BIDSDataGrabberInputSpec(BaseInterfaceInputSpec):
 
 
 class _BIDSDataGrabberOutputSpec(TraitedSpec):
-    out_dict = traits.Dict(desc="output data structure")
-    fmap = OutputMultiObject(desc="output fieldmaps")
-    bold = OutputMultiObject(desc="output functional images")
-    sbref = OutputMultiObject(desc="output sbrefs")
-    t1w = OutputMultiObject(desc="output T1w images")
-    roi = OutputMultiObject(desc="output ROI images")
-    t2w = OutputMultiObject(desc="output T2w images")
-    flair = OutputMultiObject(desc="output FLAIR images")
-    pet = OutputMultiObject(desc="output PET images")
-    dwi = OutputMultiObject(desc="output DWI images")
-    asl = OutputMultiObject(desc="output ASL images")
+    out_dict = traits.Dict(desc='output data structure')
+    fmap = OutputMultiObject(desc='output fieldmaps')
+    bold = OutputMultiObject(desc='output functional images')
+    sbref = OutputMultiObject(desc='output sbrefs')
+    t1w = OutputMultiObject(desc='output T1w images')
+    roi = OutputMultiObject(desc='output ROI images')
+    t2w = OutputMultiObject(desc='output T2w images')
+    flair = OutputMultiObject(desc='output FLAIR images')
+    pet = OutputMultiObject(desc='output PET images')
+    dwi = OutputMultiObject(desc='output DWI images')
+    asl = OutputMultiObject(desc='output ASL images')
 
 
 class BIDSDataGrabber(SimpleInterface):
@@ -265,8 +265,8 @@ class BIDSDataGrabber(SimpleInterface):
     _require_funcs = True
 
     def __init__(self, *args, **kwargs):
-        anat_only = kwargs.pop("anat_only")
-        anat_derivatives = kwargs.pop("anat_derivatives", None)
+        anat_only = kwargs.pop('anat_only')
+        anat_derivatives = kwargs.pop('anat_derivatives', None)
         super().__init__(*args, **kwargs)
         if anat_only is not None:
             self._require_funcs = not anat_only
@@ -275,59 +275,54 @@ class BIDSDataGrabber(SimpleInterface):
     def _run_interface(self, runtime):
         bids_dict = self.inputs.subject_data
 
-        self._results["out_dict"] = bids_dict
+        self._results['out_dict'] = bids_dict
         self._results.update(bids_dict)
 
         if self._require_t1w and not bids_dict['t1w']:
             raise FileNotFoundError(
-                "No T1w images found for subject sub-{}".format(self.inputs.subject_id)
+                'No T1w images found for subject sub-{}'.format(self.inputs.subject_id)
             )
 
-        if self._require_funcs and not bids_dict["bold"]:
+        if self._require_funcs and not bids_dict['bold']:
             raise FileNotFoundError(
-                "No functional images found for subject sub-{}".format(
-                    self.inputs.subject_id
-                )
+                'No functional images found for subject sub-{}'.format(self.inputs.subject_id)
             )
 
-        for imtype in ["bold", "t2w", "flair", "fmap", "sbref", "roi", "pet", "asl"]:
+        for imtype in ['bold', 't2w', 'flair', 'fmap', 'sbref', 'roi', 'pet', 'asl']:
             if not bids_dict[imtype]:
-                LOGGER.info(
-                    'No "%s" images found for sub-%s', imtype, self.inputs.subject_id
-                )
+                LOGGER.info('No "%s" images found for sub-%s', imtype, self.inputs.subject_id)
 
         return runtime
 
 
 class _PrepareDerivativeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    check_hdr = traits.Bool(True, usedefault=True, desc="fix headers of NIfTI outputs")
+    check_hdr = traits.Bool(True, usedefault=True, desc='fix headers of NIfTI outputs')
     compress = InputMultiObject(
         traits.Either(None, traits.Bool),
         usedefault=True,
-        desc="whether ``in_file`` should be compressed (True), uncompressed (False) "
-        "or left unmodified (None, default).",
+        desc='whether ``in_file`` should be compressed (True), uncompressed (False) '
+        'or left unmodified (None, default).',
     )
     data_dtype = Str(
-        desc="NumPy datatype to coerce NIfTI data to, or `source` to match the input file dtype"
+        desc='NumPy datatype to coerce NIfTI data to, or `source` to match the input file dtype'
     )
     dismiss_entities = InputMultiObject(
         traits.Either(None, Str),
         usedefault=True,
-        desc="a list entities that will not be propagated from the source file",
+        desc='a list entities that will not be propagated from the source file',
     )
-    in_file = InputMultiObject(
-        File(exists=True), mandatory=True, desc="the object to be saved"
-    )
-    meta_dict = traits.DictStrAny(desc="an input dictionary containing metadata")
+    in_file = InputMultiObject(File(exists=True), mandatory=True, desc='the object to be saved')
+    meta_dict = traits.DictStrAny(desc='an input dictionary containing metadata')
     source_file = InputMultiObject(
-        File(exists=False), mandatory=True, desc="the source file(s) to extract entities from")
+        File(exists=False), mandatory=True, desc='the source file(s) to extract entities from'
+    )
 
 
 class _PrepareDerivativeOutputSpec(TraitedSpec):
-    out_file = OutputMultiObject(File(exists=True), desc="derivative file path")
-    out_meta = traits.DictStrAny(desc="derivative metadata")
-    out_path = OutputMultiObject(Str, desc="relative path in target directory")
-    fixed_hdr = traits.List(traits.Bool, desc="whether derivative header was fixed")
+    out_file = OutputMultiObject(File(exists=True), desc='derivative file path')
+    out_meta = traits.DictStrAny(desc='derivative metadata')
+    out_path = OutputMultiObject(Str, desc='relative path in target directory')
+    fixed_hdr = traits.List(traits.Bool, desc='whether derivative header was fixed')
 
 
 class PrepareDerivative(SimpleInterface):
@@ -495,7 +490,7 @@ class PrepareDerivative(SimpleInterface):
 
     input_spec = _PrepareDerivativeInputSpec
     output_spec = _PrepareDerivativeOutputSpec
-    _config_entities = frozenset({e["name"] for e in BIDS_DERIV_ENTITIES})
+    _config_entities = frozenset({e['name'] for e in BIDS_DERIV_ENTITIES})
     _config_entities_dict = BIDS_DERIV_ENTITIES
     _standard_spaces = STANDARD_SPACES
     _file_patterns = BIDS_DERIV_PATTERNS
@@ -503,9 +498,7 @@ class PrepareDerivative(SimpleInterface):
 
     def __init__(self, allowed_entities=None, **inputs):
         """Initialize the SimpleInterface and extend inputs with custom entities."""
-        self._allowed_entities = set(allowed_entities or []).union(
-            set(self._config_entities)
-        )
+        self._allowed_entities = set(allowed_entities or []).union(set(self._config_entities))
 
         self._metadata = {}
         self._static_traits = self.input_spec.class_editable_traits() + sorted(
@@ -533,47 +526,52 @@ class PrepareDerivative(SimpleInterface):
             # Middle precedence: metadata passed to constructor
             **self._metadata,
             # Highest precedence: metadata set as inputs
-            **({
-                k: getattr(self.inputs, k)
-                for k in self.inputs.copyable_trait_names()
-                if k not in self._static_traits
-            })
+            **(
+                {
+                    k: getattr(self.inputs, k)
+                    for k in self.inputs.copyable_trait_names()
+                    if k not in self._static_traits
+                }
+            ),
         }
 
         in_file = listify(self.inputs.in_file)
 
         # Initialize entities with those from the source file.
         custom_config = Config(
-            name="custom",
+            name='custom',
             entities=self._config_entities_dict,
             default_path_patterns=self._file_patterns,
         )
         in_entities = [
             parse_file_entities(
                 str(relative_to_root(source_file)),
-                config=["bids", "derivatives", custom_config],
+                config=['bids', 'derivatives', custom_config],
             )
             for source_file in self.inputs.source_file
         ]
-        out_entities = {k: v for k, v in in_entities[0].items()
-                        if all(ent.get(k) == v for ent in in_entities[1:])}
+        out_entities = {
+            k: v
+            for k, v in in_entities[0].items()
+            if all(ent.get(k) == v for ent in in_entities[1:])
+        }
         for drop_entity in listify(self.inputs.dismiss_entities or []):
             out_entities.pop(drop_entity, None)
 
         # Override extension with that of the input file(s)
-        out_entities["extension"] = [
+        out_entities['extension'] = [
             # _splitext does not accept .surf.gii (for instance)
-            "".join(Path(orig_file).suffixes).lstrip(".")
+            ''.join(Path(orig_file).suffixes).lstrip('.')
             for orig_file in in_file
         ]
 
         compress = listify(self.inputs.compress) or [None]
         if len(compress) == 1:
             compress = compress * len(in_file)
-        for i, ext in enumerate(out_entities["extension"]):
+        for i, ext in enumerate(out_entities['extension']):
             if compress[i] is not None:
-                ext = regz.sub("", ext)
-                out_entities["extension"][i] = f"{ext}.gz" if compress[i] else ext
+                ext = regz.sub('', ext)
+                out_entities['extension'][i] = f'{ext}.gz' if compress[i] else ext
 
         # Override entities with those set as inputs
         for key in self._allowed_entities:
@@ -582,52 +580,51 @@ class PrepareDerivative(SimpleInterface):
                 out_entities[key] = value
 
         # Clean up native resolution with space
-        if out_entities.get("resolution") == "native" and out_entities.get("space"):
-            out_entities.pop("resolution", None)
+        if out_entities.get('resolution') == 'native' and out_entities.get('space'):
+            out_entities.pop('resolution', None)
 
         # Expand templateflow resolutions
-        resolution = out_entities.get("resolution")
-        space = out_entities.get("space")
+        resolution = out_entities.get('resolution')
+        space = out_entities.get('space')
         if resolution:
             # Standard spaces
             if space in self._standard_spaces:
                 res = _get_tf_resolution(space, resolution)
             else:  # TODO: Nonstandard?
-                res = "Unknown"
+                res = 'Unknown'
             metadata['Resolution'] = res
 
-        if len(set(out_entities["extension"])) == 1:
-            out_entities["extension"] = out_entities["extension"][0]
+        if len(set(out_entities['extension'])) == 1:
+            out_entities['extension'] = out_entities['extension'][0]
 
         # Insert custom (non-BIDS) entities from allowed_entities.
         custom_entities = set(out_entities) - set(self._config_entities)
         patterns = self._file_patterns
         if custom_entities:
             # Example: f"{key}-{{{key}}}" -> "task-{task}"
-            custom_pat = "_".join(f"{key}-{{{key}}}" for key in sorted(custom_entities))
+            custom_pat = '_'.join(f'{key}-{{{key}}}' for key in sorted(custom_entities))
             patterns = [
-                pat.replace("_{suffix", "_".join(("", custom_pat, "{suffix")))
-                for pat in patterns
+                pat.replace('_{suffix', '_'.join(('', custom_pat, '{suffix'))) for pat in patterns
             ]
 
         # Build the output path(s)
         dest_files = build_path(out_entities, path_patterns=patterns)
         if not dest_files:
-            raise ValueError(f"Could not build path with entities {out_entities}.")
+            raise ValueError(f'Could not build path with entities {out_entities}.')
 
         # Make sure the interpolated values is embedded in a list, and check
         dest_files = listify(dest_files)
         if len(in_file) != len(dest_files):
             raise ValueError(
-                f"Input files ({len(in_file)}) not matched "
-                f"by interpolated patterns ({len(dest_files)})."
+                f'Input files ({len(in_file)}) not matched '
+                f'by interpolated patterns ({len(dest_files)}).'
             )
 
         # Prepare SimpleInterface outputs object
-        self._results["out_file"] = []
-        self._results["fixed_hdr"] = [False] * len(in_file)
-        self._results["out_path"] = dest_files
-        self._results["out_meta"] = metadata
+        self._results['out_file'] = []
+        self._results['fixed_hdr'] = [False] * len(in_file)
+        self._results['out_path'] = dest_files
+        self._results['out_meta'] = metadata
 
         for i, (orig_file, dest_file) in enumerate(zip(in_file, dest_files)):
             # Set data and header iff changes need to be made. If these are
@@ -640,9 +637,9 @@ class PrepareDerivative(SimpleInterface):
 
             new_compression = False
             if is_nifti:
-                new_compression = (
-                    os.fspath(orig_file).endswith(".gz") ^ os.fspath(dest_file).endswith(".gz")
-                )
+                new_compression = os.fspath(orig_file).endswith('.gz') ^ os.fspath(
+                    dest_file
+                ).endswith('.gz')
 
             data_dtype = self.inputs.data_dtype or self._default_dtypes[self.inputs.suffix]
             if is_nifti and any((self.inputs.check_hdr, data_dtype)):
@@ -651,39 +648,37 @@ class PrepareDerivative(SimpleInterface):
                 if self.inputs.check_hdr:
                     hdr = nii.header
                     curr_units = tuple(
-                        [None if u == "unknown" else u for u in hdr.get_xyzt_units()]
+                        [None if u == 'unknown' else u for u in hdr.get_xyzt_units()]
                     )
-                    curr_codes = (int(hdr["qform_code"]), int(hdr["sform_code"]))
+                    curr_codes = (int(hdr['qform_code']), int(hdr['sform_code']))
 
                     # Default to mm, use sec if data type is bold
                     units = (
-                        curr_units[0] or "mm",
-                        "sec" if out_entities["suffix"] == "bold" else None,
+                        curr_units[0] or 'mm',
+                        'sec' if out_entities['suffix'] == 'bold' else None,
                     )
                     xcodes = (1, 1)  # Derivative in its original scanner space
                     if self.inputs.space:
-                        xcodes = (
-                            (4, 4) if self.inputs.space in self._standard_spaces else (2, 2)
-                        )
+                        xcodes = (4, 4) if self.inputs.space in self._standard_spaces else (2, 2)
 
                     curr_zooms = zooms = hdr.get_zooms()
-                    if "RepetitionTime" in self.inputs.get():
+                    if 'RepetitionTime' in self.inputs.get():
                         zooms = curr_zooms[:3] + (self.inputs.RepetitionTime,)
 
                     if (curr_codes, curr_units, curr_zooms) != (xcodes, units, zooms):
-                        self._results["fixed_hdr"][i] = True
+                        self._results['fixed_hdr'][i] = True
                         new_header = hdr.copy()
                         new_header.set_qform(nii.affine, xcodes[0])
                         new_header.set_sform(nii.affine, xcodes[1])
                         new_header.set_xyzt_units(*units)
                         new_header.set_zooms(zooms)
 
-                if data_dtype == "source":  # match source dtype
+                if data_dtype == 'source':  # match source dtype
                     try:
                         data_dtype = nb.load(self.inputs.source_file[0]).get_data_dtype()
                     except Exception:
                         LOGGER.warning(
-                            f"Could not get data type of file {self.inputs.source_file[0]}"
+                            f'Could not get data type of file {self.inputs.source_file[0]}'
                         )
                         data_dtype = None
 
@@ -692,8 +687,8 @@ class PrepareDerivative(SimpleInterface):
                     orig_dtype = nii.get_data_dtype()
                     if orig_dtype != data_dtype:
                         LOGGER.warning(
-                            f"Changing {Path(dest_file).name} dtype "
-                            f"from {orig_dtype} to {data_dtype}"
+                            f'Changing {Path(dest_file).name} dtype '
+                            f'from {orig_dtype} to {data_dtype}'
                         )
                         # coerce dataobj to new data dtype
                         if np.issubdtype(data_dtype, np.integer):
@@ -722,35 +717,31 @@ class PrepareDerivative(SimpleInterface):
                 else:
                     # Without this, we would be writing nans
                     # This is our punishment for hacking around nibabel defaults
-                    new_header.set_slope_inter(slope=1., inter=0.)
+                    new_header.set_slope_inter(slope=1.0, inter=0.0)
                 unsafe_write_nifti_header_and_data(
-                    fname=out_file,
-                    header=new_header,
-                    data=new_data
+                    fname=out_file, header=new_header, data=new_data
                 )
                 del orig_img
 
-            self._results["out_file"].append(str(out_file))
+            self._results['out_file'].append(str(out_file))
 
         return runtime
 
 
 class _SaveDerivativeInputSpec(TraitedSpec):
     base_directory = Directory(
-        exists=True, mandatory=True, desc="Path to the base directory for storing data."
+        exists=True, mandatory=True, desc='Path to the base directory for storing data.'
     )
-    in_file = InputMultiObject(
-        File(exists=True), mandatory=True, desc="the object to be saved"
-    )
-    metadata = traits.DictStrAny(desc="metadata to be saved alongside the file")
+    in_file = InputMultiObject(File(exists=True), mandatory=True, desc='the object to be saved')
+    metadata = traits.DictStrAny(desc='metadata to be saved alongside the file')
     relative_path = InputMultiObject(
-        traits.Str, desc="path to the file relative to the base directory"
+        traits.Str, desc='path to the file relative to the base directory'
     )
 
 
 class _SaveDerivativeOutputSpec(TraitedSpec):
-    out_file = OutputMultiObject(File, desc="written file path")
-    out_meta = OutputMultiObject(File, desc="written JSON sidecar path")
+    out_file = OutputMultiObject(File, desc='written file path')
+    out_meta = OutputMultiObject(File, desc='written JSON sidecar path')
 
 
 class SaveDerivative(SimpleInterface):
@@ -763,16 +754,18 @@ class SaveDerivative(SimpleInterface):
     This ensures that changes to the output directory metadata (e.g., mtime) do not
     trigger unnecessary recomputations in the workflow.
     """
+
     input_spec = _SaveDerivativeInputSpec
     output_spec = _SaveDerivativeOutputSpec
     _always_run = True
 
     def _run_interface(self, runtime):
-        self._results["out_file"] = []
-        self._results["out_meta"] = []
+        self._results['out_file'] = []
+        self._results['out_meta'] = []
 
         for in_file, relative_path in zip(
-            self.inputs.in_file, self.inputs.relative_path,
+            self.inputs.in_file,
+            self.inputs.relative_path,
             strict=True,
         ):
             out_file = Path(self.inputs.base_directory) / relative_path
@@ -785,49 +778,45 @@ class SaveDerivative(SimpleInterface):
                 sidecar = out_file.parent / f"{out_file.name.split('.', 1)[0]}.json"
                 sidecar.unlink(missing_ok=True)
                 sidecar.write_text(dumps(self.inputs.metadata, indent=2))
-                self._results["out_meta"].append(str(sidecar))
-            self._results["out_file"].append(str(out_file))
+                self._results['out_meta'].append(str(sidecar))
+            self._results['out_file'].append(str(out_file))
 
         return runtime
 
 
 class _DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    base_directory = traits.Directory(
-        desc="Path to the base directory for storing data."
-    )
-    check_hdr = traits.Bool(True, usedefault=True, desc="fix headers of NIfTI outputs")
+    base_directory = traits.Directory(desc='Path to the base directory for storing data.')
+    check_hdr = traits.Bool(True, usedefault=True, desc='fix headers of NIfTI outputs')
     compress = InputMultiObject(
         traits.Either(None, traits.Bool),
         usedefault=True,
-        desc="whether ``in_file`` should be compressed (True), uncompressed (False) "
-        "or left unmodified (None, default).",
+        desc='whether ``in_file`` should be compressed (True), uncompressed (False) '
+        'or left unmodified (None, default).',
     )
     data_dtype = Str(
-        desc="NumPy datatype to coerce NIfTI data to, or `source` to"
-        "match the input file dtype"
+        desc='NumPy datatype to coerce NIfTI data to, or `source` to match the input file dtype'
     )
     dismiss_entities = InputMultiObject(
         traits.Either(None, Str),
         usedefault=True,
-        desc="a list entities that will not be propagated from the source file",
+        desc='a list entities that will not be propagated from the source file',
     )
-    in_file = InputMultiObject(
-        File(exists=True), mandatory=True, desc="the object to be saved"
-    )
-    meta_dict = traits.DictStrAny(desc="an input dictionary containing metadata")
+    in_file = InputMultiObject(File(exists=True), mandatory=True, desc='the object to be saved')
+    meta_dict = traits.DictStrAny(desc='an input dictionary containing metadata')
     source_file = InputMultiObject(
-        File(exists=False), mandatory=True, desc="the source file(s) to extract entities from")
+        File(exists=False), mandatory=True, desc='the source file(s) to extract entities from'
+    )
 
 
 class _DerivativesDataSinkOutputSpec(TraitedSpec):
-    out_file = OutputMultiObject(File(exists=True, desc="written file path"))
-    out_meta = OutputMultiObject(File(exists=True, desc="written JSON sidecar path"))
+    out_file = OutputMultiObject(File(exists=True, desc='written file path'))
+    out_meta = OutputMultiObject(File(exists=True, desc='written JSON sidecar path'))
     compression = OutputMultiObject(
         traits.Either(None, traits.Bool),
-        desc="whether ``in_file`` should be compressed (True), uncompressed (False) "
-        "or left unmodified (None).",
+        desc='whether ``in_file`` should be compressed (True), uncompressed (False) '
+        'or left unmodified (None).',
     )
-    fixed_hdr = traits.List(traits.Bool, desc="whether derivative header was fixed")
+    fixed_hdr = traits.List(traits.Bool, desc='whether derivative header was fixed')
 
 
 class DerivativesDataSink(SimpleInterface):
@@ -1004,9 +993,9 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
 
     input_spec = _DerivativesDataSinkInputSpec
     output_spec = _DerivativesDataSinkOutputSpec
-    out_path_base = "niworkflows"
+    out_path_base = 'niworkflows'
     _always_run = True
-    _config_entities = frozenset({e["name"] for e in BIDS_DERIV_ENTITIES})
+    _config_entities = frozenset({e['name'] for e in BIDS_DERIV_ENTITIES})
     _config_entities_dict = BIDS_DERIV_ENTITIES
     _standard_spaces = STANDARD_SPACES
     _file_patterns = BIDS_DERIV_PATTERNS
@@ -1014,9 +1003,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
 
     def __init__(self, allowed_entities=None, out_path_base=None, **inputs):
         """Initialize the SimpleInterface and extend inputs with custom entities."""
-        self._allowed_entities = set(allowed_entities or []).union(
-            set(self._config_entities)
-        )
+        self._allowed_entities = set(allowed_entities or []).union(set(self._config_entities))
         if out_path_base:
             self.out_path_base = out_path_base
 
@@ -1059,36 +1046,39 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
 
         # Initialize entities with those from the source file.
         custom_config = Config(
-            name="custom",
+            name='custom',
             entities=self._config_entities_dict,
             default_path_patterns=self._file_patterns,
         )
         in_entities = [
             parse_file_entities(
                 str(relative_to_root(source_file)),
-                config=["bids", "derivatives", custom_config],
+                config=['bids', 'derivatives', custom_config],
             )
             for source_file in self.inputs.source_file
         ]
-        out_entities = {k: v for k, v in in_entities[0].items()
-                        if all(ent.get(k) == v for ent in in_entities[1:])}
+        out_entities = {
+            k: v
+            for k, v in in_entities[0].items()
+            if all(ent.get(k) == v for ent in in_entities[1:])
+        }
         for drop_entity in listify(self.inputs.dismiss_entities or []):
             out_entities.pop(drop_entity, None)
 
         # Override extension with that of the input file(s)
-        out_entities["extension"] = [
+        out_entities['extension'] = [
             # _splitext does not accept .surf.gii (for instance)
-            "".join(Path(orig_file).suffixes).lstrip(".")
+            ''.join(Path(orig_file).suffixes).lstrip('.')
             for orig_file in in_file
         ]
 
         compress = listify(self.inputs.compress) or [None]
         if len(compress) == 1:
             compress = compress * len(in_file)
-        for i, ext in enumerate(out_entities["extension"]):
+        for i, ext in enumerate(out_entities['extension']):
             if compress[i] is not None:
-                ext = regz.sub("", ext)
-                out_entities["extension"][i] = f"{ext}.gz" if compress[i] else ext
+                ext = regz.sub('', ext)
+                out_entities['extension'][i] = f'{ext}.gz' if compress[i] else ext
 
         # Override entities with those set as inputs
         for key in self._allowed_entities:
@@ -1097,56 +1087,55 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 out_entities[key] = value
 
         # Clean up native resolution with space
-        if out_entities.get("resolution") == "native" and out_entities.get("space"):
-            out_entities.pop("resolution", None)
+        if out_entities.get('resolution') == 'native' and out_entities.get('space'):
+            out_entities.pop('resolution', None)
 
         # Expand templateflow resolutions
-        resolution = out_entities.get("resolution")
-        space = out_entities.get("space")
+        resolution = out_entities.get('resolution')
+        space = out_entities.get('space')
         if resolution:
             # Standard spaces
             if space in self._standard_spaces:
                 res = _get_tf_resolution(space, resolution)
             else:  # TODO: Nonstandard?
-                res = "Unknown"
+                res = 'Unknown'
             self._metadata['Resolution'] = res
 
-        if len(set(out_entities["extension"])) == 1:
-            out_entities["extension"] = out_entities["extension"][0]
+        if len(set(out_entities['extension'])) == 1:
+            out_entities['extension'] = out_entities['extension'][0]
 
         # Insert custom (non-BIDS) entities from allowed_entities.
         custom_entities = set(out_entities) - set(self._config_entities)
         patterns = self._file_patterns
         if custom_entities:
             # Example: f"{key}-{{{key}}}" -> "task-{task}"
-            custom_pat = "_".join(f"{key}-{{{key}}}" for key in sorted(custom_entities))
+            custom_pat = '_'.join(f'{key}-{{{key}}}' for key in sorted(custom_entities))
             patterns = [
-                pat.replace("_{suffix", "_".join(("", custom_pat, "{suffix")))
-                for pat in patterns
+                pat.replace('_{suffix', '_'.join(('', custom_pat, '{suffix'))) for pat in patterns
             ]
 
         # Prepare SimpleInterface outputs object
-        self._results["out_file"] = []
-        self._results["compression"] = []
-        self._results["fixed_hdr"] = [False] * len(in_file)
+        self._results['out_file'] = []
+        self._results['compression'] = []
+        self._results['fixed_hdr'] = [False] * len(in_file)
 
         dest_files = build_path(out_entities, path_patterns=patterns)
         if not dest_files:
-            raise ValueError(f"Could not build path with entities {out_entities}.")
+            raise ValueError(f'Could not build path with entities {out_entities}.')
 
         # Make sure the interpolated values is embedded in a list, and check
         dest_files = listify(dest_files)
         if len(in_file) != len(dest_files):
             raise ValueError(
-                f"Input files ({len(in_file)}) not matched "
-                f"by interpolated patterns ({len(dest_files)})."
+                f'Input files ({len(in_file)}) not matched '
+                f'by interpolated patterns ({len(dest_files)}).'
             )
 
         for i, (orig_file, dest_file) in enumerate(zip(in_file, dest_files)):
             out_file = out_path / dest_file
             out_file.parent.mkdir(exist_ok=True, parents=True)
-            self._results["out_file"].append(str(out_file))
-            self._results["compression"].append(str(dest_file).endswith(".gz"))
+            self._results['out_file'].append(str(out_file))
+            self._results['compression'].append(str(dest_file).endswith('.gz'))
 
             # An odd but possible case is that an input file is in the location of
             # the output and we have made no changes to it.
@@ -1176,39 +1165,37 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 if self.inputs.check_hdr:
                     hdr = nii.header
                     curr_units = tuple(
-                        [None if u == "unknown" else u for u in hdr.get_xyzt_units()]
+                        [None if u == 'unknown' else u for u in hdr.get_xyzt_units()]
                     )
-                    curr_codes = (int(hdr["qform_code"]), int(hdr["sform_code"]))
+                    curr_codes = (int(hdr['qform_code']), int(hdr['sform_code']))
 
                     # Default to mm, use sec if data type is bold
                     units = (
-                        curr_units[0] or "mm",
-                        "sec" if out_entities["suffix"] == "bold" else None,
+                        curr_units[0] or 'mm',
+                        'sec' if out_entities['suffix'] == 'bold' else None,
                     )
                     xcodes = (1, 1)  # Derivative in its original scanner space
                     if self.inputs.space:
-                        xcodes = (
-                            (4, 4) if self.inputs.space in self._standard_spaces else (2, 2)
-                        )
+                        xcodes = (4, 4) if self.inputs.space in self._standard_spaces else (2, 2)
 
                     curr_zooms = zooms = hdr.get_zooms()
-                    if "RepetitionTime" in self.inputs.get():
+                    if 'RepetitionTime' in self.inputs.get():
                         zooms = curr_zooms[:3] + (self.inputs.RepetitionTime,)
 
                     if (curr_codes, curr_units, curr_zooms) != (xcodes, units, zooms):
-                        self._results["fixed_hdr"][i] = True
+                        self._results['fixed_hdr'][i] = True
                         new_header = hdr.copy()
                         new_header.set_qform(nii.affine, xcodes[0])
                         new_header.set_sform(nii.affine, xcodes[1])
                         new_header.set_xyzt_units(*units)
                         new_header.set_zooms(zooms)
 
-                if data_dtype == "source":  # match source dtype
+                if data_dtype == 'source':  # match source dtype
                     try:
                         data_dtype = nb.load(self.inputs.source_file[0]).get_data_dtype()
                     except Exception:
                         LOGGER.warning(
-                            f"Could not get data type of file {self.inputs.source_file[0]}"
+                            f'Could not get data type of file {self.inputs.source_file[0]}'
                         )
                         data_dtype = None
 
@@ -1217,7 +1204,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                     orig_dtype = nii.get_data_dtype()
                     if orig_dtype != data_dtype:
                         LOGGER.warning(
-                            f"Changing {out_file} dtype from {orig_dtype} to {data_dtype}"
+                            f'Changing {out_file} dtype from {orig_dtype} to {data_dtype}'
                         )
                         # coerce dataobj to new data dtype
                         if np.issubdtype(data_dtype, np.integer):
@@ -1241,33 +1228,27 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 else:
                     # Without this, we would be writing nans
                     # This is our punishment for hacking around nibabel defaults
-                    new_header.set_slope_inter(slope=1., inter=0.)
+                    new_header.set_slope_inter(slope=1.0, inter=0.0)
                 unsafe_write_nifti_header_and_data(
-                    fname=out_file,
-                    header=new_header,
-                    data=new_data
+                    fname=out_file, header=new_header, data=new_data
                 )
                 del orig_img
 
-        if len(self._results["out_file"]) == 1:
+        if len(self._results['out_file']) == 1:
             meta_fields = self.inputs.copyable_trait_names()
             self._metadata.update(
-                {
-                    k: getattr(self.inputs, k)
-                    for k in meta_fields
-                    if k not in self._static_traits
-                }
+                {k: getattr(self.inputs, k) for k in meta_fields if k not in self._static_traits}
             )
             if self._metadata:
                 sidecar = out_file.parent / f"{out_file.name.split('.', 1)[0]}.json"
                 unlink(sidecar, missing_ok=True)
                 sidecar.write_text(dumps(self._metadata, sort_keys=True, indent=2))
-                self._results["out_meta"] = str(sidecar)
+                self._results['out_meta'] = str(sidecar)
         return runtime
 
 
 class _ReadSidecarJSONInputSpec(_BIDSBaseInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="the input nifti file")
+    in_file = File(exists=True, mandatory=True, desc='the input nifti file')
 
 
 class _ReadSidecarJSONOutputSpec(_BIDSInfoOutputSpec):
@@ -1342,57 +1323,49 @@ class ReadSidecarJSON(SimpleInterface):
             self.inputs.in_file,
             self.layout,
             self.inputs.bids_validate,
-            database_path=(
-                self.inputs.index_db if isdefined(self.inputs.index_db)
-                else None
-            )
+            database_path=(self.inputs.index_db if isdefined(self.inputs.index_db) else None),
         )
 
         # Fill in BIDS entities of the output ("*_id")
         output_keys = list(_BIDSInfoOutputSpec().get().keys())
         params = self.layout.parse_file_entities(self.inputs.in_file)
-        self._results = {
-            key: params.get(key.split("_")[0], Undefined) for key in output_keys
-        }
+        self._results = {key: params.get(key.split('_')[0], Undefined) for key in output_keys}
 
         # Fill in metadata
         metadata = self.layout.get_metadata(self.inputs.in_file)
-        self._results["out_dict"] = metadata
+        self._results['out_dict'] = metadata
 
         # Set dynamic outputs if fields input is present
         for fname in self._fields:
             if not self._undef_fields and fname not in metadata:
                 raise KeyError(
-                    'Metadata field "%s" not found for file %s'
-                    % (fname, self.inputs.in_file)
+                    'Metadata field "%s" not found for file %s' % (fname, self.inputs.in_file)
                 )
             self._results[fname] = metadata.get(fname, Undefined)
         return runtime
 
 
 class _BIDSFreeSurferDirInputSpec(BaseInterfaceInputSpec):
-    derivatives = Directory(
-        exists=True, mandatory=True, desc="BIDS derivatives directory"
-    )
+    derivatives = Directory(exists=True, mandatory=True, desc='BIDS derivatives directory')
     freesurfer_home = Directory(
-        exists=True, mandatory=True, desc="FreeSurfer installation directory"
+        exists=True, mandatory=True, desc='FreeSurfer installation directory'
     )
     subjects_dir = traits.Either(
         traits.Str(),
         Directory(),
-        default="freesurfer",
+        default='freesurfer',
         usedefault=True,
-        desc="Name of FreeSurfer subjects directory",
+        desc='Name of FreeSurfer subjects directory',
     )
-    spaces = traits.List(traits.Str, desc="Set of output spaces to prepare")
+    spaces = traits.List(traits.Str, desc='Set of output spaces to prepare')
     overwrite_fsaverage = traits.Bool(
-        False, usedefault=True, desc="Overwrite fsaverage directories, if present"
+        False, usedefault=True, desc='Overwrite fsaverage directories, if present'
     )
-    minimum_fs_version = traits.Enum("7.0.0", desc="Minimum FreeSurfer version for compatibility")
+    minimum_fs_version = traits.Enum('7.0.0', desc='Minimum FreeSurfer version for compatibility')
 
 
 class _BIDSFreeSurferDirOutputSpec(TraitedSpec):
-    subjects_dir = traits.Directory(exists=True, desc="FreeSurfer subjects directory")
+    subjects_dir = traits.Directory(exists=True, desc='FreeSurfer subjects directory')
 
 
 class BIDSFreeSurferDir(SimpleInterface):
@@ -1425,9 +1398,9 @@ class BIDSFreeSurferDir(SimpleInterface):
         if not subjects_dir.is_absolute():
             subjects_dir = Path(self.inputs.derivatives) / subjects_dir
         subjects_dir.mkdir(parents=True, exist_ok=True)
-        self._results["subjects_dir"] = str(subjects_dir)
+        self._results['subjects_dir'] = str(subjects_dir)
 
-        orig_subjects_dir = Path(self.inputs.freesurfer_home) / "subjects"
+        orig_subjects_dir = Path(self.inputs.freesurfer_home) / 'subjects'
 
         # Source is target, so just quit
         if subjects_dir == orig_subjects_dir:
@@ -1435,12 +1408,12 @@ class BIDSFreeSurferDir(SimpleInterface):
 
         spaces = list(self.inputs.spaces)
         # Always copy fsaverage, for proper recon-all functionality
-        if "fsaverage" not in spaces:
-            spaces.append("fsaverage")
+        if 'fsaverage' not in spaces:
+            spaces.append('fsaverage')
 
         for space in spaces:
             # Skip non-freesurfer spaces and fsnative
-            if not space.startswith("fsaverage"):
+            if not space.startswith('fsaverage'):
                 continue
             source = orig_subjects_dir / space
             dest = subjects_dir / space
@@ -1455,7 +1428,7 @@ class BIDSFreeSurferDir(SimpleInterface):
             if (
                 space == 'fsaverage'
                 and dest.exists()
-                and self.inputs.minimum_fs_version == "7.0.0"
+                and self.inputs.minimum_fs_version == '7.0.0'
             ):
                 label = dest / 'label' / 'rh.FG1.mpm.vpnl.label'  # new in FS7
                 if not label.exists():
@@ -1475,8 +1448,8 @@ class BIDSFreeSurferDir(SimpleInterface):
                     shutil.copytree(source, dest, copy_function=shutil.copy)
                 except FileExistsError:
                     LOGGER.warning(
-                        "%s exists; if multiple jobs are running in parallel"
-                        ", this can be safely ignored",
+                        '%s exists; if multiple jobs are running in parallel'
+                        ', this can be safely ignored',
                         dest,
                     )
 
@@ -1506,11 +1479,11 @@ def _get_tf_resolution(space: str, resolution: str) -> str:
         if r in resolutions:
             res_meta = resolutions[r]
     if res_meta is None:
-        return "Unknown"
+        return 'Unknown'
 
     def _fmt_xyz(coords: list) -> str:
-        xyz = "x".join([str(c) for c in coords])
-        return f"{xyz} mm^3"
+        xyz = 'x'.join([str(c) for c in coords])
+        return f'{xyz} mm^3'
 
     return (
         f"Template {space} ({_fmt_xyz(res_meta['zooms'])}),"

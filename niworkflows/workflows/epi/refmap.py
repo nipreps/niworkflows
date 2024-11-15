@@ -34,7 +34,7 @@ DEFAULT_MEMORY_MIN_GB = 0.01
 def init_epi_reference_wf(
     omp_nthreads,
     auto_bold_nss=False,
-    name="epi_reference_wf",
+    name='epi_reference_wf',
 ):
     """
     Build a workflow that generates a reference map from a set of EPI images.
@@ -126,32 +126,28 @@ def init_epi_reference_wf(
 
     wf = Workflow(name=name)
 
-    inputnode = pe.Node(
-        niu.IdentityInterface(fields=["in_files", "t_masks"]), name="inputnode"
-    )
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 't_masks']), name='inputnode')
     outputnode = pe.Node(
         niu.IdentityInterface(
             fields=[
-                "epi_ref_file",
-                "xfm_files",
-                "per_run_ref_files",
-                "drift_factors",
-                "n_dummy",
-                "validation_report",
+                'epi_ref_file',
+                'xfm_files',
+                'per_run_ref_files',
+                'drift_factors',
+                'n_dummy',
+                'validation_report',
             ]
         ),
-        name="outputnode",
+        name='outputnode',
     )
 
-    validate_nii = pe.MapNode(
-        ValidateImage(), name="validate_nii", iterfield=["in_file"]
-    )
+    validate_nii = pe.MapNode(ValidateImage(), name='validate_nii', iterfield=['in_file'])
 
     per_run_avgs = pe.MapNode(
-        RobustAverage(), name="per_run_avgs", mem_gb=1, iterfield=["in_file", "t_mask"]
+        RobustAverage(), name='per_run_avgs', mem_gb=1, iterfield=['in_file', 't_mask']
     )
 
-    clip_avgs = pe.MapNode(IntensityClip(), name="clip_avgs", iterfield=["in_file"])
+    clip_avgs = pe.MapNode(IntensityClip(), name='clip_avgs', iterfield=['in_file'])
 
     # de-gradient the fields ("bias/illumination artifact")
     n4_avgs = pe.MapNode(
@@ -163,13 +159,13 @@ def init_epi_reference_wf(
             shrink_factor=4,
         ),
         n_procs=omp_nthreads,
-        name="n4_avgs",
-        iterfield=["input_image"],
+        name='n4_avgs',
+        iterfield=['input_image'],
     )
     clip_bg_noise = pe.MapNode(
         IntensityClip(p_min=2.0, p_max=100.0),
-        name="clip_bg_noise",
-        iterfield=["in_file"],
+        name='clip_bg_noise',
+        iterfield=['in_file'],
     )
 
     epi_merge = pe.Node(
@@ -182,10 +178,10 @@ def init_epi_reference_wf(
             no_iteration=True,
             transform_outputs=True,
         ),
-        name="epi_merge",
+        name='epi_merge',
     )
 
-    post_merge = pe.Node(niu.Function(function=_post_merge), name="post_merge")
+    post_merge = pe.Node(niu.Function(function=_post_merge), name='post_merge')
 
     def _set_threads(in_list, maximum):
         return min(len(in_list), maximum)
@@ -213,7 +209,7 @@ def init_epi_reference_wf(
 
     if auto_bold_nss:
         select_volumes = pe.MapNode(
-            NonsteadyStatesDetector(), name="select_volumes", iterfield=["in_file"]
+            NonsteadyStatesDetector(), name='select_volumes', iterfield=['in_file']
         )
         # fmt:off
         wf.connect([
@@ -223,7 +219,7 @@ def init_epi_reference_wf(
         ])
         # fmt:on
     else:
-        wf.connect(inputnode, "t_masks", per_run_avgs, "t_mask")
+        wf.connect(inputnode, 't_masks', per_run_avgs, 't_mask')
 
     return wf
 
@@ -245,17 +241,17 @@ def _post_merge(in_file, in_xfms):
     from niworkflows.utils.connections import listify
 
     in_xfms = listify(in_xfms)
-    if len(in_xfms) == 1 and in_file.endswith((".nii", ".nii.gz")):
+    if len(in_xfms) == 1 and in_file.endswith(('.nii', '.nii.gz')):
         return in_file
 
     if len(in_xfms) == 1:
-        raise RuntimeError("Output format and number of transforms do not match")
+        raise RuntimeError('Output format and number of transforms do not match')
 
     from pathlib import Path
     import nibabel as nb
     from niworkflows.interfaces.nibabel import _advanced_clip
 
-    out_file = Path() / Path(in_file).name.replace(".mgz", ".nii.gz")
+    out_file = Path() / Path(in_file).name.replace('.mgz', '.nii.gz')
     img = nb.load(in_file)
     nb.Nifti1Image(img.dataobj, img.affine, None).to_filename(out_file)
     return _advanced_clip(out_file, p_min=0.0, p_max=100.0)

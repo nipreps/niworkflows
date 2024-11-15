@@ -53,21 +53,21 @@ from ..interfaces.header import CopyXForm
 
 
 ATROPOS_MODELS = {
-    "T1w": OrderedDict([("nclasses", 3), ("csf", 1), ("gm", 2), ("wm", 3)]),
-    "T2w": OrderedDict([("nclasses", 3), ("csf", 3), ("gm", 2), ("wm", 1)]),
-    "FLAIR": OrderedDict([("nclasses", 3), ("csf", 1), ("gm", 3), ("wm", 2)]),
+    'T1w': OrderedDict([('nclasses', 3), ('csf', 1), ('gm', 2), ('wm', 3)]),
+    'T2w': OrderedDict([('nclasses', 3), ('csf', 3), ('gm', 2), ('wm', 1)]),
+    'FLAIR': OrderedDict([('nclasses', 3), ('csf', 1), ('gm', 3), ('wm', 2)]),
 }
 
 
 def init_brain_extraction_wf(
-    name="brain_extraction_wf",
-    in_template="OASIS30ANTs",
+    name='brain_extraction_wf',
+    in_template='OASIS30ANTs',
     template_spec=None,
     use_float=True,
-    normalization_quality="precise",
+    normalization_quality='precise',
     omp_nthreads=None,
     mem_gb=3.0,
-    bids_suffix="T1w",
+    bids_suffix='T1w',
     atropos_refine=True,
     atropos_use_random_seed=True,
     atropos_model=None,
@@ -193,27 +193,27 @@ def init_brain_extraction_wf(
     template_spec = template_spec or {}
 
     # suffix passed via spec takes precedence
-    template_spec["suffix"] = template_spec.get("suffix", bids_suffix)
+    template_spec['suffix'] = template_spec.get('suffix', bids_suffix)
 
     tpl_target_path, common_spec = get_template_specs(
-        in_template, template_spec=template_spec, fallback=True,
+        in_template,
+        template_spec=template_spec,
+        fallback=True,
     )
 
     # Get probabilistic brain mask if available
     tpl_mask_path = get_template(
-        in_template, label="brain", suffix="probseg", **common_spec
-    ) or get_template(in_template, desc="brain", suffix="mask", **common_spec)
+        in_template, label='brain', suffix='probseg', **common_spec
+    ) or get_template(in_template, desc='brain', suffix='mask', **common_spec)
 
     if omp_nthreads is None or omp_nthreads < 1:
         omp_nthreads = cpu_count()
 
-    inputnode = pe.Node(
-        niu.IdentityInterface(fields=["in_files", "in_mask"]), name="inputnode"
-    )
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 'in_mask']), name='inputnode')
 
     # Try to find a registration mask, set if available
     tpl_regmask_path = get_template(
-        in_template, desc="BrainCerebellumExtraction", suffix="mask", **common_spec
+        in_template, desc='BrainCerebellumExtraction', suffix='mask', **common_spec
     )
     if tpl_regmask_path:
         inputnode.inputs.in_mask = str(tpl_regmask_path)
@@ -221,23 +221,21 @@ def init_brain_extraction_wf(
     outputnode = pe.Node(
         niu.IdentityInterface(
             fields=[
-                "out_file",
-                "out_mask",
-                "bias_corrected",
-                "bias_image",
-                "out_segm",
-                "out_tpms",
+                'out_file',
+                'out_mask',
+                'bias_corrected',
+                'bias_image',
+                'out_segm',
+                'out_tpms',
             ]
         ),
-        name="outputnode",
+        name='outputnode',
     )
 
     trunc = pe.MapNode(
-        ImageMath(
-            operation="TruncateImageIntensity", op2="0.01 0.999 256", copy_header=True
-        ),
-        name="truncate_images",
-        iterfield=["op1"],
+        ImageMath(operation='TruncateImageIntensity', op2='0.01 0.999 256', copy_header=True),
+        name='truncate_images',
+        iterfield=['op1'],
     )
     inu_n4 = pe.MapNode(
         N4BiasFieldCorrection(
@@ -250,39 +248,39 @@ def init_brain_extraction_wf(
             bspline_fitting_distance=bspline_fitting_distance,
         ),
         n_procs=omp_nthreads,
-        name="inu_n4",
-        iterfield=["input_image"],
+        name='inu_n4',
+        iterfield=['input_image'],
     )
 
     res_tmpl = pe.Node(
         RegridToZooms(in_file=tpl_target_path, zooms=(4, 4, 4), smooth=True),
-        name="res_tmpl",
+        name='res_tmpl',
     )
-    res_target = pe.Node(RegridToZooms(zooms=(4, 4, 4), smooth=True), name="res_target")
+    res_target = pe.Node(RegridToZooms(zooms=(4, 4, 4), smooth=True), name='res_target')
 
     lap_tmpl = pe.Node(
-        ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True), name="lap_tmpl"
+        ImageMath(operation='Laplacian', op2='1.5 1', copy_header=True), name='lap_tmpl'
     )
     lap_tmpl.inputs.op1 = tpl_target_path
     lap_target = pe.Node(
-        ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True),
-        name="lap_target",
+        ImageMath(operation='Laplacian', op2='1.5 1', copy_header=True),
+        name='lap_target',
     )
-    mrg_tmpl = pe.Node(niu.Merge(2), name="mrg_tmpl")
+    mrg_tmpl = pe.Node(niu.Merge(2), name='mrg_tmpl')
     mrg_tmpl.inputs.in1 = tpl_target_path
-    mrg_target = pe.Node(niu.Merge(2), name="mrg_target")
+    mrg_target = pe.Node(niu.Merge(2), name='mrg_target')
 
     # Initialize transforms with antsAI
     init_aff = pe.Node(
         AI(
-            metric=("Mattes", 32, "Regular", 0.25),
-            transform=("Affine", 0.1),
+            metric=('Mattes', 32, 'Regular', 0.25),
+            transform=('Affine', 0.1),
             search_factor=(15, 0.1),
             principal_axes=False,
             convergence=(10, 1e-6, 10),
             verbose=True,
         ),
-        name="init_aff",
+        name='init_aff',
         n_procs=omp_nthreads,
     )
 
@@ -292,31 +290,31 @@ def init_brain_extraction_wf(
     except ValueError:
         warn(
             "antsAI's option --search-grid was added in ANTS 2.3.0 "
-            f"({init_aff.interface.version} found.)"
+            f'({init_aff.interface.version} found.)'
         )
 
     # Set up spatial normalization
     settings_file = (
-        "antsBrainExtraction_%s.json"
+        'antsBrainExtraction_%s.json'
         if use_laplacian
-        else "antsBrainExtractionNoLaplacian_%s.json"
+        else 'antsBrainExtractionNoLaplacian_%s.json'
     )
     norm = pe.Node(
         Registration(from_file=load_data(settings_file % normalization_quality)),
-        name="norm",
+        name='norm',
         n_procs=omp_nthreads,
         mem_gb=mem_gb,
     )
     norm.inputs.float = use_float
-    fixed_mask_trait = "fixed_image_mask"
+    fixed_mask_trait = 'fixed_image_mask'
 
-    if norm.interface.version and parseversion(norm.interface.version) >= Version(
-        "2.2.0"
-    ):
-        fixed_mask_trait += "s"
+    if norm.interface.version and parseversion(norm.interface.version) >= Version('2.2.0'):
+        fixed_mask_trait += 's'
 
     map_brainmask = pe.Node(
-        ApplyTransforms(interpolation="Gaussian"), name="map_brainmask", mem_gb=1,
+        ApplyTransforms(interpolation='Gaussian'),
+        name='map_brainmask',
+        mem_gb=1,
     )
     map_brainmask.inputs.input_image = str(tpl_mask_path)
 
@@ -329,7 +327,7 @@ def init_brain_extraction_wf(
             outside_value=0,
             copy_header=True,
         ),
-        name="thr_brainmask",
+        name='thr_brainmask',
     )
 
     # Refine INU correction
@@ -344,20 +342,20 @@ def init_brain_extraction_wf(
             bspline_fitting_distance=bspline_fitting_distance,
         ),
         n_procs=omp_nthreads,
-        name="inu_n4_final",
-        iterfield=["input_image"],
+        name='inu_n4_final',
+        iterfield=['input_image'],
     )
     try:
         inu_n4_final.inputs.rescale_intensities = True
     except ValueError:
         warn(
             "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
-            f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
+            f'({inu_n4_final.interface.version} found.) Please consider upgrading.',
             UserWarning,
         )
 
     # Apply mask
-    apply_mask = pe.MapNode(ApplyMask(), iterfield=["in_file"], name="apply_mask")
+    apply_mask = pe.MapNode(ApplyMask(), iterfield=['in_file'], name='apply_mask')
 
     # fmt: off
     wf.connect([
@@ -386,21 +384,18 @@ def init_brain_extraction_wf(
     ])
     # fmt: on
 
-    wm_tpm = (
-        get_template(in_template, label="WM", suffix="probseg", **common_spec) or None
-    )
+    wm_tpm = get_template(in_template, label='WM', suffix='probseg', **common_spec) or None
     if wm_tpm:
         map_wmmask = pe.Node(
-            ApplyTransforms(interpolation="Gaussian"), name="map_wmmask", mem_gb=1,
+            ApplyTransforms(interpolation='Gaussian'),
+            name='map_wmmask',
+            mem_gb=1,
         )
 
         # Add the brain stem if it is found.
-        bstem_tpm = (
-            get_template(in_template, label="BS", suffix="probseg", **common_spec)
-            or None
-        )
+        bstem_tpm = get_template(in_template, label='BS', suffix='probseg', **common_spec) or None
         if bstem_tpm:
-            full_wm = pe.Node(niu.Function(function=_imsum), name="full_wm")
+            full_wm = pe.Node(niu.Function(function=_imsum), name='full_wm')
             full_wm.inputs.op1 = str(wm_tpm)
             full_wm.inputs.op2 = str(bstem_tpm)
             # fmt: off
@@ -426,17 +421,17 @@ def init_brain_extraction_wf(
 
     if use_laplacian:
         lap_tmpl = pe.Node(
-            ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True),
-            name="lap_tmpl",
+            ImageMath(operation='Laplacian', op2='1.5 1', copy_header=True),
+            name='lap_tmpl',
         )
         lap_tmpl.inputs.op1 = tpl_target_path
         lap_target = pe.Node(
-            ImageMath(operation="Laplacian", op2="1.5 1", copy_header=True),
-            name="lap_target",
+            ImageMath(operation='Laplacian', op2='1.5 1', copy_header=True),
+            name='lap_target',
         )
-        mrg_tmpl = pe.Node(niu.Merge(2), name="mrg_tmpl")
+        mrg_tmpl = pe.Node(niu.Merge(2), name='mrg_tmpl')
         mrg_tmpl.inputs.in1 = tpl_target_path
-        mrg_target = pe.Node(niu.Merge(2), name="mrg_target")
+        mrg_target = pe.Node(niu.Merge(2), name='mrg_target')
         # fmt: off
         wf.connect([
             (inu_n4, lap_target, [(("output_image", _pop), "op1")]),
@@ -498,12 +493,12 @@ def init_brain_extraction_wf(
 
 
 def init_atropos_wf(
-    name="atropos_wf",
+    name='atropos_wf',
     use_random_seed=True,
     omp_nthreads=None,
     mem_gb=3.0,
     padding=10,
-    in_segmentation_model=tuple(ATROPOS_MODELS["T1w"].values()),
+    in_segmentation_model=tuple(ATROPOS_MODELS['T1w'].values()),
     bspline_fitting_distance=200,
     wm_prior=False,
 ):
@@ -589,30 +584,28 @@ def init_atropos_wf(
     """
     wf = pe.Workflow(name)
 
-    out_fields = ["bias_corrected", "bias_image", "out_mask", "out_segm", "out_tpms"]
+    out_fields = ['bias_corrected', 'bias_image', 'out_mask', 'out_segm', 'out_tpms']
 
     inputnode = pe.Node(
-        niu.IdentityInterface(
-            fields=["in_files", "in_corrected", "in_mask", "wm_prior"]
-        ),
-        name="inputnode",
+        niu.IdentityInterface(fields=['in_files', 'in_corrected', 'in_mask', 'wm_prior']),
+        name='inputnode',
     )
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=["out_file"] + out_fields), name="outputnode"
+        niu.IdentityInterface(fields=['out_file'] + out_fields), name='outputnode'
     )
 
     copy_xform = pe.Node(
-        CopyXForm(fields=out_fields), name="copy_xform", run_without_submitting=True
+        CopyXForm(fields=out_fields), name='copy_xform', run_without_submitting=True
     )
 
     # Morphological dilation, radius=2
     dil_brainmask = pe.Node(
-        ImageMath(operation="MD", op2="2", copy_header=True), name="dil_brainmask"
+        ImageMath(operation='MD', op2='2', copy_header=True), name='dil_brainmask'
     )
     # Get largest connected component
     get_brainmask = pe.Node(
-        ImageMath(operation="GetLargestComponent", copy_header=True),
-        name="get_brainmask",
+        ImageMath(operation='GetLargestComponent', copy_header=True),
+        name='get_brainmask',
     )
 
     # Run atropos (core node)
@@ -620,8 +613,8 @@ def init_atropos_wf(
         Atropos(
             convergence_threshold=0.0,
             dimension=3,
-            initialization="KMeans",
-            likelihood_model="Gaussian",
+            initialization='KMeans',
+            likelihood_model='Gaussian',
             mrf_radius=[1, 1, 1],
             mrf_smoothing_factor=0.1,
             n_iterations=3,
@@ -629,42 +622,40 @@ def init_atropos_wf(
             save_posteriors=True,
             use_random_seed=use_random_seed,
         ),
-        name="01_atropos",
+        name='01_atropos',
         n_procs=omp_nthreads,
         mem_gb=mem_gb,
     )
 
     # massage outputs
     pad_segm = pe.Node(
-        ImageMath(operation="PadImage", op2=f"{padding}", copy_header=False),
-        name="02_pad_segm",
+        ImageMath(operation='PadImage', op2=f'{padding}', copy_header=False),
+        name='02_pad_segm',
     )
     pad_mask = pe.Node(
-        ImageMath(operation="PadImage", op2=f"{padding}", copy_header=False),
-        name="03_pad_mask",
+        ImageMath(operation='PadImage', op2=f'{padding}', copy_header=False),
+        name='03_pad_mask',
     )
 
     # Split segmentation in binary masks
     sel_labels = pe.Node(
-        niu.Function(
-            function=_select_labels, output_names=["out_wm", "out_gm", "out_csf"]
-        ),
-        name="04_sel_labels",
+        niu.Function(function=_select_labels, output_names=['out_wm', 'out_gm', 'out_csf']),
+        name='04_sel_labels',
     )
     sel_labels.inputs.labels = list(reversed(in_segmentation_model[1:]))
 
     # Select largest components (GM, WM)
     # ImageMath ${DIMENSION} ${EXTRACTION_WM} GetLargestComponent ${EXTRACTION_WM}
-    get_wm = pe.Node(ImageMath(operation="GetLargestComponent"), name="05_get_wm")
-    get_gm = pe.Node(ImageMath(operation="GetLargestComponent"), name="06_get_gm")
+    get_wm = pe.Node(ImageMath(operation='GetLargestComponent'), name='05_get_wm')
+    get_gm = pe.Node(ImageMath(operation='GetLargestComponent'), name='06_get_gm')
 
     # Fill holes and calculate intersection
     # ImageMath ${DIMENSION} ${EXTRACTION_TMP} FillHoles ${EXTRACTION_GM} 2
     # MultiplyImages ${DIMENSION} ${EXTRACTION_GM} ${EXTRACTION_TMP} ${EXTRACTION_GM}
-    fill_gm = pe.Node(ImageMath(operation="FillHoles", op2="2"), name="07_fill_gm")
+    fill_gm = pe.Node(ImageMath(operation='FillHoles', op2='2'), name='07_fill_gm')
     mult_gm = pe.Node(
-        MultiplyImages(dimension=3, output_product_image="08_mult_gm.nii.gz"),
-        name="08_mult_gm",
+        MultiplyImages(dimension=3, output_product_image='08_mult_gm.nii.gz'),
+        name='08_mult_gm',
     )
 
     # MultiplyImages ${DIMENSION} ${EXTRACTION_WM} ${ATROPOS_WM_CLASS_LABEL} ${EXTRACTION_WM}
@@ -673,78 +664,72 @@ def init_atropos_wf(
         MultiplyImages(
             dimension=3,
             second_input=in_segmentation_model[-1],
-            output_product_image="09_relabel_wm.nii.gz",
+            output_product_image='09_relabel_wm.nii.gz',
         ),
-        name="09_relabel_wm",
+        name='09_relabel_wm',
     )
-    me_csf = pe.Node(ImageMath(operation="ME", op2="10"), name="10_me_csf")
+    me_csf = pe.Node(ImageMath(operation='ME', op2='10'), name='10_me_csf')
 
     # ImageMath ${DIMENSION} ${EXTRACTION_GM} addtozero ${EXTRACTION_GM} ${EXTRACTION_TMP}
     # MultiplyImages ${DIMENSION} ${EXTRACTION_GM} ${ATROPOS_GM_CLASS_LABEL} ${EXTRACTION_GM}
     # ImageMath ${DIMENSION} ${EXTRACTION_SEGMENTATION} addtozero ${EXTRACTION_WM} ${EXTRACTION_GM}
-    add_gm = pe.Node(ImageMath(operation="addtozero"), name="11_add_gm")
+    add_gm = pe.Node(ImageMath(operation='addtozero'), name='11_add_gm')
     relabel_gm = pe.Node(
         MultiplyImages(
             dimension=3,
             second_input=in_segmentation_model[-2],
-            output_product_image="12_relabel_gm.nii.gz",
+            output_product_image='12_relabel_gm.nii.gz',
         ),
-        name="12_relabel_gm",
+        name='12_relabel_gm',
     )
-    add_gm_wm = pe.Node(ImageMath(operation="addtozero"), name="13_add_gm_wm")
+    add_gm_wm = pe.Node(ImageMath(operation='addtozero'), name='13_add_gm_wm')
 
     # Superstep 7
     # Split segmentation in binary masks
     sel_labels2 = pe.Node(
-        niu.Function(function=_select_labels, output_names=["out_gm", "out_wm"]),
-        name="14_sel_labels2",
+        niu.Function(function=_select_labels, output_names=['out_gm', 'out_wm']),
+        name='14_sel_labels2',
     )
     sel_labels2.inputs.labels = in_segmentation_model[2:]
 
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} addtozero ${EXTRACTION_MASK} ${EXTRACTION_TMP}
-    add_7 = pe.Node(ImageMath(operation="addtozero"), name="15_add_7")
+    add_7 = pe.Node(ImageMath(operation='addtozero'), name='15_add_7')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} ME ${EXTRACTION_MASK} 2
-    me_7 = pe.Node(ImageMath(operation="ME", op2="2"), name="16_me_7")
+    me_7 = pe.Node(ImageMath(operation='ME', op2='2'), name='16_me_7')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} GetLargestComponent ${EXTRACTION_MASK}
-    comp_7 = pe.Node(ImageMath(operation="GetLargestComponent"), name="17_comp_7")
+    comp_7 = pe.Node(ImageMath(operation='GetLargestComponent'), name='17_comp_7')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} MD ${EXTRACTION_MASK} 4
-    md_7 = pe.Node(ImageMath(operation="MD", op2="4"), name="18_md_7")
+    md_7 = pe.Node(ImageMath(operation='MD', op2='4'), name='18_md_7')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} FillHoles ${EXTRACTION_MASK} 2
-    fill_7 = pe.Node(ImageMath(operation="FillHoles", op2="2"), name="19_fill_7")
+    fill_7 = pe.Node(ImageMath(operation='FillHoles', op2='2'), name='19_fill_7')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} addtozero ${EXTRACTION_MASK} \
     # ${EXTRACTION_MASK_PRIOR_WARPED}
-    add_7_2 = pe.Node(ImageMath(operation="addtozero"), name="20_add_7_2")
+    add_7_2 = pe.Node(ImageMath(operation='addtozero'), name='20_add_7_2')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} MD ${EXTRACTION_MASK} 5
-    md_7_2 = pe.Node(ImageMath(operation="MD", op2="5"), name="21_md_7_2")
+    md_7_2 = pe.Node(ImageMath(operation='MD', op2='5'), name='21_md_7_2')
     # ImageMath ${DIMENSION} ${EXTRACTION_MASK} ME ${EXTRACTION_MASK} 5
-    me_7_2 = pe.Node(ImageMath(operation="ME", op2="5"), name="22_me_7_2")
+    me_7_2 = pe.Node(ImageMath(operation='ME', op2='5'), name='22_me_7_2')
 
     # De-pad
     depad_mask = pe.Node(
-        ImageMath(operation="PadImage", op2="-%d" % padding), name="23_depad_mask"
+        ImageMath(operation='PadImage', op2='-%d' % padding), name='23_depad_mask'
     )
     depad_segm = pe.Node(
-        ImageMath(operation="PadImage", op2="-%d" % padding), name="24_depad_segm"
+        ImageMath(operation='PadImage', op2='-%d' % padding), name='24_depad_segm'
     )
-    depad_gm = pe.Node(
-        ImageMath(operation="PadImage", op2="-%d" % padding), name="25_depad_gm"
-    )
-    depad_wm = pe.Node(
-        ImageMath(operation="PadImage", op2="-%d" % padding), name="26_depad_wm"
-    )
-    depad_csf = pe.Node(
-        ImageMath(operation="PadImage", op2="-%d" % padding), name="27_depad_csf"
-    )
+    depad_gm = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding), name='25_depad_gm')
+    depad_wm = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding), name='26_depad_wm')
+    depad_csf = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding), name='27_depad_csf')
 
-    msk_conform = pe.Node(niu.Function(function=_conform_mask), name="msk_conform")
-    merge_tpms = pe.Node(niu.Merge(in_segmentation_model[0]), name="merge_tpms")
+    msk_conform = pe.Node(niu.Function(function=_conform_mask), name='msk_conform')
+    merge_tpms = pe.Node(niu.Merge(in_segmentation_model[0]), name='merge_tpms')
 
-    sel_wm = pe.Node(niu.Select(), name="sel_wm", run_without_submitting=True)
+    sel_wm = pe.Node(niu.Select(), name='sel_wm', run_without_submitting=True)
     if not wm_prior:
         sel_wm.inputs.index = in_segmentation_model[-1] - 1
 
     copy_xform_wm = pe.Node(
-        CopyXForm(fields=["wm_map"]), name="copy_xform_wm", run_without_submitting=True
+        CopyXForm(fields=['wm_map']), name='copy_xform_wm', run_without_submitting=True
     )
 
     # Refine INU correction
@@ -759,8 +744,8 @@ def init_atropos_wf(
             bspline_fitting_distance=bspline_fitting_distance,
         ),
         n_procs=omp_nthreads,
-        name="inu_n4_final",
-        iterfield=["input_image"],
+        name='inu_n4_final',
+        iterfield=['input_image'],
     )
 
     try:
@@ -768,12 +753,12 @@ def init_atropos_wf(
     except ValueError:
         warn(
             "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
-            f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
+            f'({inu_n4_final.interface.version} found.) Please consider upgrading.',
             UserWarning,
         )
 
     # Apply mask
-    apply_mask = pe.MapNode(ApplyMask(), iterfield=["in_file"], name="apply_mask")
+    apply_mask = pe.MapNode(ApplyMask(), iterfield=['in_file'], name='apply_mask')
 
     # fmt: off
     wf.connect([
@@ -850,12 +835,12 @@ def init_atropos_wf(
 
         match_wm = pe.Node(
             niu.Function(function=_matchlen),
-            name="match_wm",
+            name='match_wm',
             run_without_submitting=True,
         )
-        overlap = pe.Node(FuzzyOverlap(), name="overlap", run_without_submitting=True)
+        overlap = pe.Node(FuzzyOverlap(), name='overlap', run_without_submitting=True)
 
-        apply_wm_prior = pe.Node(niu.Function(function=_improd), name="apply_wm_prior")
+        apply_wm_prior = pe.Node(niu.Function(function=_improd), name='apply_wm_prior')
 
         # fmt: off
         wf.disconnect([
@@ -880,9 +865,9 @@ def init_n4_only_wf(
     atropos_model=None,
     atropos_refine=True,
     atropos_use_random_seed=True,
-    bids_suffix="T1w",
+    bids_suffix='T1w',
     mem_gb=3.0,
-    name="n4_only_wf",
+    name='n4_only_wf',
     omp_nthreads=None,
 ):
     """
@@ -956,26 +941,24 @@ def init_n4_only_wf(
 
     wf = pe.Workflow(name)
 
-    inputnode = pe.Node(
-        niu.IdentityInterface(fields=["in_files", "in_mask"]), name="inputnode"
-    )
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 'in_mask']), name='inputnode')
 
     outputnode = pe.Node(
         niu.IdentityInterface(
             fields=[
-                "out_file",
-                "out_mask",
-                "bias_corrected",
-                "bias_image",
-                "out_segm",
-                "out_tpms",
+                'out_file',
+                'out_mask',
+                'bias_corrected',
+                'bias_image',
+                'out_segm',
+                'out_tpms',
             ]
         ),
-        name="outputnode",
+        name='outputnode',
     )
 
     # Create brain mask
-    thr_brainmask = pe.Node(Binarize(thresh_low=2), name="binarize")
+    thr_brainmask = pe.Node(Binarize(thresh_low=2), name='binarize')
 
     # INU correction
     inu_n4_final = pe.MapNode(
@@ -989,8 +972,8 @@ def init_n4_only_wf(
             bspline_fitting_distance=200,
         ),
         n_procs=omp_nthreads,
-        name="inu_n4_final",
-        iterfield=["input_image"],
+        name='inu_n4_final',
+        iterfield=['input_image'],
     )
 
     # Check ANTs version
@@ -999,7 +982,7 @@ def init_n4_only_wf(
     except ValueError:
         warn(
             "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
-            f"({inu_n4_final.interface.version} found.) Please consider upgrading.",
+            f'({inu_n4_final.interface.version} found.) Please consider upgrading.',
             UserWarning,
         )
 
@@ -1057,11 +1040,11 @@ def _select_labels(in_segm, labels):
 
     cwd = getcwd()
     nii = nb.load(in_segm)
-    label_data = np.asanyarray(nii.dataobj).astype("uint8")
+    label_data = np.asanyarray(nii.dataobj).astype('uint8')
     for label in labels:
         newnii = nii.__class__(np.uint8(label_data == label), nii.affine, nii.header)
-        newnii.set_data_dtype("uint8")
-        out_file = fname_presuffix(in_segm, suffix="_class-%02d" % label, newpath=cwd)
+        newnii.set_data_dtype('uint8')
+        out_file = fname_presuffix(in_segm, suffix='_class-%02d' % label, newpath=cwd)
         newnii.to_filename(out_file)
         out_files.append(out_file)
     return out_files
@@ -1077,7 +1060,7 @@ def _conform_mask(in_mask, in_reference):
     ref = nb.load(in_reference)
     nii = nb.load(in_mask)
     hdr = nii.header.copy()
-    hdr.set_data_dtype("int16")
+    hdr.set_data_dtype('int16')
     hdr.set_slope_inter(1, 0)
 
     qform, qcode = ref.header.get_qform(coded=True)
@@ -1088,15 +1071,15 @@ def _conform_mask(in_mask, in_reference):
     if scode is not None:
         hdr.set_sform(sform, int(scode))
 
-    if "_maths" in in_mask:  # Cut the name at first _maths occurrence
-        ext = "".join(Path(in_mask).suffixes)
+    if '_maths' in in_mask:  # Cut the name at first _maths occurrence
+        ext = ''.join(Path(in_mask).suffixes)
         basename = Path(in_mask).name
-        in_mask = basename.split("_maths")[0] + ext
+        in_mask = basename.split('_maths')[0] + ext
 
-    out_file = fname_presuffix(in_mask, suffix="_mask", newpath=str(Path()))
-    nii.__class__(
-        np.asanyarray(nii.dataobj).astype("int16"), ref.affine, hdr
-    ).to_filename(out_file)
+    out_file = fname_presuffix(in_mask, suffix='_mask', newpath=str(Path()))
+    nii.__class__(np.asanyarray(nii.dataobj).astype('int16'), ref.affine, hdr).to_filename(
+        out_file
+    )
     return out_file
 
 
@@ -1109,14 +1092,14 @@ def _imsum(op1, op2, out_file=None):
 
     im1 = nb.load(op1)
 
-    data = im1.get_fdata(dtype="float32") + nb.load(op2).get_fdata(dtype="float32")
+    data = im1.get_fdata(dtype='float32') + nb.load(op2).get_fdata(dtype='float32')
     data /= data.max()
     nii = nb.Nifti1Image(data, im1.affine, im1.header)
 
     if out_file is None:
         from pathlib import Path
 
-        out_file = str((Path() / "summap.nii.gz").absolute())
+        out_file = str((Path() / 'summap.nii.gz').absolute())
 
     nii.to_filename(out_file)
     return out_file
@@ -1127,7 +1110,7 @@ def _improd(op1, op2, in_mask, out_file=None):
 
     im1 = nb.load(op1)
 
-    data = im1.get_fdata(dtype="float32") * nb.load(op2).get_fdata(dtype="float32")
+    data = im1.get_fdata(dtype='float32') * nb.load(op2).get_fdata(dtype='float32')
     mskdata = nb.load(in_mask).get_fdata() > 0
     data[~mskdata] = 0
     data[data < 0] = 0
@@ -1138,7 +1121,7 @@ def _improd(op1, op2, in_mask, out_file=None):
     if out_file is None:
         from pathlib import Path
 
-        out_file = str((Path() / "prodmap.nii.gz").absolute())
+        out_file = str((Path() / 'prodmap.nii.gz').absolute())
 
     nii.to_filename(out_file)
     return out_file

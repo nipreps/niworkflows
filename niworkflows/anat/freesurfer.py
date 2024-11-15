@@ -35,9 +35,7 @@ from ..interfaces.freesurfer import (
 from ..interfaces.surf import NormalizeSurf
 
 
-def init_gifti_surface_wf(
-    name="gifti_surface_wf", subjects_dir=getenv("SUBJECTS_DIR", None)
-):
+def init_gifti_surface_wf(name='gifti_surface_wf', subjects_dir=getenv('SUBJECTS_DIR', None)):
     """
     Build a Nipype workflow to prepare GIFTI surfaces from FreeSurfer.
 
@@ -85,49 +83,45 @@ def init_gifti_surface_wf(
 
     """
     if subjects_dir is None:
-        raise RuntimeError("``$SUBJECTS_DIR`` must be set")
+        raise RuntimeError('``$SUBJECTS_DIR`` must be set')
 
     workflow = pe.Workflow(name=name)
 
-    inputnode = pe.Node(
-        niu.IdentityInterface(["in_t1w", "subject_id"]), name="inputnode"
-    )
+    inputnode = pe.Node(niu.IdentityInterface(['in_t1w', 'subject_id']), name='inputnode')
     outputnode = pe.Node(
-        niu.IdentityInterface(["surfaces", "surf_norm", "fsnative_to_t1w_xfm"]),
-        name="outputnode",
+        niu.IdentityInterface(['surfaces', 'surf_norm', 'fsnative_to_t1w_xfm']),
+        name='outputnode',
     )
 
     fssource = pe.Node(
         nio.FreeSurferSource(subjects_dir=subjects_dir),
-        name="fssource",
+        name='fssource',
         run_without_submitting=True,
     )
 
     fsnative_2_t1_xfm = pe.Node(
-        RobustRegister(auto_sens=True, est_int_scale=True), name="fsnative_2_t1_xfm"
+        RobustRegister(auto_sens=True, est_int_scale=True), name='fsnative_2_t1_xfm'
     )
 
     midthickness = pe.MapNode(
-        MakeMidthickness(thickness=True, distance=0.5, out_name="midthickness"),
-        iterfield="in_file",
-        name="midthickness",
+        MakeMidthickness(thickness=True, distance=0.5, out_name='midthickness'),
+        iterfield='in_file',
+        name='midthickness',
     )
 
     save_midthickness = pe.Node(
         nio.DataSink(parameterization=False, base_directory=subjects_dir),
-        name="save_midthickness",
+        name='save_midthickness',
         run_without_submitting=True,
     )
 
     surface_list = pe.Node(
         niu.Merge(4, ravel_inputs=True),
-        name="surface_list",
+        name='surface_list',
         run_without_submitting=True,
     )
-    fs_2_gii = pe.MapNode(
-        fs.MRIsConvert(out_datatype="gii"), iterfield="in_file", name="fs_2_gii"
-    )
-    fix_surfs = pe.MapNode(NormalizeSurf(), iterfield="in_file", name="fix_surfs")
+    fs_2_gii = pe.MapNode(fs.MRIsConvert(out_datatype='gii'), iterfield='in_file', name='fs_2_gii')
+    fix_surfs = pe.MapNode(NormalizeSurf(), iterfield='in_file', name='fix_surfs')
 
     # fmt: off
     workflow.connect([

@@ -21,6 +21,7 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """test nibabel interfaces."""
+
 import json
 import os
 from pathlib import Path
@@ -30,7 +31,13 @@ import nibabel as nb
 import pytest
 
 from ..nibabel import (
-    Binarize, ApplyMask, SplitSeries, MergeSeries, MergeROIs, MapLabels, ReorientImage
+    Binarize,
+    ApplyMask,
+    SplitSeries,
+    MergeSeries,
+    MergeROIs,
+    MapLabels,
+    ReorientImage,
 )
 
 
@@ -41,10 +48,11 @@ def create_roi(tmp_path):
     def _create_roi(affine, img_data, roi_index):
         img_data[tuple(roi_index)] = 1
         nii = nb.Nifti1Image(img_data, affine)
-        filename = tmp_path / f"{str(uuid.uuid4())}.nii.gz"
+        filename = tmp_path / f'{str(uuid.uuid4())}.nii.gz'
         files.append(filename)
         nii.to_filename(filename)
         return filename
+
     yield _create_roi
     # cleanup files
     for f in files:
@@ -62,7 +70,7 @@ bad_affine[0, -1] = -1
 
 
 @pytest.mark.parametrize(
-    "affine, data, roi_index, error, err_message",
+    'affine, data, roi_index, error, err_message',
     [
         (np.eye(4), np.zeros((2, 2, 2, 2), dtype=np.uint16), [1, 0], None, None),
         (
@@ -70,21 +78,21 @@ bad_affine[0, -1] = -1
             np.zeros((2, 2, 3, 2), dtype=np.uint16),
             [1, 0],
             True,
-            "Mismatch in image shape",
+            'Mismatch in image shape',
         ),
         (
             bad_affine,
             np.zeros((2, 2, 2, 2), dtype=np.uint16),
             [1, 0],
             True,
-            "Mismatch in affine",
+            'Mismatch in affine',
         ),
         (
             np.eye(4),
             np.zeros((2, 2, 2, 2), dtype=np.uint16),
             [0, 0, 0],
             True,
-            "Overlapping ROIs",
+            'Overlapping ROIs',
         ),
     ],
 )
@@ -111,10 +119,10 @@ def test_Binarize(tmp_path):
     mask = np.zeros((20, 20, 20), dtype=bool)
     mask[5:15, 5:15, 5:15] = bool
 
-    data = np.zeros_like(mask, dtype="float32")
+    data = np.zeros_like(mask, dtype='float32')
     data[mask] = np.random.gamma(2, size=mask.sum())
 
-    in_file = tmp_path / "input.nii.gz"
+    in_file = tmp_path / 'input.nii.gz'
     nb.Nifti1Image(data, np.eye(4), None).to_filename(str(in_file))
 
     binif = Binarize(thresh_low=0.0, in_file=str(in_file)).run()
@@ -133,32 +141,28 @@ def test_ApplyMask(tmp_path):
     mask[8:11, 8:11, 8:11] = 1.0
 
     # Test the 3D
-    in_file = tmp_path / "input3D.nii.gz"
+    in_file = tmp_path / 'input3D.nii.gz'
     nb.Nifti1Image(data, np.eye(4), None).to_filename(str(in_file))
 
-    in_mask = tmp_path / "mask.nii.gz"
+    in_mask = tmp_path / 'mask.nii.gz'
     nb.Nifti1Image(mask, np.eye(4), None).to_filename(str(in_mask))
 
     masked1 = ApplyMask(in_file=str(in_file), in_mask=str(in_mask), threshold=0.4).run()
-    assert nb.load(masked1.outputs.out_file).get_fdata().sum() == 5 ** 3
+    assert nb.load(masked1.outputs.out_file).get_fdata().sum() == 5**3
 
     masked1 = ApplyMask(in_file=str(in_file), in_mask=str(in_mask), threshold=0.6).run()
-    assert nb.load(masked1.outputs.out_file).get_fdata().sum() == 3 ** 3
+    assert nb.load(masked1.outputs.out_file).get_fdata().sum() == 3**3
 
     data4d = np.stack((data, 2 * data, 3 * data), axis=-1)
     # Test the 4D case
-    in_file4d = tmp_path / "input4D.nii.gz"
+    in_file4d = tmp_path / 'input4D.nii.gz'
     nb.Nifti1Image(data4d, np.eye(4), None).to_filename(str(in_file4d))
 
-    masked1 = ApplyMask(
-        in_file=str(in_file4d), in_mask=str(in_mask), threshold=0.4
-    ).run()
-    assert nb.load(masked1.outputs.out_file).get_fdata().sum() == 5 ** 3 * 6
+    masked1 = ApplyMask(in_file=str(in_file4d), in_mask=str(in_mask), threshold=0.4).run()
+    assert nb.load(masked1.outputs.out_file).get_fdata().sum() == 5**3 * 6
 
-    masked1 = ApplyMask(
-        in_file=str(in_file4d), in_mask=str(in_mask), threshold=0.6
-    ).run()
-    assert nb.load(masked1.outputs.out_file).get_fdata().sum() == 3 ** 3 * 6
+    masked1 = ApplyMask(in_file=str(in_file4d), in_mask=str(in_mask), threshold=0.6).run()
+    assert nb.load(masked1.outputs.out_file).get_fdata().sum() == 3**3 * 6
 
     # Test errors
     nb.Nifti1Image(mask, 2 * np.eye(4), None).to_filename(str(in_mask))
@@ -173,7 +177,7 @@ def test_ApplyMask(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "shape,exp_n",
+    'shape,exp_n',
     [
         ((20, 20, 20, 15), 15),
         ((20, 20, 20), 1),
@@ -193,15 +197,13 @@ def test_SplitSeries(tmp_path, shape, exp_n):
     """Test 4-to-3 NIfTI split interface."""
     os.chdir(tmp_path)
 
-    in_file = str(tmp_path / "input.nii.gz")
+    in_file = str(tmp_path / 'input.nii.gz')
     nb.Nifti1Image(np.ones(shape, dtype=float), np.eye(4), None).to_filename(in_file)
 
     _interface = SplitSeries(in_file=in_file)
     if exp_n > 0:
         split = _interface.run()
-        n = int(isinstance(split.outputs.out_files, str)) or len(
-            split.outputs.out_files
-        )
+        n = int(isinstance(split.outputs.out_files, str)) or len(split.outputs.out_files)
         assert n == exp_n
     else:
         with pytest.raises(ValueError):
@@ -212,18 +214,14 @@ def test_MergeSeries(tmp_path):
     """Test 3-to-4 NIfTI concatenation interface."""
     os.chdir(str(tmp_path))
 
-    in_file = tmp_path / "input3D.nii.gz"
-    nb.Nifti1Image(np.ones((20, 20, 20), dtype=float), np.eye(4), None).to_filename(
-        str(in_file)
-    )
+    in_file = tmp_path / 'input3D.nii.gz'
+    nb.Nifti1Image(np.ones((20, 20, 20), dtype=float), np.eye(4), None).to_filename(str(in_file))
 
     merge = MergeSeries(in_files=[str(in_file)] * 5).run()
     assert nb.load(merge.outputs.out_file).dataobj.shape == (20, 20, 20, 5)
 
-    in_4D = tmp_path / "input4D.nii.gz"
-    nb.Nifti1Image(np.ones((20, 20, 20, 4), dtype=float), np.eye(4), None).to_filename(
-        str(in_4D)
-    )
+    in_4D = tmp_path / 'input4D.nii.gz'
+    nb.Nifti1Image(np.ones((20, 20, 20, 4), dtype=float), np.eye(4), None).to_filename(str(in_4D))
 
     merge = MergeSeries(in_files=[str(in_file)] + [str(in_4D)]).run()
     assert nb.load(merge.outputs.out_file).dataobj.shape == (20, 20, 20, 5)
@@ -256,7 +254,7 @@ LABEL_OUTPUT = np.asarray([0, 1, 2, 3, 4, 1, 1, 2]).reshape(2, 2, 2)
 
 
 @pytest.mark.parametrize(
-    "data,mapping,tojson,expected",
+    'data,mapping,tojson,expected',
     [
         (LABEL_INPUT, LABEL_MAPPINGS, False, LABEL_OUTPUT),
         (LABEL_INPUT, LABEL_MAPPINGS, True, LABEL_OUTPUT),
@@ -264,7 +262,7 @@ LABEL_OUTPUT = np.asarray([0, 1, 2, 3, 4, 1, 1, 2]).reshape(2, 2, 2)
 )
 def test_map_labels(tmpdir, data, mapping, tojson, expected):
     tmpdir.chdir()
-    in_file = create_image(data, Path("test.nii.gz"))
+    in_file = create_image(data, Path('test.nii.gz'))
     maplbl = MapLabels(in_file=in_file)
     if tojson:
         map_file = Path('mapping.json')
@@ -288,7 +286,7 @@ def create_save_img(ornt: str):
     data = np.random.rand(2, 2, 2)
     img = nb.Nifti1Image(data, affine=np.eye(4))
     # img will always be in RAS at the start
-    ras = nb.orientations.axcodes2ornt("RAS")
+    ras = nb.orientations.axcodes2ornt('RAS')
     if ornt != 'RAS':
         new = nb.orientations.axcodes2ornt(ornt)
         xfm = nb.orientations.ornt_transform(ras, new)
@@ -299,13 +297,13 @@ def create_save_img(ornt: str):
 
 
 @pytest.mark.parametrize(
-    "in_ornt,out_ornt",
+    'in_ornt,out_ornt',
     [
-        ("RAS", "RAS"),
-        ("RAS", "LAS"),
-        ("LAS", "RAS"),
-        ("RAS", "RPI"),
-        ("LPI", "RAS"),
+        ('RAS', 'RAS'),
+        ('RAS', 'LAS'),
+        ('LAS', 'RAS'),
+        ('RAS', 'RPI'),
+        ('LPI', 'RAS'),
     ],
 )
 def test_reorient_image(tmpdir, in_ornt, out_ornt):

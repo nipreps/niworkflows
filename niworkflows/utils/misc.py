@@ -21,19 +21,20 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Miscellaneous utilities."""
+
 import os
 from typing import Optional
 import warnings
 
 
 __all__ = [
-    "get_template_specs",
-    "fix_multi_T1w_source_name",
-    "add_suffix",
-    "read_crashfile",
-    "splitext",
-    "_copy_any",
-    "clean_directory",
+    'get_template_specs',
+    'fix_multi_T1w_source_name',
+    'add_suffix',
+    'read_crashfile',
+    'splitext',
+    '_copy_any',
+    'clean_directory',
 ]
 
 
@@ -41,7 +42,7 @@ def get_template_specs(
     in_template: str,
     template_spec: Optional[dict] = None,
     default_resolution: int = 1,
-    fallback: bool = False
+    fallback: bool = False,
 ):
     """
     Parse template specifications
@@ -82,10 +83,10 @@ def get_template_specs(
 
     # Massage spec (start creating if None)
     template_spec = template_spec or {}
-    template_spec["desc"] = template_spec.get("desc", None)
-    template_spec["atlas"] = template_spec.get("atlas", None)
-    template_spec["resolution"] = template_spec.pop(
-        "res", template_spec.get("resolution", default_resolution)
+    template_spec['desc'] = template_spec.get('desc', None)
+    template_spec['atlas'] = template_spec.get('atlas', None)
+    template_spec['resolution'] = template_spec.pop(
+        'res', template_spec.get('resolution', default_resolution)
     )
 
     # Verify resolution is valid
@@ -103,23 +104,21 @@ def get_template_specs(
         if not (set(res) & set(available_resolutions)):
             fallback_res = available_resolutions[0] if available_resolutions else None
             warnings.warn(
-                f"Template {in_template} does not have resolution: {res}."
-                f"Falling back to resolution: {fallback_res}."
+                f'Template {in_template} does not have resolution: {res}.'
+                f'Falling back to resolution: {fallback_res}.'
             )
-            template_spec["resolution"] = fallback_res
+            template_spec['resolution'] = fallback_res
 
-    common_spec = {"resolution": template_spec["resolution"]}
-    if "cohort" in template_spec:
-        common_spec["cohort"] = template_spec["cohort"]
+    common_spec = {'resolution': template_spec['resolution']}
+    if 'cohort' in template_spec:
+        common_spec['cohort'] = template_spec['cohort']
 
     tpl_target_path = tf.get(in_template, **template_spec)
     if not tpl_target_path:
         raise RuntimeError(
             """\
 Could not find template "{0}" with specs={1}. Please revise your template \
-argument.""".format(
-                in_template, template_spec
-            )
+argument.""".format(in_template, template_spec)
         )
 
     if isinstance(tpl_target_path, list):
@@ -127,7 +126,7 @@ argument.""".format(
             """\
 The available template modifiers ({0}) did not select a unique template \
 (got "{1}"). Please revise your template argument.""".format(
-                template_spec, ", ".join([str(p) for p in tpl_target_path])
+                template_spec, ', '.join([str(p) for p in tpl_target_path])
             )
         )
 
@@ -157,8 +156,8 @@ def fix_multi_T1w_source_name(in_files):
         in_file = in_file[0]
 
     base, in_file = os.path.split(in_file)
-    subject_label = in_file.split("_", 1)[0].split("-")[1]
-    return os.path.join(base, "sub-%s_T1w.nii.gz" % subject_label)
+    subject_label = in_file.split('_', 1)[0].split('-')[1]
+    return os.path.join(base, 'sub-%s_T1w.nii.gz' % subject_label)
 
 
 def add_suffix(in_files, suffix):
@@ -178,25 +177,25 @@ def add_suffix(in_files, suffix):
 
 
 def read_crashfile(path):
-    if path.endswith(".pklz"):
+    if path.endswith('.pklz'):
         return _read_pkl(path)
-    elif path.endswith(".txt"):
+    elif path.endswith('.txt'):
         return _read_txt(path)
-    raise RuntimeError("unknown crashfile format")
+    raise RuntimeError('unknown crashfile format')
 
 
 def _read_pkl(path):
     from nipype.utils.filemanip import loadcrash
 
     crash_data = loadcrash(path)
-    data = {"file": path, "traceback": "".join(crash_data["traceback"])}
-    if "node" in crash_data:
-        data["node"] = crash_data["node"]
-        if data["node"].base_dir:
-            data["node_dir"] = data["node"].output_dir()
+    data = {'file': path, 'traceback': ''.join(crash_data['traceback'])}
+    if 'node' in crash_data:
+        data['node'] = crash_data['node']
+        if data['node'].base_dir:
+            data['node_dir'] = data['node'].output_dir()
         else:
-            data["node_dir"] = "Node crashed before execution"
-        data["inputs"] = sorted(data["node"].inputs.trait_get().items())
+            data['node_dir'] = 'Node crashed before execution'
+        data['inputs'] = sorted(data['node'].inputs.trait_get().items())
     return data
 
 
@@ -215,14 +214,14 @@ def _read_txt(path):
     from pathlib import Path
 
     lines = Path(path).read_text().splitlines()
-    data = {"file": str(path)}
+    data = {'file': str(path)}
     traceback_start = 0
-    if lines[0].startswith("Node"):
-        data["node"] = lines[0].split(": ", 1)[1].strip()
-        data["node_dir"] = lines[1].split(": ", 1)[1].strip()
+    if lines[0].startswith('Node'):
+        data['node'] = lines[0].split(': ', 1)[1].strip()
+        data['node_dir'] = lines[1].split(': ', 1)[1].strip()
         inputs = []
-        cur_key = ""
-        cur_val = ""
+        cur_key = ''
+        cur_val = ''
         for i, line in enumerate(lines[5:]):
             if not line.strip():
                 continue
@@ -234,16 +233,16 @@ def _read_txt(path):
             if cur_val:
                 inputs.append((cur_key, cur_val.strip()))
 
-            if line.startswith("Traceback ("):
+            if line.startswith('Traceback ('):
                 traceback_start = i + 5
                 break
 
-            cur_key, cur_val = tuple(line.split(" = ", 1))
+            cur_key, cur_val = tuple(line.split(' = ', 1))
 
-        data["inputs"] = sorted(inputs)
+        data['inputs'] = sorted(inputs)
     else:
-        data["node_dir"] = "Node crashed before execution"
-    data["traceback"] = "\n".join(lines[traceback_start:]).strip()
+        data['node_dir'] = 'Node crashed before execution'
+    data['traceback'] = '\n'.join(lines[traceback_start:]).strip()
     return data
 
 
@@ -272,8 +271,8 @@ def splitext(fname):
     from pathlib import Path
 
     basename = str(Path(fname).name)
-    stem = Path(basename.rstrip(".gz")).stem
-    return stem, basename[len(stem):]
+    stem = Path(basename.rstrip('.gz')).stem
+    return stem, basename[len(stem) :]
 
 
 def _copy_any(src, dst):
@@ -282,8 +281,8 @@ def _copy_any(src, dst):
     from shutil import copyfileobj
     from nipype.utils.filemanip import copyfile
 
-    src_isgz = os.fspath(src).endswith(".gz")
-    dst_isgz = os.fspath(dst).endswith(".gz")
+    src_isgz = os.fspath(src).endswith('.gz')
+    dst_isgz = os.fspath(dst).endswith('.gz')
     if not src_isgz and not dst_isgz:
         copyfile(src, dst, copy=True, use_hardlink=True)
         return False  # Make sure we do not reuse the hardlink later
@@ -293,11 +292,11 @@ def _copy_any(src, dst):
         os.unlink(dst)
 
     src_open = gzip.open if src_isgz else open
-    with src_open(src, "rb") as f_in:
-        with open(dst, "wb") as f_out:
+    with src_open(src, 'rb') as f_in:
+        with open(dst, 'wb') as f_out:
             if dst_isgz:
                 # Remove FNAME header from gzip (nipreps/fmriprep#1480)
-                gz_out = gzip.GzipFile("", "wb", 9, f_out, 0.0)
+                gz_out = gzip.GzipFile('', 'wb', 9, f_out, 0.0)
                 copyfileobj(f_in, gz_out)
                 gz_out.close()
             else:
@@ -368,11 +367,11 @@ def check_valid_fs_license():
     from tempfile import TemporaryDirectory
     from .. import data
 
-    with TemporaryDirectory() as tmpdir, data.load.as_path("sentinel.nii.gz") as sentinel:
+    with TemporaryDirectory() as tmpdir, data.load.as_path('sentinel.nii.gz') as sentinel:
         # quick FreeSurfer command
-        _cmd = ("mri_convert", str(sentinel), str(Path(tmpdir) / "out.mgz"))
+        _cmd = ('mri_convert', str(sentinel), str(Path(tmpdir) / 'out.mgz'))
         proc = sp.run(_cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
-    return proc.returncode == 0 and "ERROR:" not in proc.stdout.decode()
+    return proc.returncode == 0 and 'ERROR:' not in proc.stdout.decode()
 
 
 def unlink(pathlike, missing_ok=False):
@@ -385,5 +384,5 @@ def unlink(pathlike, missing_ok=False):
             raise
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pass

@@ -20,7 +20,8 @@
 #
 #     https://www.nipreps.org/community/licensing/
 #
-""" py.test configuration file """
+"""py.test configuration file"""
+
 import os
 from pathlib import Path
 import datetime as dt
@@ -44,18 +45,18 @@ def _run_interface_mock(objekt, runtime):
 
 @pytest.fixture
 def reference():
-    return str(get_template("MNI152Lin", resolution=2, desc=None, suffix="T1w"))
+    return str(get_template('MNI152Lin', resolution=2, desc=None, suffix='T1w'))
 
 
 @pytest.fixture
 def reference_mask():
-    return str(get_template("MNI152Lin", resolution=2, desc="brain", suffix="mask"))
+    return str(get_template('MNI152Lin', resolution=2, desc='brain', suffix='mask'))
 
 
 @pytest.fixture
 def moving():
     data_env_canary()
-    return str(Path(test_data_env) / "ds000003/sub-01/anat/sub-01_T1w.nii.gz")
+    return str(Path(test_data_env) / 'ds000003/sub-01/anat/sub-01_T1w.nii.gz')
 
 
 @pytest.fixture
@@ -63,4 +64,4 @@ def nthreads():
     from multiprocessing import cpu_count
 
     # Tests are linear, so don't worry about leaving space for a control thread
-    return min(int(os.getenv("CIRCLE_NPROCS", "8")), cpu_count())
+    return min(int(os.getenv('CIRCLE_NPROCS', '8')), cpu_count())

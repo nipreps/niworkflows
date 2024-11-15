@@ -43,10 +43,10 @@ from ..utils.images import _copyxform
 class _FixTraitApplyTransformsInputSpec(ApplyTransformsInputSpec):
     transforms = InputMultiObject(
         traits.Either(File(exists=True), 'identity'),
-        argstr="%s",
+        argstr='%s',
         mandatory=True,
-        desc="transform files: will be applied in reverse order. For "
-        "example, the last specified transform will be applied first.",
+        desc='transform files: will be applied in reverse order. For '
+        'example, the last specified transform will be applied first.',
     )
 
 
@@ -61,14 +61,12 @@ class FixHeaderApplyTransforms(ApplyTransforms):
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         # Run normally
-        runtime = super()._run_interface(
-            runtime, correct_return_codes
-        )
+        runtime = super()._run_interface(runtime, correct_return_codes)
 
         _copyxform(
             self.inputs.reference_image,
-            os.path.abspath(self._gen_filename("output_image")),
-            message="%s (niworkflows v%s)" % (self.__class__.__name__, __version__),
+            os.path.abspath(self._gen_filename('output_image')),
+            message='%s (niworkflows v%s)' % (self.__class__.__name__, __version__),
         )
         return runtime
 
@@ -77,14 +75,14 @@ class _FixHeaderRegistrationInputSpec(_RegistrationInputSpec):
     restrict_deformation = traits.List(
         traits.List(traits.Range(low=0.0, high=1.0)),
         desc=(
-            "This option allows the user to restrict the optimization of "
-            "the displacement field, translation, rigid or affine transform "
-            "on a per-component basis. For example, if one wants to limit "
-            "the deformation or rotation of 3-D volume to the  first two "
-            "dimensions, this is possible by specifying a weight vector of "
+            'This option allows the user to restrict the optimization of '
+            'the displacement field, translation, rigid or affine transform '
+            'on a per-component basis. For example, if one wants to limit '
+            'the deformation or rotation of 3-D volume to the  first two '
+            'dimensions, this is possible by specifying a weight vector of '
             "'1x1x0' for a deformation field or '1x1x0x1x1x0' for a rigid "
-            "transformation.  Low-dimensional restriction only works if "
-            "there are no preceding transformations."
+            'transformation.  Low-dimensional restriction only works if '
+            'there are no preceding transformations.'
         ),
     )
 
@@ -100,9 +98,7 @@ class FixHeaderRegistration(Registration):
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         # Run normally
-        runtime = super()._run_interface(
-            runtime, correct_return_codes
-        )
+        runtime = super()._run_interface(runtime, correct_return_codes)
 
         # Forward transform
         out_file = self._get_outputfilenames(inverse=False)
@@ -110,7 +106,7 @@ class FixHeaderRegistration(Registration):
             _copyxform(
                 self.inputs.fixed_image[0],
                 os.path.abspath(out_file),
-                message="%s (niworkflows v%s)" % (self.__class__.__name__, __version__),
+                message='%s (niworkflows v%s)' % (self.__class__.__name__, __version__),
             )
 
         # Inverse transform
@@ -119,7 +115,7 @@ class FixHeaderRegistration(Registration):
             _copyxform(
                 self.inputs.moving_image[0],
                 os.path.abspath(out_file),
-                message="%s (niworkflows v%s)" % (self.__class__.__name__, __version__),
+                message='%s (niworkflows v%s)' % (self.__class__.__name__, __version__),
             )
 
         return runtime
@@ -129,8 +125,8 @@ class _FixN4BiasFieldCorrectionOutputSpec(VanillaN4OutputSpec):
     negative_values = traits.Bool(
         False,
         usedefault=True,
-        desc="Indicates whether the input was corrected for "
-        "nonpositive values by adding a constant offset.",
+        desc='Indicates whether the input was corrected for '
+        'nonpositive values by adding a constant offset.',
     )
 
 
@@ -146,11 +142,9 @@ class FixN4BiasFieldCorrection(VanillaN4):
         super().__init__(*args, **kwargs)
 
     def _format_arg(self, name, trait_spec, value):
-        if name == "input_image":
+        if name == 'input_image':
             return trait_spec.argstr % self._input_image
-        return super()._format_arg(
-            name, trait_spec, value
-        )
+        return super()._format_arg(name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
         self._input_image = self.inputs.input_image
@@ -159,7 +153,7 @@ class FixN4BiasFieldCorrection(VanillaN4):
         datamin = input_nii.get_fdata().min()
         if datamin < 0:
             self._input_image = fname_presuffix(
-                self.inputs.input_image, suffix="_scaled", newpath=os.getcwd()
+                self.inputs.input_image, suffix='_scaled', newpath=os.getcwd()
             )
             data = input_nii.get_fdata() - datamin
             newnii = input_nii.__class__(data, input_nii.affine, input_nii.header)
@@ -170,5 +164,5 @@ class FixN4BiasFieldCorrection(VanillaN4):
 
     def _list_outputs(self):
         outputs = super()._list_outputs()
-        outputs["negative_values"] = self._negative_values
+        outputs['negative_values'] = self._negative_values
         return outputs

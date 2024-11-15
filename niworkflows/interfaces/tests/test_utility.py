@@ -21,6 +21,7 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """KeySelect tests."""
+
 from pathlib import Path
 import pytest
 from ..utility import KeySelect, _tsv2json
@@ -29,7 +30,7 @@ from ..utility import KeySelect, _tsv2json
 def test_KeySelect():
     """Test KeySelect."""
     with pytest.raises(ValueError):
-        KeySelect(fields="field1", keys=["a", "b", "c", "a"])
+        KeySelect(fields='field1', keys=['a', 'b', 'c', 'a'])
 
     with pytest.raises(ValueError):
         KeySelect(fields=[])

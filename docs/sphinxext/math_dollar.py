@@ -1,5 +1,6 @@
 import re
 
+
 def dollars_to_math(source):
     r"""
     Replace dollar signs with backticks.
@@ -21,8 +22,8 @@ def dollars_to_math(source):
 
       `f(n) = 0 \text{ if $n$ is prime}`
     """
-    s = "\n".join(source)
-    if s.find("$") == -1:
+    s = '\n'.join(source)
+    if s.find('$') == -1:
         return
     # This searches for "$blah$" inside a pair of curly braces --
     # don't change these, since they're probably coming from a nested
@@ -30,25 +31,27 @@ def dollars_to_math(source):
     # string, and later on we substitute the original back.
     global _data
     _data = {}
+
     def repl(matchobj):
         global _data
         s = matchobj.group(0)
-        t = "___XXX_REPL_%d___" % len(_data)
+        t = '___XXX_REPL_%d___' % len(_data)
         _data[t] = s
         return t
-    s = re.sub(r"({[^{}$]*\$[^{}$]*\$[^{}]*})", repl, s)
+
+    s = re.sub(r'({[^{}$]*\$[^{}$]*\$[^{}]*})', repl, s)
     # matches $...$
-    dollars = re.compile(r"(?<!\$)(?<!\\)\$([^\$]+?)\$")
+    dollars = re.compile(r'(?<!\$)(?<!\\)\$([^\$]+?)\$')
     # regular expression for \$
-    slashdollar = re.compile(r"\\\$")
-    s = dollars.sub(r":math:`\1`", s)
-    s = slashdollar.sub(r"$", s)
+    slashdollar = re.compile(r'\\\$')
+    s = dollars.sub(r':math:`\1`', s)
+    s = slashdollar.sub(r'$', s)
     # change the original {...} things in:
     for r in _data:
         s = s.replace(r, _data[r])
     # now save results in "source"
     source[:] = [s]
-    
+
 
 def process_dollars(app, docname, source):
     dollars_to_math(source)
@@ -57,7 +60,7 @@ def process_dollars(app, docname, source):
 def mathdollar_docstrings(app, what, name, obj, options, lines):
     dollars_to_math(lines)
 
-    
+
 def setup(app):
-    app.connect("source-read", process_dollars)
+    app.connect('source-read', process_dollars)
     app.connect('autodoc-process-docstring', mathdollar_docstrings)

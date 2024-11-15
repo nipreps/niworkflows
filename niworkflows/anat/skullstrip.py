@@ -21,13 +21,14 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Brain extraction workflows."""
+
 from nipype.interfaces import afni, utility as niu
 from nipype.pipeline import engine as pe
 from ..interfaces.nibabel import Binarize
 from ..interfaces.fixes import FixN4BiasFieldCorrection as N4BiasFieldCorrection
 
 
-def afni_wf(name="AFNISkullStripWorkflow", unifize=False, n4_nthreads=1):
+def afni_wf(name='AFNISkullStripWorkflow', unifize=False, n4_nthreads=1):
     """
     Create a skull-stripping workflow based on AFNI's tools.
 
@@ -72,12 +73,10 @@ def afni_wf(name="AFNISkullStripWorkflow", unifize=False, n4_nthreads=1):
 
     """
     workflow = pe.Workflow(name=name)
-    inputnode = pe.Node(niu.IdentityInterface(fields=["in_file"]), name="inputnode")
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file']), name='inputnode')
     outputnode = pe.Node(
-        niu.IdentityInterface(
-            fields=["bias_corrected", "out_file", "out_mask", "bias_image"]
-        ),
-        name="outputnode",
+        niu.IdentityInterface(fields=['bias_corrected', 'out_file', 'out_mask', 'bias_image']),
+        name='outputnode',
     )
 
     inu_n4 = pe.Node(
@@ -89,22 +88,20 @@ def afni_wf(name="AFNISkullStripWorkflow", unifize=False, n4_nthreads=1):
             copy_header=True,
         ),
         n_procs=n4_nthreads,
-        name="inu_n4",
+        name='inu_n4',
     )
 
-    sstrip = pe.Node(afni.SkullStrip(outputtype="NIFTI_GZ"), name="skullstrip")
+    sstrip = pe.Node(afni.SkullStrip(outputtype='NIFTI_GZ'), name='skullstrip')
     sstrip_orig_vol = pe.Node(
-        afni.Calc(expr="a*step(b)", outputtype="NIFTI_GZ"), name="sstrip_orig_vol"
+        afni.Calc(expr='a*step(b)', outputtype='NIFTI_GZ'), name='sstrip_orig_vol'
     )
-    binarize = pe.Node(Binarize(thresh_low=0.0), name="binarize")
+    binarize = pe.Node(Binarize(thresh_low=0.0), name='binarize')
 
     if unifize:
         # Add two unifize steps, pre- and post- skullstripping.
-        inu_uni_0 = pe.Node(
-            afni.Unifize(outputtype="NIFTI_GZ"), name="unifize_pre_skullstrip"
-        )
+        inu_uni_0 = pe.Node(afni.Unifize(outputtype='NIFTI_GZ'), name='unifize_pre_skullstrip')
         inu_uni_1 = pe.Node(
-            afni.Unifize(gm=True, outputtype="NIFTI_GZ"), name="unifize_post_skullstrip"
+            afni.Unifize(gm=True, outputtype='NIFTI_GZ'), name='unifize_post_skullstrip'
         )
         # fmt: off
         workflow.connect([

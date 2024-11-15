@@ -21,6 +21,7 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """ReportCapableInterfaces for masks tools."""
+
 import os
 import numpy as np
 import nibabel as nb
@@ -43,9 +44,7 @@ class _BETInputSpecRPT(nrb._SVGReportCapableInputSpec, fsl.preprocess.BETInputSp
     pass
 
 
-class _BETOutputSpecRPT(
-    reporting.ReportCapableOutputSpec, fsl.preprocess.BETOutputSpec
-):
+class _BETOutputSpecRPT(reporting.ReportCapableOutputSpec, fsl.preprocess.BETOutputSpec):
     pass
 
 
@@ -94,16 +93,11 @@ class BrainExtractionRPT(nrb.SegmentationRC, ants.segmentation.BrainExtraction):
     output_spec = _BrainExtractionOutputSpecRPT
 
     def _post_run_hook(self, runtime):
-        """ generates a report showing slices from each axis """
+        """generates a report showing slices from each axis"""
 
-        brain_extraction_mask = self.aggregate_outputs(
-            runtime=runtime
-        ).BrainExtractionMask
+        brain_extraction_mask = self.aggregate_outputs(runtime=runtime).BrainExtractionMask
 
-        if (
-            isdefined(self.inputs.keep_temporary_files)
-            and self.inputs.keep_temporary_files == 1
-        ):
+        if isdefined(self.inputs.keep_temporary_files) and self.inputs.keep_temporary_files == 1:
             self._anat_file = self.aggregate_outputs(runtime=runtime).N4Corrected0
         else:
             self._anat_file = self.inputs.anatomical_image
@@ -124,9 +118,7 @@ class _ACompCorInputSpecRPT(nrb._SVGReportCapableInputSpec, confounds.CompCorInp
     pass
 
 
-class _ACompCorOutputSpecRPT(
-    reporting.ReportCapableOutputSpec, confounds.CompCorOutputSpec
-):
+class _ACompCorOutputSpecRPT(reporting.ReportCapableOutputSpec, confounds.CompCorOutputSpec):
     pass
 
 
@@ -135,12 +127,12 @@ class ACompCorRPT(nrb.SegmentationRC, confounds.ACompCor):
     output_spec = _ACompCorOutputSpecRPT
 
     def _post_run_hook(self, runtime):
-        """ generates a report showing slices from each axis """
+        """generates a report showing slices from each axis"""
 
         if len(self.inputs.mask_files) != 1:
             raise ValueError(
-                "ACompCorRPT only supports a single input mask. "
-                "A list %s was found." % self.inputs.mask_files
+                'ACompCorRPT only supports a single input mask. '
+                'A list %s was found.' % self.inputs.mask_files
             )
         self._anat_file = self.inputs.realigned_file
         self._mask_file = self.inputs.mask_files[0]
@@ -156,15 +148,11 @@ class ACompCorRPT(nrb.SegmentationRC, confounds.ACompCor):
         return super()._post_run_hook(runtime)
 
 
-class _TCompCorInputSpecRPT(
-    nrb._SVGReportCapableInputSpec, confounds.TCompCorInputSpec
-):
+class _TCompCorInputSpecRPT(nrb._SVGReportCapableInputSpec, confounds.TCompCorInputSpec):
     pass
 
 
-class _TCompCorOutputSpecRPT(
-    reporting.ReportCapableOutputSpec, confounds.TCompCorOutputSpec
-):
+class _TCompCorOutputSpecRPT(reporting.ReportCapableOutputSpec, confounds.TCompCorOutputSpec):
     pass
 
 
@@ -173,16 +161,14 @@ class TCompCorRPT(nrb.SegmentationRC, confounds.TCompCor):
     output_spec = _TCompCorOutputSpecRPT
 
     def _post_run_hook(self, runtime):
-        """ generates a report showing slices from each axis """
+        """generates a report showing slices from each axis"""
 
-        high_variance_masks = self.aggregate_outputs(
-            runtime=runtime
-        ).high_variance_masks
+        high_variance_masks = self.aggregate_outputs(runtime=runtime).high_variance_masks
 
         if isinstance(high_variance_masks, list):
             raise ValueError(
-                "TCompCorRPT only supports a single output high variance mask. "
-                "A list %s was found." % high_variance_masks
+                'TCompCorRPT only supports a single output high variance mask. '
+                'A list %s was found.' % high_variance_masks
             )
         self._anat_file = self.inputs.realigned_file
         self._mask_file = high_variance_masks
@@ -199,8 +185,8 @@ class TCompCorRPT(nrb.SegmentationRC, confounds.TCompCor):
 
 
 class _SimpleShowMaskInputSpec(nrb._SVGReportCapableInputSpec):
-    background_file = File(exists=True, mandatory=True, desc="file before")
-    mask_file = File(exists=True, mandatory=True, desc="file before")
+    background_file = File(exists=True, mandatory=True, desc='file before')
+    mask_file = File(exists=True, mandatory=True, desc='file before')
 
 
 class SimpleShowMaskRPT(nrb.SegmentationRC, nrb.ReportingInterface):
@@ -216,24 +202,22 @@ class SimpleShowMaskRPT(nrb.SegmentationRC, nrb.ReportingInterface):
 
 
 class _ROIsPlotInputSpecRPT(nrb._SVGReportCapableInputSpec):
-    in_file = File(
-        exists=True, mandatory=True, desc="the volume where ROIs are defined"
-    )
+    in_file = File(exists=True, mandatory=True, desc='the volume where ROIs are defined')
     in_rois = InputMultiPath(
-        File(exists=True), mandatory=True, desc="a list of regions to be plotted"
+        File(exists=True), mandatory=True, desc='a list of regions to be plotted'
     )
-    in_mask = File(exists=True, desc="a special region, eg. the brain mask")
-    masked = traits.Bool(False, usedefault=True, desc="mask in_file prior plotting")
+    in_mask = File(exists=True, desc='a special region, eg. the brain mask')
+    masked = traits.Bool(False, usedefault=True, desc='mask in_file prior plotting')
     colors = traits.Either(
-        None, traits.List(Str), usedefault=True, desc="use specific colors for contours"
+        None, traits.List(Str), usedefault=True, desc='use specific colors for contours'
     )
     levels = traits.Either(
         None,
         traits.List(traits.Float),
         usedefault=True,
-        desc="pass levels to nilearn.plotting",
+        desc='pass levels to nilearn.plotting',
     )
-    mask_color = Str("r", usedefault=True, desc="color for mask")
+    mask_color = Str('r', usedefault=True, desc='color for mask')
 
 
 class ROIsPlot(nrb.ReportingInterface):
@@ -253,23 +237,21 @@ class ROIsPlot(nrb.ReportingInterface):
         if len(seg_files) == 1:  # in_rois is a segmentation
             nsegs = len(levels)
             if nsegs == 0:
-                levels = np.unique(
-                    np.round(nb.load(seg_files[0]).get_fdata(dtype="float32"))
-                )
+                levels = np.unique(np.round(nb.load(seg_files[0]).get_fdata(dtype='float32')))
                 levels = (levels[levels > 0] - 0.5).tolist()
                 nsegs = len(levels)
 
             levels = [levels]
             missing = nsegs - len(colors)
             if missing > 0:
-                colors = colors + color_palette("husl", missing)
+                colors = colors + color_palette('husl', missing)
             colors = [colors]
         else:  # in_rois is a list of masks
             nsegs = len(seg_files)
             levels = [[0.5]] * nsegs
             missing = nsegs - len(colors)
             if missing > 0:
-                colors = [[c] for c in colors + color_palette("husl", missing)]
+                colors = [[c] for c in colors + color_palette('husl', missing)]
 
         if mask_file:
             seg_files.insert(0, mask_file)

@@ -31,8 +31,8 @@ from sphinx.addnodes import pending_xref, desc_content
 from sphinx.util import logging
 from sphinx.errors import ExtensionError
 
-if sphinx.__version__ < "5":
-    raise RuntimeError("Sphinx 5 or newer is required")
+if sphinx.__version__ < '5':
+    raise RuntimeError('Sphinx 5 or newer is required')
 
 from .docscrape_sphinx import get_doc_object
 from .validate import validate, ERROR_MSGS, get_validation_checks
@@ -52,7 +52,7 @@ def _traverse_or_findall(node, condition, **kwargs):
     """
     return (
         node.findall(condition, **kwargs)
-        if hasattr(node, "findall")
+        if hasattr(node, 'findall')
         else node.traverse(condition, **kwargs)
     )
 
@@ -63,21 +63,21 @@ def rename_references(app, what, name, obj, options, lines):
     references = set()
     for line in lines:
         line = line.strip()
-        m = re.match(r"^\.\. +\[(%s)\]" % app.config.numpydoc_citation_re, line, re.I)
+        m = re.match(r'^\.\. +\[(%s)\]' % app.config.numpydoc_citation_re, line, re.I)
         if m:
             references.add(m.group(1))
 
     if references:
         # we use a hash to mangle the reference name to avoid invalid names
         sha = hashlib.sha256()
-        sha.update(name.encode("utf8"))
-        prefix = "R" + sha.hexdigest()[:HASH_LEN]
+        sha.update(name.encode('utf8'))
+        prefix = 'R' + sha.hexdigest()[:HASH_LEN]
 
         for r in references:
-            new_r = prefix + "-" + r
+            new_r = prefix + '-' + r
             for i, line in enumerate(lines):
-                lines[i] = lines[i].replace(f"[{r}]_", f"[{new_r}]_")
-                lines[i] = lines[i].replace(f".. [{r}]", f".. [{new_r}]")
+                lines[i] = lines[i].replace(f'[{r}]_', f'[{new_r}]_')
+                lines[i] = lines[i].replace(f'.. [{r}]', f'.. [{new_r}]')
 
 
 def _is_cite_in_numpydoc_docstring(citation_node):
@@ -123,24 +123,21 @@ def relabel_references(app, doc):
         if not _is_cite_in_numpydoc_docstring(citation_node):
             continue
         label_node = citation_node[0]
-        prefix, _, new_label = label_node[0].astext().partition("-")
+        prefix, _, new_label = label_node[0].astext().partition('-')
         assert len(prefix) == HASH_LEN + 1
         new_text = Text(new_label)
         label_node.replace(label_node[0], new_text)
 
-        for id_ in citation_node["backrefs"]:
+        for id_ in citation_node['backrefs']:
             ref = doc.ids[id_]
             ref_text = ref[0]
 
             # Sphinx has created pending_xref nodes with [reftext] text.
             def matching_pending_xref(node):
-                return (
-                    isinstance(node, pending_xref)
-                    and node[0].astext() == f"[{ref_text}]"
-                )
+                return isinstance(node, pending_xref) and node[0].astext() == f'[{ref_text}]'
 
             for xref_node in _traverse_or_findall(ref.parent, matching_pending_xref):
-                xref_node.replace(xref_node[0], Text(f"[{new_text}]"))
+                xref_node.replace(xref_node[0], Text(f'[{new_text}]'))
             ref.replace(ref_text, new_text.copy())
 
 
@@ -148,20 +145,20 @@ def clean_backrefs(app, doc, docname):
     # only::latex directive has resulted in citation backrefs without reference
     known_ref_ids = set()
     for ref in _traverse_or_findall(doc, reference, descend=True):
-        for id_ in ref["ids"]:
+        for id_ in ref['ids']:
             known_ref_ids.add(id_)
     # some extensions produce backrefs to inline elements
     for ref in _traverse_or_findall(doc, inline, descend=True):
-        for id_ in ref["ids"]:
+        for id_ in ref['ids']:
             known_ref_ids.add(id_)
     for citation_node in _traverse_or_findall(doc, citation, descend=True):
         # remove backrefs to non-existent refs
-        citation_node["backrefs"] = [
-            id_ for id_ in citation_node["backrefs"] if id_ in known_ref_ids
+        citation_node['backrefs'] = [
+            id_ for id_ in citation_node['backrefs'] if id_ in known_ref_ids
         ]
 
 
-DEDUPLICATION_TAG = "    !! processed by numpydoc !!"
+DEDUPLICATION_TAG = '    !! processed by numpydoc !!'
 
 
 def mangle_docstrings(app, what, name, obj, options, lines):
@@ -175,31 +172,29 @@ def mangle_docstrings(app, what, name, obj, options, lines):
             show_inherited_class_members = True
 
     cfg = {
-        "use_plots": app.config.numpydoc_use_plots,
-        "show_class_members": app.config.numpydoc_show_class_members,
-        "show_inherited_class_members": show_inherited_class_members,
-        "class_members_toctree": app.config.numpydoc_class_members_toctree,
-        "attributes_as_param_list": app.config.numpydoc_attributes_as_param_list,
-        "xref_param_type": app.config.numpydoc_xref_param_type,
-        "xref_aliases": app.config.numpydoc_xref_aliases_complete,
-        "xref_ignore": app.config.numpydoc_xref_ignore,
+        'use_plots': app.config.numpydoc_use_plots,
+        'show_class_members': app.config.numpydoc_show_class_members,
+        'show_inherited_class_members': show_inherited_class_members,
+        'class_members_toctree': app.config.numpydoc_class_members_toctree,
+        'attributes_as_param_list': app.config.numpydoc_attributes_as_param_list,
+        'xref_param_type': app.config.numpydoc_xref_param_type,
+        'xref_aliases': app.config.numpydoc_xref_aliases_complete,
+        'xref_ignore': app.config.numpydoc_xref_ignore,
     }
 
     cfg.update(options or {})
-    u_NL = "\n"
-    if what == "module":
+    u_NL = '\n'
+    if what == 'module':
         # Strip top title
-        pattern = "^\\s*[#*=]{4,}\\n[a-z0-9 -]+\\n[#*=]{4,}\\s*"
+        pattern = '^\\s*[#*=]{4,}\\n[a-z0-9 -]+\\n[#*=]{4,}\\s*'
         title_re = re.compile(pattern, re.I | re.S)
-        lines[:] = title_re.sub("", u_NL.join(lines)).split(u_NL)
+        lines[:] = title_re.sub('', u_NL.join(lines)).split(u_NL)
     else:
         try:
-            doc = get_doc_object(
-                obj, what, u_NL.join(lines), config=cfg, builder=app.builder
-            )
+            doc = get_doc_object(obj, what, u_NL.join(lines), config=cfg, builder=app.builder)
             lines[:] = str(doc).split(u_NL)
         except Exception:
-            logger.error("[numpydoc] While processing docstring for %r", name)
+            logger.error('[numpydoc] While processing docstring for %r', name)
             raise
 
         if app.config.numpydoc_validation_checks:
@@ -215,100 +210,91 @@ def mangle_docstrings(app, what, name, obj, options, lines):
                 report = validate(doc)
                 errors = [
                     err
-                    for err in report["errors"]
+                    for err in report['errors']
                     if not (
-                        (
-                            overrides := app.config.numpydoc_validation_overrides.get(
-                                err[0]
-                            )
-                        )
-                        and re.search(overrides, report["docstring"])
+                        (overrides := app.config.numpydoc_validation_overrides.get(err[0]))
+                        and re.search(overrides, report['docstring'])
                     )
                 ]
                 if {err[0] for err in errors} & app.config.numpydoc_validation_checks:
                     msg = (
-                        f"[numpydoc] Validation warnings while processing "
-                        f"docstring for {name!r}:\n"
+                        f'[numpydoc] Validation warnings while processing '
+                        f'docstring for {name!r}:\n'
                     )
                     for err in errors:
                         if err[0] in app.config.numpydoc_validation_checks:
-                            msg += f"  {err[0]}: {err[1]}\n"
+                            msg += f'  {err[0]}: {err[1]}\n'
                     logger.warning(msg)
 
     # call function to replace reference numbers so that there are no
     # duplicates
     rename_references(app, what, name, obj, options, lines)
 
-    lines += ["..", DEDUPLICATION_TAG]
+    lines += ['..', DEDUPLICATION_TAG]
 
 
 def mangle_signature(app, what, name, obj, options, sig, retann):
     # Do not try to inspect classes that don't define `__init__`
     if inspect.isclass(obj) and (
-        not hasattr(obj, "__init__")
-        or "initializes x; see " in pydoc.getdoc(obj.__init__)
+        not hasattr(obj, '__init__') or 'initializes x; see ' in pydoc.getdoc(obj.__init__)
     ):
-        return "", ""
+        return '', ''
 
-    if not (isinstance(obj, Callable) or hasattr(obj, "__argspec_is_invalid_")):
+    if not (isinstance(obj, Callable) or hasattr(obj, '__argspec_is_invalid_')):
         return
 
-    if not hasattr(obj, "__doc__"):
+    if not hasattr(obj, '__doc__'):
         return
-    doc = get_doc_object(obj, config={"show_class_members": False})
-    sig = doc["Signature"] or _clean_text_signature(
-        getattr(obj, "__text_signature__", None)
-    )
+    doc = get_doc_object(obj, config={'show_class_members': False})
+    sig = doc['Signature'] or _clean_text_signature(getattr(obj, '__text_signature__', None))
     if sig:
-        sig = re.sub("^[^(]*", "", sig)
-        return sig, ""
+        sig = re.sub('^[^(]*', '', sig)
+        return sig, ''
 
 
 def _clean_text_signature(sig):
     if sig is None:
         return None
-    start_pattern = re.compile(r"^[^(]*\(")
+    start_pattern = re.compile(r'^[^(]*\(')
     start, end = start_pattern.search(sig).span()
     start_sig = sig[start:end]
     sig = sig[end:-1]
-    sig = re.sub(r"^\$(self|module|type)(,\s|$)", "", sig, count=1)
-    sig = re.sub(r"(^|(?<=,\s))/,\s\*", "*", sig, count=1)
-    return start_sig + sig + ")"
+    sig = re.sub(r'^\$(self|module|type)(,\s|$)', '', sig, count=1)
+    sig = re.sub(r'(^|(?<=,\s))/,\s\*', '*', sig, count=1)
+    return start_sig + sig + ')'
 
 
 def setup(app, get_doc_object_=get_doc_object):
-    if not hasattr(app, "add_config_value"):
+    if not hasattr(app, 'add_config_value'):
         return  # probably called by nose, better bail out
 
     global get_doc_object
     get_doc_object = get_doc_object_
 
-    app.setup_extension("sphinx.ext.autosummary")
-    app.connect("config-inited", update_config)
-    app.connect("autodoc-process-docstring", mangle_docstrings)
-    app.connect("autodoc-process-signature", mangle_signature)
-    app.connect("doctree-read", relabel_references)
-    app.connect("doctree-resolved", clean_backrefs)
-    app.add_config_value("numpydoc_use_plots", None, False)
-    app.add_config_value("numpydoc_show_class_members", True, True)
-    app.add_config_value(
-        "numpydoc_show_inherited_class_members", True, True, types=(bool, dict)
-    )
-    app.add_config_value("numpydoc_class_members_toctree", True, True)
-    app.add_config_value("numpydoc_citation_re", "[a-z0-9_.-]+", True)
-    app.add_config_value("numpydoc_attributes_as_param_list", True, True)
-    app.add_config_value("numpydoc_xref_param_type", False, True)
-    app.add_config_value("numpydoc_xref_aliases", dict(), True)
-    app.add_config_value("numpydoc_xref_ignore", set(), True)
-    app.add_config_value("numpydoc_validation_checks", set(), True)
-    app.add_config_value("numpydoc_validation_exclude", set(), False)
-    app.add_config_value("numpydoc_validation_overrides", dict(), False)
+    app.setup_extension('sphinx.ext.autosummary')
+    app.connect('config-inited', update_config)
+    app.connect('autodoc-process-docstring', mangle_docstrings)
+    app.connect('autodoc-process-signature', mangle_signature)
+    app.connect('doctree-read', relabel_references)
+    app.connect('doctree-resolved', clean_backrefs)
+    app.add_config_value('numpydoc_use_plots', None, False)
+    app.add_config_value('numpydoc_show_class_members', True, True)
+    app.add_config_value('numpydoc_show_inherited_class_members', True, True, types=(bool, dict))
+    app.add_config_value('numpydoc_class_members_toctree', True, True)
+    app.add_config_value('numpydoc_citation_re', '[a-z0-9_.-]+', True)
+    app.add_config_value('numpydoc_attributes_as_param_list', True, True)
+    app.add_config_value('numpydoc_xref_param_type', False, True)
+    app.add_config_value('numpydoc_xref_aliases', dict(), True)
+    app.add_config_value('numpydoc_xref_ignore', set(), True)
+    app.add_config_value('numpydoc_validation_checks', set(), True)
+    app.add_config_value('numpydoc_validation_exclude', set(), False)
+    app.add_config_value('numpydoc_validation_overrides', dict(), False)
 
     # Extra mangling domains
     app.add_domain(NumpyPythonDomain)
     app.add_domain(NumpyCDomain)
 
-    metadata = {"version": __version__, "parallel_read_safe": True}
+    metadata = {'version': __version__, 'parallel_read_safe': True}
     return metadata
 
 
@@ -328,26 +314,22 @@ def update_config(app, config=None):
 
     # Processing to determine whether numpydoc_validation_checks is treated
     # as a blocklist or allowlist
-    config.numpydoc_validation_checks = get_validation_checks(
-        config.numpydoc_validation_checks
-    )
+    config.numpydoc_validation_checks = get_validation_checks(config.numpydoc_validation_checks)
 
     # Generate the regexp for docstrings to ignore during validation
     if isinstance(config.numpydoc_validation_exclude, str):
         raise ValueError(
-            f"numpydoc_validation_exclude must be a container of strings, "
-            f"e.g. [{config.numpydoc_validation_exclude!r}]."
+            f'numpydoc_validation_exclude must be a container of strings, '
+            f'e.g. [{config.numpydoc_validation_exclude!r}].'
         )
     config.numpydoc_validation_excluder = None
     if config.numpydoc_validation_exclude:
-        exclude_expr = re.compile(
-            r"|".join(exp for exp in config.numpydoc_validation_exclude)
-        )
+        exclude_expr = re.compile(r'|'.join(exp for exp in config.numpydoc_validation_exclude))
         config.numpydoc_validation_excluder = exclude_expr
 
     for check, patterns in config.numpydoc_validation_overrides.items():
         config.numpydoc_validation_overrides[check] = re.compile(
-            r"|".join(exp for exp in patterns)
+            r'|'.join(exp for exp in patterns)
         )
 
 
@@ -369,33 +351,31 @@ class ManglingDomainBase:
 
     def wrap_mangling_directives(self):
         for name, objtype in list(self.directive_mangling_map.items()):
-            self.directives[name] = wrap_mangling_directive(
-                self.directives[name], objtype
-            )
+            self.directives[name] = wrap_mangling_directive(self.directives[name], objtype)
 
 
 class NumpyPythonDomain(ManglingDomainBase, PythonDomain):
-    name = "np"
+    name = 'np'
     directive_mangling_map = {
-        "function": "function",
-        "class": "class",
-        "exception": "class",
-        "method": "function",
-        "classmethod": "function",
-        "staticmethod": "function",
-        "attribute": "attribute",
+        'function': 'function',
+        'class': 'class',
+        'exception': 'class',
+        'method': 'function',
+        'classmethod': 'function',
+        'staticmethod': 'function',
+        'attribute': 'attribute',
     }
     indices = []
 
 
 class NumpyCDomain(ManglingDomainBase, CDomain):
-    name = "np-c"
+    name = 'np-c'
     directive_mangling_map = {
-        "function": "function",
-        "member": "attribute",
-        "macro": "function",
-        "type": "class",
-        "var": "object",
+        'function': 'function',
+        'member': 'attribute',
+        'macro': 'function',
+        'type': 'class',
+        'var': 'object',
     }
 
 
@@ -462,7 +442,7 @@ def wrap_mangling_directive(base_directive, objtype):
 
             name = None
             if self.arguments:
-                m = re.match(r"^(.*\s+)?(.*?)(\(.*)?", self.arguments[0])
+                m = re.match(r'^(.*\s+)?(.*?)(\(.*)?', self.arguments[0])
                 name = m.group(2).strip()
 
             if not name:
