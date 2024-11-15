@@ -116,23 +116,31 @@ skip-string-normalization = true
 extend-exclude = '_version.py'
 
 [tool.pytest.ini_options]
-norecursedirs = ".git"
-addopts = "-sv --doctest-modules"
+minversion = "6"
+testpaths = ["niworkflows"]
+log_cli_level = "INFO"
+xfail_strict = true
+norecursedirs = [".git"]
+addopts = [
+  "-svx",
+  "-ra",
+  "--strict-config",
+  "--strict-markers",
+  "--doctest-modules",
+  # Config pytest-cov
+  "--cov=niworkflows",
+  "--cov-report=xml",
+  "--cov-config=pyproject.toml",
+]
 doctest_optionflags = "ALLOW_UNICODE NORMALIZE_WHITESPACE ELLIPSIS"
-env = """
-    PYTHONHASHSEED=0
-"""
-filterwarnings = """
-    ignore::DeprecationWarning
-"""
+env = "PYTHONHASHSEED=0"
+filterwarnings = ["ignore::DeprecationWarning"]
 junit_family = "xunit2"
 
 [tool.coverage.run]
 branch = true
 omit = [
-    "*/tests/*",
-    "niworkflows/_version.py",
-    "niworkflows/conftest.py",
+    "*/_version.py",
 ]
 
 [tool.coverage.report]
@@ -140,4 +148,10 @@ omit = [
 exclude_lines = [
     "raise NotImplementedError",
     "warnings\\.warn",
+]
+
+[tool.coverage.paths]
+source = [
+  "niworkflows",
+  "**/site-packages/niworkflows"
 ]
