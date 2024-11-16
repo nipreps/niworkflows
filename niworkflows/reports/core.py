@@ -290,8 +290,9 @@ class Report:
 
         # Default template from niworkflows
         self.template_path = load_resource('reports') / 'report.tpl'
+        if not self.template_path.exists():
+            raise RuntimeError('Could not find report template. Corrupted installation.')
         self._load_config(Path(config or load_resource('reports') / 'default.yml'))
-        assert self.template_path.exists()
 
     def _load_config(self, config):
         from yaml import safe_load as load
@@ -415,7 +416,7 @@ class Report:
             loader=jinja2.FileSystemLoader(searchpath=str(self.template_path.parent)),
             trim_blocks=True,
             lstrip_blocks=True,
-            autoescape=False,
+            autoescape=False,  # noqa: S701  XXX Investigate if this is a problem in nireports.
         )
         report_tpl = env.get_template(self.template_path.name)
         report_render = report_tpl.render(

@@ -34,14 +34,14 @@ def test_copy_gzip(tmpdir):
     filepath2 = tmpdir / 'name2.txt'
     assert not filepath2.exists()
     open(str(filepath), 'w').close()
-    check_call(['gzip', '-N', str(filepath)])
+    check_call(['gzip', '-N', str(filepath)])  # noqa: S607 XXX replace with gzip module
     assert not filepath.exists()
 
     gzpath1 = str(tmpdir / 'name1.txt.gz')
     gzpath2 = str(tmpdir / 'name2.txt.gz')
     _copy_any(gzpath1, gzpath2)
     assert Path(gzpath2).exists()
-    check_call(['gunzip', '-N', '-f', gzpath2])
+    check_call(['gunzip', '-N', '-f', gzpath2])  # noqa: S607 XXX replace with gzip module
     assert not filepath.exists()
     assert filepath2.exists()
 

@@ -550,10 +550,10 @@ def _tsv2json(
         tsv_data.set_index(index_column, drop=True, inplace=True)
     if enforce_case:
         tsv_data.index = [
-            re.sub(re_to_snake, snake, less_breakable(i), 0).lower() for i in tsv_data.index
+            re.sub(re_to_snake, snake, less_breakable(i), count=0).lower() for i in tsv_data.index
         ]
         tsv_data.columns = [
-            re.sub(re_to_camel, camel, less_breakable(i).title(), 0).replace('Csf', 'CSF')
+            re.sub(re_to_camel, camel, less_breakable(i).title(), count=0).replace('Csf', 'CSF')
             for i in tsv_data.columns
         ]
     json_data = tsv_data.to_json(orient='index')

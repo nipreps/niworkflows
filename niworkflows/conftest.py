@@ -59,7 +59,7 @@ def legacy_printoptions():
 
 
 @pytest.fixture(autouse=True)
-def add_np(doctest_namespace):
+def _add_np(doctest_namespace):
     from .testing import data_dir, data_dir_canary
     from .utils.bids import collect_data
 

@@ -261,7 +261,7 @@ def plot_carpet(
         height_ratios=[len(v) for v in segments.values()],
     )
 
-    for i, (label, indices) in enumerate(segments.items()):
+    for i, indices in enumerate(segments.values()):
         # Carpet plot
         ax = plt.subplot(gs[i])
 
@@ -317,7 +317,7 @@ def plot_carpet(
             ax.set_title(title)
 
     if len(segments) == 1:
-        ax.set_ylabel(label)
+        ax.set_ylabel(next(iter(segments)))
 
     if legend:
         from matplotlib.patches import Patch
@@ -339,7 +339,7 @@ def plot_carpet(
             axlegend.spines[loc].set_visible(False)
 
         axlegend.legend(
-            handles=[Patch(color=colors[i], label=l) for i, l in enumerate(segments.keys())],
+            handles=[Patch(color=colors[i], label=label) for i, label in enumerate(segments)],
             loc='upper center',
             bbox_to_anchor=(0.5, 0),
             shadow=False,

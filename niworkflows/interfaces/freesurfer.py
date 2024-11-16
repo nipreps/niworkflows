@@ -566,7 +566,7 @@ def mri_info(fname, argument):
     import numpy as np
 
     cmd_info = f'mri_info --{argument} {fname}'
-    proc = sp.Popen(cmd_info, stdout=sp.PIPE, shell=True)
+    proc = sp.Popen(cmd_info, stdout=sp.PIPE, shell=True)  # noqa: S602
     data = bytearray(proc.stdout.read())
     mstring = np.fromstring(data.decode('utf-8'), sep='\n')
     result = np.reshape(mstring, (4, -1))

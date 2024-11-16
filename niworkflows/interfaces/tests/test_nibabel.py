@@ -108,7 +108,7 @@ def test_merge_rois(tmpdir, create_roi, affine, data, roi_index, error, err_mess
         merge.run()
         return
     # otherwise check expected exceptions
-    with pytest.raises(AssertionError) as err:
+    with pytest.raises(ValueError, match=r'Mismatch|Overlapping') as err:
         merge.run()
     assert err_message in str(err.value)
 
@@ -167,13 +167,13 @@ def test_ApplyMask(tmp_path):
 
     # Test errors
     nb.Nifti1Image(mask, 2 * np.eye(4), None).to_filename(str(in_mask))
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r'affines are not similar'):
         ApplyMask(in_file=str(in_file), in_mask=str(in_mask), threshold=0.4).run()
 
     nb.Nifti1Image(mask[:-1, ...], np.eye(4), None).to_filename(str(in_mask))
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r'sizes do not match'):
         ApplyMask(in_file=str(in_file), in_mask=str(in_mask), threshold=0.4).run()
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r'sizes do not match'):
         ApplyMask(in_file=str(in_file4d), in_mask=str(in_mask), threshold=0.4).run()
 
 
@@ -207,7 +207,7 @@ def test_SplitSeries(tmp_path, shape, exp_n):
         n = int(isinstance(split.outputs.out_files, str)) or len(split.outputs.out_files)
         assert n == exp_n
     else:
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r'Invalid shape'):
             _interface.run()
 
 
@@ -227,7 +227,7 @@ def test_MergeSeries(tmp_path):
     merge = MergeSeries(in_files=[str(in_file)] + [str(in_4D)]).run()
     assert nb.load(merge.outputs.out_file).dataobj.shape == (20, 20, 20, 5)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r'incorrect number of dimensions'):
         MergeSeries(in_files=[str(in_file)] + [str(in_4D)], allow_4D=False).run()
 
 
@@ -243,7 +243,7 @@ def test_MergeSeries_affines(tmp_path):
     nb.Nifti1Image(data, aff, None).to_filename(files[1])
 
     # affine mismatch will cause this to fail
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r'does not match affine'):
         MergeSeries(in_files=files).run()
     # but works if we set a tolerance
     MergeSeries(in_files=files, affine_tolerance=1e-04).run()

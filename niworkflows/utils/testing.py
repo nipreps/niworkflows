@@ -27,7 +27,7 @@ def generate_bids_skeleton(target_path, bids_config):
         try:
             bids_dict = json.loads(bids_config)
         except json.JSONDecodeError:
-            bids_dict = yaml.load(bids_config, Loader=yaml.Loader)
+            bids_dict = yaml.safe_load(bids_config)
 
     _bids_dict = deepcopy(bids_dict)
     root = Path(target_path).absolute()

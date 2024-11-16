@@ -150,9 +150,13 @@ ignore = [
 inline-quotes = "single"
 
 [tool.ruff.lint.extend-per-file-ignores]
+"*/__init__.py" = ["F401"]
 "*/test_*.py" = ["S101"]
 "docs/conf.py" = ["A001"]
-"docs/sphinxext/github_link.py" = ["BLE001"]
+"niworkflows/engine/plugin.py" = [
+  "BLE001",  # except Exception is intentional
+  "S101",  # Assertions are intentional
+]
 
 [tool.ruff.format]
 quote-style = "single"

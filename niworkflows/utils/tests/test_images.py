@@ -80,7 +80,7 @@ def test_update_header_fields_exceptions(tmp_path, fields, slope, inter):
     img.header.set_slope_inter(slope, inter)
     img.to_filename(fname)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r'data blocks are not the same size'):
         update_header_fields(fname, **fields)
 
 
@@ -90,7 +90,7 @@ def test_overwrite_header_reject_mmap(tmp_path):
     random_image().to_filename(fname)
 
     img = nb.load(fname, mmap=True)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r'mmap.*unsafe'):
         overwrite_header(img, fname)
 
 

@@ -36,7 +36,7 @@ tffiledesc, tffilename = tempfile.mkstemp()
 os.close(tffiledesc)
 templateflow.api.get = mock.MagicMock(return_value=tffilename)
 
-from niworkflows import __copyright__, __packagename__, __version__
+from niworkflows import __copyright__, __packagename__, __version__  # noqa:E402
 
 sys.path.append(os.path.abspath('sphinxext'))
 

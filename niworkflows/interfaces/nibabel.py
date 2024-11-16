@@ -760,11 +760,14 @@ def _merge_rois(in_files, newpath=None):
     nonzero = np.any(data, axis=3)
     for roi in in_files[1:]:
         img = nb.load(roi)
-        assert img.shape == data.shape, 'Mismatch in image shape'
-        assert np.allclose(img.affine, affine), 'Mismatch in affine'
+        if not img.shape == data.shape:
+            raise ValueError('Mismatch in image shape')
+        if not np.allclose(img.affine, affine):
+            raise ValueError('Mismatch in affine')
         roi_data = np.asanyarray(img.dataobj)
         roi_nonzero = np.any(roi_data, axis=3)
-        assert not np.any(roi_nonzero & nonzero), 'Overlapping ROIs'
+        if np.any(roi_nonzero & nonzero):
+            raise ValueError('Overlapping ROIs')
         nonzero |= roi_nonzero
         data += roi_data
         del roi_data

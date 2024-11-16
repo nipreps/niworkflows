@@ -23,7 +23,6 @@
 """Nipype translation of ANTs' workflows."""
 
 # general purpose
-from collections import OrderedDict
 from multiprocessing import cpu_count
 from warnings import warn
 
@@ -55,10 +54,11 @@ from ..utils.connections import pop_file as _pop
 from ..utils.misc import get_template_specs
 
 ATROPOS_MODELS = {
-    'T1w': OrderedDict([('nclasses', 3), ('csf', 1), ('gm', 2), ('wm', 3)]),
-    'T2w': OrderedDict([('nclasses', 3), ('csf', 3), ('gm', 2), ('wm', 1)]),
-    'FLAIR': OrderedDict([('nclasses', 3), ('csf', 1), ('gm', 3), ('wm', 2)]),
+    'T1w': {'nclasses': 3, 'csf': 1, 'gm': 2, 'wm': 3},
+    'T2w': {'nclasses': 3, 'csf': 3, 'gm': 2, 'wm': 1},
+    'FLAIR': {'nclasses': 3, 'csf': 1, 'gm': 3, 'wm': 2},
 }
+T1W_MODEL = tuple(ATROPOS_MODELS['T1w'].values())
 
 
 def init_brain_extraction_wf(
@@ -293,7 +293,8 @@ def init_brain_extraction_wf(
     except ValueError:
         warn(
             "antsAI's option --search-grid was added in ANTS 2.3.0 "
-            f'({init_aff.interface.version} found.)'
+            f'({init_aff.interface.version} found.)',
+            stacklevel=1,
         )
 
     # Set up spatial normalization
@@ -355,6 +356,7 @@ def init_brain_extraction_wf(
             "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
             f'({inu_n4_final.interface.version} found.) Please consider upgrading.',
             UserWarning,
+            stacklevel=1,
         )
 
     # Apply mask
@@ -501,7 +503,7 @@ def init_atropos_wf(
     omp_nthreads=None,
     mem_gb=3.0,
     padding=10,
-    in_segmentation_model=tuple(ATROPOS_MODELS['T1w'].values()),
+    in_segmentation_model=T1W_MODEL,
     bspline_fitting_distance=200,
     wm_prior=False,
 ):
@@ -758,6 +760,7 @@ def init_atropos_wf(
             "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
             f'({inu_n4_final.interface.version} found.) Please consider upgrading.',
             UserWarning,
+            stacklevel=1,
         )
 
     # Apply mask
@@ -987,6 +990,7 @@ def init_n4_only_wf(
             "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
             f'({inu_n4_final.interface.version} found.) Please consider upgrading.',
             UserWarning,
+            stacklevel=1,
         )
 
     # fmt: off

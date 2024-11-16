@@ -37,8 +37,10 @@ from ..interfaces.freesurfer import (
 )
 from ..interfaces.surf import NormalizeSurf
 
+SUBJECTS_DIR = getenv('SUBJECTS_DIR')
 
-def init_gifti_surface_wf(name='gifti_surface_wf', subjects_dir=getenv('SUBJECTS_DIR', None)):
+
+def init_gifti_surface_wf(name='gifti_surface_wf', subjects_dir=SUBJECTS_DIR):
     """
     Build a Nipype workflow to prepare GIFTI surfaces from FreeSurfer.
 

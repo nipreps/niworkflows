@@ -31,10 +31,10 @@ from ..utility import KeySelect, _tsv2json
 
 def test_KeySelect():
     """Test KeySelect."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r'duplicated entries'):
         KeySelect(fields='field1', keys=['a', 'b', 'c', 'a'])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r'list or .* must be provided'):
         KeySelect(fields=[])
 
 

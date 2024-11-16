@@ -22,8 +22,9 @@
 #
 """Handling connectivity: combines FreeSurfer surfaces with subcortical volumes."""
 
+from __future__ import annotations
+
 import json
-import typing
 import warnings
 from pathlib import Path
 
@@ -252,7 +253,7 @@ def _create_cifti_image(
     bold_surfs: tuple[str, str],
     surface_labels: tuple[str, str],
     tr: float,
-    metadata: typing.Optional[dict] = None,
+    metadata: dict | None = None,
 ):
     """
     Generate CIFTI image in target space.
@@ -280,7 +281,7 @@ def _create_cifti_image(
     bold_img = nb.load(bold_file)
     label_img = nb.load(volume_label)
     if label_img.shape != bold_img.shape[:3]:
-        warnings.warn('Resampling bold volume to match label dimensions')
+        warnings.warn('Resampling bold volume to match label dimensions', stacklevel=1)
         bold_img = resample_to_img(bold_img, label_img)
 
     # ensure images match HCP orientation (LAS)

@@ -380,7 +380,7 @@ def test_DerivativesDataSink_build_path(
                 # Nibabel 5.3 avoids unnecessary roundtrips for Cifti2Headers
                 # Older versions transformed a `SeriesStep="2"` into `SeriesStep="2.0"`
                 chksum = 'f7b8755c6ad0d8dcdb60676331b52a23ce288b61'
-        assert sha1(Path(out).read_bytes()).hexdigest() == chksum
+        assert sha1(Path(out).read_bytes()).hexdigest() == chksum  # noqa: S324
 
 
 @pytest.mark.parametrize('interface', [bintfs.DerivativesDataSink, bintfs.PrepareDerivative])
@@ -660,7 +660,7 @@ def test_DerivativesDataSink_values(tmp_path, interface, dtype):
     nii = nb.load(out_file)
     assert np.allclose(nii.dataobj, expected)
 
-    checksum = sha1(out_file.read_bytes()).hexdigest()
+    checksum = sha1(out_file.read_bytes()).hexdigest()  # noqa: S324
     out_file.unlink()
 
     # Rerun to ensure determinism with non-zero data
@@ -676,7 +676,7 @@ def test_DerivativesDataSink_values(tmp_path, interface, dtype):
 
     prep_result = prep.run()
 
-    assert sha1(out_file.read_bytes()).hexdigest() == checksum
+    assert sha1(out_file.read_bytes()).hexdigest() == checksum  # noqa: S324
 
 
 @needs_data_dir
@@ -710,7 +710,7 @@ def test_ReadSidecarJSON_connection(testdata_dir, field):
     ('derivatives', 'subjects_dir'),
     [
         (os.getenv('FREESURFER_HOME'), 'subjects'),
-        ('/tmp', os.path.join(os.getenv('FREESURFER_HOME', ''), 'subjects')),
+        ('/tmp', os.path.join(os.getenv('FREESURFER_HOME', ''), 'subjects')),  # noqa: S108
     ],
 )
 def test_fsdir_noaction(derivatives, subjects_dir):

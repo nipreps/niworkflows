@@ -133,7 +133,7 @@ class IntraModalMerge(SimpleInterface):
 
         nii_list = []
         # Remove one-sized extra dimensions
-        for i, f in enumerate(in_files):
+        for f in in_files:
             filenii = nb.load(f)
             filenii = nb.squeeze_image(filenii)
             if len(filenii.shape) == 5:

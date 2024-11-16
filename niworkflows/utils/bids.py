@@ -154,7 +154,7 @@ def collect_participants(bids_dir, participant_label=None, strict=False, bids_va
         )
         if strict:
             raise exc
-        warnings.warn(exc.msg, BIDSWarning)
+        warnings.warn(exc.msg, BIDSWarning, stacklevel=2)
 
     return found_label
 

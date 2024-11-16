@@ -22,9 +22,10 @@
 #
 """Miscellaneous utilities."""
 
+from __future__ import annotations
+
 import os
 import warnings
-from typing import Optional
 
 __all__ = [
     'get_template_specs',
@@ -39,7 +40,7 @@ __all__ = [
 
 def get_template_specs(
     in_template: str,
-    template_spec: Optional[dict] = None,
+    template_spec: dict | None = None,
     default_resolution: int = 1,
     fallback: bool = False,
 ):
@@ -94,7 +95,7 @@ def get_template_specs(
         if not isinstance(res, list):
             try:
                 res = [int(res)]
-            except Exception:
+            except ValueError:
                 res = None
         if res is None:
             res = []
@@ -104,7 +105,8 @@ def get_template_specs(
             fallback_res = available_resolutions[0] if available_resolutions else None
             warnings.warn(
                 f'Template {in_template} does not have resolution: {res}.'
-                f'Falling back to resolution: {fallback_res}.'
+                f'Falling back to resolution: {fallback_res}.',
+                stacklevel=1,
             )
             template_spec['resolution'] = fallback_res
 

@@ -61,7 +61,7 @@ def svg_compress(image, compress='auto'):
     if compress:
         cmd = 'svgo -i - -o - -q -p 3 --pretty'
         try:
-            pout = subprocess.run(
+            pout = subprocess.run(  # noqa: S602
                 cmd,
                 input=image.encode('utf-8'),
                 stdout=subprocess.PIPE,
@@ -96,7 +96,7 @@ def svg_compress(image, compress='auto'):
                     right = '"' + '"'.join(right.split('"')[1:])
 
                     cmd = 'cwebp -quiet -noalpha -q 80 -o - -- -'
-                    pout = subprocess.run(
+                    pout = subprocess.run(  # noqa: S602
                         cmd,
                         input=base64.b64decode(png_b64),
                         shell=True,
@@ -467,10 +467,10 @@ def _compose_view(bg_svgs, fg_svgs, ref=0):
             2,
             """\
 <style type="text/css">
-@keyframes flickerAnimation{0} {{ 0% {{opacity: 1;}} 100% {{ opacity: 0; }}}}
-.foreground-svg {{ animation: 1s ease-in-out 0s alternate none infinite paused flickerAnimation{0};}}
+@keyframes {0} {{ 0% {{opacity: 1;}} 100% {{ opacity: 0; }}}}
+.foreground-svg {{ animation: 1s ease-in-out 0s alternate none infinite paused {0};}}
 .foreground-svg:hover {{ animation-play-state: running;}}
-</style>""".format(uuid4()),
+</style>""".format(f'flickerAnimation{uuid4()}'),
         )
 
     return svg

@@ -69,7 +69,7 @@ LOGGER = logging.getLogger('nipype.interface')
 if sys.version_info < (3, 10):  # PY39
     builtin_zip = zip
 
-    def zip(*args, strict=False):
+    def zip(*args, strict=False):  # noqa: A001
         if strict and any(len(args[0]) != len(arg) for arg in args):
             raise ValueError('strict_zip() requires all arguments to have the same length')
         return builtin_zip(*args)
@@ -676,7 +676,7 @@ class PrepareDerivative(SimpleInterface):
                 if data_dtype == 'source':  # match source dtype
                     try:
                         data_dtype = nb.load(self.inputs.source_file[0]).get_data_dtype()
-                    except Exception:
+                    except Exception:  # noqa: BLE001
                         LOGGER.warning(
                             f'Could not get data type of file {self.inputs.source_file[0]}'
                         )
@@ -1193,7 +1193,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 if data_dtype == 'source':  # match source dtype
                     try:
                         data_dtype = nb.load(self.inputs.source_file[0]).get_data_dtype()
-                    except Exception:
+                    except Exception:  # noqa: BLE001
                         LOGGER.warning(
                             f'Could not get data type of file {self.inputs.source_file[0]}'
                         )
