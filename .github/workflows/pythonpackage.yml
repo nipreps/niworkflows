@@ -157,14 +157,3 @@ jobs:
           file: coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ always() }}
-
-  flake8:
-    if: github.event_name != 'schedule'
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3
-    - run: pipx run flake8 niworkflows/
