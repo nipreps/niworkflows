@@ -24,7 +24,6 @@
 
 import json
 import os
-import sys
 from hashlib import sha1
 from pathlib import Path
 
@@ -80,7 +79,7 @@ def connect_and_run_save(prep_result, save):
 @pytest.mark.parametrize('interface', [bintfs.DerivativesDataSink, bintfs.PrepareDerivative])
 @pytest.mark.parametrize('out_path_base', [None, 'fmriprep'])
 @pytest.mark.parametrize(
-    'source,input_files,entities,expectation,checksum',
+    ('source', 'input_files', 'entities', 'expectation', 'checksum'),
     [
         (
             T1W_PATH,
@@ -377,11 +376,7 @@ def test_DerivativesDataSink_build_path(
                 assert not np.isnan(hdr['scl_inter'])
     for out, chksum in zip(output, checksum):
         if chksum == '335f1394ce90b58bbf27026b6eeec4d2124c11da':
-            if sys.version_info < (3, 8):
-                # Python 3.8 began preserving insertion order of attributes in XML
-                # Therefore we get a different checksum before/after
-                chksum = 'a37ffb1188dd9a7b708de5b8daef46dac56ef8d4'
-            elif Version(nb.__version__) < Version('5.3'):
+            if Version(nb.__version__) < Version('5.3'):
                 # Nibabel 5.3 avoids unnecessary roundtrips for Cifti2Headers
                 # Older versions transformed a `SeriesStep="2"` into `SeriesStep="2.0"`
                 chksum = 'f7b8755c6ad0d8dcdb60676331b52a23ce288b61'
@@ -433,7 +428,7 @@ def test_DerivativesDataSink_dtseries_json(tmp_path, interface):
 
 @pytest.mark.parametrize('interface', [bintfs.DerivativesDataSink, bintfs.PrepareDerivative])
 @pytest.mark.parametrize(
-    'space, size, units, xcodes, zipped, fixed, data_dtype',
+    ('space', 'size', 'units', 'xcodes', 'zipped', 'fixed', 'data_dtype'),
     [
         ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (2, 2), True, [False], None),
         ('T1w', (30, 30, 30, 10), ('mm', 'sec'), (0, 2), True, [True], 'float64'),
@@ -492,7 +487,7 @@ def test_DerivativesDataSink_bold(
 
 @pytest.mark.parametrize('interface', [bintfs.DerivativesDataSink, bintfs.PrepareDerivative])
 @pytest.mark.parametrize(
-    'space, size, units, xcodes, fixed',
+    ('space', 'size', 'units', 'xcodes', 'fixed'),
     [
         ('MNI152Lin', (30, 30, 30), ('mm', None), (4, 4), [False]),
         ('MNI152Lin', (30, 30, 30), ('mm', 'sec'), (4, 4), [True]),
@@ -632,7 +627,7 @@ def test_DerivativesDataSink_fmapid(tmp_path, interface):
 
 
 @pytest.mark.parametrize('interface', [bintfs.DerivativesDataSink, bintfs.PrepareDerivative])
-@pytest.mark.parametrize('dtype', ('i2', 'u2', 'f4'))
+@pytest.mark.parametrize('dtype', ['i2', 'u2', 'f4'])
 def test_DerivativesDataSink_values(tmp_path, interface, dtype):
     # We use static checksums above, which ensures we don't break things, but
     # pins the tests to specific values.
@@ -712,10 +707,10 @@ def test_ReadSidecarJSON_connection(testdata_dir, field):
 
 @pytest.mark.skipif(not os.getenv('FREESURFER_HOME'), reason='No FreeSurfer')
 @pytest.mark.parametrize(
-    'derivatives, subjects_dir',
+    ('derivatives', 'subjects_dir'),
     [
         (os.getenv('FREESURFER_HOME'), 'subjects'),
-        ('/tmp', '%s/%s' % (os.getenv('FREESURFER_HOME'), 'subjects')),
+        ('/tmp', os.path.join(os.getenv('FREESURFER_HOME', ''), 'subjects')),
     ],
 )
 def test_fsdir_noaction(derivatives, subjects_dir):
@@ -724,7 +719,7 @@ def test_fsdir_noaction(derivatives, subjects_dir):
     res = bintfs.BIDSFreeSurferDir(
         derivatives=derivatives, subjects_dir=subjects_dir, freesurfer_home=fshome
     ).run()
-    assert res.outputs.subjects_dir == '%s/subjects' % fshome
+    assert res.outputs.subjects_dir == f'{fshome}/subjects'
 
 
 @pytest.mark.skipif(not os.getenv('FREESURFER_HOME'), reason='No FreeSurfer')

@@ -71,7 +71,7 @@ bad_affine[0, -1] = -1
 
 
 @pytest.mark.parametrize(
-    'affine, data, roi_index, error, err_message',
+    ('affine', 'data', 'roi_index', 'error', 'err_message'),
     [
         (np.eye(4), np.zeros((2, 2, 2, 2), dtype=np.uint16), [1, 0], None, None),
         (
@@ -178,7 +178,7 @@ def test_ApplyMask(tmp_path):
 
 
 @pytest.mark.parametrize(
-    'shape,exp_n',
+    ('shape', 'exp_n'),
     [
         ((20, 20, 20, 15), 15),
         ((20, 20, 20), 1),
@@ -255,7 +255,7 @@ LABEL_OUTPUT = np.asarray([0, 1, 2, 3, 4, 1, 1, 2]).reshape(2, 2, 2)
 
 
 @pytest.mark.parametrize(
-    'data,mapping,tojson,expected',
+    ('data', 'mapping', 'tojson', 'expected'),
     [
         (LABEL_INPUT, LABEL_MAPPINGS, False, LABEL_OUTPUT),
         (LABEL_INPUT, LABEL_MAPPINGS, True, LABEL_OUTPUT),
@@ -298,7 +298,7 @@ def create_save_img(ornt: str):
 
 
 @pytest.mark.parametrize(
-    'in_ornt,out_ornt',
+    ('in_ornt', 'out_ornt'),
     [
         ('RAS', 'RAS'),
         ('RAS', 'LAS'),

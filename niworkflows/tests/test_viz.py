@@ -39,8 +39,8 @@ from .conftest import datadir
 from .generate_data import _create_dtseries_cifti
 
 
-@pytest.mark.parametrize('tr', (None, 0.7))
-@pytest.mark.parametrize('sorting', (None, 'ward', 'linkage'))
+@pytest.mark.parametrize('tr', [None, 0.7])
+@pytest.mark.parametrize('sorting', [None, 'ward', 'linkage'])
 def test_carpetplot(tr, sorting):
     """Write a carpetplot"""
     save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)

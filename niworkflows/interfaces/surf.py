@@ -503,7 +503,7 @@ class PLYtoGifti(SimpleInterface):
         meta['AnatomicalStructureSecondary'] = SECONDARY_ANAT_STRUC[
             self.inputs.surf_key.split('.')[-1]
         ]
-        meta['Name'] = '%s_average.gii' % self.inputs.surf_key
+        meta['Name'] = f'{self.inputs.surf_key}_average.gii'
 
         out_file = Path(runtime.cwd) / meta['Name']
         out_file = ply2gii(self.inputs.in_file, meta, out_file=out_file)
@@ -742,7 +742,7 @@ def ply2gii(in_file, metadata, out_file=None):
     metadata.update(
         zip(
             ('SurfaceCenterX', 'SurfaceCenterY', 'SurfaceCenterZ'),
-            ['%.4f' % c for c in surf.centroid],
+            [f'{c:.4f}' for c in surf.centroid],
         )
     )
 

@@ -169,7 +169,7 @@ class KeySelect(BaseInterface):
 
         _invalid = set(self.input_spec.class_editable_traits()).intersection(fields)
         if _invalid:
-            raise ValueError('Some fields are invalid (%s).' % ', '.join(_invalid))
+            raise ValueError(f'Some fields are invalid ({", ".join(_invalid)}).')
 
         self._fields = fields
 
@@ -194,18 +194,16 @@ class KeySelect(BaseInterface):
             return
 
         if name == 'key' and new not in self.inputs.keys:
-            raise ValueError('Selected key "%s" not found in the index' % new)
+            raise ValueError(f'Selected key "{new}" not found in the index')
 
         if name in self._fields:
             if isinstance(new, str) or len(new) < 1:
-                raise ValueError(
-                    'Trying to set an invalid value (%s) for input "%s"' % (new, name)
-                )
+                raise ValueError(f'Trying to set an invalid value ({new}) for input "{name}"')
 
             if len(new) != len(self.inputs.keys):
                 raise ValueError(
-                    'Length of value (%s) for input field "%s" does not match '
-                    'the length of the indexing list.' % (new, name)
+                    f'Length of value ({new}) for input field "{name}" does not match '
+                    'the length of the indexing list.'
                 )
 
     def _run_interface(self, runtime):

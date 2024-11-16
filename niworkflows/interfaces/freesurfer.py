@@ -565,7 +565,7 @@ def mri_info(fname, argument):
 
     import numpy as np
 
-    cmd_info = 'mri_info --%s %s' % (argument, fname)
+    cmd_info = f'mri_info --{argument} {fname}'
     proc = sp.Popen(cmd_info, stdout=sp.PIPE, shell=True)
     data = bytearray(proc.stdout.read())
     mstring = np.fromstring(data.decode('utf-8'), sep='\n')

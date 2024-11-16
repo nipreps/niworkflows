@@ -164,7 +164,7 @@ class CiftiNameSource(SimpleInterface):
         return runtime
 
 
-def _prepare_cifti(grayordinates: str) -> typing.Tuple[list, str, dict]:
+def _prepare_cifti(grayordinates: str) -> tuple[list, str, dict]:
     """
     Fetch the required templates needed for CIFTI-2 generation, based on input surface density.
 
@@ -249,8 +249,8 @@ def _prepare_cifti(grayordinates: str) -> typing.Tuple[list, str, dict]:
 def _create_cifti_image(
     bold_file: str,
     volume_label: str,
-    bold_surfs: typing.Tuple[str, str],
-    surface_labels: typing.Tuple[str, str],
+    bold_surfs: tuple[str, str],
+    surface_labels: tuple[str, str],
     tr: float,
     metadata: typing.Optional[dict] = None,
 ):

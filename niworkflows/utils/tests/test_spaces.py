@@ -44,7 +44,7 @@ def parser():
 
 
 @pytest.mark.parametrize(
-    'spaces, expected',
+    ('spaces', 'expected'),
     [
         (('MNI152NLin6Asym',), ('MNI152NLin6Asym:res-native',)),
         (
@@ -99,7 +99,7 @@ def test_space_action(parser, spaces, expected):
         assert str(ref) == expected_ref
 
 
-@pytest.mark.parametrize('flag,expected', [(('--spaces',), True), (None, False)])
+@pytest.mark.parametrize(('flag', 'expected'), [(('--spaces',), True), (None, False)])
 def test_space_action_edgecases(parser, flag, expected):
     pargs = parser.parse_known_args(flag)[0]
     spaces = pargs.spaces

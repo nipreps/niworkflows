@@ -411,10 +411,9 @@ class SpatialNormalization(BaseInterface):
             self._reference_image = ref_template
             if not op.isfile(self._reference_image):
                 raise ValueError(
-                    """\
-The registration reference must be an existing file, but path "%s" \
+                    f"""\
+The registration reference must be an existing file, but path "{ref_template}" \
 cannot be found."""
-                    % ref_template
                 )
 
             # Get the template specified by the user.

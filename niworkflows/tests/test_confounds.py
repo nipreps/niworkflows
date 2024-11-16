@@ -40,7 +40,7 @@ def _smoke_test_report(report_interface, artifact_name):
     save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
     if save_artifacts:
         copy(out_report, os.path.join(save_artifacts, artifact_name))
-    assert os.path.isfile(out_report), 'Report "%s" does not exist' % out_report
+    assert os.path.isfile(out_report), f'Report "{out_report}" does not exist'
 
 
 def _expand_test(model_formula):

@@ -27,9 +27,9 @@ NIWORKFLOWS_LOG = logging.getLogger(__packagename__)
 NIWORKFLOWS_LOG.setLevel(logging.INFO)
 
 try:
-    import matplotlib
+    import matplotlib as mpl
 
-    matplotlib.use('Agg')
+    mpl.use('Agg')
 except ImportError:
     pass
 

@@ -34,9 +34,9 @@ from .data import load_test_data
 
 
 @pytest.mark.skipif(Info.version() is None, reason='Missing ANTs')
-@pytest.mark.parametrize('ext', ('.nii', '.nii.gz'))
-@pytest.mark.parametrize('copy_dtype', (True, False))
-@pytest.mark.parametrize('in_dtype', ('i2', 'f4'))
+@pytest.mark.parametrize('ext', ['.nii', '.nii.gz'])
+@pytest.mark.parametrize('copy_dtype', [True, False])
+@pytest.mark.parametrize('in_dtype', ['i2', 'f4'])
 def test_applytfms(tmpdir, ext, copy_dtype, in_dtype):
     import nibabel as nb
     import numpy as np

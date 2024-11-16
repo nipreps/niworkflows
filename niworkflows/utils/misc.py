@@ -123,8 +123,8 @@ argument."""
     if isinstance(tpl_target_path, list):
         raise RuntimeError(
             """\
-The available template modifiers ({0}) did not select a unique template \
-(got "{1}"). Please revise your template argument.""".format(
+The available template modifiers ({}) did not select a unique template \
+(got "{}"). Please revise your template argument.""".format(
                 template_spec, ', '.join([str(p) for p in tpl_target_path])
             )
         )
@@ -157,7 +157,7 @@ def fix_multi_T1w_source_name(in_files):
 
     base, in_file = os.path.split(in_file)
     subject_label = in_file.split('_', 1)[0].split('-')[1]
-    return os.path.join(base, 'sub-%s_T1w.nii.gz' % subject_label)
+    return os.path.join(base, f'sub-{subject_label}_T1w.nii.gz')
 
 
 def add_suffix(in_files, suffix):

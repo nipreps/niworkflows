@@ -137,7 +137,7 @@ class IntraModalMerge(SimpleInterface):
             filenii = nb.load(f)
             filenii = nb.squeeze_image(filenii)
             if len(filenii.shape) == 5:
-                raise RuntimeError('Input image (%s) is 5D.' % f)
+                raise RuntimeError(f'Input image ({f}) is 5D.')
             if filenii.dataobj.ndim == 4:
                 nii_list += nb.four_to_three(filenii)
             else:

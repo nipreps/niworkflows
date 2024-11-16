@@ -297,13 +297,13 @@ def spike_regressors(
     mask = reduce(operator.or_, mask.values())
 
     for lag in lags:
-        mask = set([m + lag for m in mask]) | mask
+        mask = {m + lag for m in mask} | mask
 
     mask = mask.intersection(indices)
     if minimum_contiguous is not None:
         post_final = data.shape[0] + 1
-        epoch_length = np.diff(sorted(mask | set([-1, post_final]))) - 1
-        epoch_end = sorted(mask | set([post_final]))
+        epoch_length = np.diff(sorted(mask | {-1, post_final})) - 1
+        epoch_end = sorted(mask | {post_final})
         for end, length in zip(epoch_end, epoch_length):
             if length < minimum_contiguous:
                 mask = mask | set(range(end - length, end))
@@ -356,7 +356,7 @@ def temporal_derivatives(order, variables, data):
     if 0 in order:
         data_deriv[0] = data[variables]
         variables_deriv[0] = variables
-        order = set(order) - set([0])
+        order = set(order) - {0}
     for o in order:
         variables_deriv[o] = [f'{v}_derivative{o}' for v in variables]
         data_deriv[o] = np.tile(np.nan, data[variables].shape)
@@ -399,7 +399,7 @@ def exponential_terms(order, variables, data):
     if 1 in order:
         data_exp[1] = data[variables]
         variables_exp[1] = variables
-        order = set(order) - set([1])
+        order = set(order) - {1}
     for o in order:
         variables_exp[o] = [f'{v}_power{o}' for v in variables]
         data_exp[o] = data[variables] ** o

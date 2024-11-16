@@ -422,7 +422,7 @@ def spikesplot(
             ax.set_xlabel('time (frame #)')
         else:
             ax.set_xlabel('time (s)')
-            ax.set_xticklabels(['%.02f' % t for t in (tr * np.array(xticks)).tolist()])
+            ax.set_xticklabels([f'{t:.2f}' for t in (tr * np.array(xticks)).tolist()])
 
     # Handle Y axis
     ylabel = 'slice-wise noise average on background'
@@ -573,13 +573,13 @@ def confoundplot(
         else:
             ax_ts.set_xlabel('time (s)')
             labels = tr * np.array(xticks)
-            ax_ts.set_xticklabels(['%.02f' % t for t in labels.tolist()])
+            ax_ts.set_xticklabels([f'{t:.2f}' for t in labels.tolist()])
     else:
         ax_ts.set_xticklabels([])
 
     if name is not None:
         if units is not None:
-            name += ' [%s]' % units
+            name += f' [{units}]'
 
         ax_ts.annotate(
             name,
@@ -674,7 +674,7 @@ def confoundplot(
     # Annotate percentile 95
     ax_ts.plot((0, ntsteps - 1), [p95] * 2, linewidth=0.1, color='lightgray')
     ax_ts.annotate(
-        '%.2f' % p95,
+        f'{p95:.2f}',
         xy=(0, p95),
         xytext=(-1, 0),
         textcoords='offset points',
@@ -691,7 +691,7 @@ def confoundplot(
         ax_ts.plot((0, ntsteps - 1), [thr] * 2, linewidth=0.2, color='dimgray')
 
         ax_ts.annotate(
-            '%.2f' % thr,
+            f'{thr:.2f}',
             xy=(0, thr),
             xytext=(-1, 0),
             textcoords='offset points',
@@ -1073,8 +1073,8 @@ def cifti_surfaces_plot(
     rh_bg[:2] = [3, -2]
 
     lh_mesh, rh_mesh = get_surface_meshes(density, surface_type)
-    lh_kwargs = dict(surf_mesh=lh_mesh, surf_map=lh_data, bg_map=lh_bg)
-    rh_kwargs = dict(surf_mesh=rh_mesh, surf_map=rh_data, bg_map=rh_bg)
+    lh_kwargs = {'surf_mesh': lh_mesh, 'surf_map': lh_data, 'bg_map': lh_bg}
+    rh_kwargs = {'surf_mesh': rh_mesh, 'surf_map': rh_data, 'bg_map': rh_bg}
 
     # Build the figure
     figure = plt.figure(figsize=plt.figaspect(0.25), constrained_layout=True)

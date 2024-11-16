@@ -94,4 +94,5 @@ def test_plugin_app_config(tmp_path, workflow, caplog):
     caplog.set_level(logging.INFO, logger='nipype.workflow')
     workflow.run(plugin=MultiProcPlugin(plugin_args={'n_procs': 2, 'app_config': app_config}))
 
-    assert init_flag.exists() and init_flag.read_text() == 'flag'
+    assert init_flag.exists()
+    assert init_flag.read_text() == 'flag'

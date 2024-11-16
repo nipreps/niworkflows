@@ -37,7 +37,7 @@ from .. import images as im
 
 
 @pytest.mark.parametrize(
-    'nvols, nmasks, ext, factor',
+    ('nvols', 'nmasks', 'ext', 'factor'),
     [
         (200, 3, '.nii', 1.1),
     ],
@@ -88,7 +88,7 @@ def test_signal_extraction_equivalence(tmp_path, nvols, nmasks, ext, factor):
 
 
 @pytest.mark.parametrize(
-    'shape, mshape',
+    ('shape', 'mshape'),
     [
         ((10, 10, 10), (10, 10, 10)),
         ((10, 10, 10, 1), (10, 10, 10)),

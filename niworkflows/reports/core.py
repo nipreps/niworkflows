@@ -172,7 +172,7 @@ class Reportlet(Element):
             raise RuntimeError('Reportlet must have a config object')
 
         self.name = config.get(
-            'name', '_'.join('%s-%s' % i for i in sorted(config['bids'].items()))
+            'name', '_'.join(f'{k}-{v}' for k, v in sorted(config['bids'].items()))
         )
         self.title = config.get('title')
         self.subtitle = config.get('subtitle')
@@ -342,11 +342,11 @@ class Report:
                     c_filt = list(filter(None, c))
                     ent_filt = list(compress(entities, c))
                     # Set a common title for this particular combination c
-                    title = 'Reports for: %s.' % ', '.join(
-                        [
-                            '%s <span class="bids-entity">%s</span>' % (ent_filt[i], c_filt[i])
+                    title = 'Reports for: {}.'.format(
+                        ', '.join(
+                            f'{ent_filt[i]} <span class="bids-entity">{c_filt[i]}</span>'
                             for i in range(len(c_filt))
-                        ]
+                        )
                     )
                     for cfg in subrep_cfg['reportlets']:
                         cfg['bids'].update({entities[i]: c[i] for i in range(len(c))})

@@ -126,7 +126,7 @@ bids_dir_deriv = {
 
 
 @pytest.mark.parametrize(
-    'test_id,json_layout,n_files,n_subjects,n_sessions',
+    ('test_id', 'json_layout', 'n_files', 'n_subjects', 'n_sessions'),
     [
         ('sessions', bids_dir_sessions, 31, 3, 2),
         ('nosession', bids_dir_session_less, 25, 4, 0),

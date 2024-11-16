@@ -48,7 +48,7 @@ def random_image():
         {'vox_offset': 20.0},
     ],
 )
-@pytest.mark.parametrize('slope, inter', [(None, None), (1.0, 0.0), (2.0, 2.0)])
+@pytest.mark.parametrize(('slope', 'inter'), [(None, None), (1.0, 0.0), (2.0, 2.0)])
 def test_update_header_fields(tmp_path, fields, slope, inter):
     fname = str(tmp_path / 'test_file.nii')
 
@@ -71,7 +71,7 @@ def test_update_header_fields(tmp_path, fields, slope, inter):
 
 
 @pytest.mark.parametrize('fields', [{'datatype': 2}])
-@pytest.mark.parametrize('slope, inter', [(None, None), (2.0, 2.0)])
+@pytest.mark.parametrize(('slope', 'inter'), [(None, None), (2.0, 2.0)])
 def test_update_header_fields_exceptions(tmp_path, fields, slope, inter):
     fname = str(tmp_path / 'test_file.nii')
 

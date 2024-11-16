@@ -33,7 +33,7 @@ from .. import header
 
 
 @pytest.mark.parametrize(
-    'qform_add, sform_add, expectation',
+    ('qform_add', 'sform_add', 'expectation'),
     [
         (0, 0, 'no_warn'),
         (0, 1e-14, 'no_warn'),
@@ -68,7 +68,7 @@ def test_qformsform_warning(tmp_path, qform_add, sform_add, expectation):
 
 
 @pytest.mark.parametrize(
-    'qform_code, warning_text',
+    ('qform_code', 'warning_text'),
     [(0, 'Note on orientation'), (1, 'WARNING - Invalid qform')],
 )
 def test_bad_qform(tmp_path, qform_code, warning_text):

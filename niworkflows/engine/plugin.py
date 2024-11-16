@@ -54,7 +54,7 @@ def run_node(node, updatehash, taskid):
 
     """
     # Init variables
-    result = dict(result=None, traceback=None, taskid=taskid)
+    result = {'result': None, 'traceback': None, 'taskid': taskid}
 
     # Try and execute the node via node.run()
     try:
@@ -188,7 +188,8 @@ class DistributedPluginBase(PluginBase):
                             self._remove_node_dirs()
                         self._clear_task(taskid)
                     else:
-                        assert self.proc_done[jobid] and self.proc_pending[jobid]
+                        assert self.proc_done[jobid]
+                        assert self.proc_pending[jobid]
                         toappend.insert(0, (taskid, jobid))
 
             if toappend:
@@ -354,12 +355,12 @@ class DistributedPluginBase(PluginBase):
             dfs_preorder = nx.dfs_preorder
         except AttributeError:
             dfs_preorder = nx.dfs_preorder_nodes
-        subnodes = [s for s in dfs_preorder(graph, self.procs[jobid])]
+        subnodes = list(dfs_preorder(graph, self.procs[jobid]))
         for node in subnodes:
             idx = self.procs.index(node)
             self.proc_done[idx] = True
             self.proc_pending[idx] = False
-        return dict(node=self.procs[jobid], dependents=subnodes, crashfile=crashfile)
+        return {'node': self.procs[jobid], 'dependents': subnodes, 'crashfile': crashfile}
 
     def _remove_node_dirs(self):
         """Remove directories whose outputs have already been used up."""

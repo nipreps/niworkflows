@@ -1339,7 +1339,7 @@ class ReadSidecarJSON(SimpleInterface):
         for fname in self._fields:
             if not self._undef_fields and fname not in metadata:
                 raise KeyError(
-                    'Metadata field "%s" not found for file %s' % (fname, self.inputs.in_file)
+                    f'Metadata field "{fname}" not found for file {self.inputs.in_file}'
                 )
             self._results[fname] = metadata.get(fname, Undefined)
         return runtime
@@ -1423,7 +1423,7 @@ class BIDSFreeSurferDir(SimpleInterface):
                 if dest.exists():
                     continue
                 else:
-                    raise FileNotFoundError("Expected to find '%s' to copy" % source)
+                    raise FileNotFoundError(f"Expected to find '{source}' to copy")
 
             if (
                 space == 'fsaverage'

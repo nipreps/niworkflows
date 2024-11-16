@@ -419,7 +419,7 @@ class GenerateSamplingReference(SimpleInterface):
             self.inputs.moving_image,
             fov_mask=self.inputs.fov_mask,
             force_xform_code=self.inputs.xform_code,
-            message='%s (niworkflows v%s)' % (self.__class__.__name__, __version__),
+            message=f'{self.__class__.__name__} (niworkflows v{__version__})',
             newpath=runtime.cwd,
         )
         return runtime

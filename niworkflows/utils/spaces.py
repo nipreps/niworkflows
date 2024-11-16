@@ -186,23 +186,23 @@ class Reference:
         if self.space in self._standard_spaces:
             object.__setattr__(self, 'standard', True)
 
-        _cohorts = ['%s' % t for t in _tfapi.TF_LAYOUT.get_cohorts(template=self.space)]
+        _cohorts = [f'{t}' for t in _tfapi.TF_LAYOUT.get_cohorts(template=self.space)]
         if 'cohort' in self.spec:
             if not _cohorts:
                 raise ValueError(
-                    'standard space "%s" does not accept a cohort specification.' % self.space
+                    f'standard space "{self.space}" does not accept a cohort specification.'
                 )
 
             if str(self.spec['cohort']) not in _cohorts:
                 raise ValueError(
-                    'standard space "%s" does not contain any cohort '
-                    'named "%s".' % (self.space, self.spec['cohort'])
+                    f'standard space "{self.space}" does not contain any cohort '
+                    f'named "{self.spec["cohort"]}".'
                 )
         elif _cohorts:
-            _cohorts = ', '.join(['"cohort-%s"' % c for c in _cohorts])
+            _cohorts = ', '.join([f'"cohort-{c}"' for c in _cohorts])
             raise ValueError(
-                'standard space "%s" is not fully defined.\n'
-                'Set a valid cohort selector from: %s.' % (self.space, _cohorts)
+                f'standard space "{self.space}" is not fully defined.\n'
+                f'Set a valid cohort selector from: {_cohorts}.'
             )
 
     @property
@@ -221,7 +221,7 @@ class Reference:
         """
         if 'cohort' not in self.spec:
             return self.space
-        return '%s:cohort-%s' % (self.space, self.spec['cohort'])
+        return f'{self.space}:cohort-{self.spec["cohort"]}'
 
     @property
     def legacyname(self):
@@ -258,8 +258,8 @@ class Reference:
         valid = list(self._standard_spaces) + NONSTANDARD_REFERENCES
         if value not in valid:
             raise ValueError(
-                'space identifier "%s" is invalid.\nValid '
-                'identifiers are: %s' % (value, ', '.join(valid))
+                f'space identifier "{value}" is invalid.\n'
+                f'Valid identifiers are: {", ".join(valid)}'
             )
 
     def __str__(self):
@@ -543,7 +543,7 @@ class SpatialReferences:
 
         """
         spaces = ', '.join([str(s) for s in self.references]) or '<none>.'
-        return 'Spatial References: %s' % spaces
+        return f'Spatial References: {spaces}'
 
     @property
     def references(self):
@@ -577,14 +577,14 @@ class SpatialReferences:
             self._refs += [self.check_space(value)]
             return
 
-        raise ValueError('space "%s" already in spaces.' % str(value))
+        raise ValueError(f'space "{value}" already in spaces.')
 
     def insert(self, index, value, error=True):
         """Concatenate one more space."""
         if value not in self:
             self._refs.insert(index, self.check_space(value))
         elif error is True:
-            raise ValueError('space "%s" already in spaces.' % str(value))
+            raise ValueError(f'space "{value}" already in spaces.')
 
     def get_spaces(self, standard=True, nonstandard=True, dim=(2, 3)):
         """
@@ -810,4 +810,4 @@ def _expand_entities(entities):
     """
     keys = list(entities.keys())
     values = list(product(*[entities[k] for k in keys]))
-    return [{k: v for k, v in zip(keys, combs)} for combs in values]
+    return [dict(zip(keys, combs)) for combs in values]

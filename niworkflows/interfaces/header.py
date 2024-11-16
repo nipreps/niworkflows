@@ -99,7 +99,7 @@ class CopyXForm(SimpleInterface):
                 _copyxform(
                     self.inputs.hdr_file,
                     out_name,
-                    message='CopyXForm (niworkflows v%s)' % __version__,
+                    message=f'CopyXForm (niworkflows v{__version__})',
                 )
                 self._results[f].append(out_name)
 
@@ -306,7 +306,7 @@ class ValidateImage(SimpleInterface):
     Analyses of this dataset MAY BE INVALID.
 </p>
 """
-        snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (warning_txt, description)
+        snippet = f'<h3 class="elem-title">{warning_txt}</h3>\n{description}\n'
         # Store new file and report
         img.to_filename(out_fname)
         with open(out_report, 'w') as fobj:
@@ -522,10 +522,7 @@ class SanitizeImage(SimpleInterface):
             img.to_filename(out_fname)
 
         if warning_txt:
-            snippet = '<h3 class="elem-title">%s</h3>\n%s\n' % (
-                warning_txt,
-                description,
-            )
+            snippet = f'<h3 class="elem-title">{warning_txt}</h3>\n{description}\n'
             with open(out_report, 'w') as fobj:
                 fobj.write(indent(snippet, '\t' * 3))
 

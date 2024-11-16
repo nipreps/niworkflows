@@ -34,7 +34,7 @@ from ..misc import check_valid_fs_license, pass_dummy_scans
 
 
 @pytest.mark.parametrize(
-    'algo_dummy_scans,dummy_scans,expected_out', [(2, 1, 1), (2, None, 2), (2, 0, 0)]
+    ('algo_dummy_scans', 'dummy_scans', 'expected_out'), [(2, 1, 1), (2, None, 2), (2, 0, 0)]
 )
 def test_pass_dummy_scans(algo_dummy_scans, dummy_scans, expected_out):
     """Check dummy scans passing."""
@@ -44,7 +44,7 @@ def test_pass_dummy_scans(algo_dummy_scans, dummy_scans, expected_out):
 
 
 @pytest.mark.parametrize(
-    'stdout,rc,valid',
+    ('stdout', 'rc', 'valid'),
     [
         (b'Successful command', 0, True),
         (b'', 0, True),

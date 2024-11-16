@@ -45,7 +45,7 @@ if datapath:
 
     for ds in datapath.glob('ds*/'):
         paths = [p for p in ds.glob('*_bold.nii.gz') if p.exists()]
-        subjects = set([p.name.replace('sub-', '').split('_')[0] for p in paths])
+        subjects = {p.name.replace('sub-', '').split('_')[0] for p in paths}
 
         for sub in subjects:
             subject_data = [p for p in paths if p.name.startswith(f'sub-{sub}')]
@@ -100,7 +100,7 @@ def symmetric_overlap(img1, img2):
     reason='FMRIPREP_REGRESSION_SOURCE env var not set, or no data is available',
 )
 @pytest.mark.skipif(not which('antsAI'), reason='antsAI executable not found')
-@pytest.mark.parametrize('input_fname,expected_fname', parameters)
+@pytest.mark.parametrize(('input_fname', 'expected_fname'), parameters)
 def test_masking(input_fname, expected_fname):
     """Check for regressions in masking."""
     from nipype import config as ncfg

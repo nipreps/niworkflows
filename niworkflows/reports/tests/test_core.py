@@ -133,7 +133,7 @@ def test_report2(tmp_path, bids_sessions):
 
 
 @pytest.mark.parametrize(
-    'orderings,expected_entities,expected_value_combos',
+    ('orderings', 'expected_entities', 'expected_value_combos'),
     [
         (
             ['session', 'task', 'run'],
@@ -179,7 +179,7 @@ def test_process_orderings_small(
 
 
 @pytest.mark.parametrize(
-    'orderings,expected_entities,first_value_combo,last_value_combo',
+    ('orderings', 'expected_entities', 'first_value_combo', 'last_value_combo'),
     [
         (
             ['session', 'task', 'ceagent', 'run'],
@@ -259,7 +259,7 @@ def test_generated_reportlets(bids_sessions, ordering):
 
 
 @pytest.mark.parametrize(
-    'subject_id,out_html',
+    ('subject_id', 'out_html'),
     [
         ('sub-01', 'sub-01.html'),
         ('sub-sub1', 'sub-sub1.html'),

@@ -266,7 +266,7 @@ def plot_segs(
         plot_params['cut_coords'] = cuts[d]
         svg = _plot_anat_with_contours(image_nii, segs=seg_niis, compress=compress, **plot_params)
         # Find and replace the figure_1 id.
-        svg = svg.replace('figure_1', 'segmentation-%s-%s' % (d, uuid4()), 1)
+        svg = svg.replace('figure_1', f'segmentation-{d}-{uuid4()}', 1)
         out_files.append(fromstring(svg))
 
     return out_files
@@ -386,7 +386,7 @@ def plot_registration(
         display.close()
 
         # Find and replace the figure_1 id.
-        svg = svg.replace('figure_1', '%s-%s-%s' % (div_id, mode, uuid4()), 1)
+        svg = svg.replace('figure_1', f'{div_id}-{mode}-{uuid4()}', 1)
         out_files.append(fromstring(svg))
 
     return out_files
@@ -467,11 +467,10 @@ def _compose_view(bg_svgs, fg_svgs, ref=0):
             2,
             """\
 <style type="text/css">
-@keyframes flickerAnimation%s { 0%% {opacity: 1;} 100%% { opacity: 0; }}
-.foreground-svg { animation: 1s ease-in-out 0s alternate none infinite paused flickerAnimation%s;}
-.foreground-svg:hover { animation-play-state: running;}
-</style>"""
-            % tuple([uuid4()] * 2),
+@keyframes flickerAnimation{0} {{ 0% {{opacity: 1;}} 100% {{ opacity: 0; }}}}
+.foreground-svg {{ animation: 1s ease-in-out 0s alternate none infinite paused flickerAnimation{0};}}
+.foreground-svg:hover {{ animation-play-state: running;}}
+</style>""".format(uuid4()),
         )
 
     return svg
@@ -629,7 +628,7 @@ def plot_melodic_components(
             textcoords='axes fraction',
             size=12,
             color='#ea8800',
-            bbox=dict(boxstyle='round', fc='#f7dcb7', ec='#FC990E'),
+            bbox={'boxstyle': 'round', 'fc': '#f7dcb7', 'ec': '#FC990E'},
         )
         ax.axes.get_xaxis().set_visible(False)
         ax.axes.get_yaxis().set_visible(False)
