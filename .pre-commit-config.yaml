@@ -14,8 +14,11 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.7.4
     hooks:
-      - id: ruff
+      - name: ruff check --fix
+        id: ruff
         args: [ --fix ]
-      - id: ruff-format
-      - id: ruff
+      - name: ruff format
+        id: ruff-format
+      - name: fix implicit string concatenation
+        id: ruff
         args: [ --select, ISC001, --fix ]
