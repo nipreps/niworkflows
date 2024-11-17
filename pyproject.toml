@@ -201,3 +201,7 @@ source = [
   "niworkflows",
   "**/site-packages/niworkflows"
 ]
+
+[tool.codespell]
+skip = "*/data/*,*/docs/_build/*,./examples/viz-report.*"
+ignore-words-list = "objekt,nd"
