@@ -157,3 +157,21 @@ jobs:
           file: coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ always() }}
+
+  checks:
+    runs-on: 'ubuntu-latest'
+    continue-on-error: true
+    strategy:
+      matrix:
+        check: ['style', 'spellcheck']
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v3
+      - name: Show tox config
+        run: uvx tox c
+      - name: Show tox config (this call)
+        run: uvx tox c -e ${{ matrix.check }}
+      - name: Run check
+        run: uvx tox -e ${{ matrix.check }}
