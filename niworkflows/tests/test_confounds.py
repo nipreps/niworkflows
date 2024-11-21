@@ -98,15 +98,15 @@ def test_expansion_derivatives_and_powers():
         {
             "a": [-1, -2, -3, -4, -5],
             "a_power2": [1, 4, 9, 16, 25],
-            "a_derivative1": [np.NaN, -1, -1, -1, -1],
-            "a_derivative1_power2": [np.NaN, 1, 1, 1, 1],
-            "b_derivative1": [np.NaN, 0, 0, 0, 0],
-            "b_derivative1_power2": [np.NaN, 0, 0, 0, 0],
-            "c_power2_derivative1": [np.NaN, 1, -1, 1, -1],
-            "c_power2_derivative2": [np.NaN, np.NaN, -2, 2, -2],
+            "a_derivative1": [np.nan, -1, -1, -1, -1],
+            "a_derivative1_power2": [np.nan, 1, 1, 1, 1],
+            "b_derivative1": [np.nan, 0, 0, 0, 0],
+            "b_derivative1_power2": [np.nan, 0, 0, 0, 0],
+            "c_power2_derivative1": [np.nan, 1, -1, 1, -1],
+            "c_power2_derivative2": [np.nan, np.nan, -2, 2, -2],
             "d": [9, 7, 5, 3, 1],
             "e": [0, 0, 0, 0, 0],
-            "f": [np.NaN, 6, 4, 2, 0],
+            "f": [np.nan, 6, 4, 2, 0],
         }
     )
     exp_data = _expand_test(model_formula)
@@ -122,10 +122,10 @@ def test_expansion_na_robustness():
     model_formula = "(dd1(f))^^2"
     expected_data = pd.DataFrame(
         {
-            "f": [np.NaN, 6, 4, 2, 0],
-            "f_power2": [np.NaN, 36, 16, 4, 0],
-            "f_derivative1": [np.NaN, np.NaN, -2, -2, -2],
-            "f_derivative1_power2": [np.NaN, np.NaN, 4, 4, 4],
+            "f": [np.nan, 6, 4, 2, 0],
+            "f_power2": [np.nan, 36, 16, 4, 0],
+            "f_derivative1": [np.nan, np.nan, -2, -2, -2],
+            "f_derivative1_power2": [np.nan, np.nan, 4, 4, 4],
         }
     )
     exp_data = _expand_test(model_formula)
