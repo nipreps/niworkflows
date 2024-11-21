@@ -749,6 +749,6 @@ class SignalExtraction(SimpleInterface):
 
         output = np.vstack((self.inputs.class_labels, series.astype(str)))
         self._results["out_file"] = os.path.join(runtime.cwd, self.inputs.out_file)
-        np.savetxt(self._results["out_file"], output, fmt=b"%s", delimiter="\t")
+        np.savetxt(self._results["out_file"], output, fmt="%s", delimiter="\t")
 
         return runtime
