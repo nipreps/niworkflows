@@ -48,6 +48,14 @@ def find_resource_or_skip(resource):
     return pathlike
 
 
+@pytest.fixture(scope="session", autouse=True)
+def legacy_printoptions():
+    from packaging.version import Version
+
+    if Version(np.__version__) >= Version("1.22"):
+        np.set_printoptions(legacy="1.21")
+
+
 @pytest.fixture(autouse=True)
 def add_np(doctest_namespace):
     from .utils.bids import collect_data
