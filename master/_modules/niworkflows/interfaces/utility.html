@@ -588,8 +588,7 @@
 <span class="sd">    &gt;&gt;&gt; addheader.inputs.in_file = &#39;data.tsv&#39;</span>
 <span class="sd">    &gt;&gt;&gt; addheader.inputs.columns = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;]</span>
 <span class="sd">    &gt;&gt;&gt; res = addheader.run()</span>
-<span class="sd">    &gt;&gt;&gt; df = pd.read_csv(res.outputs.out_file, delim_whitespace=True,</span>
-<span class="sd">    ...                  index_col=None)</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.read_csv(res.outputs.out_file, sep=&#39;\s+&#39;, index_col=None)</span>
 <span class="sd">    &gt;&gt;&gt; df.columns.ravel().tolist()</span>
 <span class="sd">    [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;]</span>
 
@@ -651,7 +650,7 @@
 <span class="sd">    &gt;&gt;&gt; join.inputs.in_file = &#39;data.tsv&#39;</span>
 <span class="sd">    &gt;&gt;&gt; join.inputs.join_file = &#39;add.tsv&#39;</span>
 <span class="sd">    &gt;&gt;&gt; res = join.run()</span>
-<span class="sd">    &gt;&gt;&gt; df = pd.read_csv(res.outputs.out_file, delim_whitespace=True,</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.read_csv(res.outputs.out_file, sep=&#39;\s+&#39;,</span>
 <span class="sd">    ...                  index_col=None, dtype=float, header=None)</span>
 <span class="sd">    &gt;&gt;&gt; df.columns.ravel().tolist() == list(range(5))</span>
 <span class="sd">    True</span>
@@ -668,8 +667,7 @@
 <span class="sd">    &gt;&gt;&gt; res = join.run()</span>
 <span class="sd">    &gt;&gt;&gt; res.outputs.out_file  # doctest: +ELLIPSIS</span>
 <span class="sd">    &#39;...data_joined.tsv&#39;</span>
-<span class="sd">    &gt;&gt;&gt; df = pd.read_csv(res.outputs.out_file, delim_whitespace=True,</span>
-<span class="sd">    ...                  index_col=None)</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.read_csv(res.outputs.out_file, sep=&#39;\s+&#39;, index_col=None)</span>
 <span class="sd">    &gt;&gt;&gt; df.columns.ravel().tolist()</span>
 <span class="sd">    [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;]</span>
 
@@ -682,8 +680,7 @@
 <span class="sd">    &gt;&gt;&gt; join.inputs.side = &#39;left&#39;</span>
 <span class="sd">    &gt;&gt;&gt; join.inputs.columns = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;]</span>
 <span class="sd">    &gt;&gt;&gt; res = join.run()</span>
-<span class="sd">    &gt;&gt;&gt; df = pd.read_csv(res.outputs.out_file, delim_whitespace=True,</span>
-<span class="sd">    ...                  index_col=None)</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.read_csv(res.outputs.out_file, sep=&#39;\s+&#39;, index_col=None)</span>
 <span class="sd">    &gt;&gt;&gt; df.columns.ravel().tolist()</span>
 <span class="sd">    [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;]</span>
 
