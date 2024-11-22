@@ -21,13 +21,15 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Check the refmap module."""
+
 import os
 import unittest
-from ..refmap import init_epi_reference_wf
+
 from ....testing import has_afni
+from ..refmap import init_epi_reference_wf
 
 
-@unittest.skipUnless(has_afni, "Needs AFNI")
+@unittest.skipUnless(has_afni, 'Needs AFNI')
 def test_reference(tmpdir, ds000030_dir, workdir, outdir):
     """Exercise the EPI reference workflow."""
     tmpdir.chdir()
@@ -37,7 +39,7 @@ def test_reference(tmpdir, ds000030_dir, workdir, outdir):
         wf.base_dir = str(workdir)
 
     wf.inputs.inputnode.in_files = [
-        str(f) for f in (ds000030_dir / "sub-10228" / "func").glob("*_bold.nii.gz")
+        str(f) for f in (ds000030_dir / 'sub-10228' / 'func').glob('*_bold.nii.gz')
     ]
 
     # if outdir:

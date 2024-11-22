@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "NeuroImaging Workflows provides processing tools for magnetic resonance images of the brain."
 readme = "README.rst"
 license = {file = "LICENSE"}
-requires-python = ">= 3.8"
+requires-python = ">= 3.9"
 authors = [
     { name = "The NiPreps Developers", email = "nipreps@gmail.com" },
 ]
@@ -16,7 +16,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -24,29 +23,28 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 dependencies = [
-    "attrs",
+    "acres",
+    "attrs >=20.1",
     "importlib_resources >= 5.7; python_version < '3.11'",
-    "jinja2",
-    "looseversion",
-    "matplotlib >= 3.4.2",
-    "nibabel >= 3.0",
-    "nilearn >= 0.5.2",
-    "nipype >= 1.8.5",
-#    "nitransforms >= 21.0.0",
-    "nitransforms@https://github.com/nipy/nitransforms/archive/refs/heads/master.zip",
-    "numpy",
-    "packaging",
-    "pandas",
-    "pybids >= 0.15.1",
-    "PyYAML",
-    "scikit-image",
-    "scipy",
-    "seaborn",
-    "svgutils >= 0.3.4",
-    "templateflow >= 0.7.2",
-    "traits < 6.4",
-    "transforms3d",
     "gradunwarp@https://github.com/nipreps/gradunwarp/archive/refs/heads/master.zip",
+    "jinja2 >=3",
+    "looseversion",
+    "matplotlib >= 3.5",
+    "nibabel >= 3.0",
+    "nilearn >= 0.8",
+    "nipype >= 1.8.5",
+    "nitransforms >= 24.0.0",
+    "numpy >= 1.20",
+    "packaging",
+    "pandas >= 1.2",
+    "pybids >= 0.15.1",
+    "PyYAML >= 5.4",
+    "scikit-image >= 0.18",
+    "scipy >= 1.8",
+    "seaborn >= 0.11",
+    "svgutils >= 0.3.4",
+    "templateflow >= 23.1",
+    "transforms3d >= 0.4",
 ]
 
 [project.optional-dependencies]
@@ -65,12 +63,12 @@ style = [
     "flake8 >= 3.7.0",
 ]
 tests = [
-    "coverage >=5.2.1",
-    "pytest >= 4.4",
-    "pytest-cov",
+    "coverage[toml] >=5.2.1",
+    "pytest >= 6",
+    "pytest-cov >= 2.11",
     "pytest-env",
-    "pytest-xdist >= 1.28",
-    "pytest-xvfb",
+    "pytest-xdist >= 2.5",
+    "pytest-xvfb >= 2",
 ]
 # Aliases
 all = ["niworkflows[doc,pointclouds,style,tests]"]
@@ -112,30 +110,84 @@ raw-options = {version_scheme = "release-branch-semver" }
 [tool.hatch.build.hooks.vcs]
 version-file = "niworkflows/_version.py"
 
+# Disable black
 [tool.black]
+exclude = ".*"
+
+[tool.ruff]
 line-length = 99
-target-version = ['py37']
-skip-string-normalization = true
-extend-exclude = '_version.py'
+
+[tool.ruff.lint]
+extend-select = [
+  "F",
+  "E",
+  "W",
+  "I",
+  "UP",
+  "YTT",
+  "S",
+  "BLE",
+  "B",
+  "A",
+  # "CPY",
+  "C4",
+  "DTZ",
+  "T10",
+  # "EM",
+  "EXE",
+  "FA",
+  "ISC",
+  "ICN",
+  "PT",
+  "Q",
+]
+ignore = [
+  "S311",  # We are not using random for cryptographic purposes
+  "ISC001",
+  "S603",
+]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+
+[tool.ruff.lint.extend-per-file-ignores]
+"*/__init__.py" = ["F401"]
+"*/test_*.py" = ["S101"]
+"docs/conf.py" = ["A001"]
+"niworkflows/engine/plugin.py" = [
+  "BLE001",  # except Exception is intentional
+  "S101",  # Assertions are intentional
+]
+
+[tool.ruff.format]
+quote-style = "single"
 
 [tool.pytest.ini_options]
-norecursedirs = ".git"
-addopts = "-sv --doctest-modules"
+minversion = "6"
+testpaths = ["niworkflows"]
+log_cli_level = "INFO"
+xfail_strict = true
+norecursedirs = [".git"]
+addopts = [
+  "-svx",
+  "-ra",
+  "--strict-config",
+  "--strict-markers",
+  "--doctest-modules",
+  # Config pytest-cov
+  "--cov=niworkflows",
+  "--cov-report=xml",
+  "--cov-config=pyproject.toml",
+]
 doctest_optionflags = "ALLOW_UNICODE NORMALIZE_WHITESPACE ELLIPSIS"
-env = """
-    PYTHONHASHSEED=0
-"""
-filterwarnings = """
-    ignore::DeprecationWarning
-"""
+env = "PYTHONHASHSEED=0"
+filterwarnings = ["ignore::DeprecationWarning"]
 junit_family = "xunit2"
 
 [tool.coverage.run]
 branch = true
 omit = [
-    "*/tests/*",
-    "niworkflows/_version.py",
-    "niworkflows/conftest.py",
+    "*/_version.py",
 ]
 
 [tool.coverage.report]
@@ -144,3 +196,13 @@ exclude_lines = [
     "raise NotImplementedError",
     "warnings\\.warn",
 ]
+
+[tool.coverage.paths]
+source = [
+  "niworkflows",
+  "**/site-packages/niworkflows"
+]
+
+[tool.codespell]
+skip = "*/data/*,*/docs/_build/*,./examples/viz-report.*"
+ignore-words-list = "objekt,nd"

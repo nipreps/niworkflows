@@ -9,6 +9,6 @@ msg = (
     'Niworkflows will be deprecating visualizations in favor of a standalone library "nireports".'
 )
 
-warnings.warn(msg, PendingDeprecationWarning)
+warnings.warn(msg, PendingDeprecationWarning, stacklevel=2)
 
-__all__ = ["plot_carpet", "SVGNS"]
+__all__ = ['plot_carpet', 'SVGNS']

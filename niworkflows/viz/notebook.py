@@ -21,10 +21,13 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Visualization component for Jupyter Notebooks."""
+
 from pathlib import Path
-import numpy as np
+
 import nibabel as nb
-from .utils import compose_view, plot_registration, cuts_from_bbox
+import numpy as np
+
+from .utils import compose_view, cuts_from_bbox, plot_registration
 
 
 def display(
@@ -32,11 +35,12 @@ def display(
     moving_image,
     contour=None,
     cuts=None,
-    fixed_label="F",
-    moving_label="M",
+    fixed_label='F',
+    moving_label='M',
 ):
     """Plot the flickering panels to show a registration process."""
-    from IPython.display import SVG, display as _disp
+    from IPython.display import SVG
+    from IPython.display import display as _disp
 
     if isinstance(fixed_image, (str, Path)):
         fixed_image = nb.load(str(fixed_image))
@@ -51,9 +55,9 @@ def display(
             cuts = cuts_from_bbox(contour, cuts=n_cuts)
         else:
             hdr = fixed_image.header.copy()
-            hdr.set_data_dtype("uint8")
+            hdr.set_data_dtype('uint8')
             mask_nii = nb.Nifti1Image(
-                np.ones(fixed_image.shape, dtype="uint8"), fixed_image.affine, hdr
+                np.ones(fixed_image.shape, dtype='uint8'), fixed_image.affine, hdr
             )
             cuts = cuts_from_bbox(mask_nii, cuts=n_cuts)
 
@@ -63,7 +67,7 @@ def display(
             compose_view(
                 plot_registration(
                     fixed_image,
-                    "fixed-image",
+                    'fixed-image',
                     estimate_brightness=True,
                     cuts=cuts,
                     label=fixed_label,
@@ -72,7 +76,7 @@ def display(
                 ),
                 plot_registration(
                     moving_image,
-                    "moving-image",
+                    'moving-image',
                     estimate_brightness=True,
                     cuts=cuts,
                     label=moving_label,

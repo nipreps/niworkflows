@@ -26,12 +26,14 @@ Reports builder for BIDS-Apps.
 Generalizes report generation across BIDS-Apps
 
 """
-from pathlib import Path
+
 import re
-from itertools import compress
 from collections import defaultdict
-from bids.layout import BIDSLayout, add_config_paths
+from itertools import compress
+from pathlib import Path
+
 import jinja2
+from bids.layout import BIDSLayout, add_config_paths
 from nipype.utils.filemanip import copyfile
 
 from .. import data, load_resource
@@ -43,7 +45,7 @@ except ValueError as e:
     if "Configuration 'figures' already exists" != str(e):
         raise
 
-PLURAL_SUFFIX = defaultdict(str("s").format, [("echo", "es")])
+PLURAL_SUFFIX = defaultdict('s'.format, [('echo', 'es')])
 SVG_SNIPPET = [
     """\
 <object class="svg-reportlet" type="image/svg+xml" data="./{0}">
@@ -74,6 +76,7 @@ class Smallest:
     >>> sorted([1, None, 2], key=lambda x: x if x is not None else Smallest())
     [None, 1, 2]
     """
+
     def __lt__(self, other):
         return not isinstance(other, Smallest)
 
@@ -166,28 +169,28 @@ class Reportlet(Element):
 
     def __init__(self, layout, out_dir, config=None):
         if not config:
-            raise RuntimeError("Reportlet must have a config object")
+            raise RuntimeError('Reportlet must have a config object')
 
         self.name = config.get(
-            "name", "_".join("%s-%s" % i for i in sorted(config["bids"].items()))
+            'name', '_'.join(f'{k}-{v}' for k, v in sorted(config['bids'].items()))
         )
-        self.title = config.get("title")
-        self.subtitle = config.get("subtitle")
-        self.description = config.get("description")
+        self.title = config.get('title')
+        self.subtitle = config.get('subtitle')
+        self.description = config.get('description')
 
         # Query the BIDS layout of reportlets
-        files = layout.get(**config["bids"])
+        files = layout.get(**config['bids'])
 
         self.components = []
         for bidsfile in files:
             src = Path(bidsfile.path)
-            ext = "".join(src.suffixes)
-            desc_text = config.get("caption")
+            ext = ''.join(src.suffixes)
+            desc_text = config.get('caption')
 
             contents = None
-            if ext == ".html":
+            if ext == '.html':
                 contents = src.read_text().strip()
-            elif ext == ".svg":
+            elif ext == '.svg':
                 entities = dict(bidsfile.entities)
                 if desc_text:
                     desc_text = desc_text.format(**entities)
@@ -200,7 +203,7 @@ class Reportlet(Element):
                     dst.parent.mkdir(parents=True, exist_ok=True)
                     copyfile(src, dst, copy=True, use_hardlink=True)
 
-                contents = SVG_SNIPPET[config.get("static", True)].format(html_anchor)
+                contents = SVG_SNIPPET[config.get('static', True)].format(html_anchor)
 
                 # Our current implementations of dynamic reportlets do this themselves,
                 # however I'll leave the code here since this is potentially something we
@@ -227,7 +230,7 @@ class Reportlet(Element):
 class SubReport(Element):
     """SubReports are sections within a Report."""
 
-    def __init__(self, name, isnested=False, reportlets=None, title=""):
+    def __init__(self, name, isnested=False, reportlets=None, title=''):
         self.name = name
         self.title = title
         self.reportlets = reportlets or []
@@ -266,7 +269,7 @@ class Report:
         out_dir,
         run_uuid,
         config=None,
-        out_filename="report.html",
+        out_filename='report.html',
         packagename=None,
         reportlets_dir=None,
         subject_id=None,
@@ -282,36 +285,35 @@ class Report:
         self.packagename = packagename
         self.subject_id = subject_id
         if subject_id is not None:
-            self.subject_id = (
-                subject_id[4:] if subject_id.startswith("sub-") else subject_id
-            )
-            self.out_filename = f"sub-{self.subject_id}.html"
+            self.subject_id = subject_id[4:] if subject_id.startswith('sub-') else subject_id
+            self.out_filename = f'sub-{self.subject_id}.html'
 
         # Default template from niworkflows
         self.template_path = load_resource('reports') / 'report.tpl'
+        if not self.template_path.exists():
+            raise RuntimeError('Could not find report template. Corrupted installation.')
         self._load_config(Path(config or load_resource('reports') / 'default.yml'))
-        assert self.template_path.exists()
 
     def _load_config(self, config):
         from yaml import safe_load as load
 
         settings = load(config.read_text())
-        self.packagename = self.packagename or settings.get("package", None)
+        self.packagename = self.packagename or settings.get('package', None)
 
         if self.packagename is not None:
             self.root = self.root / self.packagename
             self.out_dir = self.out_dir / self.packagename
 
         if self.subject_id is not None:
-            self.root = self.root / "sub-{}".format(self.subject_id)
+            self.root = self.root / f'sub-{self.subject_id}'
 
-        if "template_path" in settings:
-            self.template_path = config.parent / settings["template_path"]
+        if 'template_path' in settings:
+            self.template_path = config.parent / settings['template_path']
 
-        self.index(settings["sections"])
+        self.index(settings['sections'])
 
     def init_layout(self):
-        self.layout = BIDSLayout(self.root, config="figures", validate=False)
+        self.layout = BIDSLayout(self.root, config='figures', validate=False)
 
     def index(self, config):
         """
@@ -324,15 +326,13 @@ class Report:
         for subrep_cfg in config:
             # First determine whether we need to split by some ordering
             # (ie. sessions / tasks / runs), which are separated by commas.
-            orderings = [
-                s for s in subrep_cfg.get("ordering", "").strip().split(",") if s
-            ]
+            orderings = [s for s in subrep_cfg.get('ordering', '').strip().split(',') if s]
             entities, list_combos = self._process_orderings(orderings, self.layout)
 
             if not list_combos:  # E.g. this is an anatomical reportlet
                 reportlets = [
                     Reportlet(self.layout, self.out_dir, config=cfg)
-                    for cfg in subrep_cfg["reportlets"]
+                    for cfg in subrep_cfg['reportlets']
                 ]
             else:
                 # Do not use dictionary for queries, as we need to preserve ordering
@@ -343,15 +343,14 @@ class Report:
                     c_filt = list(filter(None, c))
                     ent_filt = list(compress(entities, c))
                     # Set a common title for this particular combination c
-                    title = "Reports for: %s." % ", ".join(
-                        [
-                            '%s <span class="bids-entity">%s</span>'
-                            % (ent_filt[i], c_filt[i])
+                    title = 'Reports for: {}.'.format(
+                        ', '.join(
+                            f'{ent_filt[i]} <span class="bids-entity">{c_filt[i]}</span>'
                             for i in range(len(c_filt))
-                        ]
+                        )
                     )
-                    for cfg in subrep_cfg["reportlets"]:
-                        cfg["bids"].update({entities[i]: c[i] for i in range(len(c))})
+                    for cfg in subrep_cfg['reportlets']:
+                        cfg['bids'].update({entities[i]: c[i] for i in range(len(c))})
                         rlet = Reportlet(self.layout, self.out_dir, config=cfg)
                         if not rlet.is_empty():
                             rlet.title = title
@@ -362,59 +361,53 @@ class Report:
             reportlets = [r for r in reportlets if not r.is_empty()]
             if reportlets:
                 sub_report = SubReport(
-                    subrep_cfg["name"],
+                    subrep_cfg['name'],
                     isnested=bool(list_combos),
                     reportlets=reportlets,
-                    title=subrep_cfg.get("title"),
+                    title=subrep_cfg.get('title'),
                 )
                 self.sections.append(sub_report)
 
         # Populate errors section
-        error_dir = (
-            self.out_dir / "sub-{}".format(self.subject_id) / "log" / self.run_uuid
-        )
+        error_dir = self.out_dir / f'sub-{self.subject_id}' / 'log' / self.run_uuid
         if error_dir.is_dir():
             from ..utils.misc import read_crashfile
 
-            self.errors = [read_crashfile(str(f)) for f in error_dir.glob("crash*.*")]
+            self.errors = [read_crashfile(str(f)) for f in error_dir.glob('crash*.*')]
 
     def generate_report(self):
         """Once the Report has been indexed, the final HTML can be generated"""
-        logs_path = self.out_dir / "logs"
+        logs_path = self.out_dir / 'logs'
 
         boilerplate = []
         boiler_idx = 0
 
-        if (logs_path / "CITATION.html").exists():
+        if (logs_path / 'CITATION.html').exists():
             text = (
-                re.compile("<body>(.*?)</body>", re.DOTALL | re.IGNORECASE)
-                .findall((logs_path / "CITATION.html").read_text())[0]
+                re.compile('<body>(.*?)</body>', re.DOTALL | re.IGNORECASE)
+                .findall((logs_path / 'CITATION.html').read_text())[0]
                 .strip()
             )
-            boilerplate.append(
-                (boiler_idx, "HTML", f'<div class="boiler-html">{text}</div>')
-            )
+            boilerplate.append((boiler_idx, 'HTML', f'<div class="boiler-html">{text}</div>'))
             boiler_idx += 1
 
-        if (logs_path / "CITATION.md").exists():
-            text = (logs_path / "CITATION.md").read_text()
-            boilerplate.append((boiler_idx, "Markdown", f"<pre>{text}</pre>\n"))
+        if (logs_path / 'CITATION.md').exists():
+            text = (logs_path / 'CITATION.md').read_text()
+            boilerplate.append((boiler_idx, 'Markdown', f'<pre>{text}</pre>\n'))
             boiler_idx += 1
 
-        if (logs_path / "CITATION.tex").exists():
+        if (logs_path / 'CITATION.tex').exists():
             text = (
-                re.compile(
-                    r"\\begin{document}(.*?)\\end{document}", re.DOTALL | re.IGNORECASE
-                )
-                .findall((logs_path / "CITATION.tex").read_text())[0]
+                re.compile(r'\\begin{document}(.*?)\\end{document}', re.DOTALL | re.IGNORECASE)
+                .findall((logs_path / 'CITATION.tex').read_text())[0]
                 .strip()
             )
-            bib = data.Loader(self.packagename).readable("data/boilerplate.bib")
+            bib = data.Loader(self.packagename).readable('data/boilerplate.bib')
             boilerplate.append(
                 (
                     boiler_idx,
-                    "LaTeX",
-                    f"<pre>{text}</pre>\n<h3>Bibliography</h3>\n<pre>{bib.read_text()}</pre>\n",
+                    'LaTeX',
+                    f'<pre>{text}</pre>\n<h3>Bibliography</h3>\n<pre>{bib.read_text()}</pre>\n',
                 )
             )
             boiler_idx += 1
@@ -423,7 +416,7 @@ class Report:
             loader=jinja2.FileSystemLoader(searchpath=str(self.template_path.parent)),
             trim_blocks=True,
             lstrip_blocks=True,
-            autoescape=False,
+            autoescape=False,  # noqa: S701  XXX Investigate if this is a problem in nireports.
         )
         report_tpl = env.get_template(self.template_path.name)
         report_render = report_tpl.render(
@@ -432,7 +425,7 @@ class Report:
 
         # Write out report
         self.out_dir.mkdir(parents=True, exist_ok=True)
-        (self.out_dir / self.out_filename).write_text(report_render, encoding="UTF-8")
+        (self.out_dir / self.out_filename).write_text(report_render, encoding='UTF-8')
         return len(self.errors)
 
     @staticmethod
@@ -476,14 +469,10 @@ class Report:
         # the "kept" entities
         entities = list(compress(orderings, keep_idx))
         # the "kept" value combinations
-        value_combos = [
-            tuple(compress(value_combo, keep_idx)) for value_combo in all_value_combos
-        ]
+        value_combos = [tuple(compress(value_combo, keep_idx)) for value_combo in all_value_combos]
         # sort the value combinations alphabetically from the first entity to the last entity
         value_combos.sort(
-            key=lambda entry: tuple(
-                value if value is not None else Smallest() for value in entry
-            )
+            key=lambda entry: tuple(value if value is not None else Smallest() for value in entry)
         )
 
         return entities, value_combos
@@ -529,7 +518,7 @@ def generate_reports(
     """Execute run_reports on a list of subjects."""
     reportlets_dir = None
     if work_dir is not None:
-        reportlets_dir = Path(work_dir) / "reportlets"
+        reportlets_dir = Path(work_dir) / 'reportlets'
     report_errors = [
         run_reports(
             output_dir,
@@ -546,15 +535,13 @@ def generate_reports(
     if errno:
         import logging
 
-        logger = logging.getLogger("cli")
-        error_list = ", ".join(
-            "%s (%d)" % (subid, err)
-            for subid, err in zip(subject_list, report_errors)
-            if err
+        logger = logging.getLogger('cli')
+        error_list = ', '.join(
+            '%s (%d)' % (subid, err) for subid, err in zip(subject_list, report_errors) if err
         )
         logger.error(
-            "Preprocessing did not finish successfully. Errors occurred while processing "
-            "data from participants: %s. Check the HTML reports for details.",
+            'Preprocessing did not finish successfully. Errors occurred while processing '
+            'data from participants: %s. Check the HTML reports for details.',
             error_list,
         )
     return errno

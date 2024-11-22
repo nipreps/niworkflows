@@ -22,11 +22,10 @@
 #
 """Workflow for the generation of EPI (echo-planar imaging) references."""
 
-from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
+from nipype.pipeline import engine as pe
 
 from ...engine.workflows import LiterateWorkflow as Workflow
-
 
 DEFAULT_MEMORY_MIN_GB = 0.01
 
@@ -34,7 +33,7 @@ DEFAULT_MEMORY_MIN_GB = 0.01
 def init_epi_reference_wf(
     omp_nthreads,
     auto_bold_nss=False,
-    name="epi_reference_wf",
+    name='epi_reference_wf',
 ):
     """
     Build a workflow that generates a reference map from a set of EPI images.
@@ -116,42 +115,38 @@ def init_epi_reference_wf(
 
     """
     from nipype.interfaces.ants import N4BiasFieldCorrection
-    from ...utils.connections import listify
 
     from ...interfaces.bold import NonsteadyStatesDetector
     from ...interfaces.freesurfer import StructuralReference
     from ...interfaces.header import ValidateImage
     from ...interfaces.images import RobustAverage
     from ...interfaces.nibabel import IntensityClip
+    from ...utils.connections import listify
 
     wf = Workflow(name=name)
 
-    inputnode = pe.Node(
-        niu.IdentityInterface(fields=["in_files", "t_masks"]), name="inputnode"
-    )
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_files', 't_masks']), name='inputnode')
     outputnode = pe.Node(
         niu.IdentityInterface(
             fields=[
-                "epi_ref_file",
-                "xfm_files",
-                "per_run_ref_files",
-                "drift_factors",
-                "n_dummy",
-                "validation_report",
+                'epi_ref_file',
+                'xfm_files',
+                'per_run_ref_files',
+                'drift_factors',
+                'n_dummy',
+                'validation_report',
             ]
         ),
-        name="outputnode",
+        name='outputnode',
     )
 
-    validate_nii = pe.MapNode(
-        ValidateImage(), name="validate_nii", iterfield=["in_file"]
-    )
+    validate_nii = pe.MapNode(ValidateImage(), name='validate_nii', iterfield=['in_file'])
 
     per_run_avgs = pe.MapNode(
-        RobustAverage(), name="per_run_avgs", mem_gb=1, iterfield=["in_file", "t_mask"]
+        RobustAverage(), name='per_run_avgs', mem_gb=1, iterfield=['in_file', 't_mask']
     )
 
-    clip_avgs = pe.MapNode(IntensityClip(), name="clip_avgs", iterfield=["in_file"])
+    clip_avgs = pe.MapNode(IntensityClip(), name='clip_avgs', iterfield=['in_file'])
 
     # de-gradient the fields ("bias/illumination artifact")
     n4_avgs = pe.MapNode(
@@ -163,13 +158,13 @@ def init_epi_reference_wf(
             shrink_factor=4,
         ),
         n_procs=omp_nthreads,
-        name="n4_avgs",
-        iterfield=["input_image"],
+        name='n4_avgs',
+        iterfield=['input_image'],
     )
     clip_bg_noise = pe.MapNode(
         IntensityClip(p_min=2.0, p_max=100.0),
-        name="clip_bg_noise",
-        iterfield=["in_file"],
+        name='clip_bg_noise',
+        iterfield=['in_file'],
     )
 
     epi_merge = pe.Node(
@@ -182,48 +177,48 @@ def init_epi_reference_wf(
             no_iteration=True,
             transform_outputs=True,
         ),
-        name="epi_merge",
+        name='epi_merge',
     )
 
-    post_merge = pe.Node(niu.Function(function=_post_merge), name="post_merge")
+    post_merge = pe.Node(niu.Function(function=_post_merge), name='post_merge')
 
     def _set_threads(in_list, maximum):
         return min(len(in_list), maximum)
 
     # fmt:off
     wf.connect([
-        (inputnode, validate_nii, [(("in_files", listify), "in_file")]),
-        (validate_nii, per_run_avgs, [("out_file", "in_file")]),
-        (per_run_avgs, clip_avgs, [("out_file", "in_file")]),
-        (clip_avgs, n4_avgs, [("out_file", "input_image")]),
-        (n4_avgs, clip_bg_noise, [("output_image", "in_file")]),
+        (inputnode, validate_nii, [(('in_files', listify), 'in_file')]),
+        (validate_nii, per_run_avgs, [('out_file', 'in_file')]),
+        (per_run_avgs, clip_avgs, [('out_file', 'in_file')]),
+        (clip_avgs, n4_avgs, [('out_file', 'input_image')]),
+        (n4_avgs, clip_bg_noise, [('output_image', 'in_file')]),
         (clip_bg_noise, epi_merge, [
-            ("out_file", "in_files"),
-            (("out_file", _set_threads, omp_nthreads), "num_threads"),
+            ('out_file', 'in_files'),
+            (('out_file', _set_threads, omp_nthreads), 'num_threads'),
         ]),
-        (epi_merge, post_merge, [("out_file", "in_file"),
-                                 ("transform_outputs", "in_xfms")]),
-        (post_merge, outputnode, [("out", "epi_ref_file")]),
-        (epi_merge, outputnode, [("transform_outputs", "xfm_files")]),
-        (per_run_avgs, outputnode, [("out_drift", "drift_factors")]),
-        (n4_avgs, outputnode, [("output_image", "per_run_ref_files")]),
-        (validate_nii, outputnode, [("out_report", "validation_report")]),
+        (epi_merge, post_merge, [('out_file', 'in_file'),
+                                 ('transform_outputs', 'in_xfms')]),
+        (post_merge, outputnode, [('out', 'epi_ref_file')]),
+        (epi_merge, outputnode, [('transform_outputs', 'xfm_files')]),
+        (per_run_avgs, outputnode, [('out_drift', 'drift_factors')]),
+        (n4_avgs, outputnode, [('output_image', 'per_run_ref_files')]),
+        (validate_nii, outputnode, [('out_report', 'validation_report')]),
     ])
     # fmt:on
 
     if auto_bold_nss:
         select_volumes = pe.MapNode(
-            NonsteadyStatesDetector(), name="select_volumes", iterfield=["in_file"]
+            NonsteadyStatesDetector(), name='select_volumes', iterfield=['in_file']
         )
         # fmt:off
         wf.connect([
-            (validate_nii, select_volumes, [("out_file", "in_file")]),
-            (select_volumes, per_run_avgs, [("t_mask", "t_mask")]),
-            (select_volumes, outputnode, [("n_dummy", "n_dummy")])
+            (validate_nii, select_volumes, [('out_file', 'in_file')]),
+            (select_volumes, per_run_avgs, [('t_mask', 't_mask')]),
+            (select_volumes, outputnode, [('n_dummy', 'n_dummy')])
         ])
         # fmt:on
     else:
-        wf.connect(inputnode, "t_masks", per_run_avgs, "t_mask")
+        wf.connect(inputnode, 't_masks', per_run_avgs, 't_mask')
 
     return wf
 
@@ -245,17 +240,19 @@ def _post_merge(in_file, in_xfms):
     from niworkflows.utils.connections import listify
 
     in_xfms = listify(in_xfms)
-    if len(in_xfms) == 1 and in_file.endswith((".nii", ".nii.gz")):
+    if len(in_xfms) == 1 and in_file.endswith(('.nii', '.nii.gz')):
         return in_file
 
     if len(in_xfms) == 1:
-        raise RuntimeError("Output format and number of transforms do not match")
+        raise RuntimeError('Output format and number of transforms do not match')
 
     from pathlib import Path
+
     import nibabel as nb
+
     from niworkflows.interfaces.nibabel import _advanced_clip
 
-    out_file = Path() / Path(in_file).name.replace(".mgz", ".nii.gz")
+    out_file = Path() / Path(in_file).name.replace('.mgz', '.nii.gz')
     img = nb.load(in_file)
     nb.Nifti1Image(img.dataobj, img.affine, None).to_filename(out_file)
     return _advanced_clip(out_file, p_min=0.0, p_max=100.0)
