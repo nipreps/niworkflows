@@ -353,6 +353,7 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;Run the BOLD reference+mask workflow&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 
 
@@ -360,43 +361,42 @@
 <a class="viewcode-back" href="../../../api/niworkflows.cli.boldref.html#niworkflows.cli.boldref.get_parser">[docs]</a>
 <span class="k">def</span> <span class="nf">get_parser</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Build parser object.&quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
-    <span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">RawTextHelpFormatter</span><span class="p">,</span> <span class="n">RawDescriptionHelpFormatter</span>
+    <span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span> <span class="n">RawTextHelpFormatter</span>
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;NiWorkflows Utilities&quot;&quot;&quot;</span><span class="p">,</span> <span class="n">formatter_class</span><span class="o">=</span><span class="n">RawTextHelpFormatter</span>
     <span class="p">)</span>
-    <span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">dest</span><span class="o">=</span><span class="s2">&quot;command&quot;</span><span class="p">)</span>
+    <span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">dest</span><span class="o">=</span><span class="s1">&#39;command&#39;</span><span class="p">)</span>
     <span class="n">be_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
-        <span class="s2">&quot;brain-extract&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;brain-extract&#39;</span><span class="p">,</span>
         <span class="n">formatter_class</span><span class="o">=</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;Execute brain extraction and related operations (e.g., </span><span class="se">\</span>
 <span class="s2">intensity nonuniformity correction, robust averaging, etc.)&quot;&quot;&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">be_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;input_file&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;the input file&quot;</span><span class="p">)</span>
-    <span class="n">be_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;out_path&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;the output directory&quot;</span><span class="p">)</span>
+    <span class="n">be_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;input_file&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;the input file&#39;</span><span class="p">)</span>
+    <span class="n">be_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;out_path&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;the output directory&#39;</span><span class="p">)</span>
     <span class="n">be_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;--modality&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;-m&quot;</span><span class="p">,</span>
-        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span>
-        <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="s2">&quot;t1w&quot;</span><span class="p">),</span>
-        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;the input file&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;--modality&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;-m&#39;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="s1">&#39;t1w&#39;</span><span class="p">),</span>
+        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;the input file&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;--omp-nthreads&quot;</span><span class="p">,</span>
-        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;--omp-nthreads&#39;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span>
         <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(),</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of CPUs available to individual processes&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of CPUs available to individual processes&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;--nprocs&quot;</span><span class="p">,</span>
-        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;--nprocs&#39;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store&#39;</span><span class="p">,</span>
         <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(),</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of processes that may run in parallel&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of processes that may run in parallel&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">parser</span></div>
@@ -408,26 +408,29 @@
 <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Entry point.&quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">hash_infile</span>
+
     <span class="kn">from</span> <span class="nn">..func.util</span> <span class="kn">import</span> <span class="n">init_bold_reference_wf</span>
 
     <span class="n">opts</span> <span class="o">=</span> <span class="n">get_parser</span><span class="p">()</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
 
     <span class="n">wf</span> <span class="o">=</span> <span class="n">init_bold_reference_wf</span><span class="p">(</span>
-        <span class="n">opts</span><span class="o">.</span><span class="n">omp_nthreads</span><span class="p">,</span> <span class="n">gen_report</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">hash_infile</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">input_file</span><span class="p">),</span>
+        <span class="n">opts</span><span class="o">.</span><span class="n">omp_nthreads</span><span class="p">,</span>
+        <span class="n">gen_report</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">hash_infile</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">input_file</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="n">wf</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">bold_file</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">input_file</span>
     <span class="n">wf</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
     <span class="n">plugin</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;MultiProc&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;plugin_args&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;nprocs&quot;</span><span class="p">:</span> <span class="n">opts</span><span class="o">.</span><span class="n">nprocs</span><span class="p">},</span>
+        <span class="s1">&#39;plugin&#39;</span><span class="p">:</span> <span class="s1">&#39;MultiProc&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;plugin_args&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;nprocs&#39;</span><span class="p">:</span> <span class="n">opts</span><span class="o">.</span><span class="n">nprocs</span><span class="p">},</span>
     <span class="p">}</span>
     <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">nprocs</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">plugin</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;Linear&quot;</span><span class="p">}</span>
+        <span class="n">plugin</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;plugin&#39;</span><span class="p">:</span> <span class="s1">&#39;Linear&#39;</span><span class="p">}</span>
     <span class="n">wf</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="o">**</span><span class="n">plugin</span><span class="p">)</span></div>
 
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">argv</span>
 
     <span class="n">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
@@ -443,7 +446,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

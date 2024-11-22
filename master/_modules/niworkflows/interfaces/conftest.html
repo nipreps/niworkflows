@@ -353,18 +353,18 @@
 
 <div class="viewcode-block" id="data_dir">
 <a class="viewcode-back" href="../../../api/niworkflows.interfaces.conftest.html#niworkflows.interfaces.conftest.data_dir">[docs]</a>
-<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;module&quot;</span><span class="p">)</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s1">&#39;module&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">data_dir</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span></div>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;tests&#39;</span> <span class="o">/</span> <span class="s1">&#39;data&#39;</span></div>
 
 
 
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">autouse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_docdir</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
     <span class="c1"># Trigger ONLY for the doctests.</span>
-    <span class="n">doctest_plugin</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pluginmanager</span><span class="o">.</span><span class="n">getplugin</span><span class="p">(</span><span class="s2">&quot;doctest&quot;</span><span class="p">)</span>
+    <span class="n">doctest_plugin</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pluginmanager</span><span class="o">.</span><span class="n">getplugin</span><span class="p">(</span><span class="s1">&#39;doctest&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">node</span><span class="p">,</span> <span class="n">doctest_plugin</span><span class="o">.</span><span class="n">DoctestItem</span><span class="p">):</span>
-        <span class="n">copytree</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">dirs_exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">copytree</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;tests&#39;</span> <span class="o">/</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">,</span> <span class="n">dirs_exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># Chdir only for the duration of the test.</span>
         <span class="k">with</span> <span class="n">_chdir</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">):</span>
@@ -385,7 +385,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

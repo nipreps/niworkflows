@@ -353,36 +353,38 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;Utilities for tracking and filtering spaces.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">argparse</span>
-<span class="kn">import</span> <span class="nn">attr</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+
+<span class="kn">import</span> <span class="nn">attr</span>
 <span class="kn">from</span> <span class="nn">templateflow</span> <span class="kn">import</span> <span class="n">api</span> <span class="k">as</span> <span class="n">_tfapi</span>
 
 <span class="n">NONSTANDARD_REFERENCES</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;T1w&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;T2w&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;anat&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;fsnative&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;func&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;run&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;sbref&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;session&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;individual&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;dwi&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;asl&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;T1w&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;T2w&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;anat&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;fsnative&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;func&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;run&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;sbref&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;session&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;individual&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;dwi&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;asl&#39;</span><span class="p">,</span>
 <span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;List of supported nonstandard reference spaces.&quot;&quot;&quot;</span>
 
-<span class="n">NONSTANDARD_2D_REFERENCES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;fsnative&quot;</span><span class="p">]</span>
+<span class="n">NONSTANDARD_2D_REFERENCES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;fsnative&#39;</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;List of supported nonstandard 2D reference spaces.&quot;&quot;&quot;</span>
 
 <span class="n">FSAVERAGE_DENSITY</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;fsaverage3&quot;</span><span class="p">:</span> <span class="s2">&quot;642&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;fsaverage4&quot;</span><span class="p">:</span> <span class="s2">&quot;2562&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;fsaverage5&quot;</span><span class="p">:</span> <span class="s2">&quot;10k&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;fsaverage6&quot;</span><span class="p">:</span> <span class="s2">&quot;41k&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;fsaverage&quot;</span><span class="p">:</span> <span class="s2">&quot;164k&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;fsaverage3&#39;</span><span class="p">:</span> <span class="s1">&#39;642&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;fsaverage4&#39;</span><span class="p">:</span> <span class="s1">&#39;2562&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;fsaverage5&#39;</span><span class="p">:</span> <span class="s1">&#39;10k&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;fsaverage6&#39;</span><span class="p">:</span> <span class="s1">&#39;41k&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;fsaverage&#39;</span><span class="p">:</span> <span class="s1">&#39;164k&#39;</span><span class="p">,</span>
 <span class="p">}</span>
 <span class="sd">&quot;&quot;&quot;A map of legacy fsaverageX names to surface densities.&quot;&quot;&quot;</span>
 
@@ -484,7 +486,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_standard_spaces</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_tfapi</span><span class="o">.</span><span class="n">templates</span><span class="p">())</span>
-    <span class="n">_spaces_2d</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_tfapi</span><span class="o">.</span><span class="n">templates</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;sphere&quot;</span><span class="p">))</span>
+    <span class="n">_spaces_2d</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_tfapi</span><span class="o">.</span><span class="n">templates</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;sphere&#39;</span><span class="p">))</span>
 
     <span class="n">space</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Name designating this space.&quot;&quot;&quot;</span>
@@ -501,41 +503,40 @@
     <span class="k">def</span> <span class="nf">__attrs_post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract cohort out of spec.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;spec&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;spec&#39;</span><span class="p">,</span> <span class="p">{})</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;fsaverage&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;fsaverage&#39;</span><span class="p">):</span>
             <span class="n">space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span>
-            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;fsaverage&quot;</span><span class="p">)</span>
+            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;space&#39;</span><span class="p">,</span> <span class="s1">&#39;fsaverage&#39;</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="s2">&quot;den&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="ow">or</span> <span class="n">space</span> <span class="o">!=</span> <span class="s2">&quot;fsaverage&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;den&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="ow">or</span> <span class="n">space</span> <span class="o">!=</span> <span class="s1">&#39;fsaverage&#39;</span><span class="p">:</span>
                 <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">spec</span><span class="p">[</span><span class="s2">&quot;den&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FSAVERAGE_DENSITY</span><span class="p">[</span><span class="n">space</span><span class="p">]</span>
-                <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;spec&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
+                <span class="n">spec</span><span class="p">[</span><span class="s1">&#39;den&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FSAVERAGE_DENSITY</span><span class="p">[</span><span class="n">space</span><span class="p">]</span>
+                <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;spec&#39;</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spaces_2d</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span> <span class="ow">in</span> <span class="n">NONSTANDARD_2D_REFERENCES</span><span class="p">):</span>
-            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;dim&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;dim&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_standard_spaces</span><span class="p">:</span>
-            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;standard&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">_cohorts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">_tfapi</span><span class="o">.</span><span class="n">TF_LAYOUT</span><span class="o">.</span><span class="n">get_cohorts</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">)]</span>
-        <span class="k">if</span> <span class="s2">&quot;cohort&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">:</span>
+        <span class="n">_cohorts</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">_tfapi</span><span class="o">.</span><span class="n">TF_LAYOUT</span><span class="o">.</span><span class="n">get_cohorts</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="s1">&#39;cohort&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">_cohorts</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s1">&#39;standard space &quot;</span><span class="si">%s</span><span class="s1">&quot; does not accept a cohort &#39;</span>
-                    <span class="s2">&quot;specification.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span>
+                    <span class="sa">f</span><span class="s1">&#39;standard space &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="si">}</span><span class="s1">&quot; does not accept a cohort specification.&#39;</span>
                 <span class="p">)</span>
 
-            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;cohort&quot;</span><span class="p">])</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_cohorts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s1">&#39;cohort&#39;</span><span class="p">])</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_cohorts</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s1">&#39;standard space &quot;</span><span class="si">%s</span><span class="s1">&quot; does not contain any cohort &#39;</span>
-                    <span class="s1">&#39;named &quot;</span><span class="si">%s</span><span class="s1">&quot;.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;cohort&quot;</span><span class="p">])</span>
+                    <span class="sa">f</span><span class="s1">&#39;standard space &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="si">}</span><span class="s1">&quot; does not contain any cohort &#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;named &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;cohort&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;.&#39;</span>
                 <span class="p">)</span>
         <span class="k">elif</span> <span class="n">_cohorts</span><span class="p">:</span>
-            <span class="n">_cohorts</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;&quot;cohort-</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">_cohorts</span><span class="p">])</span>
+            <span class="n">_cohorts</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;&quot;cohort-</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">&quot;&#39;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">_cohorts</span><span class="p">])</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;standard space &quot;</span><span class="si">%s</span><span class="s1">&quot; is not fully defined.</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="s2">&quot;Set a valid cohort selector from: </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="n">_cohorts</span><span class="p">)</span>
+                <span class="sa">f</span><span class="s1">&#39;standard space &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="si">}</span><span class="s1">&quot; is not fully defined.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;Set a valid cohort selector from: </span><span class="si">{</span><span class="n">_cohorts</span><span class="si">}</span><span class="s1">.&#39;</span>
             <span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -552,9 +553,9 @@
 <span class="sd">        &#39;MNIPediatricAsym:cohort-1&#39;</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s2">&quot;cohort&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;cohort&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">:cohort-</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;cohort&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="si">}</span><span class="s1">:cohort-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;cohort&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">legacyname</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -581,18 +582,18 @@
 <span class="sd">        True</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span> <span class="o">==</span> <span class="s2">&quot;fsaverage&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;den&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">FSAVERAGE_LEGACY</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">FSAVERAGE_LEGACY</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;den&quot;</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">space</span> <span class="o">==</span> <span class="s1">&#39;fsaverage&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s1">&#39;den&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">FSAVERAGE_LEGACY</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">FSAVERAGE_LEGACY</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="s1">&#39;den&#39;</span><span class="p">]]</span>
 
     <span class="nd">@space</span><span class="o">.</span><span class="n">validator</span>
     <span class="k">def</span> <span class="nf">_check_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;fsaverage&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;fsaverage&#39;</span><span class="p">):</span>
             <span class="k">return</span>
         <span class="n">valid</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_standard_spaces</span><span class="p">)</span> <span class="o">+</span> <span class="n">NONSTANDARD_REFERENCES</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;space identifier &quot;</span><span class="si">%s</span><span class="s1">&quot; is invalid.</span><span class="se">\n</span><span class="s1">Valid &#39;</span>
-                <span class="s2">&quot;identifiers are: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">valid</span><span class="p">))</span>
+                <span class="sa">f</span><span class="s1">&#39;space identifier &quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&quot; is invalid.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;Valid identifiers are: </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">valid</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -605,8 +606,8 @@
 <span class="sd">        &#39;MNIPediatricAsym:cohort-2:res-1&#39;</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">())]</span>
+        <span class="k">return</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">space</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">items</span><span class="p">())]</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="Reference.from_string">
@@ -680,10 +681,10 @@
 <span class="sd">         Reference(space=&#39;MNIPediatricAsym&#39;, spec={&#39;cohort&#39;: &#39;6&#39;, &#39;res&#39;: &#39;iso1.6mm&#39;})]</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">_args</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+        <span class="n">_args</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
         <span class="n">spec</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="p">{})</span>
         <span class="k">for</span> <span class="n">modifier</span> <span class="ow">in</span> <span class="n">_args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-            <span class="n">mitems</span> <span class="o">=</span> <span class="n">modifier</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">mitems</span> <span class="o">=</span> <span class="n">modifier</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">spec</span><span class="p">[</span><span class="n">mitems</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mitems</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">mitems</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="n">allspecs</span> <span class="o">=</span> <span class="n">_expand_entities</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
@@ -803,7 +804,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_refs&quot;</span><span class="p">,</span> <span class="s2">&quot;_cached&quot;</span><span class="p">)</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;_refs&#39;</span><span class="p">,</span> <span class="s1">&#39;_cached&#39;</span><span class="p">)</span>
     <span class="n">standard_spaces</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_tfapi</span><span class="o">.</span><span class="n">templates</span><span class="p">())</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;List of supported standard reference spaces.&quot;&quot;&quot;</span>
 
@@ -852,7 +853,7 @@
     <span class="k">def</span> <span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Append a list of transforms to the internal list.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Must be a list.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Must be a list.&#39;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">space</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">space</span><span class="p">)</span>
@@ -884,8 +885,8 @@
 <span class="sd">        Spatial References: MNI152NLin2009cAsym, fsaverage:den-10k</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">spaces</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">references</span><span class="p">])</span> <span class="ow">or</span> <span class="s2">&quot;&lt;none&gt;.&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;Spatial References: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">spaces</span>
+        <span class="n">spaces</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">references</span><span class="p">])</span> <span class="ow">or</span> <span class="s1">&#39;&lt;none&gt;.&#39;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Spatial References: </span><span class="si">{</span><span class="n">spaces</span><span class="si">}</span><span class="s1">&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">references</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -896,7 +897,7 @@
     <span class="k">def</span> <span class="nf">cached</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get cached spaces, raise error if not cached.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_cached</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;References have not been cached&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;References have not been cached&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached</span>
 
 <div class="viewcode-block" id="SpatialReferences.is_cached">
@@ -910,7 +911,7 @@
     <span class="k">def</span> <span class="nf">checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Cache and freeze current spaces to separate attribute.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_cached</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;References have already been cached&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;References have already been cached&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cached</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">references</span><span class="p">)</span></div>
 
 
@@ -930,7 +931,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_refs</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">check_space</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
             <span class="k">return</span>
 
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;space &quot;</span><span class="si">%s</span><span class="s1">&quot; already in spaces.&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;space &quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&quot; already in spaces.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SpatialReferences.insert">
@@ -940,7 +941,7 @@
         <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_refs</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_space</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
         <span class="k">elif</span> <span class="n">error</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;space &quot;</span><span class="si">%s</span><span class="s1">&quot; already in spaces.&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;space &quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&quot; already in spaces.&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SpatialReferences.get_spaces">
@@ -1017,9 +1018,7 @@
         <span class="k">return</span> <span class="p">[</span>
             <span class="n">s</span>
             <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">references</span>
-            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">standard</span>
-            <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">dim</span> <span class="ow">in</span> <span class="n">dim</span>
-            <span class="ow">and</span> <span class="p">(</span><span class="n">hasspec</span><span class="p">(</span><span class="s2">&quot;res&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">spec</span><span class="p">)</span> <span class="ow">or</span> <span class="n">hasspec</span><span class="p">(</span><span class="s2">&quot;den&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">spec</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">standard</span> <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">dim</span> <span class="ow">in</span> <span class="n">dim</span> <span class="ow">and</span> <span class="p">(</span><span class="n">hasspec</span><span class="p">(</span><span class="s1">&#39;res&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">spec</span><span class="p">)</span> <span class="ow">or</span> <span class="n">hasspec</span><span class="p">(</span><span class="s1">&#39;den&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">spec</span><span class="p">))</span>
         <span class="p">]</span></div>
 
 
@@ -1034,7 +1033,7 @@
             <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">references</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="o">.</span><span class="n">standard</span>
             <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">dim</span> <span class="ow">in</span> <span class="n">dim</span>
-            <span class="ow">and</span> <span class="p">(</span><span class="n">hasspec</span><span class="p">(</span><span class="s2">&quot;res&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">spec</span><span class="p">)</span> <span class="ow">or</span> <span class="n">hasspec</span><span class="p">(</span><span class="s2">&quot;den&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">spec</span><span class="p">))</span>
+            <span class="ow">and</span> <span class="p">(</span><span class="n">hasspec</span><span class="p">(</span><span class="s1">&#39;res&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">spec</span><span class="p">)</span> <span class="ow">or</span> <span class="n">hasspec</span><span class="p">(</span><span class="s1">&#39;den&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">spec</span><span class="p">))</span>
         <span class="p">]</span></div>
 
 
@@ -1067,7 +1066,7 @@
         <span class="k">return</span> <span class="p">[</span>
             <span class="n">s</span><span class="o">.</span><span class="n">legacyname</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">space</span>
             <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">references</span>
-            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">legacyname</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">space</span> <span class="o">==</span> <span class="s2">&quot;fsnative&quot;</span>
+            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">legacyname</span> <span class="ow">or</span> <span class="n">s</span><span class="o">.</span><span class="n">space</span> <span class="o">==</span> <span class="s1">&#39;fsnative&#39;</span>
         <span class="p">]</span></div>
 </div>
 
@@ -1085,18 +1084,18 @@
             <span class="c1"># option was called without any output spaces, so user does not want outputs</span>
             <span class="n">spaces</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
-            <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">NONSTANDARD_REFERENCES</span>
-                <span class="ow">and</span> <span class="ow">not</span> <span class="n">val</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;fs&quot;</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="s2">&quot;:res-&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">val</span>
-                <span class="ow">and</span> <span class="s2">&quot;:resolution-&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">val</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">val</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="s1">&#39;:res-&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">val</span>
+                <span class="ow">and</span> <span class="s1">&#39;:resolution-&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">val</span>
             <span class="p">):</span>
                 <span class="c1"># by default, explicitly set volumetric resolution to native</span>
                 <span class="c1"># relevant discussions:</span>
                 <span class="c1"># https://github.com/nipreps/niworkflows/pull/457#discussion_r375510227</span>
                 <span class="c1"># https://github.com/nipreps/niworkflows/pull/494</span>
-                <span class="n">val</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">val</span><span class="p">,</span> <span class="s2">&quot;res-native&quot;</span><span class="p">))</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">val</span><span class="p">,</span> <span class="s1">&#39;res-native&#39;</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">Reference</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
                 <span class="n">spaces</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="p">,</span> <span class="n">spaces</span><span class="p">)</span></div>
@@ -1128,11 +1127,11 @@
 <span class="sd">    &#39;MNIPediatricAsym_cohort-2_res-2&#39;</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">in_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="n">in_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;res&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">in_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resolution&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">in_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">in_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;res&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">in_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resolution&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">res</span><span class="p">:</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s2">&quot;res&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">res</span><span class="p">))))</span>
-    <span class="k">return</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s1">&#39;res&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">res</span><span class="p">))))</span>
+    <span class="k">return</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
 
 
 
@@ -1154,13 +1153,11 @@
 <span class="sd">    {&#39;space&#39;: &#39;MNIPediatricAsym&#39;, &#39;cohort&#39;: &#39;2&#39;, &#39;resolution&#39;: &#39;2&#39;, &#39;density&#39;: &#39;91k&#39;}</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">tpl_entities</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;cohort&quot;</span><span class="p">)</span>
-    <span class="n">retval</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">tpl_entities</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">in_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">))</span>
-    <span class="p">}</span>
+    <span class="n">tpl_entities</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;space&#39;</span><span class="p">,</span> <span class="s1">&#39;cohort&#39;</span><span class="p">)</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="p">{</span><span class="n">tpl_entities</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">in_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">))}</span>
     <span class="n">retval</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
         <span class="p">{</span>
-            <span class="s2">&quot;resolution&quot;</span> <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;res&quot;</span> <span class="k">else</span> <span class="s2">&quot;density&quot;</span> <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;den&quot;</span> <span class="k">else</span> <span class="n">k</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="s1">&#39;resolution&#39;</span> <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;res&#39;</span> <span class="k">else</span> <span class="s1">&#39;density&#39;</span> <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;den&#39;</span> <span class="k">else</span> <span class="n">k</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">in_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
     <span class="p">)</span>
@@ -1196,7 +1193,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">entities</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
     <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">entities</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]))</span>
-    <span class="k">return</span> <span class="p">[{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">combs</span><span class="p">)}</span> <span class="k">for</span> <span class="n">combs</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">combs</span><span class="p">))</span> <span class="k">for</span> <span class="n">combs</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
 </pre></div>
         </article>
       </div>
@@ -1209,7 +1206,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

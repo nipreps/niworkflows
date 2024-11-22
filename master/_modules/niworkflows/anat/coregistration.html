@@ -353,11 +353,12 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;Workflow for the registration of EPI datasets to anatomical space via reconstructed surfaces.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">nipype.pipeline</span> <span class="kn">import</span> <span class="n">engine</span> <span class="k">as</span> <span class="n">pe</span>
-<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">utility</span> <span class="k">as</span> <span class="n">niu</span>
-<span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
 
-<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;workflow&quot;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">utility</span> <span class="k">as</span> <span class="n">niu</span>
+<span class="kn">from</span> <span class="nn">nipype.pipeline</span> <span class="kn">import</span> <span class="n">engine</span> <span class="k">as</span> <span class="n">pe</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;workflow&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="init_bbreg_wf">
@@ -366,9 +367,9 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">omp_nthreads</span><span class="p">,</span>
     <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">epi2t1w_init</span><span class="o">=</span><span class="s2">&quot;register&quot;</span><span class="p">,</span>
+    <span class="n">epi2t1w_init</span><span class="o">=</span><span class="s1">&#39;register&#39;</span><span class="p">,</span>
     <span class="n">epi2t1w_dof</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;bbreg_wf&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;bbreg_wf&#39;</span><span class="p">,</span>
     <span class="n">use_bbr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -441,8 +442,12 @@
     <span class="c1"># See https://github.com/nipreps/fmriprep/issues/768</span>
     <span class="kn">from</span> <span class="nn">..interfaces.freesurfer</span> <span class="kn">import</span> <span class="p">(</span>
         <span class="n">PatchedBBRegisterRPT</span> <span class="k">as</span> <span class="n">BBRegisterRPT</span><span class="p">,</span>
-        <span class="n">PatchedMRICoregRPT</span> <span class="k">as</span> <span class="n">MRICoregRPT</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">..interfaces.freesurfer</span> <span class="kn">import</span> <span class="p">(</span>
         <span class="n">PatchedLTAConvert</span> <span class="k">as</span> <span class="n">LTAConvert</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">..interfaces.freesurfer</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">PatchedMRICoregRPT</span> <span class="k">as</span> <span class="n">MRICoregRPT</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="kn">from</span> <span class="nn">..interfaces.nitransforms</span> <span class="kn">import</span> <span class="n">ConcatenateXFMs</span>
 
@@ -452,64 +457,60 @@
 <span class="s2">`bbregister` (FreeSurfer) which implements boundary-based registration [@bbr].</span>
 <span class="s2">Co-registration was configured with </span><span class="si">{dof}</span><span class="s2"> degrees of freedom</span><span class="si">{reason}</span><span class="s2">.</span>
 <span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-        <span class="n">dof</span><span class="o">=</span><span class="p">{</span><span class="mi">6</span><span class="p">:</span> <span class="s2">&quot;six&quot;</span><span class="p">,</span> <span class="mi">9</span><span class="p">:</span> <span class="s2">&quot;nine&quot;</span><span class="p">,</span> <span class="mi">12</span><span class="p">:</span> <span class="s2">&quot;twelve&quot;</span><span class="p">}[</span><span class="n">epi2t1w_dof</span><span class="p">],</span>
-        <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+        <span class="n">dof</span><span class="o">=</span><span class="p">{</span><span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;six&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;nine&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">:</span> <span class="s1">&#39;twelve&#39;</span><span class="p">}[</span><span class="n">epi2t1w_dof</span><span class="p">],</span>
+        <span class="n">reason</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
         <span class="k">if</span> <span class="n">epi2t1w_dof</span> <span class="o">==</span> <span class="mi">6</span>
-        <span class="k">else</span> <span class="s2">&quot;to account for distortions remaining in the EPI reference&quot;</span><span class="p">,</span>
+        <span class="k">else</span> <span class="s1">&#39;to account for distortions remaining in the EPI reference&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">inputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
         <span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="s2">&quot;in_file&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;fsnative2t1w_xfm&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;subjects_dir&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;subject_id&quot;</span><span class="p">,</span>  <span class="c1"># BBRegister</span>
-                <span class="s2">&quot;t1w_dseg&quot;</span><span class="p">,</span>  <span class="c1"># FLIRT BBR</span>
-                <span class="s2">&quot;t1w_brain&quot;</span><span class="p">,</span>  <span class="c1"># FLIRT BBR</span>
+                <span class="s1">&#39;in_file&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;fsnative2t1w_xfm&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;subjects_dir&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;subject_id&#39;</span><span class="p">,</span>  <span class="c1"># BBRegister</span>
+                <span class="s1">&#39;t1w_dseg&#39;</span><span class="p">,</span>  <span class="c1"># FLIRT BBR</span>
+                <span class="s1">&#39;t1w_brain&#39;</span><span class="p">,</span>  <span class="c1"># FLIRT BBR</span>
             <span class="p">]</span>
         <span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;inputnode&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;inputnode&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">outputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
-        <span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span>
-            <span class="p">[</span><span class="s2">&quot;itk_epi_to_t1w&quot;</span><span class="p">,</span> <span class="s2">&quot;itk_t1w_to_epi&quot;</span><span class="p">,</span> <span class="s2">&quot;out_report&quot;</span><span class="p">,</span> <span class="s2">&quot;fallback&quot;</span><span class="p">]</span>
-        <span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;outputnode&quot;</span><span class="p">,</span>
+        <span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">([</span><span class="s1">&#39;itk_epi_to_t1w&#39;</span><span class="p">,</span> <span class="s1">&#39;itk_t1w_to_epi&#39;</span><span class="p">,</span> <span class="s1">&#39;out_report&#39;</span><span class="p">,</span> <span class="s1">&#39;fallback&#39;</span><span class="p">]),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;outputnode&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">epi2t1w_init</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;register&quot;</span><span class="p">,</span> <span class="s2">&quot;header&quot;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown EPI-T1w initialization option: </span><span class="si">{</span><span class="n">epi2t1w_init</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">epi2t1w_init</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;register&#39;</span><span class="p">,</span> <span class="s1">&#39;header&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown EPI-T1w initialization option: </span><span class="si">{</span><span class="n">epi2t1w_init</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="c1"># For now make BBR unconditional - in the future, we can fall back to identity,</span>
     <span class="c1"># but adding the flexibility without testing seems a bit dangerous</span>
-    <span class="k">if</span> <span class="n">epi2t1w_init</span> <span class="o">==</span> <span class="s2">&quot;header&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">epi2t1w_init</span> <span class="o">==</span> <span class="s1">&#39;header&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">use_bbr</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot disable BBR and use header registration&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot disable BBR and use header registration&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">use_bbr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Initializing BBR with header; affine fallback disabled&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Initializing BBR with header; affine fallback disabled&#39;</span><span class="p">)</span>
             <span class="n">use_bbr</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="n">merge_ltas</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;merge_ltas&quot;</span><span class="p">,</span> <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">concat_xfm</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">ConcatenateXFMs</span><span class="p">(</span><span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;concat_xfm&quot;</span><span class="p">)</span>
+    <span class="n">merge_ltas</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;merge_ltas&#39;</span><span class="p">,</span> <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">concat_xfm</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">ConcatenateXFMs</span><span class="p">(</span><span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;concat_xfm&#39;</span><span class="p">)</span>
 
     <span class="c1"># fmt:off</span>
     <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
         <span class="c1"># Output ITK transforms</span>
-        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">merge_ltas</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;fsnative2t1w_xfm&quot;</span><span class="p">,</span> <span class="s2">&quot;in2&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">merge_ltas</span><span class="p">,</span> <span class="n">concat_xfm</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;in_xfms&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">concat_xfm</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_xfm&quot;</span><span class="p">,</span> <span class="s2">&quot;itk_epi_to_t1w&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">concat_xfm</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_inv&quot;</span><span class="p">,</span> <span class="s2">&quot;itk_t1w_to_epi&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">merge_ltas</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;fsnative2t1w_xfm&#39;</span><span class="p">,</span> <span class="s1">&#39;in2&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">merge_ltas</span><span class="p">,</span> <span class="n">concat_xfm</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;in_xfms&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">concat_xfm</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_xfm&#39;</span><span class="p">,</span> <span class="s1">&#39;itk_epi_to_t1w&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">concat_xfm</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_inv&#39;</span><span class="p">,</span> <span class="s1">&#39;itk_t1w_to_epi&#39;</span><span class="p">)]),</span>
     <span class="p">])</span>
     <span class="c1"># fmt:on</span>
 
     <span class="k">if</span> <span class="n">debug</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">..interfaces.nibabel</span> <span class="kn">import</span> <span class="n">RegridToZooms</span>
 
-        <span class="n">downsample</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
-            <span class="n">RegridToZooms</span><span class="p">(</span><span class="n">zooms</span><span class="o">=</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">),</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;downsample&quot;</span>
-        <span class="p">)</span>
-        <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">downsample</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;in_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)])])</span>
+        <span class="n">downsample</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">RegridToZooms</span><span class="p">(</span><span class="n">zooms</span><span class="o">=</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">),</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;downsample&#39;</span><span class="p">)</span>
+        <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">downsample</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)])])</span>
 
     <span class="n">mri_coreg</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
         <span class="n">MRICoregRPT</span><span class="p">(</span>
@@ -519,31 +520,31 @@
             <span class="n">linmintol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
             <span class="n">generate_report</span><span class="o">=</span><span class="ow">not</span> <span class="n">use_bbr</span><span class="p">,</span>
         <span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mri_coreg&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mri_coreg&#39;</span><span class="p">,</span>
         <span class="n">n_procs</span><span class="o">=</span><span class="n">omp_nthreads</span><span class="p">,</span>
         <span class="n">mem_gb</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># Use mri_coreg</span>
-    <span class="k">if</span> <span class="n">epi2t1w_init</span> <span class="o">==</span> <span class="s2">&quot;register&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">epi2t1w_init</span> <span class="o">==</span> <span class="s1">&#39;register&#39;</span><span class="p">:</span>
         <span class="c1"># fmt:off</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
-            <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">mri_coreg</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;subjects_dir&quot;</span><span class="p">,</span> <span class="s2">&quot;subjects_dir&quot;</span><span class="p">),</span>
-                                    <span class="p">(</span><span class="s2">&quot;subject_id&quot;</span><span class="p">,</span> <span class="s2">&quot;subject_id&quot;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">mri_coreg</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;subjects_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;subjects_dir&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s1">&#39;subject_id&#39;</span><span class="p">)]),</span>
         <span class="p">])</span>
         <span class="c1"># fmt:on</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">debug</span><span class="p">:</span>
-            <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">,</span> <span class="n">mri_coreg</span><span class="p">,</span> <span class="s2">&quot;source_file&quot;</span><span class="p">)</span>
+            <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="n">mri_coreg</span><span class="p">,</span> <span class="s1">&#39;source_file&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">downsample</span><span class="p">,</span> <span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="n">mri_coreg</span><span class="p">,</span> <span class="s2">&quot;source_file&quot;</span><span class="p">)</span>
+            <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">downsample</span><span class="p">,</span> <span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">mri_coreg</span><span class="p">,</span> <span class="s1">&#39;source_file&#39;</span><span class="p">)</span>
 
         <span class="c1"># Short-circuit workflow building, use initial registration</span>
         <span class="k">if</span> <span class="n">use_bbr</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="c1"># fmt:off</span>
             <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
-                <span class="p">(</span><span class="n">mri_coreg</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_report&quot;</span><span class="p">,</span> <span class="s2">&quot;out_report&quot;</span><span class="p">)]),</span>
-                <span class="p">(</span><span class="n">mri_coreg</span><span class="p">,</span> <span class="n">merge_ltas</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_lta_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in1&quot;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">mri_coreg</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_report&#39;</span><span class="p">,</span> <span class="s1">&#39;out_report&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">mri_coreg</span><span class="p">,</span> <span class="n">merge_ltas</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_lta_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in1&#39;</span><span class="p">)]),</span>
             <span class="p">])</span>
             <span class="c1"># fmt:on</span>
             <span class="n">outputnode</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fallback</span> <span class="o">=</span> <span class="kc">True</span>
@@ -553,38 +554,38 @@
     <span class="n">bbregister</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
         <span class="n">BBRegisterRPT</span><span class="p">(</span>
             <span class="n">dof</span><span class="o">=</span><span class="n">epi2t1w_dof</span><span class="p">,</span>
-            <span class="n">contrast_type</span><span class="o">=</span><span class="s2">&quot;t2&quot;</span><span class="p">,</span>
+            <span class="n">contrast_type</span><span class="o">=</span><span class="s1">&#39;t2&#39;</span><span class="p">,</span>
             <span class="n">registered_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">out_lta_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">generate_report</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;bbregister&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;bbregister&#39;</span><span class="p">,</span>
         <span class="n">mem_gb</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># fmt:off</span>
     <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
-        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">bbregister</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;subjects_dir&quot;</span><span class="p">,</span> <span class="s2">&quot;subjects_dir&quot;</span><span class="p">),</span>
-                                 <span class="p">(</span><span class="s2">&quot;subject_id&quot;</span><span class="p">,</span> <span class="s2">&quot;subject_id&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">bbregister</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;subjects_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;subjects_dir&#39;</span><span class="p">),</span>
+                                 <span class="p">(</span><span class="s1">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s1">&#39;subject_id&#39;</span><span class="p">)]),</span>
     <span class="p">])</span>
     <span class="c1"># fmt:on</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">debug</span><span class="p">:</span>
-        <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">,</span> <span class="n">bbregister</span><span class="p">,</span> <span class="s2">&quot;source_file&quot;</span><span class="p">)</span>
+        <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="n">bbregister</span><span class="p">,</span> <span class="s1">&#39;source_file&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">downsample</span><span class="p">,</span> <span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="n">bbregister</span><span class="p">,</span> <span class="s2">&quot;source_file&quot;</span><span class="p">)</span>
+        <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">downsample</span><span class="p">,</span> <span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">bbregister</span><span class="p">,</span> <span class="s1">&#39;source_file&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">epi2t1w_init</span> <span class="o">==</span> <span class="s2">&quot;header&quot;</span><span class="p">:</span>
-        <span class="n">bbregister</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="s2">&quot;header&quot;</span>
+    <span class="k">if</span> <span class="n">epi2t1w_init</span> <span class="o">==</span> <span class="s1">&#39;header&#39;</span><span class="p">:</span>
+        <span class="n">bbregister</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="s1">&#39;header&#39;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">mri_coreg</span><span class="p">,</span> <span class="n">bbregister</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_lta_file&quot;</span><span class="p">,</span> <span class="s2">&quot;init_reg_file&quot;</span><span class="p">)])])</span>
+        <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">mri_coreg</span><span class="p">,</span> <span class="n">bbregister</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_lta_file&#39;</span><span class="p">,</span> <span class="s1">&#39;init_reg_file&#39;</span><span class="p">)])])</span>
 
     <span class="c1"># Short-circuit workflow building, use boundary-based registration</span>
     <span class="k">if</span> <span class="n">use_bbr</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="c1"># fmt:off</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
-            <span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_report&quot;</span><span class="p">,</span> <span class="s2">&quot;out_report&quot;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="n">merge_ltas</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_lta_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in1&quot;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_report&#39;</span><span class="p">,</span> <span class="s1">&#39;out_report&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="n">merge_ltas</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_lta_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in1&#39;</span><span class="p">)]),</span>
         <span class="p">])</span>
         <span class="c1"># fmt:on</span>
 
@@ -592,41 +593,35 @@
         <span class="k">return</span> <span class="n">workflow</span>
 
     <span class="c1"># Only reach this point if epi2t1w_init is &quot;register&quot; and use_bbr is None</span>
-    <span class="n">transforms</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;transforms&quot;</span><span class="p">)</span>
-    <span class="n">reports</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;reports&quot;</span><span class="p">)</span>
+    <span class="n">transforms</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;transforms&#39;</span><span class="p">)</span>
+    <span class="n">reports</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;reports&#39;</span><span class="p">)</span>
 
     <span class="n">lta_ras2ras</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
-        <span class="n">LTAConvert</span><span class="p">(</span><span class="n">out_lta</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_lta&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lta_ras2ras&quot;</span><span class="p">,</span> <span class="n">mem_gb</span><span class="o">=</span><span class="mi">2</span>
+        <span class="n">LTAConvert</span><span class="p">(</span><span class="n">out_lta</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;in_lta&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;lta_ras2ras&#39;</span><span class="p">,</span> <span class="n">mem_gb</span><span class="o">=</span><span class="mi">2</span>
     <span class="p">)</span>
-    <span class="n">compare_transforms</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
-        <span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="n">compare_xforms</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;compare_transforms&quot;</span>
-    <span class="p">)</span>
+    <span class="n">compare_transforms</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="n">compare_xforms</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;compare_transforms&#39;</span><span class="p">)</span>
 
-    <span class="n">select_transform</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
-        <span class="n">niu</span><span class="o">.</span><span class="n">Select</span><span class="p">(),</span> <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;select_transform&quot;</span>
-    <span class="p">)</span>
-    <span class="n">select_report</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
-        <span class="n">niu</span><span class="o">.</span><span class="n">Select</span><span class="p">(),</span> <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;select_report&quot;</span>
-    <span class="p">)</span>
+    <span class="n">select_transform</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Select</span><span class="p">(),</span> <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;select_transform&#39;</span><span class="p">)</span>
+    <span class="n">select_report</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Select</span><span class="p">(),</span> <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;select_report&#39;</span><span class="p">)</span>
 
     <span class="c1"># fmt:off</span>
     <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
-        <span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="n">transforms</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_lta_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in1&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">mri_coreg</span><span class="p">,</span> <span class="n">transforms</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_lta_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in2&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="n">transforms</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_lta_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in1&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">mri_coreg</span><span class="p">,</span> <span class="n">transforms</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_lta_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in2&#39;</span><span class="p">)]),</span>
         <span class="c1"># Normalize LTA transforms to RAS2RAS (inputs are VOX2VOX) and compare</span>
-        <span class="p">(</span><span class="n">transforms</span><span class="p">,</span> <span class="n">lta_ras2ras</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;in_lta&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">lta_ras2ras</span><span class="p">,</span> <span class="n">compare_transforms</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_lta&quot;</span><span class="p">,</span> <span class="s2">&quot;lta_list&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">compare_transforms</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;fallback&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">transforms</span><span class="p">,</span> <span class="n">lta_ras2ras</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;in_lta&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">lta_ras2ras</span><span class="p">,</span> <span class="n">compare_transforms</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_lta&#39;</span><span class="p">,</span> <span class="s1">&#39;lta_list&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">compare_transforms</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;fallback&#39;</span><span class="p">)]),</span>
         <span class="c1"># Select output transform</span>
-        <span class="p">(</span><span class="n">transforms</span><span class="p">,</span> <span class="n">select_transform</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;inlist&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">compare_transforms</span><span class="p">,</span> <span class="n">select_transform</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">select_transform</span><span class="p">,</span> <span class="n">merge_ltas</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;in1&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">transforms</span><span class="p">,</span> <span class="n">select_transform</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;inlist&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">compare_transforms</span><span class="p">,</span> <span class="n">select_transform</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">select_transform</span><span class="p">,</span> <span class="n">merge_ltas</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;in1&#39;</span><span class="p">)]),</span>
         <span class="c1"># Select output report</span>
-        <span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="n">reports</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_report&quot;</span><span class="p">,</span> <span class="s2">&quot;in1&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">mri_coreg</span><span class="p">,</span> <span class="n">reports</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_report&quot;</span><span class="p">,</span> <span class="s2">&quot;in2&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">reports</span><span class="p">,</span> <span class="n">select_report</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;inlist&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">compare_transforms</span><span class="p">,</span> <span class="n">select_report</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">select_report</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;out_report&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="n">reports</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_report&#39;</span><span class="p">,</span> <span class="s1">&#39;in1&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">mri_coreg</span><span class="p">,</span> <span class="n">reports</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_report&#39;</span><span class="p">,</span> <span class="s1">&#39;in2&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">reports</span><span class="p">,</span> <span class="n">select_report</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;inlist&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">compare_transforms</span><span class="p">,</span> <span class="n">select_report</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">select_report</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;out_report&#39;</span><span class="p">)]),</span>
     <span class="p">])</span>
     <span class="c1"># fmt:on</span>
 
@@ -666,8 +661,9 @@
 <span class="sd">          second transform relative to the first (default: `15`)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">niworkflows.interfaces.surf</span> <span class="kn">import</span> <span class="n">load_transform</span>
     <span class="kn">from</span> <span class="nn">nipype.algorithms.rapidart</span> <span class="kn">import</span> <span class="n">_calc_norm_affine</span>
+
+    <span class="kn">from</span> <span class="nn">niworkflows.interfaces.surf</span> <span class="kn">import</span> <span class="n">load_transform</span>
 
     <span class="n">bbr_affine</span> <span class="o">=</span> <span class="n">load_transform</span><span class="p">(</span><span class="n">lta_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">fallback_affine</span> <span class="o">=</span> <span class="n">load_transform</span><span class="p">(</span><span class="n">lta_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -688,7 +684,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

@@ -333,6 +333,7 @@
 <span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
 <span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
 <span class="sd">&quot;&quot;&quot;This module provides interfaces for workbench surface commands.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
@@ -346,11 +347,11 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.workbench.base</span> <span class="kn">import</span> <span class="n">WBCommand</span>
 
-<span class="n">iflogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;nipype.interface&quot;</span><span class="p">)</span>
+<span class="n">iflogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;nipype.interface&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">OpenMPTraitedSpec</span><span class="p">(</span><span class="n">CommandLineInputSpec</span><span class="p">):</span>
-    <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;allows for specifying more threads&quot;</span><span class="p">)</span>
+    <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;allows for specifying more threads&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="OpenMPCommandMixin">
@@ -362,22 +363,22 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">on_trait_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_threads_update</span><span class="p">,</span> <span class="s2">&quot;num_threads&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">on_trait_change</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_threads_update</span><span class="p">,</span> <span class="s1">&#39;num_threads&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_threads</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_num_threads</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_num_threads</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;OMP_NUM_THREADS&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_threads</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_threads</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_num_threads_update</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_num_threads_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span><span class="p">)})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;OMP_NUM_THREADS&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span><span class="p">)})</span>
 
 <div class="viewcode-block" id="OpenMPCommandMixin.run">
 <a class="viewcode-back" href="../../../api/niworkflows.interfaces.workbench.html#niworkflows.interfaces.workbench.OpenMPCommandMixin.run">[docs]</a>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s2">&quot;num_threads&quot;</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;num_threads&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;num_threads&#39;</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;num_threads&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_num_threads_update</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span></div>
 </div>
@@ -388,89 +389,89 @@
     <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> &quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> &#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the metric to dilate&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the metric to dilate&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">surf_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> &quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> &#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the surface to compute on&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the surface to compute on&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">distance</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%f</span><span class="s2"> &quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1"> &#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;distance in mm to dilate&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;distance in mm to dilate&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">],</span>
-        <span class="n">name_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.func.gii&quot;</span><span class="p">,</span>
+        <span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;in_file&#39;</span><span class="p">],</span>
+        <span class="n">name_template</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.func.gii&#39;</span><span class="p">,</span>
         <span class="n">keep_extension</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> &quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> &#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output - the output metric&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output - the output metric&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">bad_vertex_roi_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-bad-vertex-roi </span><span class="si">%s</span><span class="s2"> &quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-bad-vertex-roi </span><span class="si">%s</span><span class="s1"> &#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;metric file, positive values denote vertices to have their values replaced&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;metric file, positive values denote vertices to have their values replaced&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">data_roi_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-data-roi </span><span class="si">%s</span><span class="s2"> &quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-data-roi </span><span class="si">%s</span><span class="s1"> &#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;metric file, positive values denote vertices that have data&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;metric file, positive values denote vertices that have data&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">column</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-column </span><span class="si">%d</span><span class="s2"> &quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the column number&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-column </span><span class="si">%d</span><span class="s1"> &#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the column number&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">nearest</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-nearest &quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;use the nearest good value instead of a weighted average&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-nearest &#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;use the nearest good value instead of a weighted average&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">linear</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-linear &quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;fill in values with linear interpolation along strongest gradient&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-linear &#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;fill in values with linear interpolation along strongest gradient&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">exponent</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-exponent </span><span class="si">%f</span><span class="s2"> &quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-exponent </span><span class="si">%f</span><span class="s1"> &#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;exponent n to use in (area / (distance ^ n)) as the &quot;</span>
-        <span class="s2">&quot;weighting function (default 6)&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;exponent n to use in (area / (distance ^ n)) as the &#39;</span>
+        <span class="s1">&#39;weighting function (default 6)&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">corrected_areas</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-corrected-areas </span><span class="si">%s</span><span class="s2"> &quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-corrected-areas </span><span class="si">%s</span><span class="s1"> &#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;vertex areas to use instead of computing them from the surface&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;vertex areas to use instead of computing them from the surface&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">legacy_cutoff</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-legacy-cutoff &quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;use the v1.3.2 method of choosing how many vertices to &quot;</span>
-        <span class="s2">&quot;use when calculating the dilated value with weighted method&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-legacy-cutoff &#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;use the v1.3.2 method of choosing how many vertices to &#39;</span>
+        <span class="s1">&#39;use when calculating the dilated value with weighted method&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">MetricDilateOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output file&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output file&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MetricDilate">
@@ -498,7 +499,7 @@
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">MetricDilateInputSpec</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">MetricDilateOutputSpec</span>
-    <span class="n">_cmd</span> <span class="o">=</span> <span class="s2">&quot;wb_command -metric-dilate &quot;</span></div>
+    <span class="n">_cmd</span> <span class="o">=</span> <span class="s1">&#39;wb_command -metric-dilate &#39;</span></div>
 
 
 
@@ -506,91 +507,91 @@
     <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The metric file to resample&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;The metric file to resample&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">current_sphere</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;A sphere surface with the mesh that the metric is currently on&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;A sphere surface with the mesh that the metric is currently on&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">new_sphere</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;A sphere surface that is in register with &lt;current-sphere&gt; and&quot;</span>
-        <span class="s2">&quot; has the desired output mesh&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;A sphere surface that is in register with &lt;current-sphere&gt; and&#39;</span>
+        <span class="s1">&#39; has the desired output mesh&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">method</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
-        <span class="s2">&quot;ADAP_BARY_AREA&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;BARYCENTRIC&quot;</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;ADAP_BARY_AREA&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;BARYCENTRIC&#39;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The method name - ADAP_BARY_AREA method is recommended for&quot;</span>
-        <span class="s2">&quot; ordinary metric data, because it should use all data while&quot;</span>
-        <span class="s2">&quot; downsampling, unlike BARYCENTRIC. If ADAP_BARY_AREA is used,&quot;</span>
-        <span class="s2">&quot; exactly one of area_surfs or area_metrics must be specified&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;The method name - ADAP_BARY_AREA method is recommended for&#39;</span>
+        <span class="s1">&#39; ordinary metric data, because it should use all data while&#39;</span>
+        <span class="s1">&#39; downsampling, unlike BARYCENTRIC. If ADAP_BARY_AREA is used,&#39;</span>
+        <span class="s1">&#39; exactly one of area_surfs or area_metrics must be specified&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;new_sphere&quot;</span><span class="p">],</span>
-        <span class="n">name_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.out&quot;</span><span class="p">,</span>
+        <span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;new_sphere&#39;</span><span class="p">],</span>
+        <span class="n">name_template</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.out&#39;</span><span class="p">,</span>
         <span class="n">keep_extension</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The output metric&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;The output metric&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">area_surfs</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-area-surfs&quot;</span><span class="p">,</span>
-        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;area_metrics&quot;</span><span class="p">],</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Specify surfaces to do vertex area correction based on&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-area-surfs&#39;</span><span class="p">,</span>
+        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;area_metrics&#39;</span><span class="p">],</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Specify surfaces to do vertex area correction based on&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">area_metrics</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-area-metrics&quot;</span><span class="p">,</span>
-        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;area_surfs&quot;</span><span class="p">],</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Specify vertex area metrics to do area correction based on&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-area-metrics&#39;</span><span class="p">,</span>
+        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;area_surfs&#39;</span><span class="p">],</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Specify vertex area metrics to do area correction based on&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">current_area</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;A relevant anatomical surface with &lt;current-sphere&gt; mesh OR&quot;</span>
-        <span class="s2">&quot; a metric file with vertex areas for &lt;current-sphere&gt; mesh&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;A relevant anatomical surface with &lt;current-sphere&gt; mesh OR&#39;</span>
+        <span class="s1">&#39; a metric file with vertex areas for &lt;current-sphere&gt; mesh&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">new_area</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;A relevant anatomical surface with &lt;current-sphere&gt; mesh OR&quot;</span>
-        <span class="s2">&quot; a metric file with vertex areas for &lt;current-sphere&gt; mesh&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;A relevant anatomical surface with &lt;current-sphere&gt; mesh OR&#39;</span>
+        <span class="s1">&#39; a metric file with vertex areas for &lt;current-sphere&gt; mesh&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">roi_metric</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-current-roi </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Input roi on the current mesh used to exclude non-data vertices&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-current-roi </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Input roi on the current mesh used to exclude non-data vertices&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">valid_roi_out</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-valid-roi-out&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Output the ROI of vertices that got data from valid source vertices&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-valid-roi-out&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Output the ROI of vertices that got data from valid source vertices&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">largest</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-largest&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Use only the value of the vertex with the largest weight&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-largest&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Use only the value of the vertex with the largest weight&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">MetricResampleOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the output metric&quot;</span><span class="p">)</span>
-    <span class="n">roi_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;ROI of vertices that got data from valid source vertices&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the output metric&#39;</span><span class="p">)</span>
+    <span class="n">roi_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;ROI of vertices that got data from valid source vertices&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MetricResample">
@@ -619,33 +620,31 @@
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">MetricResampleInputSpec</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">MetricResampleOutputSpec</span>
-    <span class="n">_cmd</span> <span class="o">=</span> <span class="s2">&quot;wb_command -metric-resample&quot;</span>
+    <span class="n">_cmd</span> <span class="o">=</span> <span class="s1">&#39;wb_command -metric-resample&#39;</span>
 
     <span class="k">def</span> <span class="nf">_format_arg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;current_area&quot;</span><span class="p">,</span> <span class="s2">&quot;new_area&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;current_area&#39;</span><span class="p">,</span> <span class="s1">&#39;new_area&#39;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">area_surfs</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">area_metrics</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> was set but neither area_surfs or area_metrics were set&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
-                <span class="p">)</span>
-        <span class="k">if</span> <span class="n">opt</span> <span class="o">==</span> <span class="s2">&quot;method&quot;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">opt</span><span class="si">}</span><span class="s1"> was set but neither area_surfs or area_metrics were set&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">opt</span> <span class="o">==</span> <span class="s1">&#39;method&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="n">val</span> <span class="o">==</span> <span class="s2">&quot;ADAP_BARY_AREA&quot;</span>
+                <span class="n">val</span> <span class="o">==</span> <span class="s1">&#39;ADAP_BARY_AREA&#39;</span>
                 <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">area_surfs</span>
                 <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">area_metrics</span>
             <span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Exactly one of area_surfs or area_metrics must be specified&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">opt</span> <span class="o">==</span> <span class="s2">&quot;valid_roi_out&quot;</span> <span class="ow">and</span> <span class="n">val</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Exactly one of area_surfs or area_metrics must be specified&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">opt</span> <span class="o">==</span> <span class="s1">&#39;valid_roi_out&#39;</span> <span class="ow">and</span> <span class="n">val</span><span class="p">:</span>
             <span class="c1"># generate a filename and add it to argstr</span>
-            <span class="n">roi_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_roi&quot;</span><span class="p">)</span>
-            <span class="n">iflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Setting roi output file as&quot;</span><span class="p">,</span> <span class="n">roi_out</span><span class="p">)</span>
-            <span class="n">spec</span><span class="o">.</span><span class="n">argstr</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">roi_out</span>
+            <span class="n">roi_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_roi&#39;</span><span class="p">)</span>
+            <span class="n">iflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Setting roi output file as&#39;</span><span class="p">,</span> <span class="n">roi_out</span><span class="p">)</span>
+            <span class="n">spec</span><span class="o">.</span><span class="n">argstr</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">roi_out</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format_arg</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_list_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">valid_roi_out</span><span class="p">:</span>
-            <span class="n">roi_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_roi&quot;</span><span class="p">)</span>
-            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;roi_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">roi_file</span><span class="p">)</span>
+            <span class="n">roi_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_roi&#39;</span><span class="p">)</span>
+            <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;roi_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">roi_file</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">outputs</span></div>
 
 
@@ -653,151 +652,151 @@
 <span class="k">class</span> <span class="nc">VolumeToSurfaceMappingInputSpec</span><span class="p">(</span><span class="n">OpenMPTraitedSpec</span><span class="p">):</span>
     <span class="n">volume_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the volume to map data from&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the volume to map data from&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">surface_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the surface to map the data onto&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the surface to map the data onto&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;surface_file&quot;</span><span class="p">],</span>
-        <span class="n">name_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_mapped.func.gii&quot;</span><span class="p">,</span>
+        <span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;surface_file&#39;</span><span class="p">],</span>
+        <span class="n">name_template</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_mapped.func.gii&#39;</span><span class="p">,</span>
         <span class="n">keep_extension</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the output metric file&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the output metric file&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">method</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
-        <span class="s2">&quot;trilinear&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;enclosing&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;cubic&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ribbon-constrained&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;myelin-style&quot;</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;trilinear&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;enclosing&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;cubic&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ribbon-constrained&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;myelin-style&#39;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the interpolation method to use&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the interpolation method to use&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">_ribbon_constrained</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;inner_surface&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;outer_surface&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;volume_roi&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;weighted&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;voxel_subdiv&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;gaussian&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;interpolate&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;bad_vertices_out&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;output_weights&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;output_weights_text&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;inner_surface&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;outer_surface&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;volume_roi&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;weighted&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;voxel_subdiv&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;gaussian&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;interpolate&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;bad_vertices_out&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;output_weights&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;output_weights_text&#39;</span><span class="p">,</span>
     <span class="p">]</span>
     <span class="n">_myelin_style</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;ribbon_roi&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;thickness&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;sigma&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;legacy_bug&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;ribbon_roi&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;thickness&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sigma&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;legacy_bug&#39;</span><span class="p">,</span>
     <span class="p">]</span>
     <span class="n">inner_surface</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the inner surface of the ribbon [-ribbon-constrained]&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the inner surface of the ribbon [-ribbon-constrained]&#39;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_myelin_style</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">outer_surface</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the outer surface of the ribbon [-ribbon-constrained]&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the outer surface of the ribbon [-ribbon-constrained]&#39;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_myelin_style</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">volume_roi</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-volume-roi </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-volume-roi </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;use a volume roi [-ribbon-constrained]&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;use a volume roi [-ribbon-constrained]&#39;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_myelin_style</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">weighted</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-weighted&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-weighted&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;treat the roi values as weightings rather than binary [-ribbon-constrained]&quot;</span><span class="p">,</span>
-        <span class="n">requires</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;volume_roi&quot;</span><span class="p">],</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;treat the roi values as weightings rather than binary [-ribbon-constrained]&#39;</span><span class="p">,</span>
+        <span class="n">requires</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;volume_roi&#39;</span><span class="p">],</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_myelin_style</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">voxel_subdiv</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span>
         <span class="n">default_value</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-voxel-subdiv </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;voxel divisions while estimating voxel weights [-ribbon-constrained]&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-voxel-subdiv </span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;voxel divisions while estimating voxel weights [-ribbon-constrained]&#39;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_myelin_style</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">thin_columns</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-thin-columns&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;use non-overlapping polyhedra [-ribbon-constrained]&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-thin-columns&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;use non-overlapping polyhedra [-ribbon-constrained]&#39;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_myelin_style</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">gaussian</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-gaussian </span><span class="si">%g</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-gaussian </span><span class="si">%g</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reduce weight to voxels that aren&#39;t near &lt;surface&gt; [-ribbon-constrained]&quot;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_myelin_style</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">interpolate</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
-        <span class="s2">&quot;CUBIC&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;TRILINEAR&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ENCLOSING_VOXEL&quot;</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-interpolate </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;instead of a weighted average of voxels, &quot;</span>
-        <span class="s2">&quot;interpolate at subpoints inside the ribbon [-ribbon-constrained]&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;CUBIC&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;TRILINEAR&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ENCLOSING_VOXEL&#39;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-interpolate </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;instead of a weighted average of voxels, &#39;</span>
+        <span class="s1">&#39;interpolate at subpoints inside the ribbon [-ribbon-constrained]&#39;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_myelin_style</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">bad_vertices_out</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-bad-vertices-out </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-bad-vertices-out </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output an ROI of which vertices didn&#39;t intersect any valid voxels&quot;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_myelin_style</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">output_weights</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-output-weights </span><span class="si">%(0)d</span><span class="s2"> output_weights.nii.gz&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;write the voxel weights for a vertex to a volume file&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-output-weights </span><span class="si">%(0)d</span><span class="s1"> output_weights.nii.gz&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;write the voxel weights for a vertex to a volume file&#39;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_myelin_style</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">output_weights_text</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">File</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-output-weights-text </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;write the voxel weights for all vertices to a text file&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-output-weights-text </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;write the voxel weights for all vertices to a text file&#39;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_myelin_style</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">ribbon_roi</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;an roi volume of the cortical ribbon for this hemisphere [-myelin-style]&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;an roi volume of the cortical ribbon for this hemisphere [-myelin-style]&#39;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_ribbon_constrained</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">thickness</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the thickness metric file for this hemisphere [-myelin-style]&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the thickness metric file for this hemisphere [-myelin-style]&#39;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_ribbon_constrained</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%g</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%g</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;gaussian kernel in mm for weighting voxels within range [-myelin-style]&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;gaussian kernel in mm for weighting voxels within range [-myelin-style]&#39;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_ribbon_constrained</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">legacy_bug</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-legacy-bug&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-legacy-bug&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;use the old bug in the myelin-style algorithm [-myelin-style]&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;use the old bug in the myelin-style algorithm [-myelin-style]&#39;</span><span class="p">,</span>
         <span class="n">xor</span><span class="o">=</span><span class="n">_ribbon_constrained</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">subvol_select</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-subvol-select </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;select a single subvolume to map&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-subvol-select </span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;select a single subvolume to map&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;\</span>
@@ -865,10 +864,10 @@
 
 
 <span class="k">class</span> <span class="nc">VolumeToSurfaceMappingOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the output metric file&quot;</span><span class="p">)</span>
-    <span class="n">bad_vertices_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the output metric file of vertices that have no data&quot;</span><span class="p">)</span>
-    <span class="n">weights_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;volume to write the weights to&quot;</span><span class="p">)</span>
-    <span class="n">weights_text_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the output text filename&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the output metric file&#39;</span><span class="p">)</span>
+    <span class="n">bad_vertices_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the output metric file of vertices that have no data&#39;</span><span class="p">)</span>
+    <span class="n">weights_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;volume to write the weights to&#39;</span><span class="p">)</span>
+    <span class="n">weights_text_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the output text filename&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="VolumeToSurfaceMapping">
@@ -931,25 +930,25 @@
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">VolumeToSurfaceMappingInputSpec</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">VolumeToSurfaceMappingOutputSpec</span>
-    <span class="n">_cmd</span> <span class="o">=</span> <span class="s2">&quot;wb_command -volume-to-surface-mapping&quot;</span>
+    <span class="n">_cmd</span> <span class="o">=</span> <span class="s1">&#39;wb_command -volume-to-surface-mapping&#39;</span>
 
     <span class="k">def</span> <span class="nf">_format_arg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">opt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="o">.</span><span class="n">_ribbon_constrained</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">method</span> <span class="o">!=</span> <span class="s2">&quot;ribbon-constrained&quot;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">method</span> <span class="o">!=</span> <span class="s1">&#39;ribbon-constrained&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;&#39;</span>
         <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="o">.</span><span class="n">_myelin_style</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">method</span> <span class="o">!=</span> <span class="s2">&quot;myelin-style&quot;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">method</span> <span class="o">!=</span> <span class="s1">&#39;myelin-style&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;&#39;</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format_arg</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_list_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bad_vertices_out</span><span class="p">):</span>
-            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;bad_vertices_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bad_vertices_out</span><span class="p">)</span>
+            <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;bad_vertices_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bad_vertices_out</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_weights</span><span class="p">):</span>
-            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;weights_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_weights</span><span class="p">)</span>
+            <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;weights_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_weights</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_weights_text</span><span class="p">):</span>
-            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;weights_text_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_weights_text</span><span class="p">)</span>
+            <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;weights_text_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_weights_text</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">outputs</span></div>
 
 
@@ -971,36 +970,36 @@
 
     <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input metric file&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input metric file&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;mask metric file&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;mask metric file&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">name_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_masked.func.gii&quot;</span><span class="p">,</span>
-        <span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">],</span>
+        <span class="n">name_template</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_masked.func.gii&#39;</span><span class="p">,</span>
+        <span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;in_file&#39;</span><span class="p">],</span>
         <span class="n">keep_extension</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output metric file&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output metric file&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">column</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Either</span><span class="p">(</span>
         <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span>
         <span class="n">traits</span><span class="o">.</span><span class="n">String</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-column </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;select a single column by number or name&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-column </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;select a single column by number or name&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">MetricMaskOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output metric file&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output metric file&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MetricMask">
@@ -1020,7 +1019,7 @@
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">MetricMaskInputSpec</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">MetricMaskOutputSpec</span>
-    <span class="n">_cmd</span> <span class="o">=</span> <span class="s2">&quot;wb_command -metric-mask&quot;</span></div>
+    <span class="n">_cmd</span> <span class="o">=</span> <span class="s1">&#39;wb_command -metric-mask&#39;</span></div>
 
 
 
@@ -1042,34 +1041,34 @@
     <span class="n">surface_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;surface to use for neighbor information&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;surface to use for neighbor information&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">metric_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input ROI metric&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input ROI metric&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">name_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_filled.shape.gii&quot;</span><span class="p">,</span>
-        <span class="n">name_source</span><span class="o">=</span><span class="s2">&quot;metric_file&quot;</span><span class="p">,</span>
+        <span class="n">name_template</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_filled.shape.gii&#39;</span><span class="p">,</span>
+        <span class="n">name_source</span><span class="o">=</span><span class="s1">&#39;metric_file&#39;</span><span class="p">,</span>
         <span class="n">keep_extension</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output ROI metric&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output ROI metric&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">corrected_areas</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-corrected-areas </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;vertex areas to use instead of computing them from the surface&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-corrected-areas </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;vertex areas to use instead of computing them from the surface&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">MetricFillHolesOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output ROI metric&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output ROI metric&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MetricFillHoles">
@@ -1090,7 +1089,7 @@
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">MetricFillHolesInputSpec</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">MetricFillHolesOutputSpec</span>
-    <span class="n">_cmd</span> <span class="o">=</span> <span class="s2">&quot;wb_command -metric-fill-holes&quot;</span></div>
+    <span class="n">_cmd</span> <span class="o">=</span> <span class="s1">&#39;wb_command -metric-fill-holes&#39;</span></div>
 
 
 
@@ -1112,34 +1111,34 @@
     <span class="n">surface_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;surface to use for neighbor information&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;surface to use for neighbor information&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">metric_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input ROI metric&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input ROI metric&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">name_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_noislands.shape.gii&quot;</span><span class="p">,</span>
-        <span class="n">name_source</span><span class="o">=</span><span class="s2">&quot;metric_file&quot;</span><span class="p">,</span>
+        <span class="n">name_template</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_noislands.shape.gii&#39;</span><span class="p">,</span>
+        <span class="n">name_source</span><span class="o">=</span><span class="s1">&#39;metric_file&#39;</span><span class="p">,</span>
         <span class="n">keep_extension</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output ROI metric&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output ROI metric&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">corrected_areas</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-corrected-areas </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;vertex areas to use instead of computing them from the surface&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-corrected-areas </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;vertex areas to use instead of computing them from the surface&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">MetricRemoveIslandsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output ROI metric&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output ROI metric&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MetricRemoveIslands">
@@ -1160,7 +1159,7 @@
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">MetricRemoveIslandsInputSpec</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">MetricRemoveIslandsOutputSpec</span>
-    <span class="n">_cmd</span> <span class="o">=</span> <span class="s2">&quot;wb_command -metric-remove-islands&quot;</span></div>
+    <span class="n">_cmd</span> <span class="o">=</span> <span class="s1">&#39;wb_command -metric-remove-islands&#39;</span></div>
 
 </pre></div>
         </article>
@@ -1174,7 +1173,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

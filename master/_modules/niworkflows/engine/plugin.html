@@ -354,14 +354,14 @@
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;A lightweight NiPype MultiProc execution plugin.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">gc</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">time</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
-<span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
 <span class="kn">from</span> <span class="nn">traceback</span> <span class="kn">import</span> <span class="n">format_exception</span>
-<span class="kn">import</span> <span class="nn">gc</span>
 
 <span class="kn">from</span> <span class="nn">nipype.utils.misc</span> <span class="kn">import</span> <span class="n">str2bool</span>
 
@@ -388,14 +388,14 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Init variables</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">traceback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">taskid</span><span class="o">=</span><span class="n">taskid</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;result&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;traceback&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;taskid&#39;</span><span class="p">:</span> <span class="n">taskid</span><span class="p">}</span>
 
     <span class="c1"># Try and execute the node via node.run()</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">updatehash</span><span class="o">=</span><span class="n">updatehash</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">updatehash</span><span class="o">=</span><span class="n">updatehash</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: E722, intendedly catch all here</span>
-        <span class="n">result</span><span class="p">[</span><span class="s2">&quot;traceback&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_exception</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
-        <span class="n">result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">result</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;traceback&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_exception</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">result</span>
 
     <span class="c1"># Return the result dictionary</span>
     <span class="k">return</span> <span class="n">result</span></div>
@@ -413,7 +413,7 @@
             <span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plugin_args</span> <span class="o">=</span> <span class="n">plugin_args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_status_callback</span> <span class="o">=</span> <span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status_callback&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_status_callback</span> <span class="o">=</span> <span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status_callback&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PluginBase.run">
 <a class="viewcode-back" href="../../../api/niworkflows.engine.plugin.html#niworkflows.engine.plugin.PluginBase.run">[docs]</a>
@@ -486,7 +486,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">proc_done</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proc_pending</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pending_tasks</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_jobs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_jobs&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_prerun_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Stub method to validate/massage graph and nodes before running.&quot;&quot;&quot;</span>
@@ -501,7 +501,7 @@
         <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
-        <span class="n">poll_sleep_secs</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;execution&quot;</span><span class="p">][</span><span class="s2">&quot;poll_sleep_duration&quot;</span><span class="p">])</span>
+        <span class="n">poll_sleep_secs</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;execution&#39;</span><span class="p">][</span><span class="s1">&#39;poll_sleep_duration&#39;</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_prerun_check</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
         <span class="c1"># Generate appropriate structures for worker-manager model</span>
@@ -525,15 +525,16 @@
                     <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;traceback&quot;</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;traceback&#39;</span><span class="p">]:</span>
                             <span class="n">notrun</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_clean_queue</span><span class="p">(</span><span class="n">jobid</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="n">result</span><span class="p">))</span>
-                            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;traceback&quot;</span><span class="p">]))</span>
+                            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;traceback&#39;</span><span class="p">]))</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">_task_finished_cb</span><span class="p">(</span><span class="n">jobid</span><span class="p">)</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">_remove_node_dirs</span><span class="p">()</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_clear_task</span><span class="p">(</span><span class="n">taskid</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_done</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_pending</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span>
+                        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_done</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span>
+                        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_pending</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span>
                         <span class="n">toappend</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">taskid</span><span class="p">,</span> <span class="n">jobid</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="n">toappend</span><span class="p">:</span>
@@ -559,7 +560,7 @@
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">error</span><span class="p">,</span> <span class="n">cause</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span><span class="si">}</span><span class="s2"> raised. Re-raising first.&quot;</span><span class="p">),</span>
+                    <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span><span class="si">}</span><span class="s1"> raised. Re-raising first.&#39;</span><span class="p">),</span>
                     <span class="n">error</span><span class="p">,</span>
                 <span class="p">)</span>
 
@@ -577,8 +578,8 @@
 
         <span class="n">tb</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">node</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
-            <span class="n">tb</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;traceback&quot;</span><span class="p">]</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span>
+            <span class="n">tb</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;traceback&#39;</span><span class="p">]</span>
             <span class="n">node</span><span class="o">.</span><span class="n">_traceback</span> <span class="o">=</span> <span class="n">tb</span>
         <span class="k">return</span> <span class="n">report_crash</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">traceback</span><span class="o">=</span><span class="n">tb</span><span class="p">)</span>
 
@@ -587,16 +588,16 @@
 
     <span class="k">def</span> <span class="nf">_clean_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jobid</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_callback</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_status_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">],</span> <span class="s2">&quot;exception&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_status_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">],</span> <span class="s1">&#39;exception&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s2">&quot;traceback&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">format_exception</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())),</span>
+                <span class="s1">&#39;result&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;traceback&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">format_exception</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())),</span>
             <span class="p">}</span>
 
         <span class="n">crashfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_report_crash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">],</span> <span class="n">result</span><span class="o">=</span><span class="n">result</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">str2bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s2">&quot;execution&quot;</span><span class="p">][</span><span class="s2">&quot;stop_on_first_crash&quot;</span><span class="p">]):</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;traceback&quot;</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">str2bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;execution&#39;</span><span class="p">][</span><span class="s1">&#39;stop_on_first_crash&#39;</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;traceback&#39;</span><span class="p">]))</span>
         <span class="k">if</span> <span class="n">jobid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapnodesubids</span><span class="p">:</span>
             <span class="c1"># remove current jobid</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">proc_pending</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
@@ -625,11 +626,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mapnodesubids</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">depidx</span> <span class="o">=</span> <span class="n">ssp</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">depidx</span><span class="p">,</span> <span class="n">ssp</span><span class="o">.</span><span class="n">lil_matrix</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numnodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">depidx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])))),</span>
-            <span class="s2">&quot;lil&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;lil&#39;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">depidx</span> <span class="o">=</span> <span class="n">ssp</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">depidx</span><span class="p">,</span> <span class="n">ssp</span><span class="o">.</span><span class="n">lil_matrix</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">depidx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">numnodes</span><span class="p">)))),</span>
-            <span class="s2">&quot;lil&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;lil&#39;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">depidx</span><span class="p">[</span><span class="o">-</span><span class="n">numnodes</span><span class="p">:,</span> <span class="n">jobid</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proc_done</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">proc_done</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">numnodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)))</span>
@@ -637,7 +638,7 @@
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">_local_hash_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jobid</span><span class="p">,</span> <span class="n">graph</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">str2bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;execution&quot;</span><span class="p">][</span><span class="s2">&quot;local_hash_check&quot;</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">str2bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;execution&#39;</span><span class="p">][</span><span class="s1">&#39;local_hash_check&#39;</span><span class="p">]):</span>
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -665,7 +666,7 @@
 <span class="sd">        This is called when a job is completed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_callback</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_status_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">],</span> <span class="s2">&quot;end&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_status_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">],</span> <span class="s1">&#39;end&#39;</span><span class="p">)</span>
         <span class="c1"># Update job and worker queues</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proc_pending</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="c1"># update the job dependency structure</span>
@@ -688,7 +689,7 @@
             <span class="kn">from</span> <span class="nn">networkx</span> <span class="kn">import</span> <span class="n">to_scipy_sparse_matrix</span> <span class="k">as</span> <span class="n">to_scipy_sparse_array</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topological_sort</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">depidx</span> <span class="o">=</span> <span class="n">to_scipy_sparse_array</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">nodelist</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;lil&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">depidx</span> <span class="o">=</span> <span class="n">to_scipy_sparse_array</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">nodelist</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;lil&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">refidx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">depidx</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proc_done</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">proc_pending</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
@@ -700,19 +701,20 @@
             <span class="n">dfs_preorder</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">dfs_preorder</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="n">dfs_preorder</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">dfs_preorder_nodes</span>
-        <span class="n">subnodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">dfs_preorder</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">])]</span>
+        <span class="n">subnodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dfs_preorder</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">]))</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">subnodes</span><span class="p">:</span>
             <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">proc_done</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">proc_pending</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">],</span> <span class="n">dependents</span><span class="o">=</span><span class="n">subnodes</span><span class="p">,</span> <span class="n">crashfile</span><span class="o">=</span><span class="n">crashfile</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;node&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">],</span> <span class="s1">&#39;dependents&#39;</span><span class="p">:</span> <span class="n">subnodes</span><span class="p">,</span> <span class="s1">&#39;crashfile&#39;</span><span class="p">:</span> <span class="n">crashfile</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_remove_node_dirs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove directories whose outputs have already been used up.&quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
         <span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">rmtree</span>
 
-        <span class="k">if</span> <span class="n">str2bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s2">&quot;execution&quot;</span><span class="p">][</span><span class="s2">&quot;remove_node_directories&quot;</span><span class="p">]):</span>
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+        <span class="k">if</span> <span class="n">str2bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;execution&#39;</span><span class="p">][</span><span class="s1">&#39;remove_node_directories&#39;</span><span class="p">]):</span>
             <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">refidx</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">__array__</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapnodesubids</span><span class="p">:</span>
@@ -779,9 +781,10 @@
 
         <span class="c1"># Retrieve a nipreps-style configuration object</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">config</span> <span class="o">=</span> <span class="n">plugin_args</span><span class="p">[</span><span class="s2">&quot;app_config&quot;</span><span class="p">]</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">plugin_args</span><span class="p">[</span><span class="s1">&#39;app_config&#39;</span><span class="p">]</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
             <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">SimpleNamespace</span>
+
             <span class="kn">from</span> <span class="nn">nipype.utils.profiler</span> <span class="kn">import</span> <span class="n">get_system_total_memory_gb</span>
 
             <span class="n">config</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span>
@@ -796,15 +799,15 @@
             <span class="p">)</span>
 
         <span class="c1"># Read in options or set defaults.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">processors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;n_procs&quot;</span><span class="p">,</span> <span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;n_procs&#39;</span><span class="p">,</span> <span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">memory_gb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="s2">&quot;memory_gb&quot;</span><span class="p">,</span>  <span class="c1"># Allocate 90% of system memory</span>
+            <span class="s1">&#39;memory_gb&#39;</span><span class="p">,</span>  <span class="c1"># Allocate 90% of system memory</span>
             <span class="n">config</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">total_memory</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">raise_insufficient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;raise_insufficient&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raise_insufficient</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;raise_insufficient&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># Instantiate different thread pools for non-daemon processes</span>
-        <span class="n">mp_context</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">get_context</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mp_context&quot;</span><span class="p">))</span>
+        <span class="n">mp_context</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">get_context</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mp_context&#39;</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">pool</span> <span class="ow">or</span> <span class="n">ProcessPoolExecutor</span><span class="p">(</span>
             <span class="n">max_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">processors</span><span class="p">,</span>
             <span class="n">initializer</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">_process_initializer</span><span class="p">,</span>
@@ -816,7 +819,7 @@
 
     <span class="k">def</span> <span class="nf">_async_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_taskresult</span><span class="p">[</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;taskid&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">result</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_taskresult</span><span class="p">[</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;taskid&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">result</span>
 
     <span class="k">def</span> <span class="nf">_get_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">taskid</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taskresult</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">taskid</span><span class="p">)</span>
@@ -828,8 +831,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_taskid</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="c1"># Don&#39;t allow streaming outputs</span>
-        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">interface</span><span class="p">,</span> <span class="s2">&quot;terminal_output&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;stream&quot;</span><span class="p">:</span>
-            <span class="n">node</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s2">&quot;allatonce&quot;</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">interface</span><span class="p">,</span> <span class="s1">&#39;terminal_output&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;stream&#39;</span><span class="p">:</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s1">&#39;allatonce&#39;</span>
 
         <span class="n">result_future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">run_node</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">updatehash</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taskid</span><span class="p">)</span>
         <span class="n">result_future</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_async_callback</span><span class="p">)</span>
@@ -850,7 +853,7 @@
             <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tasks_mem_gb</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_gb</span><span class="p">)</span>
             <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tasks_num_th</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">processors</span><span class="p">)</span>
         <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Insufficient resources available for job&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Insufficient resources available for job&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_postrun_check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
@@ -894,7 +897,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">jobids</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pending_tasks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="n">jobids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_jobs</span><span class="p">(</span><span class="n">jobids</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scheduler&quot;</span><span class="p">))</span>
+        <span class="n">jobids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_jobs</span><span class="p">(</span><span class="n">jobids</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plugin_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scheduler&#39;</span><span class="p">))</span>
 
         <span class="c1"># Run garbage collector before potentially submitting jobs</span>
         <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
@@ -902,13 +905,13 @@
         <span class="c1"># Submit jobs</span>
         <span class="k">for</span> <span class="n">jobid</span> <span class="ow">in</span> <span class="n">jobids</span><span class="p">:</span>
             <span class="c1"># First expand mapnodes</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;MapNode&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;MapNode&#39;</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">num_subnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span><span class="o">.</span><span class="n">num_subnodes</span><span class="p">()</span>
                 <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                     <span class="n">traceback</span> <span class="o">=</span> <span class="n">format_exception</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_clean_queue</span><span class="p">(</span>
-                        <span class="n">jobid</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;traceback&quot;</span><span class="p">:</span> <span class="n">traceback</span><span class="p">}</span>
+                        <span class="n">jobid</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;result&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;traceback&#39;</span><span class="p">:</span> <span class="n">traceback</span><span class="p">}</span>
                     <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">proc_pending</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="k">continue</span>
@@ -942,7 +945,7 @@
                 <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                     <span class="n">traceback</span> <span class="o">=</span> <span class="n">format_exception</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_clean_queue</span><span class="p">(</span>
-                        <span class="n">jobid</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;traceback&quot;</span><span class="p">:</span> <span class="n">traceback</span><span class="p">}</span>
+                        <span class="n">jobid</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;result&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;traceback&#39;</span><span class="p">:</span> <span class="n">traceback</span><span class="p">}</span>
                     <span class="p">)</span>
 
                 <span class="c1"># Release resources</span>
@@ -960,7 +963,7 @@
             <span class="c1"># Task should be submitted to workers</span>
             <span class="c1"># Send job to task manager and add to pending tasks</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status_callback</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_status_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">],</span> <span class="s2">&quot;start&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_status_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">],</span> <span class="s1">&#39;start&#39;</span><span class="p">)</span>
             <span class="n">tid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_submit_job</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">jobid</span><span class="p">]),</span> <span class="n">updatehash</span><span class="o">=</span><span class="n">updatehash</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">tid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">proc_done</span><span class="p">[</span><span class="n">jobid</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
@@ -970,8 +973,8 @@
             <span class="c1"># Display stats next loop</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_stats</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">_sort_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">=</span><span class="s2">&quot;tsort&quot;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">scheduler</span> <span class="o">==</span> <span class="s2">&quot;mem_thread&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_sort_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jobids</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">=</span><span class="s1">&#39;tsort&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">scheduler</span> <span class="o">==</span> <span class="s1">&#39;mem_thread&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span>
                 <span class="n">jobids</span><span class="p">,</span>
                 <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="o">.</span><span class="n">mem_gb</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">procs</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="o">.</span><span class="n">n_procs</span><span class="p">),</span>
@@ -990,7 +993,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

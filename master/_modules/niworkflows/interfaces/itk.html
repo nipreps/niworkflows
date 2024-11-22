@@ -353,6 +353,7 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;ITK files handling.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">mimetypes</span> <span class="kn">import</span> <span class="n">guess_type</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
@@ -375,20 +376,20 @@
 
 <span class="kn">from</span> <span class="nn">.fixes</span> <span class="kn">import</span> <span class="n">_FixTraitApplyTransformsInputSpec</span>
 
-<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;nipype.interface&quot;</span><span class="p">)</span>
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;nipype.interface&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_MCFLIRT2ITKInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
     <span class="n">in_files</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
-        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;list of MAT files from MCFLIRT&quot;</span>
+        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;list of MAT files from MCFLIRT&#39;</span>
     <span class="p">)</span>
-    <span class="n">in_reference</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input image for spatial reference&quot;</span><span class="p">)</span>
-    <span class="n">in_source</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input image for spatial source&quot;</span><span class="p">)</span>
-    <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="n">nohash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;number of parallel processes&quot;</span><span class="p">)</span>
+    <span class="n">in_reference</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input image for spatial reference&#39;</span><span class="p">)</span>
+    <span class="n">in_source</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input image for spatial source&#39;</span><span class="p">)</span>
+    <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="n">nohash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;number of parallel processes&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_MCFLIRT2ITKOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the output ITKTransform file&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the output ITKTransform file&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MCFLIRT2ITK">
@@ -401,7 +402,7 @@
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span><span class="p">):</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Multithreading is deprecated. Remove the num_threads input.&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Multithreading is deprecated. Remove the num_threads input.&#39;</span><span class="p">)</span>
 
         <span class="n">source</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_source</span><span class="p">)</span>
         <span class="n">reference</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_reference</span><span class="p">)</span>
@@ -414,8 +415,8 @@
             <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">matrix</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">affines</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="s2">&quot;mat2itk.txt&quot;</span><span class="p">)</span>
-        <span class="n">affarray</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="s1">&#39;mat2itk.txt&#39;</span><span class="p">)</span>
+        <span class="n">affarray</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
 
@@ -425,23 +426,19 @@
     <span class="n">input_image</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
         <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input time-series as a list of volumes after splitting&quot;</span>
-        <span class="s2">&quot; through the fourth dimension&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input time-series as a list of volumes after splitting&#39;</span>
+        <span class="s1">&#39; through the fourth dimension&#39;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span>
-        <span class="mi">1</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nohash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;number of parallel processes&quot;</span>
-    <span class="p">)</span>
+    <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nohash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;number of parallel processes&#39;</span><span class="p">)</span>
     <span class="n">save_cmd</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
-        <span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;write a log of command lines that were applied&quot;</span>
+        <span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;write a log of command lines that were applied&#39;</span>
     <span class="p">)</span>
-    <span class="n">copy_dtype</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
-        <span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;copy dtype from inputs to outputs&quot;</span>
-    <span class="p">)</span>
+    <span class="n">copy_dtype</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;copy dtype from inputs to outputs&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_MultiApplyTransformsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_files</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the output ITKTransform file&quot;</span><span class="p">)</span>
-    <span class="n">log_cmdline</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;a list of command lines used to apply transforms&quot;</span><span class="p">)</span>
+    <span class="n">out_files</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the output ITKTransform file&#39;</span><span class="p">)</span>
+    <span class="n">log_cmdline</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;a list of command lines used to apply transforms&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MultiApplyTransforms">
@@ -457,25 +454,23 @@
         <span class="n">ifargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 
         <span class="c1"># Extract number of input images and transforms</span>
-        <span class="n">in_files</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;input_image&quot;</span><span class="p">)</span>
+        <span class="n">in_files</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;input_image&#39;</span><span class="p">)</span>
         <span class="n">num_files</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_files</span><span class="p">)</span>
-        <span class="n">transforms</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;transforms&quot;</span><span class="p">)</span>
+        <span class="n">transforms</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;transforms&#39;</span><span class="p">)</span>
         <span class="c1"># Get number of parallel jobs</span>
-        <span class="n">num_threads</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;num_threads&quot;</span><span class="p">)</span>
-        <span class="n">save_cmd</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;save_cmd&quot;</span><span class="p">)</span>
+        <span class="n">num_threads</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;num_threads&#39;</span><span class="p">)</span>
+        <span class="n">save_cmd</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;save_cmd&#39;</span><span class="p">)</span>
 
         <span class="c1"># Remove certain keys</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;environ&quot;</span><span class="p">,</span> <span class="s2">&quot;ignore_exception&quot;</span><span class="p">,</span> <span class="s2">&quot;terminal_output&quot;</span><span class="p">,</span> <span class="s2">&quot;output_image&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;environ&#39;</span><span class="p">,</span> <span class="s1">&#39;ignore_exception&#39;</span><span class="p">,</span> <span class="s1">&#39;terminal_output&#39;</span><span class="p">,</span> <span class="s1">&#39;output_image&#39;</span><span class="p">]:</span>
             <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># Get a temp folder ready</span>
-        <span class="n">tmp_folder</span> <span class="o">=</span> <span class="n">TemporaryDirectory</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;tmp-&quot;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
+        <span class="n">tmp_folder</span> <span class="o">=</span> <span class="n">TemporaryDirectory</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;tmp-&#39;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
 
         <span class="n">xfms_list</span> <span class="o">=</span> <span class="n">_arrange_xfms</span><span class="p">(</span><span class="n">transforms</span><span class="p">,</span> <span class="n">num_files</span><span class="p">,</span> <span class="n">tmp_folder</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xfms_list</span><span class="p">)</span> <span class="o">!=</span> <span class="n">num_files</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Number of files and entries in the transforms list do not match&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Number of files and entries in the transforms list do not match&#39;</span><span class="p">)</span>
 
         <span class="c1"># Inputs are ready to run in parallel</span>
         <span class="k">if</span> <span class="n">num_threads</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -495,21 +490,19 @@
                         <span class="n">_applytfms</span><span class="p">,</span>
                         <span class="p">[</span>
                             <span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">in_xfm</span><span class="p">,</span> <span class="n">ifargs</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
-                            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">in_xfm</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
-                                <span class="nb">zip</span><span class="p">(</span><span class="n">in_files</span><span class="p">,</span> <span class="n">xfms_list</span><span class="p">)</span>
-                            <span class="p">)</span>
+                            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">in_xfm</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">in_files</span><span class="p">,</span> <span class="n">xfms_list</span><span class="p">))</span>
                         <span class="p">],</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
         <span class="n">tmp_folder</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
 
         <span class="c1"># Collect output file names, after sorting by index</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_files&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">out_files</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">out_files</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">save_cmd</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;log_cmdline&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="s2">&quot;command.txt&quot;</span><span class="p">)</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;log_cmdline&quot;</span><span class="p">],</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cmdfile</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">-------</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">el</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">out_files</span><span class="p">]),</span> <span class="n">file</span><span class="o">=</span><span class="n">cmdfile</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;log_cmdline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="s1">&#39;command.txt&#39;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;log_cmdline&#39;</span><span class="p">],</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cmdfile</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">-------</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">el</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">out_files</span><span class="p">]),</span> <span class="n">file</span><span class="o">=</span><span class="n">cmdfile</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
@@ -522,18 +515,19 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
     <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
+
     <span class="kn">from</span> <span class="nn">niworkflows.interfaces.fixes</span> <span class="kn">import</span> <span class="n">FixHeaderApplyTransforms</span> <span class="k">as</span> <span class="n">ApplyTransforms</span>
 
     <span class="n">in_file</span><span class="p">,</span> <span class="n">in_xform</span><span class="p">,</span> <span class="n">ifargs</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">newpath</span> <span class="o">=</span> <span class="n">args</span>
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
-        <span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_xform-</span><span class="si">%05d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">index</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">,</span> <span class="n">use_ext</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_xform-</span><span class="si">%05d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">index</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">,</span> <span class="n">use_ext</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
 
-    <span class="n">copy_dtype</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;copy_dtype&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">copy_dtype</span> <span class="o">=</span> <span class="n">ifargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;copy_dtype&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
     <span class="n">xfm</span> <span class="o">=</span> <span class="n">ApplyTransforms</span><span class="p">(</span>
         <span class="n">input_image</span><span class="o">=</span><span class="n">in_file</span><span class="p">,</span> <span class="n">transforms</span><span class="o">=</span><span class="n">in_xform</span><span class="p">,</span> <span class="n">output_image</span><span class="o">=</span><span class="n">out_file</span><span class="p">,</span> <span class="o">**</span><span class="n">ifargs</span>
     <span class="p">)</span>
-    <span class="n">xfm</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s2">&quot;allatonce&quot;</span>
+    <span class="n">xfm</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s1">&#39;allatonce&#39;</span>
     <span class="n">xfm</span><span class="o">.</span><span class="n">resource_monitor</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">runtime</span> <span class="o">=</span> <span class="n">xfm</span><span class="o">.</span><span class="n">run</span><span class="p">()</span><span class="o">.</span><span class="n">runtime</span>
 
@@ -554,16 +548,16 @@
 <span class="sd">    Convenience method to arrange the list of transforms that should be applied</span>
 <span class="sd">    to each input file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">base_xform</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;#Insight Transform File V1.0&quot;</span><span class="p">,</span> <span class="s2">&quot;#Transform 0&quot;</span><span class="p">]</span>
+    <span class="n">base_xform</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;#Insight Transform File V1.0&#39;</span><span class="p">,</span> <span class="s1">&#39;#Transform 0&#39;</span><span class="p">]</span>
     <span class="c1"># Initialize the transforms matrix</span>
     <span class="n">xfms_T</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tf_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">transforms</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">tf_file</span> <span class="o">==</span> <span class="s2">&quot;identity&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tf_file</span> <span class="o">==</span> <span class="s1">&#39;identity&#39;</span><span class="p">:</span>
             <span class="n">xfms_T</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">tf_file</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_files</span><span class="p">)</span>
             <span class="k">continue</span>
 
         <span class="c1"># If it is a deformation field, copy to the tfs_matrix directly</span>
-        <span class="k">if</span> <span class="n">guess_type</span><span class="p">(</span><span class="n">tf_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;text/plain&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">guess_type</span><span class="p">(</span><span class="n">tf_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;text/plain&#39;</span><span class="p">:</span>
             <span class="n">xfms_T</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">tf_file</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_files</span><span class="p">)</span>
             <span class="k">continue</span>
 
@@ -571,15 +565,15 @@
             <span class="n">tfdata</span> <span class="o">=</span> <span class="n">tf_fh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
         <span class="c1"># If it is not an ITK transform file, copy to the tfs_matrix directly</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">tfdata</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#Insight Transform File&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tfdata</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#Insight Transform File&#39;</span><span class="p">):</span>
             <span class="n">xfms_T</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">tf_file</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_files</span><span class="p">)</span>
             <span class="k">continue</span>
 
         <span class="c1"># Count number of transforms in ITK transform file</span>
-        <span class="n">nxforms</span> <span class="o">=</span> <span class="n">tfdata</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;#Transform&quot;</span><span class="p">)</span>
+        <span class="n">nxforms</span> <span class="o">=</span> <span class="n">tfdata</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;#Transform&#39;</span><span class="p">)</span>
 
         <span class="c1"># Remove first line</span>
-        <span class="n">tfdata</span> <span class="o">=</span> <span class="n">tfdata</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">tfdata</span> <span class="o">=</span> <span class="n">tfdata</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
 
         <span class="c1"># If it is a ITK transform file with only 1 xform, copy to the tfs_matrix directly</span>
         <span class="k">if</span> <span class="n">nxforms</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -588,23 +582,23 @@
 
         <span class="k">if</span> <span class="n">nxforms</span> <span class="o">!=</span> <span class="n">num_files</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;Number of transforms (</span><span class="si">%d</span><span class="s2">) found in the ITK file does not match&quot;</span>
-                <span class="s2">&quot; the number of input image files (</span><span class="si">%d</span><span class="s2">).&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nxforms</span><span class="p">,</span> <span class="n">num_files</span><span class="p">)</span>
+                <span class="s1">&#39;Number of transforms (</span><span class="si">%d</span><span class="s1">) found in the ITK file does not match&#39;</span>
+                <span class="s1">&#39; the number of input image files (</span><span class="si">%d</span><span class="s1">).&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nxforms</span><span class="p">,</span> <span class="n">num_files</span><span class="p">)</span>
             <span class="p">)</span>
 
         <span class="c1"># At this point splitting transforms will be necessary, generate a base name</span>
         <span class="n">out_base</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
-            <span class="n">tf_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_pos-</span><span class="si">%03d</span><span class="s2">_xfm-</span><span class="si">{:05d}</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">tmp_folder</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">tf_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_pos-</span><span class="si">%03d</span><span class="s1">_xfm-</span><span class="si">{:05d}</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">tmp_folder</span><span class="o">.</span><span class="n">name</span>
         <span class="p">)</span><span class="o">.</span><span class="n">format</span>
         <span class="c1"># Split combined ITK transforms file</span>
         <span class="n">split_xfms</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">xform_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nxforms</span><span class="p">):</span>
             <span class="c1"># Find start token to extract</span>
-            <span class="n">startidx</span> <span class="o">=</span> <span class="n">tfdata</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;#Transform </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">xform_i</span><span class="p">)</span>
-            <span class="n">next_xform</span> <span class="o">=</span> <span class="n">base_xform</span> <span class="o">+</span> <span class="n">tfdata</span><span class="p">[</span><span class="n">startidx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">startidx</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+            <span class="n">startidx</span> <span class="o">=</span> <span class="n">tfdata</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;#Transform </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">xform_i</span><span class="p">)</span>
+            <span class="n">next_xform</span> <span class="o">=</span> <span class="n">base_xform</span> <span class="o">+</span> <span class="n">tfdata</span><span class="p">[</span><span class="n">startidx</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">startidx</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
             <span class="n">xfm_file</span> <span class="o">=</span> <span class="n">out_base</span><span class="p">(</span><span class="n">xform_i</span><span class="p">)</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">xfm_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_xfm</span><span class="p">:</span>
-                <span class="n">out_xfm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">next_xform</span><span class="p">))</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">xfm_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_xfm</span><span class="p">:</span>
+                <span class="n">out_xfm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">next_xform</span><span class="p">))</span>
             <span class="n">split_xfms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xfm_file</span><span class="p">)</span>
         <span class="n">xfms_T</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">split_xfms</span><span class="p">)</span>
 
@@ -622,7 +616,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

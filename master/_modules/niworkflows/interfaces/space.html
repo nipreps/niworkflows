@@ -353,26 +353,25 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;Interfaces for handling spaces.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">traits</span><span class="p">,</span>
-    <span class="n">TraitedSpec</span><span class="p">,</span>
     <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
     <span class="n">SimpleInterface</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
 <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_SpaceDataSourceInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_tuple</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Tuple</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Dict</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;a space declaration&quot;</span>
-    <span class="p">)</span>
+    <span class="n">in_tuple</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Tuple</span><span class="p">((</span><span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Dict</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;a space declaration&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_SpaceDataSourceOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">space</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the space identifier, after dropping the cohort modifier.&quot;</span><span class="p">)</span>
-    <span class="n">cohort</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;a cohort specifier&quot;</span><span class="p">)</span>
-    <span class="n">resolution</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;a resolution specifier&quot;</span><span class="p">)</span>
-    <span class="n">density</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;a density specifier&quot;</span><span class="p">)</span>
-    <span class="n">uid</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;a unique identifier combining space specifications&quot;</span><span class="p">)</span>
+    <span class="n">space</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the space identifier, after dropping the cohort modifier.&#39;</span><span class="p">)</span>
+    <span class="n">cohort</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;a cohort specifier&#39;</span><span class="p">)</span>
+    <span class="n">resolution</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;a resolution specifier&#39;</span><span class="p">)</span>
+    <span class="n">density</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;a density specifier&#39;</span><span class="p">)</span>
+    <span class="n">uid</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;a unique identifier combining space specifications&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="SpaceDataSource">
@@ -412,7 +411,7 @@
         <span class="kn">from</span> <span class="nn">..utils.spaces</span> <span class="kn">import</span> <span class="n">format_reference</span><span class="p">,</span> <span class="n">reference2dict</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="n">reference2dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_tuple</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;uid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_reference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_tuple</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;uid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_reference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_tuple</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 </pre></div>
@@ -427,7 +426,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

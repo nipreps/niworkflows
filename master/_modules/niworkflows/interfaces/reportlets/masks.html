@@ -353,20 +353,22 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;ReportCapableInterfaces for masks tools.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
 
-<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span><span class="p">,</span> <span class="n">ants</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">nipype.algorithms</span> <span class="kn">import</span> <span class="n">confounds</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">ants</span><span class="p">,</span> <span class="n">fsl</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">File</span><span class="p">,</span>
-    <span class="n">traits</span><span class="p">,</span>
-    <span class="n">isdefined</span><span class="p">,</span>
     <span class="n">InputMultiPath</span><span class="p">,</span>
     <span class="n">Str</span><span class="p">,</span>
+    <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.mixins</span> <span class="kn">import</span> <span class="n">reporting</span>
-<span class="kn">from</span> <span class="nn">nipype.algorithms</span> <span class="kn">import</span> <span class="n">confounds</span>
+
 <span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">NIWORKFLOWS_LOG</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">base</span> <span class="k">as</span> <span class="n">nrb</span>
 
@@ -375,9 +377,7 @@
     <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">_BETOutputSpecRPT</span><span class="p">(</span>
-    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">BETOutputSpec</span>
-<span class="p">):</span>
+<span class="k">class</span> <span class="nc">_BETOutputSpecRPT</span><span class="p">(</span><span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">BETOutputSpec</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
@@ -431,16 +431,11 @@
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_BrainExtractionOutputSpecRPT</span>
 
     <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; generates a report showing slices from each axis &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;generates a report showing slices from each axis&quot;&quot;&quot;</span>
 
-        <span class="n">brain_extraction_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span>
-            <span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">BrainExtractionMask</span>
+        <span class="n">brain_extraction_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">BrainExtractionMask</span>
 
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">keep_temporary_files</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">keep_temporary_files</span> <span class="o">==</span> <span class="mi">1</span>
-        <span class="p">):</span>
+        <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">keep_temporary_files</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">keep_temporary_files</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_anat_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">N4Corrected0</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_anat_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">anatomical_image</span>
@@ -462,9 +457,7 @@
     <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">_ACompCorOutputSpecRPT</span><span class="p">(</span>
-    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">confounds</span><span class="o">.</span><span class="n">CompCorOutputSpec</span>
-<span class="p">):</span>
+<span class="k">class</span> <span class="nc">_ACompCorOutputSpecRPT</span><span class="p">(</span><span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">confounds</span><span class="o">.</span><span class="n">CompCorOutputSpec</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
@@ -475,12 +468,12 @@
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_ACompCorOutputSpecRPT</span>
 
     <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; generates a report showing slices from each axis &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;generates a report showing slices from each axis&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_files</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;ACompCorRPT only supports a single input mask. &quot;</span>
-                <span class="s2">&quot;A list </span><span class="si">%s</span><span class="s2"> was found.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_files</span>
+                <span class="s1">&#39;ACompCorRPT only supports a single input mask. &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;A list </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_files</span><span class="si">}</span><span class="s1"> was found.&#39;</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_anat_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">realigned_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mask_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -497,15 +490,11 @@
 
 
 
-<span class="k">class</span> <span class="nc">_TCompCorInputSpecRPT</span><span class="p">(</span>
-    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">confounds</span><span class="o">.</span><span class="n">TCompCorInputSpec</span>
-<span class="p">):</span>
+<span class="k">class</span> <span class="nc">_TCompCorInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">confounds</span><span class="o">.</span><span class="n">TCompCorInputSpec</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">_TCompCorOutputSpecRPT</span><span class="p">(</span>
-    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">confounds</span><span class="o">.</span><span class="n">TCompCorOutputSpec</span>
-<span class="p">):</span>
+<span class="k">class</span> <span class="nc">_TCompCorOutputSpecRPT</span><span class="p">(</span><span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">confounds</span><span class="o">.</span><span class="n">TCompCorOutputSpec</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
@@ -516,16 +505,14 @@
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_TCompCorOutputSpecRPT</span>
 
     <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; generates a report showing slices from each axis &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;generates a report showing slices from each axis&quot;&quot;&quot;</span>
 
-        <span class="n">high_variance_masks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span>
-            <span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">high_variance_masks</span>
+        <span class="n">high_variance_masks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">high_variance_masks</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">high_variance_masks</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;TCompCorRPT only supports a single output high variance mask. &quot;</span>
-                <span class="s2">&quot;A list </span><span class="si">%s</span><span class="s2"> was found.&quot;</span> <span class="o">%</span> <span class="n">high_variance_masks</span>
+                <span class="s1">&#39;TCompCorRPT only supports a single output high variance mask. &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;A list </span><span class="si">{</span><span class="n">high_variance_masks</span><span class="si">}</span><span class="s1"> was found.&#39;</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_anat_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">realigned_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mask_file</span> <span class="o">=</span> <span class="n">high_variance_masks</span>
@@ -543,8 +530,8 @@
 
 
 <span class="k">class</span> <span class="nc">_SimpleShowMaskInputSpec</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">):</span>
-    <span class="n">background_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;file before&quot;</span><span class="p">)</span>
-    <span class="n">mask_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;file before&quot;</span><span class="p">)</span>
+    <span class="n">background_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;file before&#39;</span><span class="p">)</span>
+    <span class="n">mask_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;file before&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="SimpleShowMaskRPT">
@@ -563,24 +550,22 @@
 
 
 <span class="k">class</span> <span class="nc">_ROIsPlotInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">):</span>
-    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the volume where ROIs are defined&quot;</span>
-    <span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the volume where ROIs are defined&#39;</span><span class="p">)</span>
     <span class="n">in_rois</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span>
-        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;a list of regions to be plotted&quot;</span>
+        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;a list of regions to be plotted&#39;</span>
     <span class="p">)</span>
-    <span class="n">in_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;a special region, eg. the brain mask&quot;</span><span class="p">)</span>
-    <span class="n">masked</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;mask in_file prior plotting&quot;</span><span class="p">)</span>
+    <span class="n">in_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;a special region, eg. the brain mask&#39;</span><span class="p">)</span>
+    <span class="n">masked</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;mask in_file prior plotting&#39;</span><span class="p">)</span>
     <span class="n">colors</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Either</span><span class="p">(</span>
-        <span class="kc">None</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">Str</span><span class="p">),</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;use specific colors for contours&quot;</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">Str</span><span class="p">),</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;use specific colors for contours&#39;</span>
     <span class="p">)</span>
     <span class="n">levels</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Either</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
         <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">),</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;pass levels to nilearn.plotting&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;pass levels to nilearn.plotting&#39;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">mask_color</span> <span class="o">=</span> <span class="n">Str</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;color for mask&quot;</span><span class="p">)</span>
+    <span class="n">mask_color</span> <span class="o">=</span> <span class="n">Str</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;color for mask&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ROIsPlot">
@@ -590,35 +575,34 @@
 
     <span class="k">def</span> <span class="nf">_generate_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">seaborn</span> <span class="kn">import</span> <span class="n">color_palette</span>
-        <span class="kn">from</span> <span class="nn">niworkflows.viz.utils</span> <span class="kn">import</span> <span class="n">plot_segs</span><span class="p">,</span> <span class="n">compose_view</span>
+
+        <span class="kn">from</span> <span class="nn">niworkflows.viz.utils</span> <span class="kn">import</span> <span class="n">compose_view</span><span class="p">,</span> <span class="n">plot_segs</span>
 
         <span class="n">seg_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_rois</span>
         <span class="n">mask_file</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_mask</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_mask</span>
 
         <span class="c1"># Remove trait decoration and replace None with []</span>
-        <span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="n">level</span> <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">levels</span> <span class="ow">or</span> <span class="p">[]]</span>
-        <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">colors</span> <span class="ow">or</span> <span class="p">[]]</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">levels</span> <span class="ow">or</span> <span class="p">[])</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">colors</span> <span class="ow">or</span> <span class="p">[])</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">seg_files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># in_rois is a segmentation</span>
             <span class="n">nsegs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">nsegs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">levels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">seg_files</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">))</span>
-                <span class="p">)</span>
+                <span class="n">levels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">seg_files</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)))</span>
                 <span class="n">levels</span> <span class="o">=</span> <span class="p">(</span><span class="n">levels</span><span class="p">[</span><span class="n">levels</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
                 <span class="n">nsegs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
 
             <span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="n">levels</span><span class="p">]</span>
             <span class="n">missing</span> <span class="o">=</span> <span class="n">nsegs</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">missing</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span> <span class="o">+</span> <span class="n">color_palette</span><span class="p">(</span><span class="s2">&quot;husl&quot;</span><span class="p">,</span> <span class="n">missing</span><span class="p">)</span>
+                <span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span> <span class="o">+</span> <span class="n">color_palette</span><span class="p">(</span><span class="s1">&#39;husl&#39;</span><span class="p">,</span> <span class="n">missing</span><span class="p">)</span>
             <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">colors</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># in_rois is a list of masks</span>
             <span class="n">nsegs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">seg_files</span><span class="p">)</span>
             <span class="n">levels</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">]]</span> <span class="o">*</span> <span class="n">nsegs</span>
             <span class="n">missing</span> <span class="o">=</span> <span class="n">nsegs</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">missing</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">colors</span> <span class="o">=</span> <span class="p">[[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">colors</span> <span class="o">+</span> <span class="n">color_palette</span><span class="p">(</span><span class="s2">&quot;husl&quot;</span><span class="p">,</span> <span class="n">missing</span><span class="p">)]</span>
+                <span class="n">colors</span> <span class="o">=</span> <span class="p">[[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">colors</span> <span class="o">+</span> <span class="n">color_palette</span><span class="p">(</span><span class="s1">&#39;husl&#39;</span><span class="p">,</span> <span class="n">missing</span><span class="p">)]</span>
 
         <span class="k">if</span> <span class="n">mask_file</span><span class="p">:</span>
             <span class="n">seg_files</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">mask_file</span><span class="p">)</span>
@@ -655,7 +639,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

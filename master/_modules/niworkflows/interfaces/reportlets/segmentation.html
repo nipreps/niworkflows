@@ -353,11 +353,13 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;ReportCapableInterfaces for segmentation tools.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">freesurfer</span><span class="p">,</span> <span class="n">fsl</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="n">File</span><span class="p">,</span> <span class="n">isdefined</span>
-<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span><span class="p">,</span> <span class="n">freesurfer</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.mixins</span> <span class="kn">import</span> <span class="n">reporting</span>
+
 <span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">NIWORKFLOWS_LOG</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">base</span> <span class="k">as</span> <span class="n">nrb</span>
 
@@ -366,9 +368,7 @@
     <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">_FASTOutputSpecRPT</span><span class="p">(</span>
-    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">FASTOutputSpec</span>
-<span class="p">):</span>
+<span class="k">class</span> <span class="nc">_FASTOutputSpecRPT</span><span class="p">(</span><span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">FASTOutputSpec</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
@@ -397,8 +397,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_masked</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s2">&quot;Generating report for FAST (in_files </span><span class="si">%s</span><span class="s2">, &quot;</span>
-            <span class="s2">&quot;segmentation </span><span class="si">%s</span><span class="s2">, individual tissue classes </span><span class="si">%s</span><span class="s2">).&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;Generating report for FAST (in_files </span><span class="si">%s</span><span class="s1">, &#39;</span>
+            <span class="s1">&#39;segmentation </span><span class="si">%s</span><span class="s1">, individual tissue classes </span><span class="si">%s</span><span class="s1">).&#39;</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">,</span>
             <span class="n">outputs</span><span class="o">.</span><span class="n">tissue_class_map</span><span class="p">,</span>
             <span class="n">outputs</span><span class="o">.</span><span class="n">tissue_class_files</span><span class="p">,</span>
@@ -432,16 +432,12 @@
 <span class="sd">        overlaid&quot;&quot;&quot;</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_anat_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">outputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="n">outputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">,</span> <span class="s2">&quot;mri&quot;</span><span class="p">,</span> <span class="s2">&quot;brain.mgz&quot;</span>
+            <span class="n">outputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="n">outputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">,</span> <span class="s1">&#39;mri&#39;</span><span class="p">,</span> <span class="s1">&#39;brain.mgz&#39;</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">outputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="n">outputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">,</span> <span class="s2">&quot;mri&quot;</span><span class="p">,</span> <span class="s2">&quot;ribbon.mgz&quot;</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="n">outputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">,</span> <span class="s1">&#39;mri&#39;</span><span class="p">,</span> <span class="s1">&#39;ribbon.mgz&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_masked</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s2">&quot;Generating report for ReconAll (subject </span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">outputs</span><span class="o">.</span><span class="n">subject_id</span>
-        <span class="p">)</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Generating report for ReconAll (subject </span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">outputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
@@ -449,19 +445,17 @@
 
 <span class="k">class</span> <span class="nc">_MELODICInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">MELODICInputSpec</span><span class="p">):</span>
     <span class="n">out_report</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="s2">&quot;melodic_reportlet.svg&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;melodic_reportlet.svg&#39;</span><span class="p">,</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Filename for the visual report generated by Nipype.&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Filename for the visual report generated by Nipype.&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">report_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Mask used to draw the outline on the reportlet. &quot;</span>
-        <span class="s2">&quot;If not set the mask will be derived from the data.&quot;</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Mask used to draw the outline on the reportlet. &#39;</span>
+        <span class="s1">&#39;If not set the mask will be derived from the data.&#39;</span>
     <span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">_MELODICOutputSpecRPT</span><span class="p">(</span>
-    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">MELODICOutputSpec</span>
-<span class="p">):</span>
+<span class="k">class</span> <span class="nc">_MELODICOutputSpecRPT</span><span class="p">(</span><span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">MELODICOutputSpec</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
@@ -483,7 +477,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_report</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">runtime</span>
 
-        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating report for MELODIC.&quot;</span><span class="p">)</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Generating report for MELODIC.&#39;</span><span class="p">)</span>
         <span class="n">_melodic_dir</span> <span class="o">=</span> <span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
         <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_dir</span><span class="p">):</span>
             <span class="n">_melodic_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_dir</span>
@@ -491,18 +485,14 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_report</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span><span class="p">))</span>
 
-        <span class="n">mix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_melodic_dir</span><span class="p">,</span> <span class="s2">&quot;melodic_mix&quot;</span><span class="p">)</span>
+        <span class="n">mix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_melodic_dir</span><span class="p">,</span> <span class="s1">&#39;melodic_mix&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">mix</span><span class="p">):</span>
-            <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;MELODIC outputs not found, assuming it didn&#39;t converge.&quot;</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.svg&quot;</span><span class="p">,</span> <span class="s2">&quot;.html&quot;</span><span class="p">)</span>
-            <span class="n">snippet</span> <span class="o">=</span> <span class="s2">&quot;&lt;h4&gt;MELODIC did not converge, no output&lt;/h4&gt;&quot;</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fobj</span><span class="p">:</span>
+            <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;MELODIC outputs not found, assuming it didn&#39;t converge.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.svg&#39;</span><span class="p">,</span> <span class="s1">&#39;.html&#39;</span><span class="p">)</span>
+            <span class="n">snippet</span> <span class="o">=</span> <span class="s1">&#39;&lt;h4&gt;MELODIC did not converge, no output&lt;/h4&gt;&#39;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fobj</span><span class="p">:</span>
                 <span class="n">fobj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">snippet</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">runtime</span>
 
@@ -515,7 +505,7 @@
         <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
             <span class="n">outputs</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;out_report&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span>
+            <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;out_report&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span>
         <span class="k">return</span> <span class="n">outputs</span>
 
     <span class="k">def</span> <span class="nf">_generate_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -532,23 +522,19 @@
 
 
 
-<span class="k">class</span> <span class="nc">_ICA_AROMAInputSpecRPT</span><span class="p">(</span>
-    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">aroma</span><span class="o">.</span><span class="n">ICA_AROMAInputSpec</span>
-<span class="p">):</span>
+<span class="k">class</span> <span class="nc">_ICA_AROMAInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">aroma</span><span class="o">.</span><span class="n">ICA_AROMAInputSpec</span><span class="p">):</span>
     <span class="n">out_report</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="s2">&quot;ica_aroma_reportlet.svg&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;ica_aroma_reportlet.svg&#39;</span><span class="p">,</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Filename for the visual report generated by Nipype.&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Filename for the visual report generated by Nipype.&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">report_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Mask used to draw the outline on the reportlet. &quot;</span>
-        <span class="s2">&quot;If not set the mask will be derived from the data.&quot;</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Mask used to draw the outline on the reportlet. &#39;</span>
+        <span class="s1">&#39;If not set the mask will be derived from the data.&#39;</span>
     <span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">_ICA_AROMAOutputSpecRPT</span><span class="p">(</span>
-    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">aroma</span><span class="o">.</span><span class="n">ICA_AROMAOutputSpec</span>
-<span class="p">):</span>
+<span class="k">class</span> <span class="nc">_ICA_AROMAOutputSpecRPT</span><span class="p">(</span><span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">aroma</span><span class="o">.</span><span class="n">ICA_AROMAOutputSpec</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
@@ -572,11 +558,9 @@
 
     <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_noise_components_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">outputs</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="s2">&quot;classified_motion_ICs.txt&quot;</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_noise_components_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="s1">&#39;classified_motion_ICs.txt&#39;</span><span class="p">)</span>
 
-        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating report for ICA AROMA&quot;</span><span class="p">)</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Generating report for ICA AROMA&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span></div>
 
@@ -592,7 +576,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

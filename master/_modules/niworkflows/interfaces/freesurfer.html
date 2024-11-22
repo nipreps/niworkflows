@@ -356,23 +356,24 @@
 
 <span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">op</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
 <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
-<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">copyfile</span><span class="p">,</span> <span class="n">filename_to_list</span><span class="p">,</span> <span class="n">fname_presuffix</span>
-<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">isdefined</span><span class="p">,</span>
-    <span class="n">InputMultiPath</span><span class="p">,</span>
-    <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
-    <span class="n">TraitedSpec</span><span class="p">,</span>
-    <span class="n">File</span><span class="p">,</span>
-    <span class="n">traits</span><span class="p">,</span>
-    <span class="n">Directory</span><span class="p">,</span>
-<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">freesurfer</span> <span class="k">as</span> <span class="n">fs</span>
-<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="n">SimpleInterface</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
+    <span class="n">Directory</span><span class="p">,</span>
+    <span class="n">File</span><span class="p">,</span>
+    <span class="n">InputMultiPath</span><span class="p">,</span>
+    <span class="n">SimpleInterface</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
+    <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.freesurfer.preprocess</span> <span class="kn">import</span> <span class="n">ConcatenateLTA</span><span class="p">,</span> <span class="n">RobustRegister</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.freesurfer.utils</span> <span class="kn">import</span> <span class="n">LTAConvert</span>
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">copyfile</span><span class="p">,</span> <span class="n">filename_to_list</span><span class="p">,</span> <span class="n">fname_presuffix</span>
+
 <span class="kn">from</span> <span class="nn">.reportlets.registration</span> <span class="kn">import</span> <span class="n">BBRegisterRPT</span><span class="p">,</span> <span class="n">MRICoregRPT</span>
 
 
@@ -413,18 +414,18 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cmdline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_vols</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;echo Only one time point!&quot;</span>
+            <span class="k">return</span> <span class="s1">&#39;echo Only one time point!&#39;</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">cmdline</span>
 
     <span class="k">def</span> <span class="nf">_list_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_vols</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">in_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_file</span>
-            <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;transform_outputs&quot;</span><span class="p">]):</span>
-                <span class="n">transform_file</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;transform_outputs&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_file</span>
+            <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;transform_outputs&#39;</span><span class="p">]):</span>
+                <span class="n">transform_file</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;transform_outputs&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">fs</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">LTAConvert</span><span class="p">(</span>
-                    <span class="n">in_lta</span><span class="o">=</span><span class="s2">&quot;identity.nofile&quot;</span><span class="p">,</span>
+                    <span class="n">in_lta</span><span class="o">=</span><span class="s1">&#39;identity.nofile&#39;</span><span class="p">,</span>
                     <span class="n">source_file</span><span class="o">=</span><span class="n">in_file</span><span class="p">,</span>
                     <span class="n">target_file</span><span class="o">=</span><span class="n">in_file</span><span class="p">,</span>
                     <span class="n">out_lta</span><span class="o">=</span><span class="n">transform_file</span><span class="p">,</span>
@@ -434,7 +435,7 @@
 
 
 <span class="k">class</span> <span class="nc">_MakeMidthicknessInputSpec</span><span class="p">(</span><span class="n">fs</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">MRIsExpandInputSpec</span><span class="p">):</span>
-    <span class="n">graymid</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Existing graymid/midthickness file&quot;</span><span class="p">)</span>
+    <span class="n">graymid</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Existing graymid/midthickness file&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MakeMidthickness">
@@ -463,8 +464,8 @@
         <span class="c1"># as input</span>
         <span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">in_base</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
-        <span class="n">mt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_associated_file</span><span class="p">(</span><span class="n">in_base</span><span class="p">,</span> <span class="s2">&quot;midthickness&quot;</span><span class="p">)</span>
-        <span class="n">gm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_associated_file</span><span class="p">(</span><span class="n">in_base</span><span class="p">,</span> <span class="s2">&quot;graymid&quot;</span><span class="p">)</span>
+        <span class="n">mt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_associated_file</span><span class="p">(</span><span class="n">in_base</span><span class="p">,</span> <span class="s1">&#39;midthickness&#39;</span><span class="p">)</span>
+        <span class="n">gm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_associated_file</span><span class="p">(</span><span class="n">in_base</span><span class="p">,</span> <span class="s1">&#39;graymid&#39;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">surf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">graymid</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">surf</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">mt</span><span class="p">:</span>
@@ -476,19 +477,19 @@
         <span class="k">if</span> <span class="n">source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cmd</span>
 
-        <span class="k">return</span> <span class="s2">&quot;cp </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()[</span><span class="s2">&quot;out_file&quot;</span><span class="p">])</span></div>
+        <span class="k">return</span> <span class="s1">&#39;cp </span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()[</span><span class="s1">&#39;out_file&#39;</span><span class="p">])</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_FSInjectBrainExtractedInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;FreeSurfer SUBJECTS_DIR&quot;</span><span class="p">)</span>
-    <span class="n">subject_id</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Subject ID&quot;</span><span class="p">)</span>
-    <span class="n">in_brain</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input file, part of a BIDS tree&quot;</span><span class="p">)</span>
+    <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;FreeSurfer SUBJECTS_DIR&#39;</span><span class="p">)</span>
+    <span class="n">subject_id</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Subject ID&#39;</span><span class="p">)</span>
+    <span class="n">in_brain</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input file, part of a BIDS tree&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_FSInjectBrainExtractedOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;FreeSurfer SUBJECTS_DIR&quot;</span><span class="p">)</span>
-    <span class="n">subject_id</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Subject ID&quot;</span><span class="p">)</span>
+    <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;FreeSurfer SUBJECTS_DIR&#39;</span><span class="p">)</span>
+    <span class="n">subject_id</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Subject ID&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="FSInjectBrainExtracted">
@@ -502,32 +503,28 @@
         <span class="n">subjects_dir</span><span class="p">,</span> <span class="n">subject_id</span> <span class="o">=</span> <span class="n">inject_skullstripped</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_brain</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;subjects_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subjects_dir</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;subject_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subject_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;subjects_dir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subjects_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;subject_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subject_id</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_FSDetectInputsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
     <span class="n">t1w_list</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span>
-        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input file, part of a BIDS tree&quot;</span>
+        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input file, part of a BIDS tree&#39;</span>
     <span class="p">)</span>
-    <span class="n">t2w_list</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input file, part of a BIDS tree&quot;</span><span class="p">)</span>
-    <span class="n">flair_list</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span>
-        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input file, part of a BIDS tree&quot;</span>
-    <span class="p">)</span>
-    <span class="n">hires_enabled</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
-        <span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;enable hi-resolution processing&quot;</span>
-    <span class="p">)</span>
+    <span class="n">t2w_list</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input file, part of a BIDS tree&#39;</span><span class="p">)</span>
+    <span class="n">flair_list</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input file, part of a BIDS tree&#39;</span><span class="p">)</span>
+    <span class="n">hires_enabled</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;enable hi-resolution processing&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_FSDetectInputsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">t2w</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference T2w image&quot;</span><span class="p">)</span>
-    <span class="n">use_t2w</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;enable use of T2w downstream computation&quot;</span><span class="p">)</span>
-    <span class="n">flair</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference FLAIR image&quot;</span><span class="p">)</span>
-    <span class="n">use_flair</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;enable use of FLAIR downstream computation&quot;</span><span class="p">)</span>
-    <span class="n">hires</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;enable hi-res processing&quot;</span><span class="p">)</span>
-    <span class="n">mris_inflate</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;mris_inflate argument&quot;</span><span class="p">)</span>
+    <span class="n">t2w</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;reference T2w image&#39;</span><span class="p">)</span>
+    <span class="n">use_t2w</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;enable use of T2w downstream computation&#39;</span><span class="p">)</span>
+    <span class="n">flair</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;reference FLAIR image&#39;</span><span class="p">)</span>
+    <span class="n">use_flair</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;enable use of FLAIR downstream computation&#39;</span><span class="p">)</span>
+    <span class="n">hires</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;enable hi-res processing&#39;</span><span class="p">)</span>
+    <span class="n">mris_inflate</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;mris_inflate argument&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="FSDetectInputs">
@@ -537,25 +534,23 @@
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FSDetectInputsOutputSpec</span>
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-        <span class="n">t2w</span><span class="p">,</span> <span class="n">flair</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;hires&quot;</span><span class="p">],</span> <span class="n">mris_inflate</span> <span class="o">=</span> <span class="n">detect_inputs</span><span class="p">(</span>
+        <span class="n">t2w</span><span class="p">,</span> <span class="n">flair</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;hires&#39;</span><span class="p">],</span> <span class="n">mris_inflate</span> <span class="o">=</span> <span class="n">detect_inputs</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t1w_list</span><span class="p">,</span>
             <span class="n">t2w_list</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t2w_list</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t2w_list</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">flair_list</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">flair_list</span>
-            <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">flair_list</span><span class="p">)</span>
-            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">flair_list</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">flair_list</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">flair_list</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">hires_enabled</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">hires_enabled</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;use_t2w&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t2w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;use_t2w&quot;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;t2w&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t2w</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;use_t2w&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t2w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;use_t2w&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;t2w&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t2w</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;use_flair&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flair</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;use_flair&quot;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;flair&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flair</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;use_flair&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flair</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;use_flair&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;flair&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flair</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;hires&quot;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;mris_inflate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mris_inflate</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;hires&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;mris_inflate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mris_inflate</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
 
@@ -580,10 +575,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Use a tuple in case some object produces multiple transforms</span>
-    <span class="n">lta_outputs</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;out_lta_file&quot;</span><span class="p">,)</span>
+    <span class="n">lta_outputs</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;out_lta_file&#39;</span><span class="p">,)</span>
 
     <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-
         <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">lta_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lta_outputs</span><span class="p">:</span>
@@ -613,7 +607,7 @@
 <span class="sd">    the fix is now done through mixin with TruncateLTA</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">lta_outputs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span></div>
+    <span class="n">lta_outputs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span></div>
 
 
 
@@ -625,7 +619,7 @@
 <span class="sd">    truncate filename through mixin TruncateLTA</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">lta_outputs</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;out_lta&quot;</span><span class="p">,)</span></div>
+    <span class="n">lta_outputs</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;out_lta&#39;</span><span class="p">,)</span></div>
 
 
 
@@ -646,26 +640,22 @@
 <div class="viewcode-block" id="PatchedRobustRegister">
 <a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.PatchedRobustRegister">[docs]</a>
 <span class="k">class</span> <span class="nc">PatchedRobustRegister</span><span class="p">(</span><span class="n">TruncateLTA</span><span class="p">,</span> <span class="n">RobustRegister</span><span class="p">):</span>
-    <span class="n">lta_outputs</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;out_reg_file&quot;</span><span class="p">,</span> <span class="s2">&quot;half_source_xfm&quot;</span><span class="p">,</span> <span class="s2">&quot;half_targ_xfm&quot;</span><span class="p">)</span></div>
+    <span class="n">lta_outputs</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;out_reg_file&#39;</span><span class="p">,</span> <span class="s1">&#39;half_source_xfm&#39;</span><span class="p">,</span> <span class="s1">&#39;half_targ_xfm&#39;</span><span class="p">)</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_RefineBrainMaskInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_anat</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input anatomical reference (INU corrected)&quot;</span>
-    <span class="p">)</span>
-    <span class="n">in_aseg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input ``aseg`` file, in NifTi format.&quot;</span>
-    <span class="p">)</span>
+    <span class="n">in_anat</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input anatomical reference (INU corrected)&#39;</span><span class="p">)</span>
+    <span class="n">in_aseg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input ``aseg`` file, in NifTi format.&#39;</span><span class="p">)</span>
     <span class="n">in_ants</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;brain tissue segmentation generated with antsBrainExtraction.sh&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;brain tissue segmentation generated with antsBrainExtraction.sh&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_RefineBrainMaskOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;new mask&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;new mask&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="RefineBrainMask">
@@ -681,36 +671,35 @@
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_RefineBrainMaskOutputSpec</span>
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_anat</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_rbrainmask&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_anat</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_rbrainmask&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
         <span class="p">)</span>
 
         <span class="n">anatnii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_anat</span><span class="p">)</span>
         <span class="n">msknii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span>
             <span class="n">grow_mask</span><span class="p">(</span>
-                <span class="n">anatnii</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_aseg</span><span class="p">)</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;int16&quot;</span><span class="p">),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_ants</span><span class="p">)</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;int16&quot;</span><span class="p">),</span>
+                <span class="n">anatnii</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_aseg</span><span class="p">)</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int16&#39;</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_ants</span><span class="p">)</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int16&#39;</span><span class="p">),</span>
             <span class="p">),</span>
             <span class="n">anatnii</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span>
             <span class="n">anatnii</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">msknii</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
-        <span class="n">msknii</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">])</span>
+        <span class="n">msknii</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_MedialNaNsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input surface file&quot;</span><span class="p">)</span>
-    <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;FreeSurfer SUBJECTS_DIR&quot;</span><span class="p">)</span>
-    <span class="n">density</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s2">&quot;32k&quot;</span><span class="p">,</span> <span class="s2">&quot;59k&quot;</span><span class="p">,</span> <span class="s2">&quot;164k&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Input file density (fsLR only)&quot;</span><span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input surface file&#39;</span><span class="p">)</span>
+    <span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">Directory</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;FreeSurfer SUBJECTS_DIR&#39;</span><span class="p">)</span>
+    <span class="n">density</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s1">&#39;32k&#39;</span><span class="p">,</span> <span class="s1">&#39;59k&#39;</span><span class="p">,</span> <span class="s1">&#39;164k&#39;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Input file density (fsLR only)&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_MedialNaNsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the output surface file&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the output surface file&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MedialNaNs">
@@ -722,7 +711,7 @@
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_MedialNaNsOutputSpec</span>
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">medial_wall_to_nan</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">medial_wall_to_nan</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">density</span><span class="p">,</span>
@@ -771,14 +760,14 @@
     <span class="n">fixed</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">newfile</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;filename = &quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">255</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;filename = &#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">255</span><span class="p">:</span>
             <span class="n">fixed</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">newfile</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;filename = path_too_long</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">newfile</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;filename = path_too_long</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">newfile</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">fixed</span><span class="p">:</span>
-        <span class="n">Path</span><span class="p">(</span><span class="n">lta_file</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newfile</span><span class="p">))</span>
+        <span class="n">Path</span><span class="p">(</span><span class="n">lta_file</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newfile</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">fixed</span></div>
 
 
@@ -786,21 +775,19 @@
 <div class="viewcode-block" id="inject_skullstripped">
 <a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.inject_skullstripped">[docs]</a>
 <span class="k">def</span> <span class="nf">inject_skullstripped</span><span class="p">(</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="n">subject_id</span><span class="p">,</span> <span class="n">skullstripped</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">resample_to_img</span><span class="p">,</span> <span class="n">new_img_like</span>
+    <span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">new_img_like</span><span class="p">,</span> <span class="n">resample_to_img</span>
 
-    <span class="n">mridir</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="n">subject_id</span><span class="p">,</span> <span class="s2">&quot;mri&quot;</span><span class="p">)</span>
-    <span class="n">t1</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mridir</span><span class="p">,</span> <span class="s2">&quot;T1.mgz&quot;</span><span class="p">)</span>
-    <span class="n">bm_auto</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mridir</span><span class="p">,</span> <span class="s2">&quot;brainmask.auto.mgz&quot;</span><span class="p">)</span>
-    <span class="n">bm</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mridir</span><span class="p">,</span> <span class="s2">&quot;brainmask.mgz&quot;</span><span class="p">)</span>
+    <span class="n">mridir</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="n">subject_id</span><span class="p">,</span> <span class="s1">&#39;mri&#39;</span><span class="p">)</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mridir</span><span class="p">,</span> <span class="s1">&#39;T1.mgz&#39;</span><span class="p">)</span>
+    <span class="n">bm_auto</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mridir</span><span class="p">,</span> <span class="s1">&#39;brainmask.auto.mgz&#39;</span><span class="p">)</span>
+    <span class="n">bm</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mridir</span><span class="p">,</span> <span class="s1">&#39;brainmask.mgz&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">op</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">bm_auto</span><span class="p">):</span>
         <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">skullstripped</span><span class="p">)</span>
         <span class="n">bmask</span> <span class="o">=</span> <span class="n">new_img_like</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="n">resampled_mask</span> <span class="o">=</span> <span class="n">resample_to_img</span><span class="p">(</span><span class="n">bmask</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
-        <span class="n">masked_image</span> <span class="o">=</span> <span class="n">new_img_like</span><span class="p">(</span>
-            <span class="n">img</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span> <span class="o">*</span> <span class="n">resampled_mask</span><span class="o">.</span><span class="n">dataobj</span>
-        <span class="p">)</span>
+        <span class="n">resampled_mask</span> <span class="o">=</span> <span class="n">resample_to_img</span><span class="p">(</span><span class="n">bmask</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="s1">&#39;nearest&#39;</span><span class="p">)</span>
+        <span class="n">masked_image</span> <span class="o">=</span> <span class="n">new_img_like</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span> <span class="o">*</span> <span class="n">resampled_mask</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span>
         <span class="n">masked_image</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">bm_auto</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">op</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">bm</span><span class="p">):</span>
@@ -831,7 +818,7 @@
         <span class="n">flair</span> <span class="o">=</span> <span class="n">flair_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># https://surfer.nmr.mgh.harvard.edu/fswiki/SubmillimeterRecon</span>
-    <span class="n">mris_inflate</span> <span class="o">=</span> <span class="s2">&quot;-n 50&quot;</span> <span class="k">if</span> <span class="n">hires</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">mris_inflate</span> <span class="o">=</span> <span class="s1">&#39;-n 50&#39;</span> <span class="k">if</span> <span class="n">hires</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">t2w</span><span class="p">,</span> <span class="n">flair</span><span class="p">,</span> <span class="n">hires</span><span class="p">,</span> <span class="n">mris_inflate</span><span class="p">)</span></div>
 
 
@@ -855,8 +842,8 @@
 <span class="sd">         cerebral brain is segmented out).</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">skimage</span> <span class="kn">import</span> <span class="n">morphology</span> <span class="k">as</span> <span class="n">sim</span>
     <span class="kn">from</span> <span class="nn">scipy.ndimage.morphology</span> <span class="kn">import</span> <span class="n">binary_fill_holes</span>
+    <span class="kn">from</span> <span class="nn">skimage</span> <span class="kn">import</span> <span class="n">morphology</span> <span class="k">as</span> <span class="n">sim</span>
 
     <span class="c1"># Read aseg data</span>
     <span class="n">bmask</span> <span class="o">=</span> <span class="n">aseg</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -904,9 +891,9 @@
             <span class="k">continue</span>
 
         <span class="n">window</span> <span class="o">=</span> <span class="n">gm</span><span class="p">[</span>
-            <span class="n">pixel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ww</span><span class="p">:</span><span class="n">pixel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">ww</span><span class="p">,</span>
-            <span class="n">pixel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ww</span><span class="p">:</span><span class="n">pixel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ww</span><span class="p">,</span>
-            <span class="n">pixel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">ww</span><span class="p">:</span><span class="n">pixel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">ww</span><span class="p">,</span>
+            <span class="n">pixel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ww</span> <span class="p">:</span> <span class="n">pixel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">ww</span><span class="p">,</span>
+            <span class="n">pixel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ww</span> <span class="p">:</span> <span class="n">pixel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ww</span><span class="p">,</span>
+            <span class="n">pixel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">ww</span> <span class="p">:</span> <span class="n">pixel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">ww</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">window</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">mu</span> <span class="o">=</span> <span class="n">window</span><span class="p">[</span><span class="n">window</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
@@ -924,27 +911,26 @@
 <span class="k">def</span> <span class="nf">medial_wall_to_nan</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">subjects_dir</span><span class="p">,</span> <span class="n">den</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert values on medial wall to NaNs.&quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">os</span>
+
     <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
     <span class="kn">import</span> <span class="nn">templateflow.api</span> <span class="k">as</span> <span class="nn">tf</span>
 
     <span class="n">fn</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
-    <span class="n">target_subject</span> <span class="o">=</span> <span class="n">in_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">target_subject</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;fs&quot;</span><span class="p">):</span>
+    <span class="n">target_subject</span> <span class="o">=</span> <span class="n">in_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">target_subject</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">in_file</span>
 
     <span class="n">func</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">target_subject</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;fsaverage&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">target_subject</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;fsaverage&#39;</span><span class="p">):</span>
         <span class="n">cortex</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">read_label</span><span class="p">(</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="n">subjects_dir</span><span class="p">,</span> <span class="n">target_subject</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.cortex.label&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fn</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
-            <span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="n">target_subject</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">fn</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1">.cortex.label&#39;</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">medial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)),</span> <span class="n">cortex</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">target_subject</span> <span class="o">==</span> <span class="s2">&quot;fslr&quot;</span> <span class="ow">and</span> <span class="n">den</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">target_subject</span> <span class="o">==</span> <span class="s1">&#39;fslr&#39;</span> <span class="ow">and</span> <span class="n">den</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">hemi</span> <span class="o">=</span> <span class="n">fn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="n">label_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
-            <span class="n">tf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fsLR&quot;</span><span class="p">,</span> <span class="n">hemi</span><span class="o">=</span><span class="n">hemi</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;nomedialwall&quot;</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">den</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;dparc&quot;</span><span class="p">)</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fsLR&#39;</span><span class="p">,</span> <span class="n">hemi</span><span class="o">=</span><span class="n">hemi</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;nomedialwall&#39;</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="n">den</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;dparc&#39;</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">label</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">label_file</span><span class="p">)</span>
         <span class="n">medial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">))</span>
@@ -964,12 +950,13 @@
 <a class="viewcode-back" href="../../../api/niworkflows.interfaces.freesurfer.html#niworkflows.interfaces.freesurfer.mri_info">[docs]</a>
 <span class="k">def</span> <span class="nf">mri_info</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">argument</span><span class="p">):</span>
     <span class="kn">import</span> <span class="nn">subprocess</span> <span class="k">as</span> <span class="nn">sp</span>
+
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-    <span class="n">cmd_info</span> <span class="o">=</span> <span class="s2">&quot;mri_info --</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">argument</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
-    <span class="n">proc</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd_info</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">sp</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">cmd_info</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;mri_info --</span><span class="si">{</span><span class="n">argument</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="n">proc</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd_info</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">sp</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># noqa: S602</span>
     <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
-    <span class="n">mstring</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">mstring</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">mstring</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
@@ -985,7 +972,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

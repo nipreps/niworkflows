@@ -353,45 +353,47 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;Utilities for BOLD fMRI imaging.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
 <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">traits</span><span class="p">,</span>
-    <span class="n">TraitedSpec</span><span class="p">,</span>
     <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
-    <span class="n">SimpleInterface</span><span class="p">,</span>
     <span class="n">File</span><span class="p">,</span>
+    <span class="n">SimpleInterface</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;nipype.interface&quot;</span><span class="p">)</span>
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;nipype.interface&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_NonsteadyStatesDetectorInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;BOLD fMRI timeseries&quot;</span><span class="p">)</span>
-    <span class="n">nonnegative</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                              <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;whether image voxels must be nonnegative&quot;</span><span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;BOLD fMRI timeseries&#39;</span><span class="p">)</span>
+    <span class="n">nonnegative</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
+        <span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;whether image voxels must be nonnegative&#39;</span>
+    <span class="p">)</span>
     <span class="n">n_volumes</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span>
         <span class="n">value</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
         <span class="n">low</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
         <span class="n">high</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;drop volumes in 4D image beyond this timepoint&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;drop volumes in 4D image beyond this timepoint&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">zero_dummy_masked</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span>
         <span class="n">value</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
         <span class="n">low</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">high</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;number of timepoints to average when the number of dummies is zero&quot;</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;number of timepoints to average when the number of dummies is zero&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_NonsteadyStatesDetectorOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
     <span class="n">t_mask</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span>
-        <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;list of nonsteady-states (True) and stable (False) volumes&quot;</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;list of nonsteady-states (True) and stable (False) volumes&#39;</span>
     <span class="p">)</span>
-    <span class="n">n_dummy</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;number of volumes identified as nonsteady states&quot;</span><span class="p">)</span>
+    <span class="n">n_dummy</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;number of volumes identified as nonsteady states&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="NonsteadyStatesDetector">
@@ -409,29 +411,29 @@
         <span class="n">t_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ntotal</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ntotal</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;t_mask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;n_dummy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;t_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;n_dummy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="k">return</span> <span class="n">runtime</span>
 
         <span class="kn">from</span> <span class="nn">nipype.algorithms.confounds</span> <span class="kn">import</span> <span class="n">is_outlier</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">n_volumes</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">n_volumes</span><span class="p">]</span>
         <span class="c1"># Data can come with outliers showing very high numbers - preemptively prune</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
             <span class="n">data</span><span class="p">,</span>
             <span class="n">a_min</span><span class="o">=</span><span class="mf">0.0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">nonnegative</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">),</span>
             <span class="n">a_max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mf">99.8</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;n_dummy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_outlier</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;n_dummy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_outlier</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
 
         <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;n_dummy&quot;</span><span class="p">]</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;n_dummy&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">stop</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">stop</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ntotal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">n_volumes</span><span class="p">)</span>
             <span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">stop</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">zero_dummy_masked</span><span class="p">)</span>
 
         <span class="n">t_mask</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;t_mask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t_mask</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;t_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t_mask</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
 
@@ -447,7 +449,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

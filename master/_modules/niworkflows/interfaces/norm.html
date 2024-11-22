@@ -353,27 +353,26 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;A robust ANTs T1-to-MNI registration workflow with fallback retry.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span> <span class="k">as</span> <span class="n">op</span>
 
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">cpu_count</span>
-<span class="kn">from</span> <span class="nn">packaging.version</span> <span class="kn">import</span> <span class="n">Version</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span> <span class="k">as</span> <span class="n">op</span>
 
-<span class="kn">from</span> <span class="nn">nipype.interfaces.ants.registration</span> <span class="kn">import</span> <span class="n">RegistrationOutputSpec</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.ants</span> <span class="kn">import</span> <span class="n">AffineInitializer</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.ants.registration</span> <span class="kn">import</span> <span class="n">RegistrationOutputSpec</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">traits</span><span class="p">,</span>
-    <span class="n">isdefined</span><span class="p">,</span>
     <span class="n">BaseInterface</span><span class="p">,</span>
     <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
     <span class="n">File</span><span class="p">,</span>
+    <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
 <span class="p">)</span>
-
+<span class="kn">from</span> <span class="nn">packaging.version</span> <span class="kn">import</span> <span class="n">Version</span>
 <span class="kn">from</span> <span class="nn">templateflow.api</span> <span class="kn">import</span> <span class="n">get</span> <span class="k">as</span> <span class="n">get_template</span>
+
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">NIWORKFLOWS_LOG</span><span class="p">,</span> <span class="n">__version__</span>
 <span class="kn">from</span> <span class="nn">..data</span> <span class="kn">import</span> <span class="n">load</span> <span class="k">as</span> <span class="n">load_data</span>
 <span class="kn">from</span> <span class="nn">.fixes</span> <span class="kn">import</span> <span class="n">FixHeaderRegistration</span> <span class="k">as</span> <span class="n">Registration</span>
-
 
 <span class="n">niworkflows_version</span> <span class="o">=</span> <span class="n">Version</span><span class="p">(</span><span class="n">__version__</span><span class="p">)</span>
 
@@ -383,60 +382,58 @@
     <span class="n">package_version</span> <span class="o">=</span> <span class="n">niworkflows_version</span>
 
     <span class="c1"># Moving image.</span>
-    <span class="n">moving_image</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;image to apply transformation to&quot;</span>
-    <span class="p">)</span>
+    <span class="n">moving_image</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;image to apply transformation to&#39;</span><span class="p">)</span>
     <span class="c1"># Reference image (optional).</span>
-    <span class="n">reference_image</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;override the reference image&quot;</span><span class="p">)</span>
+    <span class="n">reference_image</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;override the reference image&#39;</span><span class="p">)</span>
     <span class="c1"># Moving mask (optional).</span>
-    <span class="n">moving_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;moving image mask&quot;</span><span class="p">)</span>
+    <span class="n">moving_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;moving image mask&#39;</span><span class="p">)</span>
     <span class="c1"># Reference mask (optional).</span>
-    <span class="n">reference_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference image mask&quot;</span><span class="p">)</span>
+    <span class="n">reference_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;reference image mask&#39;</span><span class="p">)</span>
     <span class="c1"># Lesion mask (optional).</span>
-    <span class="n">lesion_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;lesion mask image&quot;</span><span class="p">)</span>
+    <span class="n">lesion_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;lesion mask image&#39;</span><span class="p">)</span>
     <span class="c1"># Number of threads to use for ANTs/ITK processes.</span>
     <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span>
-        <span class="n">cpu_count</span><span class="p">(),</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nohash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Number of ITK threads to use&quot;</span>
+        <span class="n">cpu_count</span><span class="p">(),</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nohash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Number of ITK threads to use&#39;</span>
     <span class="p">)</span>
     <span class="c1"># ANTs parameter set to use.</span>
     <span class="n">flavor</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
-        <span class="s2">&quot;precise&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;testing&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;fast&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;precise&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;testing&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;fast&#39;</span><span class="p">,</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;registration settings parameter set&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;registration settings parameter set&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># Template orientation.</span>
     <span class="n">orientation</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
-        <span class="s2">&quot;RAS&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;LAS&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;RAS&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;LAS&#39;</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;modify template orientation (should match input image)&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;modify template orientation (should match input image)&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># Modality of the reference image.</span>
     <span class="n">reference</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
-        <span class="s2">&quot;T1w&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;T2w&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;boldref&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;PDw&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;T1w&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;T2w&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;boldref&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PDw&#39;</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;set the reference modality for registration&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;set the reference modality for registration&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># T1 or EPI registration?</span>
     <span class="n">moving</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
-        <span class="s2">&quot;T1w&quot;</span><span class="p">,</span> <span class="s2">&quot;boldref&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;registration type&quot;</span>
+        <span class="s1">&#39;T1w&#39;</span><span class="p">,</span> <span class="s1">&#39;boldref&#39;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;registration type&#39;</span>
     <span class="p">)</span>
     <span class="c1"># Template to use as the default reference image.</span>
     <span class="n">template</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span>
-        <span class="s2">&quot;MNI152NLin2009cAsym&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;define the template to be used&quot;</span>
+        <span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;define the template to be used&#39;</span>
     <span class="p">)</span>
     <span class="c1"># Load other settings from file.</span>
-    <span class="n">settings</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;pass on the list of settings files&quot;</span><span class="p">)</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;pass on the list of settings files&#39;</span><span class="p">)</span>
     <span class="c1"># Resolution of the default template.</span>
-    <span class="n">template_spec</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">DictStrAny</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;template specifications&quot;</span><span class="p">)</span>
-    <span class="n">template_resolution</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;(DEPRECATED) template resolution&quot;</span><span class="p">)</span>
+    <span class="n">template_spec</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">DictStrAny</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;template specifications&#39;</span><span class="p">)</span>
+    <span class="n">template_resolution</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;(DEPRECATED) template resolution&#39;</span><span class="p">)</span>
     <span class="c1"># Use explicit masking?</span>
     <span class="n">explicit_masking</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
         <span class="kc">True</span><span class="p">,</span>
@@ -447,16 +444,12 @@
 <span class="s2">See https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba</span><span class="se">\</span>
 <span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">initial_moving_transform</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;transform for initialization&quot;</span><span class="p">)</span>
-    <span class="nb">float</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
-        <span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;use single precision calculations&quot;</span>
-    <span class="p">)</span>
+    <span class="n">initial_moving_transform</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;transform for initialization&#39;</span><span class="p">)</span>
+    <span class="nb">float</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;use single precision calculations&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_SpatialNormalizationOutputSpec</span><span class="p">(</span><span class="n">RegistrationOutputSpec</span><span class="p">):</span>
-    <span class="n">reference_image</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference image used for registration target&quot;</span>
-    <span class="p">)</span>
+    <span class="n">reference_image</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;reference image used for registration target&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="SpatialNormalization">
@@ -474,14 +467,14 @@
 
     <span class="k">def</span> <span class="nf">_list_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()</span>
-        <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;reference_image&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reference_image</span>
+        <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;reference_image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reference_image</span>
         <span class="k">return</span> <span class="n">outputs</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reference_image</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">retry</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s1">&#39;file&#39;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -492,14 +485,19 @@
         <span class="c1"># If user-defined settings exist...</span>
         <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">settings</span><span class="p">):</span>
             <span class="c1"># Note this in the log and return those settings.</span>
-            <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;User-defined settings, overriding defaults&quot;</span><span class="p">)</span>
+            <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;User-defined settings, overriding defaults&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">settings</span>
 
         <span class="n">data_dir</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">()</span>
         <span class="c1"># Get a list of settings files that match the flavor.</span>
-        <span class="k">return</span> <span class="nb">sorted</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">data_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">-mni_registration_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">flavor</span><span class="si">}</span><span class="s2">_*.json&quot;</span>
-        <span class="p">)])</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">data_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">-mni_registration_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">flavor</span><span class="si">}</span><span class="s1">_*.json&#39;</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
         <span class="c1"># Get a list of settings files.</span>
@@ -507,29 +505,28 @@
         <span class="n">ants_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ants_args</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">initial_moving_transform</span><span class="p">):</span>
-            <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Estimating initial transform using AffineInitializer&quot;</span><span class="p">)</span>
+            <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Estimating initial transform using AffineInitializer&#39;</span><span class="p">)</span>
             <span class="n">init</span> <span class="o">=</span> <span class="n">AffineInitializer</span><span class="p">(</span>
-                <span class="n">fixed_image</span><span class="o">=</span><span class="n">ants_args</span><span class="p">[</span><span class="s2">&quot;fixed_image&quot;</span><span class="p">],</span>
-                <span class="n">moving_image</span><span class="o">=</span><span class="n">ants_args</span><span class="p">[</span><span class="s2">&quot;moving_image&quot;</span><span class="p">],</span>
+                <span class="n">fixed_image</span><span class="o">=</span><span class="n">ants_args</span><span class="p">[</span><span class="s1">&#39;fixed_image&#39;</span><span class="p">],</span>
+                <span class="n">moving_image</span><span class="o">=</span><span class="n">ants_args</span><span class="p">[</span><span class="s1">&#39;moving_image&#39;</span><span class="p">],</span>
                 <span class="n">num_threads</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">init</span><span class="o">.</span><span class="n">resource_monitor</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">init</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s2">&quot;allatonce&quot;</span>
+            <span class="n">init</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s1">&#39;allatonce&#39;</span>
             <span class="n">init_result</span> <span class="o">=</span> <span class="n">init</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
             <span class="c1"># Save outputs (if available)</span>
-            <span class="n">init_out</span> <span class="o">=</span> <span class="n">_write_outputs</span><span class="p">(</span><span class="n">init_result</span><span class="o">.</span><span class="n">runtime</span><span class="p">,</span> <span class="s2">&quot;.nipype-init&quot;</span><span class="p">)</span>
+            <span class="n">init_out</span> <span class="o">=</span> <span class="n">_write_outputs</span><span class="p">(</span><span class="n">init_result</span><span class="o">.</span><span class="n">runtime</span><span class="p">,</span> <span class="s1">&#39;.nipype-init&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">init_out</span><span class="p">:</span>
                 <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="s2">&quot;Terminal outputs of initialization saved (</span><span class="si">%s</span><span class="s2">).&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">init_out</span><span class="p">),</span>
+                    <span class="s1">&#39;Terminal outputs of initialization saved (</span><span class="si">%s</span><span class="s1">).&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">init_out</span><span class="p">),</span>
                 <span class="p">)</span>
 
-            <span class="n">ants_args</span><span class="p">[</span><span class="s2">&quot;initial_moving_transform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">init_result</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_file</span>
+            <span class="n">ants_args</span><span class="p">[</span><span class="s1">&#39;initial_moving_transform&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">init_result</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_file</span>
 
         <span class="c1"># For each settings file...</span>
         <span class="k">for</span> <span class="n">ants_settings</span> <span class="ow">in</span> <span class="n">settings_files</span><span class="p">:</span>
-
-            <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading settings from file </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">ants_settings</span><span class="p">)</span>
+            <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Loading settings from file </span><span class="si">%s</span><span class="s1">.&#39;</span><span class="p">,</span> <span class="n">ants_settings</span><span class="p">)</span>
             <span class="c1"># Configure an ANTs run based on these settings.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="n">Registration</span><span class="p">(</span><span class="n">from_file</span><span class="o">=</span><span class="n">ants_settings</span><span class="p">,</span> <span class="o">**</span><span class="n">ants_args</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">resource_monitor</span> <span class="o">=</span> <span class="kc">False</span>
@@ -537,30 +534,24 @@
 
             <span class="n">cmd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">cmdline</span>
             <span class="c1"># Print the retry number and command line call to the log.</span>
-            <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Retry #</span><span class="si">%d</span><span class="s2">, commandline: </span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+            <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Retry #</span><span class="si">%d</span><span class="s1">, commandline: </span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ignore_exception</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;command.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cmdfile</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">cmd</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">cmdfile</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;command.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cmdfile</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">cmd</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">cmdfile</span><span class="p">)</span>
 
             <span class="c1"># Try running registration.</span>
             <span class="n">interface_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">interface_result</span><span class="o">.</span><span class="n">runtime</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Retry #</span><span class="si">%d</span><span class="s2"> failed.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">)</span>
+                <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Retry #</span><span class="si">%d</span><span class="s1"> failed.&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">)</span>
                 <span class="c1"># Save outputs (if available)</span>
-                <span class="n">term_out</span> <span class="o">=</span> <span class="n">_write_outputs</span><span class="p">(</span>
-                    <span class="n">interface_result</span><span class="o">.</span><span class="n">runtime</span><span class="p">,</span> <span class="s2">&quot;.nipype-</span><span class="si">%04d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span>
-                <span class="p">)</span>
+                <span class="n">term_out</span> <span class="o">=</span> <span class="n">_write_outputs</span><span class="p">(</span><span class="n">interface_result</span><span class="o">.</span><span class="n">runtime</span><span class="p">,</span> <span class="s1">&#39;.nipype-</span><span class="si">%04d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">term_out</span><span class="p">:</span>
-                    <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                        <span class="s2">&quot;Log of failed retry saved (</span><span class="si">%s</span><span class="s2">).&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">term_out</span><span class="p">)</span>
-                    <span class="p">)</span>
+                    <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Log of failed retry saved (</span><span class="si">%s</span><span class="s1">).&#39;</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">term_out</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">runtime</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="c1"># Note this in the log.</span>
-                <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="s2">&quot;Successful spatial normalization (retry #</span><span class="si">%d</span><span class="s2">).&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span>
-                <span class="p">)</span>
+                <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Successful spatial normalization (retry #</span><span class="si">%d</span><span class="s1">).&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">)</span>
                 <span class="c1"># Break out of the retry loop.</span>
                 <span class="k">return</span> <span class="n">runtime</span>
 
@@ -568,17 +559,17 @@
 
         <span class="c1"># If all tries fail, raise an error.</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="s2">&quot;Robust spatial normalization failed after </span><span class="si">%d</span><span class="s2"> retries.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">retry</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="s1">&#39;Robust spatial normalization failed after </span><span class="si">%d</span><span class="s1"> retries.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">retry</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_ants_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;moving_image&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving_image</span><span class="p">,</span>
-            <span class="s2">&quot;num_threads&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span><span class="p">,</span>
-            <span class="s2">&quot;float&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">float</span><span class="p">,</span>
-            <span class="s2">&quot;terminal_output&quot;</span><span class="p">:</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;write_composite_transform&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;initial_moving_transform&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">initial_moving_transform</span><span class="p">,</span>
+            <span class="s1">&#39;moving_image&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving_image</span><span class="p">,</span>
+            <span class="s1">&#39;num_threads&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span><span class="p">,</span>
+            <span class="s1">&#39;float&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">float</span><span class="p">,</span>
+            <span class="s1">&#39;terminal_output&#39;</span><span class="p">:</span> <span class="s1">&#39;file&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;write_composite_transform&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;initial_moving_transform&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">initial_moving_transform</span><span class="p">,</span>
         <span class="p">}</span>
 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -615,17 +606,17 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">explicit_masking</span><span class="p">:</span>
                 <span class="c1"># Mask the moving image.</span>
                 <span class="c1"># Do not use a moving mask during registration.</span>
-                <span class="n">args</span><span class="p">[</span><span class="s2">&quot;moving_image&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask</span><span class="p">(</span>
+                <span class="n">args</span><span class="p">[</span><span class="s1">&#39;moving_image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving_image</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving_mask</span><span class="p">,</span>
-                    <span class="s2">&quot;moving_masked.nii.gz&quot;</span><span class="p">,</span>
+                    <span class="s1">&#39;moving_masked.nii.gz&#39;</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="c1"># If explicit masking is disabled...</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Use the moving mask during registration.</span>
                 <span class="c1"># Do not mask the moving image.</span>
-                <span class="n">args</span><span class="p">[</span><span class="s2">&quot;moving_image_masks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving_mask</span>
+                <span class="n">args</span><span class="p">[</span><span class="s1">&#39;moving_image_masks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving_mask</span>
 
             <span class="c1"># If a lesion mask is also provided...</span>
             <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">lesion_mask</span><span class="p">):</span>
@@ -633,7 +624,7 @@
                 <span class="c1"># [global mask - lesion mask] (if explicit masking is enabled)</span>
                 <span class="c1"># [moving mask - lesion mask] (if explicit masking is disabled)</span>
                 <span class="c1"># Use this as the moving mask.</span>
-                <span class="n">args</span><span class="p">[</span><span class="s2">&quot;moving_image_masks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_cfm</span><span class="p">(</span>
+                <span class="n">args</span><span class="p">[</span><span class="s1">&#39;moving_image_masks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_cfm</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving_mask</span><span class="p">,</span>
                     <span class="n">lesion_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">lesion_mask</span><span class="p">,</span>
                     <span class="n">global_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">explicit_masking</span><span class="p">,</span>
@@ -644,7 +635,7 @@
         <span class="k">elif</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">lesion_mask</span><span class="p">):</span>
             <span class="c1"># Create a cost function mask with the form: [global mask - lesion mask]</span>
             <span class="c1"># Use this as the moving mask.</span>
-            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;moving_image_masks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_cfm</span><span class="p">(</span>
+            <span class="n">args</span><span class="p">[</span><span class="s1">&#39;moving_image_masks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_cfm</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving_image</span><span class="p">,</span>
                 <span class="n">lesion_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">lesion_mask</span><span class="p">,</span>
                 <span class="n">global_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -681,7 +672,7 @@
         <span class="c1"># If a reference image is provided...</span>
         <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_image</span><span class="p">):</span>
             <span class="c1"># Use the reference image as the fixed image.</span>
-            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;fixed_image&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_image</span>
+            <span class="n">args</span><span class="p">[</span><span class="s1">&#39;fixed_image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_image</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_reference_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_image</span>
 
             <span class="c1"># If a reference mask is provided...</span>
@@ -690,17 +681,17 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">explicit_masking</span><span class="p">:</span>
                     <span class="c1"># Mask the reference image.</span>
                     <span class="c1"># Do not use a fixed mask during registration.</span>
-                    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;fixed_image&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask</span><span class="p">(</span>
+                    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;fixed_image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_image</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_mask</span><span class="p">,</span>
-                        <span class="s2">&quot;fixed_masked.nii.gz&quot;</span><span class="p">,</span>
+                        <span class="s1">&#39;fixed_masked.nii.gz&#39;</span><span class="p">,</span>
                     <span class="p">)</span>
 
                     <span class="c1"># If a lesion mask is also provided...</span>
                     <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">lesion_mask</span><span class="p">):</span>
                         <span class="c1"># Create a cost function mask with the form: [global mask]</span>
                         <span class="c1"># Use this as the fixed mask.</span>
-                        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;fixed_image_masks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_cfm</span><span class="p">(</span>
+                        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;fixed_image_masks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_cfm</span><span class="p">(</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_mask</span><span class="p">,</span>
                             <span class="n">lesion_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">global_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -711,14 +702,14 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># Use the reference mask as the fixed mask during registration.</span>
                     <span class="c1"># Do not mask the fixed image.</span>
-                    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;fixed_image_masks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_mask</span>
+                    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;fixed_image_masks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_mask</span>
 
             <span class="c1"># If no reference mask is provided...</span>
             <span class="c1"># But a lesion mask *IS* provided ...</span>
             <span class="k">elif</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">lesion_mask</span><span class="p">):</span>
                 <span class="c1"># Create a cost function mask with the form: [global mask]</span>
                 <span class="c1"># Use this as the fixed mask</span>
-                <span class="n">args</span><span class="p">[</span><span class="s2">&quot;fixed_image_masks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_cfm</span><span class="p">(</span>
+                <span class="n">args</span><span class="p">[</span><span class="s1">&#39;fixed_image_masks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_cfm</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_image</span><span class="p">,</span> <span class="n">lesion_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_mask</span><span class="o">=</span><span class="kc">True</span>
                 <span class="p">)</span>
 
@@ -727,28 +718,22 @@
             <span class="kn">from</span> <span class="nn">..utils.misc</span> <span class="kn">import</span> <span class="n">get_template_specs</span>
 
             <span class="c1"># Raise an error if the user specifies an unsupported image orientation.</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;LAS&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;LAS&#39;</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
             <span class="n">template_spec</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_spec</span>
-                <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_spec</span><span class="p">)</span>
-                <span class="k">else</span> <span class="p">{}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_spec</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_spec</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
             <span class="p">)</span>
 
-            <span class="n">default_resolution</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;precise&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;fast&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;testing&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">flavor</span>
-            <span class="p">]</span>
+            <span class="n">default_resolution</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;precise&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;fast&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;testing&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}[</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">flavor</span><span class="p">]</span>
 
             <span class="c1"># Set the template resolution.</span>
             <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_resolution</span><span class="p">):</span>
-                <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;The use of ``template_resolution`` is deprecated&quot;</span>
-                <span class="p">)</span>
-                <span class="n">template_spec</span><span class="p">[</span><span class="s2">&quot;res&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_resolution</span>
+                <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;The use of ``template_resolution`` is deprecated&#39;</span><span class="p">)</span>
+                <span class="n">template_spec</span><span class="p">[</span><span class="s1">&#39;res&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_resolution</span>
 
-            <span class="n">template_spec</span><span class="p">[</span><span class="s2">&quot;suffix&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference</span>
-            <span class="n">template_spec</span><span class="p">[</span><span class="s2">&quot;desc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">template_spec</span><span class="p">[</span><span class="s1">&#39;suffix&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference</span>
+            <span class="n">template_spec</span><span class="p">[</span><span class="s1">&#39;desc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">ref_template</span><span class="p">,</span> <span class="n">template_spec</span> <span class="o">=</span> <span class="n">get_template_specs</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span><span class="p">,</span>
                 <span class="n">template_spec</span><span class="o">=</span><span class="n">template_spec</span><span class="p">,</span>
@@ -760,36 +745,33 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_reference_image</span> <span class="o">=</span> <span class="n">ref_template</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">op</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_reference_image</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-<span class="w">                    </span><span class="sd">&quot;&quot;&quot;\</span>
-<span class="sd">The registration reference must be an existing file, but path &quot;%s&quot; \</span>
-<span class="sd">cannot be found.&quot;&quot;&quot;</span>
-                    <span class="o">%</span> <span class="n">ref_template</span>
+                    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">The registration reference must be an existing file, but path &quot;</span><span class="si">{</span><span class="n">ref_template</span><span class="si">}</span><span class="s2">&quot; </span><span class="se">\</span>
+<span class="s2">cannot be found.&quot;&quot;&quot;</span>
                 <span class="p">)</span>
 
             <span class="c1"># Get the template specified by the user.</span>
             <span class="n">ref_mask</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;brain&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;mask&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">template_spec</span>
-            <span class="p">)</span> <span class="ow">or</span> <span class="n">get_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;brain&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;mask&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">template_spec</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;brain&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;mask&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">template_spec</span>
+            <span class="p">)</span> <span class="ow">or</span> <span class="n">get_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;brain&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;mask&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">template_spec</span><span class="p">)</span>
 
             <span class="c1"># Default is explicit masking disabled</span>
-            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;fixed_image&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref_template</span>
+            <span class="n">args</span><span class="p">[</span><span class="s1">&#39;fixed_image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref_template</span>
             <span class="c1"># Use the template mask as the fixed mask.</span>
-            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;fixed_image_masks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ref_mask</span><span class="p">)</span>
+            <span class="n">args</span><span class="p">[</span><span class="s1">&#39;fixed_image_masks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ref_mask</span><span class="p">)</span>
 
             <span class="c1"># Overwrite defaults if explicit masking</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">explicit_masking</span><span class="p">:</span>
                 <span class="c1"># Mask the template image with the template mask.</span>
-                <span class="n">args</span><span class="p">[</span><span class="s2">&quot;fixed_image&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask</span><span class="p">(</span>
-                    <span class="n">ref_template</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ref_mask</span><span class="p">),</span> <span class="s2">&quot;fixed_masked.nii.gz&quot;</span>
-                <span class="p">)</span>
+                <span class="n">args</span><span class="p">[</span><span class="s1">&#39;fixed_image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask</span><span class="p">(</span><span class="n">ref_template</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ref_mask</span><span class="p">),</span> <span class="s1">&#39;fixed_masked.nii.gz&#39;</span><span class="p">)</span>
                 <span class="c1"># Do not use a fixed mask during registration.</span>
-                <span class="n">args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;fixed_image_masks&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;fixed_image_masks&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
                 <span class="c1"># If a lesion mask is provided...</span>
                 <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">lesion_mask</span><span class="p">):</span>
                     <span class="c1"># Create a cost function mask with the form: [global mask]</span>
                     <span class="c1"># Use this as the fixed mask.</span>
-                    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;fixed_image_masks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_cfm</span><span class="p">(</span>
+                    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;fixed_image_masks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_cfm</span><span class="p">(</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">ref_mask</span><span class="p">),</span> <span class="n">lesion_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_mask</span><span class="o">=</span><span class="kc">True</span>
                     <span class="p">)</span>
 
@@ -823,8 +805,9 @@
 <span class="sd">    image space and have the same dimensions.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
     <span class="kn">import</span> <span class="nn">os</span>
+
+    <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
 
     <span class="c1"># Load the input image</span>
     <span class="n">in_nii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
@@ -871,32 +854,29 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">os</span>
-    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
     <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
     <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
 
     <span class="k">if</span> <span class="n">out_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">out_path</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_cfm&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+        <span class="n">out_path</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_cfm&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">out_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">out_path</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">global_mask</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">lesion_mask</span><span class="p">:</span>
         <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="s2">&quot;No lesion mask was provided and global_mask not requested, &quot;</span>
-            <span class="s2">&quot;therefore the original mask will not be modified.&quot;</span>
+            <span class="s1">&#39;No lesion mask was provided and global_mask not requested, &#39;</span>
+            <span class="s1">&#39;therefore the original mask will not be modified.&#39;</span>
         <span class="p">)</span>
 
     <span class="c1"># Load the input image</span>
     <span class="n">in_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
 
     <span class="c1"># If we want a global mask, create one based on the input image.</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">in_img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">global_mask</span>
-        <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">in_img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span>
-    <span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">in_img</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span> <span class="k">if</span> <span class="n">global_mask</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">in_img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="o">-</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">}:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`global_mask` must be true if `in_file` is not a binary mask&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`global_mask` must be true if `in_file` is not a binary mask&#39;</span><span class="p">)</span>
 
     <span class="c1"># If a lesion mask was provided, combine it with the secondary mask.</span>
     <span class="k">if</span> <span class="n">lesion_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -920,14 +900,14 @@
 
 <span class="k">def</span> <span class="nf">_write_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="p">,</span> <span class="n">out_fname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">out_fname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">out_fname</span> <span class="o">=</span> <span class="s2">&quot;.nipype&quot;</span>
+        <span class="n">out_fname</span> <span class="o">=</span> <span class="s1">&#39;.nipype&#39;</span>
 
     <span class="n">out_files</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;stdout&quot;</span><span class="p">,</span> <span class="s2">&quot;stderr&quot;</span><span class="p">,</span> <span class="s2">&quot;merged&quot;</span><span class="p">]:</span>
-        <span class="n">stream</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">runtime</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;stdout&#39;</span><span class="p">,</span> <span class="s1">&#39;stderr&#39;</span><span class="p">,</span> <span class="s1">&#39;merged&#39;</span><span class="p">]:</span>
+        <span class="n">stream</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">runtime</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">stream</span><span class="p">:</span>
             <span class="n">out_file</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="n">out_fname</span><span class="p">)</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outf</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outf</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">outf</span><span class="p">)</span>
             <span class="n">out_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out_files</span>
@@ -943,7 +923,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

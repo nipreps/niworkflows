@@ -354,11 +354,10 @@
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;Workflow for the generation of EPI (echo-planar imaging) references.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">nipype.pipeline</span> <span class="kn">import</span> <span class="n">engine</span> <span class="k">as</span> <span class="n">pe</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">utility</span> <span class="k">as</span> <span class="n">niu</span>
+<span class="kn">from</span> <span class="nn">nipype.pipeline</span> <span class="kn">import</span> <span class="n">engine</span> <span class="k">as</span> <span class="n">pe</span>
 
 <span class="kn">from</span> <span class="nn">...engine.workflows</span> <span class="kn">import</span> <span class="n">LiterateWorkflow</span> <span class="k">as</span> <span class="n">Workflow</span>
-
 
 <span class="n">DEFAULT_MEMORY_MIN_GB</span> <span class="o">=</span> <span class="mf">0.01</span>
 
@@ -368,7 +367,7 @@
 <span class="k">def</span> <span class="nf">init_epi_reference_wf</span><span class="p">(</span>
     <span class="n">omp_nthreads</span><span class="p">,</span>
     <span class="n">auto_bold_nss</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;epi_reference_wf&quot;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;epi_reference_wf&#39;</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build a workflow that generates a reference map from a set of EPI images.</span>
@@ -450,42 +449,38 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">nipype.interfaces.ants</span> <span class="kn">import</span> <span class="n">N4BiasFieldCorrection</span>
-    <span class="kn">from</span> <span class="nn">...utils.connections</span> <span class="kn">import</span> <span class="n">listify</span>
 
     <span class="kn">from</span> <span class="nn">...interfaces.bold</span> <span class="kn">import</span> <span class="n">NonsteadyStatesDetector</span>
     <span class="kn">from</span> <span class="nn">...interfaces.freesurfer</span> <span class="kn">import</span> <span class="n">StructuralReference</span>
     <span class="kn">from</span> <span class="nn">...interfaces.header</span> <span class="kn">import</span> <span class="n">ValidateImage</span>
     <span class="kn">from</span> <span class="nn">...interfaces.images</span> <span class="kn">import</span> <span class="n">RobustAverage</span>
     <span class="kn">from</span> <span class="nn">...interfaces.nibabel</span> <span class="kn">import</span> <span class="n">IntensityClip</span>
+    <span class="kn">from</span> <span class="nn">...utils.connections</span> <span class="kn">import</span> <span class="n">listify</span>
 
     <span class="n">wf</span> <span class="o">=</span> <span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
-    <span class="n">inputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
-        <span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_files&quot;</span><span class="p">,</span> <span class="s2">&quot;t_masks&quot;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;inputnode&quot;</span>
-    <span class="p">)</span>
+    <span class="n">inputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;in_files&#39;</span><span class="p">,</span> <span class="s1">&#39;t_masks&#39;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;inputnode&#39;</span><span class="p">)</span>
     <span class="n">outputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
         <span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span>
             <span class="n">fields</span><span class="o">=</span><span class="p">[</span>
-                <span class="s2">&quot;epi_ref_file&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;xfm_files&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;per_run_ref_files&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;drift_factors&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;n_dummy&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;validation_report&quot;</span><span class="p">,</span>
+                <span class="s1">&#39;epi_ref_file&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;xfm_files&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;per_run_ref_files&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;drift_factors&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;n_dummy&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;validation_report&#39;</span><span class="p">,</span>
             <span class="p">]</span>
         <span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;outputnode&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;outputnode&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">validate_nii</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
-        <span class="n">ValidateImage</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;validate_nii&quot;</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">]</span>
-    <span class="p">)</span>
+    <span class="n">validate_nii</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">ValidateImage</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;validate_nii&#39;</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;in_file&#39;</span><span class="p">])</span>
 
     <span class="n">per_run_avgs</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
-        <span class="n">RobustAverage</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;per_run_avgs&quot;</span><span class="p">,</span> <span class="n">mem_gb</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">,</span> <span class="s2">&quot;t_mask&quot;</span><span class="p">]</span>
+        <span class="n">RobustAverage</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;per_run_avgs&#39;</span><span class="p">,</span> <span class="n">mem_gb</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;t_mask&#39;</span><span class="p">]</span>
     <span class="p">)</span>
 
-    <span class="n">clip_avgs</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">IntensityClip</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;clip_avgs&quot;</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">])</span>
+    <span class="n">clip_avgs</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">IntensityClip</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;clip_avgs&#39;</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;in_file&#39;</span><span class="p">])</span>
 
     <span class="c1"># de-gradient the fields (&quot;bias/illumination artifact&quot;)</span>
     <span class="n">n4_avgs</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
@@ -497,13 +492,13 @@
             <span class="n">shrink_factor</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="n">n_procs</span><span class="o">=</span><span class="n">omp_nthreads</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;n4_avgs&quot;</span><span class="p">,</span>
-        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;input_image&quot;</span><span class="p">],</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;n4_avgs&#39;</span><span class="p">,</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;input_image&#39;</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="n">clip_bg_noise</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
         <span class="n">IntensityClip</span><span class="p">(</span><span class="n">p_min</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="mf">100.0</span><span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;clip_bg_noise&quot;</span><span class="p">,</span>
-        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">],</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;clip_bg_noise&#39;</span><span class="p">,</span>
+        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;in_file&#39;</span><span class="p">],</span>
     <span class="p">)</span>
 
     <span class="n">epi_merge</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
@@ -516,48 +511,48 @@
             <span class="n">no_iteration</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">transform_outputs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;epi_merge&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;epi_merge&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">post_merge</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="n">_post_merge</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;post_merge&quot;</span><span class="p">)</span>
+    <span class="n">post_merge</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="n">_post_merge</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;post_merge&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_set_threads</span><span class="p">(</span><span class="n">in_list</span><span class="p">,</span> <span class="n">maximum</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">in_list</span><span class="p">),</span> <span class="n">maximum</span><span class="p">)</span>
 
     <span class="c1"># fmt:off</span>
     <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
-        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">validate_nii</span><span class="p">,</span> <span class="p">[((</span><span class="s2">&quot;in_files&quot;</span><span class="p">,</span> <span class="n">listify</span><span class="p">),</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">validate_nii</span><span class="p">,</span> <span class="n">per_run_avgs</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">per_run_avgs</span><span class="p">,</span> <span class="n">clip_avgs</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">clip_avgs</span><span class="p">,</span> <span class="n">n4_avgs</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;input_image&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">n4_avgs</span><span class="p">,</span> <span class="n">clip_bg_noise</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;output_image&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">validate_nii</span><span class="p">,</span> <span class="p">[((</span><span class="s1">&#39;in_files&#39;</span><span class="p">,</span> <span class="n">listify</span><span class="p">),</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">validate_nii</span><span class="p">,</span> <span class="n">per_run_avgs</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">per_run_avgs</span><span class="p">,</span> <span class="n">clip_avgs</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">clip_avgs</span><span class="p">,</span> <span class="n">n4_avgs</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;input_image&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">n4_avgs</span><span class="p">,</span> <span class="n">clip_bg_noise</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;output_image&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
         <span class="p">(</span><span class="n">clip_bg_noise</span><span class="p">,</span> <span class="n">epi_merge</span><span class="p">,</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_files&quot;</span><span class="p">),</span>
-            <span class="p">((</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="n">_set_threads</span><span class="p">,</span> <span class="n">omp_nthreads</span><span class="p">),</span> <span class="s2">&quot;num_threads&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in_files&#39;</span><span class="p">),</span>
+            <span class="p">((</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">_set_threads</span><span class="p">,</span> <span class="n">omp_nthreads</span><span class="p">),</span> <span class="s1">&#39;num_threads&#39;</span><span class="p">),</span>
         <span class="p">]),</span>
-        <span class="p">(</span><span class="n">epi_merge</span><span class="p">,</span> <span class="n">post_merge</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">),</span>
-                                 <span class="p">(</span><span class="s2">&quot;transform_outputs&quot;</span><span class="p">,</span> <span class="s2">&quot;in_xfms&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">post_merge</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;epi_ref_file&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">epi_merge</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;transform_outputs&quot;</span><span class="p">,</span> <span class="s2">&quot;xfm_files&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">per_run_avgs</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_drift&quot;</span><span class="p">,</span> <span class="s2">&quot;drift_factors&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">n4_avgs</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;output_image&quot;</span><span class="p">,</span> <span class="s2">&quot;per_run_ref_files&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">validate_nii</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_report&quot;</span><span class="p">,</span> <span class="s2">&quot;validation_report&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">epi_merge</span><span class="p">,</span> <span class="n">post_merge</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">),</span>
+                                 <span class="p">(</span><span class="s1">&#39;transform_outputs&#39;</span><span class="p">,</span> <span class="s1">&#39;in_xfms&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">post_merge</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;epi_ref_file&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">epi_merge</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;transform_outputs&#39;</span><span class="p">,</span> <span class="s1">&#39;xfm_files&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">per_run_avgs</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_drift&#39;</span><span class="p">,</span> <span class="s1">&#39;drift_factors&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">n4_avgs</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;output_image&#39;</span><span class="p">,</span> <span class="s1">&#39;per_run_ref_files&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">validate_nii</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_report&#39;</span><span class="p">,</span> <span class="s1">&#39;validation_report&#39;</span><span class="p">)]),</span>
     <span class="p">])</span>
     <span class="c1"># fmt:on</span>
 
     <span class="k">if</span> <span class="n">auto_bold_nss</span><span class="p">:</span>
         <span class="n">select_volumes</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span>
-            <span class="n">NonsteadyStatesDetector</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;select_volumes&quot;</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">]</span>
+            <span class="n">NonsteadyStatesDetector</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;select_volumes&#39;</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;in_file&#39;</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="c1"># fmt:off</span>
         <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
-            <span class="p">(</span><span class="n">validate_nii</span><span class="p">,</span> <span class="n">select_volumes</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">select_volumes</span><span class="p">,</span> <span class="n">per_run_avgs</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;t_mask&quot;</span><span class="p">,</span> <span class="s2">&quot;t_mask&quot;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">select_volumes</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;n_dummy&quot;</span><span class="p">,</span> <span class="s2">&quot;n_dummy&quot;</span><span class="p">)])</span>
+            <span class="p">(</span><span class="n">validate_nii</span><span class="p">,</span> <span class="n">select_volumes</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">select_volumes</span><span class="p">,</span> <span class="n">per_run_avgs</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;t_mask&#39;</span><span class="p">,</span> <span class="s1">&#39;t_mask&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">select_volumes</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;n_dummy&#39;</span><span class="p">,</span> <span class="s1">&#39;n_dummy&#39;</span><span class="p">)])</span>
         <span class="p">])</span>
         <span class="c1"># fmt:on</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s2">&quot;t_masks&quot;</span><span class="p">,</span> <span class="n">per_run_avgs</span><span class="p">,</span> <span class="s2">&quot;t_mask&quot;</span><span class="p">)</span>
+        <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s1">&#39;t_masks&#39;</span><span class="p">,</span> <span class="n">per_run_avgs</span><span class="p">,</span> <span class="s1">&#39;t_mask&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">wf</span></div>
 
@@ -580,17 +575,19 @@
     <span class="kn">from</span> <span class="nn">niworkflows.utils.connections</span> <span class="kn">import</span> <span class="n">listify</span>
 
     <span class="n">in_xfms</span> <span class="o">=</span> <span class="n">listify</span><span class="p">(</span><span class="n">in_xfms</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_xfms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">in_file</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;.nii&quot;</span><span class="p">,</span> <span class="s2">&quot;.nii.gz&quot;</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_xfms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">in_file</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;.nii&#39;</span><span class="p">,</span> <span class="s1">&#39;.nii.gz&#39;</span><span class="p">)):</span>
         <span class="k">return</span> <span class="n">in_file</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_xfms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Output format and number of transforms do not match&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Output format and number of transforms do not match&#39;</span><span class="p">)</span>
 
     <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
     <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+
     <span class="kn">from</span> <span class="nn">niworkflows.interfaces.nibabel</span> <span class="kn">import</span> <span class="n">_advanced_clip</span>
 
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">()</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.mgz&quot;</span><span class="p">,</span> <span class="s2">&quot;.nii.gz&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">()</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.mgz&#39;</span><span class="p">,</span> <span class="s1">&#39;.nii.gz&#39;</span><span class="p">)</span>
     <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
     <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">,</span> <span class="n">img</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_advanced_clip</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">p_min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">p_max</span><span class="o">=</span><span class="mf">100.0</span><span class="p">)</span>
@@ -606,7 +603,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

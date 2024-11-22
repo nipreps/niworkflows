@@ -353,52 +353,43 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;Utilities.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
 
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
-<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">traits</span><span class="p">,</span>
-    <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
     <span class="n">File</span><span class="p">,</span>
     <span class="n">InputMultiPath</span><span class="p">,</span>
-    <span class="n">TraitedSpec</span><span class="p">,</span>
-    <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
     <span class="n">SimpleInterface</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
+    <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
 
-
-<span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;nipype.interface&quot;</span><span class="p">)</span>
+<span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;nipype.interface&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_TPM2ROIInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_tpm</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Tissue probability map file in T1 space&quot;</span>
-    <span class="p">)</span>
-    <span class="n">in_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Binary mask of skull-stripped T1w image&quot;</span>
-    <span class="p">)</span>
+    <span class="n">in_tpm</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Tissue probability map file in T1 space&#39;</span><span class="p">)</span>
+    <span class="n">in_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Binary mask of skull-stripped T1w image&#39;</span><span class="p">)</span>
     <span class="n">mask_erode_mm</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
-        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mask_erode_prop&quot;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;erode input mask (kernel width in mm)&quot;</span>
+        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mask_erode_prop&#39;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;erode input mask (kernel width in mm)&#39;</span>
     <span class="p">)</span>
-    <span class="n">erode_mm</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
-        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;erode_prop&quot;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;erode output mask (kernel width in mm)&quot;</span>
-    <span class="p">)</span>
+    <span class="n">erode_mm</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;erode_prop&#39;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;erode output mask (kernel width in mm)&#39;</span><span class="p">)</span>
     <span class="n">mask_erode_prop</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
-        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mask_erode_mm&quot;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;erode input mask (target volume ratio)&quot;</span>
+        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mask_erode_mm&#39;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;erode input mask (target volume ratio)&#39;</span>
     <span class="p">)</span>
-    <span class="n">erode_prop</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
-        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;erode_mm&quot;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;erode output mask (target volume ratio)&quot;</span>
-    <span class="p">)</span>
+    <span class="n">erode_prop</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;erode_mm&#39;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;erode output mask (target volume ratio)&#39;</span><span class="p">)</span>
     <span class="n">prob_thresh</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
-        <span class="mf">0.95</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;threshold for the tissue probability maps&quot;</span>
+        <span class="mf">0.95</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;threshold for the tissue probability maps&#39;</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_TPM2ROIOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">roi_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output ROI file&quot;</span><span class="p">)</span>
-    <span class="n">eroded_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;resulting eroded mask&quot;</span><span class="p">)</span>
+    <span class="n">roi_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output ROI file&#39;</span><span class="p">)</span>
+    <span class="n">eroded_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;resulting eroded mask&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="TPM2ROI">
@@ -441,21 +432,19 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">prob_thresh</span><span class="p">,</span>
             <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;roi_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">roi_file</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;eroded_mask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eroded_mask</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;roi_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">roi_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;eroded_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eroded_mask</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_AddTPMsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_files</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span>
-        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input list of ROIs&quot;</span>
-    <span class="p">)</span>
-    <span class="n">indices</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;select specific maps&quot;</span><span class="p">)</span>
+    <span class="n">in_files</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input list of ROIs&#39;</span><span class="p">)</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;select specific maps&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_AddTPMsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;union of binarized input files&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;union of binarized input files&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="AddTPMs">
@@ -474,27 +463,27 @@
             <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">indices</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">runtime</span>
 
         <span class="n">first_fname</span> <span class="o">=</span> <span class="n">in_files</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_fname</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_fname</span>
             <span class="k">return</span> <span class="n">runtime</span>
 
         <span class="n">im</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">concat_images</span><span class="p">([</span><span class="n">in_files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">])</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 
-        <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">first_fname</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_tpmsum&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">first_fname</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_tpmsum&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
         <span class="n">newnii</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">im</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">im</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
         <span class="n">newnii</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="c1"># Set visualization thresholds</span>
-        <span class="n">newnii</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;cal_max&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
-        <span class="n">newnii</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;cal_min&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">newnii</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;cal_max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">newnii</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;cal_min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">newnii</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
 
@@ -523,7 +512,7 @@
         <span class="n">mask_erosion_prop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">mask_erosion_prop</span> <span class="o">&lt;</span> <span class="mi">1</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">erode_in</span><span class="p">:</span>
-        <span class="n">eroded_mask_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">in_mask</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_eroded&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">)</span>
+        <span class="n">eroded_mask_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">in_mask</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_eroded&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">)</span>
         <span class="n">mask_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_mask</span><span class="p">)</span>
         <span class="n">mask_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">mask_img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">mask_erosion_mm</span><span class="p">:</span>
@@ -557,7 +546,7 @@
                 <span class="n">roi_mask</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">binary_erosion</span><span class="p">(</span><span class="n">roi_mask</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># Create image to resample</span>
-    <span class="n">roi_fname</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">in_tpm</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_roi&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">)</span>
+    <span class="n">roi_fname</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">in_tpm</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_roi&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">)</span>
     <span class="n">roi_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span><span class="n">roi_mask</span><span class="p">,</span> <span class="n">tpm_img</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">tpm_img</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
     <span class="n">roi_img</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
     <span class="n">roi_img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">roi_fname</span><span class="p">)</span>
@@ -574,7 +563,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

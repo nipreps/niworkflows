@@ -353,46 +353,45 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;Handling surfaces.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
-
-<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
-    <span class="n">TraitedSpec</span><span class="p">,</span>
-    <span class="n">DynamicTraitedSpec</span><span class="p">,</span>
-    <span class="n">SimpleInterface</span><span class="p">,</span>
     <span class="n">CommandLine</span><span class="p">,</span>
     <span class="n">CommandLineInputSpec</span><span class="p">,</span>
+    <span class="n">DynamicTraitedSpec</span><span class="p">,</span>
     <span class="n">File</span><span class="p">,</span>
-    <span class="n">traits</span><span class="p">,</span>
-    <span class="n">isdefined</span><span class="p">,</span>
     <span class="n">InputMultiPath</span><span class="p">,</span>
     <span class="n">OutputMultiPath</span><span class="p">,</span>
+    <span class="n">SimpleInterface</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
     <span class="n">Undefined</span><span class="p">,</span>
+    <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
 <span class="p">)</span>
-
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
 
 <span class="n">SECONDARY_ANAT_STRUC</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;smoothwm&quot;</span><span class="p">:</span> <span class="s2">&quot;GrayWhite&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;white&quot;</span><span class="p">:</span> <span class="s2">&quot;GrayWhite&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;pial&quot;</span><span class="p">:</span> <span class="s2">&quot;Pial&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;midthickness&quot;</span><span class="p">:</span> <span class="s2">&quot;GrayMid&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;smoothwm&#39;</span><span class="p">:</span> <span class="s1">&#39;GrayWhite&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;white&#39;</span><span class="p">:</span> <span class="s1">&#39;GrayWhite&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;pial&#39;</span><span class="p">:</span> <span class="s1">&#39;Pial&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;midthickness&#39;</span><span class="p">:</span> <span class="s1">&#39;GrayMid&#39;</span><span class="p">,</span>
 <span class="p">}</span>
 
 
 <span class="k">class</span> <span class="nc">_NormalizeSurfInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Freesurfer-generated GIFTI file&quot;</span><span class="p">)</span>
-    <span class="n">transform_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;FSL or LTA affine transform file&quot;</span><span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Freesurfer-generated GIFTI file&#39;</span><span class="p">)</span>
+    <span class="n">transform_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;FSL or LTA affine transform file&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_NormalizeSurfOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output file with re-centered GIFTI coordinates&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output file with re-centered GIFTI coordinates&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="NormalizeSurf">
@@ -441,7 +440,7 @@
         <span class="n">transform_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transform_file</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">isdefined</span><span class="p">(</span><span class="n">transform_file</span><span class="p">):</span>
             <span class="n">transform_file</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalize_surfs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalize_surfs</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">transform_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
@@ -449,7 +448,7 @@
 
 
 <span class="k">class</span> <span class="nc">_Path2BIDSInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input GIFTI file&quot;</span><span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input GIFTI file&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_Path2BIDSOutputSpec</span><span class="p">(</span><span class="n">DynamicTraitedSpec</span><span class="p">):</span>
@@ -503,10 +502,10 @@
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_Path2BIDSInputSpec</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_Path2BIDSOutputSpec</span>
     <span class="n">_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-        <span class="sa">r</span><span class="s2">&quot;(?P&lt;hemi&gt;[lr])h.(?P&lt;suffix&gt;(white|smoothwm|pial|midthickness|&quot;</span>
-        <span class="sa">r</span><span class="s2">&quot;inflated|vinflated|sphere|flat|sulc|curv|thickness))[\w\d_-]*(?P&lt;extprefix&gt;\.\w+)?&quot;</span>
+        <span class="sa">r</span><span class="s1">&#39;(?P&lt;hemi&gt;[lr])h.(?P&lt;suffix&gt;(white|smoothwm|pial|midthickness|&#39;</span>
+        <span class="sa">r</span><span class="s1">&#39;inflated|vinflated|sphere|flat|sulc|curv|thickness))[\w\d_-]*(?P&lt;extprefix&gt;\.\w+)?&#39;</span>
     <span class="p">)</span>
-    <span class="n">_excluded</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;extprefix&quot;</span><span class="p">,)</span>
+    <span class="n">_excluded</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;extprefix&#39;</span><span class="p">,)</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the interface.&quot;&quot;&quot;</span>
@@ -528,27 +527,27 @@
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
         <span class="n">in_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>
-        <span class="n">extension</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">in_file</span><span class="o">.</span><span class="n">suffixes</span><span class="p">[</span><span class="o">-</span><span class="p">((</span><span class="n">in_file</span><span class="o">.</span><span class="n">suffixes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.gz&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):])</span>
+        <span class="n">extension</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">in_file</span><span class="o">.</span><span class="n">suffixes</span><span class="p">[</span><span class="o">-</span><span class="p">((</span><span class="n">in_file</span><span class="o">.</span><span class="n">suffixes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;.gz&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:])</span>
         <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">in_file</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">extension</span><span class="p">)])</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;extension&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;extprefix&#39;</span><span class="p">,</span><span class="w"> </span><span class="kc">None</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}{</span><span class="n">extension</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;extension&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;extprefix&#39;</span><span class="p">,</span><span class="w"> </span><span class="kc">None</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}{</span><span class="n">extension</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s2">&quot;hemi&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;hemi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;hemi&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s1">&#39;hemi&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;hemi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;hemi&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_GiftiNameSourceInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input GIFTI file&quot;</span><span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input GIFTI file&#39;</span><span class="p">)</span>
     <span class="n">pattern</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input file name pattern (must capture named group &quot;LR&quot;)&#39;</span>
     <span class="p">)</span>
-    <span class="n">template</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output file name template&quot;</span><span class="p">)</span>
-    <span class="n">template_kwargs</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;additional template keyword value pairs&quot;</span><span class="p">)</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output file name template&#39;</span><span class="p">)</span>
+    <span class="n">template_kwargs</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;additional template keyword value pairs&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_GiftiNameSourceOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_name</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;(partial) filename formatted according to template&quot;</span><span class="p">)</span>
+    <span class="n">out_name</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;(partial) filename formatted according to template&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="GiftiNameSource">
@@ -607,6 +606,7 @@
 
 <span class="sd">    .. _GIFTI Standard: https://www.nitrc.org/frs/download.php/2871/GIFTI_Surface_Format.pdf</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_GiftiNameSourceInputSpec</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_GiftiNameSourceOutputSpec</span>
 
@@ -614,23 +614,21 @@
         <span class="n">in_format</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">pattern</span><span class="p">)</span>
         <span class="n">in_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>
         <span class="n">info</span> <span class="o">=</span> <span class="n">in_format</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()</span>
-        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;LR&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;LR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;LR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;LR&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_kwargs</span><span class="p">:</span>
             <span class="n">info</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_kwargs</span><span class="p">)</span>
         <span class="n">filefmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filefmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">info</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filefmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">info</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_GiftiSetAnatomicalStructureInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;GIFTI file beginning with &quot;lh.&quot; or &quot;rh.&quot;&#39;</span>
-    <span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;GIFTI file beginning with &quot;lh.&quot; or &quot;rh.&quot;&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_GiftiSetAnatomicalStructureOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output file with updated AnatomicalStructurePrimary entry&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output file with updated AnatomicalStructurePrimary entry&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="GiftiSetAnatomicalStructure">
@@ -656,33 +654,29 @@
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
         <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">nvpair</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;AnatomicalStruturePrimary&quot;</span> <span class="k">for</span> <span class="n">nvpair</span> <span class="ow">in</span> <span class="n">img</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">nvpair</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;AnatomicalStruturePrimary&#39;</span> <span class="k">for</span> <span class="n">nvpair</span> <span class="ow">in</span> <span class="n">img</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
             <span class="n">out_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">fname</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;lh.&quot;</span><span class="p">,</span> <span class="s2">&quot;rh.&quot;</span><span class="p">):</span>
-                <span class="n">asp</span> <span class="o">=</span> <span class="s2">&quot;CortexLeft&quot;</span> <span class="k">if</span> <span class="n">fname</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;l&quot;</span> <span class="k">else</span> <span class="s2">&quot;CortexRight&quot;</span>
+            <span class="k">if</span> <span class="n">fname</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;lh.&#39;</span><span class="p">,</span> <span class="s1">&#39;rh.&#39;</span><span class="p">):</span>
+                <span class="n">asp</span> <span class="o">=</span> <span class="s1">&#39;CortexLeft&#39;</span> <span class="k">if</span> <span class="n">fname</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;l&#39;</span> <span class="k">else</span> <span class="s1">&#39;CortexRight&#39;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;AnatomicalStructurePrimary cannot be derived from filename&quot;</span>
-                <span class="p">)</span>
-            <span class="n">img</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-                <span class="mi">0</span><span class="p">,</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiNVPairs</span><span class="p">(</span><span class="s2">&quot;AnatomicalStructurePrimary&quot;</span><span class="p">,</span> <span class="n">asp</span><span class="p">)</span>
-            <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;AnatomicalStructurePrimary cannot be derived from filename&#39;</span><span class="p">)</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiNVPairs</span><span class="p">(</span><span class="s1">&#39;AnatomicalStructurePrimary&#39;</span><span class="p">,</span> <span class="n">asp</span><span class="p">))</span>
             <span class="n">out_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
             <span class="n">img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_GiftiToCSVInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;GIFTI file&quot;</span><span class="p">)</span>
-    <span class="n">itk_lps</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;flip XY axes&quot;</span><span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;GIFTI file&#39;</span><span class="p">)</span>
+    <span class="n">itk_lps</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;flip XY axes&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_GiftiToCSVOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output csv file&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output csv file&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="GiftiToCSV">
@@ -705,28 +699,28 @@
         <span class="n">csvdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">))))</span>
 
         <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="n">use_ext</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;points.csv&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="n">use_ext</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;points.csv&#39;</span>
         <span class="p">)</span>
         <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span>
             <span class="n">out_file</span><span class="p">,</span>
             <span class="n">csvdata</span><span class="p">,</span>
-            <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span>
-            <span class="n">header</span><span class="o">=</span><span class="s2">&quot;x,y,z,t,label,comment&quot;</span><span class="p">,</span>
-            <span class="n">fmt</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">%.5f</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span>
+            <span class="n">header</span><span class="o">=</span><span class="s1">&#39;x,y,z,t,label,comment&#39;</span><span class="p">,</span>
+            <span class="n">fmt</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">%.5f</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_CSVToGiftiInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;CSV file&quot;</span><span class="p">)</span>
-    <span class="n">gii_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference GIfTI file&quot;</span><span class="p">)</span>
-    <span class="n">itk_lps</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;flip XY axes&quot;</span><span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;CSV file&#39;</span><span class="p">)</span>
+    <span class="n">gii_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;reference GIfTI file&#39;</span><span class="p">)</span>
+    <span class="n">itk_lps</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;flip XY axes&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_CSVToGiftiOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output GIfTI file&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output GIfTI file&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="CSVToGifti">
@@ -740,32 +734,28 @@
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
         <span class="n">gii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">gii_file</span><span class="p">)</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">itk_lps</span><span class="p">:</span>  <span class="c1"># ITK: flip X and Y around 0</span>
             <span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
 
         <span class="n">gii</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">gii</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">gii_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.transformed&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">gii_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.transformed&#39;</span>
         <span class="p">)</span>
         <span class="n">gii</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_SurfacesToPointCloudInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_files</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span>
-        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input GIfTI files&quot;</span>
-    <span class="p">)</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="s2">&quot;pointcloud.ply&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output file name&quot;</span><span class="p">)</span>
+    <span class="n">in_files</span> <span class="o">=</span> <span class="n">InputMultiPath</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input GIfTI files&#39;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="s1">&#39;pointcloud.ply&#39;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output file name&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_SurfacesToPointCloudOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output pointcloud in PLY format&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output pointcloud in PLY format&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="SurfacesToPointCloud">
@@ -782,12 +772,10 @@
 
         <span class="n">giis</span> <span class="o">=</span> <span class="p">[</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">]</span>
         <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">giis</span><span class="p">])</span>
-        <span class="n">norms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">vertex_normals</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">giis</span><span class="p">]</span>
-        <span class="p">)</span>
+        <span class="n">norms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">vertex_normals</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">giis</span><span class="p">])</span>
         <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
         <span class="n">pointcloud2ply</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">norms</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="n">out_file</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
@@ -796,20 +784,20 @@
     <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;--in </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input PLY pointcloud (vertices + normals)&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;--in </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input PLY pointcloud (vertices + normals)&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;--out </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;--out </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">keep_extension</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">],</span>
-        <span class="n">name_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_avg&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output PLY triangular mesh&quot;</span><span class="p">,</span>
+        <span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;in_file&#39;</span><span class="p">],</span>
+        <span class="n">name_template</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_avg&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output PLY triangular mesh&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_PoissonReconOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output PLY triangular mesh&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output PLY triangular mesh&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="PoissonRecon">
@@ -822,17 +810,17 @@
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_PoissonReconInputSpec</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_PoissonReconOutputSpec</span>
-    <span class="n">_cmd</span> <span class="o">=</span> <span class="s2">&quot;PoissonRecon&quot;</span></div>
+    <span class="n">_cmd</span> <span class="o">=</span> <span class="s1">&#39;PoissonRecon&#39;</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_PLYtoGiftiInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input PLY file&quot;</span><span class="p">)</span>
-    <span class="n">surf_key</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference GIfTI file&quot;</span><span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input PLY file&#39;</span><span class="p">)</span>
+    <span class="n">surf_key</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;reference GIfTI file&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_PLYtoGiftiOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output GIfTI file&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output GIfTI file&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="PLYtoGifti">
@@ -847,52 +835,52 @@
         <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
         <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;GeometricType&quot;</span><span class="p">:</span> <span class="s2">&quot;Anatomical&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomWidth&quot;</span><span class="p">:</span> <span class="s2">&quot;256&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomHeight&quot;</span><span class="p">:</span> <span class="s2">&quot;256&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomDepth&quot;</span><span class="p">:</span> <span class="s2">&quot;256&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomXsize&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomYsize&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomZsize&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomX_R&quot;</span><span class="p">:</span> <span class="s2">&quot;-1.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomX_A&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomX_S&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomY_R&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomY_A&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomY_S&quot;</span><span class="p">:</span> <span class="s2">&quot;-1.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomZ_R&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomZ_A&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomZ_S&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomC_R&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomC_A&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;VolGeomC_S&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;GeometricType&#39;</span><span class="p">:</span> <span class="s1">&#39;Anatomical&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomWidth&#39;</span><span class="p">:</span> <span class="s1">&#39;256&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomHeight&#39;</span><span class="p">:</span> <span class="s1">&#39;256&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomDepth&#39;</span><span class="p">:</span> <span class="s1">&#39;256&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomXsize&#39;</span><span class="p">:</span> <span class="s1">&#39;1.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomYsize&#39;</span><span class="p">:</span> <span class="s1">&#39;1.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomZsize&#39;</span><span class="p">:</span> <span class="s1">&#39;1.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomX_R&#39;</span><span class="p">:</span> <span class="s1">&#39;-1.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomX_A&#39;</span><span class="p">:</span> <span class="s1">&#39;0.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomX_S&#39;</span><span class="p">:</span> <span class="s1">&#39;0.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomY_R&#39;</span><span class="p">:</span> <span class="s1">&#39;0.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomY_A&#39;</span><span class="p">:</span> <span class="s1">&#39;0.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomY_S&#39;</span><span class="p">:</span> <span class="s1">&#39;-1.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomZ_R&#39;</span><span class="p">:</span> <span class="s1">&#39;0.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomZ_A&#39;</span><span class="p">:</span> <span class="s1">&#39;1.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomZ_S&#39;</span><span class="p">:</span> <span class="s1">&#39;0.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomC_R&#39;</span><span class="p">:</span> <span class="s1">&#39;0.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomC_A&#39;</span><span class="p">:</span> <span class="s1">&#39;0.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;VolGeomC_S&#39;</span><span class="p">:</span> <span class="s1">&#39;0.0&#39;</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;AnatomicalStructurePrimary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Cortex</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="s2">&quot;Left&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surf_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;lh&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;Right&quot;</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;AnatomicalStructurePrimary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Cortex</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="s1">&#39;Left&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surf_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;lh&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;Right&#39;</span>
         <span class="p">)</span>
-        <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;AnatomicalStructureSecondary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SECONDARY_ANAT_STRUC</span><span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surf_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;AnatomicalStructureSecondary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SECONDARY_ANAT_STRUC</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surf_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="p">]</span>
-        <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_average.gii&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surf_key</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surf_key</span><span class="si">}</span><span class="s1">_average.gii&#39;</span>
 
-        <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="o">/</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="o">/</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span>
         <span class="n">out_file</span> <span class="o">=</span> <span class="n">ply2gii</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="n">out_file</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_UnzipJoinedSurfacesInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
     <span class="n">in_files</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span>
-        <span class="n">InputMultiPath</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input GIfTI files&quot;</span><span class="p">)</span>
+        <span class="n">InputMultiPath</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input GIfTI files&#39;</span><span class="p">)</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_UnzipJoinedSurfacesOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
     <span class="n">out_files</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span>
-        <span class="n">OutputMultiPath</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output pointcloud in PLY format&quot;</span><span class="p">)</span>
+        <span class="n">OutputMultiPath</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output pointcloud in PLY format&#39;</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">surf_keys</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;surface identifier keys&quot;</span><span class="p">)</span>
+    <span class="n">surf_keys</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;surface identifier keys&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="UnzipJoinedSurfaces">
@@ -911,10 +899,10 @@
 
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">in_files</span><span class="p">:</span>
             <span class="n">bname</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
-            <span class="n">groups</span><span class="p">[</span><span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">groups</span><span class="p">[</span><span class="n">bname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_files&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">sorted</span><span class="p">(</span><span class="n">els</span><span class="p">)</span> <span class="k">for</span> <span class="n">els</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;surf_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">groups</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">sorted</span><span class="p">(</span><span class="n">els</span><span class="p">)</span> <span class="k">for</span> <span class="n">els</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;surf_keys&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">groups</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
 
@@ -923,8 +911,8 @@
 <span class="k">class</span> <span class="nc">CreateSurfaceROIInputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
     <span class="n">subject_id</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;subject ID&#39;</span><span class="p">)</span>
     <span class="n">hemisphere</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
-        <span class="s2">&quot;L&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;R&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;L&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R&#39;</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;hemisphere&#39;</span><span class="p">,</span>
     <span class="p">)</span>
@@ -954,11 +942,11 @@
             <span class="n">subject</span> <span class="o">=</span> <span class="s1">&#39;sub-XYZ&#39;</span>
         <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">GiftiImage</span><span class="o">.</span><span class="n">from_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">thickness_file</span><span class="p">)</span>
         <span class="c1"># wb_command -set-structure (L282)</span>
-        <span class="n">img</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;AnatomicalStructurePrimary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;L&#39;</span><span class="p">:</span> <span class="s1">&#39;CortexLeft&#39;</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="s1">&#39;CortexRight&#39;</span><span class="p">}[</span><span class="n">hemi</span><span class="p">]</span>
+        <span class="n">img</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;AnatomicalStructurePrimary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;L&#39;</span><span class="p">:</span> <span class="s1">&#39;CortexLeft&#39;</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="s1">&#39;CortexRight&#39;</span><span class="p">}[</span><span class="n">hemi</span><span class="p">]</span>
         <span class="n">darray</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">darrays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="c1"># wb_command -set-map-names (L284)</span>
         <span class="n">meta</span> <span class="o">=</span> <span class="n">darray</span><span class="o">.</span><span class="n">meta</span>
-        <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">hemi</span><span class="si">}</span><span class="s2">_ROI&quot;</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">hemi</span><span class="si">}</span><span class="s1">_ROI&#39;</span>
         <span class="c1"># wb_command -metric-palette calls (L285, L289) have no effect on ROI files</span>
 
         <span class="c1"># Compiling an odd sequence of math operations (L283, L288, L290) that work out to:</span>
@@ -976,9 +964,9 @@
             <span class="n">meta</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">out_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">hemi</span><span class="si">}</span><span class="s2">.roi.native.shape.gii&quot;</span><span class="p">)</span>
+        <span class="n">out_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">hemi</span><span class="si">}</span><span class="s1">.roi.native.shape.gii&#39;</span><span class="p">)</span>
         <span class="n">img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_filename</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;roi_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;roi_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_filename</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
@@ -999,23 +987,21 @@
 
     <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
     <span class="n">transform</span> <span class="o">=</span> <span class="n">load_transform</span><span class="p">(</span><span class="n">transform_file</span><span class="p">)</span>
-    <span class="n">pointset</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">get_arrays_from_intent</span><span class="p">(</span><span class="s2">&quot;NIFTI_INTENT_POINTSET&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">pointset</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">get_arrays_from_intent</span><span class="p">(</span><span class="s1">&#39;NIFTI_INTENT_POINTSET&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="n">pointset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">T</span>
-    <span class="n">c_ras_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;VolGeomC_R&quot;</span><span class="p">,</span> <span class="s2">&quot;VolGeomC_A&quot;</span><span class="p">,</span> <span class="s2">&quot;VolGeomC_S&quot;</span><span class="p">)</span>
+    <span class="n">c_ras_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;VolGeomC_R&#39;</span><span class="p">,</span> <span class="s1">&#39;VolGeomC_A&#39;</span><span class="p">,</span> <span class="s1">&#39;VolGeomC_S&#39;</span><span class="p">)</span>
     <span class="n">ras</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="nb">float</span><span class="p">(</span><span class="n">pointset</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">])]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">c_ras_keys</span><span class="p">])</span>
     <span class="n">ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">coords</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
     <span class="c1"># Apply C_RAS translation to coordinates, then transform</span>
-    <span class="n">pointset</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">coords</span> <span class="o">+</span> <span class="n">ras</span><span class="p">,</span> <span class="n">ones</span><span class="p">)))[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
-        <span class="n">coords</span><span class="o">.</span><span class="n">dtype</span>
-    <span class="p">)</span>
+    <span class="n">pointset</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">coords</span> <span class="o">+</span> <span class="n">ras</span><span class="p">,</span> <span class="n">ones</span><span class="p">)))[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
-    <span class="n">secondary</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiNVPairs</span><span class="p">(</span><span class="s2">&quot;AnatomicalStructureSecondary&quot;</span><span class="p">,</span> <span class="s2">&quot;MidThickness&quot;</span><span class="p">)</span>
-    <span class="n">geom_type</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiNVPairs</span><span class="p">(</span><span class="s2">&quot;GeometricType&quot;</span><span class="p">,</span> <span class="s2">&quot;Anatomical&quot;</span><span class="p">)</span>
+    <span class="n">secondary</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiNVPairs</span><span class="p">(</span><span class="s1">&#39;AnatomicalStructureSecondary&#39;</span><span class="p">,</span> <span class="s1">&#39;MidThickness&#39;</span><span class="p">)</span>
+    <span class="n">geom_type</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">gifti</span><span class="o">.</span><span class="n">GiftiNVPairs</span><span class="p">(</span><span class="s1">&#39;GeometricType&#39;</span><span class="p">,</span> <span class="s1">&#39;Anatomical&#39;</span><span class="p">)</span>
     <span class="n">has_ass</span> <span class="o">=</span> <span class="n">has_geo</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">for</span> <span class="n">nvpair</span> <span class="ow">in</span> <span class="n">pointset</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
         <span class="c1"># Remove C_RAS translation from metadata to avoid double-dipping in FreeSurfer</span>
         <span class="k">if</span> <span class="n">nvpair</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">c_ras_keys</span><span class="p">:</span>
-            <span class="n">nvpair</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;0.000000&quot;</span>
+            <span class="n">nvpair</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;0.000000&#39;</span>
         <span class="c1"># Check for missing metadata</span>
         <span class="k">elif</span> <span class="n">nvpair</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">secondary</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
             <span class="n">has_ass</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1023,7 +1009,7 @@
             <span class="n">has_geo</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
     <span class="c1"># Update metadata for MidThickness/graymid surfaces</span>
-    <span class="k">if</span> <span class="s2">&quot;midthickness&quot;</span> <span class="ow">in</span> <span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;graymid&quot;</span> <span class="ow">in</span> <span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s1">&#39;midthickness&#39;</span> <span class="ow">in</span> <span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;graymid&#39;</span> <span class="ow">in</span> <span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">has_ass</span><span class="p">:</span>
             <span class="n">pointset</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">secondary</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">has_geo</span><span class="p">:</span>
@@ -1055,17 +1041,17 @@
     <span class="k">if</span> <span class="n">fname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.mat&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.mat&#39;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.lta&quot;</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fobj</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.lta&#39;</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fobj</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fobj</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;1 4 4&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;1 4 4&#39;</span><span class="p">):</span>
                     <span class="k">break</span>
             <span class="n">lines</span> <span class="o">=</span> <span class="n">fobj</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[:</span><span class="mi">4</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
 
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown transform type; pass FSL (.mat) or LTA (.lta)&quot;</span><span class="p">)</span></div>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown transform type; pass FSL (.mat) or LTA (.lta)&#39;</span><span class="p">)</span></div>
 
 
 
@@ -1075,7 +1061,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the normals of a triangular mesh&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">normalize_v3</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Normalize a numpy array of 3 component vectors shape=(n,3) &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalize a numpy array of 3 component vectors shape=(n,3)&quot;&quot;&quot;</span>
         <span class="n">lens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">arr</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">arr</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">arr</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">arr</span> <span class="o">/=</span> <span class="n">lens</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
 
@@ -1097,15 +1083,16 @@
 <span class="k">def</span> <span class="nf">pointcloud2ply</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts the file to PLY format&quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
     <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
     <span class="kn">from</span> <span class="nn">pyntcloud</span> <span class="kn">import</span> <span class="n">PyntCloud</span>
 
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">)))</span>
-    <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="s2">&quot;nx&quot;</span><span class="p">,</span> <span class="s2">&quot;ny&quot;</span><span class="p">,</span> <span class="s2">&quot;nz&quot;</span><span class="p">]</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;nx&#39;</span><span class="p">,</span> <span class="s1">&#39;ny&#39;</span><span class="p">,</span> <span class="s1">&#39;nz&#39;</span><span class="p">]</span>
     <span class="n">cloud</span> <span class="o">=</span> <span class="n">PyntCloud</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">out_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;pointcloud.ply&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;pointcloud.ply&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 
     <span class="n">cloud</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">out_file</span></div>
@@ -1117,13 +1104,14 @@
 <span class="k">def</span> <span class="nf">ply2gii</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert from ply to GIfTI&quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-    <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">eye</span>
+
     <span class="kn">from</span> <span class="nn">nibabel.gifti</span> <span class="kn">import</span> <span class="p">(</span>
-        <span class="n">GiftiMetaData</span><span class="p">,</span>
         <span class="n">GiftiCoordSystem</span><span class="p">,</span>
-        <span class="n">GiftiImage</span><span class="p">,</span>
         <span class="n">GiftiDataArray</span><span class="p">,</span>
+        <span class="n">GiftiImage</span><span class="p">,</span>
+        <span class="n">GiftiMetaData</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">eye</span>
     <span class="kn">from</span> <span class="nn">pyntcloud</span> <span class="kn">import</span> <span class="n">PyntCloud</span>
 
     <span class="n">in_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
@@ -1132,24 +1120,24 @@
     <span class="c1"># Update centroid metadata</span>
     <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
         <span class="nb">zip</span><span class="p">(</span>
-            <span class="p">(</span><span class="s2">&quot;SurfaceCenterX&quot;</span><span class="p">,</span> <span class="s2">&quot;SurfaceCenterY&quot;</span><span class="p">,</span> <span class="s2">&quot;SurfaceCenterZ&quot;</span><span class="p">),</span>
-            <span class="p">[</span><span class="s2">&quot;</span><span class="si">%.4f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">surf</span><span class="o">.</span><span class="n">centroid</span><span class="p">],</span>
+            <span class="p">(</span><span class="s1">&#39;SurfaceCenterX&#39;</span><span class="p">,</span> <span class="s1">&#39;SurfaceCenterY&#39;</span><span class="p">,</span> <span class="s1">&#39;SurfaceCenterZ&#39;</span><span class="p">),</span>
+            <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">c</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">surf</span><span class="o">.</span><span class="n">centroid</span><span class="p">],</span>
         <span class="p">)</span>
     <span class="p">)</span>
 
     <span class="c1"># Prepare data arrays</span>
     <span class="n">da</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">GiftiDataArray</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">surf</span><span class="o">.</span><span class="n">xyz</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">),</span>
-            <span class="n">datatype</span><span class="o">=</span><span class="s2">&quot;NIFTI_TYPE_FLOAT32&quot;</span><span class="p">,</span>
-            <span class="n">intent</span><span class="o">=</span><span class="s2">&quot;NIFTI_INTENT_POINTSET&quot;</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">surf</span><span class="o">.</span><span class="n">xyz</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">),</span>
+            <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;NIFTI_TYPE_FLOAT32&#39;</span><span class="p">,</span>
+            <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;NIFTI_INTENT_POINTSET&#39;</span><span class="p">,</span>
             <span class="n">meta</span><span class="o">=</span><span class="n">GiftiMetaData</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">metadata</span><span class="p">),</span>
             <span class="n">coordsys</span><span class="o">=</span><span class="n">GiftiCoordSystem</span><span class="p">(</span><span class="n">xform</span><span class="o">=</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">xformspace</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span>
         <span class="p">),</span>
         <span class="n">GiftiDataArray</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">surf</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
-            <span class="n">datatype</span><span class="o">=</span><span class="s2">&quot;NIFTI_TYPE_INT32&quot;</span><span class="p">,</span>
-            <span class="n">intent</span><span class="o">=</span><span class="s2">&quot;NIFTI_INTENT_TRIANGLE&quot;</span><span class="p">,</span>
+            <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;NIFTI_TYPE_INT32&#39;</span><span class="p">,</span>
+            <span class="n">intent</span><span class="o">=</span><span class="s1">&#39;NIFTI_INTENT_TRIANGLE&#39;</span><span class="p">,</span>
             <span class="n">coordsys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">),</span>
     <span class="p">)</span>
@@ -1157,7 +1145,7 @@
 
     <span class="k">if</span> <span class="n">out_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
-            <span class="n">in_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.gii&quot;</span><span class="p">,</span> <span class="n">use_ext</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">())</span>
+            <span class="n">in_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.gii&#39;</span><span class="p">,</span> <span class="n">use_ext</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">())</span>
         <span class="p">)</span>
 
     <span class="n">surfgii</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">))</span>
@@ -1187,7 +1175,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

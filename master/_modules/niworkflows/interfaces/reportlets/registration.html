@@ -353,31 +353,34 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;ReportCapableInterfaces for registration tools.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">looseversion</span> <span class="kn">import</span> <span class="n">LooseVersion</span>
-<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
-<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">traits</span><span class="p">,</span>
-    <span class="n">isdefined</span><span class="p">,</span>
-    <span class="n">File</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">nipype.interfaces.mixins</span> <span class="kn">import</span> <span class="n">reporting</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">freesurfer</span> <span class="k">as</span> <span class="n">fs</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.ants</span> <span class="kn">import</span> <span class="n">registration</span><span class="p">,</span> <span class="n">resampling</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">File</span><span class="p">,</span>
+    <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.mixins</span> <span class="kn">import</span> <span class="n">reporting</span>
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
 
 <span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">NIWORKFLOWS_LOG</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">base</span> <span class="k">as</span> <span class="n">nrb</span>
-<span class="kn">from</span> <span class="nn">..norm</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">_SpatialNormalizationInputSpec</span><span class="p">,</span>
-    <span class="n">_SpatialNormalizationOutputSpec</span><span class="p">,</span>
-    <span class="n">SpatialNormalization</span><span class="p">,</span>
-<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..fixes</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">FixHeaderApplyTransforms</span> <span class="k">as</span> <span class="n">ApplyTransforms</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..fixes</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">FixHeaderRegistration</span> <span class="k">as</span> <span class="n">Registration</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..norm</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SpatialNormalization</span><span class="p">,</span>
+    <span class="n">_SpatialNormalizationInputSpec</span><span class="p">,</span>
+    <span class="n">_SpatialNormalizationOutputSpec</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">base</span> <span class="k">as</span> <span class="n">nrb</span>
 
 
 <span class="k">class</span> <span class="nc">_SpatialNormalizationInputSpecRPT</span><span class="p">(</span>
@@ -400,15 +403,15 @@
 
     <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
         <span class="c1"># We need to dig into the internal ants.Registration interface</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ants_args</span><span class="p">()[</span><span class="s2">&quot;fixed_image&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ants_args</span><span class="p">()[</span><span class="s1">&#39;fixed_image&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># get first item if list</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ants_args</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fixed_image_mask&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ants_args</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fixed_image_mask&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ants_args</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fixed_image_mask&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ants_args</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fixed_image_mask&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">warped_image</span>
         <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s2">&quot;Report - setting fixed (</span><span class="si">%s</span><span class="s2">) and moving (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;Report - setting fixed (</span><span class="si">%s</span><span class="s1">) and moving (</span><span class="si">%s</span><span class="s1">) images&#39;</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
         <span class="p">)</span>
@@ -439,7 +442,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fixed_image</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">warped_image</span>
         <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s2">&quot;Report - setting fixed (</span><span class="si">%s</span><span class="s2">) and moving (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;Report - setting fixed (</span><span class="si">%s</span><span class="s1">) and moving (</span><span class="si">%s</span><span class="s1">) images&#39;</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
         <span class="p">)</span>
@@ -470,7 +473,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_image</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">output_image</span>
         <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s2">&quot;Report - setting fixed (</span><span class="si">%s</span><span class="s2">) and moving (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;Report - setting fixed (</span><span class="si">%s</span><span class="s1">) and moving (</span><span class="si">%s</span><span class="s1">) images&#39;</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
         <span class="p">)</span>
@@ -479,15 +482,11 @@
 
 
 
-<span class="k">class</span> <span class="nc">_ApplyTOPUPInputSpecRPT</span><span class="p">(</span>
-    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">epi</span><span class="o">.</span><span class="n">ApplyTOPUPInputSpec</span>
-<span class="p">):</span>
-    <span class="n">wm_seg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-wmseg </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference white matter segmentation mask&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">_ApplyTOPUPInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">epi</span><span class="o">.</span><span class="n">ApplyTOPUPInputSpec</span><span class="p">):</span>
+    <span class="n">wm_seg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-wmseg </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;reference white matter segmentation mask&#39;</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">_ApplyTOPUPOutputSpecRPT</span><span class="p">(</span>
-    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">epi</span><span class="o">.</span><span class="n">ApplyTOPUPOutputSpec</span>
-<span class="p">):</span>
+<span class="k">class</span> <span class="nc">_ApplyTOPUPOutputSpecRPT</span><span class="p">(</span><span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">epi</span><span class="o">.</span><span class="n">ApplyTOPUPOutputSpec</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
@@ -500,15 +499,13 @@
     <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">nilearn.image</span> <span class="kn">import</span> <span class="n">index_img</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image_label</span> <span class="o">=</span> <span class="s2">&quot;after&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image_label</span> <span class="o">=</span> <span class="s2">&quot;before&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="n">index_img</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">out_corrected</span><span class="p">,</span> <span class="mi">0</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image_label</span> <span class="o">=</span> <span class="s1">&#39;after&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image_label</span> <span class="o">=</span> <span class="s1">&#39;before&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="n">index_img</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">out_corrected</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="n">index_img</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s2">&quot;Report - setting corrected (</span><span class="si">%s</span><span class="s2">) and warped (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;Report - setting corrected (</span><span class="si">%s</span><span class="s1">) and warped (</span><span class="si">%s</span><span class="s1">) images&#39;</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
         <span class="p">)</span>
@@ -518,12 +515,10 @@
 
 
 <span class="k">class</span> <span class="nc">_FUGUEInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">FUGUEInputSpec</span><span class="p">):</span>
-    <span class="n">wm_seg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;-wmseg </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference white matter segmentation mask&quot;</span><span class="p">)</span>
+    <span class="n">wm_seg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;-wmseg </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;reference white matter segmentation mask&#39;</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">_FUGUEOutputSpecRPT</span><span class="p">(</span>
-    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">FUGUEOutputSpec</span>
-<span class="p">):</span>
+<span class="k">class</span> <span class="nc">_FUGUEOutputSpecRPT</span><span class="p">(</span><span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">FUGUEOutputSpec</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
@@ -534,13 +529,13 @@
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FUGUEOutputSpecRPT</span>
 
     <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image_label</span> <span class="o">=</span> <span class="s2">&quot;after&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image_label</span> <span class="o">=</span> <span class="s2">&quot;before&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image_label</span> <span class="o">=</span> <span class="s1">&#39;after&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image_label</span> <span class="o">=</span> <span class="s1">&#39;before&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">unwarped_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s2">&quot;Report - setting corrected (</span><span class="si">%s</span><span class="s2">) and warped (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;Report - setting corrected (</span><span class="si">%s</span><span class="s1">) and warped (</span><span class="si">%s</span><span class="s1">) images&#39;</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
         <span class="p">)</span>
@@ -553,9 +548,7 @@
     <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">_FLIRTOutputSpecRPT</span><span class="p">(</span>
-    <span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">FLIRTOutputSpec</span>
-<span class="p">):</span>
+<span class="k">class</span> <span class="nc">_FLIRTOutputSpecRPT</span><span class="p">(</span><span class="n">reporting</span><span class="o">.</span><span class="n">ReportCapableOutputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">FLIRTOutputSpec</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
@@ -570,7 +563,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">out_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s2">&quot;Report - setting fixed (</span><span class="si">%s</span><span class="s2">) and moving (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;Report - setting fixed (</span><span class="si">%s</span><span class="s1">) and moving (</span><span class="si">%s</span><span class="s1">) images&#39;</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
         <span class="p">)</span>
@@ -579,9 +572,7 @@
 
 
 
-<span class="k">class</span> <span class="nc">_ApplyXFMInputSpecRPT</span><span class="p">(</span>
-    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">ApplyXFMInputSpec</span>
-<span class="p">):</span>
+<span class="k">class</span> <span class="nc">_ApplyXFMInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fsl</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">ApplyXFMInputSpec</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
@@ -593,7 +584,7 @@
 
 
 
-<span class="k">if</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s2">&quot;0.0.0&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">fs</span><span class="o">.</span><span class="n">Info</span><span class="o">.</span><span class="n">looseversion</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s2">&quot;6.0.0&quot;</span><span class="p">):</span>
+<span class="k">if</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s1">&#39;0.0.0&#39;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">fs</span><span class="o">.</span><span class="n">Info</span><span class="o">.</span><span class="n">looseversion</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s1">&#39;6.0.0&#39;</span><span class="p">):</span>
     <span class="n">_BBRegisterInputSpec</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">BBRegisterInputSpec</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="n">_BBRegisterInputSpec</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">preprocess</span><span class="o">.</span><span class="n">BBRegisterInputSpec6</span>
@@ -606,9 +597,9 @@
         <span class="n">File</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">argstr</span><span class="o">=</span><span class="s2">&quot;--lta </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">min_ver</span><span class="o">=</span><span class="s2">&quot;5.2.0&quot;</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;write the transformation matrix in LTA format&quot;</span><span class="p">,</span>
+        <span class="n">argstr</span><span class="o">=</span><span class="s1">&#39;--lta </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">min_ver</span><span class="o">=</span><span class="s1">&#39;5.2.0&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;write the transformation matrix in LTA format&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
@@ -626,23 +617,23 @@
 
     <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span>
-        <span class="n">mri_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">,</span> <span class="s2">&quot;mri&quot;</span><span class="p">)</span>
-        <span class="n">target_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mri_dir</span><span class="p">,</span> <span class="s2">&quot;brainmask.mgz&quot;</span><span class="p">)</span>
+        <span class="n">mri_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">,</span> <span class="s1">&#39;mri&#39;</span><span class="p">)</span>
+        <span class="n">target_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mri_dir</span><span class="p">,</span> <span class="s1">&#39;brainmask.mgz&#39;</span><span class="p">)</span>
 
         <span class="c1"># Apply transform for simplicity</span>
         <span class="n">mri_vol2vol</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">ApplyVolTransform</span><span class="p">(</span>
             <span class="n">source_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span><span class="p">,</span>
             <span class="n">target_file</span><span class="o">=</span><span class="n">target_file</span><span class="p">,</span>
             <span class="n">lta_file</span><span class="o">=</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_lta_file</span><span class="p">,</span>
-            <span class="n">interp</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span>
+            <span class="n">interp</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">mri_vol2vol</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="n">target_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">transformed_file</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mri_dir</span><span class="p">,</span> <span class="s2">&quot;ribbon.mgz&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mri_dir</span><span class="p">,</span> <span class="s1">&#39;ribbon.mgz&#39;</span><span class="p">)</span>
         <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s2">&quot;Report - setting fixed (</span><span class="si">%s</span><span class="s2">) and moving (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;Report - setting fixed (</span><span class="si">%s</span><span class="s1">) and moving (</span><span class="si">%s</span><span class="s1">) images&#39;</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
         <span class="p">)</span>
@@ -651,9 +642,7 @@
 
 
 
-<span class="k">class</span> <span class="nc">_MRICoregInputSpecRPT</span><span class="p">(</span>
-    <span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fs</span><span class="o">.</span><span class="n">registration</span><span class="o">.</span><span class="n">MRICoregInputSpec</span>
-<span class="p">):</span>
+<span class="k">class</span> <span class="nc">_MRICoregInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">,</span> <span class="n">fs</span><span class="o">.</span><span class="n">registration</span><span class="o">.</span><span class="n">MRICoregInputSpec</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
@@ -673,30 +662,28 @@
         <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">)</span>
         <span class="n">mri_dir</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">):</span>
-            <span class="n">mri_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">,</span> <span class="s2">&quot;mri&quot;</span>
-            <span class="p">)</span>
+            <span class="n">mri_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">,</span> <span class="s1">&#39;mri&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_file</span><span class="p">):</span>
             <span class="n">target_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_file</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">target_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mri_dir</span><span class="p">,</span> <span class="s2">&quot;brainmask.mgz&quot;</span><span class="p">)</span>
+            <span class="n">target_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mri_dir</span><span class="p">,</span> <span class="s1">&#39;brainmask.mgz&#39;</span><span class="p">)</span>
 
         <span class="c1"># Apply transform for simplicity</span>
         <span class="n">mri_vol2vol</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">ApplyVolTransform</span><span class="p">(</span>
             <span class="n">source_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span><span class="p">,</span>
             <span class="n">target_file</span><span class="o">=</span><span class="n">target_file</span><span class="p">,</span>
             <span class="n">lta_file</span><span class="o">=</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_lta_file</span><span class="p">,</span>
-            <span class="n">interp</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span>
+            <span class="n">interp</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">mri_vol2vol</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="n">target_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">transformed_file</span>
         <span class="k">if</span> <span class="n">mri_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mri_dir</span><span class="p">,</span> <span class="s2">&quot;ribbon.mgz&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mri_dir</span><span class="p">,</span> <span class="s1">&#39;ribbon.mgz&#39;</span><span class="p">)</span>
         <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s2">&quot;Report - setting fixed (</span><span class="si">%s</span><span class="s2">) and moving (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;Report - setting fixed (</span><span class="si">%s</span><span class="s1">) and moving (</span><span class="si">%s</span><span class="s1">) images&#39;</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
         <span class="p">)</span>
@@ -706,14 +693,12 @@
 
 
 <span class="k">class</span> <span class="nc">_SimpleBeforeAfterInputSpecRPT</span><span class="p">(</span><span class="n">nrb</span><span class="o">.</span><span class="n">_SVGReportCapableInputSpec</span><span class="p">):</span>
-    <span class="n">before</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;file before&quot;</span><span class="p">)</span>
-    <span class="n">after</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;file after&quot;</span><span class="p">)</span>
-    <span class="n">wm_seg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference white matter segmentation mask&quot;</span><span class="p">)</span>
-    <span class="n">before_label</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="s2">&quot;before&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">after_label</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="s2">&quot;after&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">dismiss_affine</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
-        <span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;rotate image(s) to cardinal axes&quot;</span>
-    <span class="p">)</span>
+    <span class="n">before</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;file before&#39;</span><span class="p">)</span>
+    <span class="n">after</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;file after&#39;</span><span class="p">)</span>
+    <span class="n">wm_seg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;reference white matter segmentation mask&#39;</span><span class="p">)</span>
+    <span class="n">before_label</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="s1">&#39;before&#39;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">after_label</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="s1">&#39;after&#39;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">dismiss_affine</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;rotate image(s) to cardinal axes&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="SimpleBeforeAfterRPT">
@@ -722,7 +707,7 @@
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_SimpleBeforeAfterInputSpecRPT</span>
 
     <span class="k">def</span> <span class="nf">_post_run_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; there is not inner interface to run &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;there is not inner interface to run&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">after_label</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">before_label</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">after</span>
@@ -730,7 +715,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dismiss_affine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dismiss_affine</span>
         <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s2">&quot;Report - setting before (</span><span class="si">%s</span><span class="s2">) and after (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;Report - setting before (</span><span class="si">%s</span><span class="s1">) and after (</span><span class="si">%s</span><span class="s1">) images&#39;</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
         <span class="p">)</span>
@@ -740,7 +725,7 @@
 
 
 <span class="k">class</span> <span class="nc">_ResampleBeforeAfterInputSpecRPT</span><span class="p">(</span><span class="n">_SimpleBeforeAfterInputSpecRPT</span><span class="p">):</span>
-    <span class="n">base</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s2">&quot;before&quot;</span><span class="p">,</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s1">&#39;before&#39;</span><span class="p">,</span> <span class="s1">&#39;after&#39;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ResampleBeforeAfterRPT">
@@ -753,31 +738,25 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">after</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">before</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base</span> <span class="o">==</span> <span class="s2">&quot;before&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base</span> <span class="o">==</span> <span class="s1">&#39;before&#39;</span><span class="p">:</span>
             <span class="n">resampled_after</span> <span class="o">=</span> <span class="n">nli</span><span class="o">.</span><span class="n">resample_to_img</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">)</span>
-            <span class="n">fname</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_resampled&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
-            <span class="p">)</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_resampled&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
             <span class="n">resampled_after</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span> <span class="o">=</span> <span class="n">fname</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">resampled_before</span> <span class="o">=</span> <span class="n">nli</span><span class="o">.</span><span class="n">resample_to_img</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span>
-            <span class="p">)</span>
-            <span class="n">fname</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_resampled&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
-            <span class="p">)</span>
+            <span class="n">resampled_before</span> <span class="o">=</span> <span class="n">nli</span><span class="o">.</span><span class="n">resample_to_img</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">)</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_resampled&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
             <span class="n">resampled_before</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span> <span class="o">=</span> <span class="n">fname</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_contour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_seg</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s2">&quot;Report - setting before (</span><span class="si">%s</span><span class="s2">) and after (</span><span class="si">%s</span><span class="s2">) images&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;Report - setting before (</span><span class="si">%s</span><span class="s1">) and after (</span><span class="si">%s</span><span class="s1">) images&#39;</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_image</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_moving_image</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">runtime</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_post_run_hook</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
-        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Successfully created report (</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span><span class="p">)</span>
+        <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Successfully created report (</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_report</span><span class="p">)</span>
         <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
@@ -794,7 +773,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

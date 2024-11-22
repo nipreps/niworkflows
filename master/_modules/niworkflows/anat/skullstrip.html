@@ -353,15 +353,18 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;Brain extraction workflows.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span><span class="p">,</span> <span class="n">utility</span> <span class="k">as</span> <span class="n">niu</span>
+
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">utility</span> <span class="k">as</span> <span class="n">niu</span>
 <span class="kn">from</span> <span class="nn">nipype.pipeline</span> <span class="kn">import</span> <span class="n">engine</span> <span class="k">as</span> <span class="n">pe</span>
-<span class="kn">from</span> <span class="nn">..interfaces.nibabel</span> <span class="kn">import</span> <span class="n">Binarize</span>
+
 <span class="kn">from</span> <span class="nn">..interfaces.fixes</span> <span class="kn">import</span> <span class="n">FixN4BiasFieldCorrection</span> <span class="k">as</span> <span class="n">N4BiasFieldCorrection</span>
+<span class="kn">from</span> <span class="nn">..interfaces.nibabel</span> <span class="kn">import</span> <span class="n">Binarize</span>
 
 
 <div class="viewcode-block" id="afni_wf">
 <a class="viewcode-back" href="../../../api/niworkflows.anat.skullstrip.html#niworkflows.anat.skullstrip.afni_wf">[docs]</a>
-<span class="k">def</span> <span class="nf">afni_wf</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;AFNISkullStripWorkflow&quot;</span><span class="p">,</span> <span class="n">unifize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n4_nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">afni_wf</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;AFNISkullStripWorkflow&#39;</span><span class="p">,</span> <span class="n">unifize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n4_nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a skull-stripping workflow based on AFNI&#39;s tools.</span>
 
@@ -406,12 +409,10 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">workflow</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">inputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_file&quot;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;inputnode&quot;</span><span class="p">)</span>
+    <span class="n">inputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;in_file&#39;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;inputnode&#39;</span><span class="p">)</span>
     <span class="n">outputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
-        <span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span>
-            <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;bias_corrected&quot;</span><span class="p">,</span> <span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;out_mask&quot;</span><span class="p">,</span> <span class="s2">&quot;bias_image&quot;</span><span class="p">]</span>
-        <span class="p">),</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;outputnode&quot;</span><span class="p">,</span>
+        <span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bias_corrected&#39;</span><span class="p">,</span> <span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;out_mask&#39;</span><span class="p">,</span> <span class="s1">&#39;bias_image&#39;</span><span class="p">]),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;outputnode&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">inu_n4</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
@@ -423,51 +424,49 @@
             <span class="n">copy_header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="n">n_procs</span><span class="o">=</span><span class="n">n4_nthreads</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;inu_n4&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;inu_n4&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">sstrip</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">afni</span><span class="o">.</span><span class="n">SkullStrip</span><span class="p">(</span><span class="n">outputtype</span><span class="o">=</span><span class="s2">&quot;NIFTI_GZ&quot;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;skullstrip&quot;</span><span class="p">)</span>
+    <span class="n">sstrip</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">afni</span><span class="o">.</span><span class="n">SkullStrip</span><span class="p">(</span><span class="n">outputtype</span><span class="o">=</span><span class="s1">&#39;NIFTI_GZ&#39;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;skullstrip&#39;</span><span class="p">)</span>
     <span class="n">sstrip_orig_vol</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
-        <span class="n">afni</span><span class="o">.</span><span class="n">Calc</span><span class="p">(</span><span class="n">expr</span><span class="o">=</span><span class="s2">&quot;a*step(b)&quot;</span><span class="p">,</span> <span class="n">outputtype</span><span class="o">=</span><span class="s2">&quot;NIFTI_GZ&quot;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sstrip_orig_vol&quot;</span>
+        <span class="n">afni</span><span class="o">.</span><span class="n">Calc</span><span class="p">(</span><span class="n">expr</span><span class="o">=</span><span class="s1">&#39;a*step(b)&#39;</span><span class="p">,</span> <span class="n">outputtype</span><span class="o">=</span><span class="s1">&#39;NIFTI_GZ&#39;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;sstrip_orig_vol&#39;</span>
     <span class="p">)</span>
-    <span class="n">binarize</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">Binarize</span><span class="p">(</span><span class="n">thresh_low</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;binarize&quot;</span><span class="p">)</span>
+    <span class="n">binarize</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">Binarize</span><span class="p">(</span><span class="n">thresh_low</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;binarize&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">unifize</span><span class="p">:</span>
         <span class="c1"># Add two unifize steps, pre- and post- skullstripping.</span>
-        <span class="n">inu_uni_0</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
-            <span class="n">afni</span><span class="o">.</span><span class="n">Unifize</span><span class="p">(</span><span class="n">outputtype</span><span class="o">=</span><span class="s2">&quot;NIFTI_GZ&quot;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;unifize_pre_skullstrip&quot;</span>
-        <span class="p">)</span>
+        <span class="n">inu_uni_0</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">afni</span><span class="o">.</span><span class="n">Unifize</span><span class="p">(</span><span class="n">outputtype</span><span class="o">=</span><span class="s1">&#39;NIFTI_GZ&#39;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;unifize_pre_skullstrip&#39;</span><span class="p">)</span>
         <span class="n">inu_uni_1</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
-            <span class="n">afni</span><span class="o">.</span><span class="n">Unifize</span><span class="p">(</span><span class="n">gm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">outputtype</span><span class="o">=</span><span class="s2">&quot;NIFTI_GZ&quot;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;unifize_post_skullstrip&quot;</span>
+            <span class="n">afni</span><span class="o">.</span><span class="n">Unifize</span><span class="p">(</span><span class="n">gm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">outputtype</span><span class="o">=</span><span class="s1">&#39;NIFTI_GZ&#39;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;unifize_post_skullstrip&#39;</span>
         <span class="p">)</span>
         <span class="c1"># fmt: off</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
-            <span class="p">(</span><span class="n">inu_n4</span><span class="p">,</span> <span class="n">inu_uni_0</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;output_image&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">inu_uni_0</span><span class="p">,</span> <span class="n">sstrip</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">inu_uni_0</span><span class="p">,</span> <span class="n">sstrip_orig_vol</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file_a&quot;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">sstrip_orig_vol</span><span class="p">,</span> <span class="n">inu_uni_1</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">inu_uni_1</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;out_file&quot;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">inu_uni_0</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;bias_corrected&quot;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">inu_n4</span><span class="p">,</span> <span class="n">inu_uni_0</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;output_image&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">inu_uni_0</span><span class="p">,</span> <span class="n">sstrip</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">inu_uni_0</span><span class="p">,</span> <span class="n">sstrip_orig_vol</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file_a&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">sstrip_orig_vol</span><span class="p">,</span> <span class="n">inu_uni_1</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">inu_uni_1</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;out_file&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">inu_uni_0</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;bias_corrected&#39;</span><span class="p">)]),</span>
         <span class="p">])</span>
         <span class="c1"># fmt: on</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># fmt: off</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
-            <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">sstrip_orig_vol</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;in_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file_a&quot;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">inu_n4</span><span class="p">,</span> <span class="n">sstrip</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;output_image&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">sstrip_orig_vol</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;out_file&quot;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">inu_n4</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;output_image&quot;</span><span class="p">,</span> <span class="s2">&quot;bias_corrected&quot;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">sstrip_orig_vol</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file_a&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">inu_n4</span><span class="p">,</span> <span class="n">sstrip</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;output_image&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">sstrip_orig_vol</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;out_file&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">inu_n4</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;output_image&#39;</span><span class="p">,</span> <span class="s1">&#39;bias_corrected&#39;</span><span class="p">)]),</span>
         <span class="p">])</span>
         <span class="c1"># fmt: on</span>
 
     <span class="c1"># Remaining connections</span>
     <span class="c1"># fmt: off</span>
     <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
-        <span class="p">(</span><span class="n">sstrip</span><span class="p">,</span> <span class="n">sstrip_orig_vol</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file_b&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">inu_n4</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;in_file&quot;</span><span class="p">,</span> <span class="s2">&quot;input_image&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">sstrip_orig_vol</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_file&quot;</span><span class="p">,</span> <span class="s2">&quot;in_file&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">binarize</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;out_mask&quot;</span><span class="p">,</span> <span class="s2">&quot;out_mask&quot;</span><span class="p">)]),</span>
-        <span class="p">(</span><span class="n">inu_n4</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;bias_image&quot;</span><span class="p">,</span> <span class="s2">&quot;bias_image&quot;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">sstrip</span><span class="p">,</span> <span class="n">sstrip_orig_vol</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file_b&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">inu_n4</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;input_image&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">sstrip_orig_vol</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">binarize</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_mask&#39;</span><span class="p">,</span> <span class="s1">&#39;out_mask&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">inu_n4</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;bias_image&#39;</span><span class="p">,</span> <span class="s1">&#39;bias_image&#39;</span><span class="p">)]),</span>
     <span class="p">])</span>
     <span class="c1"># fmt: on</span>
     <span class="k">return</span> <span class="n">workflow</span></div>
@@ -484,7 +483,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

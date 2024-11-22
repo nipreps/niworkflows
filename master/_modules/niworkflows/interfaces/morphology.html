@@ -353,26 +353,27 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;Mathematical morphology operations as nipype interfaces.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
 
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">traits</span><span class="p">,</span>
-    <span class="n">TraitedSpec</span><span class="p">,</span>
     <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
     <span class="n">File</span><span class="p">,</span>
     <span class="n">SimpleInterface</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
 <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_BinaryDilationInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input mask&quot;</span><span class="p">)</span>
-    <span class="n">radius</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Radius of dilation&quot;</span><span class="p">)</span>
+    <span class="n">in_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input mask&#39;</span><span class="p">)</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Radius of dilation&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_BinaryDilationOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;dilated mask&quot;</span><span class="p">)</span>
+    <span class="n">out_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;dilated mask&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="BinaryDilation">
@@ -393,22 +394,22 @@
             <span class="n">maskdata</span><span class="p">,</span>
             <span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">out_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">((</span><span class="n">Path</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;dilated_mask.nii.gz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">((</span><span class="n">Path</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="o">/</span> <span class="s1">&#39;dilated_mask.nii.gz&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span>
         <span class="n">out_img</span> <span class="o">=</span> <span class="n">mask_img</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">dilated</span><span class="p">,</span> <span class="n">mask_img</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">mask_img</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
-        <span class="n">out_img</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="s2">&quot;uint8&quot;</span><span class="p">)</span>
+        <span class="n">out_img</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="s1">&#39;uint8&#39;</span><span class="p">)</span>
         <span class="n">out_img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_mask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_BinarySubtractInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_base</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input base mask&quot;</span><span class="p">)</span>
-    <span class="n">in_subtract</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input subtract mask&quot;</span><span class="p">)</span>
+    <span class="n">in_base</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input base mask&#39;</span><span class="p">)</span>
+    <span class="n">in_subtract</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input subtract mask&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_BinarySubtractionOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;subtracted mask&quot;</span><span class="p">)</span>
+    <span class="n">out_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;subtracted mask&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="BinarySubtraction">
@@ -425,15 +426,11 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">(</span><span class="n">base_img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span>
         <span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_subtract</span><span class="p">)</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="n">out_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">((</span><span class="n">Path</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;subtracted_mask.nii.gz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span>
-        <span class="n">out_img</span> <span class="o">=</span> <span class="n">base_img</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
-            <span class="n">data</span><span class="p">,</span>
-            <span class="n">base_img</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span>
-            <span class="n">base_img</span><span class="o">.</span><span class="n">header</span>
-        <span class="p">)</span>
-        <span class="n">out_img</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="s2">&quot;uint8&quot;</span><span class="p">)</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="nb">str</span><span class="p">((</span><span class="n">Path</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="o">/</span> <span class="s1">&#39;subtracted_mask.nii.gz&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span>
+        <span class="n">out_img</span> <span class="o">=</span> <span class="n">base_img</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">base_img</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">base_img</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">out_img</span><span class="o">.</span><span class="n">set_data_dtype</span><span class="p">(</span><span class="s1">&#39;uint8&#39;</span><span class="p">)</span>
         <span class="n">out_img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_mask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_file</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
@@ -468,7 +465,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

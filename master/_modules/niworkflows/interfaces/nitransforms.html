@@ -355,43 +355,42 @@
 <span class="sd">&quot;&quot;&quot;Wrappers of NiTransforms.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">TraitedSpec</span><span class="p">,</span>
     <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
     <span class="n">File</span><span class="p">,</span>
-    <span class="n">SimpleInterface</span><span class="p">,</span>
     <span class="n">InputMultiObject</span><span class="p">,</span>
-    <span class="n">traits</span><span class="p">,</span>
+    <span class="n">SimpleInterface</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
     <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">XFM_FMT</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;.lta&quot;</span><span class="p">:</span> <span class="s2">&quot;fs&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;.txt&quot;</span><span class="p">:</span> <span class="s2">&quot;itk&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;.mat&quot;</span><span class="p">:</span> <span class="s2">&quot;itk&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;.tfm&quot;</span><span class="p">:</span> <span class="s2">&quot;itk&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;.lta&#39;</span><span class="p">:</span> <span class="s1">&#39;fs&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;.txt&#39;</span><span class="p">:</span> <span class="s1">&#39;itk&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;.mat&#39;</span><span class="p">:</span> <span class="s1">&#39;itk&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;.tfm&#39;</span><span class="p">:</span> <span class="s1">&#39;itk&#39;</span><span class="p">,</span>
 <span class="p">}</span>
 
 
 <span class="k">class</span> <span class="nc">_ConcatenateXFMsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_xfms</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input transform piles&quot;</span><span class="p">)</span>
-    <span class="n">inverse</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;generate inverse&quot;</span><span class="p">)</span>
-    <span class="n">out_fmt</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s2">&quot;itk&quot;</span><span class="p">,</span> <span class="s2">&quot;fs&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output format&quot;</span><span class="p">)</span>
+    <span class="n">in_xfms</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input transform piles&#39;</span><span class="p">)</span>
+    <span class="n">inverse</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;generate inverse&#39;</span><span class="p">)</span>
+    <span class="n">out_fmt</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s1">&#39;itk&#39;</span><span class="p">,</span> <span class="s1">&#39;fs&#39;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output format&#39;</span><span class="p">)</span>
     <span class="n">reference</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;reference file (only for writing LTA format, if not &quot;</span>
-        <span class="s2">&quot;concatenating another LTA).&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;reference file (only for writing LTA format, if not concatenating another LTA).&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">moving</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;moving file (only for writing LTA format, if not &quot;</span>
-        <span class="s2">&quot;concatenating another LTA).&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;moving file (only for writing LTA format, if not concatenating another LTA).&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_ConcatenateXFMsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_xfm</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output, combined transform&quot;</span><span class="p">)</span>
-    <span class="n">out_inv</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output, combined transform&quot;</span><span class="p">)</span>
+    <span class="n">out_xfm</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output, combined transform&#39;</span><span class="p">)</span>
+    <span class="n">out_inv</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output, combined transform&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ConcatenateXFMs">
@@ -403,15 +402,15 @@
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_ConcatenateXFMsOutputSpec</span>
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-        <span class="n">out_ext</span> <span class="o">=</span> <span class="s2">&quot;lta&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_fmt</span> <span class="o">==</span> <span class="s2">&quot;fs&quot;</span> <span class="k">else</span> <span class="s2">&quot;tfm&quot;</span>
+        <span class="n">out_ext</span> <span class="o">=</span> <span class="s1">&#39;lta&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_fmt</span> <span class="o">==</span> <span class="s1">&#39;fs&#39;</span> <span class="k">else</span> <span class="s1">&#39;tfm&#39;</span>
         <span class="n">reference</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">moving</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;out_fwd.</span><span class="si">{</span><span class="n">out_ext</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_xfm&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;out_fwd.</span><span class="si">{</span><span class="n">out_ext</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_xfm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
         <span class="n">out_inv</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inverse</span><span class="p">:</span>
-            <span class="n">out_inv</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;out_inv.</span><span class="si">{</span><span class="n">out_ext</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_inv&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_inv</span><span class="p">)</span>
+            <span class="n">out_inv</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;out_inv.</span><span class="si">{</span><span class="n">out_ext</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_inv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">out_inv</span><span class="p">)</span>
 
         <span class="n">concatenate_xfms</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_xfms</span><span class="p">,</span>
@@ -427,12 +426,10 @@
 
 <div class="viewcode-block" id="concatenate_xfms">
 <a class="viewcode-back" href="../../../api/niworkflows.interfaces.nitransforms.html#niworkflows.interfaces.nitransforms.concatenate_xfms">[docs]</a>
-<span class="k">def</span> <span class="nf">concatenate_xfms</span><span class="p">(</span>
-    <span class="n">in_files</span><span class="p">,</span> <span class="n">out_file</span><span class="p">,</span> <span class="n">out_inv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">moving</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;itk&quot;</span>
-<span class="p">):</span>
+<span class="k">def</span> <span class="nf">concatenate_xfms</span><span class="p">(</span><span class="n">in_files</span><span class="p">,</span> <span class="n">out_file</span><span class="p">,</span> <span class="n">out_inv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">moving</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;itk&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Concatenate linear transforms.&quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">nitransforms.manip</span> <span class="kn">import</span> <span class="n">TransformChain</span>
     <span class="kn">from</span> <span class="nn">nitransforms.linear</span> <span class="kn">import</span> <span class="n">load</span> <span class="k">as</span> <span class="n">load_affine</span>
+    <span class="kn">from</span> <span class="nn">nitransforms.manip</span> <span class="kn">import</span> <span class="n">TransformChain</span>
 
     <span class="n">xfm</span> <span class="o">=</span> <span class="n">TransformChain</span><span class="p">(</span>
         <span class="p">[</span><span class="n">load_affine</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="n">XFM_FMT</span><span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="p">])</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">in_files</span><span class="p">]</span>
@@ -460,7 +457,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

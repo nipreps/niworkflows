@@ -353,40 +353,38 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;Image tools interfaces.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
 
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
-<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">traits</span><span class="p">,</span>
-    <span class="n">TraitedSpec</span><span class="p">,</span>
     <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
-    <span class="n">SimpleInterface</span><span class="p">,</span>
     <span class="n">File</span><span class="p">,</span>
     <span class="n">InputMultiObject</span><span class="p">,</span>
     <span class="n">OutputMultiObject</span><span class="p">,</span>
+    <span class="n">SimpleInterface</span><span class="p">,</span>
+    <span class="n">TraitedSpec</span><span class="p">,</span>
     <span class="n">isdefined</span><span class="p">,</span>
+    <span class="n">traits</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
 
-
-<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;nipype.interface&quot;</span><span class="p">)</span>
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;nipype.interface&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_RegridToZoomsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;a file whose resolution is to change&quot;</span>
-    <span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;a file whose resolution is to change&#39;</span><span class="p">)</span>
     <span class="n">zooms</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Tuple</span><span class="p">(</span>
         <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span>
         <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span>
         <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the new resolution&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the new resolution&#39;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">order</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;order of interpolator&quot;</span><span class="p">)</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;order of interpolator&#39;</span><span class="p">)</span>
     <span class="n">clip</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
         <span class="kc">True</span><span class="p">,</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -397,12 +395,12 @@
         <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(),</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;apply gaussian smoothing before resampling&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;apply gaussian smoothing before resampling&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_RegridToZoomsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dec</span><span class="o">=</span><span class="s2">&quot;the regridded file&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dec</span><span class="o">=</span><span class="s1">&#39;the regridded file&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="RegridToZooms">
@@ -416,8 +414,8 @@
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">..utils.images</span> <span class="kn">import</span> <span class="n">resample_by_spacing</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_regrid&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_regrid&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
         <span class="p">)</span>
         <span class="n">resample_by_spacing</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span>
@@ -425,14 +423,14 @@
             <span class="n">order</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">order</span><span class="p">,</span>
             <span class="n">clip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">clip</span><span class="p">,</span>
             <span class="n">smooth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">smooth</span><span class="p">,</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">])</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_IntraModalMergeInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_files</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input files&quot;</span><span class="p">)</span>
-    <span class="n">in_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input mask for grand mean scaling&quot;</span><span class="p">)</span>
+    <span class="n">in_files</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input files&#39;</span><span class="p">)</span>
+    <span class="n">in_mask</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input mask for grand mean scaling&#39;</span><span class="p">)</span>
     <span class="n">hmc</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">zero_based_avg</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">to_ras</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -440,10 +438,10 @@
 
 
 <span class="k">class</span> <span class="nc">_IntraModalMergeOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;merged image&quot;</span><span class="p">)</span>
-    <span class="n">out_avg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;average image&quot;</span><span class="p">)</span>
-    <span class="n">out_mats</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output matrices&quot;</span><span class="p">)</span>
-    <span class="n">out_movpar</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;output movement parameters&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;merged image&#39;</span><span class="p">)</span>
+    <span class="n">out_avg</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;average image&#39;</span><span class="p">)</span>
+    <span class="n">out_mats</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output matrices&#39;</span><span class="p">)</span>
+    <span class="n">out_movpar</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;output movement parameters&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="IntraModalMerge">
@@ -472,11 +470,11 @@
 
         <span class="n">nii_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Remove one-sized extra dimensions</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">in_files</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">in_files</span><span class="p">:</span>
             <span class="n">filenii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
             <span class="n">filenii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">squeeze_image</span><span class="p">(</span><span class="n">filenii</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filenii</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Input image (</span><span class="si">%s</span><span class="s2">) is 5D.&quot;</span> <span class="o">%</span> <span class="n">f</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Input image (</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1">) is 5D.&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">filenii</span><span class="o">.</span><span class="n">dataobj</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
                 <span class="n">nii_list</span> <span class="o">+=</span> <span class="n">nb</span><span class="o">.</span><span class="n">four_to_three</span><span class="p">(</span><span class="n">filenii</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -488,11 +486,11 @@
             <span class="n">filenii</span> <span class="o">=</span> <span class="n">nii_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">merged_fname</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_merged&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_merged&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
         <span class="p">)</span>
         <span class="n">filenii</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">merged_fname</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_fname</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_avg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_fname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_fname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_avg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_fname</span>
 
         <span class="k">if</span> <span class="n">filenii</span><span class="o">.</span><span class="n">dataobj</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
             <span class="c1"># TODO: generate identity out_mats and zero-filled out_movpar</span>
@@ -502,7 +500,7 @@
             <span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">MCFLIRT</span>
 
             <span class="n">mcflirt</span> <span class="o">=</span> <span class="n">MCFLIRT</span><span class="p">(</span>
-                <span class="n">cost</span><span class="o">=</span><span class="s2">&quot;normcorr&quot;</span><span class="p">,</span>
+                <span class="n">cost</span><span class="o">=</span><span class="s1">&#39;normcorr&#39;</span><span class="p">,</span>
                 <span class="n">save_mats</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">save_plots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">ref_vol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -510,23 +508,21 @@
             <span class="p">)</span>
             <span class="n">mcres</span> <span class="o">=</span> <span class="n">mcflirt</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
             <span class="n">filenii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">mcres</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_file</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mcres</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_file</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_mats&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mcres</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">mat_file</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_movpar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mcres</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">par_file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mcres</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_mats&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mcres</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">mat_file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_movpar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mcres</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">par_file</span>
 
-        <span class="n">hmcdata</span> <span class="o">=</span> <span class="n">filenii</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">hmcdata</span> <span class="o">=</span> <span class="n">filenii</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">grand_mean_scaling</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_mask</span><span class="p">):</span>
                 <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">hmcdata</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
                 <span class="n">thres</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
                 <span class="n">mask</span> <span class="o">=</span> <span class="n">mean</span> <span class="o">&gt;</span> <span class="n">thres</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">mask</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_mask</span><span class="p">)</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.5</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_mask</span><span class="p">)</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.5</span>
 
             <span class="n">nimgs</span> <span class="o">=</span> <span class="n">hmcdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span>
-                <span class="n">hmcdata</span><span class="p">[</span><span class="n">mask</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nimgs</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
-            <span class="p">)</span>
+            <span class="n">means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">hmcdata</span><span class="p">[</span><span class="n">mask</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nimgs</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">max_mean</span> <span class="o">=</span> <span class="n">means</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nimgs</span><span class="p">):</span>
                 <span class="n">hmcdata</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*=</span> <span class="n">max_mean</span> <span class="o">/</span> <span class="n">means</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
@@ -535,11 +531,11 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">zero_based_avg</span><span class="p">:</span>
             <span class="n">hmcdata</span> <span class="o">-=</span> <span class="n">hmcdata</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_avg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_avg&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_avg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_avg&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
         <span class="p">)</span>
         <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span><span class="n">hmcdata</span><span class="p">,</span> <span class="n">filenii</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">filenii</span><span class="o">.</span><span class="n">header</span><span class="p">)</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_avg&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_avg&#39;</span><span class="p">]</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
@@ -550,33 +546,33 @@
     <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Either a 3D reference or 4D file to average through the last axis&quot;</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Either a 3D reference or 4D file to average through the last axis&#39;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">t_mask</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;List of selected timepoints to be averaged&quot;</span><span class="p">)</span>
+    <span class="n">t_mask</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;List of selected timepoints to be averaged&#39;</span><span class="p">)</span>
     <span class="n">mc_method</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span>
-        <span class="s2">&quot;AFNI&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;FSL&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;AFNI&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;FSL&#39;</span><span class="p">,</span>
         <span class="kc">None</span><span class="p">,</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Which software to use to perform motion correction&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Which software to use to perform motion correction&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">nonnegative</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
-        <span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;whether the output should be clipped below zero&quot;</span>
+        <span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;whether the output should be clipped below zero&#39;</span>
     <span class="p">)</span>
-    <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;number of threads&quot;</span><span class="p">)</span>
+    <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;number of threads&#39;</span><span class="p">)</span>
     <span class="n">two_pass</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span>
-        <span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;whether two passes of correction is necessary&quot;</span>
+        <span class="kc">True</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;whether two passes of correction is necessary&#39;</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_RobustAverageOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the averaged image&quot;</span><span class="p">)</span>
-    <span class="n">out_volumes</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the volumes selected that have been averaged&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the averaged image&#39;</span><span class="p">)</span>
+    <span class="n">out_volumes</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the volumes selected that have been averaged&#39;</span><span class="p">)</span>
     <span class="n">out_drift</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span>
-        <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;the ratio to the grand mean or global signal drift&quot;</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;the ratio to the grand mean or global signal drift&#39;</span>
     <span class="p">)</span>
-    <span class="n">out_hmc</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;head-motion correction matrices&quot;</span><span class="p">)</span>
-    <span class="n">out_hmc_volumes</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;head-motion correction volumes&quot;</span><span class="p">)</span>
+    <span class="n">out_hmc</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;head-motion correction matrices&#39;</span><span class="p">)</span>
+    <span class="n">out_hmc_volumes</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;head-motion correction volumes&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="RobustAverage">
@@ -592,9 +588,9 @@
 
         <span class="c1"># If reference is 3D, return it directly</span>
         <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">dataobj</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_volumes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_drift&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_volumes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_drift&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">runtime</span>
 
         <span class="n">fname</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">fname_presuffix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
@@ -607,34 +603,30 @@
 
         <span class="c1"># If reference was 4D, but single-volume - write out squeezed and return.</span>
         <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">dataobj</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_squeezed&quot;</span><span class="p">)</span>
-            <span class="n">img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_volumes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_drift&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_squeezed&#39;</span><span class="p">)</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_volumes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_drift&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">runtime</span>
 
         <span class="n">img_len</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-        <span class="n">t_mask</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t_mask</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t_mask</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">img_len</span>
-        <span class="p">)</span>
+        <span class="n">t_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t_mask</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t_mask</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">img_len</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_mask</span><span class="p">)</span> <span class="o">!=</span> <span class="n">img_len</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Image length (</span><span class="si">{</span><span class="n">img_len</span><span class="si">}</span><span class="s2"> timepoints) unmatched by mask (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">t_mask</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="sa">f</span><span class="s1">&#39;Image length (</span><span class="si">{</span><span class="n">img_len</span><span class="si">}</span><span class="s1"> timepoints) unmatched by mask (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">t_mask</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span>
             <span class="p">)</span>
 
         <span class="n">n_volumes</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">t_mask</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">n_volumes</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At least one volume should be selected for slicing&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;At least one volume should be selected for slicing&#39;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_average&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_volumes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_sliced&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_average&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_volumes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_sliced&#39;</span><span class="p">)</span>
 
-        <span class="n">sliced</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">concat_images</span><span class="p">(</span>
-            <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">four_to_three</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">t_mask</span><span class="p">)</span> <span class="k">if</span> <span class="n">t</span>
-        <span class="p">)</span>
+        <span class="n">sliced</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">concat_images</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">four_to_three</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">t_mask</span><span class="p">)</span> <span class="k">if</span> <span class="n">t</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">sliced</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">sliced</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
         <span class="c1"># Data can come with outliers showing very high numbers - preemptively prune</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
             <span class="n">data</span><span class="p">,</span>
@@ -644,7 +636,7 @@
 
         <span class="n">gs_drift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
         <span class="n">gs_drift</span> <span class="o">/=</span> <span class="n">gs_drift</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_drift&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">gs_drift</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_drift&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">gs_drift</span><span class="p">]</span>
 
         <span class="n">data</span> <span class="o">/=</span> <span class="n">gs_drift</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
@@ -653,43 +645,43 @@
             <span class="n">a_max</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="n">sliced</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">sliced</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">sliced</span><span class="o">.</span><span class="n">header</span><span class="p">)</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_volumes&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_volumes&#39;</span><span class="p">]</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">n_volumes</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">nb</span><span class="o">.</span><span class="n">squeeze_image</span><span class="p">(</span><span class="n">sliced</span><span class="p">)</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_drift&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
+            <span class="n">nb</span><span class="o">.</span><span class="n">squeeze_image</span><span class="p">(</span><span class="n">sliced</span><span class="p">)</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_drift&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">runtime</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mc_method</span> <span class="o">==</span> <span class="s2">&quot;AFNI&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mc_method</span> <span class="o">==</span> <span class="s1">&#39;AFNI&#39;</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">nipype.interfaces.afni</span> <span class="kn">import</span> <span class="n">Volreg</span>
 
             <span class="n">volreg</span> <span class="o">=</span> <span class="n">Volreg</span><span class="p">(</span>
-                <span class="n">in_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_volumes&quot;</span><span class="p">],</span>
-                <span class="n">interp</span><span class="o">=</span><span class="s2">&quot;Fourier&quot;</span><span class="p">,</span>
-                <span class="n">args</span><span class="o">=</span><span class="s2">&quot;-twopass&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">two_pass</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">in_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_volumes&#39;</span><span class="p">],</span>
+                <span class="n">interp</span><span class="o">=</span><span class="s1">&#39;Fourier&#39;</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="s1">&#39;-twopass&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">two_pass</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
                 <span class="n">zpad</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-                <span class="n">outputtype</span><span class="o">=</span><span class="s2">&quot;NIFTI_GZ&quot;</span><span class="p">,</span>
+                <span class="n">outputtype</span><span class="o">=</span><span class="s1">&#39;NIFTI_GZ&#39;</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span><span class="p">):</span>
                 <span class="n">volreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span>
 
             <span class="n">res</span> <span class="o">=</span> <span class="n">volreg</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_hmc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">oned_matrix_save</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_hmc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">oned_matrix_save</span>
 
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mc_method</span> <span class="o">==</span> <span class="s2">&quot;FSL&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mc_method</span> <span class="o">==</span> <span class="s1">&#39;FSL&#39;</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">MCFLIRT</span>
 
             <span class="n">res</span> <span class="o">=</span> <span class="n">MCFLIRT</span><span class="p">(</span>
-                <span class="n">in_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_volumes&quot;</span><span class="p">],</span>
+                <span class="n">in_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_volumes&#39;</span><span class="p">],</span>
                 <span class="n">ref_vol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                <span class="n">interpolation</span><span class="o">=</span><span class="s2">&quot;sinc&quot;</span><span class="p">,</span>
+                <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;sinc&#39;</span><span class="p">,</span>
             <span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_hmc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">mat_file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_hmc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">mat_file</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mc_method</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_hmc_volumes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_file</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_file</span><span class="p">)</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_hmc_volumes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_file</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_file</span><span class="p">)</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
             <span class="n">data</span><span class="p">,</span>
@@ -697,9 +689,9 @@
             <span class="n">a_max</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
         <span class="p">)</span>
 
-        <span class="n">sliced</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span> <span class="n">sliced</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">sliced</span><span class="o">.</span><span class="n">header</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">])</span>
+        <span class="n">sliced</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span> <span class="n">sliced</span><span class="o">.</span><span class="n">affine</span><span class="p">,</span> <span class="n">sliced</span><span class="o">.</span><span class="n">header</span><span class="p">)</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
@@ -719,31 +711,31 @@
 
 
 <span class="k">class</span> <span class="nc">_TemplateDimensionsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">anat_type</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s2">&quot;T1w&quot;</span><span class="p">,</span> <span class="s2">&quot;T2w&quot;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Anatomical image type&quot;</span><span class="p">)</span>
+    <span class="n">anat_type</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s1">&#39;T1w&#39;</span><span class="p">,</span> <span class="s1">&#39;T2w&#39;</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Anatomical image type&#39;</span><span class="p">)</span>
     <span class="n">anat_list</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
-        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;t1w_list&quot;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;input anatomical images&quot;</span>
+        <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;t1w_list&#39;</span><span class="p">],</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input anatomical images&#39;</span>
     <span class="p">)</span>
     <span class="n">t1w_list</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
         <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;anat_list&quot;</span><span class="p">],</span>
-        <span class="n">deprecated</span><span class="o">=</span><span class="s2">&quot;1.14.0&quot;</span><span class="p">,</span>
-        <span class="n">new_name</span><span class="o">=</span><span class="s2">&quot;anat_list&quot;</span><span class="p">,</span>
+        <span class="n">xor</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;anat_list&#39;</span><span class="p">],</span>
+        <span class="n">deprecated</span><span class="o">=</span><span class="s1">&#39;1.14.0&#39;</span><span class="p">,</span>
+        <span class="n">new_name</span><span class="o">=</span><span class="s1">&#39;anat_list&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">max_scale</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span>
-        <span class="mf">3.0</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Maximum scaling factor in images to accept&quot;</span>
+        <span class="mf">3.0</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Maximum scaling factor in images to accept&#39;</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_TemplateDimensionsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">t1w_valid_list</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;valid T1w images&quot;</span><span class="p">)</span>
-    <span class="n">anat_valid_list</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;valid anatomical images&quot;</span><span class="p">)</span>
+    <span class="n">t1w_valid_list</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;valid T1w images&#39;</span><span class="p">)</span>
+    <span class="n">anat_valid_list</span> <span class="o">=</span> <span class="n">OutputMultiObject</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;valid anatomical images&#39;</span><span class="p">)</span>
     <span class="n">target_zooms</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Tuple</span><span class="p">(</span>
-        <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Target zoom information&quot;</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Target zoom information&#39;</span>
     <span class="p">)</span>
     <span class="n">target_shape</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Tuple</span><span class="p">(</span>
-        <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Target shape information&quot;</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Target shape information&#39;</span>
     <span class="p">)</span>
-    <span class="n">out_report</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;conformation report&quot;</span><span class="p">)</span>
+    <span class="n">out_report</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;conformation report&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="TemplateDimensions">
@@ -772,14 +764,12 @@
             <span class="n">DISCARD_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">basename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">discards</span>
         <span class="p">]</span>
-        <span class="n">discard_list</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;</span><span class="se">\t\t\t</span><span class="s2">&lt;ul&gt;&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">items</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;</span><span class="se">\t\t\t</span><span class="s2">&lt;/ul&gt;&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="n">items</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
-        <span class="p">)</span>
-        <span class="n">zoom_fmt</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:.02g}</span><span class="s2">mm x </span><span class="si">{:.02g}</span><span class="s2">mm x </span><span class="si">{:.02g}</span><span class="s2">mm&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">zooms</span><span class="p">)</span>
+        <span class="n">discard_list</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="se">\t\t\t</span><span class="s1">&lt;ul&gt;&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">items</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;</span><span class="se">\t\t\t</span><span class="s1">&lt;/ul&gt;&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">items</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">zoom_fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{:.02g}</span><span class="s1">mm x </span><span class="si">{:.02g}</span><span class="s1">mm x </span><span class="si">{:.02g}</span><span class="s1">mm&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">zooms</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">CONFORMATION_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">anat</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">anat_type</span><span class="p">,</span>
             <span class="n">n_anat</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">anat_list</span><span class="p">),</span>
-            <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">dims</span><span class="p">)),</span>
+            <span class="n">dims</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">dims</span><span class="p">)),</span>
             <span class="n">zooms</span><span class="o">=</span><span class="n">zoom_fmt</span><span class="p">,</span>
             <span class="n">n_discards</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">discards</span><span class="p">),</span>
             <span class="n">discard_list</span><span class="o">=</span><span class="n">discard_list</span><span class="p">,</span>
@@ -807,42 +797,42 @@
 
         <span class="c1"># Ignore dropped images</span>
         <span class="n">valid_fnames</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">in_names</span><span class="p">[</span><span class="n">valid</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;anat_valid_list&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">valid_fnames</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;t1w_valid_list&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">valid_fnames</span>  <span class="c1"># Deprecate: 1.14.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;anat_valid_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">valid_fnames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;t1w_valid_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">valid_fnames</span>  <span class="c1"># Deprecate: 1.14.0</span>
 
         <span class="c1"># Set target shape information</span>
         <span class="n">target_zooms</span> <span class="o">=</span> <span class="n">all_zooms</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">target_shape</span> <span class="o">=</span> <span class="n">all_shapes</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;target_zooms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">target_zooms</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;target_shape&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">target_shape</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;target_zooms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">target_zooms</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;target_shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">target_shape</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 
         <span class="c1"># Create report</span>
         <span class="n">dropped_images</span> <span class="o">=</span> <span class="n">in_names</span><span class="p">[</span><span class="o">~</span><span class="n">valid</span><span class="p">]</span>
         <span class="n">segment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_segment</span><span class="p">(</span><span class="n">dropped_images</span><span class="p">,</span> <span class="n">target_shape</span><span class="p">,</span> <span class="n">target_zooms</span><span class="p">)</span>
-        <span class="n">out_report</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="s2">&quot;report.html&quot;</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_report</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fobj</span><span class="p">:</span>
+        <span class="n">out_report</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="s1">&#39;report.html&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_report</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fobj</span><span class="p">:</span>
             <span class="n">fobj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_report&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_report</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_report&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_report</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
 
 
 
 <span class="k">class</span> <span class="nc">_ConformInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Input image&quot;</span><span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Input image&#39;</span><span class="p">)</span>
     <span class="n">target_zooms</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Tuple</span><span class="p">(</span>
-        <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Target zoom information&quot;</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Target zoom information&#39;</span>
     <span class="p">)</span>
     <span class="n">target_shape</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Tuple</span><span class="p">(</span>
-        <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Target shape information&quot;</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Target shape information&#39;</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_ConformOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Conformed image&quot;</span><span class="p">)</span>
-    <span class="n">transform</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Conformation transform (voxel-to-voxel)&quot;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Conformed image&#39;</span><span class="p">)</span>
+    <span class="n">transform</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Conformation transform (voxel-to-voxel)&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Conform">
@@ -879,22 +869,20 @@
         <span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reoriented</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
 
         <span class="c1"># Reconstruct transform from orig to reoriented image</span>
-        <span class="n">ornt_xfm</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">orientations</span><span class="o">.</span><span class="n">inv_ornt_aff</span><span class="p">(</span>
-            <span class="n">nb</span><span class="o">.</span><span class="n">io_orientation</span><span class="p">(</span><span class="n">orig_img</span><span class="o">.</span><span class="n">affine</span><span class="p">),</span> <span class="n">orig_img</span><span class="o">.</span><span class="n">shape</span>
-        <span class="p">)</span>
+        <span class="n">ornt_xfm</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">orientations</span><span class="o">.</span><span class="n">inv_ornt_aff</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">io_orientation</span><span class="p">(</span><span class="n">orig_img</span><span class="o">.</span><span class="n">affine</span><span class="p">),</span> <span class="n">orig_img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="c1"># Identity unless proven otherwise</span>
         <span class="n">target_affine</span> <span class="o">=</span> <span class="n">reoriented</span><span class="o">.</span><span class="n">affine</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">conform_xfm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
         <span class="n">xyz_unit</span> <span class="o">=</span> <span class="n">reoriented</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_xyzt_units</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">xyz_unit</span> <span class="o">==</span> <span class="s2">&quot;unknown&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">xyz_unit</span> <span class="o">==</span> <span class="s1">&#39;unknown&#39;</span><span class="p">:</span>
             <span class="c1"># Common assumption; if we&#39;re wrong, unlikely to be the only thing that breaks</span>
-            <span class="n">xyz_unit</span> <span class="o">=</span> <span class="s2">&quot;mm&quot;</span>
+            <span class="n">xyz_unit</span> <span class="o">=</span> <span class="s1">&#39;mm&#39;</span>
 
         <span class="c1"># Set a 0.05mm threshold to performing rescaling</span>
-        <span class="n">atol_gross</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;meter&quot;</span><span class="p">:</span> <span class="mf">5e-5</span><span class="p">,</span> <span class="s2">&quot;mm&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span> <span class="s2">&quot;micron&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">}[</span><span class="n">xyz_unit</span><span class="p">]</span>
+        <span class="n">atol_gross</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;meter&#39;</span><span class="p">:</span> <span class="mf">5e-5</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span> <span class="s1">&#39;micron&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">}[</span><span class="n">xyz_unit</span><span class="p">]</span>
         <span class="c1"># if 0.01 &gt; difference &gt; 0.001mm, freesurfer won&#39;t be able to merge the images</span>
-        <span class="n">atol_fine</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;meter&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="s2">&quot;mm&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span> <span class="s2">&quot;micron&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}[</span><span class="n">xyz_unit</span><span class="p">]</span>
+        <span class="n">atol_fine</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;meter&#39;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span> <span class="s1">&#39;micron&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}[</span><span class="n">xyz_unit</span><span class="p">]</span>
 
         <span class="c1"># Update zooms =&gt; Modify affine</span>
         <span class="c1"># Rescale =&gt; Resample to resized voxels</span>
@@ -907,18 +895,14 @@
             <span class="c1"># Use an affine with the corrected zooms, whether or not we resample</span>
             <span class="k">if</span> <span class="n">update_zooms</span><span class="p">:</span>
                 <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">target_zooms</span> <span class="o">/</span> <span class="n">zooms</span>
-                <span class="n">target_affine</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">reoriented</span><span class="o">.</span><span class="n">affine</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span>
-                    <span class="n">scale_factor</span>
-                <span class="p">)</span>
+                <span class="n">target_affine</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">reoriented</span><span class="o">.</span><span class="n">affine</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">scale_factor</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">resize</span><span class="p">:</span>
                 <span class="c1"># The shift is applied after scaling.</span>
                 <span class="c1"># Use a proportional shift to maintain relative position in dataset</span>
                 <span class="n">size_factor</span> <span class="o">=</span> <span class="n">target_span</span> <span class="o">/</span> <span class="p">(</span><span class="n">zooms</span> <span class="o">*</span> <span class="n">shape</span><span class="p">)</span>
                 <span class="c1"># Use integer shifts to avoid unnecessary interpolation</span>
-                <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">reoriented</span><span class="o">.</span><span class="n">affine</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">size_factor</span> <span class="o">-</span> <span class="n">reoriented</span><span class="o">.</span><span class="n">affine</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
-                <span class="p">)</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="n">reoriented</span><span class="o">.</span><span class="n">affine</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">size_factor</span> <span class="o">-</span> <span class="n">reoriented</span><span class="o">.</span><span class="n">affine</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
                 <span class="n">target_affine</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">reoriented</span><span class="o">.</span><span class="n">affine</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">offset</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
             <span class="n">conform_xfm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">reoriented</span><span class="o">.</span><span class="n">affine</span><span class="p">)</span> <span class="o">@</span> <span class="n">target_affine</span>
@@ -933,22 +917,20 @@
 
         <span class="c1"># Image may be reoriented, rescaled, and/or resized</span>
         <span class="k">if</span> <span class="n">reoriented</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">orig_img</span><span class="p">:</span>
-            <span class="n">out_name</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_ras&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
+            <span class="n">out_name</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_ras&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">)</span>
             <span class="n">reoriented</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">out_name</span> <span class="o">=</span> <span class="n">fname</span>
 
         <span class="n">transform</span> <span class="o">=</span> <span class="n">ornt_xfm</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">conform_xfm</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">orig_img</span><span class="o">.</span><span class="n">affine</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">transform</span><span class="p">),</span> <span class="n">target_affine</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Original and target affines are not similar&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Original and target affines are not similar&#39;</span><span class="p">)</span>
 
-        <span class="n">mat_name</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
-            <span class="n">fname</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.mat&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="n">use_ext</span><span class="o">=</span><span class="kc">False</span>
-        <span class="p">)</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">mat_name</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%.08f</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">mat_name</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.mat&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="n">use_ext</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">mat_name</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.08f</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mat_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mat_name</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
 
@@ -958,7 +940,7 @@
 <a class="viewcode-back" href="../../../api/niworkflows.interfaces.images.html#niworkflows.interfaces.images.reorient">[docs]</a>
 <span class="k">def</span> <span class="nf">reorient</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reorient Nifti files to RAS.&quot;&quot;&quot;</span>
-    <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;_ras&quot;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_ras&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">newpath</span><span class="p">)</span>
     <span class="n">nb</span><span class="o">.</span><span class="n">as_closest_canonical</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">))</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out_file</span></div>
 
@@ -1008,47 +990,46 @@
 
 
 <span class="k">class</span> <span class="nc">_SignalExtractionInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
-    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;4-D fMRI nii file&quot;</span><span class="p">)</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;4-D fMRI nii file&#39;</span><span class="p">)</span>
     <span class="n">label_files</span> <span class="o">=</span> <span class="n">InputMultiObject</span><span class="p">(</span>
         <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;a 3D label image, with 0 denoting &quot;</span>
-        <span class="s2">&quot;background, or a list of 3D probability &quot;</span>
-        <span class="s2">&quot;maps (one per label) or the equivalent 4D &quot;</span>
-        <span class="s2">&quot;file.&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;a 3D label image, with 0 denoting &#39;</span>
+        <span class="s1">&#39;background, or a list of 3D probability &#39;</span>
+        <span class="s1">&#39;maps (one per label) or the equivalent 4D &#39;</span>
+        <span class="s1">&#39;file.&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">prob_thres</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span>
         <span class="n">low</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="n">high</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;If label_files are probability masks, threshold &quot;</span>
-        <span class="s2">&quot;at specified probability.&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;If label_files are probability masks, threshold at specified probability.&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">class_labels</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span>
         <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Human-readable labels for each segment &quot;</span>
-        <span class="s2">&quot;in the label file, in order. The length of &quot;</span>
-        <span class="s2">&quot;class_labels must be equal to the number of &quot;</span>
-        <span class="s2">&quot;segments (background excluded). This list &quot;</span>
-        <span class="s2">&quot;corresponds to the class labels in label_file &quot;</span>
-        <span class="s2">&quot;in ascending order&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Human-readable labels for each segment &#39;</span>
+        <span class="s1">&#39;in the label file, in order. The length of &#39;</span>
+        <span class="s1">&#39;class_labels must be equal to the number of &#39;</span>
+        <span class="s1">&#39;segments (background excluded). This list &#39;</span>
+        <span class="s1">&#39;corresponds to the class labels in label_file &#39;</span>
+        <span class="s1">&#39;in ascending order&#39;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
-        <span class="s2">&quot;signals.tsv&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;signals.tsv&#39;</span><span class="p">,</span>
         <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The name of the file to output to. signals.tsv by default&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;The name of the file to output to. signals.tsv by default&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_SignalExtractionOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span>
         <span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;tsv file containing the computed &quot;</span>
-        <span class="s2">&quot;signals, with as many columns as there are labels and as &quot;</span>
-        <span class="s2">&quot;many rows as there are timepoints in in_file, plus a &quot;</span>
-        <span class="s2">&quot;header row with values from class_labels&quot;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;tsv file containing the computed &#39;</span>
+        <span class="s1">&#39;signals, with as many columns as there are labels and as &#39;</span>
+        <span class="s1">&#39;many rows as there are timepoints in in_file, plus a &#39;</span>
+        <span class="s1">&#39;header row with values from class_labels&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 
@@ -1076,16 +1057,15 @@
         <span class="c1"># This check assumes all input masks have same dimensions</span>
         <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mask_imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;Input image and mask should be of &quot;</span>
-                <span class="s2">&quot;same dimensions before running SignalExtraction&quot;</span>
+                <span class="s1">&#39;Input image and mask should be of &#39;</span>
+                <span class="s1">&#39;same dimensions before running SignalExtraction&#39;</span>
             <span class="p">)</span>
         <span class="c1"># Load the mask.</span>
         <span class="c1"># If mask is a list, each mask is treated as its own ROI/parcel</span>
         <span class="c1"># If mask is a 3D, each integer is treated as its own ROI/parcel</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask_imgs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">masks</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">mask_img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">prob_thres</span>
-                <span class="k">for</span> <span class="n">mask_img</span> <span class="ow">in</span> <span class="n">mask_imgs</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">mask_img</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">prob_thres</span> <span class="k">for</span> <span class="n">mask_img</span> <span class="ow">in</span> <span class="n">mask_imgs</span>
             <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">labelsmap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">mask_imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)</span>
@@ -1094,7 +1074,7 @@
             <span class="n">masks</span> <span class="o">=</span> <span class="p">[</span><span class="n">labelsmap</span> <span class="o">==</span> <span class="n">label</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">masks</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">class_labels</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of masks must match number of labels&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Number of masks must match number of labels&#39;</span><span class="p">)</span>
 
         <span class="n">series</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">masks</span><span class="p">)))</span>
 
@@ -1103,8 +1083,8 @@
             <span class="n">series</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">class_labels</span><span class="p">,</span> <span class="n">series</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span><span class="p">)</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s2">&quot;out_file&quot;</span><span class="p">],</span> <span class="n">output</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">],</span> <span class="n">output</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
 
@@ -1120,7 +1100,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

@@ -353,26 +353,27 @@
 <span class="c1">#     https://www.nipreps.org/community/licensing/</span>
 <span class="c1">#</span>
 <span class="sd">&quot;&quot;&quot;Helpers for handling BIDS-like neuroimaging structures.&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
 <span class="kn">from</span> <span class="nn">bids</span> <span class="kn">import</span> <span class="n">BIDSLayout</span>
 <span class="kn">from</span> <span class="nn">bids.layout</span> <span class="kn">import</span> <span class="n">Query</span>
 <span class="kn">from</span> <span class="nn">packaging.version</span> <span class="kn">import</span> <span class="n">Version</span>
 
-
 <span class="n">DEFAULT_BIDS_QUERIES</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;bold&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;func&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
-    <span class="s2">&quot;dwi&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;dwi&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;flair&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;anat&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;FLAIR&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
-    <span class="s2">&quot;fmap&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;fmap&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;pet&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;pet&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;roi&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;anat&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;roi&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;sbref&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;func&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;sbref&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
-    <span class="s2">&quot;t1w&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;anat&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;T1w&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
-    <span class="s2">&quot;t2w&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;anat&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;T2w&quot;</span><span class="p">,</span> <span class="s2">&quot;part&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
-    <span class="s2">&quot;asl&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="s2">&quot;perf&quot;</span><span class="p">,</span> <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="s2">&quot;asl&quot;</span><span class="p">},</span>
+    <span class="s1">&#39;bold&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;func&#39;</span><span class="p">,</span> <span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="s1">&#39;part&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
+    <span class="s1">&#39;dwi&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;dwi&#39;</span><span class="p">},</span>
+    <span class="s1">&#39;flair&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;anat&#39;</span><span class="p">,</span> <span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;FLAIR&#39;</span><span class="p">,</span> <span class="s1">&#39;part&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
+    <span class="s1">&#39;fmap&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;fmap&#39;</span><span class="p">},</span>
+    <span class="s1">&#39;pet&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;pet&#39;</span><span class="p">},</span>
+    <span class="s1">&#39;roi&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;anat&#39;</span><span class="p">,</span> <span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;roi&#39;</span><span class="p">},</span>
+    <span class="s1">&#39;sbref&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;func&#39;</span><span class="p">,</span> <span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;sbref&#39;</span><span class="p">,</span> <span class="s1">&#39;part&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
+    <span class="s1">&#39;t1w&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;anat&#39;</span><span class="p">,</span> <span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;T1w&#39;</span><span class="p">,</span> <span class="s1">&#39;part&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
+    <span class="s1">&#39;t2w&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;anat&#39;</span><span class="p">,</span> <span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;T2w&#39;</span><span class="p">,</span> <span class="s1">&#39;part&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
+    <span class="s1">&#39;asl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;perf&#39;</span><span class="p">,</span> <span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;asl&#39;</span><span class="p">},</span>
 <span class="p">}</span>
 
 
@@ -382,13 +383,13 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">bids_root</span><span class="p">):</span>
         <span class="n">indent</span> <span class="o">=</span> <span class="mi">10</span>
         <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{sep}</span><span class="s1"> BIDS root folder: &quot;</span><span class="si">{bids_root}</span><span class="s1">&quot; </span><span class="si">{sep}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="n">bids_root</span><span class="o">=</span><span class="n">bids_root</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;-&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">indent</span><span class="p">)</span>
+            <span class="n">bids_root</span><span class="o">=</span><span class="n">bids_root</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;-&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">indent</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="si">{header}</span><span class="se">\n</span><span class="si">{indent}{message}</span><span class="se">\n</span><span class="si">{footer}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">{header}</span><span class="se">\n</span><span class="si">{indent}{message}</span><span class="se">\n</span><span class="si">{footer}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>
-            <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot; &quot;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">indent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
+            <span class="n">indent</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39; &#39;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">indent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
             <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span>
-            <span class="n">footer</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;-&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)),</span>
+            <span class="n">footer</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;-&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)),</span>
         <span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bids_root</span> <span class="o">=</span> <span class="n">bids_root</span></div>
@@ -404,9 +405,7 @@
 
 <div class="viewcode-block" id="collect_participants">
 <a class="viewcode-back" href="../../../api/niworkflows.utils.bids.html#niworkflows.utils.bids.collect_participants">[docs]</a>
-<span class="k">def</span> <span class="nf">collect_participants</span><span class="p">(</span>
-    <span class="n">bids_dir</span><span class="p">,</span> <span class="n">participant_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bids_validate</span><span class="o">=</span><span class="kc">True</span>
-<span class="p">):</span>
+<span class="k">def</span> <span class="nf">collect_participants</span><span class="p">(</span><span class="n">bids_dir</span><span class="p">,</span> <span class="n">participant_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bids_validate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    List the participants under the BIDS root and checks that participants</span>
 <span class="sd">    designated with the participant_label argument exist in that folder.</span>
@@ -458,11 +457,11 @@
     <span class="c1"># Error: bids_dir does not contain subjects</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">all_participants</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">BIDSError</span><span class="p">(</span>
-            <span class="s2">&quot;Could not find participants. Please make sure the BIDS data &quot;</span>
-            <span class="s2">&quot;structure is present and correct. Datasets can be validated &quot;</span>
-            <span class="s2">&quot;online using the BIDS Validator &quot;</span>
-            <span class="s2">&quot;(https://bids-standard.github.io/bids-validator/).</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="s2">&quot;If you are using Docker for Mac or Docker for Windows, you &quot;</span>
+            <span class="s1">&#39;Could not find participants. Please make sure the BIDS data &#39;</span>
+            <span class="s1">&#39;structure is present and correct. Datasets can be validated &#39;</span>
+            <span class="s1">&#39;online using the BIDS Validator &#39;</span>
+            <span class="s1">&#39;(https://bids-standard.github.io/bids-validator/).</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;If you are using Docker for Mac or Docker for Windows, you &#39;</span>
             <span class="s1">&#39;may need to adjust your &quot;File sharing&quot; preferences.&#39;</span><span class="p">,</span>
             <span class="n">bids_dir</span><span class="p">,</span>
         <span class="p">)</span>
@@ -475,16 +474,14 @@
         <span class="n">participant_label</span> <span class="o">=</span> <span class="p">[</span><span class="n">participant_label</span><span class="p">]</span>
 
     <span class="c1"># Drop sub- prefixes</span>
-    <span class="n">participant_label</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">sub</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span> <span class="k">if</span> <span class="n">sub</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sub-&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">sub</span> <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">participant_label</span>
-    <span class="p">]</span>
+    <span class="n">participant_label</span> <span class="o">=</span> <span class="p">[</span><span class="n">sub</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span> <span class="k">if</span> <span class="n">sub</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;sub-&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">sub</span> <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">participant_label</span><span class="p">]</span>
     <span class="c1"># Remove duplicates</span>
     <span class="n">participant_label</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">participant_label</span><span class="p">))</span>
     <span class="c1"># Remove labels not found</span>
     <span class="n">found_label</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">participant_label</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">all_participants</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">found_label</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">BIDSError</span><span class="p">(</span>
-            <span class="s2">&quot;Could not find participants [</span><span class="si">{}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">participant_label</span><span class="p">)),</span>
+            <span class="s1">&#39;Could not find participants [</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">participant_label</span><span class="p">)),</span>
             <span class="n">bids_dir</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -492,12 +489,12 @@
     <span class="n">notfound_label</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">participant_label</span><span class="p">)</span> <span class="o">-</span> <span class="n">all_participants</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">notfound_label</span><span class="p">:</span>
         <span class="n">exc</span> <span class="o">=</span> <span class="n">BIDSError</span><span class="p">(</span>
-            <span class="s2">&quot;Some participants were not found: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">notfound_label</span><span class="p">)),</span>
+            <span class="s1">&#39;Some participants were not found: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">notfound_label</span><span class="p">)),</span>
             <span class="n">bids_dir</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exc</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">msg</span><span class="p">,</span> <span class="n">BIDSWarning</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">msg</span><span class="p">,</span> <span class="n">BIDSWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">found_label</span></div>
 
@@ -595,23 +592,18 @@
                 <span class="k">del</span> <span class="n">layout_get_kwargs</span><span class="p">[</span><span class="n">entity</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">task</span><span class="p">:</span>
-        <span class="n">queries</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">][</span><span class="s2">&quot;task&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task</span>
+        <span class="n">queries</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">][</span><span class="s1">&#39;task&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task</span>
 
     <span class="k">if</span> <span class="n">echo</span><span class="p">:</span>
-        <span class="n">queries</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">][</span><span class="s2">&quot;echo&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">echo</span>
+        <span class="n">queries</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">][</span><span class="s1">&#39;echo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">echo</span>
 
     <span class="n">subj_data</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">dtype</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">layout_get_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">query</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">queries</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">dtype</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">layout_get_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">query</span><span class="p">))</span> <span class="k">for</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">queries</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">}</span>
 
     <span class="c1"># Special case: multi-echo BOLD, grouping echos</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">group_echos</span>
-        <span class="ow">and</span> <span class="s2">&quot;bold&quot;</span> <span class="ow">in</span> <span class="n">subj_data</span>
-        <span class="ow">and</span> <span class="nb">any</span><span class="p">([</span><span class="s2">&quot;_echo-&quot;</span> <span class="ow">in</span> <span class="n">bold</span> <span class="k">for</span> <span class="n">bold</span> <span class="ow">in</span> <span class="n">subj_data</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">]])</span>
-    <span class="p">):</span>
-        <span class="n">subj_data</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_multiecho</span><span class="p">(</span><span class="n">subj_data</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">group_echos</span> <span class="ow">and</span> <span class="s1">&#39;bold&#39;</span> <span class="ow">in</span> <span class="n">subj_data</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="s1">&#39;_echo-&#39;</span> <span class="ow">in</span> <span class="n">bold</span> <span class="k">for</span> <span class="n">bold</span> <span class="ow">in</span> <span class="n">subj_data</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]):</span>
+        <span class="n">subj_data</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_multiecho</span><span class="p">(</span><span class="n">subj_data</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">subj_data</span><span class="p">,</span> <span class="n">layout</span></div>
 
@@ -647,12 +639,12 @@
     <span class="k">if</span> <span class="n">bids_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">in_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">in_file</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sub-&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;sub-&#39;</span><span class="p">):</span>
                 <span class="n">bids_dir</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
                 <span class="k">break</span>
 
         <span class="k">if</span> <span class="n">bids_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Could not infer BIDS root&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Could not infer BIDS root&#39;</span><span class="p">)</span>
 
     <span class="n">layout</span> <span class="o">=</span> <span class="n">BIDSLayout</span><span class="p">(</span>
         <span class="nb">str</span><span class="p">(</span><span class="n">bids_dir</span><span class="p">),</span>
@@ -743,16 +735,16 @@
     <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
 
     <span class="k">def</span> <span class="nf">_grp_echos</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s2">&quot;_echo-&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;_echo-&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">x</span>
-        <span class="n">echo</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;_echo-</span><span class="se">\\</span><span class="s2">d*&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">echo</span><span class="p">,</span> <span class="s2">&quot;_echo-?&quot;</span><span class="p">)</span>
+        <span class="n">echo</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;_echo-</span><span class="se">\\</span><span class="s1">d*&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">echo</span><span class="p">,</span> <span class="s1">&#39;_echo-?&#39;</span><span class="p">)</span>
 
     <span class="n">ses_uids</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">bold</span> <span class="ow">in</span> <span class="n">groupby</span><span class="p">(</span><span class="n">bold_sess</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_grp_echos</span><span class="p">):</span>
         <span class="n">bold</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bold</span><span class="p">)</span>
         <span class="c1"># If single- or dual-echo, flatten list; keep list otherwise.</span>
-        <span class="n">action</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ses_uids</span><span class="p">,</span> <span class="s2">&quot;append&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bold</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">&quot;extend&quot;</span><span class="p">)</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ses_uids</span><span class="p">,</span> <span class="s1">&#39;append&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bold</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="s1">&#39;extend&#39;</span><span class="p">)</span>
         <span class="n">action</span><span class="p">(</span><span class="n">bold</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ses_uids</span></div>
 
@@ -786,17 +778,17 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sub-&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;sub-&#39;</span><span class="p">):</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="p">[</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">path</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span>
             <span class="n">parents</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sub-&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;sub-&#39;</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="o">*</span><span class="n">parents</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">path</span>
 
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Could not determine the BIDS root of &lt;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&gt;. &quot;</span>
-        <span class="s2">&quot;Only files under a subject directory are currently supported.&quot;</span>
+        <span class="sa">f</span><span class="s1">&#39;Could not determine the BIDS root of &lt;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">&gt;. &#39;</span>
+        <span class="s1">&#39;Only files under a subject directory are currently supported.&#39;</span>
     <span class="p">)</span></div>
 
 
@@ -840,9 +832,9 @@
         <span class="k">return</span>
 
     <span class="n">desc</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data_desc</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-    <span class="n">dvers</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PipelineDescription&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Version&quot;</span><span class="p">,</span> <span class="s2">&quot;0+unknown&quot;</span><span class="p">)</span>
+    <span class="n">dvers</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PipelineDescription&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;Version&#39;</span><span class="p">,</span> <span class="s1">&#39;0+unknown&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">Version</span><span class="p">(</span><span class="n">cvers</span><span class="p">)</span><span class="o">.</span><span class="n">public</span> <span class="o">!=</span> <span class="n">Version</span><span class="p">(</span><span class="n">dvers</span><span class="p">)</span><span class="o">.</span><span class="n">public</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;Previous output generated by version </span><span class="si">{}</span><span class="s2"> found.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dvers</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Previous output generated by version </span><span class="si">{</span><span class="n">dvers</span><span class="si">}</span><span class="s1"> found.&#39;</span></div>
 
 </pre></div>
         </article>
@@ -856,7 +848,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             

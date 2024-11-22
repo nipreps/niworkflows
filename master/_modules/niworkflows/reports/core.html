@@ -358,12 +358,14 @@
 <span class="sd">Generalizes report generation across BIDS-Apps</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">compress</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-<span class="kn">from</span> <span class="nn">bids.layout</span> <span class="kn">import</span> <span class="n">BIDSLayout</span><span class="p">,</span> <span class="n">add_config_paths</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">compress</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
 <span class="kn">import</span> <span class="nn">jinja2</span>
+<span class="kn">from</span> <span class="nn">bids.layout</span> <span class="kn">import</span> <span class="n">BIDSLayout</span><span class="p">,</span> <span class="n">add_config_paths</span>
 <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">copyfile</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">data</span><span class="p">,</span> <span class="n">load_resource</span>
@@ -375,7 +377,7 @@
     <span class="k">if</span> <span class="s2">&quot;Configuration &#39;figures&#39; already exists&quot;</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
         <span class="k">raise</span>
 
-<span class="n">PLURAL_SUFFIX</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;echo&quot;</span><span class="p">,</span> <span class="s2">&quot;es&quot;</span><span class="p">)])</span>
+<span class="n">PLURAL_SUFFIX</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;echo&#39;</span><span class="p">,</span> <span class="s1">&#39;es&#39;</span><span class="p">)])</span>
 <span class="n">SVG_SNIPPET</span> <span class="o">=</span> <span class="p">[</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;\</span>
 <span class="sd">&lt;object class=&quot;svg-reportlet&quot; type=&quot;image/svg+xml&quot; data=&quot;./{0}&quot;&gt;</span>
@@ -408,6 +410,7 @@
 <span class="sd">    &gt;&gt;&gt; sorted([1, None, 2], key=lambda x: x if x is not None else Smallest())</span>
 <span class="sd">    [None, 1, 2]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Smallest</span><span class="p">)</span>
 
@@ -506,28 +509,28 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Reportlet must have a config object&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Reportlet must have a config object&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">-</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;bids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;bids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">subtitle</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;subtitle&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subtitle</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;subtitle&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">)</span>
 
         <span class="c1"># Query the BIDS layout of reportlets</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;bids&quot;</span><span class="p">])</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;bids&#39;</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">components</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">bidsfile</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
             <span class="n">src</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">bidsfile</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-            <span class="n">ext</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">suffixes</span><span class="p">)</span>
-            <span class="n">desc_text</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;caption&quot;</span><span class="p">)</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">suffixes</span><span class="p">)</span>
+            <span class="n">desc_text</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;caption&#39;</span><span class="p">)</span>
 
             <span class="n">contents</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">&quot;.html&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.html&#39;</span><span class="p">:</span>
                 <span class="n">contents</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">&quot;.svg&quot;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.svg&#39;</span><span class="p">:</span>
                 <span class="n">entities</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">bidsfile</span><span class="o">.</span><span class="n">entities</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">desc_text</span><span class="p">:</span>
                     <span class="n">desc_text</span> <span class="o">=</span> <span class="n">desc_text</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">entities</span><span class="p">)</span>
@@ -540,7 +543,7 @@
                     <span class="n">dst</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                     <span class="n">copyfile</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_hardlink</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-                <span class="n">contents</span> <span class="o">=</span> <span class="n">SVG_SNIPPET</span><span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;static&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">html_anchor</span><span class="p">)</span>
+                <span class="n">contents</span> <span class="o">=</span> <span class="n">SVG_SNIPPET</span><span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;static&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">html_anchor</span><span class="p">)</span>
 
                 <span class="c1"># Our current implementations of dynamic reportlets do this themselves,</span>
                 <span class="c1"># however I&#39;ll leave the code here since this is potentially something we</span>
@@ -573,7 +576,7 @@
 <span class="k">class</span> <span class="nc">SubReport</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;SubReports are sections within a Report.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">isnested</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reportlets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">isnested</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reportlets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reportlets</span> <span class="o">=</span> <span class="n">reportlets</span> <span class="ow">or</span> <span class="p">[]</span>
@@ -615,7 +618,7 @@
         <span class="n">out_dir</span><span class="p">,</span>
         <span class="n">run_uuid</span><span class="p">,</span>
         <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">out_filename</span><span class="o">=</span><span class="s2">&quot;report.html&quot;</span><span class="p">,</span>
+        <span class="n">out_filename</span><span class="o">=</span><span class="s1">&#39;report.html&#39;</span><span class="p">,</span>
         <span class="n">packagename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">reportlets_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">subject_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -631,38 +634,37 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span> <span class="o">=</span> <span class="n">packagename</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="n">subject_id</span>
         <span class="k">if</span> <span class="n">subject_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">subject_id</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span> <span class="k">if</span> <span class="n">subject_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;sub-&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">subject_id</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">out_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;sub-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span><span class="si">}</span><span class="s2">.html&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="n">subject_id</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span> <span class="k">if</span> <span class="n">subject_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;sub-&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">subject_id</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">out_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;sub-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span><span class="si">}</span><span class="s1">.html&#39;</span>
 
         <span class="c1"># Default template from niworkflows</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">template_path</span> <span class="o">=</span> <span class="n">load_resource</span><span class="p">(</span><span class="s1">&#39;reports&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="s1">&#39;report.tpl&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Could not find report template. Corrupted installation.&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_config</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">config</span> <span class="ow">or</span> <span class="n">load_resource</span><span class="p">(</span><span class="s1">&#39;reports&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="s1">&#39;default.yml&#39;</span><span class="p">))</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_load_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">yaml</span> <span class="kn">import</span> <span class="n">safe_load</span> <span class="k">as</span> <span class="n">load</span>
 
         <span class="n">settings</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span> <span class="ow">or</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;package&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span> <span class="ow">or</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;package&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">packagename</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;sub-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;sub-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span><span class="si">}</span><span class="s1">&#39;</span>
 
-        <span class="k">if</span> <span class="s2">&quot;template_path&quot;</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">template_path</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;template_path&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;template_path&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template_path</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;template_path&#39;</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sections&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sections&#39;</span><span class="p">])</span>
 
 <div class="viewcode-block" id="Report.init_layout">
 <a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.Report.init_layout">[docs]</a>
     <span class="k">def</span> <span class="nf">init_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">BIDSLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">&quot;figures&quot;</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">BIDSLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s1">&#39;figures&#39;</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Report.index">
@@ -678,15 +680,13 @@
         <span class="k">for</span> <span class="n">subrep_cfg</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
             <span class="c1"># First determine whether we need to split by some ordering</span>
             <span class="c1"># (ie. sessions / tasks / runs), which are separated by commas.</span>
-            <span class="n">orderings</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">subrep_cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ordering&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span>
-            <span class="p">]</span>
+            <span class="n">orderings</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">subrep_cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ordering&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span><span class="p">]</span>
             <span class="n">entities</span><span class="p">,</span> <span class="n">list_combos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_orderings</span><span class="p">(</span><span class="n">orderings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">list_combos</span><span class="p">:</span>  <span class="c1"># E.g. this is an anatomical reportlet</span>
                 <span class="n">reportlets</span> <span class="o">=</span> <span class="p">[</span>
                     <span class="n">Reportlet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">subrep_cfg</span><span class="p">[</span><span class="s2">&quot;reportlets&quot;</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">subrep_cfg</span><span class="p">[</span><span class="s1">&#39;reportlets&#39;</span><span class="p">]</span>
                 <span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Do not use dictionary for queries, as we need to preserve ordering</span>
@@ -697,15 +697,14 @@
                     <span class="n">c_filt</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
                     <span class="n">ent_filt</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compress</span><span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
                     <span class="c1"># Set a common title for this particular combination c</span>
-                    <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Reports for: </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                        <span class="p">[</span>
-                            <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> &lt;span class=&quot;bids-entity&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/span&gt;&#39;</span>
-                            <span class="o">%</span> <span class="p">(</span><span class="n">ent_filt</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">c_filt</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Reports for: </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ent_filt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> &lt;span class=&quot;bids-entity&quot;&gt;</span><span class="si">{</span><span class="n">c_filt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&lt;/span&gt;&#39;</span>
                             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">c_filt</span><span class="p">))</span>
-                        <span class="p">]</span>
+                        <span class="p">)</span>
                     <span class="p">)</span>
-                    <span class="k">for</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">subrep_cfg</span><span class="p">[</span><span class="s2">&quot;reportlets&quot;</span><span class="p">]:</span>
-                        <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;bids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">entities</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">))})</span>
+                    <span class="k">for</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">subrep_cfg</span><span class="p">[</span><span class="s1">&#39;reportlets&#39;</span><span class="p">]:</span>
+                        <span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;bids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">entities</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">))})</span>
                         <span class="n">rlet</span> <span class="o">=</span> <span class="n">Reportlet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">)</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">rlet</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
                             <span class="n">rlet</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
@@ -716,62 +715,56 @@
             <span class="n">reportlets</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">reportlets</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">r</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()]</span>
             <span class="k">if</span> <span class="n">reportlets</span><span class="p">:</span>
                 <span class="n">sub_report</span> <span class="o">=</span> <span class="n">SubReport</span><span class="p">(</span>
-                    <span class="n">subrep_cfg</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                    <span class="n">subrep_cfg</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
                     <span class="n">isnested</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">list_combos</span><span class="p">),</span>
                     <span class="n">reportlets</span><span class="o">=</span><span class="n">reportlets</span><span class="p">,</span>
-                    <span class="n">title</span><span class="o">=</span><span class="n">subrep_cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">),</span>
+                    <span class="n">title</span><span class="o">=</span><span class="n">subrep_cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">),</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">sections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub_report</span><span class="p">)</span>
 
         <span class="c1"># Populate errors section</span>
-        <span class="n">error_dir</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">/</span> <span class="s2">&quot;sub-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;log&quot;</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_uuid</span>
-        <span class="p">)</span>
+        <span class="n">error_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;sub-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subject_id</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">/</span> <span class="s1">&#39;log&#39;</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_uuid</span>
         <span class="k">if</span> <span class="n">error_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
             <span class="kn">from</span> <span class="nn">..utils.misc</span> <span class="kn">import</span> <span class="n">read_crashfile</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_crashfile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">error_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;crash*.*&quot;</span><span class="p">)]</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_crashfile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">error_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;crash*.*&#39;</span><span class="p">)]</span></div>
 
 
 <div class="viewcode-block" id="Report.generate_report">
 <a class="viewcode-back" href="../../../api/niworkflows.reports.core.html#niworkflows.reports.Report.generate_report">[docs]</a>
     <span class="k">def</span> <span class="nf">generate_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Once the Report has been indexed, the final HTML can be generated&quot;&quot;&quot;</span>
-        <span class="n">logs_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">/</span> <span class="s2">&quot;logs&quot;</span>
+        <span class="n">logs_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">/</span> <span class="s1">&#39;logs&#39;</span>
 
         <span class="n">boilerplate</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">boiler_idx</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s2">&quot;CITATION.html&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s1">&#39;CITATION.html&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="n">text</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;&lt;body&gt;(.*?)&lt;/body&gt;&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">findall</span><span class="p">((</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s2">&quot;CITATION.html&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;&lt;body&gt;(.*?)&lt;/body&gt;&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">findall</span><span class="p">((</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s1">&#39;CITATION.html&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="p">)</span>
-            <span class="n">boilerplate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">boiler_idx</span><span class="p">,</span> <span class="s2">&quot;HTML&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;&lt;div class=&quot;boiler-html&quot;&gt;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s1">&lt;/div&gt;&#39;</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">boilerplate</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">boiler_idx</span><span class="p">,</span> <span class="s1">&#39;HTML&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;&lt;div class=&quot;boiler-html&quot;&gt;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s1">&lt;/div&gt;&#39;</span><span class="p">))</span>
             <span class="n">boiler_idx</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s2">&quot;CITATION.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s2">&quot;CITATION.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
-            <span class="n">boilerplate</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">boiler_idx</span><span class="p">,</span> <span class="s2">&quot;Markdown&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;&lt;pre&gt;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">&lt;/pre&gt;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s1">&#39;CITATION.md&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s1">&#39;CITATION.md&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+            <span class="n">boilerplate</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">boiler_idx</span><span class="p">,</span> <span class="s1">&#39;Markdown&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;&lt;pre&gt;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s1">&lt;/pre&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
             <span class="n">boiler_idx</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s2">&quot;CITATION.tex&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s1">&#39;CITATION.tex&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="n">text</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-                    <span class="sa">r</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">begin</span><span class="si">{document}</span><span class="s2">(.*?)</span><span class="se">\\</span><span class="s2">end</span><span class="si">{document}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span>
-                <span class="p">)</span>
-                <span class="o">.</span><span class="n">findall</span><span class="p">((</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s2">&quot;CITATION.tex&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">begin</span><span class="si">{document}</span><span class="s1">(.*?)</span><span class="se">\\</span><span class="s1">end</span><span class="si">{document}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">findall</span><span class="p">((</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s1">&#39;CITATION.tex&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="p">)</span>
-            <span class="n">bib</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">Loader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packagename</span><span class="p">)</span><span class="o">.</span><span class="n">readable</span><span class="p">(</span><span class="s2">&quot;data/boilerplate.bib&quot;</span><span class="p">)</span>
+            <span class="n">bib</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">Loader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packagename</span><span class="p">)</span><span class="o">.</span><span class="n">readable</span><span class="p">(</span><span class="s1">&#39;data/boilerplate.bib&#39;</span><span class="p">)</span>
             <span class="n">boilerplate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="p">(</span>
                     <span class="n">boiler_idx</span><span class="p">,</span>
-                    <span class="s2">&quot;LaTeX&quot;</span><span class="p">,</span>
-                    <span class="sa">f</span><span class="s2">&quot;&lt;pre&gt;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">&lt;/pre&gt;</span><span class="se">\n</span><span class="s2">&lt;h3&gt;Bibliography&lt;/h3&gt;</span><span class="se">\n</span><span class="s2">&lt;pre&gt;</span><span class="si">{</span><span class="n">bib</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="si">}</span><span class="s2">&lt;/pre&gt;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="s1">&#39;LaTeX&#39;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s1">&#39;&lt;pre&gt;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s1">&lt;/pre&gt;</span><span class="se">\n</span><span class="s1">&lt;h3&gt;Bibliography&lt;/h3&gt;</span><span class="se">\n</span><span class="s1">&lt;pre&gt;</span><span class="si">{</span><span class="n">bib</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="si">}</span><span class="s1">&lt;/pre&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
             <span class="n">boiler_idx</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -780,7 +773,7 @@
             <span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">FileSystemLoader</span><span class="p">(</span><span class="n">searchpath</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_path</span><span class="o">.</span><span class="n">parent</span><span class="p">)),</span>
             <span class="n">trim_blocks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">lstrip_blocks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">autoescape</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">autoescape</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># noqa: S701  XXX Investigate if this is a problem in nireports.</span>
         <span class="p">)</span>
         <span class="n">report_tpl</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">report_render</span> <span class="o">=</span> <span class="n">report_tpl</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
@@ -789,7 +782,7 @@
 
         <span class="c1"># Write out report</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_filename</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">report_render</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;UTF-8&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_filename</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">report_render</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span></div>
 
 
@@ -834,14 +827,10 @@
         <span class="c1"># the &quot;kept&quot; entities</span>
         <span class="n">entities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compress</span><span class="p">(</span><span class="n">orderings</span><span class="p">,</span> <span class="n">keep_idx</span><span class="p">))</span>
         <span class="c1"># the &quot;kept&quot; value combinations</span>
-        <span class="n">value_combos</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="nb">tuple</span><span class="p">(</span><span class="n">compress</span><span class="p">(</span><span class="n">value_combo</span><span class="p">,</span> <span class="n">keep_idx</span><span class="p">))</span> <span class="k">for</span> <span class="n">value_combo</span> <span class="ow">in</span> <span class="n">all_value_combos</span>
-        <span class="p">]</span>
+        <span class="n">value_combos</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">compress</span><span class="p">(</span><span class="n">value_combo</span><span class="p">,</span> <span class="n">keep_idx</span><span class="p">))</span> <span class="k">for</span> <span class="n">value_combo</span> <span class="ow">in</span> <span class="n">all_value_combos</span><span class="p">]</span>
         <span class="c1"># sort the value combinations alphabetically from the first entity to the last entity</span>
         <span class="n">value_combos</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
-            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">entry</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span>
-                <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Smallest</span><span class="p">()</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">entry</span>
-            <span class="p">)</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">entry</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Smallest</span><span class="p">()</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">entities</span><span class="p">,</span> <span class="n">value_combos</span></div>
@@ -893,7 +882,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Execute run_reports on a list of subjects.&quot;&quot;&quot;</span>
     <span class="n">reportlets_dir</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">work_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">reportlets_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;reportlets&quot;</span>
+        <span class="n">reportlets_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s1">&#39;reportlets&#39;</span>
     <span class="n">report_errors</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">run_reports</span><span class="p">(</span>
             <span class="n">output_dir</span><span class="p">,</span>
@@ -910,15 +899,13 @@
     <span class="k">if</span> <span class="n">errno</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">logging</span>
 
-        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;cli&quot;</span><span class="p">)</span>
-        <span class="n">error_list</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> (</span><span class="si">%d</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">subid</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">subid</span><span class="p">,</span> <span class="n">err</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">subject_list</span><span class="p">,</span> <span class="n">report_errors</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">err</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;cli&#39;</span><span class="p">)</span>
+        <span class="n">error_list</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%d</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">subid</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span> <span class="k">for</span> <span class="n">subid</span><span class="p">,</span> <span class="n">err</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">subject_list</span><span class="p">,</span> <span class="n">report_errors</span><span class="p">)</span> <span class="k">if</span> <span class="n">err</span>
         <span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-            <span class="s2">&quot;Preprocessing did not finish successfully. Errors occurred while processing &quot;</span>
-            <span class="s2">&quot;data from participants: </span><span class="si">%s</span><span class="s2">. Check the HTML reports for details.&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;Preprocessing did not finish successfully. Errors occurred while processing &#39;</span>
+            <span class="s1">&#39;data from participants: </span><span class="si">%s</span><span class="s1">. Check the HTML reports for details.&#39;</span><span class="p">,</span>
             <span class="n">error_list</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">errno</span></div>
@@ -935,7 +922,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; Copyright 2024, The NiPreps Developers
+                Copyright &#169; Copyright, The NiPreps Developers
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
