@@ -926,7 +926,11 @@ def confounds_correlation_plot(
     gs_descending = gs_descending[:max_dim]
     features = [p for p in corr.columns if p in gs_descending]
     corr = corr.loc[features, features]
-    np.fill_diagonal(corr.values, 0)
+
+    # Modifying in-place is no longer supported
+    corr_vals = corr.to_numpy(copy=True)
+    np.fill_diagonal(corr_vals, 0)
+    corr.iloc[:, :] = corr_vals
 
     if figure is None:
         plt.figure(figsize=(15, 5))
