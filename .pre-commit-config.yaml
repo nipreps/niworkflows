@@ -1,0 +1,24 @@
+exclude: ".*/data/.*"
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: 'examples'
+      - id: end-of-file-fixer
+        exclude: 'examples|docs/_static/.*\.(css|js)'
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-added-large-files
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      - name: ruff check --fix
+        id: ruff
+        args: [ --fix ]
+      - name: ruff format
+        id: ruff-format
+      - name: fix implicit string concatenation
+        id: ruff
+        args: [ --select, ISC001, --fix ]

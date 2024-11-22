@@ -21,36 +21,38 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Utilities for tracking and filtering spaces."""
+
 import argparse
-import attr
 from collections import defaultdict
 from itertools import product
+
+import attr
 from templateflow import api as _tfapi
 
 NONSTANDARD_REFERENCES = [
-    "T1w",
-    "T2w",
-    "anat",
-    "fsnative",
-    "func",
-    "run",
-    "sbref",
-    "session",
-    "individual",
-    "dwi",
-    "asl",
+    'T1w',
+    'T2w',
+    'anat',
+    'fsnative',
+    'func',
+    'run',
+    'sbref',
+    'session',
+    'individual',
+    'dwi',
+    'asl',
 ]
 """List of supported nonstandard reference spaces."""
 
-NONSTANDARD_2D_REFERENCES = ["fsnative"]
+NONSTANDARD_2D_REFERENCES = ['fsnative']
 """List of supported nonstandard 2D reference spaces."""
 
 FSAVERAGE_DENSITY = {
-    "fsaverage3": "642",
-    "fsaverage4": "2562",
-    "fsaverage5": "10k",
-    "fsaverage6": "41k",
-    "fsaverage": "164k",
+    'fsaverage3': '642',
+    'fsaverage4': '2562',
+    'fsaverage5': '10k',
+    'fsaverage6': '41k',
+    'fsaverage': '164k',
 }
 """A map of legacy fsaverageX names to surface densities."""
 
@@ -150,7 +152,7 @@ class Reference:
     """
 
     _standard_spaces = tuple(_tfapi.templates())
-    _spaces_2d = tuple(_tfapi.templates(suffix="sphere"))
+    _spaces_2d = tuple(_tfapi.templates(suffix='sphere'))
 
     space = attr.ib(default=None, type=str)
     """Name designating this space."""
@@ -167,41 +169,40 @@ class Reference:
     def __attrs_post_init__(self):
         """Extract cohort out of spec."""
         if self.spec is None:
-            object.__setattr__(self, "spec", {})
+            object.__setattr__(self, 'spec', {})
 
-        if self.space.startswith("fsaverage"):
+        if self.space.startswith('fsaverage'):
             space = self.space
-            object.__setattr__(self, "space", "fsaverage")
+            object.__setattr__(self, 'space', 'fsaverage')
 
-            if "den" not in self.spec or space != "fsaverage":
+            if 'den' not in self.spec or space != 'fsaverage':
                 spec = self.spec.copy()
-                spec["den"] = FSAVERAGE_DENSITY[space]
-                object.__setattr__(self, "spec", spec)
+                spec['den'] = FSAVERAGE_DENSITY[space]
+                object.__setattr__(self, 'spec', spec)
 
         if (self.space in self._spaces_2d) or (self.space in NONSTANDARD_2D_REFERENCES):
-            object.__setattr__(self, "dim", 2)
+            object.__setattr__(self, 'dim', 2)
 
         if self.space in self._standard_spaces:
-            object.__setattr__(self, "standard", True)
+            object.__setattr__(self, 'standard', True)
 
-        _cohorts = ["%s" % t for t in _tfapi.TF_LAYOUT.get_cohorts(template=self.space)]
-        if "cohort" in self.spec:
+        _cohorts = [f'{t}' for t in _tfapi.TF_LAYOUT.get_cohorts(template=self.space)]
+        if 'cohort' in self.spec:
             if not _cohorts:
                 raise ValueError(
-                    'standard space "%s" does not accept a cohort '
-                    "specification." % self.space
+                    f'standard space "{self.space}" does not accept a cohort specification.'
                 )
 
-            if str(self.spec["cohort"]) not in _cohorts:
+            if str(self.spec['cohort']) not in _cohorts:
                 raise ValueError(
-                    'standard space "%s" does not contain any cohort '
-                    'named "%s".' % (self.space, self.spec["cohort"])
+                    f'standard space "{self.space}" does not contain any cohort '
+                    f'named "{self.spec["cohort"]}".'
                 )
         elif _cohorts:
-            _cohorts = ", ".join(['"cohort-%s"' % c for c in _cohorts])
+            _cohorts = ', '.join([f'"cohort-{c}"' for c in _cohorts])
             raise ValueError(
-                'standard space "%s" is not fully defined.\n'
-                "Set a valid cohort selector from: %s." % (self.space, _cohorts)
+                f'standard space "{self.space}" is not fully defined.\n'
+                f'Set a valid cohort selector from: {_cohorts}.'
             )
 
     @property
@@ -218,9 +219,9 @@ class Reference:
         'MNIPediatricAsym:cohort-1'
 
         """
-        if "cohort" not in self.spec:
+        if 'cohort' not in self.spec:
             return self.space
-        return "%s:cohort-%s" % (self.space, self.spec["cohort"])
+        return f'{self.space}:cohort-{self.spec["cohort"]}'
 
     @property
     def legacyname(self):
@@ -247,18 +248,18 @@ class Reference:
         True
 
         """
-        if self.space == "fsaverage" and self.spec["den"] in FSAVERAGE_LEGACY:
-            return FSAVERAGE_LEGACY[self.spec["den"]]
+        if self.space == 'fsaverage' and self.spec['den'] in FSAVERAGE_LEGACY:
+            return FSAVERAGE_LEGACY[self.spec['den']]
 
     @space.validator
     def _check_name(self, attribute, value):
-        if value.startswith("fsaverage"):
+        if value.startswith('fsaverage'):
             return
         valid = list(self._standard_spaces) + NONSTANDARD_REFERENCES
         if value not in valid:
             raise ValueError(
-                'space identifier "%s" is invalid.\nValid '
-                "identifiers are: %s" % (value, ", ".join(valid))
+                f'space identifier "{value}" is invalid.\n'
+                f'Valid identifiers are: {", ".join(valid)}'
             )
 
     def __str__(self):
@@ -271,8 +272,8 @@ class Reference:
         'MNIPediatricAsym:cohort-2:res-1'
 
         """
-        return ":".join(
-            [self.space] + ["-".join((k, str(v))) for k, v in sorted(self.spec.items())]
+        return ':'.join(
+            [self.space] + ['-'.join((k, str(v))) for k, v in sorted(self.spec.items())]
         )
 
     @classmethod
@@ -344,10 +345,10 @@ class Reference:
          Reference(space='MNIPediatricAsym', spec={'cohort': '6', 'res': 'iso1.6mm'})]
 
         """
-        _args = value.split(":")
+        _args = value.split(':')
         spec = defaultdict(list, {})
         for modifier in _args[1:]:
-            mitems = modifier.split("-", 1)
+            mitems = modifier.split('-', 1)
             spec[mitems[0]].append(len(mitems) == 1 or mitems[1])
 
         allspecs = _expand_entities(spec)
@@ -463,7 +464,7 @@ class SpatialReferences:
 
     """
 
-    __slots__ = ("_refs", "_cached")
+    __slots__ = ('_refs', '_cached')
     standard_spaces = tuple(_tfapi.templates())
     """List of supported standard reference spaces."""
 
@@ -509,7 +510,7 @@ class SpatialReferences:
     def __iadd__(self, b):
         """Append a list of transforms to the internal list."""
         if not isinstance(b, (list, tuple)):
-            raise TypeError("Must be a list.")
+            raise TypeError('Must be a list.')
 
         for space in b:
             self.append(space)
@@ -541,8 +542,8 @@ class SpatialReferences:
         Spatial References: MNI152NLin2009cAsym, fsaverage:den-10k
 
         """
-        spaces = ", ".join([str(s) for s in self.references]) or "<none>."
-        return "Spatial References: %s" % spaces
+        spaces = ', '.join([str(s) for s in self.references]) or '<none>.'
+        return f'Spatial References: {spaces}'
 
     @property
     def references(self):
@@ -553,7 +554,7 @@ class SpatialReferences:
     def cached(self):
         """Get cached spaces, raise error if not cached."""
         if not self.is_cached():
-            raise ValueError("References have not been cached")
+            raise ValueError('References have not been cached')
         return self._cached
 
     def is_cached(self):
@@ -562,7 +563,7 @@ class SpatialReferences:
     def checkpoint(self, force=False):
         """Cache and freeze current spaces to separate attribute."""
         if self.is_cached() and not force:
-            raise ValueError("References have already been cached")
+            raise ValueError('References have already been cached')
         self._cached = self.__class__(self.references)
 
     def add(self, value):
@@ -576,14 +577,14 @@ class SpatialReferences:
             self._refs += [self.check_space(value)]
             return
 
-        raise ValueError('space "%s" already in spaces.' % str(value))
+        raise ValueError(f'space "{value}" already in spaces.')
 
     def insert(self, index, value, error=True):
         """Concatenate one more space."""
         if value not in self:
             self._refs.insert(index, self.check_space(value))
         elif error is True:
-            raise ValueError('space "%s" already in spaces.' % str(value))
+            raise ValueError(f'space "{value}" already in spaces.')
 
     def get_spaces(self, standard=True, nonstandard=True, dim=(2, 3)):
         """
@@ -654,9 +655,7 @@ class SpatialReferences:
         return [
             s
             for s in self.references
-            if s.standard
-            and s.dim in dim
-            and (hasspec("res", s.spec) or hasspec("den", s.spec))
+            if s.standard and s.dim in dim and (hasspec('res', s.spec) or hasspec('den', s.spec))
         ]
 
     def get_nonstandard(self, full_spec=False, dim=(2, 3)):
@@ -668,7 +667,7 @@ class SpatialReferences:
             for s in self.references
             if not s.standard
             and s.dim in dim
-            and (hasspec("res", s.spec) or hasspec("den", s.spec))
+            and (hasspec('res', s.spec) or hasspec('den', s.spec))
         ]
 
     def get_fs_spaces(self):
@@ -698,7 +697,7 @@ class SpatialReferences:
         return [
             s.legacyname or s.space
             for s in self.references
-            if s.legacyname or s.space == "fsnative"
+            if s.legacyname or s.space == 'fsnative'
         ]
 
 
@@ -712,18 +711,18 @@ class OutputReferencesAction(argparse.Action):
             # option was called without any output spaces, so user does not want outputs
             spaces.checkpoint()
         for val in values:
-            val = val.rstrip(":")
+            val = val.rstrip(':')
             if (
                 val not in NONSTANDARD_REFERENCES
-                and not val.split(":")[0].startswith("fs")
-                and ":res-" not in val
-                and ":resolution-" not in val
+                and not val.split(':')[0].startswith('fs')
+                and ':res-' not in val
+                and ':resolution-' not in val
             ):
                 # by default, explicitly set volumetric resolution to native
                 # relevant discussions:
                 # https://github.com/nipreps/niworkflows/pull/457#discussion_r375510227
                 # https://github.com/nipreps/niworkflows/pull/494
-                val = ":".join((val, "res-native"))
+                val = ':'.join((val, 'res-native'))
             for sp in Reference.from_string(val):
                 spaces.add(sp)
         setattr(namespace, self.dest, spaces)
@@ -749,11 +748,11 @@ def format_reference(in_tuple):
     'MNIPediatricAsym_cohort-2_res-2'
 
     """
-    out = in_tuple[0].split(":")
-    res = in_tuple[1].get("res", None) or in_tuple[1].get("resolution", None)
+    out = in_tuple[0].split(':')
+    res = in_tuple[1].get('res', None) or in_tuple[1].get('resolution', None)
     if res:
-        out.append("-".join(("res", str(res))))
-    return "_".join(out)
+        out.append('-'.join(('res', str(res))))
+    return '_'.join(out)
 
 
 def reference2dict(in_tuple):
@@ -772,13 +771,11 @@ def reference2dict(in_tuple):
     {'space': 'MNIPediatricAsym', 'cohort': '2', 'resolution': '2', 'density': '91k'}
 
     """
-    tpl_entities = ("space", "cohort")
-    retval = {
-        tpl_entities[i]: v.split("-")[i] for i, v in enumerate(in_tuple[0].split(":"))
-    }
+    tpl_entities = ('space', 'cohort')
+    retval = {tpl_entities[i]: v.split('-')[i] for i, v in enumerate(in_tuple[0].split(':'))}
     retval.update(
         {
-            "resolution" if k == "res" else "density" if k == "den" else k: f"{v}"
+            'resolution' if k == 'res' else 'density' if k == 'den' else k: f'{v}'
             for k, v in in_tuple[1].items()
         }
     )
@@ -813,4 +810,4 @@ def _expand_entities(entities):
     """
     keys = list(entities.keys())
     values = list(product(*[entities[k] for k in keys]))
-    return [{k: v for k, v in zip(keys, combs)} for combs in values]
+    return [dict(zip(keys, combs)) for combs in values]

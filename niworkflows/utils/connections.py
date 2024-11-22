@@ -29,8 +29,8 @@ all the imports MUST be done in each function's context.
 """
 
 __all__ = [
-    "listify",
-    "pop_file",
+    'listify',
+    'pop_file',
 ]
 
 
@@ -70,7 +70,9 @@ def listify(value):
 
     """
     from pathlib import Path
+
     from nipype.interfaces.base import isdefined
+
     if not isdefined(value) or value is None:
         return value
     if isinstance(value, (str, bytes, Path)):

@@ -21,32 +21,34 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Exercise interface.header."""
-import numpy as np
-import nibabel as nb
-from nipype.pipeline import engine as pe
-from .. import header
+
 from pathlib import Path
 
+import nibabel as nb
+import numpy as np
 import pytest
+from nipype.pipeline import engine as pe
+
+from .. import header
 
 
 @pytest.mark.parametrize(
-    "qform_add, sform_add, expectation",
+    ('qform_add', 'sform_add', 'expectation'),
     [
-        (0, 0, "no_warn"),
-        (0, 1e-14, "no_warn"),
-        (0, 1e-09, "no_warn"),
-        (1e-6, 0, "warn"),
-        (0, 1e-6, "warn"),
-        (1e-5, 0, "warn"),
-        (0, 1e-5, "warn"),
-        (1e-3, 1e-3, "no_warn"),
+        (0, 0, 'no_warn'),
+        (0, 1e-14, 'no_warn'),
+        (0, 1e-09, 'no_warn'),
+        (1e-6, 0, 'warn'),
+        (0, 1e-6, 'warn'),
+        (1e-5, 0, 'warn'),
+        (0, 1e-5, 'warn'),
+        (1e-3, 1e-3, 'no_warn'),
     ],
 )
 # just a diagonal of ones in qform and sform and see that this doesn't warn
 # only look at the 2 areas of images.py that I added and get code coverage of those
 def test_qformsform_warning(tmp_path, qform_add, sform_add, expectation):
-    fname = str(tmp_path / "test.nii")
+    fname = str(tmp_path / 'test.nii')
 
     # make a random image
     random_data = np.random.random(size=(5, 5, 5) + (5,))
@@ -55,54 +57,51 @@ def test_qformsform_warning(tmp_path, qform_add, sform_add, expectation):
     img.set_qform(np.eye(4) + qform_add)
     img.to_filename(fname)
 
-    validate = pe.Node(header.ValidateImage(), name="validate", base_dir=str(tmp_path))
+    validate = pe.Node(header.ValidateImage(), name='validate', base_dir=str(tmp_path))
     validate.inputs.in_file = fname
     res = validate.run()
     out_report = Path(res.outputs.out_report).read_text()
-    if expectation == "warn":
-        assert "Note on" in out_report
-    elif expectation == "no_warn":
+    if expectation == 'warn':
+        assert 'Note on' in out_report
+    elif expectation == 'no_warn':
         assert len(out_report) == 0
 
 
 @pytest.mark.parametrize(
-    "qform_code, warning_text",
-    [(0, "Note on orientation"), (1, "WARNING - Invalid qform")],
+    ('qform_code', 'warning_text'),
+    [(0, 'Note on orientation'), (1, 'WARNING - Invalid qform')],
 )
 def test_bad_qform(tmp_path, qform_code, warning_text):
-    fname = str(tmp_path / "test.nii")
+    fname = str(tmp_path / 'test.nii')
 
     # make a random image
     random_data = np.random.random(size=(5, 5, 5) + (5,))
     img = nb.Nifti1Image(random_data, np.eye(4))
 
     # Some magic terms from a bad qform in the wild
-    img.header["qform_code"] = qform_code
-    img.header["quatern_b"] = 0
-    img.header["quatern_c"] = 0.998322
-    img.header["quatern_d"] = -0.0579125
+    img.header['qform_code'] = qform_code
+    img.header['quatern_b'] = 0
+    img.header['quatern_c'] = 0.998322
+    img.header['quatern_d'] = -0.0579125
     img.to_filename(fname)
 
-    validate = pe.Node(header.ValidateImage(), name="validate", base_dir=str(tmp_path))
+    validate = pe.Node(header.ValidateImage(), name='validate', base_dir=str(tmp_path))
     validate.inputs.in_file = fname
     res = validate.run()
     assert warning_text in Path(res.outputs.out_report).read_text()
 
 
 def test_no_good_affines(tmp_path):
-    fname = str(tmp_path / "test.nii")
+    fname = str(tmp_path / 'test.nii')
 
     # make a random image
     random_data = np.random.random(size=(5, 5, 5) + (5,))
     img = nb.Nifti1Image(random_data, None)
-    img.header["qform_code"] = 0
-    img.header["sform_code"] = 0
+    img.header['qform_code'] = 0
+    img.header['sform_code'] = 0
     img.to_filename(fname)
 
-    validate = pe.Node(header.ValidateImage(), name="validate", base_dir=str(tmp_path))
+    validate = pe.Node(header.ValidateImage(), name='validate', base_dir=str(tmp_path))
     validate.inputs.in_file = fname
     res = validate.run()
-    assert (
-        "WARNING - Missing orientation information"
-        in Path(res.outputs.out_report).read_text()
-    )
+    assert 'WARNING - Missing orientation information' in Path(res.outputs.out_report).read_text()

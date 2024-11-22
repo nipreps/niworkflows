@@ -21,10 +21,12 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Test morphology module."""
-from pathlib import Path
+
 import shutil
-import numpy as np
+from pathlib import Path
+
 import nibabel as nb
+import numpy as np
 
 from niworkflows.interfaces.morphology import (
     BinaryDilation,
@@ -35,40 +37,40 @@ from niworkflows.interfaces.morphology import (
 def test_BinaryDilation_interface(tmpdir):
     """Check the dilation interface."""
 
-    data = np.zeros((80, 80, 80), dtype="uint8")
+    data = np.zeros((80, 80, 80), dtype='uint8')
     data[30:-30, 35:-35, 20:-20] = 1
 
-    nb.Nifti1Image(data, np.eye(4), None).to_filename("mask.nii.gz")
+    nb.Nifti1Image(data, np.eye(4), None).to_filename('mask.nii.gz')
 
     out1 = (
         BinaryDilation(
-            in_mask=str(Path("mask.nii.gz").absolute()),
+            in_mask=str(Path('mask.nii.gz').absolute()),
             radius=4,
         )
         .run()
         .outputs.out_mask
     )
-    shutil.move(out1, "large_radius.nii.gz")
+    shutil.move(out1, 'large_radius.nii.gz')
 
     out2 = (
         BinaryDilation(
-            in_mask=str(Path("mask.nii.gz").absolute()),
+            in_mask=str(Path('mask.nii.gz').absolute()),
             radius=1,
         )
         .run()
         .outputs.out_mask
     )
-    shutil.move(out2, "small_radius.nii.gz")
+    shutil.move(out2, 'small_radius.nii.gz')
 
     out_final = (
         BinarySubtraction(
-            in_base=str(Path("large_radius.nii.gz").absolute()),
-            in_subtract=str(Path("small_radius.nii.gz").absolute()),
+            in_base=str(Path('large_radius.nii.gz').absolute()),
+            in_subtract=str(Path('small_radius.nii.gz').absolute()),
         )
         .run()
         .outputs.out_mask
     )
 
-    out_data = np.asanyarray(nb.load(out_final).dataobj, dtype="uint8")
+    out_data = np.asanyarray(nb.load(out_final).dataobj, dtype='uint8')
 
     assert np.all(out_data[data] == 0)

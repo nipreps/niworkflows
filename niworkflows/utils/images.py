@@ -21,9 +21,11 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Utilities to manipulate images."""
+
+from gzip import GzipFile
+
 import nibabel as nb
 import numpy as np
-from gzip import GzipFile
 
 
 def rotation2canonical(img):
@@ -56,15 +58,15 @@ def unsafe_write_nifti_header_and_data(fname, header, data):
     If you're not using this for NIfTI files specifically, you're playing
     with Fortran-ordered fire.
     """
-    with open(fname, "wb") as fobj:
+    with open(fname, 'wb') as fobj:
         # Avoid setting fname or mtime, for deterministic outputs
-        if str(fname).endswith(".gz"):
-            fobj = GzipFile("", "wb", 9, fobj, 0.0)
+        if str(fname).endswith('.gz'):
+            fobj = GzipFile('', 'wb', 9, fobj, 0.0)
         header.write_to(fobj)
         # This function serializes one block at a time to reduce memory usage a bit
         # It assumes Fortran-ordered data.
         nb.volumeutils.array_to_file(data, fobj, offset=header.get_data_offset())
-        if str(fname).endswith(".gz"):
+        if str(fname).endswith('.gz'):
             fobj.close()
 
 
@@ -82,11 +84,11 @@ def _copyxform(ref_image, out_image, message=None):
     if not np.allclose(orig.affine, resampled.affine):
         from nipype import logging
 
-        logging.getLogger("nipype.interface").debug(
-            "Affines of input and reference images do not match, "
-            "FMRIPREP will set the reference image headers. "
-            "Please, check that the x-form matrices of the input dataset"
-            "are correct and manually verify the alignment of results."
+        logging.getLogger('nipype.interface').debug(
+            'Affines of input and reference images do not match, '
+            'FMRIPREP will set the reference image headers. '
+            'Please, check that the x-form matrices of the input dataset'
+            'are correct and manually verify the alignment of results.'
         )
 
     # Copy xform infos
@@ -95,7 +97,7 @@ def _copyxform(ref_image, out_image, message=None):
     header = resampled.header.copy()
     header.set_qform(qform, int(qform_code))
     header.set_sform(sform, int(sform_code))
-    header["descrip"] = "xform matrices modified by %s." % (message or "(unknown)")
+    header['descrip'] = 'xform matrices modified by %s.' % (message or '(unknown)')
 
     newimg = resampled.__class__(resampled.dataobj, orig.affine, header)
     newimg.to_filename(out_image)
@@ -142,30 +144,30 @@ def overwrite_header(img, fname):
     header = img.header
     dataobj = img.dataobj
 
-    if getattr(img.dataobj, "_mmap", False):
-        raise ValueError("Image loaded with `mmap=True`. Aborting unsafe operation.")
+    if getattr(img.dataobj, '_mmap', False):
+        raise ValueError('Image loaded with `mmap=True`. Aborting unsafe operation.')
 
     set_consumables(header, dataobj)
 
     ondisk = nb.load(fname, mmap=False)
 
-    errmsg = "Cannot overwrite header (reason: {}).".format
+    errmsg = 'Cannot overwrite header (reason: {}).'.format
     if not isinstance(ondisk.header, img.header_class):
-        raise ValueError(errmsg("inconsistent header objects"))
+        raise ValueError(errmsg('inconsistent header objects'))
 
     if (
         ondisk.get_data_dtype() != img.get_data_dtype()
         or img.header.get_data_shape() != ondisk.shape
     ):
-        raise ValueError(errmsg("data blocks are not the same size"))
+        raise ValueError(errmsg('data blocks are not the same size'))
 
-    if img.header["vox_offset"] != ondisk.dataobj.offset:
-        raise ValueError(errmsg("change in offset from start of file"))
+    if img.header['vox_offset'] != ondisk.dataobj.offset:
+        raise ValueError(errmsg('change in offset from start of file'))
 
     if not np.allclose(
-        img.header["scl_slope"], ondisk.dataobj.slope, equal_nan=True
-    ) or not np.allclose(img.header["scl_inter"], ondisk.dataobj.inter, equal_nan=True):
-        raise ValueError(errmsg("change in scale factors"))
+        img.header['scl_slope'], ondisk.dataobj.slope, equal_nan=True
+    ) or not np.allclose(img.header['scl_inter'], ondisk.dataobj.inter, equal_nan=True):
+        raise ValueError(errmsg('change in scale factors'))
 
     data = np.asarray(dataobj.get_unscaled())
     img._dataobj = data  # Allow old dataobj to be garbage collected
@@ -174,7 +176,7 @@ def overwrite_header(img, fname):
 
 
 def update_header_fields(fname, **kwargs):
-    """ Adjust header fields """
+    """Adjust header fields"""
     # No-op
     if not kwargs:
         return
@@ -187,16 +189,17 @@ def update_header_fields(fname, **kwargs):
 def dseg_label(in_seg, label, newpath=None):
     """Extract a particular label from a discrete segmentation."""
     from pathlib import Path
+
     import nibabel as nb
     import numpy as np
     from nipype.utils.filemanip import fname_presuffix
 
-    newpath = Path(newpath or ".")
+    newpath = Path(newpath or '.')
 
     nii = nb.load(in_seg)
     data = np.int16(nii.dataobj) == label
 
-    out_file = fname_presuffix(in_seg, suffix="_mask", newpath=str(newpath.absolute()))
+    out_file = fname_presuffix(in_seg, suffix='_mask', newpath=str(newpath.absolute()))
     new = nii.__class__(data, nii.affine, nii.header)
     new.set_data_dtype(np.uint8)
     new.to_filename(out_file)
@@ -206,8 +209,9 @@ def dseg_label(in_seg, label, newpath=None):
 def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
     """Regrid the input image to match the new zooms."""
     from pathlib import Path
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
     from scipy.ndimage import map_coordinates
 
     if isinstance(in_file, (str, Path)):
@@ -239,7 +243,7 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
             np.arange(new_size[0]),
             np.arange(new_size[1]),
             np.arange(new_size[2]),
-            indexing="ij",
+            indexing='ij',
         )
     ).reshape((3, -1))
 
@@ -250,6 +254,7 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
 
     if smooth:
         from scipy.ndimage import gaussian_filter
+
         if smooth is True:
             smooth = np.maximum(0, (pre_zooms / zooms - 1) / 2)
         data = gaussian_filter(in_file.get_fdata(), smooth)
@@ -261,7 +266,7 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
         data,
         ijk[:3, :],
         order=order,
-        mode="constant",
+        mode='constant',
         cval=0,
         prefilter=True,
     ).reshape(new_size)
@@ -293,11 +298,12 @@ def resample_by_spacing(in_file, zooms, order=3, clip=True, smooth=False):
 def demean(in_file, in_mask, only_mask=False, newpath=None):
     """Demean ``in_file`` within the mask defined by ``in_mask``."""
     import os
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
     from nipype.utils.filemanip import fname_presuffix
 
-    out_file = fname_presuffix(in_file, suffix="_demeaned", newpath=os.getcwd())
+    out_file = fname_presuffix(in_file, suffix='_demeaned', newpath=os.getcwd())
     nii = nb.load(in_file)
     msk = np.asanyarray(nb.load(in_mask).dataobj)
     data = nii.get_fdata()
@@ -312,13 +318,14 @@ def demean(in_file, in_mask, only_mask=False, newpath=None):
 def nii_ones_like(in_file, value, dtype, newpath=None):
     """Create a NIfTI file filled with ``value``, matching properties of ``in_file``."""
     import os
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
 
     nii = nb.load(in_file)
     data = np.ones(nii.shape, dtype=float) * value
 
-    out_file = os.path.join(newpath or os.getcwd(), "filled.nii.gz")
+    out_file = os.path.join(newpath or os.getcwd(), 'filled.nii.gz')
     nii = nb.Nifti1Image(data, nii.affine, nii.header)
     nii.set_data_dtype(dtype)
     nii.to_filename(out_file)

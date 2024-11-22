@@ -21,59 +21,53 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Utilities based on nilearn."""
+
 import os
+
 import nibabel as nb
 import numpy as np
-
 from nipype import logging
-from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    traits,
-    isdefined,
-    TraitedSpec,
     BaseInterfaceInputSpec,
     File,
     InputMultiPath,
     SimpleInterface,
+    TraitedSpec,
+    isdefined,
+    traits,
 )
 from nipype.interfaces.mixins import reporting
+from nipype.utils.filemanip import fname_presuffix
+
 from .reportlets import base as nrb
 
 try:
     from nilearn import __version__ as NILEARN_VERSION
 except ImportError:
-    NILEARN_VERSION = "unknown"
+    NILEARN_VERSION = 'unknown'
 
-LOGGER = logging.getLogger("nipype.interface")
-__all__ = ["NILEARN_VERSION", "MaskEPI", "Merge", "ComputeEPIMask"]
+LOGGER = logging.getLogger('nipype.interface')
+__all__ = ['NILEARN_VERSION', 'MaskEPI', 'Merge', 'ComputeEPIMask']
 
 
 class _MaskEPIInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiPath(
-        File(exists=True), mandatory=True, desc="input EPI or list of files"
-    )
+    in_files = InputMultiPath(File(exists=True), mandatory=True, desc='input EPI or list of files')
     lower_cutoff = traits.Float(0.2, usedefault=True)
     upper_cutoff = traits.Float(0.85, usedefault=True)
     connected = traits.Bool(True, usedefault=True)
-    enhance_t2 = traits.Bool(
-        False, usedefault=True, desc="enhance T2 contrast on image"
-    )
+    enhance_t2 = traits.Bool(False, usedefault=True, desc='enhance T2 contrast on image')
     opening = traits.Int(2, usedefault=True)
     closing = traits.Bool(True, usedefault=True)
     fill_holes = traits.Bool(True, usedefault=True)
     exclude_zeros = traits.Bool(False, usedefault=True)
     ensure_finite = traits.Bool(True, usedefault=True)
-    target_affine = traits.Either(
-        None, traits.File(exists=True), default=None, usedefault=True
-    )
-    target_shape = traits.Either(
-        None, traits.File(exists=True), default=None, usedefault=True
-    )
+    target_affine = traits.Either(None, traits.File(exists=True), default=None, usedefault=True)
+    target_shape = traits.Either(None, traits.File(exists=True), default=None, usedefault=True)
     no_sanitize = traits.Bool(False, usedefault=True)
 
 
 class _MaskEPIOutputSpec(TraitedSpec):
-    out_mask = File(exists=True, desc="output mask")
+    out_mask = File(exists=True, desc='output mask')
 
 
 class MaskEPI(SimpleInterface):
@@ -83,9 +77,9 @@ class MaskEPI(SimpleInterface):
     output_spec = _MaskEPIOutputSpec
 
     def _run_interface(self, runtime):
-        from skimage import morphology as sim
-        from scipy.ndimage.morphology import binary_fill_holes
         from nilearn.masking import compute_epi_mask
+        from scipy.ndimage.morphology import binary_fill_holes
+        from skimage import morphology as sim
 
         in_files = self.inputs.in_files
 
@@ -126,38 +120,34 @@ class MaskEPI(SimpleInterface):
             sform, code = nii.get_sform(coded=True)
             masknii.set_sform(sform, int(code))
 
-        self._results["out_mask"] = fname_presuffix(
-            self.inputs.in_files[0], suffix="_mask", newpath=runtime.cwd
+        self._results['out_mask'] = fname_presuffix(
+            self.inputs.in_files[0], suffix='_mask', newpath=runtime.cwd
         )
-        masknii.to_filename(self._results["out_mask"])
+        masknii.to_filename(self._results['out_mask'])
         return runtime
 
 
 class _MergeInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(
-        File(exists=True), mandatory=True, desc="input list of files to merge"
+        File(exists=True), mandatory=True, desc='input list of files to merge'
     )
     dtype = traits.Enum(
-        "f4",
-        "f8",
-        "u1",
-        "u2",
-        "u4",
-        "i2",
-        "i4",
+        'f4',
+        'f8',
+        'u1',
+        'u2',
+        'u4',
+        'i2',
+        'i4',
         usedefault=True,
-        desc="numpy dtype of output image",
+        desc='numpy dtype of output image',
     )
-    header_source = File(
-        exists=True, desc="a Nifti file from which the header should be copied"
-    )
-    compress = traits.Bool(
-        True, usedefault=True, desc="Use gzip compression on .nii output"
-    )
+    header_source = File(exists=True, desc='a Nifti file from which the header should be copied')
+    compress = traits.Bool(True, usedefault=True, desc='Use gzip compression on .nii output')
 
 
 class _MergeOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="output merged file")
+    out_file = File(exists=True, desc='output merged file')
 
 
 class Merge(SimpleInterface):
@@ -169,10 +159,10 @@ class Merge(SimpleInterface):
     def _run_interface(self, runtime):
         from nilearn.image import concat_imgs
 
-        ext = ".nii.gz" if self.inputs.compress else ".nii"
-        self._results["out_file"] = fname_presuffix(
+        ext = '.nii.gz' if self.inputs.compress else '.nii'
+        self._results['out_file'] = fname_presuffix(
             self.inputs.in_files[0],
-            suffix="_merged" + ext,
+            suffix='_merged' + ext,
             newpath=runtime.cwd,
             use_ext=False,
         )
@@ -185,18 +175,18 @@ class Merge(SimpleInterface):
                 list(new_nii.header.get_zooms()[:3]) + [src_hdr.get_zooms()[3]]
             )
 
-        new_nii.to_filename(self._results["out_file"])
+        new_nii.to_filename(self._results['out_file'])
 
         return runtime
 
 
 class _ComputeEPIMaskInputSpec(nrb._SVGReportCapableInputSpec, BaseInterfaceInputSpec):
-    in_file = File(exists=True, desc="3D or 4D EPI file")
-    dilation = traits.Int(desc="binary dilation on the nilearn output")
+    in_file = File(exists=True, desc='3D or 4D EPI file')
+    dilation = traits.Int(desc='binary dilation on the nilearn output')
 
 
 class _ComputeEPIMaskOutputSpec(reporting.ReportCapableOutputSpec):
-    mask_file = File(exists=True, desc="Binary brain mask")
+    mask_file = File(exists=True, desc='Binary brain mask')
 
 
 class ComputeEPIMask(nrb.SegmentationRC):
@@ -204,16 +194,14 @@ class ComputeEPIMask(nrb.SegmentationRC):
     output_spec = _ComputeEPIMaskOutputSpec
 
     def _run_interface(self, runtime):
-        from scipy.ndimage.morphology import binary_dilation
         from nilearn.masking import compute_epi_mask
+        from scipy.ndimage.morphology import binary_dilation
 
         orig_file_nii = nb.load(self.inputs.in_file)
         in_file_data = orig_file_nii.get_fdata()
 
         # pad the data to avoid the mask estimation running into edge effects
-        in_file_data_padded = np.pad(
-            in_file_data, (1, 1), "constant", constant_values=(0, 0)
-        )
+        in_file_data_padded = np.pad(in_file_data, (1, 1), 'constant', constant_values=(0, 0))
 
         padded_nii = nb.Nifti1Image(
             in_file_data_padded, orig_file_nii.affine, orig_file_nii.header
@@ -232,20 +220,18 @@ class ComputeEPIMask(nrb.SegmentationRC):
         mask_data[in_file_data == 0] = 0
         mask_data[np.isnan(in_file_data)] = 0
 
-        better_mask = nb.Nifti1Image(
-            mask_data, orig_file_nii.affine, orig_file_nii.header
-        )
+        better_mask = nb.Nifti1Image(mask_data, orig_file_nii.affine, orig_file_nii.header)
         better_mask.set_data_dtype(np.uint8)
-        better_mask.to_filename("mask_file.nii.gz")
+        better_mask.to_filename('mask_file.nii.gz')
 
-        self._mask_file = os.path.join(runtime.cwd, "mask_file.nii.gz")
+        self._mask_file = os.path.join(runtime.cwd, 'mask_file.nii.gz')
 
         runtime.returncode = 0
         return super()._run_interface(runtime)
 
     def _list_outputs(self):
         outputs = super()._list_outputs()
-        outputs["mask_file"] = self._mask_file
+        outputs['mask_file'] = self._mask_file
         return outputs
 
     def _post_run_hook(self, runtime):
@@ -272,7 +258,7 @@ def _enhance_t2_contrast(in_file, newpath=None, offset=0.5):
     effectively splits brain and background and makes the
     overall distribution more Gaussian.
     """
-    out_file = fname_presuffix(in_file, suffix="_t1enh", newpath=newpath)
+    out_file = fname_presuffix(in_file, suffix='_t1enh', newpath=newpath)
     nii = nb.load(in_file)
     data = nii.get_fdata()
     maxd = data.max()

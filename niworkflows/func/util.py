@@ -21,25 +21,29 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Utility workflows."""
-from packaging.version import parse as parseversion, Version
 
+from nipype.interfaces import afni, fsl
+from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
-from nipype.interfaces import utility as niu, fsl, afni
-
+from packaging.version import Version
+from packaging.version import parse as parseversion
 from templateflow.api import get as get_template
 
 from .. import data
 from ..engine.workflows import LiterateWorkflow as Workflow
 from ..interfaces.fixes import (
-    FixHeaderRegistration as Registration,
     FixHeaderApplyTransforms as ApplyTransforms,
+)
+from ..interfaces.fixes import (
+    FixHeaderRegistration as Registration,
+)
+from ..interfaces.fixes import (
     FixN4BiasFieldCorrection as N4BiasFieldCorrection,
 )
 from ..interfaces.header import CopyHeader, CopyXForm, ValidateImage
 from ..interfaces.reportlets.masks import SimpleShowMaskRPT
 from ..utils.connections import listify
 from ..utils.misc import pass_dummy_scans as _pass_dummy_scans
-
 
 DEFAULT_MEMORY_MIN_GB = 0.01
 
@@ -51,7 +55,7 @@ def init_bold_reference_wf(
     brainmask_thresh=0.85,
     pre_mask=False,
     multiecho=False,
-    name="bold_reference_wf",
+    name='bold_reference_wf',
     gen_report=False,
 ):
     """
@@ -140,9 +144,9 @@ def init_bold_reference_wf(
         * :py:func:`~niworkflows.func.util.init_enhance_and_skullstrip_wf`
 
     """
-    from ..utils.connections import pop_file as _pop
     from ..interfaces.bold import NonsteadyStatesDetector
     from ..interfaces.images import RobustAverage
+    from ..utils.connections import pop_file as _pop
 
     workflow = Workflow(name=name)
     workflow.__desc__ = f"""\
@@ -152,27 +156,25 @@ methodology of *fMRIPrep*.
 """
 
     inputnode = pe.Node(
-        niu.IdentityInterface(
-            fields=["bold_file", "bold_mask", "dummy_scans", "sbref_file"]
-        ),
-        name="inputnode",
+        niu.IdentityInterface(fields=['bold_file', 'bold_mask', 'dummy_scans', 'sbref_file']),
+        name='inputnode',
     )
     outputnode = pe.Node(
         niu.IdentityInterface(
             fields=[
-                "bold_file",
-                "all_bold_files",
-                "raw_ref_image",
-                "skip_vols",
-                "algo_dummy_scans",
-                "ref_image",
-                "ref_image_brain",
-                "bold_mask",
-                "validation_report",
-                "mask_report",
+                'bold_file',
+                'all_bold_files',
+                'raw_ref_image',
+                'skip_vols',
+                'algo_dummy_scans',
+                'ref_image',
+                'ref_image_brain',
+                'bold_mask',
+                'validation_report',
+                'mask_report',
             ]
         ),
-        name="outputnode",
+        name='outputnode',
     )
 
     # Simplify manually setting input image
@@ -181,13 +183,13 @@ methodology of *fMRIPrep*.
 
     val_bold = pe.MapNode(
         ValidateImage(),
-        name="val_bold",
+        name='val_bold',
         mem_gb=DEFAULT_MEMORY_MIN_GB,
-        iterfield=["in_file"],
+        iterfield=['in_file'],
     )
 
-    get_dummy = pe.Node(NonsteadyStatesDetector(), name="get_dummy")
-    gen_avg = pe.Node(RobustAverage(), name="gen_avg", mem_gb=1)
+    get_dummy = pe.Node(NonsteadyStatesDetector(), name='get_dummy')
+    gen_avg = pe.Node(RobustAverage(), name='gen_avg', mem_gb=1)
 
     enhance_and_skullstrip_bold_wf = init_enhance_and_skullstrip_bold_wf(
         brainmask_thresh=brainmask_thresh,
@@ -196,41 +198,41 @@ methodology of *fMRIPrep*.
     )
 
     calc_dummy_scans = pe.Node(
-        niu.Function(function=_pass_dummy_scans, output_names=["skip_vols_num"]),
-        name="calc_dummy_scans",
+        niu.Function(function=_pass_dummy_scans, output_names=['skip_vols_num']),
+        name='calc_dummy_scans',
         run_without_submitting=True,
         mem_gb=DEFAULT_MEMORY_MIN_GB,
     )
 
     # fmt: off
     workflow.connect([
-        (inputnode, val_bold, [(("bold_file", listify), "in_file")]),
-        (inputnode, get_dummy, [(("bold_file", _pop), "in_file")]),
-        (inputnode, enhance_and_skullstrip_bold_wf, [("bold_mask", "inputnode.pre_mask")]),
-        (inputnode, calc_dummy_scans, [("dummy_scans", "dummy_scans")]),
-        (gen_avg, enhance_and_skullstrip_bold_wf, [("out_file", "inputnode.in_file")]),
-        (get_dummy, calc_dummy_scans, [("n_dummy", "algo_dummy_scans")]),
-        (calc_dummy_scans, outputnode, [("skip_vols_num", "skip_vols")]),
-        (gen_avg, outputnode, [("out_file", "raw_ref_image")]),
-        (get_dummy, outputnode, [("n_dummy", "algo_dummy_scans")]),
-        (val_bold, outputnode, [(("out_file", _pop), "bold_file"),
-                                ("out_file", "all_bold_files"),
-                                (("out_report", _pop), "validation_report")]),
+        (inputnode, val_bold, [(('bold_file', listify), 'in_file')]),
+        (inputnode, get_dummy, [(('bold_file', _pop), 'in_file')]),
+        (inputnode, enhance_and_skullstrip_bold_wf, [('bold_mask', 'inputnode.pre_mask')]),
+        (inputnode, calc_dummy_scans, [('dummy_scans', 'dummy_scans')]),
+        (gen_avg, enhance_and_skullstrip_bold_wf, [('out_file', 'inputnode.in_file')]),
+        (get_dummy, calc_dummy_scans, [('n_dummy', 'algo_dummy_scans')]),
+        (calc_dummy_scans, outputnode, [('skip_vols_num', 'skip_vols')]),
+        (gen_avg, outputnode, [('out_file', 'raw_ref_image')]),
+        (get_dummy, outputnode, [('n_dummy', 'algo_dummy_scans')]),
+        (val_bold, outputnode, [(('out_file', _pop), 'bold_file'),
+                                ('out_file', 'all_bold_files'),
+                                (('out_report', _pop), 'validation_report')]),
         (enhance_and_skullstrip_bold_wf, outputnode, [
-            ("outputnode.bias_corrected_file", "ref_image"),
-            ("outputnode.mask_file", "bold_mask"),
-            ("outputnode.skull_stripped_file", "ref_image_brain"),
+            ('outputnode.bias_corrected_file', 'ref_image'),
+            ('outputnode.mask_file', 'bold_mask'),
+            ('outputnode.skull_stripped_file', 'ref_image_brain'),
         ]),
     ])
     # fmt: on
 
     if gen_report:
-        mask_reportlet = pe.Node(SimpleShowMaskRPT(), name="mask_reportlet")
+        mask_reportlet = pe.Node(SimpleShowMaskRPT(), name='mask_reportlet')
         # fmt: off
         workflow.connect([
             (enhance_and_skullstrip_bold_wf, mask_reportlet, [
-                ("outputnode.bias_corrected_file", "background_file"),
-                ("outputnode.mask_file", "mask_file"),
+                ('outputnode.bias_corrected_file', 'background_file'),
+                ('outputnode.mask_file', 'mask_file'),
             ]),
         ])
         # fmt: on
@@ -238,8 +240,8 @@ methodology of *fMRIPrep*.
     if not sbref_files:
         # fmt: off
         workflow.connect([
-            (val_bold, gen_avg, [(("out_file", _pop), "in_file")]),  # pop first echo of ME-EPI
-            (get_dummy, gen_avg, [("t_mask", "t_mask")]),
+            (val_bold, gen_avg, [(('out_file', _pop), 'in_file')]),  # pop first echo of ME-EPI
+            (get_dummy, gen_avg, [('t_mask', 't_mask')]),
         ])
         # fmt: on
         return workflow
@@ -254,17 +256,17 @@ methodology of *fMRIPrep*.
 
     val_sbref = pe.MapNode(
         ValidateImage(),
-        name="val_sbref",
+        name='val_sbref',
         mem_gb=DEFAULT_MEMORY_MIN_GB,
-        iterfield=["in_file"],
+        iterfield=['in_file'],
     )
-    merge_sbrefs = pe.Node(MergeSeries(), name="merge_sbrefs")
+    merge_sbrefs = pe.Node(MergeSeries(), name='merge_sbrefs')
 
     # fmt: off
     workflow.connect([
-        (inputnode, val_sbref, [(("sbref_file", listify), "in_file")]),
-        (val_sbref, merge_sbrefs, [("out_file", "in_files")]),
-        (merge_sbrefs, gen_avg, [("out_file", "in_file")]),
+        (inputnode, val_sbref, [(('sbref_file', listify), 'in_file')]),
+        (val_sbref, merge_sbrefs, [('out_file', 'in_files')]),
+        (merge_sbrefs, gen_avg, [('out_file', 'in_file')]),
     ])
     # fmt: on
 
@@ -279,7 +281,7 @@ by aligning and averaging {nsbrefs or ''} single-band references (SBRefs).
 
 def init_enhance_and_skullstrip_bold_wf(
     brainmask_thresh=0.5,
-    name="enhance_and_skullstrip_bold_wf",
+    name='enhance_and_skullstrip_bold_wf',
     omp_nthreads=1,
     pre_mask=False,
 ):
@@ -366,164 +368,154 @@ def init_enhance_and_skullstrip_bold_wf(
     from niworkflows.interfaces.nibabel import ApplyMask, BinaryDilation
 
     workflow = Workflow(name=name)
-    inputnode = pe.Node(
-        niu.IdentityInterface(fields=["in_file", "pre_mask"]), name="inputnode"
-    )
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'pre_mask']), name='inputnode')
     outputnode = pe.Node(
-        niu.IdentityInterface(
-            fields=["mask_file", "skull_stripped_file", "bias_corrected_file"]
-        ),
-        name="outputnode",
+        niu.IdentityInterface(fields=['mask_file', 'skull_stripped_file', 'bias_corrected_file']),
+        name='outputnode',
     )
 
     # Run N4 normally, force num_threads=1 for stability (images are small, no need for >1)
     n4_correct = pe.Node(
-        N4BiasFieldCorrection(
-            dimension=3, copy_header=True, bspline_fitting_distance=200
-        ),
+        N4BiasFieldCorrection(dimension=3, copy_header=True, bspline_fitting_distance=200),
         shrink_factor=2,
-        name="n4_correct",
+        name='n4_correct',
         n_procs=1,
     )
     n4_correct.inputs.rescale_intensities = True
 
     # Create a generous BET mask out of the bias-corrected EPI
-    skullstrip_first_pass = pe.Node(
-        fsl.BET(frac=0.2, mask=True), name="skullstrip_first_pass"
-    )
-    first_dilate = pe.Node(BinaryDilation(radius=6), name="first_dilate")
-    first_mask = pe.Node(ApplyMask(), name="first_mask")
+    skullstrip_first_pass = pe.Node(fsl.BET(frac=0.2, mask=True), name='skullstrip_first_pass')
+    first_dilate = pe.Node(BinaryDilation(radius=6), name='first_dilate')
+    first_mask = pe.Node(ApplyMask(), name='first_mask')
 
     # Use AFNI's unifize for T2 contrast & fix header
     unifize = pe.Node(
         afni.Unifize(
             t2=True,
-            outputtype="NIFTI_GZ",
+            outputtype='NIFTI_GZ',
             # Default -clfrac is 0.1, 0.4 was too conservative
             # -rbt because I'm a Jedi AFNI Master (see 3dUnifize's documentation)
-            args="-clfrac 0.2 -rbt 18.3 65.0 90.0",
-            out_file="uni.nii.gz",
+            args='-clfrac 0.2 -rbt 18.3 65.0 90.0',
+            out_file='uni.nii.gz',
         ),
-        name="unifize",
+        name='unifize',
     )
-    fixhdr_unifize = pe.Node(CopyXForm(), name="fixhdr_unifize", mem_gb=0.1)
+    fixhdr_unifize = pe.Node(CopyXForm(), name='fixhdr_unifize', mem_gb=0.1)
 
     # Run ANFI's 3dAutomask to extract a refined brain mask
     skullstrip_second_pass = pe.Node(
-        afni.Automask(dilate=1, outputtype="NIFTI_GZ"), name="skullstrip_second_pass"
+        afni.Automask(dilate=1, outputtype='NIFTI_GZ'), name='skullstrip_second_pass'
     )
-    fixhdr_skullstrip2 = pe.Node(CopyXForm(), name="fixhdr_skullstrip2", mem_gb=0.1)
+    fixhdr_skullstrip2 = pe.Node(CopyXForm(), name='fixhdr_skullstrip2', mem_gb=0.1)
 
     # Take intersection of both masks
-    combine_masks = pe.Node(fsl.BinaryMaths(operation="mul"), name="combine_masks")
+    combine_masks = pe.Node(fsl.BinaryMaths(operation='mul'), name='combine_masks')
 
     # Compute masked brain
-    apply_mask = pe.Node(ApplyMask(), name="apply_mask")
+    apply_mask = pe.Node(ApplyMask(), name='apply_mask')
 
     if not pre_mask:
         from nipype.interfaces.ants.utils import AI
 
         bold_template = get_template(
-            "MNI152NLin2009cAsym", resolution=2, desc="fMRIPrep", suffix="boldref"
+            'MNI152NLin2009cAsym', resolution=2, desc='fMRIPrep', suffix='boldref'
         )
-        brain_mask = get_template(
-            "MNI152NLin2009cAsym", resolution=2, desc="brain", suffix="mask"
-        )
+        brain_mask = get_template('MNI152NLin2009cAsym', resolution=2, desc='brain', suffix='mask')
 
         # Initialize transforms with antsAI
         init_aff = pe.Node(
             AI(
                 fixed_image=str(bold_template),
                 fixed_image_mask=str(brain_mask),
-                metric=("Mattes", 32, "Regular", 0.2),
-                transform=("Affine", 0.1),
+                metric=('Mattes', 32, 'Regular', 0.2),
+                transform=('Affine', 0.1),
                 search_factor=(20, 0.12),
                 principal_axes=False,
                 convergence=(10, 1e-6, 10),
                 verbose=True,
             ),
-            name="init_aff",
+            name='init_aff',
             n_procs=omp_nthreads,
         )
 
         # Registration().version may be None
-        if parseversion(Registration().version or "0.0.0") > Version("2.2.0"):
+        if parseversion(Registration().version or '0.0.0') > Version('2.2.0'):
             init_aff.inputs.search_grid = (40, (0, 40, 40))
 
         # Set up spatial normalization
         norm = pe.Node(
-            Registration(from_file=data.load("epi_atlasbased_brainmask.json")),
-            name="norm",
+            Registration(from_file=data.load('epi_atlasbased_brainmask.json')),
+            name='norm',
             n_procs=omp_nthreads,
         )
         norm.inputs.fixed_image = str(bold_template)
         map_brainmask = pe.Node(
             ApplyTransforms(
-                interpolation="Linear",
+                interpolation='Linear',
                 # Use the higher resolution and probseg for numerical stability in rounding
                 input_image=str(
                     get_template(
-                        "MNI152NLin2009cAsym",
+                        'MNI152NLin2009cAsym',
                         resolution=1,
-                        label="brain",
-                        suffix="probseg",
+                        label='brain',
+                        suffix='probseg',
                     )
                 ),
             ),
-            name="map_brainmask",
+            name='map_brainmask',
         )
         # Ensure mask's header matches reference's
-        fix_header = pe.Node(CopyHeader(), name="fix_header", run_without_submitting=True)
+        fix_header = pe.Node(CopyHeader(), name='fix_header', run_without_submitting=True)
 
         # fmt: off
         workflow.connect([
-            (inputnode, fix_header, [("in_file", "hdr_file")]),
-            (inputnode, init_aff, [("in_file", "moving_image")]),
-            (inputnode, map_brainmask, [("in_file", "reference_image")]),
-            (inputnode, norm, [("in_file", "moving_image")]),
-            (init_aff, norm, [("output_transform", "initial_moving_transform")]),
+            (inputnode, fix_header, [('in_file', 'hdr_file')]),
+            (inputnode, init_aff, [('in_file', 'moving_image')]),
+            (inputnode, map_brainmask, [('in_file', 'reference_image')]),
+            (inputnode, norm, [('in_file', 'moving_image')]),
+            (init_aff, norm, [('output_transform', 'initial_moving_transform')]),
             (norm, map_brainmask, [
-                ("reverse_invert_flags", "invert_transform_flags"),
-                ("reverse_transforms", "transforms"),
+                ('reverse_invert_flags', 'invert_transform_flags'),
+                ('reverse_transforms', 'transforms'),
             ]),
-            (map_brainmask, fix_header, [("output_image", "in_file")]),
-            (fix_header, n4_correct, [("out_file", "weight_image")]),
+            (map_brainmask, fix_header, [('output_image', 'in_file')]),
+            (fix_header, n4_correct, [('out_file', 'weight_image')]),
         ])
         # fmt: on
     else:
         # fmt: off
         workflow.connect([
-            (inputnode, n4_correct, [("pre_mask", "weight_image")]),
+            (inputnode, n4_correct, [('pre_mask', 'weight_image')]),
         ])
         # fmt: on
 
     # fmt: off
     workflow.connect([
-        (inputnode, n4_correct, [("in_file", "input_image")]),
-        (inputnode, fixhdr_unifize, [("in_file", "hdr_file")]),
-        (inputnode, fixhdr_skullstrip2, [("in_file", "hdr_file")]),
-        (n4_correct, skullstrip_first_pass, [("output_image", "in_file")]),
-        (skullstrip_first_pass, first_dilate, [("mask_file", "in_file")]),
-        (first_dilate, first_mask, [("out_file", "in_mask")]),
-        (skullstrip_first_pass, first_mask, [("out_file", "in_file")]),
-        (first_mask, unifize, [("out_file", "in_file")]),
-        (unifize, fixhdr_unifize, [("out_file", "in_file")]),
-        (fixhdr_unifize, skullstrip_second_pass, [("out_file", "in_file")]),
-        (skullstrip_first_pass, combine_masks, [("mask_file", "in_file")]),
-        (skullstrip_second_pass, fixhdr_skullstrip2, [("out_file", "in_file")]),
-        (fixhdr_skullstrip2, combine_masks, [("out_file", "operand_file")]),
-        (fixhdr_unifize, apply_mask, [("out_file", "in_file")]),
-        (combine_masks, apply_mask, [("out_file", "in_mask")]),
-        (combine_masks, outputnode, [("out_file", "mask_file")]),
-        (apply_mask, outputnode, [("out_file", "skull_stripped_file")]),
-        (n4_correct, outputnode, [("output_image", "bias_corrected_file")]),
+        (inputnode, n4_correct, [('in_file', 'input_image')]),
+        (inputnode, fixhdr_unifize, [('in_file', 'hdr_file')]),
+        (inputnode, fixhdr_skullstrip2, [('in_file', 'hdr_file')]),
+        (n4_correct, skullstrip_first_pass, [('output_image', 'in_file')]),
+        (skullstrip_first_pass, first_dilate, [('mask_file', 'in_file')]),
+        (first_dilate, first_mask, [('out_file', 'in_mask')]),
+        (skullstrip_first_pass, first_mask, [('out_file', 'in_file')]),
+        (first_mask, unifize, [('out_file', 'in_file')]),
+        (unifize, fixhdr_unifize, [('out_file', 'in_file')]),
+        (fixhdr_unifize, skullstrip_second_pass, [('out_file', 'in_file')]),
+        (skullstrip_first_pass, combine_masks, [('mask_file', 'in_file')]),
+        (skullstrip_second_pass, fixhdr_skullstrip2, [('out_file', 'in_file')]),
+        (fixhdr_skullstrip2, combine_masks, [('out_file', 'operand_file')]),
+        (fixhdr_unifize, apply_mask, [('out_file', 'in_file')]),
+        (combine_masks, apply_mask, [('out_file', 'in_mask')]),
+        (combine_masks, outputnode, [('out_file', 'mask_file')]),
+        (apply_mask, outputnode, [('out_file', 'skull_stripped_file')]),
+        (n4_correct, outputnode, [('output_image', 'bias_corrected_file')]),
     ])
     # fmt: on
 
     return workflow
 
 
-def init_skullstrip_bold_wf(name="skullstrip_bold_wf"):
+def init_skullstrip_bold_wf(name='skullstrip_bold_wf'):
     """
     Apply skull-stripping to a BOLD image.
 
@@ -558,38 +550,34 @@ def init_skullstrip_bold_wf(name="skullstrip_bold_wf"):
     from niworkflows.interfaces.nibabel import ApplyMask
 
     workflow = Workflow(name=name)
-    inputnode = pe.Node(niu.IdentityInterface(fields=["in_file"]), name="inputnode")
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file']), name='inputnode')
     outputnode = pe.Node(
-        niu.IdentityInterface(
-            fields=["mask_file", "skull_stripped_file", "out_report"]
-        ),
-        name="outputnode",
+        niu.IdentityInterface(fields=['mask_file', 'skull_stripped_file', 'out_report']),
+        name='outputnode',
     )
-    skullstrip_first_pass = pe.Node(
-        fsl.BET(frac=0.2, mask=True), name="skullstrip_first_pass"
-    )
+    skullstrip_first_pass = pe.Node(fsl.BET(frac=0.2, mask=True), name='skullstrip_first_pass')
     skullstrip_second_pass = pe.Node(
-        afni.Automask(dilate=1, outputtype="NIFTI_GZ"), name="skullstrip_second_pass"
+        afni.Automask(dilate=1, outputtype='NIFTI_GZ'), name='skullstrip_second_pass'
     )
-    combine_masks = pe.Node(fsl.BinaryMaths(operation="mul"), name="combine_masks")
-    apply_mask = pe.Node(ApplyMask(), name="apply_mask")
-    mask_reportlet = pe.Node(SimpleShowMaskRPT(), name="mask_reportlet")
+    combine_masks = pe.Node(fsl.BinaryMaths(operation='mul'), name='combine_masks')
+    apply_mask = pe.Node(ApplyMask(), name='apply_mask')
+    mask_reportlet = pe.Node(SimpleShowMaskRPT(), name='mask_reportlet')
 
     # fmt: off
     workflow.connect([
-        (inputnode, skullstrip_first_pass, [("in_file", "in_file")]),
-        (skullstrip_first_pass, skullstrip_second_pass, [("out_file", "in_file")]),
-        (skullstrip_first_pass, combine_masks, [("mask_file", "in_file")]),
-        (skullstrip_second_pass, combine_masks, [("out_file", "operand_file")]),
-        (combine_masks, outputnode, [("out_file", "mask_file")]),
+        (inputnode, skullstrip_first_pass, [('in_file', 'in_file')]),
+        (skullstrip_first_pass, skullstrip_second_pass, [('out_file', 'in_file')]),
+        (skullstrip_first_pass, combine_masks, [('mask_file', 'in_file')]),
+        (skullstrip_second_pass, combine_masks, [('out_file', 'operand_file')]),
+        (combine_masks, outputnode, [('out_file', 'mask_file')]),
         # Masked file
-        (inputnode, apply_mask, [("in_file", "in_file")]),
-        (combine_masks, apply_mask, [("out_file", "in_mask")]),
-        (apply_mask, outputnode, [("out_file", "skull_stripped_file")]),
+        (inputnode, apply_mask, [('in_file', 'in_file')]),
+        (combine_masks, apply_mask, [('out_file', 'in_mask')]),
+        (apply_mask, outputnode, [('out_file', 'skull_stripped_file')]),
         # Reportlet
-        (inputnode, mask_reportlet, [("in_file", "background_file")]),
-        (combine_masks, mask_reportlet, [("out_file", "mask_file")]),
-        (mask_reportlet, outputnode, [("out_report", "out_report")]),
+        (inputnode, mask_reportlet, [('in_file', 'background_file')]),
+        (combine_masks, mask_reportlet, [('out_file', 'mask_file')]),
+        (mask_reportlet, outputnode, [('out_report', 'out_report')]),
     ])
     # fmt: on
 

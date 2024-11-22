@@ -21,52 +21,43 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Utilities."""
-import numpy as np
-import nibabel as nb
 
+import nibabel as nb
+import numpy as np
 from nipype import logging
-from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    traits,
-    isdefined,
+    BaseInterfaceInputSpec,
     File,
     InputMultiPath,
-    TraitedSpec,
-    BaseInterfaceInputSpec,
     SimpleInterface,
+    TraitedSpec,
+    isdefined,
+    traits,
 )
+from nipype.utils.filemanip import fname_presuffix
 
-
-LOG = logging.getLogger("nipype.interface")
+LOG = logging.getLogger('nipype.interface')
 
 
 class _TPM2ROIInputSpec(BaseInterfaceInputSpec):
-    in_tpm = File(
-        exists=True, mandatory=True, desc="Tissue probability map file in T1 space"
-    )
-    in_mask = File(
-        exists=True, mandatory=True, desc="Binary mask of skull-stripped T1w image"
-    )
+    in_tpm = File(exists=True, mandatory=True, desc='Tissue probability map file in T1 space')
+    in_mask = File(exists=True, mandatory=True, desc='Binary mask of skull-stripped T1w image')
     mask_erode_mm = traits.Float(
-        xor=["mask_erode_prop"], desc="erode input mask (kernel width in mm)"
+        xor=['mask_erode_prop'], desc='erode input mask (kernel width in mm)'
     )
-    erode_mm = traits.Float(
-        xor=["erode_prop"], desc="erode output mask (kernel width in mm)"
-    )
+    erode_mm = traits.Float(xor=['erode_prop'], desc='erode output mask (kernel width in mm)')
     mask_erode_prop = traits.Float(
-        xor=["mask_erode_mm"], desc="erode input mask (target volume ratio)"
+        xor=['mask_erode_mm'], desc='erode input mask (target volume ratio)'
     )
-    erode_prop = traits.Float(
-        xor=["erode_mm"], desc="erode output mask (target volume ratio)"
-    )
+    erode_prop = traits.Float(xor=['erode_mm'], desc='erode output mask (target volume ratio)')
     prob_thresh = traits.Float(
-        0.95, usedefault=True, desc="threshold for the tissue probability maps"
+        0.95, usedefault=True, desc='threshold for the tissue probability maps'
     )
 
 
 class _TPM2ROIOutputSpec(TraitedSpec):
-    roi_file = File(exists=True, desc="output ROI file")
-    eroded_mask = File(exists=True, desc="resulting eroded mask")
+    roi_file = File(exists=True, desc='output ROI file')
+    eroded_mask = File(exists=True, desc='resulting eroded mask')
 
 
 class TPM2ROI(SimpleInterface):
@@ -107,20 +98,18 @@ class TPM2ROI(SimpleInterface):
             self.inputs.prob_thresh,
             newpath=runtime.cwd,
         )
-        self._results["roi_file"] = roi_file
-        self._results["eroded_mask"] = eroded_mask
+        self._results['roi_file'] = roi_file
+        self._results['eroded_mask'] = eroded_mask
         return runtime
 
 
 class _AddTPMsInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiPath(
-        File(exists=True), mandatory=True, desc="input list of ROIs"
-    )
-    indices = traits.List(traits.Int, desc="select specific maps")
+    in_files = InputMultiPath(File(exists=True), mandatory=True, desc='input list of ROIs')
+    indices = traits.List(traits.Int, desc='select specific maps')
 
 
 class _AddTPMsOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="union of binarized input files")
+    out_file = File(exists=True, desc='union of binarized input files')
 
 
 class AddTPMs(SimpleInterface):
@@ -137,27 +126,27 @@ class AddTPMs(SimpleInterface):
             indices = self.inputs.indices
 
         if len(self.inputs.in_files) < 2:
-            self._results["out_file"] = in_files[0]
+            self._results['out_file'] = in_files[0]
             return runtime
 
         first_fname = in_files[indices[0]]
         if len(indices) == 1:
-            self._results["out_file"] = first_fname
+            self._results['out_file'] = first_fname
             return runtime
 
         im = nb.concat_images([in_files[i] for i in indices])
         data = im.get_fdata().sum(axis=3)
         data = np.clip(data, a_min=0.0, a_max=1.0)
 
-        out_file = fname_presuffix(first_fname, suffix="_tpmsum", newpath=runtime.cwd)
+        out_file = fname_presuffix(first_fname, suffix='_tpmsum', newpath=runtime.cwd)
         newnii = im.__class__(data, im.affine, im.header)
         newnii.set_data_dtype(np.float32)
 
         # Set visualization thresholds
-        newnii.header["cal_max"] = 1.0
-        newnii.header["cal_min"] = 0.0
+        newnii.header['cal_max'] = 1.0
+        newnii.header['cal_min'] = 0.0
         newnii.to_filename(out_file)
-        self._results["out_file"] = out_file
+        self._results['out_file'] = out_file
 
         return runtime
 
@@ -185,7 +174,7 @@ def _tpm2roi(
         mask_erosion_prop is not None and mask_erosion_prop < 1
     )
     if erode_in:
-        eroded_mask_file = fname_presuffix(in_mask, suffix="_eroded", newpath=newpath)
+        eroded_mask_file = fname_presuffix(in_mask, suffix='_eroded', newpath=newpath)
         mask_img = nb.load(in_mask)
         mask_data = np.asanyarray(mask_img.dataobj).astype(np.uint8)
         if mask_erosion_mm:
@@ -219,7 +208,7 @@ def _tpm2roi(
                 roi_mask = nd.binary_erosion(roi_mask, iterations=1)
 
     # Create image to resample
-    roi_fname = fname_presuffix(in_tpm, suffix="_roi", newpath=newpath)
+    roi_fname = fname_presuffix(in_tpm, suffix='_roi', newpath=newpath)
     roi_img = nb.Nifti1Image(roi_mask, tpm_img.affine, tpm_img.header)
     roi_img.set_data_dtype(np.uint8)
     roi_img.to_filename(roi_fname)

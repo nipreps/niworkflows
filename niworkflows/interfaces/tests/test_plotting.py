@@ -21,20 +21,23 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Tests plotting interfaces."""
+
 import os
+
 import nibabel as nb
+
 from niworkflows import viz
-from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
 from niworkflows.interfaces.plotting import _get_tr
 from niworkflows.tests.data import load_test_data
+from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
 
 
 def test_cifti_carpetplot():
     """Exercise extraction of timeseries from CIFTI2."""
-    save_artifacts = os.getenv("SAVE_CIRCLE_ARTIFACTS", False)
+    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
 
     cifti_file = load_test_data(
-        "sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii"
+        'sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii'
     )
     data, segments = _cifti_timeseries(str(cifti_file))
     viz.plot_carpet(
@@ -42,34 +45,26 @@ def test_cifti_carpetplot():
         segments,
         tr=_get_tr(nb.load(cifti_file)),
         output_file=(
-            os.path.join(
-                save_artifacts, "carpetplot_cifti.svg"
-            ) if save_artifacts else None
+            os.path.join(save_artifacts, 'carpetplot_cifti.svg') if save_artifacts else None
         ),
         drop_trs=0,
-        cmap="paired",
+        cmap='paired',
     )
 
 
 def test_nifti_carpetplot():
     """Exercise extraction of timeseries from CIFTI2."""
-    save_artifacts = os.getenv("SAVE_CIRCLE_ARTIFACTS", False)
+    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
 
-    nifti_file = load_test_data(
-        "sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz"
-    )
-    seg_file = load_test_data(
-        "sub-ds205s03_task-functionallocalizer_run-01_bold_parc.nii.gz"
-    )
+    nifti_file = load_test_data('sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz')
+    seg_file = load_test_data('sub-ds205s03_task-functionallocalizer_run-01_bold_parc.nii.gz')
     data, segments = _nifti_timeseries(str(nifti_file), str(seg_file))
     viz.plot_carpet(
         data,
         segments,
         tr=_get_tr(nb.load(nifti_file)),
         output_file=(
-            os.path.join(
-                save_artifacts, "carpetplot_nifti.svg"
-            ) if save_artifacts else None
+            os.path.join(save_artifacts, 'carpetplot_nifti.svg') if save_artifacts else None
         ),
         drop_trs=0,
     )

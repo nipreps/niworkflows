@@ -33,26 +33,26 @@ from ..itk import MCFLIRT2ITK, _applytfms
 from .data import load_test_data
 
 
-@pytest.mark.skipif(Info.version() is None, reason="Missing ANTs")
-@pytest.mark.parametrize("ext", (".nii", ".nii.gz"))
-@pytest.mark.parametrize("copy_dtype", (True, False))
-@pytest.mark.parametrize("in_dtype", ("i2", "f4"))
+@pytest.mark.skipif(Info.version() is None, reason='Missing ANTs')
+@pytest.mark.parametrize('ext', ['.nii', '.nii.gz'])
+@pytest.mark.parametrize('copy_dtype', [True, False])
+@pytest.mark.parametrize('in_dtype', ['i2', 'f4'])
 def test_applytfms(tmpdir, ext, copy_dtype, in_dtype):
     import nibabel as nb
     import numpy as np
 
-    in_file = str(tmpdir / ("src" + ext))
+    in_file = str(tmpdir / ('src' + ext))
     nii = nb.Nifti1Image(np.zeros((5, 5, 5), dtype=np.float32), np.eye(4))
     nii.set_data_dtype(in_dtype)
     nii.to_filename(in_file)
 
-    in_xform = data.load("itkIdentityTransform.txt")
+    in_xform = data.load('itkIdentityTransform.txt')
 
-    ifargs = {"copy_dtype": copy_dtype, "reference_image": in_file}
+    ifargs = {'copy_dtype': copy_dtype, 'reference_image': in_file}
     args = (in_file, in_xform, ifargs, 0, str(tmpdir))
     out_file, cmdline = _applytfms(args)
 
-    assert out_file == str(tmpdir / ("src_xform-%05d%s" % (0, ext)))
+    assert out_file == str(tmpdir / ('src_xform-%05d%s' % (0, ext)))
 
     out_nii = nb.load(out_file)
     assert np.allclose(nii.affine, out_nii.affine)
@@ -67,11 +67,11 @@ def test_MCFLIRT2ITK(tmp_path):
 
     fsl2itk = pe.Node(
         MCFLIRT2ITK(
-            in_files=[str(test_data / "MAT_0098"), str(test_data / "MAT_0099")],
-            in_reference=str(test_data / "boldref.nii"),
-            in_source=str(test_data / "boldref.nii"),
+            in_files=[str(test_data / 'MAT_0098'), str(test_data / 'MAT_0099')],
+            in_reference=str(test_data / 'boldref.nii'),
+            in_source=str(test_data / 'boldref.nii'),
         ),
-        name="fsl2itk",
+        name='fsl2itk',
         base_dir=str(tmp_path),
     )
 
@@ -82,22 +82,22 @@ def test_MCFLIRT2ITK(tmp_path):
     lines = out_file.read_text().splitlines()
 
     assert lines[:2] == [
-        "#Insight Transform File V1.0",
-        "#Transform 0",
+        '#Insight Transform File V1.0',
+        '#Transform 0',
     ]
     assert re.match(
-        r"Transform: (MatrixOffsetTransformBase|AffineTransform)_(float|double)_3_3",
+        r'Transform: (MatrixOffsetTransformBase|AffineTransform)_(float|double)_3_3',
         lines[2],
     )
-    assert lines[3].startswith("Parameters: ")
-    assert lines[4] == "FixedParameters: 0 0 0"
-    offset = 1 if lines[5] == "" else 0
-    assert lines[5 + offset] == "#Transform 1"
+    assert lines[3].startswith('Parameters: ')
+    assert lines[4] == 'FixedParameters: 0 0 0'
+    offset = 1 if lines[5] == '' else 0
+    assert lines[5 + offset] == '#Transform 1'
     assert lines[6 + offset] == lines[2]
-    assert lines[7 + offset].startswith("Parameters: ")
+    assert lines[7 + offset].startswith('Parameters: ')
 
-    params0 = np.array([float(p) for p in lines[3].split(" ")[1:]])
-    params1 = np.array([float(p) for p in lines[7 + offset].split(" ")[1:]])
+    params0 = np.array([float(p) for p in lines[3].split(' ')[1:]])
+    params1 = np.array([float(p) for p in lines[7 + offset].split(' ')[1:]])
     # Empirically determined
     assert np.allclose(
         params0,

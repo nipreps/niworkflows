@@ -21,40 +21,38 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Image tools interfaces."""
+
 import os
 from functools import partial
-import numpy as np
-import nibabel as nb
 
+import nibabel as nb
+import numpy as np
 from nipype import logging
-from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    traits,
-    TraitedSpec,
     BaseInterfaceInputSpec,
-    SimpleInterface,
     File,
     InputMultiObject,
     OutputMultiObject,
+    SimpleInterface,
+    TraitedSpec,
     isdefined,
+    traits,
 )
+from nipype.utils.filemanip import fname_presuffix
 
-
-LOGGER = logging.getLogger("nipype.interface")
+LOGGER = logging.getLogger('nipype.interface')
 
 
 class _RegridToZoomsInputSpec(BaseInterfaceInputSpec):
-    in_file = File(
-        exists=True, mandatory=True, desc="a file whose resolution is to change"
-    )
+    in_file = File(exists=True, mandatory=True, desc='a file whose resolution is to change')
     zooms = traits.Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         mandatory=True,
-        desc="the new resolution",
+        desc='the new resolution',
     )
-    order = traits.Int(3, usedefault=True, desc="order of interpolator")
+    order = traits.Int(3, usedefault=True, desc='order of interpolator')
     clip = traits.Bool(
         True,
         usedefault=True,
@@ -65,12 +63,12 @@ class _RegridToZoomsInputSpec(BaseInterfaceInputSpec):
         traits.Float(),
         default=False,
         usedefault=True,
-        desc="apply gaussian smoothing before resampling",
+        desc='apply gaussian smoothing before resampling',
     )
 
 
 class _RegridToZoomsOutputSpec(TraitedSpec):
-    out_file = File(exists=True, dec="the regridded file")
+    out_file = File(exists=True, dec='the regridded file')
 
 
 class RegridToZooms(SimpleInterface):
@@ -82,8 +80,8 @@ class RegridToZooms(SimpleInterface):
     def _run_interface(self, runtime):
         from ..utils.images import resample_by_spacing
 
-        self._results["out_file"] = fname_presuffix(
-            self.inputs.in_file, suffix="_regrid", newpath=runtime.cwd
+        self._results['out_file'] = fname_presuffix(
+            self.inputs.in_file, suffix='_regrid', newpath=runtime.cwd
         )
         resample_by_spacing(
             self.inputs.in_file,
@@ -91,13 +89,13 @@ class RegridToZooms(SimpleInterface):
             order=self.inputs.order,
             clip=self.inputs.clip,
             smooth=self.inputs.smooth,
-        ).to_filename(self._results["out_file"])
+        ).to_filename(self._results['out_file'])
         return runtime
 
 
 class _IntraModalMergeInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiObject(File(exists=True), mandatory=True, desc="input files")
-    in_mask = File(exists=True, desc="input mask for grand mean scaling")
+    in_files = InputMultiObject(File(exists=True), mandatory=True, desc='input files')
+    in_mask = File(exists=True, desc='input mask for grand mean scaling')
     hmc = traits.Bool(True, usedefault=True)
     zero_based_avg = traits.Bool(True, usedefault=True)
     to_ras = traits.Bool(True, usedefault=True)
@@ -105,10 +103,10 @@ class _IntraModalMergeInputSpec(BaseInterfaceInputSpec):
 
 
 class _IntraModalMergeOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="merged image")
-    out_avg = File(exists=True, desc="average image")
-    out_mats = OutputMultiObject(File(exists=True), desc="output matrices")
-    out_movpar = OutputMultiObject(File(exists=True), desc="output movement parameters")
+    out_file = File(exists=True, desc='merged image')
+    out_avg = File(exists=True, desc='average image')
+    out_mats = OutputMultiObject(File(exists=True), desc='output matrices')
+    out_movpar = OutputMultiObject(File(exists=True), desc='output movement parameters')
 
 
 class IntraModalMerge(SimpleInterface):
@@ -135,11 +133,11 @@ class IntraModalMerge(SimpleInterface):
 
         nii_list = []
         # Remove one-sized extra dimensions
-        for i, f in enumerate(in_files):
+        for f in in_files:
             filenii = nb.load(f)
             filenii = nb.squeeze_image(filenii)
             if len(filenii.shape) == 5:
-                raise RuntimeError("Input image (%s) is 5D." % f)
+                raise RuntimeError(f'Input image ({f}) is 5D.')
             if filenii.dataobj.ndim == 4:
                 nii_list += nb.four_to_three(filenii)
             else:
@@ -151,11 +149,11 @@ class IntraModalMerge(SimpleInterface):
             filenii = nii_list[0]
 
         merged_fname = fname_presuffix(
-            self.inputs.in_files[0], suffix="_merged", newpath=runtime.cwd
+            self.inputs.in_files[0], suffix='_merged', newpath=runtime.cwd
         )
         filenii.to_filename(merged_fname)
-        self._results["out_file"] = merged_fname
-        self._results["out_avg"] = merged_fname
+        self._results['out_file'] = merged_fname
+        self._results['out_avg'] = merged_fname
 
         if filenii.dataobj.ndim < 4:
             # TODO: generate identity out_mats and zero-filled out_movpar
@@ -165,7 +163,7 @@ class IntraModalMerge(SimpleInterface):
             from nipype.interfaces.fsl import MCFLIRT
 
             mcflirt = MCFLIRT(
-                cost="normcorr",
+                cost='normcorr',
                 save_mats=True,
                 save_plots=True,
                 ref_vol=0,
@@ -173,23 +171,21 @@ class IntraModalMerge(SimpleInterface):
             )
             mcres = mcflirt.run()
             filenii = nb.load(mcres.outputs.out_file)
-            self._results["out_file"] = mcres.outputs.out_file
-            self._results["out_mats"] = mcres.outputs.mat_file
-            self._results["out_movpar"] = mcres.outputs.par_file
+            self._results['out_file'] = mcres.outputs.out_file
+            self._results['out_mats'] = mcres.outputs.mat_file
+            self._results['out_movpar'] = mcres.outputs.par_file
 
-        hmcdata = filenii.get_fdata(dtype="float32")
+        hmcdata = filenii.get_fdata(dtype='float32')
         if self.inputs.grand_mean_scaling:
             if not isdefined(self.inputs.in_mask):
                 mean = np.median(hmcdata, axis=-1)
                 thres = np.percentile(mean, 25)
                 mask = mean > thres
             else:
-                mask = nb.load(self.inputs.in_mask).get_fdata(dtype="float32") > 0.5
+                mask = nb.load(self.inputs.in_mask).get_fdata(dtype='float32') > 0.5
 
             nimgs = hmcdata.shape[-1]
-            means = np.median(
-                hmcdata[mask[..., np.newaxis]].reshape((-1, nimgs)).T, axis=-1
-            )
+            means = np.median(hmcdata[mask[..., np.newaxis]].reshape((-1, nimgs)).T, axis=-1)
             max_mean = means.max()
             for i in range(nimgs):
                 hmcdata[..., i] *= max_mean / means[i]
@@ -198,11 +194,11 @@ class IntraModalMerge(SimpleInterface):
         if self.inputs.zero_based_avg:
             hmcdata -= hmcdata.min()
 
-        self._results["out_avg"] = fname_presuffix(
-            self.inputs.in_files[0], suffix="_avg", newpath=runtime.cwd
+        self._results['out_avg'] = fname_presuffix(
+            self.inputs.in_files[0], suffix='_avg', newpath=runtime.cwd
         )
         nb.Nifti1Image(hmcdata, filenii.affine, filenii.header).to_filename(
-            self._results["out_avg"]
+            self._results['out_avg']
         )
 
         return runtime
@@ -212,33 +208,33 @@ class _RobustAverageInputSpec(BaseInterfaceInputSpec):
     in_file = File(
         exists=True,
         mandatory=True,
-        desc="Either a 3D reference or 4D file to average through the last axis"
+        desc='Either a 3D reference or 4D file to average through the last axis',
     )
-    t_mask = traits.List(traits.Bool, desc="List of selected timepoints to be averaged")
+    t_mask = traits.List(traits.Bool, desc='List of selected timepoints to be averaged')
     mc_method = traits.Enum(
-        "AFNI",
-        "FSL",
+        'AFNI',
+        'FSL',
         None,
         usedefault=True,
-        desc="Which software to use to perform motion correction",
+        desc='Which software to use to perform motion correction',
     )
     nonnegative = traits.Bool(
-        True, usedefault=True, desc="whether the output should be clipped below zero"
+        True, usedefault=True, desc='whether the output should be clipped below zero'
     )
-    num_threads = traits.Int(desc="number of threads")
+    num_threads = traits.Int(desc='number of threads')
     two_pass = traits.Bool(
-        True, usedefault=True, desc="whether two passes of correction is necessary"
+        True, usedefault=True, desc='whether two passes of correction is necessary'
     )
 
 
 class _RobustAverageOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="the averaged image")
-    out_volumes = File(exists=True, desc="the volumes selected that have been averaged")
+    out_file = File(exists=True, desc='the averaged image')
+    out_volumes = File(exists=True, desc='the volumes selected that have been averaged')
     out_drift = traits.List(
-        traits.Float, desc="the ratio to the grand mean or global signal drift"
+        traits.Float, desc='the ratio to the grand mean or global signal drift'
     )
-    out_hmc = OutputMultiObject(File(exists=True), desc="head-motion correction matrices")
-    out_hmc_volumes = OutputMultiObject(File(exists=True), desc="head-motion correction volumes")
+    out_hmc = OutputMultiObject(File(exists=True), desc='head-motion correction matrices')
+    out_hmc_volumes = OutputMultiObject(File(exists=True), desc='head-motion correction volumes')
 
 
 class RobustAverage(SimpleInterface):
@@ -252,9 +248,9 @@ class RobustAverage(SimpleInterface):
 
         # If reference is 3D, return it directly
         if img.dataobj.ndim == 3:
-            self._results["out_file"] = self.inputs.in_file
-            self._results["out_volumes"] = self.inputs.in_file
-            self._results["out_drift"] = [1.0]
+            self._results['out_file'] = self.inputs.in_file
+            self._results['out_volumes'] = self.inputs.in_file
+            self._results['out_drift'] = [1.0]
             return runtime
 
         fname = partial(fname_presuffix, self.inputs.in_file, newpath=runtime.cwd)
@@ -267,34 +263,30 @@ class RobustAverage(SimpleInterface):
 
         # If reference was 4D, but single-volume - write out squeezed and return.
         if img.dataobj.ndim == 3:
-            self._results["out_file"] = fname(suffix="_squeezed")
-            img.to_filename(self._results["out_file"])
-            self._results["out_volumes"] = self.inputs.in_file
-            self._results["out_drift"] = [1.0]
+            self._results['out_file'] = fname(suffix='_squeezed')
+            img.to_filename(self._results['out_file'])
+            self._results['out_volumes'] = self.inputs.in_file
+            self._results['out_drift'] = [1.0]
             return runtime
 
         img_len = img.shape[3]
-        t_mask = (
-            self.inputs.t_mask if isdefined(self.inputs.t_mask) else [True] * img_len
-        )
+        t_mask = self.inputs.t_mask if isdefined(self.inputs.t_mask) else [True] * img_len
 
         if len(t_mask) != img_len:
             raise ValueError(
-                f"Image length ({img_len} timepoints) unmatched by mask ({len(t_mask)})"
+                f'Image length ({img_len} timepoints) unmatched by mask ({len(t_mask)})'
             )
 
         n_volumes = sum(t_mask)
         if n_volumes < 1:
-            raise ValueError("At least one volume should be selected for slicing")
+            raise ValueError('At least one volume should be selected for slicing')
 
-        self._results["out_file"] = fname(suffix="_average")
-        self._results["out_volumes"] = fname(suffix="_sliced")
+        self._results['out_file'] = fname(suffix='_average')
+        self._results['out_volumes'] = fname(suffix='_sliced')
 
-        sliced = nb.concat_images(
-            i for i, t in zip(nb.four_to_three(img), t_mask) if t
-        )
+        sliced = nb.concat_images(i for i, t in zip(nb.four_to_three(img), t_mask) if t)
 
-        data = sliced.get_fdata(dtype="float32")
+        data = sliced.get_fdata(dtype='float32')
         # Data can come with outliers showing very high numbers - preemptively prune
         data = np.clip(
             data,
@@ -304,7 +296,7 @@ class RobustAverage(SimpleInterface):
 
         gs_drift = np.mean(data, axis=(0, 1, 2))
         gs_drift /= gs_drift.max()
-        self._results["out_drift"] = [float(i) for i in gs_drift]
+        self._results['out_drift'] = [float(i) for i in gs_drift]
 
         data /= gs_drift
         data = np.clip(
@@ -313,43 +305,43 @@ class RobustAverage(SimpleInterface):
             a_max=data.max(),
         )
         sliced.__class__(data, sliced.affine, sliced.header).to_filename(
-            self._results["out_volumes"]
+            self._results['out_volumes']
         )
 
         if n_volumes == 1:
-            nb.squeeze_image(sliced).to_filename(self._results["out_file"])
-            self._results["out_drift"] = [1.0]
+            nb.squeeze_image(sliced).to_filename(self._results['out_file'])
+            self._results['out_drift'] = [1.0]
             return runtime
 
-        if self.inputs.mc_method == "AFNI":
+        if self.inputs.mc_method == 'AFNI':
             from nipype.interfaces.afni import Volreg
 
             volreg = Volreg(
-                in_file=self._results["out_volumes"],
-                interp="Fourier",
-                args="-twopass" if self.inputs.two_pass else "",
+                in_file=self._results['out_volumes'],
+                interp='Fourier',
+                args='-twopass' if self.inputs.two_pass else '',
                 zpad=4,
-                outputtype="NIFTI_GZ",
+                outputtype='NIFTI_GZ',
             )
             if isdefined(self.inputs.num_threads):
                 volreg.inputs.num_threads = self.inputs.num_threads
 
             res = volreg.run()
-            self._results["out_hmc"] = res.outputs.oned_matrix_save
+            self._results['out_hmc'] = res.outputs.oned_matrix_save
 
-        elif self.inputs.mc_method == "FSL":
+        elif self.inputs.mc_method == 'FSL':
             from nipype.interfaces.fsl import MCFLIRT
 
             res = MCFLIRT(
-                in_file=self._results["out_volumes"],
+                in_file=self._results['out_volumes'],
                 ref_vol=0,
-                interpolation="sinc",
+                interpolation='sinc',
             ).run()
-            self._results["out_hmc"] = res.outputs.mat_file
+            self._results['out_hmc'] = res.outputs.mat_file
 
         if self.inputs.mc_method:
-            self._results["out_hmc_volumes"] = res.outputs.out_file
-            data = nb.load(res.outputs.out_file).get_fdata(dtype="float32")
+            self._results['out_hmc_volumes'] = res.outputs.out_file
+            data = nb.load(res.outputs.out_file).get_fdata(dtype='float32')
 
         data = np.clip(
             data,
@@ -357,9 +349,9 @@ class RobustAverage(SimpleInterface):
             a_max=data.max(),
         )
 
-        sliced.__class__(
-            np.median(data, axis=3), sliced.affine, sliced.header
-        ).to_filename(self._results["out_file"])
+        sliced.__class__(np.median(data, axis=3), sliced.affine, sliced.header).to_filename(
+            self._results['out_file']
+        )
         return runtime
 
 
@@ -378,31 +370,31 @@ DISCARD_TEMPLATE = """\t\t\t\t<li><abbr title="{path}">{basename}</abbr></li>"""
 
 
 class _TemplateDimensionsInputSpec(BaseInterfaceInputSpec):
-    anat_type = traits.Enum("T1w", "T2w", usedefault=True, desc="Anatomical image type")
+    anat_type = traits.Enum('T1w', 'T2w', usedefault=True, desc='Anatomical image type')
     anat_list = InputMultiObject(
-        File(exists=True), xor=["t1w_list"], desc="input anatomical images"
+        File(exists=True), xor=['t1w_list'], desc='input anatomical images'
     )
     t1w_list = InputMultiObject(
         File(exists=True),
-        xor=["anat_list"],
-        deprecated="1.14.0",
-        new_name="anat_list",
+        xor=['anat_list'],
+        deprecated='1.14.0',
+        new_name='anat_list',
     )
     max_scale = traits.Float(
-        3.0, usedefault=True, desc="Maximum scaling factor in images to accept"
+        3.0, usedefault=True, desc='Maximum scaling factor in images to accept'
     )
 
 
 class _TemplateDimensionsOutputSpec(TraitedSpec):
-    t1w_valid_list = OutputMultiObject(exists=True, desc="valid T1w images")
-    anat_valid_list = OutputMultiObject(exists=True, desc="valid anatomical images")
+    t1w_valid_list = OutputMultiObject(exists=True, desc='valid T1w images')
+    anat_valid_list = OutputMultiObject(exists=True, desc='valid anatomical images')
     target_zooms = traits.Tuple(
-        traits.Float, traits.Float, traits.Float, desc="Target zoom information"
+        traits.Float, traits.Float, traits.Float, desc='Target zoom information'
     )
     target_shape = traits.Tuple(
-        traits.Int, traits.Int, traits.Int, desc="Target shape information"
+        traits.Int, traits.Int, traits.Int, desc='Target shape information'
     )
-    out_report = File(exists=True, desc="conformation report")
+    out_report = File(exists=True, desc='conformation report')
 
 
 class TemplateDimensions(SimpleInterface):
@@ -429,14 +421,12 @@ class TemplateDimensions(SimpleInterface):
             DISCARD_TEMPLATE.format(path=path, basename=os.path.basename(path))
             for path in discards
         ]
-        discard_list = (
-            "\n".join(["\t\t\t<ul>"] + items + ["\t\t\t</ul>"]) if items else ""
-        )
-        zoom_fmt = "{:.02g}mm x {:.02g}mm x {:.02g}mm".format(*zooms)
+        discard_list = '\n'.join(['\t\t\t<ul>'] + items + ['\t\t\t</ul>']) if items else ''
+        zoom_fmt = '{:.02g}mm x {:.02g}mm x {:.02g}mm'.format(*zooms)
         return CONFORMATION_TEMPLATE.format(
             anat=self.inputs.anat_type,
             n_anat=len(self.inputs.anat_list),
-            dims="x".join(map(str, dims)),
+            dims='x'.join(map(str, dims)),
             zooms=zoom_fmt,
             n_discards=len(discards),
             discard_list=discard_list,
@@ -464,41 +454,41 @@ class TemplateDimensions(SimpleInterface):
 
         # Ignore dropped images
         valid_fnames = np.atleast_1d(in_names[valid]).tolist()
-        self._results["anat_valid_list"] = valid_fnames
-        self._results["t1w_valid_list"] = valid_fnames  # Deprecate: 1.14.0
+        self._results['anat_valid_list'] = valid_fnames
+        self._results['t1w_valid_list'] = valid_fnames  # Deprecate: 1.14.0
 
         # Set target shape information
         target_zooms = all_zooms[valid].min(axis=0)
         target_shape = all_shapes[valid].max(axis=0)
 
-        self._results["target_zooms"] = tuple(target_zooms.tolist())
-        self._results["target_shape"] = tuple(target_shape.tolist())
+        self._results['target_zooms'] = tuple(target_zooms.tolist())
+        self._results['target_shape'] = tuple(target_shape.tolist())
 
         # Create report
         dropped_images = in_names[~valid]
         segment = self._generate_segment(dropped_images, target_shape, target_zooms)
-        out_report = os.path.join(runtime.cwd, "report.html")
-        with open(out_report, "w") as fobj:
+        out_report = os.path.join(runtime.cwd, 'report.html')
+        with open(out_report, 'w') as fobj:
             fobj.write(segment)
 
-        self._results["out_report"] = out_report
+        self._results['out_report'] = out_report
 
         return runtime
 
 
 class _ConformInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="Input image")
+    in_file = File(exists=True, mandatory=True, desc='Input image')
     target_zooms = traits.Tuple(
-        traits.Float, traits.Float, traits.Float, desc="Target zoom information"
+        traits.Float, traits.Float, traits.Float, desc='Target zoom information'
     )
     target_shape = traits.Tuple(
-        traits.Int, traits.Int, traits.Int, desc="Target shape information"
+        traits.Int, traits.Int, traits.Int, desc='Target shape information'
     )
 
 
 class _ConformOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="Conformed image")
-    transform = File(exists=True, desc="Conformation transform (voxel-to-voxel)")
+    out_file = File(exists=True, desc='Conformed image')
+    transform = File(exists=True, desc='Conformation transform (voxel-to-voxel)')
 
 
 class Conform(SimpleInterface):
@@ -533,22 +523,20 @@ class Conform(SimpleInterface):
         shape = np.array(reoriented.shape[:3])
 
         # Reconstruct transform from orig to reoriented image
-        ornt_xfm = nb.orientations.inv_ornt_aff(
-            nb.io_orientation(orig_img.affine), orig_img.shape
-        )
+        ornt_xfm = nb.orientations.inv_ornt_aff(nb.io_orientation(orig_img.affine), orig_img.shape)
         # Identity unless proven otherwise
         target_affine = reoriented.affine.copy()
         conform_xfm = np.eye(4)
 
         xyz_unit = reoriented.header.get_xyzt_units()[0]
-        if xyz_unit == "unknown":
+        if xyz_unit == 'unknown':
             # Common assumption; if we're wrong, unlikely to be the only thing that breaks
-            xyz_unit = "mm"
+            xyz_unit = 'mm'
 
         # Set a 0.05mm threshold to performing rescaling
-        atol_gross = {"meter": 5e-5, "mm": 0.05, "micron": 50}[xyz_unit]
+        atol_gross = {'meter': 5e-5, 'mm': 0.05, 'micron': 50}[xyz_unit]
         # if 0.01 > difference > 0.001mm, freesurfer won't be able to merge the images
-        atol_fine = {"meter": 1e-6, "mm": 0.001, "micron": 1}[xyz_unit]
+        atol_fine = {'meter': 1e-6, 'mm': 0.001, 'micron': 1}[xyz_unit]
 
         # Update zooms => Modify affine
         # Rescale => Resample to resized voxels
@@ -561,18 +549,14 @@ class Conform(SimpleInterface):
             # Use an affine with the corrected zooms, whether or not we resample
             if update_zooms:
                 scale_factor = target_zooms / zooms
-                target_affine[:3, :3] = reoriented.affine[:3, :3] @ np.diag(
-                    scale_factor
-                )
+                target_affine[:3, :3] = reoriented.affine[:3, :3] @ np.diag(scale_factor)
 
             if resize:
                 # The shift is applied after scaling.
                 # Use a proportional shift to maintain relative position in dataset
                 size_factor = target_span / (zooms * shape)
                 # Use integer shifts to avoid unnecessary interpolation
-                offset = (
-                    reoriented.affine[:3, 3] * size_factor - reoriented.affine[:3, 3]
-                )
+                offset = reoriented.affine[:3, 3] * size_factor - reoriented.affine[:3, 3]
                 target_affine[:3, 3] = reoriented.affine[:3, 3] + offset.astype(int)
 
             conform_xfm = np.linalg.inv(reoriented.affine) @ target_affine
@@ -587,29 +571,27 @@ class Conform(SimpleInterface):
 
         # Image may be reoriented, rescaled, and/or resized
         if reoriented is not orig_img:
-            out_name = fname_presuffix(fname, suffix="_ras", newpath=runtime.cwd)
+            out_name = fname_presuffix(fname, suffix='_ras', newpath=runtime.cwd)
             reoriented.to_filename(out_name)
         else:
             out_name = fname
 
         transform = ornt_xfm.dot(conform_xfm)
         if not np.allclose(orig_img.affine.dot(transform), target_affine):
-            raise ValueError("Original and target affines are not similar")
+            raise ValueError('Original and target affines are not similar')
 
-        mat_name = fname_presuffix(
-            fname, suffix=".mat", newpath=runtime.cwd, use_ext=False
-        )
-        np.savetxt(mat_name, transform, fmt="%.08f")
+        mat_name = fname_presuffix(fname, suffix='.mat', newpath=runtime.cwd, use_ext=False)
+        np.savetxt(mat_name, transform, fmt='%.08f')
 
-        self._results["out_file"] = out_name
-        self._results["transform"] = mat_name
+        self._results['out_file'] = out_name
+        self._results['transform'] = mat_name
 
         return runtime
 
 
 def reorient(in_file, newpath=None):
     """Reorient Nifti files to RAS."""
-    out_file = fname_presuffix(in_file, suffix="_ras", newpath=newpath)
+    out_file = fname_presuffix(in_file, suffix='_ras', newpath=newpath)
     nb.as_closest_canonical(nb.load(in_file)).to_filename(out_file)
     return out_file
 
@@ -655,47 +637,46 @@ def normalize_xform(img):
 
 
 class _SignalExtractionInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="4-D fMRI nii file")
+    in_file = File(exists=True, mandatory=True, desc='4-D fMRI nii file')
     label_files = InputMultiObject(
         File(exists=True),
         mandatory=True,
-        desc="a 3D label image, with 0 denoting "
-        "background, or a list of 3D probability "
-        "maps (one per label) or the equivalent 4D "
-        "file.",
+        desc='a 3D label image, with 0 denoting '
+        'background, or a list of 3D probability '
+        'maps (one per label) or the equivalent 4D '
+        'file.',
     )
     prob_thres = traits.Range(
         low=0.0,
         high=1.0,
         value=0.5,
         usedefault=True,
-        desc="If label_files are probability masks, threshold "
-        "at specified probability.",
+        desc='If label_files are probability masks, threshold at specified probability.',
     )
     class_labels = traits.List(
         mandatory=True,
-        desc="Human-readable labels for each segment "
-        "in the label file, in order. The length of "
-        "class_labels must be equal to the number of "
-        "segments (background excluded). This list "
-        "corresponds to the class labels in label_file "
-        "in ascending order",
+        desc='Human-readable labels for each segment '
+        'in the label file, in order. The length of '
+        'class_labels must be equal to the number of '
+        'segments (background excluded). This list '
+        'corresponds to the class labels in label_file '
+        'in ascending order',
     )
     out_file = File(
-        "signals.tsv",
+        'signals.tsv',
         usedefault=True,
         exists=False,
-        desc="The name of the file to output to. signals.tsv by default",
+        desc='The name of the file to output to. signals.tsv by default',
     )
 
 
 class _SignalExtractionOutputSpec(TraitedSpec):
     out_file = File(
         exists=True,
-        desc="tsv file containing the computed "
-        "signals, with as many columns as there are labels and as "
-        "many rows as there are timepoints in in_file, plus a "
-        "header row with values from class_labels",
+        desc='tsv file containing the computed '
+        'signals, with as many columns as there are labels and as '
+        'many rows as there are timepoints in in_file, plus a '
+        'header row with values from class_labels',
     )
 
 
@@ -721,16 +702,15 @@ class SignalExtraction(SimpleInterface):
         # This check assumes all input masks have same dimensions
         if img.shape[:3] != mask_imgs[0].shape[:3]:
             raise NotImplementedError(
-                "Input image and mask should be of "
-                "same dimensions before running SignalExtraction"
+                'Input image and mask should be of '
+                'same dimensions before running SignalExtraction'
             )
         # Load the mask.
         # If mask is a list, each mask is treated as its own ROI/parcel
         # If mask is a 3D, each integer is treated as its own ROI/parcel
         if len(mask_imgs) > 1:
             masks = [
-                np.asanyarray(mask_img.dataobj) >= self.inputs.prob_thres
-                for mask_img in mask_imgs
+                np.asanyarray(mask_img.dataobj) >= self.inputs.prob_thres for mask_img in mask_imgs
             ]
         else:
             labelsmap = np.asanyarray(mask_imgs[0].dataobj)
@@ -739,7 +719,7 @@ class SignalExtraction(SimpleInterface):
             masks = [labelsmap == label for label in labels]
 
         if len(masks) != len(self.inputs.class_labels):
-            raise ValueError("Number of masks must match number of labels")
+            raise ValueError('Number of masks must match number of labels')
 
         series = np.zeros((img.shape[3], len(masks)))
 
@@ -748,7 +728,7 @@ class SignalExtraction(SimpleInterface):
             series[:, j] = data[mask, :].mean(axis=0)
 
         output = np.vstack((self.inputs.class_labels, series.astype(str)))
-        self._results["out_file"] = os.path.join(runtime.cwd, self.inputs.out_file)
-        np.savetxt(self._results["out_file"], output, fmt="%s", delimiter="\t")
+        self._results['out_file'] = os.path.join(runtime.cwd, self.inputs.out_file)
+        np.savetxt(self._results['out_file'], output, fmt='%s', delimiter='\t')
 
         return runtime

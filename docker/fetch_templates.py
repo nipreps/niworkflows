@@ -19,11 +19,11 @@ def fetch_MNI2009():
     tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-fMRIPrep_boldref.nii.gz
     tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-01_label-brain_probseg.nii.gz
     """
-    template = "MNI152NLin2009cAsym"
+    template = 'MNI152NLin2009cAsym'
 
-    tf.get(template, resolution=2, desc="brain", suffix="mask")
-    tf.get(template, resolution=2, desc="fMRIPrep", suffix="boldref")
-    tf.get(template, resolution=1, label="brain", suffix="probseg")
+    tf.get(template, resolution=2, desc='brain', suffix='mask')
+    tf.get(template, resolution=2, desc='fMRIPrep', suffix='boldref')
+    tf.get(template, resolution=1, label='brain', suffix='probseg')
 
 
 def fetch_MNI152Lin():
@@ -33,10 +33,10 @@ def fetch_MNI152Lin():
     tpl-MNI152Lin/tpl-MNI152Lin_res-02_T1w.nii.gz
     tpl-MNI152Lin/tpl-MNI152Lin_res-02_desc-brain_mask.nii.gz
     """
-    template = "MNI152Lin"
+    template = 'MNI152Lin'
 
-    tf.get(template, resolution=2, desc=None, suffix="T1w")
-    tf.get(template, resolution=2, desc="brain", suffix="mask")
+    tf.get(template, resolution=2, desc=None, suffix='T1w')
+    tf.get(template, resolution=2, desc='brain', suffix='mask')
 
 
 def fetch_OASIS():
@@ -50,13 +50,13 @@ def fetch_OASIS():
     tpl-OASIS30ANTs/tpl-OASIS30ANTs_res-01_desc-brain_mask.nii.gz
     tpl-OASIS30ANTs/tpl-OASIS30ANTs_res-01_desc-BrainCerebellumExtraction_mask.nii.gz
     """
-    template = "OASIS30ANTs"
+    template = 'OASIS30ANTs'
 
-    tf.get(template, resolution=1, desc="4", suffix="dseg")
-    tf.get(template, resolution=1, desc=None, suffix="T1w")
-    tf.get(template, resolution=1, label="brain", suffix="mask")
-    tf.get(template, resolution=1, desc="BrainCerebellumExtraction", suffix="mask")
-    tf.get(template, resolution=1, label="brain", suffix="probseg")
+    tf.get(template, resolution=1, desc='4', suffix='dseg')
+    tf.get(template, resolution=1, desc=None, suffix='T1w')
+    tf.get(template, resolution=1, label='brain', suffix='mask')
+    tf.get(template, resolution=1, desc='BrainCerebellumExtraction', suffix='mask')
+    tf.get(template, resolution=1, label='brain', suffix='probseg')
 
 
 def fetch_fsaverage():
@@ -70,10 +70,10 @@ def fetch_fsaverage():
     tpl-fsaverage/tpl-fsaverage_hemi-L_den-164k_midthickness.surf.gii
     tpl-fsaverage/tpl-fsaverage_hemi-R_den-164k_midthickness.surf.gii
     """
-    template = "fsaverage"
+    template = 'fsaverage'
 
-    tf.get(template, density="164k", desc="std", suffix="sphere")
-    tf.get(template, density="164k", suffix="midthickness")
+    tf.get(template, density='164k', desc='std', suffix='sphere')
+    tf.get(template, density='164k', suffix='midthickness')
 
 
 def fetch_fsLR():
@@ -89,7 +89,7 @@ def fetch_fsLR():
     tpl-fsLR/tpl-fsLR_space-fsaverage_hemi-L_den-32k_sphere.surf.gii
     tpl-fsLR/tpl-fsLR_space-fsaverage_hemi-R_den-32k_sphere.surf.gii
     """
-    tf.get("fsLR", density="32k")
+    tf.get('fsLR', density='32k')
 
 
 def fetch_all():
@@ -100,21 +100,21 @@ def fetch_all():
     fetch_fsLR()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="Helper script for pre-caching required templates to run fMRIPrep",
+        description='Helper script for pre-caching required templates to run fMRIPrep',
     )
     parser.add_argument(
-        "--tf-dir",
+        '--tf-dir',
         type=os.path.abspath,
-        help="Directory to save templates in. If not provided, templates will be saved to"
-        " `${HOME}/.cache/templateflow`.",
+        help='Directory to save templates in. If not provided, templates will be saved to'
+        ' `${HOME}/.cache/templateflow`.',
     )
     opts = parser.parse_args()
 
     # set envvar (if necessary) prior to templateflow import
     if opts.tf_dir is not None:
-        os.environ["TEMPLATEFLOW_HOME"] = opts.tf_dir
+        os.environ['TEMPLATEFLOW_HOME'] = opts.tf_dir
 
     import templateflow.api as tf
 

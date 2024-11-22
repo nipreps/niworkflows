@@ -23,43 +23,42 @@
 """Wrappers of NiTransforms."""
 
 from pathlib import Path
+
 from nipype.interfaces.base import (
-    TraitedSpec,
     BaseInterfaceInputSpec,
     File,
-    SimpleInterface,
     InputMultiObject,
-    traits,
+    SimpleInterface,
+    TraitedSpec,
     isdefined,
+    traits,
 )
 
 XFM_FMT = {
-    ".lta": "fs",
-    ".txt": "itk",
-    ".mat": "itk",
-    ".tfm": "itk",
+    '.lta': 'fs',
+    '.txt': 'itk',
+    '.mat': 'itk',
+    '.tfm': 'itk',
 }
 
 
 class _ConcatenateXFMsInputSpec(BaseInterfaceInputSpec):
-    in_xfms = InputMultiObject(File(exists=True), desc="input transform piles")
-    inverse = traits.Bool(False, usedefault=True, desc="generate inverse")
-    out_fmt = traits.Enum("itk", "fs", usedefault=True, desc="output format")
+    in_xfms = InputMultiObject(File(exists=True), desc='input transform piles')
+    inverse = traits.Bool(False, usedefault=True, desc='generate inverse')
+    out_fmt = traits.Enum('itk', 'fs', usedefault=True, desc='output format')
     reference = File(
         exists=True,
-        desc="reference file (only for writing LTA format, if not "
-        "concatenating another LTA).",
+        desc='reference file (only for writing LTA format, if not concatenating another LTA).',
     )
     moving = File(
         exists=True,
-        desc="moving file (only for writing LTA format, if not "
-        "concatenating another LTA).",
+        desc='moving file (only for writing LTA format, if not concatenating another LTA).',
     )
 
 
 class _ConcatenateXFMsOutputSpec(TraitedSpec):
-    out_xfm = File(exists=True, desc="output, combined transform")
-    out_inv = File(desc="output, combined transform")
+    out_xfm = File(exists=True, desc='output, combined transform')
+    out_inv = File(desc='output, combined transform')
 
 
 class ConcatenateXFMs(SimpleInterface):
@@ -69,15 +68,15 @@ class ConcatenateXFMs(SimpleInterface):
     output_spec = _ConcatenateXFMsOutputSpec
 
     def _run_interface(self, runtime):
-        out_ext = "lta" if self.inputs.out_fmt == "fs" else "tfm"
+        out_ext = 'lta' if self.inputs.out_fmt == 'fs' else 'tfm'
         reference = self.inputs.reference if isdefined(self.inputs.reference) else None
         moving = self.inputs.moving if isdefined(self.inputs.moving) else None
-        out_file = Path(runtime.cwd) / f"out_fwd.{out_ext}"
-        self._results["out_xfm"] = str(out_file)
+        out_file = Path(runtime.cwd) / f'out_fwd.{out_ext}'
+        self._results['out_xfm'] = str(out_file)
         out_inv = None
         if self.inputs.inverse:
-            out_inv = Path(runtime.cwd) / f"out_inv.{out_ext}"
-            self._results["out_inv"] = str(out_inv)
+            out_inv = Path(runtime.cwd) / f'out_inv.{out_ext}'
+            self._results['out_inv'] = str(out_inv)
 
         concatenate_xfms(
             self.inputs.in_xfms,
@@ -90,12 +89,10 @@ class ConcatenateXFMs(SimpleInterface):
         return runtime
 
 
-def concatenate_xfms(
-    in_files, out_file, out_inv=None, reference=None, moving=None, fmt="itk"
-):
+def concatenate_xfms(in_files, out_file, out_inv=None, reference=None, moving=None, fmt='itk'):
     """Concatenate linear transforms."""
-    from nitransforms.manip import TransformChain
     from nitransforms.linear import load as load_affine
+    from nitransforms.manip import TransformChain
 
     xfm = TransformChain(
         [load_affine(f, fmt=XFM_FMT[Path(f).suffix]) for f in in_files]

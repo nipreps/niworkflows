@@ -21,34 +21,35 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Interfaces under evaluation before upstreaming to nipype.interfaces.utility."""
-import numpy as np
-import re
+
 import json
+import re
 from collections import OrderedDict
 
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.io import add_traits
+import numpy as np
 from nipype.interfaces.base import (
     BaseInterface,
     BaseInterfaceInputSpec,
     DynamicTraitedSpec,
     File,
     InputMultiObject,
-    isdefined,
     SimpleInterface,
     Str,
     TraitedSpec,
+    isdefined,
     traits,
 )
+from nipype.interfaces.io import add_traits
+from nipype.utils.filemanip import fname_presuffix
 
 
 class _KeySelectInputSpec(DynamicTraitedSpec):
-    key = Str(mandatory=True, desc="selective key")
-    keys = InputMultiObject(Str, mandatory=True, min=1, desc="index of keys")
+    key = Str(mandatory=True, desc='selective key')
+    keys = InputMultiObject(Str, mandatory=True, min=1, desc='index of keys')
 
 
 class _KeySelectOutputSpec(DynamicTraitedSpec):
-    key = Str(desc="propagates selected key")
+    key = Str(desc='propagates selected key')
 
 
 class KeySelect(BaseInterface):
@@ -161,15 +162,14 @@ class KeySelect(BaseInterface):
         # Handle and initiate fields
         if not fields:
             raise ValueError(
-                "A list or multiplexed fields must be provided at "
-                "instantiation time."
+                'A list or multiplexed fields must be provided at instantiation time.'
             )
         if isinstance(fields, str):
             fields = [fields]
 
         _invalid = set(self.input_spec.class_editable_traits()).intersection(fields)
         if _invalid:
-            raise ValueError("Some fields are invalid (%s)." % ", ".join(_invalid))
+            raise ValueError(f'Some fields are invalid ({", ".join(_invalid)}).')
 
         self._fields = fields
 
@@ -185,29 +185,25 @@ class KeySelect(BaseInterface):
             setattr(self.inputs, in_field, inputs[in_field])
 
     def _check_len(self, name, new):
-        if name == "keys":
+        if name == 'keys':
             nitems = len(new)
             if len(set(new)) != nitems:
-                raise ValueError(
-                    "Found duplicated entries in the index of ordered keys"
-                )
+                raise ValueError('Found duplicated entries in the index of ordered keys')
 
         if not isdefined(self.inputs.keys):
             return
 
-        if name == "key" and new not in self.inputs.keys:
-            raise ValueError('Selected key "%s" not found in the index' % new)
+        if name == 'key' and new not in self.inputs.keys:
+            raise ValueError(f'Selected key "{new}" not found in the index')
 
         if name in self._fields:
             if isinstance(new, str) or len(new) < 1:
-                raise ValueError(
-                    'Trying to set an invalid value (%s) for input "%s"' % (new, name)
-                )
+                raise ValueError(f'Trying to set an invalid value ({new}) for input "{name}"')
 
             if len(new) != len(self.inputs.keys):
                 raise ValueError(
-                    'Length of value (%s) for input field "%s" does not match '
-                    "the length of the indexing list." % (new, name)
+                    f'Length of value ({new}) for input field "{name}" does not match '
+                    'the length of the indexing list.'
                 )
 
     def _run_interface(self, runtime):
@@ -218,7 +214,7 @@ class KeySelect(BaseInterface):
 
         outputs = {k: getattr(self.inputs, k)[index] for k in self._fields}
 
-        outputs["key"] = self.inputs.key
+        outputs['key'] = self.inputs.key
         return outputs
 
     def _outputs(self):
@@ -228,12 +224,12 @@ class KeySelect(BaseInterface):
 
 
 class _AddTSVHeaderInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="input file")
-    columns = traits.List(traits.Str, mandatory=True, desc="header for columns")
+    in_file = File(exists=True, mandatory=True, desc='input file')
+    columns = traits.List(traits.Str, mandatory=True, desc='header for columns')
 
 
 class _AddTSVHeaderOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="output average file")
+    out_file = File(exists=True, desc='output average file')
 
 
 class AddTSVHeader(SimpleInterface):
@@ -259,13 +255,14 @@ class AddTSVHeader(SimpleInterface):
     True
 
     """
+
     input_spec = _AddTSVHeaderInputSpec
     output_spec = _AddTSVHeaderOutputSpec
 
     def _run_interface(self, runtime):
         out_file = fname_presuffix(
             self.inputs.in_file,
-            suffix="_motion.tsv",
+            suffix='_motion.tsv',
             newpath=runtime.cwd,
             use_ext=False,
         )
@@ -273,24 +270,24 @@ class AddTSVHeader(SimpleInterface):
         np.savetxt(
             out_file,
             data,
-            delimiter="\t",
-            header="\t".join(self.inputs.columns),
-            comments="",
+            delimiter='\t',
+            header='\t'.join(self.inputs.columns),
+            comments='',
         )
 
-        self._results["out_file"] = out_file
+        self._results['out_file'] = out_file
         return runtime
 
 
 class _JoinTSVColumnsInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="input file")
-    join_file = File(exists=True, mandatory=True, desc="file to be adjoined")
-    side = traits.Enum("right", "left", usedefault=True, desc="where to join")
-    columns = traits.List(traits.Str, desc="header for columns")
+    in_file = File(exists=True, mandatory=True, desc='input file')
+    join_file = File(exists=True, mandatory=True, desc='file to be adjoined')
+    side = traits.Enum('right', 'left', usedefault=True, desc='where to join')
+    columns = traits.List(traits.Str, desc='header for columns')
 
 
 class _JoinTSVColumnsOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="output TSV file")
+    out_file = File(exists=True, desc='output TSV file')
 
 
 class JoinTSVColumns(SimpleInterface):
@@ -348,20 +345,21 @@ class JoinTSVColumns(SimpleInterface):
     True
 
     """
+
     input_spec = _JoinTSVColumnsInputSpec
     output_spec = _JoinTSVColumnsOutputSpec
 
     def _run_interface(self, runtime):
         out_file = fname_presuffix(
             self.inputs.in_file,
-            suffix="_joined.tsv",
+            suffix='_joined.tsv',
             newpath=runtime.cwd,
             use_ext=False,
         )
 
-        header = ""
+        header = ''
         if isdefined(self.inputs.columns) and self.inputs.columns:
-            header = "\t".join(self.inputs.columns)
+            header = '\t'.join(self.inputs.columns)
 
         with open(self.inputs.in_file) as ifh:
             data = ifh.read().splitlines(keepends=False)
@@ -370,33 +368,33 @@ class JoinTSVColumns(SimpleInterface):
             join = ifh.read().splitlines(keepends=False)
 
         if len(data) != len(join):
-            raise ValueError("Number of columns in datasets do not match")
+            raise ValueError('Number of columns in datasets do not match')
 
         merged = []
         for d, j in zip(data, join):
-            line = "%s\t%s" % ((j, d) if self.inputs.side == "left" else (d, j))
+            line = '%s\t%s' % ((j, d) if self.inputs.side == 'left' else (d, j))
             merged.append(line)
 
         if header:
             merged.insert(0, header)
 
-        with open(out_file, "w") as ofh:
-            ofh.write("\n".join(merged))
+        with open(out_file, 'w') as ofh:
+            ofh.write('\n'.join(merged))
 
-        self._results["out_file"] = out_file
+        self._results['out_file'] = out_file
         return runtime
 
 
 class _DictMergeInputSpec(BaseInterfaceInputSpec):
     in_dicts = traits.List(
         traits.Either(traits.Dict, traits.Instance(OrderedDict)),
-        desc="Dictionaries to be merged. In the event of a collision, values "
-        "from dictionaries later in the list receive precedence.",
+        desc='Dictionaries to be merged. In the event of a collision, values '
+        'from dictionaries later in the list receive precedence.',
     )
 
 
 class _DictMergeOutputSpec(TraitedSpec):
-    out_dict = traits.Dict(desc="Merged dictionary")
+    out_dict = traits.Dict(desc='Merged dictionary')
 
 
 class DictMerge(SimpleInterface):
@@ -409,45 +407,43 @@ class DictMerge(SimpleInterface):
         out_dict = {}
         for in_dict in self.inputs.in_dicts:
             out_dict.update(in_dict)
-        self._results["out_dict"] = out_dict
+        self._results['out_dict'] = out_dict
         return runtime
 
 
 class _TSV2JSONInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="Input TSV file")
+    in_file = File(exists=True, mandatory=True, desc='Input TSV file')
     index_column = traits.Str(
         mandatory=True,
-        desc="Name of the column in the TSV to be used "
-        "as the top-level key in the JSON. All "
-        "remaining columns will be assigned as "
-        "nested keys.",
+        desc='Name of the column in the TSV to be used '
+        'as the top-level key in the JSON. All '
+        'remaining columns will be assigned as '
+        'nested keys.',
     )
     output = traits.Either(
         None,
         File,
-        desc="Path where the output file is to be saved. "
-        "If this is `None`, then a JSON-compatible "
-        "dictionary is returned instead.",
+        desc='Path where the output file is to be saved. '
+        'If this is `None`, then a JSON-compatible '
+        'dictionary is returned instead.',
     )
     additional_metadata = traits.Either(
         None,
         traits.Dict,
         traits.Instance(OrderedDict),
         usedefault=True,
-        desc="Any additional metadata that "
-        "should be applied to all "
-        "entries in the JSON.",
+        desc='Any additional metadata that should be applied to all entries in the JSON.',
     )
     drop_columns = traits.Either(
         None,
         traits.List(),
         usedefault=True,
-        desc="List of columns in the TSV to be dropped from the JSON.",
+        desc='List of columns in the TSV to be dropped from the JSON.',
     )
     enforce_case = traits.Bool(
         True,
         usedefault=True,
-        desc="Enforce snake case for top-level keys and camel case for nested keys",
+        desc='Enforce snake case for top-level keys and camel case for nested keys',
     )
 
 
@@ -456,7 +452,7 @@ class _TSV2JSONOutputSpec(TraitedSpec):
         traits.Dict,
         File(exists=True),
         traits.Instance(OrderedDict),
-        desc="Output dictionary or JSON file",
+        desc='Output dictionary or JSON file',
     )
 
 
@@ -469,12 +465,12 @@ class TSV2JSON(SimpleInterface):
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.output):
             output = fname_presuffix(
-                self.inputs.in_file, suffix=".json", newpath=runtime.cwd, use_ext=False
+                self.inputs.in_file, suffix='.json', newpath=runtime.cwd, use_ext=False
             )
         else:
             output = self.inputs.output
 
-        self._results["output"] = _tsv2json(
+        self._results['output'] = _tsv2json(
             in_tsv=self.inputs.in_file,
             out_json=output,
             index_column=self.inputs.index_column,
@@ -525,45 +521,42 @@ def _tsv2json(
 
     # Adapted from https://dev.to/rrampage/snake-case-to-camel-case-and- ...
     # back-using-regular-expressions-and-python-m9j
-    re_to_camel = r"(.*?)_([a-zA-Z0-9])"
-    re_to_snake = r"(^.+?|.*?)((?<![_A-Z])[A-Z]|(?<![_0-9])[0-9]+)"
+    re_to_camel = r'(.*?)_([a-zA-Z0-9])'
+    re_to_snake = r'(^.+?|.*?)((?<![_A-Z])[A-Z]|(?<![_0-9])[0-9]+)'
 
     def snake(match):
-        return "{}_{}".format(match.group(1).lower(), match.group(2).lower())
+        return f'{match.group(1).lower()}_{match.group(2).lower()}'
 
     def camel(match):
-        return "{}{}".format(match.group(1), match.group(2).upper())
+        return f'{match.group(1)}{match.group(2).upper()}'
 
     # from fmriprep
     def less_breakable(a_string):
         """hardens the string to different envs (i.e. case insensitive, no
         whitespace, '#'"""
-        return "".join(a_string.split()).strip("#")
+        return ''.join(a_string.split()).strip('#')
 
     drop_columns = drop_columns or []
     additional_metadata = additional_metadata or {}
     try:
-        tsv_data = pd.read_csv(in_tsv, sep="\t")
+        tsv_data = pd.read_csv(in_tsv, sep='\t')
     except pd.errors.EmptyDataError:
         tsv_data = pd.DataFrame()
     for k, v in additional_metadata.items():
         tsv_data[k] = [v] * len(tsv_data.index)
     for col in drop_columns:
-        tsv_data.drop(labels=col, axis="columns", inplace=True)
+        tsv_data.drop(labels=col, axis='columns', inplace=True)
     if index_column in tsv_data:
         tsv_data.set_index(index_column, drop=True, inplace=True)
     if enforce_case:
         tsv_data.index = [
-            re.sub(re_to_snake, snake, less_breakable(i), 0).lower()
-            for i in tsv_data.index
+            re.sub(re_to_snake, snake, less_breakable(i), count=0).lower() for i in tsv_data.index
         ]
         tsv_data.columns = [
-            re.sub(re_to_camel, camel, less_breakable(i).title(), 0).replace(
-                "Csf", "CSF"
-            )
+            re.sub(re_to_camel, camel, less_breakable(i).title(), count=0).replace('Csf', 'CSF')
             for i in tsv_data.columns
         ]
-    json_data = tsv_data.to_json(orient="index")
+    json_data = tsv_data.to_json(orient='index')
     json_data = json.JSONDecoder(object_pairs_hook=OrderedDict).decode(json_data)
     for i in json_data:
         json_data[i].update(additional_metadata)
@@ -571,6 +564,6 @@ def _tsv2json(
     if out_json is None:
         return json_data
 
-    with open(out_json, "w") as f:
+    with open(out_json, 'w') as f:
         json.dump(json_data, f, indent=4)
     return out_json

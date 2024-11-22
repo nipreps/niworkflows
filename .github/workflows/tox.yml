@@ -158,13 +158,20 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ always() }}
 
-  flake8:
-    if: github.event_name != 'schedule'
-    runs-on: ubuntu-latest
+  checks:
+    runs-on: 'ubuntu-latest'
+    continue-on-error: true
+    strategy:
+      matrix:
+        check: ['style', 'spellcheck']
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3
-    - run: pipx run flake8 niworkflows/
+      - uses: actions/checkout@v4
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v3
+      - name: Show tox config
+        run: uvx tox c
+      - name: Show tox config (this call)
+        run: uvx tox c -e ${{ matrix.check }}
+      - name: Run check
+        run: uvx tox -e ${{ matrix.check }}

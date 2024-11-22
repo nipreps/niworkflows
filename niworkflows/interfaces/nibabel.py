@@ -21,36 +21,37 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Nibabel-based interfaces."""
+
 from pathlib import Path
 from warnings import warn
 
-import numpy as np
 import nibabel as nb
+import numpy as np
 from nipype import logging
-from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.base import (
-    traits,
-    TraitedSpec,
     BaseInterfaceInputSpec,
     File,
-    SimpleInterface,
-    OutputMultiObject,
     InputMultiObject,
+    OutputMultiObject,
+    SimpleInterface,
+    TraitedSpec,
+    traits,
 )
+from nipype.utils.filemanip import fname_presuffix
 
-IFLOGGER = logging.getLogger("nipype.interface")
+IFLOGGER = logging.getLogger('nipype.interface')
 
 
 class _ApplyMaskInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="an image")
-    in_mask = File(exists=True, mandatory=True, desc="a mask")
+    in_file = File(exists=True, mandatory=True, desc='an image')
+    in_mask = File(exists=True, mandatory=True, desc='a mask')
     threshold = traits.Float(
-        0.5, usedefault=True, desc="a threshold to the mask, if it is nonbinary"
+        0.5, usedefault=True, desc='a threshold to the mask, if it is nonbinary'
     )
 
 
 class _ApplyMaskOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="masked file")
+    out_file = File(exists=True, desc='masked file')
 
 
 class ApplyMask(SimpleInterface):
@@ -64,32 +65,32 @@ class ApplyMask(SimpleInterface):
         msknii = nb.load(self.inputs.in_mask)
         msk = msknii.get_fdata() > self.inputs.threshold
 
-        self._results["out_file"] = fname_presuffix(
-            self.inputs.in_file, suffix="_masked", newpath=runtime.cwd
+        self._results['out_file'] = fname_presuffix(
+            self.inputs.in_file, suffix='_masked', newpath=runtime.cwd
         )
 
         if img.dataobj.shape[:3] != msk.shape:
-            raise ValueError("Image and mask sizes do not match.")
+            raise ValueError('Image and mask sizes do not match.')
 
         if not np.allclose(img.affine, msknii.affine):
-            raise ValueError("Image and mask affines are not similar enough.")
+            raise ValueError('Image and mask affines are not similar enough.')
 
         if img.dataobj.ndim == msk.ndim + 1:
             msk = msk[..., np.newaxis]
 
         masked = img.__class__(img.dataobj * msk, None, img.header)
-        masked.to_filename(self._results["out_file"])
+        masked.to_filename(self._results['out_file'])
         return runtime
 
 
 class _BinarizeInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="input image")
-    thresh_low = traits.Float(mandatory=True, desc="non-inclusive lower threshold")
+    in_file = File(exists=True, mandatory=True, desc='input image')
+    thresh_low = traits.Float(mandatory=True, desc='non-inclusive lower threshold')
 
 
 class _BinarizeOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="masked file")
-    out_mask = File(exists=True, desc="output mask")
+    out_file = File(exists=True, desc='masked file')
+    out_mask = File(exists=True, desc='output mask')
 
 
 class Binarize(SimpleInterface):
@@ -101,38 +102,39 @@ class Binarize(SimpleInterface):
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file)
 
-        self._results["out_file"] = fname_presuffix(
-            self.inputs.in_file, suffix="_masked", newpath=runtime.cwd
+        self._results['out_file'] = fname_presuffix(
+            self.inputs.in_file, suffix='_masked', newpath=runtime.cwd
         )
-        self._results["out_mask"] = fname_presuffix(
-            self.inputs.in_file, suffix="_mask", newpath=runtime.cwd
+        self._results['out_mask'] = fname_presuffix(
+            self.inputs.in_file, suffix='_mask', newpath=runtime.cwd
         )
 
         data = img.get_fdata()
         mask = data > self.inputs.thresh_low
         data[~mask] = 0.0
         masked = img.__class__(data, img.affine, img.header)
-        masked.to_filename(self._results["out_file"])
+        masked.to_filename(self._results['out_file'])
 
-        img.header.set_data_dtype("uint8")
-        maskimg = img.__class__(mask.astype("uint8"), img.affine, img.header)
-        maskimg.to_filename(self._results["out_mask"])
+        img.header.set_data_dtype('uint8')
+        maskimg = img.__class__(mask.astype('uint8'), img.affine, img.header)
+        maskimg.to_filename(self._results['out_mask'])
 
         return runtime
 
 
 class _BinaryDilationInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="binary file to dilate")
-    radius = traits.Float(3, usedefault=True, desc="structure element (ball) radius")
-    iterations = traits.Range(low=0, value=1, usedefault=True, desc="repeat dilation")
+    in_file = File(exists=True, mandatory=True, desc='binary file to dilate')
+    radius = traits.Float(3, usedefault=True, desc='structure element (ball) radius')
+    iterations = traits.Range(low=0, value=1, usedefault=True, desc='repeat dilation')
 
 
 class _BinaryDilationOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="the input file, after binary dilation")
+    out_file = File(exists=True, desc='the input file, after binary dilation')
 
 
 class BinaryDilation(SimpleInterface):
     """Morphological binary dilation using Scipy."""
+
     # DEPRECATED in 1.7.0
     # To remove in 1.9.0
 
@@ -140,15 +142,19 @@ class BinaryDilation(SimpleInterface):
     output_spec = _BinaryDilationOutputSpec
 
     def __init__(self, from_file=None, resource_monitor=None, **inputs):
-        warn("""\
+        warn(
+            """\
 niworkflows.interfaces.nibabel.BinaryDilation is deprecated in favor of
 niworkflows.interfaces.morphology.BinaryDilation. Please validate that
 interface for your use case and switch.
-""", DeprecationWarning, stacklevel=2)
+""",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         super().__init__(from_file=from_file, resource_monitor=resource_monitor, **inputs)
 
     def _run_interface(self, runtime):
-        self._results["out_file"] = _dilate(
+        self._results['out_file'] = _dilate(
             self.inputs.in_file,
             radius=self.inputs.radius,
             iterations=self.inputs.iterations,
@@ -158,11 +164,11 @@ interface for your use case and switch.
 
 
 class _SplitSeriesInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="input 4d image")
+    in_file = File(exists=True, mandatory=True, desc='input 4d image')
 
 
 class _SplitSeriesOutputSpec(TraitedSpec):
-    out_files = OutputMultiObject(File(exists=True), desc="output list of 3d images")
+    out_files = OutputMultiObject(File(exists=True), desc='output list of 3d images')
 
 
 class SplitSeries(SimpleInterface):
@@ -181,29 +187,25 @@ class SplitSeries(SimpleInterface):
             img.dataobj.reshape(img.shape[:3] + extra_dims), img.affine, img.header
         )
 
-        self._results["out_files"] = []
+        self._results['out_files'] = []
         for i, img_3d in enumerate(nb.four_to_three(img)):
-            out_file = fname_presuffix(
-                in_file, suffix=f"_idx-{i:03}", newpath=runtime.cwd
-            )
+            out_file = fname_presuffix(in_file, suffix=f'_idx-{i:03}', newpath=runtime.cwd)
             img_3d.to_filename(out_file)
-            self._results["out_files"].append(out_file)
+            self._results['out_files'].append(out_file)
 
         return runtime
 
 
 class _MergeSeriesInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiObject(
-        File(exists=True, mandatory=True, desc="input list of 3d images")
-    )
+    in_files = InputMultiObject(File(exists=True, mandatory=True, desc='input list of 3d images'))
     allow_4D = traits.Bool(
-        True, usedefault=True, desc="whether 4D images are allowed to be concatenated"
+        True, usedefault=True, desc='whether 4D images are allowed to be concatenated'
     )
-    affine_tolerance = traits.Float(desc="Absolute tolerance allowed between image affines")
+    affine_tolerance = traits.Float(desc='Absolute tolerance allowed between image affines')
 
 
 class _MergeSeriesOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="output 4d image")
+    out_file = File(exists=True, desc='output 4d image')
 
 
 class MergeSeries(SimpleInterface):
@@ -222,8 +224,8 @@ class MergeSeries(SimpleInterface):
                     aff0 = filenii.affine
                 elif not np.allclose(aff0, filenii.affine, atol=self.inputs.affine_tolerance):
                     raise ValueError(
-                        "Difference in affines greater than allowed tolerance "
-                        f"{self.inputs.affine_tolerance}"
+                        'Difference in affines greater than allowed tolerance '
+                        f'{self.inputs.affine_tolerance}'
                     )
             ndim = filenii.dataobj.ndim
             if ndim == 3:
@@ -233,29 +235,22 @@ class MergeSeries(SimpleInterface):
                 nii_list += nb.four_to_three(filenii)
                 continue
             else:
-                raise ValueError(
-                    f"Input image has an incorrect number of dimensions ({ndim})."
-                )
+                raise ValueError(f'Input image has an incorrect number of dimensions ({ndim}).')
 
-        img_4d = nb.concat_images(
-            nii_list,
-            check_affines=not bool(self.inputs.affine_tolerance)
-        )
-        out_file = fname_presuffix(
-            self.inputs.in_files[0], suffix="_merged", newpath=runtime.cwd
-        )
+        img_4d = nb.concat_images(nii_list, check_affines=not bool(self.inputs.affine_tolerance))
+        out_file = fname_presuffix(self.inputs.in_files[0], suffix='_merged', newpath=runtime.cwd)
         img_4d.to_filename(out_file)
 
-        self._results["out_file"] = out_file
+        self._results['out_file'] = out_file
         return runtime
 
 
 class _MergeROIsInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiObject(File(exists=True), desc="ROI files to be merged")
+    in_files = InputMultiObject(File(exists=True), desc='ROI files to be merged')
 
 
 class _MergeROIsOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="NIfTI containing all ROIs")
+    out_file = File(exists=True, desc='NIfTI containing all ROIs')
 
 
 class MergeROIs(SimpleInterface):
@@ -265,22 +260,20 @@ class MergeROIs(SimpleInterface):
     output_spec = _MergeROIsOutputSpec
 
     def _run_interface(self, runtime):
-        self._results["out_file"] = _merge_rois(self.inputs.in_files, newpath=runtime.cwd)
+        self._results['out_file'] = _merge_rois(self.inputs.in_files, newpath=runtime.cwd)
         return runtime
 
 
 class _RegridToZoomsInputSpec(BaseInterfaceInputSpec):
-    in_file = File(
-        exists=True, mandatory=True, desc="a file whose resolution is to change"
-    )
+    in_file = File(exists=True, mandatory=True, desc='a file whose resolution is to change')
     zooms = traits.Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         mandatory=True,
-        desc="the new resolution",
+        desc='the new resolution',
     )
-    order = traits.Int(3, usedefault=True, desc="order of interpolator")
+    order = traits.Int(3, usedefault=True, desc='order of interpolator')
     clip = traits.Bool(
         True,
         usedefault=True,
@@ -291,12 +284,12 @@ class _RegridToZoomsInputSpec(BaseInterfaceInputSpec):
         traits.Float(),
         default=False,
         usedefault=True,
-        desc="apply gaussian smoothing before resampling",
+        desc='apply gaussian smoothing before resampling',
     )
 
 
 class _RegridToZoomsOutputSpec(TraitedSpec):
-    out_file = File(exists=True, dec="the regridded file")
+    out_file = File(exists=True, dec='the regridded file')
 
 
 class RegridToZooms(SimpleInterface):
@@ -308,8 +301,8 @@ class RegridToZooms(SimpleInterface):
     def _run_interface(self, runtime):
         from ..utils.images import resample_by_spacing
 
-        self._results["out_file"] = fname_presuffix(
-            self.inputs.in_file, suffix="_regrid", newpath=runtime.cwd
+        self._results['out_file'] = fname_presuffix(
+            self.inputs.in_file, suffix='_regrid', newpath=runtime.cwd
         )
         resample_by_spacing(
             self.inputs.in_file,
@@ -317,20 +310,18 @@ class RegridToZooms(SimpleInterface):
             order=self.inputs.order,
             clip=self.inputs.clip,
             smooth=self.inputs.smooth,
-        ).to_filename(self._results["out_file"])
+        ).to_filename(self._results['out_file'])
         return runtime
 
 
 class _DemeanImageInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="image to be demeaned")
-    in_mask = File(
-        exists=True, mandatory=True, desc="mask where median will be calculated"
-    )
-    only_mask = traits.Bool(False, usedefault=True, desc="demean only within mask")
+    in_file = File(exists=True, mandatory=True, desc='image to be demeaned')
+    in_mask = File(exists=True, mandatory=True, desc='mask where median will be calculated')
+    only_mask = traits.Bool(False, usedefault=True, desc='demean only within mask')
 
 
 class _DemeanImageOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="demeaned image")
+    out_file = File(exists=True, desc='demeaned image')
 
 
 class DemeanImage(SimpleInterface):
@@ -340,7 +331,7 @@ class DemeanImage(SimpleInterface):
     def _run_interface(self, runtime):
         from ..utils.images import demean
 
-        self._results["out_file"] = demean(
+        self._results['out_file'] = demean(
             self.inputs.in_file,
             self.inputs.in_mask,
             only_mask=self.inputs.only_mask,
@@ -350,15 +341,13 @@ class DemeanImage(SimpleInterface):
 
 
 class _FilledImageLikeInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="image to be demeaned")
-    fill_value = traits.Float(1.0, usedefault=True, desc="value to fill")
-    dtype = traits.Enum(
-        "float32", "uint8", usedefault=True, desc="force output data type"
-    )
+    in_file = File(exists=True, mandatory=True, desc='image to be demeaned')
+    fill_value = traits.Float(1.0, usedefault=True, desc='value to fill')
+    dtype = traits.Enum('float32', 'uint8', usedefault=True, desc='force output data type')
 
 
 class _FilledImageLikeOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="demeaned image")
+    out_file = File(exists=True, desc='demeaned image')
 
 
 class FilledImageLike(SimpleInterface):
@@ -368,7 +357,7 @@ class FilledImageLike(SimpleInterface):
     def _run_interface(self, runtime):
         from ..utils.images import nii_ones_like
 
-        self._results["out_file"] = nii_ones_like(
+        self._results['out_file'] = nii_ones_like(
             self.inputs.in_file,
             self.inputs.fill_value,
             self.inputs.dtype,
@@ -378,28 +367,26 @@ class FilledImageLike(SimpleInterface):
 
 
 class _GenerateSamplingReferenceInputSpec(BaseInterfaceInputSpec):
-    fixed_image = File(
-        exists=True, mandatory=True, desc="the reference file, defines the FoV"
-    )
-    moving_image = File(exists=True, mandatory=True, desc="the pixel size reference")
-    xform_code = traits.Enum(None, 2, 4, usedefault=True, desc="force xform code")
+    fixed_image = File(exists=True, mandatory=True, desc='the reference file, defines the FoV')
+    moving_image = File(exists=True, mandatory=True, desc='the pixel size reference')
+    xform_code = traits.Enum(None, 2, 4, usedefault=True, desc='force xform code')
     fov_mask = traits.Either(
         None,
         File(exists=True),
         usedefault=True,
-        desc="mask to clip field of view (in fixed_image space)",
+        desc='mask to clip field of view (in fixed_image space)',
     )
     keep_native = traits.Bool(
         True,
         usedefault=True,
-        desc="calculate a grid with native resolution covering "
-        "the volume extent given by fixed_image, fast forward "
-        "fixed_image otherwise.",
+        desc='calculate a grid with native resolution covering '
+        'the volume extent given by fixed_image, fast forward '
+        'fixed_image otherwise.',
     )
 
 
 class _GenerateSamplingReferenceOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="one file with all inputs flattened")
+    out_file = File(exists=True, desc='one file with all inputs flattened')
 
 
 class GenerateSamplingReference(SimpleInterface):
@@ -422,39 +409,35 @@ class GenerateSamplingReference(SimpleInterface):
 
     def _run_interface(self, runtime):
         if not self.inputs.keep_native:
-            self._results["out_file"] = self.inputs.fixed_image
+            self._results['out_file'] = self.inputs.fixed_image
             return runtime
 
         from .. import __version__
 
-        self._results["out_file"] = _gen_reference(
+        self._results['out_file'] = _gen_reference(
             self.inputs.fixed_image,
             self.inputs.moving_image,
             fov_mask=self.inputs.fov_mask,
             force_xform_code=self.inputs.xform_code,
-            message="%s (niworkflows v%s)" % (self.__class__.__name__, __version__),
+            message=f'{self.__class__.__name__} (niworkflows v{__version__})',
             newpath=runtime.cwd,
         )
         return runtime
 
 
 class _IntensityClipInputSpec(BaseInterfaceInputSpec):
-    in_file = File(
-        exists=True, mandatory=True, desc="3D file which intensity will be clipped"
-    )
-    p_min = traits.Float(35.0, usedefault=True, desc="percentile for the lower bound")
-    p_max = traits.Float(99.98, usedefault=True, desc="percentile for the upper bound")
+    in_file = File(exists=True, mandatory=True, desc='3D file which intensity will be clipped')
+    p_min = traits.Float(35.0, usedefault=True, desc='percentile for the lower bound')
+    p_max = traits.Float(99.98, usedefault=True, desc='percentile for the upper bound')
     nonnegative = traits.Bool(
-        True, usedefault=True, desc="whether input intensities must be positive"
+        True, usedefault=True, desc='whether input intensities must be positive'
     )
-    dtype = traits.Enum(
-        "int16", "float32", "uint8", usedefault=True, desc="output datatype"
-    )
-    invert = traits.Bool(False, usedefault=True, desc="finalize by inverting contrast")
+    dtype = traits.Enum('int16', 'float32', 'uint8', usedefault=True, desc='output datatype')
+    invert = traits.Bool(False, usedefault=True, desc='finalize by inverting contrast')
 
 
 class _IntensityClipOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="file after clipping")
+    out_file = File(exists=True, desc='file after clipping')
 
 
 class IntensityClip(SimpleInterface):
@@ -464,7 +447,7 @@ class IntensityClip(SimpleInterface):
     output_spec = _IntensityClipOutputSpec
 
     def _run_interface(self, runtime):
-        self._results["out_file"] = _advanced_clip(
+        self._results['out_file'] = _advanced_clip(
             self.inputs.in_file,
             p_min=self.inputs.p_min,
             p_max=self.inputs.p_max,
@@ -477,18 +460,18 @@ class IntensityClip(SimpleInterface):
 
 
 class _MapLabelsInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, desc="Segmented NIfTI")
+    in_file = File(exists=True, desc='Segmented NIfTI')
     mappings = traits.Dict(
-        xor=["mappings_file"],
-        desc="Dictionary of label / replacement label pairs",
+        xor=['mappings_file'],
+        desc='Dictionary of label / replacement label pairs',
     )
     mappings_file = File(
-        exists=True, xor=["mappings"], help="JSON composed of label / replacement label pairs."
+        exists=True, xor=['mappings'], help='JSON composed of label / replacement label pairs.'
     )
 
 
 class _MapLabelsOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="Labeled file")
+    out_file = File(exists=True, desc='Labeled file')
 
 
 class MapLabels(SimpleInterface):
@@ -499,7 +482,7 @@ class MapLabels(SimpleInterface):
 
     def _run_interface(self, runtime):
         mapping = self.inputs.mappings or _load_int_json(self.inputs.mappings_file)
-        self._results["out_file"] = _remap_labels(
+        self._results['out_file'] = _remap_labels(
             self.inputs.in_file,
             mapping,
             newpath=runtime.cwd,
@@ -508,17 +491,17 @@ class MapLabels(SimpleInterface):
 
 
 class ReorientImageInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="Moving file")
+    in_file = File(exists=True, mandatory=True, desc='Moving file')
     target_file = File(
-        exists=True, xor=["target_orientation"], desc="Reference file to reorient to"
+        exists=True, xor=['target_orientation'], desc='Reference file to reorient to'
     )
     target_orientation = traits.Str(
-        xor=["target_file"], desc="Axis codes of coordinate system to reorient to"
+        xor=['target_file'], desc='Axis codes of coordinate system to reorient to'
     )
 
 
 class ReorientImageOutputSpec(TraitedSpec):
-    out_file = File(desc="Reoriented file")
+    out_file = File(desc='Reoriented file')
 
 
 class ReorientImage(SimpleInterface):
@@ -526,7 +509,7 @@ class ReorientImage(SimpleInterface):
     output_spec = ReorientImageOutputSpec
 
     def _run_interface(self, runtime):
-        self._results["out_file"] = reorient_file(
+        self._results['out_file'] = reorient_file(
             self.inputs.in_file,
             target_file=self.inputs.target_file,
             target_ornt=self.inputs.target_orientation,
@@ -535,7 +518,11 @@ class ReorientImage(SimpleInterface):
 
 
 def reorient_file(
-    in_file: str, *, target_file: str = None, target_ornt: str = None, newpath: str = None,
+    in_file: str,
+    *,
+    target_file: str = None,
+    target_ornt: str = None,
+    newpath: str = None,
 ) -> str:
     """
     Reorient an image.
@@ -553,7 +540,7 @@ def reorient_file(
 
     img = nb.load(in_file)
     if not target_file and not target_ornt:
-        raise TypeError("No target orientation or file is specified.")
+        raise TypeError('No target orientation or file is specified.')
 
     if target_file:
         target_img = nb.load(target_file)
@@ -563,7 +550,7 @@ def reorient_file(
 
     if newpath is None:
         newpath = Path()
-    out_file = str((Path(newpath) / "reoriented.nii.gz").absolute())
+    out_file = str((Path(newpath) / 'reoriented.nii.gz').absolute())
     reoriented.to_filename(out_file)
     return out_file
 
@@ -593,9 +580,7 @@ def _gen_reference(
     import nilearn.image as nli
 
     if out_file is None:
-        out_file = fname_presuffix(
-            fixed_image, suffix="_reference", newpath=newpath
-        )
+        out_file = fname_presuffix(fixed_image, suffix='_reference', newpath=newpath)
 
     # Moving images may not be RAS/LPS (more generally, transverse-longitudinal-axial)
     reoriented_moving_img = nb.as_closest_canonical(nb.load(moving_image))
@@ -606,9 +591,7 @@ def _gen_reference(
     # A positive diagonal affine is RAS, hence the need to reorient above.
     new_affine = np.diag(np.round(new_zooms, 3))
 
-    resampled = nli.resample_img(
-        fixed_image, target_affine=new_affine, interpolation="nearest"
-    )
+    resampled = nli.resample_img(fixed_image, target_affine=new_affine, interpolation='nearest')
 
     if fov_mask is not None:
         # If we have a mask, resample again dropping (empty) samples
@@ -617,15 +600,13 @@ def _gen_reference(
         masknii = nb.load(fov_mask)
 
         if np.all(masknii.shape[:3] != fixednii.shape[:3]):
-            raise RuntimeError("Fixed image and mask do not have the same dimensions.")
+            raise RuntimeError('Fixed image and mask do not have the same dimensions.')
 
         if not np.allclose(masknii.affine, fixednii.affine, atol=1e-5):
-            raise RuntimeError("Fixed image and mask have different affines")
+            raise RuntimeError('Fixed image and mask have different affines')
 
         # Get mask into reference space
-        masknii = nli.resample_img(
-            masknii, target_affine=new_affine, interpolation="nearest"
-        )
+        masknii = nli.resample_img(masknii, target_affine=new_affine, interpolation='nearest')
         res_shape = np.array(masknii.shape[:3])
 
         # Calculate a bounding box for the input mask
@@ -644,7 +625,7 @@ def _gen_reference(
             fixed_image,
             target_affine=new_affine_4,
             target_shape=new_shape.tolist(),
-            interpolation="nearest",
+            interpolation='nearest',
         )
 
     xform = resampled.affine  # nibabel will pick the best affine
@@ -661,15 +642,21 @@ def _gen_reference(
     # Keep 0, 2, 3, 4 unchanged
     resampled.header.set_qform(xform, int(xform_code))
     resampled.header.set_sform(xform, int(xform_code))
-    resampled.header["descrip"] = "reference image generated by %s." % (
-        message or "(unknown software)"
+    resampled.header['descrip'] = 'reference image generated by %s.' % (
+        message or '(unknown software)'
     )
     resampled.to_filename(out_file)
     return out_file
 
 
 def _advanced_clip(
-    in_file, p_min=35, p_max=99.98, nonnegative=True, dtype="int16", invert=False, newpath=None,
+    in_file,
+    p_min=35,
+    p_max=99.98,
+    nonnegative=True,
+    dtype='int16',
+    invert=False,
+    newpath=None,
 ):
     """
     Remove outliers at both ends of the intensity distribution and fit into a given dtype.
@@ -686,30 +673,25 @@ def _advanced_clip(
 
     """
     from pathlib import Path
+
     import nibabel as nb
     import numpy as np
     from scipy import ndimage
     from skimage.morphology import ball
 
-    out_file = (Path(newpath or "") / "clipped.nii.gz").absolute()
+    out_file = (Path(newpath or '') / 'clipped.nii.gz').absolute()
 
     # Load data
     img = nb.squeeze_image(nb.load(in_file))
     if len(img.shape) != 3:
-        raise RuntimeError(f"<{in_file}> is not a 3D file.")
-    data = img.get_fdata(dtype="float32")
+        raise RuntimeError(f'<{in_file}> is not a 3D file.')
+    data = img.get_fdata(dtype='float32')
 
     # Calculate stats on denoised version, to preempt outliers from biasing
     denoised = ndimage.median_filter(data, footprint=ball(3))
 
-    a_min = np.percentile(
-        denoised[denoised > 0] if nonnegative else denoised,
-        p_min
-    )
-    a_max = np.percentile(
-        denoised[denoised > 0] if nonnegative else denoised,
-        p_max
-    )
+    a_min = np.percentile(denoised[denoised > 0] if nonnegative else denoised, p_min)
+    a_max = np.percentile(denoised[denoised > 0] if nonnegative else denoised, p_max)
 
     # Clip and cast
     data = np.clip(data, a_min=a_min, a_max=a_max)
@@ -719,12 +701,12 @@ def _advanced_clip(
     if invert:
         data = 1.0 - data
 
-    if dtype in ("uint8", "int16"):
+    if dtype in ('uint8', 'int16'):
         data = np.round(255 * data).astype(dtype)
 
     hdr = img.header.copy()
     hdr.set_data_dtype(dtype)
-    hdr["cal_max"] = data.max()
+    hdr['cal_max'] = data.max()
 
     img.__class__(data, img.affine, hdr).to_filename(out_file)
 
@@ -734,11 +716,12 @@ def _advanced_clip(
 def _dilate(in_file, radius=3, iterations=1, newpath=None):
     """Dilate (binary) input mask."""
     from pathlib import Path
-    import numpy as np
+
     import nibabel as nb
+    import numpy as np
+    from nipype.utils.filemanip import fname_presuffix
     from scipy import ndimage
     from skimage.morphology import ball
-    from nipype.utils.filemanip import fname_presuffix
 
     mask = nb.load(in_file)
     newdata = ndimage.binary_dilation(
@@ -748,9 +731,9 @@ def _dilate(in_file, radius=3, iterations=1, newpath=None):
     )
 
     hdr = mask.header.copy()
-    hdr.set_data_dtype("uint8")
-    out_file = fname_presuffix(in_file, suffix="_dil", newpath=newpath or Path.cwd())
-    mask.__class__(newdata.astype("uint8"), mask.affine, hdr).to_filename(out_file)
+    hdr.set_data_dtype('uint8')
+    out_file = fname_presuffix(in_file, suffix='_dil', newpath=newpath or Path.cwd())
+    mask.__class__(newdata.astype('uint8'), mask.affine, hdr).to_filename(out_file)
     return out_file
 
 
@@ -765,6 +748,7 @@ def _merge_rois(in_files, newpath=None):
     If any of these checks fail, an ``AssertionError`` will be raised.
     """
     from pathlib import Path
+
     import nibabel as nb
     import numpy as np
 
@@ -776,24 +760,28 @@ def _merge_rois(in_files, newpath=None):
     nonzero = np.any(data, axis=3)
     for roi in in_files[1:]:
         img = nb.load(roi)
-        assert img.shape == data.shape, "Mismatch in image shape"
-        assert np.allclose(img.affine, affine), "Mismatch in affine"
+        if not img.shape == data.shape:
+            raise ValueError('Mismatch in image shape')
+        if not np.allclose(img.affine, affine):
+            raise ValueError('Mismatch in affine')
         roi_data = np.asanyarray(img.dataobj)
         roi_nonzero = np.any(roi_data, axis=3)
-        assert not np.any(roi_nonzero & nonzero), "Overlapping ROIs"
+        if np.any(roi_nonzero & nonzero):
+            raise ValueError('Overlapping ROIs')
         nonzero |= roi_nonzero
         data += roi_data
         del roi_data
 
     if newpath is None:
         newpath = Path()
-    out_file = str((Path(newpath) / "combined.nii.gz").absolute())
+    out_file = str((Path(newpath) / 'combined.nii.gz').absolute())
     img.__class__(data, affine, header).to_filename(out_file)
     return out_file
 
 
 def _remap_labels(in_file, mapping, newpath=None):
     from pathlib import Path
+
     import nibabel as nb
     import numpy as np
 
@@ -814,7 +802,7 @@ def _remap_labels(in_file, mapping, newpath=None):
 
     if newpath is None:
         newpath = Path()
-    out_file = str((Path(newpath) / "relabeled.nii.gz").absolute())
+    out_file = str((Path(newpath) / 'relabeled.nii.gz').absolute())
     img.__class__(out, img.affine, header=img.header).to_filename(out_file)
     return out_file
 

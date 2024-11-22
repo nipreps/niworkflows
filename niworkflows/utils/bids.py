@@ -21,26 +21,27 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Helpers for handling BIDS-like neuroimaging structures."""
-from pathlib import Path
+
 import json
 import re
 import warnings
+from pathlib import Path
+
 from bids import BIDSLayout
 from bids.layout import Query
 from packaging.version import Version
 
-
 DEFAULT_BIDS_QUERIES = {
-    "bold": {"datatype": "func", "suffix": "bold", "part": ["mag", None]},
-    "dwi": {"suffix": "dwi"},
-    "flair": {"datatype": "anat", "suffix": "FLAIR", "part": ["mag", None]},
-    "fmap": {"datatype": "fmap"},
-    "pet": {"suffix": "pet"},
-    "roi": {"datatype": "anat", "suffix": "roi"},
-    "sbref": {"datatype": "func", "suffix": "sbref", "part": ["mag", None]},
-    "t1w": {"datatype": "anat", "suffix": "T1w", "part": ["mag", None]},
-    "t2w": {"datatype": "anat", "suffix": "T2w", "part": ["mag", None]},
-    "asl": {"datatype": "perf", "suffix": "asl"},
+    'bold': {'datatype': 'func', 'suffix': 'bold', 'part': ['mag', None]},
+    'dwi': {'suffix': 'dwi'},
+    'flair': {'datatype': 'anat', 'suffix': 'FLAIR', 'part': ['mag', None]},
+    'fmap': {'datatype': 'fmap'},
+    'pet': {'suffix': 'pet'},
+    'roi': {'datatype': 'anat', 'suffix': 'roi'},
+    'sbref': {'datatype': 'func', 'suffix': 'sbref', 'part': ['mag', None]},
+    't1w': {'datatype': 'anat', 'suffix': 'T1w', 'part': ['mag', None]},
+    't2w': {'datatype': 'anat', 'suffix': 'T2w', 'part': ['mag', None]},
+    'asl': {'datatype': 'perf', 'suffix': 'asl'},
 }
 
 
@@ -48,13 +49,13 @@ class BIDSError(ValueError):
     def __init__(self, message, bids_root):
         indent = 10
         header = '{sep} BIDS root folder: "{bids_root}" {sep}'.format(
-            bids_root=bids_root, sep="".join(["-"] * indent)
+            bids_root=bids_root, sep=''.join(['-'] * indent)
         )
-        self.msg = "\n{header}\n{indent}{message}\n{footer}".format(
+        self.msg = '\n{header}\n{indent}{message}\n{footer}'.format(
             header=header,
-            indent="".join([" "] * (indent + 1)),
+            indent=''.join([' '] * (indent + 1)),
             message=message,
-            footer="".join(["-"] * len(header)),
+            footer=''.join(['-'] * len(header)),
         )
         super().__init__(self.msg)
         self.bids_root = bids_root
@@ -64,9 +65,7 @@ class BIDSWarning(RuntimeWarning):
     pass
 
 
-def collect_participants(
-    bids_dir, participant_label=None, strict=False, bids_validate=True
-):
+def collect_participants(bids_dir, participant_label=None, strict=False, bids_validate=True):
     """
     List the participants under the BIDS root and checks that participants
     designated with the participant_label argument exist in that folder.
@@ -118,11 +117,11 @@ def collect_participants(
     # Error: bids_dir does not contain subjects
     if not all_participants:
         raise BIDSError(
-            "Could not find participants. Please make sure the BIDS data "
-            "structure is present and correct. Datasets can be validated "
-            "online using the BIDS Validator "
-            "(https://bids-standard.github.io/bids-validator/).\n"
-            "If you are using Docker for Mac or Docker for Windows, you "
+            'Could not find participants. Please make sure the BIDS data '
+            'structure is present and correct. Datasets can be validated '
+            'online using the BIDS Validator '
+            '(https://bids-standard.github.io/bids-validator/).\n'
+            'If you are using Docker for Mac or Docker for Windows, you '
             'may need to adjust your "File sharing" preferences.',
             bids_dir,
         )
@@ -135,16 +134,14 @@ def collect_participants(
         participant_label = [participant_label]
 
     # Drop sub- prefixes
-    participant_label = [
-        sub[4:] if sub.startswith("sub-") else sub for sub in participant_label
-    ]
+    participant_label = [sub[4:] if sub.startswith('sub-') else sub for sub in participant_label]
     # Remove duplicates
     participant_label = sorted(set(participant_label))
     # Remove labels not found
     found_label = sorted(set(participant_label) & all_participants)
     if not found_label:
         raise BIDSError(
-            "Could not find participants [{}]".format(", ".join(participant_label)),
+            'Could not find participants [{}]'.format(', '.join(participant_label)),
             bids_dir,
         )
 
@@ -152,12 +149,12 @@ def collect_participants(
     notfound_label = sorted(set(participant_label) - all_participants)
     if notfound_label:
         exc = BIDSError(
-            "Some participants were not found: {}".format(", ".join(notfound_label)),
+            'Some participants were not found: {}'.format(', '.join(notfound_label)),
             bids_dir,
         )
         if strict:
             raise exc
-        warnings.warn(exc.msg, BIDSWarning)
+        warnings.warn(exc.msg, BIDSWarning, stacklevel=2)
 
     return found_label
 
@@ -252,23 +249,18 @@ def collect_data(
                 del layout_get_kwargs[entity]
 
     if task:
-        queries["bold"]["task"] = task
+        queries['bold']['task'] = task
 
     if echo:
-        queries["bold"]["echo"] = echo
+        queries['bold']['echo'] = echo
 
     subj_data = {
-        dtype: sorted(layout.get(**layout_get_kwargs, **query))
-        for dtype, query in queries.items()
+        dtype: sorted(layout.get(**layout_get_kwargs, **query)) for dtype, query in queries.items()
     }
 
     # Special case: multi-echo BOLD, grouping echos
-    if (
-        group_echos
-        and "bold" in subj_data
-        and any(["_echo-" in bold for bold in subj_data["bold"]])
-    ):
-        subj_data["bold"] = group_multiecho(subj_data["bold"])
+    if group_echos and 'bold' in subj_data and any('_echo-' in bold for bold in subj_data['bold']):
+        subj_data['bold'] = group_multiecho(subj_data['bold'])
 
     return subj_data, layout
 
@@ -300,12 +292,12 @@ def _init_layout(in_file=None, bids_dir=None, validate=True, database_path=None)
     if bids_dir is None:
         in_file = Path(in_file)
         for parent in in_file.parents:
-            if parent.name.startswith("sub-"):
+            if parent.name.startswith('sub-'):
                 bids_dir = parent.parent.resolve()
                 break
 
         if bids_dir is None:
-            raise RuntimeError("Could not infer BIDS root")
+            raise RuntimeError('Could not infer BIDS root')
 
     layout = BIDSLayout(
         str(bids_dir),
@@ -394,16 +386,16 @@ def group_multiecho(bold_sess):
     from itertools import groupby
 
     def _grp_echos(x):
-        if "_echo-" not in x:
+        if '_echo-' not in x:
             return x
-        echo = re.search("_echo-\\d*", x).group(0)
-        return x.replace(echo, "_echo-?")
+        echo = re.search('_echo-\\d*', x).group(0)
+        return x.replace(echo, '_echo-?')
 
     ses_uids = []
     for _, bold in groupby(bold_sess, key=_grp_echos):
         bold = list(bold)
         # If single- or dual-echo, flatten list; keep list otherwise.
-        action = getattr(ses_uids, "append" if len(bold) > 2 else "extend")
+        action = getattr(ses_uids, 'append' if len(bold) > 2 else 'extend')
         action(bold)
     return ses_uids
 
@@ -434,17 +426,17 @@ def relative_to_root(path):
 
     """
     path = Path(path)
-    if path.name.startswith("sub-"):
+    if path.name.startswith('sub-'):
         parents = [path.name]
         for p in path.parents:
             parents.insert(0, p.name)
-            if p.name.startswith("sub-"):
+            if p.name.startswith('sub-'):
                 return Path(*parents)
         return path
 
     raise ValueError(
-        f"Could not determine the BIDS root of <{path}>. "
-        "Only files under a subject directory are currently supported."
+        f'Could not determine the BIDS root of <{path}>. '
+        'Only files under a subject directory are currently supported.'
     )
 
 
@@ -485,6 +477,6 @@ def check_pipeline_version(cvers, data_desc):
         return
 
     desc = json.loads(data_desc.read_text())
-    dvers = desc.get("PipelineDescription", {}).get("Version", "0+unknown")
+    dvers = desc.get('PipelineDescription', {}).get('Version', '0+unknown')
     if Version(cvers).public != Version(dvers).public:
-        return "Previous output generated by version {} found.".format(dvers)
+        return f'Previous output generated by version {dvers} found.'

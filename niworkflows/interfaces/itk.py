@@ -21,6 +21,7 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """ITK files handling."""
+
 import os
 from mimetypes import guess_type
 from tempfile import TemporaryDirectory
@@ -43,20 +44,20 @@ from nipype.utils.filemanip import fname_presuffix
 
 from .fixes import _FixTraitApplyTransformsInputSpec
 
-LOGGER = logging.getLogger("nipype.interface")
+LOGGER = logging.getLogger('nipype.interface')
 
 
 class _MCFLIRT2ITKInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiObject(
-        File(exists=True), mandatory=True, desc="list of MAT files from MCFLIRT"
+        File(exists=True), mandatory=True, desc='list of MAT files from MCFLIRT'
     )
-    in_reference = File(exists=True, mandatory=True, desc="input image for spatial reference")
-    in_source = File(exists=True, mandatory=True, desc="input image for spatial source")
-    num_threads = traits.Int(nohash=True, desc="number of parallel processes")
+    in_reference = File(exists=True, mandatory=True, desc='input image for spatial reference')
+    in_source = File(exists=True, mandatory=True, desc='input image for spatial source')
+    num_threads = traits.Int(nohash=True, desc='number of parallel processes')
 
 
 class _MCFLIRT2ITKOutputSpec(TraitedSpec):
-    out_file = File(desc="the output ITKTransform file")
+    out_file = File(desc='the output ITKTransform file')
 
 
 class MCFLIRT2ITK(SimpleInterface):
@@ -67,7 +68,7 @@ class MCFLIRT2ITK(SimpleInterface):
 
     def _run_interface(self, runtime):
         if isdefined(self.inputs.num_threads):
-            LOGGER.warning("Multithreading is deprecated. Remove the num_threads input.")
+            LOGGER.warning('Multithreading is deprecated. Remove the num_threads input.')
 
         source = nb.load(self.inputs.in_source)
         reference = nb.load(self.inputs.in_reference)
@@ -80,8 +81,8 @@ class MCFLIRT2ITK(SimpleInterface):
             np.stack([a.matrix for a in affines], axis=0),
         )
 
-        self._results["out_file"] = os.path.join(runtime.cwd, "mat2itk.txt")
-        affarray.to_filename(self._results["out_file"])
+        self._results['out_file'] = os.path.join(runtime.cwd, 'mat2itk.txt')
+        affarray.to_filename(self._results['out_file'])
 
         return runtime
 
@@ -90,23 +91,19 @@ class _MultiApplyTransformsInputSpec(_FixTraitApplyTransformsInputSpec):
     input_image = InputMultiObject(
         File(exists=True),
         mandatory=True,
-        desc="input time-series as a list of volumes after splitting"
-        " through the fourth dimension",
+        desc='input time-series as a list of volumes after splitting'
+        ' through the fourth dimension',
     )
-    num_threads = traits.Int(
-        1, usedefault=True, nohash=True, desc="number of parallel processes"
-    )
+    num_threads = traits.Int(1, usedefault=True, nohash=True, desc='number of parallel processes')
     save_cmd = traits.Bool(
-        True, usedefault=True, desc="write a log of command lines that were applied"
+        True, usedefault=True, desc='write a log of command lines that were applied'
     )
-    copy_dtype = traits.Bool(
-        False, usedefault=True, desc="copy dtype from inputs to outputs"
-    )
+    copy_dtype = traits.Bool(False, usedefault=True, desc='copy dtype from inputs to outputs')
 
 
 class _MultiApplyTransformsOutputSpec(TraitedSpec):
-    out_files = OutputMultiObject(File(), desc="the output ITKTransform file")
-    log_cmdline = File(desc="a list of command lines used to apply transforms")
+    out_files = OutputMultiObject(File(), desc='the output ITKTransform file')
+    log_cmdline = File(desc='a list of command lines used to apply transforms')
 
 
 class MultiApplyTransforms(SimpleInterface):
@@ -120,25 +117,23 @@ class MultiApplyTransforms(SimpleInterface):
         ifargs = self.inputs.get()
 
         # Extract number of input images and transforms
-        in_files = ifargs.pop("input_image")
+        in_files = ifargs.pop('input_image')
         num_files = len(in_files)
-        transforms = ifargs.pop("transforms")
+        transforms = ifargs.pop('transforms')
         # Get number of parallel jobs
-        num_threads = ifargs.pop("num_threads")
-        save_cmd = ifargs.pop("save_cmd")
+        num_threads = ifargs.pop('num_threads')
+        save_cmd = ifargs.pop('save_cmd')
 
         # Remove certain keys
-        for key in ["environ", "ignore_exception", "terminal_output", "output_image"]:
+        for key in ['environ', 'ignore_exception', 'terminal_output', 'output_image']:
             ifargs.pop(key, None)
 
         # Get a temp folder ready
-        tmp_folder = TemporaryDirectory(prefix="tmp-", dir=runtime.cwd)
+        tmp_folder = TemporaryDirectory(prefix='tmp-', dir=runtime.cwd)
 
         xfms_list = _arrange_xfms(transforms, num_files, tmp_folder)
         if len(xfms_list) != num_files:
-            raise ValueError(
-                "Number of files and entries in the transforms list do not match"
-            )
+            raise ValueError('Number of files and entries in the transforms list do not match')
 
         # Inputs are ready to run in parallel
         if num_threads < 1:
@@ -158,21 +153,19 @@ class MultiApplyTransforms(SimpleInterface):
                         _applytfms,
                         [
                             (in_file, in_xfm, ifargs, i, runtime.cwd)
-                            for i, (in_file, in_xfm) in enumerate(
-                                zip(in_files, xfms_list)
-                            )
+                            for i, (in_file, in_xfm) in enumerate(zip(in_files, xfms_list))
                         ],
                     )
                 )
         tmp_folder.cleanup()
 
         # Collect output file names, after sorting by index
-        self._results["out_files"] = [el[0] for el in out_files]
+        self._results['out_files'] = [el[0] for el in out_files]
 
         if save_cmd:
-            self._results["log_cmdline"] = os.path.join(runtime.cwd, "command.txt")
-            with open(self._results["log_cmdline"], "w") as cmdfile:
-                print("\n-------\n".join([el[1] for el in out_files]), file=cmdfile)
+            self._results['log_cmdline'] = os.path.join(runtime.cwd, 'command.txt')
+            with open(self._results['log_cmdline'], 'w') as cmdfile:
+                print('\n-------\n'.join([el[1] for el in out_files]), file=cmdfile)
         return runtime
 
 
@@ -184,18 +177,19 @@ def _applytfms(args):
     """
     import nibabel as nb
     from nipype.utils.filemanip import fname_presuffix
+
     from niworkflows.interfaces.fixes import FixHeaderApplyTransforms as ApplyTransforms
 
     in_file, in_xform, ifargs, index, newpath = args
     out_file = fname_presuffix(
-        in_file, suffix="_xform-%05d" % index, newpath=newpath, use_ext=True
+        in_file, suffix='_xform-%05d' % index, newpath=newpath, use_ext=True
     )
 
-    copy_dtype = ifargs.pop("copy_dtype", False)
+    copy_dtype = ifargs.pop('copy_dtype', False)
     xfm = ApplyTransforms(
         input_image=in_file, transforms=in_xform, output_image=out_file, **ifargs
     )
-    xfm.terminal_output = "allatonce"
+    xfm.terminal_output = 'allatonce'
     xfm.resource_monitor = False
     runtime = xfm.run().runtime
 
@@ -216,16 +210,16 @@ def _arrange_xfms(transforms, num_files, tmp_folder):
     Convenience method to arrange the list of transforms that should be applied
     to each input file
     """
-    base_xform = ["#Insight Transform File V1.0", "#Transform 0"]
+    base_xform = ['#Insight Transform File V1.0', '#Transform 0']
     # Initialize the transforms matrix
     xfms_T = []
     for i, tf_file in enumerate(transforms):
-        if tf_file == "identity":
+        if tf_file == 'identity':
             xfms_T.append([tf_file] * num_files)
             continue
 
         # If it is a deformation field, copy to the tfs_matrix directly
-        if guess_type(tf_file)[0] != "text/plain":
+        if guess_type(tf_file)[0] != 'text/plain':
             xfms_T.append([tf_file] * num_files)
             continue
 
@@ -233,15 +227,15 @@ def _arrange_xfms(transforms, num_files, tmp_folder):
             tfdata = tf_fh.read().strip()
 
         # If it is not an ITK transform file, copy to the tfs_matrix directly
-        if not tfdata.startswith("#Insight Transform File"):
+        if not tfdata.startswith('#Insight Transform File'):
             xfms_T.append([tf_file] * num_files)
             continue
 
         # Count number of transforms in ITK transform file
-        nxforms = tfdata.count("#Transform")
+        nxforms = tfdata.count('#Transform')
 
         # Remove first line
-        tfdata = tfdata.split("\n")[1:]
+        tfdata = tfdata.split('\n')[1:]
 
         # If it is a ITK transform file with only 1 xform, copy to the tfs_matrix directly
         if nxforms == 1:
@@ -250,23 +244,23 @@ def _arrange_xfms(transforms, num_files, tmp_folder):
 
         if nxforms != num_files:
             raise RuntimeError(
-                "Number of transforms (%d) found in the ITK file does not match"
-                " the number of input image files (%d)." % (nxforms, num_files)
+                'Number of transforms (%d) found in the ITK file does not match'
+                ' the number of input image files (%d).' % (nxforms, num_files)
             )
 
         # At this point splitting transforms will be necessary, generate a base name
         out_base = fname_presuffix(
-            tf_file, suffix="_pos-%03d_xfm-{:05d}" % i, newpath=tmp_folder.name
+            tf_file, suffix='_pos-%03d_xfm-{:05d}' % i, newpath=tmp_folder.name
         ).format
         # Split combined ITK transforms file
         split_xfms = []
         for xform_i in range(nxforms):
             # Find start token to extract
-            startidx = tfdata.index("#Transform %d" % xform_i)
-            next_xform = base_xform + tfdata[startidx + 1:startidx + 4] + [""]
+            startidx = tfdata.index('#Transform %d' % xform_i)
+            next_xform = base_xform + tfdata[startidx + 1 : startidx + 4] + ['']
             xfm_file = out_base(xform_i)
-            with open(xfm_file, "w") as out_xfm:
-                out_xfm.write("\n".join(next_xform))
+            with open(xfm_file, 'w') as out_xfm:
+                out_xfm.write('\n'.join(next_xform))
             split_xfms.append(xfm_file)
         xfms_T.append(split_xfms)
 

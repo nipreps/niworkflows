@@ -22,16 +22,15 @@
 #
 """Plotting tools shared across MRIQC and fMRIPrep."""
 
-import numpy as np
-import nibabel as nb
-import pandas as pd
-
+import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+import nibabel as nb
+import numpy as np
+import pandas as pd
 from matplotlib import colormaps
 from matplotlib import gridspec as mgs
-import matplotlib.cm as cm
-from matplotlib.colors import Normalize
 from matplotlib.colorbar import ColorbarBase
+from matplotlib.colors import Normalize
 
 DINA4_LANDSCAPE = (11.69, 8.27)
 
@@ -40,14 +39,14 @@ class fMRIPlot:
     """Generates the fMRI Summary Plot."""
 
     __slots__ = (
-        "timeseries",
-        "segments",
-        "tr",
-        "confounds",
-        "spikes",
-        "nskip",
-        "sort_carpet",
-        "paired_carpet",
+        'timeseries',
+        'segments',
+        'tr',
+        'confounds',
+        'spikes',
+        'nskip',
+        'sort_carpet',
+        'paired_carpet',
     )
 
     def __init__(
@@ -78,14 +77,14 @@ class fMRIPlot:
             vlines = {}
         self.confounds = {}
         if confounds is None and conf_file:
-            confounds = pd.read_csv(conf_file, sep=r"[\t\s]+", usecols=usecols, index_col=False)
+            confounds = pd.read_csv(conf_file, sep=r'[\t\s]+', usecols=usecols, index_col=False)
 
         if confounds is not None:
             for name in confounds.columns:
                 self.confounds[name] = {
-                    "values": confounds[[name]].values.squeeze().tolist(),
-                    "units": units.get(name),
-                    "cutoff": vlines.get(name),
+                    'values': confounds[[name]].values.squeeze().tolist(),
+                    'units': units.get(name),
+                    'cutoff': vlines.get(name),
                 }
 
         self.spikes = []
@@ -97,8 +96,8 @@ class fMRIPlot:
         """Main plotter"""
         import seaborn as sns
 
-        sns.set_style("whitegrid")
-        sns.set_context("paper", font_scale=0.8)
+        sns.set_style('whitegrid')
+        sns.set_context('paper', font_scale=0.8)
 
         if figure is None:
             figure = plt.gcf()
@@ -120,10 +119,10 @@ class fMRIPlot:
         if self.confounds:
             from seaborn import color_palette
 
-            palette = color_palette("husl", nconfounds)
+            palette = color_palette('husl', nconfounds)
 
         for i, (name, kwargs) in enumerate(self.confounds.items()):
-            tseries = kwargs.pop("values")
+            tseries = kwargs.pop('values')
             confoundplot(tseries, grid[grid_id], tr=self.tr, color=palette[i], name=name, **kwargs)
             grid_id += 1
 
@@ -134,7 +133,7 @@ class fMRIPlot:
             tr=self.tr,
             sort_rows=self.sort_carpet,
             drop_trs=self.nskip,
-            cmap="paired" if self.paired_carpet else None,
+            cmap='paired' if self.paired_carpet else None,
         )
         return figure
 
@@ -149,7 +148,7 @@ def plot_carpet(
     title=None,
     output_file=None,
     size=(900, 1200),
-    sort_rows="ward",
+    sort_rows='ward',
     drop_trs=0,
     legend=True,
 ):
@@ -193,22 +192,21 @@ def plot_carpet(
 
     """
     if segments is None:
-        segments = {
-            "whole brain (voxels)": list(range(data.shape[0]))
-        }
+        segments = {'whole brain (voxels)': list(range(data.shape[0]))}
 
     if len(segments) == 1:
         legend = False
 
     if cmap is None:
-        colors = colormaps["tab10"].colors
-    elif cmap == "paired":
-        colors = list(colormaps["Paired"].colors)
+        colors = colormaps['tab10'].colors
+    elif cmap == 'paired':
+        colors = list(colormaps['Paired'].colors)
         colors[0], colors[1] = colors[1], colors[0]
         colors[2], colors[7] = colors[7], colors[2]
 
     if detrend:
         from nilearn.signal import clean
+
         data = clean(data.T, t_r=tr, filter=False).T
 
     # We want all subplots to have the same dynamic range
@@ -223,7 +221,7 @@ def plot_carpet(
 
     # Cluster segments (if argument enabled)
     if sort_rows:
-        from scipy.cluster.hierarchy import linkage, dendrogram
+        from scipy.cluster.hierarchy import dendrogram, linkage
         from sklearn.cluster import ward_tree
 
         for seg_label, seg_idx in segments.items():
@@ -231,9 +229,9 @@ def plot_carpet(
             if len(seg_idx) < 2:
                 continue
             roi_data = data[seg_idx]
-            if isinstance(sort_rows, str) and sort_rows.lower() == "linkage":
+            if isinstance(sort_rows, str) and sort_rows.lower() == 'linkage':
                 linkage_matrix = linkage(
-                    roi_data, method="average", metric="euclidean", optimal_ordering=True
+                    roi_data, method='average', metric='euclidean', optimal_ordering=True
                 )
             else:
                 children, _, n_leaves, _, distances = ward_tree(roi_data, return_distance=True)
@@ -241,7 +239,7 @@ def plot_carpet(
 
             dn = dendrogram(linkage_matrix, no_plot=True)
             # Override the ordering of the indices in this segment
-            segments[seg_label] = np.array(seg_idx)[np.array(dn["leaves"])]
+            segments[seg_label] = np.array(seg_idx)[np.array(dn['leaves'])]
 
     # If subplot is not defined
     if subplot is None:
@@ -260,33 +258,33 @@ def plot_carpet(
         1,
         subplot_spec=subplot,
         hspace=0.05,
-        height_ratios=[len(v) for v in segments.values()]
+        height_ratios=[len(v) for v in segments.values()],
     )
 
-    for i, (label, indices) in enumerate(segments.items()):
+    for i, indices in enumerate(segments.values()):
         # Carpet plot
         ax = plt.subplot(gs[i])
 
         ax.imshow(
             data[indices, :],
-            interpolation="nearest",
-            aspect="auto",
-            cmap="gray",
+            interpolation='nearest',
+            aspect='auto',
+            cmap='gray',
             vmin=vminmax[0],
             vmax=vminmax[1],
         )
 
         # Toggle the spine objects
-        ax.spines["top"].set_color("none")
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_color("none")
-        ax.spines["right"].set_visible(False)
+        ax.spines['top'].set_color('none')
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_color('none')
+        ax.spines['right'].set_visible(False)
 
         # Make colored left axis
-        ax.spines["left"].set_linewidth(3)
-        ax.spines["left"].set_color(colors[i])
-        ax.spines["left"].set_capstyle("butt")
-        ax.spines["left"].set_position(("outward", 2))
+        ax.spines['left'].set_linewidth(3)
+        ax.spines['left'].set_color(colors[i])
+        ax.spines['left'].set_capstyle('butt')
+        ax.spines['left'].set_position(('outward', 2))
 
         # Make all subplots have same xticks
         xticks = np.linspace(0, data.shape[-1], endpoint=True, num=7)
@@ -295,31 +293,31 @@ def plot_carpet(
         ax.grid(False)
 
         if i == (len(segments) - 1):
-            xlabel = "time-points (index)"
-            xticklabels = (xticks * n_trs / data.shape[-1]).astype("uint32") + drop_trs
+            xlabel = 'time-points (index)'
+            xticklabels = (xticks * n_trs / data.shape[-1]).astype('uint32') + drop_trs
             if tr is not None:
-                xlabel = "time (mm:ss)"
+                xlabel = 'time (mm:ss)'
                 xticklabels = [
-                    f"{int(t // 60):02d}:{(t % 60).round(0).astype(int):02d}"
+                    f'{int(t // 60):02d}:{(t % 60).round(0).astype(int):02d}'
                     for t in (tr * xticklabels)
                 ]
 
             ax.set_xlabel(xlabel)
             ax.set_xticklabels(xticklabels)
-            ax.spines["bottom"].set_position(("outward", 5))
-            ax.spines["bottom"].set_color("k")
-            ax.spines["bottom"].set_linewidth(.8)
+            ax.spines['bottom'].set_position(('outward', 5))
+            ax.spines['bottom'].set_color('k')
+            ax.spines['bottom'].set_linewidth(0.8)
         else:
             ax.set_xticklabels([])
             ax.set_xticks([])
-            ax.spines["bottom"].set_color("none")
-            ax.spines["bottom"].set_visible(False)
+            ax.spines['bottom'].set_color('none')
+            ax.spines['bottom'].set_visible(False)
 
         if title and i == 0:
             ax.set_title(title)
 
     if len(segments) == 1:
-        ax.set_ylabel(label)
+        ax.set_ylabel(next(iter(segments)))
 
     if legend:
         from matplotlib.patches import Patch
@@ -327,7 +325,7 @@ def plot_carpet(
 
         axlegend = inset_axes(
             ax,
-            width="100%",
+            width='100%',
             height=0.01,
             loc='lower center',
             borderpad=-4.1,
@@ -336,27 +334,24 @@ def plot_carpet(
         axlegend.set_xticks([])
         axlegend.set_yticks([])
         axlegend.patch.set_alpha(0.0)
-        for loc in ("top", "bottom", "left", "right"):
-            axlegend.spines[loc].set_color("none")
+        for loc in ('top', 'bottom', 'left', 'right'):
+            axlegend.spines[loc].set_color('none')
             axlegend.spines[loc].set_visible(False)
 
         axlegend.legend(
-            handles=[
-                Patch(color=colors[i], label=l)
-                for i, l in enumerate(segments.keys())
-            ],
-            loc="upper center",
+            handles=[Patch(color=colors[i], label=label) for i, label in enumerate(segments)],
+            loc='upper center',
             bbox_to_anchor=(0.5, 0),
             shadow=False,
             fancybox=False,
             ncol=min(len(segments.keys()), 5),
             frameon=False,
-            prop={'size': 8}
+            prop={'size': 8},
         )
 
     if output_file is not None:
         figure = plt.gcf()
-        figure.savefig(output_file, bbox_inches="tight")
+        figure.savefig(output_file, bbox_inches='tight')
         plt.close(figure)
         figure = None
         return output_file
@@ -370,9 +365,9 @@ def spikesplot(
     tr=None,
     zscored=True,
     spike_thresh=6.0,
-    title="Spike plot",
+    title='Spike plot',
     ax=None,
-    cmap="viridis",
+    cmap='viridis',
     hide_x=True,
     nskip=0,
 ):
@@ -409,9 +404,9 @@ def spikesplot(
             ax.plot(ts_z[sl, :], color=colors[sl], lw=0.5)
         else:
             markerline, stemlines, baseline = ax.stem(ts_z[sl, :])
-            plt.setp(markerline, "markerfacecolor", colors[sl])
-            plt.setp(baseline, "color", colors[sl], "linewidth", 1)
-            plt.setp(stemlines, "color", colors[sl], "linewidth", 1)
+            plt.setp(markerline, 'markerfacecolor', colors[sl])
+            plt.setp(baseline, 'color', colors[sl], 'linewidth', 1)
+            plt.setp(stemlines, 'color', colors[sl], 'linewidth', 1)
 
     # Handle X, Y axes
     ax.grid(False)
@@ -424,15 +419,15 @@ def spikesplot(
 
     if not hide_x:
         if tr is None:
-            ax.set_xlabel("time (frame #)")
+            ax.set_xlabel('time (frame #)')
         else:
-            ax.set_xlabel("time (s)")
-            ax.set_xticklabels(["%.02f" % t for t in (tr * np.array(xticks)).tolist()])
+            ax.set_xlabel('time (s)')
+            ax.set_xticklabels([f'{t:.2f}' for t in (tr * np.array(xticks)).tolist()])
 
     # Handle Y axis
-    ylabel = "slice-wise noise average on background"
+    ylabel = 'slice-wise noise average on background'
     if zscored:
-        ylabel += " (z-scored)"
+        ylabel += ' (z-scored)'
         zs_max = np.abs(ts_z).max()
         ax.set_ylim(
             (
@@ -448,13 +443,13 @@ def spikesplot(
         # yticks.insert(0, ts_z.min())
         # yticks += [ts_z.max()]
         for val in ytick_vals:
-            ax.plot((0, ntsteps - 1), (-val, -val), "k:", alpha=0.2)
-            ax.plot((0, ntsteps - 1), (val, val), "k:", alpha=0.2)
+            ax.plot((0, ntsteps - 1), (-val, -val), 'k:', alpha=0.2)
+            ax.plot((0, ntsteps - 1), (val, val), 'k:', alpha=0.2)
 
         # Plot spike threshold
         if zs_max < spike_thresh:
-            ax.plot((0, ntsteps - 1), (-spike_thresh, -spike_thresh), "k:")
-            ax.plot((0, ntsteps - 1), (spike_thresh, spike_thresh), "k:")
+            ax.plot((0, ntsteps - 1), (-spike_thresh, -spike_thresh), 'k:')
+            ax.plot((0, ntsteps - 1), (spike_thresh, spike_thresh), 'k:')
     else:
         yticks = [
             ts_z[:, nskip:].min(),
@@ -468,20 +463,20 @@ def spikesplot(
     ax.annotate(
         ylabel,
         xy=(0.0, 0.7),
-        xycoords="axes fraction",
+        xycoords='axes fraction',
         xytext=(0, 0),
-        textcoords="offset points",
-        va="center",
-        ha="left",
-        color="gray",
+        textcoords='offset points',
+        va='center',
+        ha='left',
+        color='gray',
         size=4,
         bbox={
-            "boxstyle": "round",
-            "fc": "w",
-            "ec": "none",
-            "color": "none",
-            "lw": 0,
-            "alpha": 0.8,
+            'boxstyle': 'round',
+            'fc': 'w',
+            'ec': 'none',
+            'color': 'none',
+            'lw': 0,
+            'alpha': 0.8,
         },
     )
     ax.set_yticks([])
@@ -494,21 +489,21 @@ def spikesplot(
     #     ax.plot((0, ntsteps - 1), (yticks[0], yticks[0]), 'k:')
     #     ax.plot((0, ntsteps - 1), (yticks[-1], yticks[-1]), 'k:')
 
-    for side in ["top", "right"]:
-        ax.spines[side].set_color("none")
+    for side in ['top', 'right']:
+        ax.spines[side].set_color('none')
         ax.spines[side].set_visible(False)
 
     if not hide_x:
-        ax.spines["bottom"].set_position(("outward", 10))
-        ax.xaxis.set_ticks_position("bottom")
+        ax.spines['bottom'].set_position(('outward', 10))
+        ax.xaxis.set_ticks_position('bottom')
     else:
-        ax.spines["bottom"].set_color("none")
-        ax.spines["bottom"].set_visible(False)
+        ax.spines['bottom'].set_color('none')
+        ax.spines['bottom'].set_visible(False)
 
     # ax.spines["left"].set_position(('outward', 30))
     # ax.yaxis.set_ticks_position('left')
-    ax.spines["left"].set_visible(False)
-    ax.spines["left"].set_color(None)
+    ax.spines['left'].set_visible(False)
+    ax.spines['left'].set_color(None)
 
     # labels = [label for label in ax.yaxis.get_ticklabels()]
     # labels[0].set_weight('bold')
@@ -518,7 +513,7 @@ def spikesplot(
     return ax
 
 
-def spikesplot_cb(position, cmap="viridis", fig=None):
+def spikesplot_cb(position, cmap='viridis', fig=None):
     # Add colorbar
     if fig is None:
         fig = plt.gcf()
@@ -527,12 +522,12 @@ def spikesplot_cb(position, cmap="viridis", fig=None):
     cb = ColorbarBase(
         cax,
         cmap=colormaps[cmap],
-        spacing="proportional",
-        orientation="horizontal",
+        spacing='proportional',
+        orientation='horizontal',
         drawedges=False,
     )
     cb.set_ticks([0, 0.5, 1.0])
-    cb.set_ticklabels(["Inferior", "(axial slice)", "Superior"])
+    cb.set_ticklabels(['Inferior', '(axial slice)', 'Superior'])
     cb.outline.set_linewidth(0)
     cb.ax.xaxis.set_tick_params(width=0)
     return cax
@@ -546,7 +541,7 @@ def confoundplot(
     units=None,
     tr=None,
     hide_x=True,
-    color="b",
+    color='b',
     nskip=0,
     cutoff=None,
     ylims=None,
@@ -574,52 +569,52 @@ def confoundplot(
 
     if not hide_x:
         if notr:
-            ax_ts.set_xlabel("time (frame #)")
+            ax_ts.set_xlabel('time (frame #)')
         else:
-            ax_ts.set_xlabel("time (s)")
+            ax_ts.set_xlabel('time (s)')
             labels = tr * np.array(xticks)
-            ax_ts.set_xticklabels(["%.02f" % t for t in labels.tolist()])
+            ax_ts.set_xticklabels([f'{t:.2f}' for t in labels.tolist()])
     else:
         ax_ts.set_xticklabels([])
 
     if name is not None:
         if units is not None:
-            name += " [%s]" % units
+            name += f' [{units}]'
 
         ax_ts.annotate(
             name,
             xy=(0.0, 0.7),
             xytext=(0, 0),
-            xycoords="axes fraction",
-            textcoords="offset points",
-            va="center",
-            ha="left",
+            xycoords='axes fraction',
+            textcoords='offset points',
+            va='center',
+            ha='left',
             color=color,
             size=8,
             bbox={
-                "boxstyle": "round",
-                "fc": "w",
-                "ec": "none",
-                "color": "none",
-                "lw": 0,
-                "alpha": 0.8,
+                'boxstyle': 'round',
+                'fc': 'w',
+                'ec': 'none',
+                'color': 'none',
+                'lw': 0,
+                'alpha': 0.8,
             },
         )
 
-    for side in ["top", "right"]:
-        ax_ts.spines[side].set_color("none")
+    for side in ['top', 'right']:
+        ax_ts.spines[side].set_color('none')
         ax_ts.spines[side].set_visible(False)
 
     if not hide_x:
-        ax_ts.spines["bottom"].set_position(("outward", 20))
-        ax_ts.xaxis.set_ticks_position("bottom")
+        ax_ts.spines['bottom'].set_position(('outward', 20))
+        ax_ts.xaxis.set_ticks_position('bottom')
     else:
-        ax_ts.spines["bottom"].set_color("none")
-        ax_ts.spines["bottom"].set_visible(False)
+        ax_ts.spines['bottom'].set_color('none')
+        ax_ts.spines['bottom'].set_visible(False)
 
     # ax_ts.spines["left"].set_position(('outward', 30))
-    ax_ts.spines["left"].set_color("none")
-    ax_ts.spines["left"].set_visible(False)
+    ax_ts.spines['left'].set_color('none')
+    ax_ts.spines['left'].set_visible(False)
     # ax_ts.yaxis.set_ticks_position('left')
 
     ax_ts.set_yticks([])
@@ -653,39 +648,39 @@ def confoundplot(
         p95 = 0
 
     stats_label = (
-        r"max: {max:.3f}{units} $\bullet$ mean: {mean:.3f}{units} "
-        r"$\bullet$ $\sigma$: {sigma:.3f}"
-    ).format(max=maxv, mean=mean, units=units or "", sigma=stdv)
+        r'max: {max:.3f}{units} $\bullet$ mean: {mean:.3f}{units} '
+        r'$\bullet$ $\sigma$: {sigma:.3f}'
+    ).format(max=maxv, mean=mean, units=units or '', sigma=stdv)
     ax_ts.annotate(
         stats_label,
         xy=(0.98, 0.7),
-        xycoords="axes fraction",
+        xycoords='axes fraction',
         xytext=(0, 0),
-        textcoords="offset points",
-        va="center",
-        ha="right",
+        textcoords='offset points',
+        va='center',
+        ha='right',
         color=color,
         size=4,
         bbox={
-            "boxstyle": "round",
-            "fc": "w",
-            "ec": "none",
-            "color": "none",
-            "lw": 0,
-            "alpha": 0.8,
+            'boxstyle': 'round',
+            'fc': 'w',
+            'ec': 'none',
+            'color': 'none',
+            'lw': 0,
+            'alpha': 0.8,
         },
     )
 
     # Annotate percentile 95
-    ax_ts.plot((0, ntsteps - 1), [p95] * 2, linewidth=0.1, color="lightgray")
+    ax_ts.plot((0, ntsteps - 1), [p95] * 2, linewidth=0.1, color='lightgray')
     ax_ts.annotate(
-        "%.2f" % p95,
+        f'{p95:.2f}',
         xy=(0, p95),
         xytext=(-1, 0),
-        textcoords="offset points",
-        va="center",
-        ha="right",
-        color="lightgray",
+        textcoords='offset points',
+        va='center',
+        ha='right',
+        color='lightgray',
         size=3,
     )
 
@@ -693,16 +688,16 @@ def confoundplot(
         cutoff = []
 
     for thr in cutoff:
-        ax_ts.plot((0, ntsteps - 1), [thr] * 2, linewidth=0.2, color="dimgray")
+        ax_ts.plot((0, ntsteps - 1), [thr] * 2, linewidth=0.2, color='dimgray')
 
         ax_ts.annotate(
-            "%.2f" % thr,
+            f'{thr:.2f}',
             xy=(0, thr),
             xytext=(-1, 0),
-            textcoords="offset points",
-            va="center",
-            ha="right",
-            color="dimgray",
+            textcoords='offset points',
+            va='center',
+            ha='right',
+            color='dimgray',
             size=3,
         )
 
@@ -712,7 +707,7 @@ def confoundplot(
     if gs_dist is not None:
         ax_dist = plt.subplot(gs_dist)
         sns.displot(tseries, vertical=True, ax=ax_dist)
-        ax_dist.set_xlabel("Timesteps")
+        ax_dist.set_xlabel('Timesteps')
         ax_dist.set_ylim(ax_ts.get_ylim())
         ax_dist.set_yticklabels([])
 
@@ -759,28 +754,28 @@ def compcor_variance_plot(
     metadata = {}
     if metadata_sources is None:
         if len(metadata_files) == 1:
-            metadata_sources = ["CompCor"]
+            metadata_sources = ['CompCor']
         else:
-            metadata_sources = ["Decomposition {:d}".format(i) for i in range(len(metadata_files))]
+            metadata_sources = [f'Decomposition {i:d}' for i in range(len(metadata_files))]
     for file, source in zip(metadata_files, metadata_sources):
-        metadata[source] = pd.read_csv(str(file), sep=r"\s+")
-        metadata[source]["source"] = source
+        metadata[source] = pd.read_csv(str(file), sep=r'\s+')
+        metadata[source]['source'] = source
     metadata = pd.concat(list(metadata.values()))
     bbox_txt = {
-        "boxstyle": "round",
-        "fc": "white",
-        "ec": "none",
-        "color": "none",
-        "linewidth": 0,
-        "alpha": 0.8,
+        'boxstyle': 'round',
+        'fc': 'white',
+        'ec': 'none',
+        'color': 'none',
+        'linewidth': 0,
+        'alpha': 0.8,
     }
 
     decompositions = []
-    data_sources = list(metadata.groupby(["source", "mask"]).groups.keys())
+    data_sources = list(metadata.groupby(['source', 'mask']).groups.keys())
     for source, mask in data_sources:
         if not np.isnan(
-            metadata.loc[(metadata["source"] == source) & (metadata["mask"] == mask)][
-                "singular_value"
+            metadata.loc[(metadata['source'] == source) & (metadata['mask'] == mask)][
+                'singular_value'
             ].values[0]
         ):
             decompositions.append((source, mask))
@@ -793,62 +788,62 @@ def compcor_variance_plot(
         ax = [plt.axes()]
 
     for m, (source, mask) in enumerate(decompositions):
-        components = metadata[(metadata["mask"] == mask) & (metadata["source"] == source)]
+        components = metadata[(metadata['mask'] == mask) & (metadata['source'] == source)]
         if len([m for s, m in decompositions if s == source]) > 1:
-            title_mask = " ({} mask)".format(mask)
+            title_mask = f' ({mask} mask)'
         else:
-            title_mask = ""
-        fig_title = "{}{}".format(source, title_mask)
+            title_mask = ''
+        fig_title = f'{source}{title_mask}'
 
         ax[m].plot(
             np.arange(components.shape[0] + 1),
-            [0] + list(100 * components["cumulative_variance_explained"]),
-            color="purple",
+            [0] + list(100 * components['cumulative_variance_explained']),
+            color='purple',
             linewidth=2.5,
         )
         ax[m].grid(False)
-        ax[m].set_xlabel("number of components in model")
-        ax[m].set_ylabel("cumulative variance explained (%)")
+        ax[m].set_xlabel('number of components in model')
+        ax[m].set_ylabel('cumulative variance explained (%)')
         ax[m].set_title(fig_title)
 
         varexp = {}
 
         for i, thr in enumerate(varexp_thresh):
             varexp[thr] = (
-                np.atleast_1d(np.searchsorted(components["cumulative_variance_explained"], thr))
+                np.atleast_1d(np.searchsorted(components['cumulative_variance_explained'], thr))
                 + 1
             )
-            ax[m].axhline(y=100 * thr, color="lightgrey", linewidth=0.25)
-            ax[m].axvline(x=varexp[thr], color="C{}".format(i), linewidth=2, linestyle=":")
+            ax[m].axhline(y=100 * thr, color='lightgrey', linewidth=0.25)
+            ax[m].axvline(x=varexp[thr], color=f'C{i}', linewidth=2, linestyle=':')
             ax[m].text(
                 0,
                 100 * thr,
-                "{:.0f}".format(100 * thr),
-                fontsize="x-small",
+                f'{100 * thr:.0f}',
+                fontsize='x-small',
                 bbox=bbox_txt,
             )
             ax[m].text(
                 varexp[thr][0],
                 25,
-                "{} components explain\n{:.0f}% of variance".format(varexp[thr][0], 100 * thr),
+                f'{varexp[thr][0]} components explain\n{100 * thr:.0f}% of variance',
                 rotation=90,
-                horizontalalignment="center",
-                fontsize="xx-small",
+                horizontalalignment='center',
+                fontsize='xx-small',
                 bbox=bbox_txt,
             )
 
         ax[m].set_yticks([])
         ax[m].set_yticklabels([])
         for label in ax[m].xaxis.get_majorticklabels():
-            label.set_fontsize("x-small")
-            label.set_rotation("vertical")
-        for side in ["top", "right", "left"]:
-            ax[m].spines[side].set_color("none")
+            label.set_fontsize('x-small')
+            label.set_rotation('vertical')
+        for side in ['top', 'right', 'left']:
+            ax[m].spines[side].set_color('none')
             ax[m].spines[side].set_visible(False)
 
     if output_file is not None:
         figure = plt.gcf()
-        figure.savefig(output_file, bbox_inches="tight")
+        figure.savefig(output_file, bbox_inches='tight')
         plt.close(figure)
         figure = None
         return output_file
@@ -861,7 +856,7 @@ def confounds_correlation_plot(
     figure=None,
     max_dim=20,
     output_file=None,
-    reference="global_signal",
+    reference='global_signal',
     ignore_initial_volumes=0,
 ):
     """
@@ -917,9 +912,9 @@ def confounds_correlation_plot(
     corr = confounds_data.corr()
 
     gscorr = corr.copy()
-    gscorr["index"] = gscorr.index
+    gscorr['index'] = gscorr.index
     gscorr[reference] = np.abs(gscorr[reference])
-    gs_descending = gscorr.sort_values(by=reference, ascending=False)["index"]
+    gs_descending = gscorr.sort_values(by=reference, ascending=False)['index']
     n_vars = corr.shape[0]
     max_dim = min(n_vars, max_dim)
 
@@ -940,40 +935,40 @@ def confounds_correlation_plot(
 
     mask = np.zeros_like(corr, dtype=bool)
     mask[np.triu_indices_from(mask)] = True
-    sns.heatmap(corr, linewidths=0.5, cmap="coolwarm", center=0, square=True, ax=ax0)
-    ax0.tick_params(axis="both", which="both", width=0)
+    sns.heatmap(corr, linewidths=0.5, cmap='coolwarm', center=0, square=True, ax=ax0)
+    ax0.tick_params(axis='both', which='both', width=0)
 
     for label in ax0.xaxis.get_majorticklabels():
-        label.set_fontsize("small")
+        label.set_fontsize('small')
     for label in ax0.yaxis.get_majorticklabels():
-        label.set_fontsize("small")
+        label.set_fontsize('small')
     sns.barplot(
         data=gscorr,
-        x="index",
+        x='index',
         y=reference,
         ax=ax1,
         order=gs_descending,
-        palette="Reds_d",
+        palette='Reds_d',
         saturation=0.5,
     )
 
-    ax1.set_xlabel("Confound time series")
-    ax1.set_ylabel("Magnitude of correlation with {}".format(reference))
-    ax1.tick_params(axis="x", which="both", width=0)
-    ax1.tick_params(axis="y", which="both", width=5, length=5)
+    ax1.set_xlabel('Confound time series')
+    ax1.set_ylabel(f'Magnitude of correlation with {reference}')
+    ax1.tick_params(axis='x', which='both', width=0)
+    ax1.tick_params(axis='y', which='both', width=5, length=5)
 
     for label in ax1.xaxis.get_majorticklabels():
-        label.set_fontsize("small")
-        label.set_rotation("vertical")
+        label.set_fontsize('small')
+        label.set_rotation('vertical')
     for label in ax1.yaxis.get_majorticklabels():
-        label.set_fontsize("small")
-    for side in ["top", "right", "left"]:
-        ax1.spines[side].set_color("none")
+        label.set_fontsize('small')
+    for side in ['top', 'right', 'left']:
+        ax1.spines[side].set_color('none')
         ax1.spines[side].set_visible(False)
 
     if output_file is not None:
         figure = plt.gcf()
-        figure.savefig(output_file, bbox_inches="tight")
+        figure.savefig(output_file, bbox_inches='tight')
         plt.close(figure)
         figure = None
         return output_file
@@ -982,8 +977,8 @@ def confounds_correlation_plot(
 
 def cifti_surfaces_plot(
     in_cifti,
-    density="32k",
-    surface_type="inflated",
+    density='32k',
+    surface_type='inflated',
     clip_range=(0, None),
     output_file=None,
     **kwargs,
@@ -1021,34 +1016,34 @@ def cifti_surfaces_plot(
     def get_surface_meshes(density, surface_type):
         import templateflow.api as tf
 
-        lh, rh = tf.get("fsLR", density=density, suffix=surface_type, extension=[".surf.gii"])
+        lh, rh = tf.get('fsLR', density=density, suffix=surface_type, extension=['.surf.gii'])
         return str(lh), str(rh)
 
-    if density != "32k":
-        raise NotImplementedError("Only 32k density is currently supported.")
+    if density != '32k':
+        raise NotImplementedError('Only 32k density is currently supported.')
 
     img = nb.cifti2.load(in_cifti)
-    if img.nifti_header.get_intent()[0] != "ConnDenseSeries":
-        raise TypeError(f"{in_cifti} is not a dense timeseries CIFTI file")
+    if img.nifti_header.get_intent()[0] != 'ConnDenseSeries':
+        raise TypeError(f'{in_cifti} is not a dense timeseries CIFTI file')
 
     geo = img.header.get_index_map(1)
     left_cortex, right_cortex = None, None
     for bm in geo.brain_models:
-        if bm.brain_structure == "CIFTI_STRUCTURE_CORTEX_LEFT":
+        if bm.brain_structure == 'CIFTI_STRUCTURE_CORTEX_LEFT':
             left_cortex = bm
-        elif bm.brain_structure == "CIFTI_STRUCTURE_CORTEX_RIGHT":
+        elif bm.brain_structure == 'CIFTI_STRUCTURE_CORTEX_RIGHT':
             right_cortex = bm
 
     if left_cortex is None or right_cortex is None:
-        raise RuntimeError("CIFTI is missing cortex information")
+        raise RuntimeError('CIFTI is missing cortex information')
 
     # calculate an average of the BOLD data, excluding the first 5 volumes
     # as potential nonsteady states
     data = img.dataobj[5:20].mean(axis=0)
 
     counts = (left_cortex.index_count, right_cortex.index_count)
-    if density == "32k" and counts != (29696, 29716):
-        raise ValueError("Cortex data is not in fsLR space")
+    if density == '32k' and counts != (29696, 29716):
+        raise ValueError('Cortex data is not in fsLR space')
 
     # medial wall needs to be added back in
     lh_data = np.full(left_cortex.surface_number_of_vertices, np.nan)
@@ -1078,8 +1073,8 @@ def cifti_surfaces_plot(
     rh_bg[:2] = [3, -2]
 
     lh_mesh, rh_mesh = get_surface_meshes(density, surface_type)
-    lh_kwargs = dict(surf_mesh=lh_mesh, surf_map=lh_data, bg_map=lh_bg)
-    rh_kwargs = dict(surf_mesh=rh_mesh, surf_map=rh_data, bg_map=rh_bg)
+    lh_kwargs = {'surf_mesh': lh_mesh, 'surf_map': lh_data, 'bg_map': lh_bg}
+    rh_kwargs = {'surf_mesh': rh_mesh, 'surf_map': rh_data, 'bg_map': rh_bg}
 
     # Build the figure
     figure = plt.figure(figsize=plt.figaspect(0.25), constrained_layout=True)
@@ -1097,7 +1092,7 @@ def cifti_surfaces_plot(
                 vmax=mx,
                 axes=ax,
                 **hemi_kwargs,
-                **kwargs
+                **kwargs,
             )
             # plot_surf sets this to 8, which seems a little far out, but 6 starts clipping
             ax.dist = 7
@@ -1105,7 +1100,7 @@ def cifti_surfaces_plot(
     figure.colorbar(cbar_map, shrink=0.2, ax=figure.axes, location='bottom')
 
     if output_file is not None:
-        figure.savefig(output_file, bbox_inches="tight", dpi=400)
+        figure.savefig(output_file, bbox_inches='tight', dpi=400)
         plt.close(figure)
         return output_file
 
@@ -1116,7 +1111,7 @@ def _concat_brain_struct_data(structs, data):
     concat_data = np.array([], dtype=data.dtype)
     for struct in structs:
         struct_upper_bound = struct.index_offset + struct.index_count
-        struct_data = data[struct.index_offset:struct_upper_bound]
+        struct_data = data[struct.index_offset : struct_upper_bound]
         concat_data = np.concatenate((concat_data, struct_data))
     return concat_data
 

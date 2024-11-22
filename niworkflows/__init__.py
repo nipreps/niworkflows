@@ -1,33 +1,35 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """NeuroImaging Workflows (NIWorkflows) is a selection of image processing workflows."""
+
 import logging
 
 from acres import Loader
 
-from .__about__ import __packagename__, __copyright__, __credits__
+from .__about__ import __copyright__, __credits__, __packagename__
+
 try:
     from ._version import __version__
 except ImportError:  # pragma: no cover
-    __version__ = "0+unknown"
+    __version__ = '0+unknown'
 
 
 __all__ = [
-    "__version__",
-    "__packagename__",
-    "__copyright__",
-    "__credits__",
-    "NIWORKFLOWS_LOG",
-    "load_resource",
+    '__version__',
+    '__packagename__',
+    '__copyright__',
+    '__credits__',
+    'NIWORKFLOWS_LOG',
+    'load_resource',
 ]
 
 NIWORKFLOWS_LOG = logging.getLogger(__packagename__)
 NIWORKFLOWS_LOG.setLevel(logging.INFO)
 
 try:
-    import matplotlib
+    import matplotlib as mpl
 
-    matplotlib.use("Agg")
+    mpl.use('Agg')
 except ImportError:
     pass
 
