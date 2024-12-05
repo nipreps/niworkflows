@@ -94,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"] #, "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         dependencies: [latest, pre]
         include:
           - python-version: "3.9"
@@ -168,9 +168,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v4
+      - name: Install tox
+        run: uv tool install tox --with=tox-uv
       - name: Show tox config
-        run: uvx tox c
+        run: tox c
       - name: Show tox config (this call)
-        run: uvx tox c -e ${{ matrix.check }}
+        run: tox c -e ${{ matrix.check }}
       - name: Run check
-        run: uvx tox -e ${{ matrix.check }}
+        run: tox -e ${{ matrix.check }}

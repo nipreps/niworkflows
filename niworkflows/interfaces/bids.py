@@ -312,7 +312,7 @@ class _PrepareDerivativeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         desc='a list entities that will not be propagated from the source file',
     )
     in_file = InputMultiObject(File(exists=True), mandatory=True, desc='the object to be saved')
-    meta_dict = traits.DictStrAny(desc='an input dictionary containing metadata')
+    meta_dict = traits.Dict(Str, desc='an input dictionary containing metadata')
     source_file = InputMultiObject(
         File(exists=False), mandatory=True, desc='the source file(s) to extract entities from'
     )
@@ -320,7 +320,7 @@ class _PrepareDerivativeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 class _PrepareDerivativeOutputSpec(TraitedSpec):
     out_file = OutputMultiObject(File(exists=True), desc='derivative file path')
-    out_meta = traits.DictStrAny(desc='derivative metadata')
+    out_meta = traits.Dict(Str, desc='derivative metadata')
     out_path = OutputMultiObject(Str, desc='relative path in target directory')
     fixed_hdr = traits.List(traits.Bool, desc='whether derivative header was fixed')
 
@@ -733,7 +733,7 @@ class _SaveDerivativeInputSpec(TraitedSpec):
         exists=True, mandatory=True, desc='Path to the base directory for storing data.'
     )
     in_file = InputMultiObject(File(exists=True), mandatory=True, desc='the object to be saved')
-    metadata = traits.DictStrAny(desc='metadata to be saved alongside the file')
+    metadata = traits.Dict(Str, desc='metadata to be saved alongside the file')
     relative_path = InputMultiObject(
         traits.Str, desc='path to the file relative to the base directory'
     )
@@ -802,7 +802,7 @@ class _DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         desc='a list entities that will not be propagated from the source file',
     )
     in_file = InputMultiObject(File(exists=True), mandatory=True, desc='the object to be saved')
-    meta_dict = traits.DictStrAny(desc='an input dictionary containing metadata')
+    meta_dict = traits.Dict(Str, desc='an input dictionary containing metadata')
     source_file = InputMultiObject(
         File(exists=False), mandatory=True, desc='the source file(s) to extract entities from'
     )
