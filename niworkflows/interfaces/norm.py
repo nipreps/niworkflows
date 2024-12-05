@@ -32,6 +32,7 @@ from nipype.interfaces.base import (
     BaseInterface,
     BaseInterfaceInputSpec,
     File,
+    Str,
     isdefined,
     traits,
 )
@@ -100,7 +101,7 @@ class _SpatialNormalizationInputSpec(BaseInterfaceInputSpec):
     # Load other settings from file.
     settings = traits.List(File(exists=True), desc='pass on the list of settings files')
     # Resolution of the default template.
-    template_spec = traits.DictStrAny(desc='template specifications')
+    template_spec = traits.Dict(Str, desc='template specifications')
     template_resolution = traits.Enum(1, 2, None, desc='(DEPRECATED) template resolution')
     # Use explicit masking?
     explicit_masking = traits.Bool(
