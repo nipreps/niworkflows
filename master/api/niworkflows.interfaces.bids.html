@@ -724,7 +724,7 @@ a single image, the session entity is removed automatically.</p>
 <li><p><strong>data_dtype</strong> (<em>a string</em>) – NumPy datatype to coerce NIfTI data to, or <cite>source</cite> to match the input file dtype.</p></li>
 <li><p><strong>dismiss_entities</strong> (<em>a list of items which are a string or None</em>) – A list entities that will not be propagated from the source file.
 (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">[]</span></code>)</p></li>
-<li><p><strong>meta_dict</strong> (<em>a dictionary with keys which are a value of class ‘str’ and with values which are any value</em>) – An input dictionary containing metadata.</p></li>
+<li><p><strong>meta_dict</strong> (<em>a dictionary with keys which are a string and with values which are any value</em>) – An input dictionary containing metadata.</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Outputs<span class="colon">:</span></dt>
@@ -923,14 +923,14 @@ a single image, the session entity is removed automatically.</p>
 <li><p><strong>data_dtype</strong> (<em>a string</em>) – NumPy datatype to coerce NIfTI data to, or <cite>source</cite> to match the input file dtype.</p></li>
 <li><p><strong>dismiss_entities</strong> (<em>a list of items which are a string or None</em>) – A list entities that will not be propagated from the source file.
 (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">[]</span></code>)</p></li>
-<li><p><strong>meta_dict</strong> (<em>a dictionary with keys which are a value of class ‘str’ and with values which are any value</em>) – An input dictionary containing metadata.</p></li>
+<li><p><strong>meta_dict</strong> (<em>a dictionary with keys which are a string and with values which are any value</em>) – An input dictionary containing metadata.</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Outputs<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fixed_hdr</strong> (<em>a list of items which are a boolean</em>) – Whether derivative header was fixed.</p></li>
 <li><p><strong>out_file</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Derivative file path.</p></li>
-<li><p><strong>out_meta</strong> (<em>a dictionary with keys which are a value of class ‘str’ and with values which are any value</em>) – Derivative metadata.</p></li>
+<li><p><strong>out_meta</strong> (<em>a dictionary with keys which are a string and with values which are any value</em>) – Derivative metadata.</p></li>
 <li><p><strong>out_path</strong> (<em>a list of items which are a string</em>) – Relative path in target directory.</p></li>
 </ul>
 </dd>
@@ -1036,7 +1036,7 @@ trigger unnecessary recomputations in the workflow.</p>
 </dd>
 <dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>metadata</strong> (<em>a dictionary with keys which are a value of class ‘str’ and with values which are any value</em>) – Metadata to be saved alongside the file.</p></li>
+<li><p><strong>metadata</strong> (<em>a dictionary with keys which are a string and with values which are any value</em>) – Metadata to be saved alongside the file.</p></li>
 <li><p><strong>relative_path</strong> (<em>a list of items which are a string</em>) – Path to the file relative to the base directory.</p></li>
 </ul>
 </dd>
