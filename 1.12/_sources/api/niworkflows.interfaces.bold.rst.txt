@@ -1,0 +1,7 @@
+niworkflows.interfaces.bold module
+==================================
+
+.. automodule:: niworkflows.interfaces.bold
+   :members:
+   :undoc-members:
+   :show-inheritance:

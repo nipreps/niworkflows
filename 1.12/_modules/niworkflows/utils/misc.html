@@ -1,0 +1,782 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+
+    <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>niworkflows.utils.misc - niworkflows 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/version-switch.css?v=45d66e8a" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">niworkflows 0+unknown documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+    <span class="sidebar-brand-text">niworkflows</span>
+    <span id="version-slug" class="sidebar-brand-text">0 (dev)</span>
+</a>
+
+<!-- Versions dropdown -->
+<div id="version-menu" class="version-tree">
+  <ul>
+  <li class="toctree-l1 has-children">
+  <span class="sidebar-brand-text">0 (dev)</span>
+  <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
+  <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
+  <ul id="v-tags"></ul>
+  </ul>
+</div><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api.html">Library API (application program interface)</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Library API (application program interface)</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.anat.html">niworkflows.anat package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of niworkflows.anat package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.anat.ants.html">niworkflows.anat.ants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.anat.coregistration.html">niworkflows.anat.coregistration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.anat.freesurfer.html">niworkflows.anat.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.anat.skullstrip.html">niworkflows.anat.skullstrip module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.cli.html">niworkflows.cli package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of niworkflows.cli package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.cli.boldref.html">niworkflows.cli.boldref module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/niworkflows.data.html">niworkflows.data package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.engine.html">niworkflows.engine package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of niworkflows.engine package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.engine.plugin.html">niworkflows.engine.plugin module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.engine.workflows.html">niworkflows.engine.workflows module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.func.html">niworkflows.func package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of niworkflows.func package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.func.util.html">niworkflows.func.util module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.interfaces.html">niworkflows.interfaces package</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of niworkflows.interfaces package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.html">niworkflows.interfaces.reportlets package</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of niworkflows.interfaces.reportlets package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.base.html">niworkflows.interfaces.reportlets.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.masks.html">niworkflows.interfaces.reportlets.masks module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.registration.html">niworkflows.interfaces.reportlets.registration module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.interfaces.reportlets.segmentation.html">niworkflows.interfaces.reportlets.segmentation module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.bids.html">niworkflows.interfaces.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.bold.html">niworkflows.interfaces.bold module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.confounds.html">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.conftest.html">niworkflows.interfaces.conftest module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.header.html">niworkflows.interfaces.header module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.images.html">niworkflows.interfaces.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.itk.html">niworkflows.interfaces.itk module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.morphology.html">niworkflows.interfaces.morphology module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.nibabel.html">niworkflows.interfaces.nibabel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.nilearn.html">niworkflows.interfaces.nilearn module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.nitransforms.html">niworkflows.interfaces.nitransforms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.norm.html">niworkflows.interfaces.norm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.patches.html">niworkflows.interfaces.patches module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.plotting.html">niworkflows.interfaces.plotting module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.probmaps.html">niworkflows.interfaces.probmaps module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.interfaces.workbench.html">niworkflows.interfaces.workbench module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.reports.html">niworkflows.reports package</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of niworkflows.reports package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.reports.core.html">niworkflows.reports.core module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.utils.html">niworkflows.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of niworkflows.utils package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.bids.html">niworkflows.utils.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.connections.html">niworkflows.utils.connections module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.debug.html">niworkflows.utils.debug module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.images.html">niworkflows.utils.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.misc.html">niworkflows.utils.misc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.spaces.html">niworkflows.utils.spaces module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.testing.html">niworkflows.utils.testing module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.utils.timeseries.html">niworkflows.utils.timeseries module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.viz.html">niworkflows.viz package</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of niworkflows.viz package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.viz.notebook.html">niworkflows.viz.notebook module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.viz.plots.html">niworkflows.viz.plots module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/niworkflows.viz.utils.html">niworkflows.viz.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/niworkflows.workflows.html">niworkflows.workflows package</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of niworkflows.workflows package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/niworkflows.workflows.epi.html">niworkflows.workflows.epi package</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of niworkflows.workflows.epi package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/niworkflows.workflows.epi.refmap.html">niworkflows.workflows.epi.refmap module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">What’s new?</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for niworkflows.utils.misc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
+<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2021 The NiPreps Developers &lt;nipreps@gmail.com&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#</span>
+<span class="c1"># We support and encourage derived works from this project, please read</span>
+<span class="c1"># about our expectations at</span>
+<span class="c1">#</span>
+<span class="c1">#     https://www.nipreps.org/community/licensing/</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;Miscellaneous utilities.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;get_template_specs&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;fix_multi_T1w_source_name&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;add_suffix&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;read_crashfile&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;splitext&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;_copy_any&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;clean_directory&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="get_template_specs">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.get_template_specs">[docs]</a>
+<span class="k">def</span> <span class="nf">get_template_specs</span><span class="p">(</span>
+    <span class="n">in_template</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">template_spec</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default_resolution</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">fallback</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse template specifications</span>
+
+<span class="sd">    &gt;&gt;&gt; get_template_specs(&#39;MNI152NLin2009cAsym&#39;, {&#39;suffix&#39;: &#39;T1w&#39;})[1]</span>
+<span class="sd">    {&#39;resolution&#39;: 1}</span>
+
+<span class="sd">    &gt;&gt;&gt; get_template_specs(&#39;MNI152NLin2009cAsym&#39;, {&#39;res&#39;: &#39;2&#39;, &#39;suffix&#39;: &#39;T1w&#39;})[1]</span>
+<span class="sd">    {&#39;resolution&#39;: &#39;2&#39;}</span>
+
+<span class="sd">    &gt;&gt;&gt; specs = get_template_specs(&#39;MNIInfant&#39;, {&#39;res&#39;: &#39;2&#39;, &#39;cohort&#39;: &#39;10&#39;, &#39;suffix&#39;: &#39;T1w&#39;})[1]</span>
+<span class="sd">    &gt;&gt;&gt; sorted(specs.items())</span>
+<span class="sd">    [(&#39;cohort&#39;, &#39;10&#39;), (&#39;resolution&#39;, &#39;2&#39;)]</span>
+
+<span class="sd">    &gt;&gt;&gt; get_template_specs(&#39;MNI152NLin2009cAsym&#39;,</span>
+<span class="sd">    ...                    {&#39;suffix&#39;: &#39;T1w&#39;, &#39;cohort&#39;: 1})[1] # doctest: +IGNORE_EXCEPTION_DETAIL</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    RuntimeError:</span>
+<span class="sd">    ...</span>
+
+<span class="sd">    &gt;&gt;&gt; get_template_specs(&#39;MNI152NLin2009cAsym&#39;,</span>
+<span class="sd">    ...                    {&#39;suffix&#39;: &#39;T1w&#39;, &#39;res&#39;: &#39;1|2&#39;})[1] # doctest: +IGNORE_EXCEPTION_DETAIL</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    RuntimeError:</span>
+<span class="sd">    ...</span>
+
+<span class="sd">    &gt;&gt;&gt; get_template_specs(&#39;UNCInfant&#39;,</span>
+<span class="sd">    ...                    {&#39;suffix&#39;: &#39;T1w&#39;, &#39;res&#39;: 1})[1] # doctest: +IGNORE_EXCEPTION_DETAIL</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    RuntimeError:</span>
+<span class="sd">    ...</span>
+
+<span class="sd">    &gt;&gt;&gt; get_template_specs(&#39;UNCInfant&#39;,</span>
+<span class="sd">    ...                    {&#39;cohort&#39;: 1, &#39;suffix&#39;: &#39;T1w&#39;, &#39;res&#39;: 1}, fallback=True)[1]</span>
+<span class="sd">    {&#39;resolution&#39;: None, &#39;cohort&#39;: 1}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">templateflow.api</span> <span class="k">as</span> <span class="nn">tf</span>
+
+    <span class="c1"># Massage spec (start creating if None)</span>
+    <span class="n">template_spec</span> <span class="o">=</span> <span class="n">template_spec</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">template_spec</span><span class="p">[</span><span class="s1">&#39;desc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">template_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;desc&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">template_spec</span><span class="p">[</span><span class="s1">&#39;atlas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">template_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;atlas&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">template_spec</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">template_spec</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
+        <span class="s1">&#39;res&#39;</span><span class="p">,</span> <span class="n">template_spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resolution&#39;</span><span class="p">,</span> <span class="n">default_resolution</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Verify resolution is valid</span>
+    <span class="k">if</span> <span class="n">fallback</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">template_spec</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">res</span><span class="p">)]</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">available_resolutions</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">TF_LAYOUT</span><span class="o">.</span><span class="n">get_resolutions</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">in_template</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">available_resolutions</span><span class="p">)):</span>
+            <span class="n">fallback_res</span> <span class="o">=</span> <span class="n">available_resolutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">available_resolutions</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Template </span><span class="si">{</span><span class="n">in_template</span><span class="si">}</span><span class="s1"> does not have resolution: </span><span class="si">{</span><span class="n">res</span><span class="si">}</span><span class="s1">.&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;Falling back to resolution: </span><span class="si">{</span><span class="n">fallback_res</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">template_spec</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fallback_res</span>
+
+    <span class="n">common_spec</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;resolution&#39;</span><span class="p">:</span> <span class="n">template_spec</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]}</span>
+    <span class="k">if</span> <span class="s1">&#39;cohort&#39;</span> <span class="ow">in</span> <span class="n">template_spec</span><span class="p">:</span>
+        <span class="n">common_spec</span><span class="p">[</span><span class="s1">&#39;cohort&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">template_spec</span><span class="p">[</span><span class="s1">&#39;cohort&#39;</span><span class="p">]</span>
+
+    <span class="n">tpl_target_path</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">in_template</span><span class="p">,</span> <span class="o">**</span><span class="n">template_spec</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tpl_target_path</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">Could not find template &quot;</span><span class="si">{</span><span class="n">in_template</span><span class="si">}</span><span class="s2">&quot; with specs=</span><span class="si">{</span><span class="n">template_spec</span><span class="si">}</span><span class="s2">. Please revise your template </span><span class="se">\</span>
+<span class="s2">argument.&quot;&quot;&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tpl_target_path</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;\</span>
+<span class="sd">The available template modifiers ({}) did not select a unique template \</span>
+<span class="sd">(got &quot;{}&quot;). Please revise your template argument.&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">template_spec</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">tpl_target_path</span><span class="p">])</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">tpl_target_path</span><span class="p">),</span> <span class="n">common_spec</span></div>
+
+
+
+<div class="viewcode-block" id="fix_multi_T1w_source_name">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.fix_multi_T1w_source_name">[docs]</a>
+<span class="k">def</span> <span class="nf">fix_multi_T1w_source_name</span><span class="p">(</span><span class="n">in_files</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make up a generic source name when there are multiple T1s</span>
+
+<span class="sd">    &gt;&gt;&gt; fix_multi_T1w_source_name([</span>
+<span class="sd">    ...     &#39;/path/to/sub-045_ses-test_T1w.nii.gz&#39;,</span>
+<span class="sd">    ...     &#39;/path/to/sub-045_ses-retest_T1w.nii.gz&#39;])</span>
+<span class="sd">    &#39;/path/to/sub-045_T1w.nii.gz&#39;</span>
+
+
+<span class="sd">    &gt;&gt;&gt; fix_multi_T1w_source_name([</span>
+<span class="sd">    ...    (&#39;/path/to/sub-045-echo-1_T1w.nii.gz&#39;, &#39;path/to/sub-045-echo-2_T1w.nii.gz&#39;)])</span>
+<span class="sd">    &#39;/path/to/sub-045_T1w.nii.gz&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+
+    <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">filename_to_list</span>
+
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">filename_to_list</span><span class="p">(</span><span class="n">in_files</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="n">in_file</span> <span class="o">=</span> <span class="n">in_file</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">base</span><span class="p">,</span> <span class="n">in_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+    <span class="n">subject_label</span> <span class="o">=</span> <span class="n">in_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;sub-</span><span class="si">{</span><span class="n">subject_label</span><span class="si">}</span><span class="s1">_T1w.nii.gz&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="add_suffix">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.add_suffix">[docs]</a>
+<span class="k">def</span> <span class="nf">add_suffix</span><span class="p">(</span><span class="n">in_files</span><span class="p">,</span> <span class="n">suffix</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrap nipype&#39;s fname_presuffix to conveniently just add a prefix</span>
+
+<span class="sd">    &gt;&gt;&gt; add_suffix([</span>
+<span class="sd">    ...     &#39;/path/to/sub-045_ses-test_T1w.nii.gz&#39;,</span>
+<span class="sd">    ...     &#39;/path/to/sub-045_ses-retest_T1w.nii.gz&#39;], &#39;_test&#39;)</span>
+<span class="sd">    &#39;sub-045_ses-test_T1w_test.nii.gz&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">op</span>
+
+    <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">filename_to_list</span><span class="p">,</span> <span class="n">fname_presuffix</span>
+
+    <span class="k">return</span> <span class="n">op</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fname_presuffix</span><span class="p">(</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">in_files</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="read_crashfile">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.read_crashfile">[docs]</a>
+<span class="k">def</span> <span class="nf">read_crashfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.pklz&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_read_pkl</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_read_txt</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;unknown crashfile format&#39;</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_read_pkl</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">loadcrash</span>
+
+    <span class="n">crash_data</span> <span class="o">=</span> <span class="n">loadcrash</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span> <span class="s1">&#39;traceback&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">crash_data</span><span class="p">[</span><span class="s1">&#39;traceback&#39;</span><span class="p">])}</span>
+    <span class="k">if</span> <span class="s1">&#39;node&#39;</span> <span class="ow">in</span> <span class="n">crash_data</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crash_data</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">base_dir</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;node_dir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">output_dir</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;node_dir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Node crashed before execution&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">trait_get</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span> <span class="nf">_read_txt</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a txt crashfile</span>
+
+<span class="sd">    &gt;&gt;&gt; from niworkflows import data</span>
+<span class="sd">    &gt;&gt;&gt; crashfile = data.load(&#39;tests/crashfile.txt&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; info = _read_txt(crashfile)</span>
+<span class="sd">    &gt;&gt;&gt; info[&#39;node&#39;]  # doctest: +ELLIPSIS</span>
+<span class="sd">    &#39;...func_preproc_task_machinegame_run_02_wf.carpetplot_wf.conf_plot&#39;</span>
+<span class="sd">    &gt;&gt;&gt; info[&#39;traceback&#39;]  # doctest: +ELLIPSIS</span>
+<span class="sd">    &#39;...ValueError: zero-size array to reduction operation minimum which has no identity&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)}</span>
+    <span class="n">traceback_start</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Node&#39;</span><span class="p">):</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;: &#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;node_dir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;: &#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cur_key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">cur_val</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">5</span><span class="p">:]):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+                <span class="n">cur_val</span> <span class="o">+=</span> <span class="n">line</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">cur_val</span><span class="p">:</span>
+                <span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cur_key</span><span class="p">,</span> <span class="n">cur_val</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Traceback (&#39;</span><span class="p">):</span>
+                <span class="n">traceback_start</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">5</span>
+                <span class="k">break</span>
+
+            <span class="n">cur_key</span><span class="p">,</span> <span class="n">cur_val</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; = &#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;node_dir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Node crashed before execution&#39;</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;traceback&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">traceback_start</span><span class="p">:])</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<div class="viewcode-block" id="splitext">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.splitext">[docs]</a>
+<span class="k">def</span> <span class="nf">splitext</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Split filename in name and extension (.gz safe).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; splitext(&#39;some/file.nii.gz&#39;)</span>
+<span class="sd">    (&#39;file&#39;, &#39;.nii.gz&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; splitext(&#39;some/other/file.nii&#39;)</span>
+<span class="sd">    (&#39;file&#39;, &#39;.nii&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; splitext(&#39;otherext.tar.gz&#39;)</span>
+<span class="sd">    (&#39;otherext&#39;, &#39;.tar.gz&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; splitext(&#39;text.txt&#39;)</span>
+<span class="sd">    (&#39;text&#39;, &#39;.txt&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; splitext(&#39;some/figure.svg&#39;)</span>
+<span class="sd">    (&#39;figure&#39;, &#39;.svg&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; splitext(&#39;some/figure.svg.gz&#39;)</span>
+<span class="sd">    (&#39;figure&#39;, &#39;.svg.gz&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; splitext(&#39;some/sub-01_bold.func.gii&#39;)</span>
+<span class="sd">    (&#39;sub-01_bold.func&#39;, &#39;.gii&#39;)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+    <span class="n">basename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">stem</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">basename</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;.gz&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">stem</span>
+    <span class="k">return</span> <span class="n">stem</span><span class="p">,</span> <span class="n">basename</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">stem</span><span class="p">)</span> <span class="p">:]</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_copy_any</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">gzip</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">copyfileobj</span>
+
+    <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">copyfile</span>
+
+    <span class="n">src_isgz</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">src</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.gz&#39;</span><span class="p">)</span>
+    <span class="n">dst_isgz</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.gz&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">src_isgz</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dst_isgz</span><span class="p">:</span>
+        <span class="n">copyfile</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_hardlink</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># Make sure we do not reuse the hardlink later</span>
+
+    <span class="c1"># Unlink target (should not exist)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dst</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span>
+
+    <span class="n">src_open</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span> <span class="k">if</span> <span class="n">src_isgz</span> <span class="k">else</span> <span class="nb">open</span>
+    <span class="k">with</span> <span class="n">src_open</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_in</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_out</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dst_isgz</span><span class="p">:</span>
+                <span class="c1"># Remove FNAME header from gzip (nipreps/fmriprep#1480)</span>
+                <span class="n">gz_out</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">GzipFile</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="n">f_out</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="n">copyfileobj</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">gz_out</span><span class="p">)</span>
+                <span class="n">gz_out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">copyfileobj</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">f_out</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<div class="viewcode-block" id="clean_directory">
+<a class="viewcode-back" href="../../../api/niworkflows.utils.misc.html#niworkflows.utils.misc.clean_directory">[docs]</a>
+<span class="k">def</span> <span class="nf">clean_directory</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clears a directory of all contents.</span>
+
+<span class="sd">    Returns `True` if no content remains. If any content cannot be removed, returns `False`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function is not guaranteed to work across multiple threads or processes.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">shutil</span>
+    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">f</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">pass_dummy_scans</span><span class="p">(</span><span class="n">algo_dummy_scans</span><span class="p">,</span> <span class="n">dummy_scans</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Graft manually provided number of dummy scans, if necessary.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    algo_dummy_scans : int</span>
+<span class="sd">        number of volumes to skip determined by an algorithm</span>
+<span class="sd">    dummy_scans : int or None</span>
+<span class="sd">        number of volumes to skip determined by the user</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    skip_vols_num : int</span>
+<span class="sd">        number of volumes to skip</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dummy_scans</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">algo_dummy_scans</span>
+    <span class="k">return</span> <span class="n">dummy_scans</span>
+
+
+<span class="k">def</span> <span class="nf">check_valid_fs_license</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run ``mri_convert`` to assess FreeSurfer access to a license.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    valid : :obj:`bool`</span>
+<span class="sd">        FreeSurfer successfully executed (valid license)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">subprocess</span> <span class="k">as</span> <span class="nn">sp</span>
+    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+    <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
+
+    <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">data</span>
+
+    <span class="k">with</span> <span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">load</span><span class="o">.</span><span class="n">as_path</span><span class="p">(</span><span class="s1">&#39;sentinel.nii.gz&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sentinel</span><span class="p">:</span>
+        <span class="c1"># quick FreeSurfer command</span>
+        <span class="n">_cmd</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;mri_convert&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sentinel</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span> <span class="o">/</span> <span class="s1">&#39;out.mgz&#39;</span><span class="p">))</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">_cmd</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">sp</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">sp</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="s1">&#39;ERROR:&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">unlink</span><span class="p">(</span><span class="n">pathlike</span><span class="p">,</span> <span class="n">missing_ok</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Backport of Path.unlink from Python 3.8+ with missing_ok keyword&quot;&quot;&quot;</span>
+    <span class="c1"># PY37 hack; drop when python_requires &gt;= 3.8</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">pathlike</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">missing_ok</span><span class="p">:</span>
+            <span class="k">raise</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Copyright, The NiPreps Developers
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="../../../_static/js/version-switch.js?v=b7149f84"></script>
+    </body>
+</html>
