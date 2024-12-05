@@ -1,3 +1,25 @@
+1.12.0 (December 05, 2024)
+==========================
+New minor release in the 1.12.x series.
+
+This release includes support for Python 3.13, Numpy 2.0 and Nipype 1.9.
+
+Note that using Python 3.13 requires building traits from the development branch.
+
+* FIX: Pandas deprecations (#906)
+* FIX: Numpy 2 compatibility (#905)
+* FIX: Check 2D spaces against list from templateflow (#888)
+* ENH: Add boldmap suffix to filename patterns. (#899)
+* ENH: Add dir entity to T2starmap pattern. (#898)
+* TEST: CIFTI2 expected checksum has changed (#895)
+* STY: Replace black+flake8 with ruff, add pre-commit (#904)
+* STY: use f-string within normalization interface (#892)
+  MNT: Enable 3.13 tests (#909)
+* MNT: Switch to tox for testing and CI (#900)
+* MNT: Drop Python 3.8, update dependencies (#896)
+* CI: Fix get_data job on CircleCI (#897)
+
+
 1.11.0 (July 31, 2024)
 ======================
 New minor release to start the 1.11.x series.
