@@ -114,6 +114,7 @@ See https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba\
 """,
     )
     initial_moving_transform = File(exists=True, desc='transform for initialization')
+    use_histogram_matching = traits.Bool(desc='determine use of histogram matching')
     float = traits.Bool(False, usedefault=True, desc='use single precision calculations')
 
 
@@ -196,6 +197,15 @@ class SpatialNormalization(BaseInterface):
             NIWORKFLOWS_LOG.info('Loading settings from file %s.', ants_settings)
             # Configure an ANTs run based on these settings.
             self.norm = Registration(from_file=ants_settings, **ants_args)
+            if isdefined(self.inputs.use_histogram_matching):
+                # Most (all?) configuration files use histogram matching, so more important
+                # to allow disabling, such as in the case of intermodality normalization
+                NIWORKFLOWS_LOG.info(
+                    'Overriding (%sabling) histogram matching for file %s',
+                    'en' if self.inputs.use_histogram_matching else 'dis',
+                    ants_settings,
+                )
+                self.norm.inputs.use_histogram_matching = self.inputs.use_histogram_matching
             self.norm.resource_monitor = False
             self.norm.terminal_output = self.terminal_output
 
