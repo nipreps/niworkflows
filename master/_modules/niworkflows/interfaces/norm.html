@@ -446,6 +446,7 @@
 <span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">initial_moving_transform</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;transform for initialization&#39;</span><span class="p">)</span>
+    <span class="n">use_histogram_matching</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;determine use of histogram matching&#39;</span><span class="p">)</span>
     <span class="nb">float</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;use single precision calculations&#39;</span><span class="p">)</span>
 
 
@@ -530,6 +531,15 @@
             <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Loading settings from file </span><span class="si">%s</span><span class="s1">.&#39;</span><span class="p">,</span> <span class="n">ants_settings</span><span class="p">)</span>
             <span class="c1"># Configure an ANTs run based on these settings.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="n">Registration</span><span class="p">(</span><span class="n">from_file</span><span class="o">=</span><span class="n">ants_settings</span><span class="p">,</span> <span class="o">**</span><span class="n">ants_args</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_histogram_matching</span><span class="p">):</span>
+                <span class="c1"># Most (all?) configuration files use histogram matching, so more important</span>
+                <span class="c1"># to allow disabling, such as in the case of intermodality normalization</span>
+                <span class="n">NIWORKFLOWS_LOG</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;Overriding (</span><span class="si">%s</span><span class="s1">abling) histogram matching for file </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;en&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_histogram_matching</span> <span class="k">else</span> <span class="s1">&#39;dis&#39;</span><span class="p">,</span>
+                    <span class="n">ants_settings</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_histogram_matching</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_histogram_matching</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">resource_monitor</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminal_output</span>
 
