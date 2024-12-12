@@ -1,3 +1,10 @@
+1.12.1 (December 12, 2024)
+==========================
+Patch release that adds a new input to `SpatialNormalization`, but remains backwards compatible.
+
+* ENH: Allow adjusting histogram matching of configuration files (#911)
+
+
 1.12.0 (December 05, 2024)
 ==========================
 New minor release in the 1.12.x series.
