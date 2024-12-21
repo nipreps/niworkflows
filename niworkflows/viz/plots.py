@@ -414,7 +414,7 @@ def spikesplot(
     # Handle X axis
     last = ntsteps - 1
     ax.set_xlim(0, last)
-    xticks = list(range(0, last)[::20]) + [last] if not hide_x else []
+    xticks = list(range(last)[::20]) + [last] if not hide_x else []
     ax.set_xticks(xticks)
 
     if not hide_x:
@@ -564,7 +564,7 @@ def confoundplot(
 
     # Set 10 frame markers in X axis
     interval = max((ntsteps // 10, ntsteps // 5, 1))
-    xticks = list(range(0, ntsteps)[::interval])
+    xticks = list(range(ntsteps)[::interval])
     ax_ts.set_xticks(xticks)
 
     if not hide_x:
