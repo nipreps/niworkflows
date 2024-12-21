@@ -49,7 +49,7 @@ def create_roi(tmp_path):
     def _create_roi(affine, img_data, roi_index):
         img_data[tuple(roi_index)] = 1
         nii = nb.Nifti1Image(img_data, affine)
-        filename = tmp_path / f'{str(uuid.uuid4())}.nii.gz'
+        filename = tmp_path / f'{uuid.uuid4()}.nii.gz'
         files.append(filename)
         nii.to_filename(filename)
         return filename
