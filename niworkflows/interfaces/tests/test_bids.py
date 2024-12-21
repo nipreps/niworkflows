@@ -367,7 +367,7 @@ def test_DerivativesDataSink_build_path(
     for out, exp in zip(output, expectation):
         assert Path(out).relative_to(base_directory) == Path(base) / exp
         # Regression - some images were given nan scale factors
-        if out.endswith('.nii') or out.endswith('.nii.gz'):
+        if out.endswith(('.nii', '.nii.gz')):
             img = nb.load(out)
             if isinstance(img, nb.Nifti1Image):
                 with nb.openers.ImageOpener(out) as fobj:
