@@ -537,7 +537,7 @@ def generate_reports(
 
         logger = logging.getLogger('cli')
         error_list = ', '.join(
-            '%s (%d)' % (subid, err) for subid, err in zip(subject_list, report_errors) if err
+            f'{subid} ({err})' for subid, err in zip(subject_list, report_errors) if err
         )
         logger.error(
             'Preprocessing did not finish successfully. Errors occurred while processing '

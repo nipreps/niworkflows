@@ -222,7 +222,7 @@ class SpatialNormalization(BaseInterface):
             if interface_result.runtime.returncode != 0:
                 NIWORKFLOWS_LOG.warning('Retry #%d failed.', self.retry)
                 # Save outputs (if available)
-                term_out = _write_outputs(interface_result.runtime, '.nipype-%04d' % self.retry)
+                term_out = _write_outputs(interface_result.runtime, f'.nipype-{self.retry:04d}')
                 if term_out:
                     NIWORKFLOWS_LOG.warning('Log of failed retry saved (%s).', ', '.join(term_out))
             else:
@@ -235,9 +235,7 @@ class SpatialNormalization(BaseInterface):
             self.retry += 1
 
         # If all tries fail, raise an error.
-        raise RuntimeError(
-            'Robust spatial normalization failed after %d retries.' % (self.retry - 1)
-        )
+        raise RuntimeError(f'Robust spatial normalization failed after {self.retry - 1} retries.')
 
     def _get_ants_args(self):
         args = {

@@ -716,15 +716,11 @@ def init_atropos_wf(
     me_7_2 = pe.Node(ImageMath(operation='ME', op2='5'), name='22_me_7_2')
 
     # De-pad
-    depad_mask = pe.Node(
-        ImageMath(operation='PadImage', op2='-%d' % padding), name='23_depad_mask'
-    )
-    depad_segm = pe.Node(
-        ImageMath(operation='PadImage', op2='-%d' % padding), name='24_depad_segm'
-    )
-    depad_gm = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding), name='25_depad_gm')
-    depad_wm = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding), name='26_depad_wm')
-    depad_csf = pe.Node(ImageMath(operation='PadImage', op2='-%d' % padding), name='27_depad_csf')
+    depad_mask = pe.Node(ImageMath(operation='PadImage', op2=f'-{padding}'), name='23_depad_mask')
+    depad_segm = pe.Node(ImageMath(operation='PadImage', op2=f'-{padding}'), name='24_depad_segm')
+    depad_gm = pe.Node(ImageMath(operation='PadImage', op2=f'-{padding}'), name='25_depad_gm')
+    depad_wm = pe.Node(ImageMath(operation='PadImage', op2=f'-{padding}'), name='26_depad_wm')
+    depad_csf = pe.Node(ImageMath(operation='PadImage', op2=f'-{padding}'), name='27_depad_csf')
 
     msk_conform = pe.Node(niu.Function(function=_conform_mask), name='msk_conform')
     merge_tpms = pe.Node(niu.Merge(in_segmentation_model[0]), name='merge_tpms')
@@ -1052,7 +1048,7 @@ def _select_labels(in_segm, labels):
     for label in labels:
         newnii = nii.__class__(np.uint8(label_data == label), nii.affine, nii.header)
         newnii.set_data_dtype('uint8')
-        out_file = fname_presuffix(in_segm, suffix='_class-%02d' % label, newpath=cwd)
+        out_file = fname_presuffix(in_segm, suffix=f'_class-{label:02d}', newpath=cwd)
         newnii.to_filename(out_file)
         out_files.append(out_file)
     return out_files
