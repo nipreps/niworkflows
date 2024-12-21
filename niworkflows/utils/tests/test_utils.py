@@ -83,12 +83,13 @@ def test_clean_symlink(tmp_path):
 
 
 def _gen_skeleton(root):
-    dirs, files = [], []
-    files.append(root / 'file1')
-    files.append(root / '.file2')
-    dirs.append(root / 'subdir1')
-    files.append(dirs[0] / 'file3')
-    files.append(dirs[0] / '.file4')
+    dirs = [root / 'subdir1']
+    files = [
+        root / 'file1',
+        root / '.file2',
+        dirs[0] / 'file3',
+        dirs[0] / '.file4',
+    ]
     for d in dirs:
         d.mkdir()
     for f in files:
