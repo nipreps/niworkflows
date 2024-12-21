@@ -987,9 +987,7 @@
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">check_hdr</span><span class="p">:</span>
                     <span class="n">hdr</span> <span class="o">=</span> <span class="n">nii</span><span class="o">.</span><span class="n">header</span>
-                    <span class="n">curr_units</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                        <span class="p">[</span><span class="kc">None</span> <span class="k">if</span> <span class="n">u</span> <span class="o">==</span> <span class="s1">&#39;unknown&#39;</span> <span class="k">else</span> <span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">hdr</span><span class="o">.</span><span class="n">get_xyzt_units</span><span class="p">()]</span>
-                    <span class="p">)</span>
+                    <span class="n">curr_units</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">u</span> <span class="o">==</span> <span class="s1">&#39;unknown&#39;</span> <span class="k">else</span> <span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">hdr</span><span class="o">.</span><span class="n">get_xyzt_units</span><span class="p">())</span>
                     <span class="n">curr_codes</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">hdr</span><span class="p">[</span><span class="s1">&#39;qform_code&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">hdr</span><span class="p">[</span><span class="s1">&#39;sform_code&#39;</span><span class="p">]))</span>
 
                     <span class="c1"># Default to mm, use sec if data type is bold</span>
@@ -1510,9 +1508,7 @@
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">check_hdr</span><span class="p">:</span>
                     <span class="n">hdr</span> <span class="o">=</span> <span class="n">nii</span><span class="o">.</span><span class="n">header</span>
-                    <span class="n">curr_units</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                        <span class="p">[</span><span class="kc">None</span> <span class="k">if</span> <span class="n">u</span> <span class="o">==</span> <span class="s1">&#39;unknown&#39;</span> <span class="k">else</span> <span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">hdr</span><span class="o">.</span><span class="n">get_xyzt_units</span><span class="p">()]</span>
-                    <span class="p">)</span>
+                    <span class="n">curr_units</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">u</span> <span class="o">==</span> <span class="s1">&#39;unknown&#39;</span> <span class="k">else</span> <span class="n">u</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">hdr</span><span class="o">.</span><span class="n">get_xyzt_units</span><span class="p">())</span>
                     <span class="n">curr_codes</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">hdr</span><span class="p">[</span><span class="s1">&#39;qform_code&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">hdr</span><span class="p">[</span><span class="s1">&#39;sform_code&#39;</span><span class="p">]))</span>
 
                     <span class="c1"># Default to mm, use sec if data type is bold</span>
