@@ -454,9 +454,9 @@ class Report:
             for bids_file in layout.get()
         }
         # remove the all None member if it exists
-        none_member = tuple([None for k in orderings])
+        none_member = tuple(None for k in orderings)
         if none_member in all_value_combos:
-            all_value_combos.remove(tuple([None for k in orderings]))
+            all_value_combos.remove(tuple(None for k in orderings))
         # see what values exist for each entity
         unique_values = [
             {value[idx] for value in all_value_combos} for idx in range(len(orderings))

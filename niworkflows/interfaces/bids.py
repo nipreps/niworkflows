@@ -647,9 +647,7 @@ class PrepareDerivative(SimpleInterface):
 
                 if self.inputs.check_hdr:
                     hdr = nii.header
-                    curr_units = tuple(
-                        [None if u == 'unknown' else u for u in hdr.get_xyzt_units()]
-                    )
+                    curr_units = tuple(None if u == 'unknown' else u for u in hdr.get_xyzt_units())
                     curr_codes = (int(hdr['qform_code']), int(hdr['sform_code']))
 
                     # Default to mm, use sec if data type is bold
@@ -1164,9 +1162,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
 
                 if self.inputs.check_hdr:
                     hdr = nii.header
-                    curr_units = tuple(
-                        [None if u == 'unknown' else u for u in hdr.get_xyzt_units()]
-                    )
+                    curr_units = tuple(None if u == 'unknown' else u for u in hdr.get_xyzt_units())
                     curr_codes = (int(hdr['qform_code']), int(hdr['sform_code']))
 
                     # Default to mm, use sec if data type is bold
