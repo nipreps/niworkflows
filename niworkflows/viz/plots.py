@@ -39,14 +39,14 @@ class fMRIPlot:
     """Generates the fMRI Summary Plot."""
 
     __slots__ = (
-        'timeseries',
-        'segments',
-        'tr',
         'confounds',
-        'spikes',
         'nskip',
-        'sort_carpet',
         'paired_carpet',
+        'segments',
+        'sort_carpet',
+        'spikes',
+        'timeseries',
+        'tr',
     )
 
     def __init__(
