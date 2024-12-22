@@ -22,12 +22,11 @@
 #
 """Plotting tools shared across MRIQC and fMRIPrep."""
 
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import nibabel as nb
 import numpy as np
 import pandas as pd
-from matplotlib import colormaps
+from matplotlib import cm, colormaps
 from matplotlib import gridspec as mgs
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.colors import Normalize
