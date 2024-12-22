@@ -757,7 +757,7 @@
     <span class="c1"># Handle X axis</span>
     <span class="n">last</span> <span class="o">=</span> <span class="n">ntsteps</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span>
-    <span class="n">xticks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">last</span><span class="p">)[::</span><span class="mi">20</span><span class="p">])</span> <span class="o">+</span> <span class="p">[</span><span class="n">last</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_x</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="n">xticks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">last</span><span class="p">)[::</span><span class="mi">20</span><span class="p">])</span> <span class="o">+</span> <span class="p">[</span><span class="n">last</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_x</span> <span class="k">else</span> <span class="p">[]</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">xticks</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_x</span><span class="p">:</span>
@@ -913,7 +913,7 @@
 
     <span class="c1"># Set 10 frame markers in X axis</span>
     <span class="n">interval</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">ntsteps</span> <span class="o">//</span> <span class="mi">10</span><span class="p">,</span> <span class="n">ntsteps</span> <span class="o">//</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="n">xticks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ntsteps</span><span class="p">)[::</span><span class="n">interval</span><span class="p">])</span>
+    <span class="n">xticks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ntsteps</span><span class="p">)[::</span><span class="n">interval</span><span class="p">])</span>
     <span class="n">ax_ts</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">xticks</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_x</span><span class="p">:</span>
