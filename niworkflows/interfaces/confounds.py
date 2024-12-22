@@ -442,7 +442,7 @@ def _check_and_expand_derivative(expr, variables, data):
     6th only."""
     if re.search(r'^dd[0-9]+', expr):
         order = re.compile(r'^dd([0-9]+)').findall(expr)
-        order = range(0, int(*order) + 1)
+        order = range(int(*order) + 1)
         (variables, data) = temporal_derivatives(order, variables, data)
     elif re.search(r'^d[0-9]+[\-]?[0-9]*', expr):
         order = re.compile(r'^d([0-9]+[\-]?[0-9]*)').findall(expr)
