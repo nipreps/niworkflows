@@ -464,7 +464,7 @@ class SpatialReferences:
 
     """
 
-    __slots__ = ('_refs', '_cached')
+    __slots__ = ('_cached', '_refs')
     standard_spaces = tuple(_tfapi.templates())
     """List of supported standard reference spaces."""
 

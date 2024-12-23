@@ -202,7 +202,7 @@ def _prepare_cifti(grayordinates: str) -> tuple[list, str, dict]:
         '170k': {'surface-den': '59k', 'tf-res': '06', 'grayords': '170,494', 'res-mm': '1.6mm'},
     }
     if grayordinates not in grayord_key:
-        raise NotImplementedError('Grayordinates {grayordinates} is not supported.')
+        raise NotImplementedError(f'Grayordinates {grayordinates} is not supported.')
 
     tf_vol_res = grayord_key[grayordinates]['tf-res']
     total_grayords = grayord_key[grayordinates]['grayords']

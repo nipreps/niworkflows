@@ -388,7 +388,7 @@ def group_multiecho(bold_sess):
     def _grp_echos(x):
         if '_echo-' not in x:
             return x
-        echo = re.search('_echo-\\d*', x).group(0)
+        echo = re.search(r'_echo-\d*', x).group(0)
         return x.replace(echo, '_echo-?')
 
     ses_uids = []

@@ -15,11 +15,11 @@ except ImportError:  # pragma: no cover
 
 
 __all__ = [
-    '__version__',
-    '__packagename__',
+    'NIWORKFLOWS_LOG',
     '__copyright__',
     '__credits__',
-    'NIWORKFLOWS_LOG',
+    '__packagename__',
+    '__version__',
     'load_resource',
 ]
 

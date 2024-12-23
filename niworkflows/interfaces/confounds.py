@@ -535,20 +535,20 @@ def _expand_shorthand(model_formula, variables):
     nss = _get_matches_from_data('non_steady_state_outlier[0-9]+', variables)
     spikes = _get_matches_from_data('motion_outlier[0-9]+', variables)
 
-    model_formula = re.sub('wm', wm, model_formula)
-    model_formula = re.sub('gsr', gsr, model_formula)
-    model_formula = re.sub('rps', rps, model_formula)
-    model_formula = re.sub('fd', fd, model_formula)
-    model_formula = re.sub('acc', acc, model_formula)
-    model_formula = re.sub('tcc', tcc, model_formula)
-    model_formula = re.sub('dv', dv, model_formula)
-    model_formula = re.sub('dvall', dvall, model_formula)
-    model_formula = re.sub('nss', nss, model_formula)
-    model_formula = re.sub('spikes', spikes, model_formula)
+    model_formula = re.sub(r'wm', wm, model_formula)
+    model_formula = re.sub(r'gsr', gsr, model_formula)
+    model_formula = re.sub(r'rps', rps, model_formula)
+    model_formula = re.sub(r'fd', fd, model_formula)
+    model_formula = re.sub(r'acc', acc, model_formula)
+    model_formula = re.sub(r'tcc', tcc, model_formula)
+    model_formula = re.sub(r'dv', dv, model_formula)
+    model_formula = re.sub(r'dvall', dvall, model_formula)
+    model_formula = re.sub(r'nss', nss, model_formula)
+    model_formula = re.sub(r'spikes', spikes, model_formula)
 
     formula_variables = _get_variables_from_formula(model_formula)
     others = ' + '.join(set(variables) - set(formula_variables))
-    model_formula = re.sub('others', others, model_formula)
+    model_formula = re.sub(r'others', others, model_formula)
     return model_formula
 
 
