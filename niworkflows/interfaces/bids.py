@@ -216,9 +216,7 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
             except ValueError:
                 pass
         params = parse_file_entities(in_file)
-        self._results = {
-            key: params.get(key, Undefined) for key in _BIDSInfoOutputSpec().get().keys()
-        }
+        self._results = {key: params.get(key, Undefined) for key in _BIDSInfoOutputSpec().get()}
         return runtime
 
 
