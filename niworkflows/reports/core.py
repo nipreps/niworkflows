@@ -285,7 +285,7 @@ class Report:
         self.packagename = packagename
         self.subject_id = subject_id
         if subject_id is not None:
-            self.subject_id = subject_id[4:] if subject_id.startswith('sub-') else subject_id
+            self.subject_id = subject_id.removeprefix('sub-')
             self.out_filename = f'sub-{self.subject_id}.html'
 
         # Default template from niworkflows

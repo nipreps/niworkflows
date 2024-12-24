@@ -1,4 +1,5 @@
 import logging
+import operator
 from types import SimpleNamespace
 
 import pytest
@@ -6,10 +7,6 @@ from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
 
 from ..plugin import MultiProcPlugin
-
-
-def add(x, y):
-    return x + y
 
 
 def addall(inlist):
@@ -28,7 +25,7 @@ def workflow(tmp_path):
 
     # Generate many nodes and claim a lot of memory
     add_nd = pe.MapNode(
-        niu.Function(function=add, input_names=['x', 'y'], output_names=['z']),
+        niu.Function(function=operator.add, input_names=['x', 'y'], output_names=['z']),
         name='add',
         iterfield=['x'],
         mem_gb=0.8,
@@ -39,7 +36,7 @@ def workflow(tmp_path):
 
     # Run without submitting is another code path
     add_more_nd = pe.Node(
-        niu.Function(function=add, input_names=['x', 'y'], output_names=['z']),
+        niu.Function(function=operator.add, input_names=['x', 'y'], output_names=['z']),
         name='add_more',
         run_without_submitting=True,
     )

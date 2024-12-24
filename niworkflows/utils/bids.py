@@ -134,7 +134,7 @@ def collect_participants(bids_dir, participant_label=None, strict=False, bids_va
         participant_label = [participant_label]
 
     # Drop sub- prefixes
-    participant_label = [sub[4:] if sub.startswith('sub-') else sub for sub in participant_label]
+    participant_label = [sub.removeprefix('sub-') for sub in participant_label]
     # Remove duplicates
     participant_label = sorted(set(participant_label))
     # Remove labels not found
