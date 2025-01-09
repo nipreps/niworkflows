@@ -253,18 +253,11 @@ class BIDSDataGrabber(SimpleInterface):
     >>> bids_src.inputs.subject_data = bids_collect_data(
     ...     str(datadir / 'ds114'), '01', bids_validate=False)[0]
     >>> bids_src.inputs.subject_id = '01'
-    >>> bids_src._require_t1w
-    True
-    >>> bids_src._require_funcs
-    True
     >>> res = bids_src.run()
     >>> res.outputs.t1w  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
     ['.../ds114/sub-01/ses-retest/anat/sub-01_ses-retest_T1w.nii.gz',
      '.../ds114/sub-01/ses-test/anat/sub-01_ses-test_T1w.nii.gz']
 
-    >>> bids_src = BIDSDataGrabber(require_t1w=False)
-    >>> bids_src._require_t1w
-    False
     """
 
     input_spec = _BIDSDataGrabberInputSpec
