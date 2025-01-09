@@ -773,7 +773,7 @@ class SaveDerivative(SimpleInterface):
                 _copy_any(in_file, out_file)
 
             if self.inputs.metadata:
-                sidecar = out_file.parent / f"{out_file.name.split('.', 1)[0]}.json"
+                sidecar = out_file.parent / f'{out_file.name.split(".", 1)[0]}.json'
                 sidecar.unlink(missing_ok=True)
                 sidecar.write_text(dumps(self.inputs.metadata, indent=2))
                 self._results['out_meta'].append(str(sidecar))
@@ -1236,7 +1236,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 {k: getattr(self.inputs, k) for k in meta_fields if k not in self._static_traits}
             )
             if self._metadata:
-                sidecar = out_file.parent / f"{out_file.name.split('.', 1)[0]}.json"
+                sidecar = out_file.parent / f'{out_file.name.split(".", 1)[0]}.json'
                 unlink(sidecar, missing_ok=True)
                 sidecar.write_text(dumps(self._metadata, sort_keys=True, indent=2))
                 self._results['out_meta'] = str(sidecar)
@@ -1482,6 +1482,6 @@ def _get_tf_resolution(space: str, resolution: str) -> str:
         return f'{xyz} mm^3'
 
     return (
-        f"Template {space} ({_fmt_xyz(res_meta['zooms'])}),"
-        f" curated by TemplateFlow {tf.__version__}"
+        f'Template {space} ({_fmt_xyz(res_meta["zooms"])}),'
+        f' curated by TemplateFlow {tf.__version__}'
     )

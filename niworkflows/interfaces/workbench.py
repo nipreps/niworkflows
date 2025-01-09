@@ -114,8 +114,7 @@ class MetricDilateInputSpec(OpenMPTraitedSpec):
         argstr='-exponent %f ',
         position=9,
         default=6.0,
-        desc='exponent n to use in (area / (distance ^ n)) as the '
-        'weighting function (default 6)',
+        desc='exponent n to use in (area / (distance ^ n)) as the weighting function (default 6)',
     )
 
     corrected_areas = File(
