@@ -793,3 +793,16 @@ def test_fsdir_min_version(tmp_path, min_version):
         assert not patched_subject_dir.exists()
     else:
         assert patched_subject_dir.exists()
+
+
+def test_BIDSDataGrabber():
+    x = bintfs.BIDSDataGrabber(anat_only=True)
+    assert x._require_t1w is True
+    assert x._require_funcs is False
+
+    x = bintfs.BIDSDataGrabber(anat_only=False, require_t1w=False)
+    assert x._require_t1w is False
+    assert x._require_funcs is True
+
+    x = bintfs.BIDSDataGrabber(anat_derivatives='derivatives')
+    assert x._require_t1w is False
