@@ -702,8 +702,7 @@ class SignalExtraction(SimpleInterface):
         # This check assumes all input masks have same dimensions
         if img.shape[:3] != mask_imgs[0].shape[:3]:
             raise NotImplementedError(
-                'Input image and mask should be of '
-                'same dimensions before running SignalExtraction'
+                'Input image and mask should be of same dimensions before running SignalExtraction'
             )
         # Load the mask.
         # If mask is a list, each mask is treated as its own ROI/parcel

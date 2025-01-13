@@ -91,9 +91,9 @@ def test_space_action(parser, spaces, expected):
     pargs = parser.parse_known_args(args=('--spaces',) + spaces)[0]
     parsed_spaces = pargs.spaces
     assert isinstance(parsed_spaces, SpatialReferences)
-    assert all(
-        isinstance(sp, Reference) for sp in parsed_spaces.references
-    ), 'Every element must be a `Reference`'
+    assert all(isinstance(sp, Reference) for sp in parsed_spaces.references), (
+        'Every element must be a `Reference`'
+    )
     assert len(parsed_spaces.references) == len(expected)
     for ref, expected_ref in zip(parsed_spaces.references, expected):
         assert str(ref) == expected_ref

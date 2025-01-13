@@ -96,4 +96,4 @@ def to_json(filename, data):
 
 
 def combine_entities(**entities):
-    return f"_{'_'.join([f'{lab}-{val}' for lab, val in entities.items()])}" if entities else ''
+    return f'_{"_".join([f"{lab}-{val}" for lab, val in entities.items()])}' if entities else ''

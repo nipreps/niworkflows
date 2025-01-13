@@ -91,8 +91,7 @@ class _MultiApplyTransformsInputSpec(_FixTraitApplyTransformsInputSpec):
     input_image = InputMultiObject(
         File(exists=True),
         mandatory=True,
-        desc='input time-series as a list of volumes after splitting'
-        ' through the fourth dimension',
+        desc='input time-series as a list of volumes after splitting through the fourth dimension',
     )
     num_threads = traits.Int(1, usedefault=True, nohash=True, desc='number of parallel processes')
     save_cmd = traits.Bool(

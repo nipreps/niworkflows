@@ -176,8 +176,7 @@ class _SpikeRegressorsInputSpec(BaseInterfaceInputSpec):
     concatenate = traits.Bool(
         True,
         usedefault=True,
-        desc='Indicates whether to concatenate spikes to existing confounds '
-        'or return spikes only',
+        desc='Indicates whether to concatenate spikes to existing confounds or return spikes only',
     )
     output_format = traits.Enum(
         'spikes', 'mask', usedefault=True, desc='Format of output (spikes or mask)'
