@@ -1057,8 +1057,7 @@
         <span class="c1"># This check assumes all input masks have same dimensions</span>
         <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mask_imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s1">&#39;Input image and mask should be of &#39;</span>
-                <span class="s1">&#39;same dimensions before running SignalExtraction&#39;</span>
+                <span class="s1">&#39;Input image and mask should be of same dimensions before running SignalExtraction&#39;</span>
             <span class="p">)</span>
         <span class="c1"># Load the mask.</span>
         <span class="c1"># If mask is a list, each mask is treated as its own ROI/parcel</span>
