@@ -28,13 +28,13 @@ import os
 import warnings
 
 __all__ = [
-    'get_template_specs',
-    'fix_multi_T1w_source_name',
+    '_copy_any',
     'add_suffix',
+    'clean_directory',
+    'fix_multi_T1w_source_name',
+    'get_template_specs',
     'read_crashfile',
     'splitext',
-    '_copy_any',
-    'clean_directory',
 ]
 
 

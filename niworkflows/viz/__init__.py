@@ -11,4 +11,4 @@ msg = (
 
 warnings.warn(msg, PendingDeprecationWarning, stacklevel=2)
 
-__all__ = ['plot_carpet', 'SVGNS']
+__all__ = ['SVGNS', 'plot_carpet']

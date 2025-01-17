@@ -47,7 +47,7 @@ except ImportError:
     NILEARN_VERSION = 'unknown'
 
 LOGGER = logging.getLogger('nipype.interface')
-__all__ = ['NILEARN_VERSION', 'MaskEPI', 'Merge', 'ComputeEPIMask']
+__all__ = ['NILEARN_VERSION', 'ComputeEPIMask', 'MaskEPI', 'Merge']
 
 
 class _MaskEPIInputSpec(BaseInterfaceInputSpec):
