@@ -182,7 +182,7 @@ class Path2BIDS(SimpleInterface):
             trait_change_notify=False,
             **{
                 entity: Undefined
-                for entity in self._pattern.groupindex.keys()
+                for entity in self._pattern.groupindex
                 if entity not in self._excluded
             },
         )

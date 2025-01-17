@@ -42,7 +42,7 @@ def _cifti_timeseries(dataset):
     }
     seg = {label: [] for label in list(labels.values()) + ['Other']}
     for bm in matrix.get_index_map(1).brain_models:
-        label = 'Other' if bm.brain_structure not in labels else labels[bm.brain_structure]
+        label = labels.get(bm.brain_structure, 'Other')
         seg[label] += list(range(bm.index_offset, bm.index_offset + bm.index_count))
 
     return dataset.get_fdata(dtype='float32').T, seg
