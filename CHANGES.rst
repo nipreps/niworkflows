@@ -1,3 +1,16 @@
+1.12.2 (January 23, 2025)
+=========================
+Patch release that includes a new keyword argument to `BIDSDataGrabber` to bypass requiring a T1w image.
+
+* ENH: Parse kwargs to allow no T1w (#922)
+* MNT: Bump astral-sh/setup-uv from 4 to 5 (#920)
+* STY: Format + add git blame ignore file (#923)
+* STY: Apply ruff/Pylint rule PLR0402 (#916)
+* STY: Apply ruff/flake8-pie rules (PIE) (#914)
+* STY: Apply ruff/flake8-comprehensions preview rule C409 (#912)
+* STY: Use f-strings where possible (#836)
+
+
 1.12.1 (December 12, 2024)
 ==========================
 Patch release that adds a new input to `SpatialNormalization`, but remains backwards compatible.
