@@ -122,15 +122,6 @@ jobs:
         with:
           path: ~/.cache/stanford-crn/
           key: data-v0-${{ github.ref_name }}-${{ github.sha }}
-      - name: Load TemplateFlow cache
-        uses: actions/cache@v4
-        id: templateflow
-        with:
-          path: ~/.cache/templateflow
-          key: templateflow-v0-${{ github.ref_name }}-${{ strategy.job-index }}-${{ github.sha }}
-          restore-keys: |
-            templateflow-v0-${{ github.ref_name }}-
-            templateflow-v0-
       - uses: actions/cache@v4
         with:
           path: ~/.cache/templateflow
