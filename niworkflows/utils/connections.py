@@ -67,6 +67,8 @@ def listify(value):
     [0.1, 0.2]
     >>> listify(None) is None
     True
+    >>> listify(1)
+    [1]
 
     """
     from pathlib import Path
@@ -77,4 +79,6 @@ def listify(value):
         return value
     if isinstance(value, (str, bytes, Path)):
         return [str(value)]
+    if isinstance(value, (int, float)):
+        return [value]
     return list(value)
