@@ -21,26 +21,25 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Interfaces for handling spaces."""
+
 from nipype.interfaces.base import (
-    traits,
-    TraitedSpec,
     BaseInterfaceInputSpec,
     SimpleInterface,
+    TraitedSpec,
+    traits,
 )
 
 
 class _SpaceDataSourceInputSpec(BaseInterfaceInputSpec):
-    in_tuple = traits.Tuple(
-        (traits.Str, traits.Dict), mandatory=True, desc="a space declaration"
-    )
+    in_tuple = traits.Tuple((traits.Str, traits.Dict), mandatory=True, desc='a space declaration')
 
 
 class _SpaceDataSourceOutputSpec(TraitedSpec):
-    space = traits.Str(desc="the space identifier, after dropping the cohort modifier.")
-    cohort = traits.Str(desc="a cohort specifier")
-    resolution = traits.Str(desc="a resolution specifier")
-    density = traits.Str(desc="a density specifier")
-    uid = traits.Str(desc="a unique identifier combining space specifications")
+    space = traits.Str(desc='the space identifier, after dropping the cohort modifier.')
+    cohort = traits.Str(desc='a cohort specifier')
+    resolution = traits.Str(desc='a resolution specifier')
+    density = traits.Str(desc='a density specifier')
+    uid = traits.Str(desc='a unique identifier combining space specifications')
 
 
 class SpaceDataSource(SimpleInterface):
@@ -78,5 +77,5 @@ class SpaceDataSource(SimpleInterface):
         from ..utils.spaces import format_reference, reference2dict
 
         self._results = reference2dict(self.inputs.in_tuple)
-        self._results["uid"] = format_reference(self.inputs.in_tuple)
+        self._results['uid'] = format_reference(self.inputs.in_tuple)
         return runtime

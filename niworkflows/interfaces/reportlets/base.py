@@ -21,24 +21,24 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """class mixin and utilities for enabling reports for nipype interfaces."""
+
 from nipype.interfaces.base import File, traits
 from nipype.interfaces.mixins import reporting
+
 from ... import NIWORKFLOWS_LOG
-from ...viz.utils import cuts_from_bbox, compose_view
+from ...viz.utils import compose_view, cuts_from_bbox
 
 
 class _SVGReportCapableInputSpec(reporting.ReportCapableInputSpec):
-    out_report = File(
-        "report.svg", usedefault=True, desc="filename for the visual report"
-    )
+    out_report = File('report.svg', usedefault=True, desc='filename for the visual report')
     compress_report = traits.Enum(
-        "auto",
+        'auto',
         True,
         False,
         usedefault=True,
-        desc="Compress the reportlet using SVGO or"
+        desc='Compress the reportlet using SVGO or'
         "WEBP. 'auto' - compress if relevant "
-        "software is installed, True = force,"
+        'software is installed, True = force,'
         "False - don't attempt to compress",
     )
 
@@ -49,18 +49,19 @@ class RegistrationRC(reporting.ReportCapableInterface):
     _fixed_image = None
     _moving_image = None
     _fixed_image_mask = None
-    _fixed_image_label = "fixed"
-    _moving_image_label = "moving"
+    _fixed_image_label = 'fixed'
+    _moving_image_label = 'moving'
     _contour = None
     _dismiss_affine = False
 
     def _generate_report(self):
         """Generate the visual report."""
-        from nilearn.image import threshold_img, load_img
+        from nilearn.image import load_img, threshold_img
         from nilearn.masking import apply_mask, unmask
+
         from niworkflows.viz.utils import plot_registration
 
-        NIWORKFLOWS_LOG.info("Generating visual report")
+        NIWORKFLOWS_LOG.info('Generating visual report')
 
         fixed_image_nii = load_img(self._fixed_image)
         moving_image_nii = load_img(self._moving_image)
@@ -91,7 +92,7 @@ class RegistrationRC(reporting.ReportCapableInterface):
         compose_view(
             plot_registration(
                 fixed_image_nii,
-                "fixed-image",
+                'fixed-image',
                 estimate_brightness=True,
                 cuts=cuts,
                 label=self._fixed_image_label,
@@ -101,7 +102,7 @@ class RegistrationRC(reporting.ReportCapableInterface):
             ),
             plot_registration(
                 moving_image_nii,
-                "moving-image",
+                'moving-image',
                 estimate_brightness=True,
                 cuts=cuts,
                 label=self._moving_image_label,
@@ -142,11 +143,12 @@ class SurfaceSegmentationRC(reporting.ReportCapableInterface):
 
     def _generate_report(self):
         """Generate the visual report."""
-        from nilearn.image import threshold_img, load_img
+        from nilearn.image import load_img, threshold_img
         from nilearn.masking import apply_mask, unmask
+
         from niworkflows.viz.utils import plot_registration
 
-        NIWORKFLOWS_LOG.info("Generating visual report")
+        NIWORKFLOWS_LOG.info('Generating visual report')
 
         anat = load_img(self._anat_file)
         contour_nii = load_img(self._contour) if self._contour is not None else None
@@ -167,7 +169,7 @@ class SurfaceSegmentationRC(reporting.ReportCapableInterface):
         compose_view(
             plot_registration(
                 anat,
-                "fixed-image",
+                'fixed-image',
                 estimate_brightness=True,
                 cuts=cuts,
                 contour=contour_nii,
@@ -189,9 +191,7 @@ class ReportingInterface(reporting.ReportCapableInterface):
     output_spec = reporting.ReportCapableOutputSpec
 
     def __init__(self, generate_report=True, **kwargs):
-        super().__init__(
-            generate_report=generate_report, **kwargs
-        )
+        super().__init__(generate_report=generate_report, **kwargs)
 
     def _run_interface(self, runtime):
         return runtime

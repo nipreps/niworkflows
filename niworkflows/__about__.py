@@ -26,17 +26,14 @@ These pipelines are developed by the Poldrack lab at Stanford University
 Center for Reproducible Neuroscience (https://reproducibility.stanford.edu/),
 as well as for open-source software distribution.
 """
-from datetime import datetime
 
-__packagename__ = "niworkflows"
-__copyright__ = "Copyright {}, The NiPreps Developers".format(
-    datetime.now().year
-)
+__packagename__ = 'niworkflows'
+__copyright__ = 'Copyright, The NiPreps Developers'
 __credits__ = [
-    "Oscar Esteban",
-    "Ross Blair",
-    "Shoshana L. Berleant",
-    "Christopher J. Markiewicz",
-    "Chris Gorgolewski",
-    "Russell A. Poldrack",
+    'Oscar Esteban',
+    'Ross Blair',
+    'Shoshana L. Berleant',
+    'Christopher J. Markiewicz',
+    'Chris Gorgolewski',
+    'Russell A. Poldrack',
 ]

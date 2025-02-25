@@ -21,26 +21,27 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Mathematical morphology operations as nipype interfaces."""
-from pathlib import Path
-import numpy as np
-import nibabel as nb
 
+from pathlib import Path
+
+import nibabel as nb
+import numpy as np
 from nipype.interfaces.base import (
-    traits,
-    TraitedSpec,
     BaseInterfaceInputSpec,
     File,
     SimpleInterface,
+    TraitedSpec,
+    traits,
 )
 
 
 class _BinaryDilationInputSpec(BaseInterfaceInputSpec):
-    in_mask = File(exists=True, mandatory=True, desc="input mask")
-    radius = traits.Int(2, usedefault=True, desc="Radius of dilation")
+    in_mask = File(exists=True, mandatory=True, desc='input mask')
+    radius = traits.Int(2, usedefault=True, desc='Radius of dilation')
 
 
 class _BinaryDilationOutputSpec(TraitedSpec):
-    out_mask = File(exists=False, desc="dilated mask")
+    out_mask = File(exists=False, desc='dilated mask')
 
 
 class BinaryDilation(SimpleInterface):
@@ -59,21 +60,21 @@ class BinaryDilation(SimpleInterface):
             maskdata,
             radius=self.inputs.radius,
         )
-        out_file = str((Path(runtime.cwd) / "dilated_mask.nii.gz").absolute())
+        out_file = str((Path(runtime.cwd) / 'dilated_mask.nii.gz').absolute())
         out_img = mask_img.__class__(dilated, mask_img.affine, mask_img.header)
-        out_img.set_data_dtype("uint8")
+        out_img.set_data_dtype('uint8')
         out_img.to_filename(out_file)
-        self._results["out_mask"] = out_file
+        self._results['out_mask'] = out_file
         return runtime
 
 
 class _BinarySubtractInputSpec(BaseInterfaceInputSpec):
-    in_base = File(exists=True, mandatory=True, desc="input base mask")
-    in_subtract = File(exists=True, mandatory=True, desc="input subtract mask")
+    in_base = File(exists=True, mandatory=True, desc='input base mask')
+    in_subtract = File(exists=True, mandatory=True, desc='input subtract mask')
 
 
 class _BinarySubtractionOutputSpec(TraitedSpec):
-    out_mask = File(exists=False, desc="subtracted mask")
+    out_mask = File(exists=False, desc='subtracted mask')
 
 
 class BinarySubtraction(SimpleInterface):
@@ -88,15 +89,11 @@ class BinarySubtraction(SimpleInterface):
         data = np.bool_(base_img.dataobj)
         data[np.bool_(nb.load(self.inputs.in_subtract).dataobj)] = False
 
-        out_file = str((Path(runtime.cwd) / "subtracted_mask.nii.gz").absolute())
-        out_img = base_img.__class__(
-            data,
-            base_img.affine,
-            base_img.header
-        )
-        out_img.set_data_dtype("uint8")
+        out_file = str((Path(runtime.cwd) / 'subtracted_mask.nii.gz').absolute())
+        out_img = base_img.__class__(data, base_img.affine, base_img.header)
+        out_img.set_data_dtype('uint8')
         out_img.to_filename(out_file)
-        self._results["out_mask"] = out_file
+        self._results['out_mask'] = out_file
         return runtime
 
 

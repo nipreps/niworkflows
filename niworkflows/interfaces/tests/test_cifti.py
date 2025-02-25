@@ -6,18 +6,18 @@ import nibabel as nb
 import numpy as np
 import pytest
 
-from ..cifti import GenerateCifti, CIFTI_STRUCT_WITH_LABELS, _create_cifti_image
+from ..cifti import CIFTI_STRUCT_WITH_LABELS, GenerateCifti, _create_cifti_image
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module')
 def cifti_data():
     import tempfile
 
     with tempfile.TemporaryDirectory('cifti-data') as tmp:
         out = Path(tmp).absolute()
-        volume_file = str(out / "volume.nii.gz")
-        left_gii = str(out / "left.gii")
-        right_gii = str(out / "right.gii")
+        volume_file = str(out / 'volume.nii.gz')
+        left_gii = str(out / 'left.gii')
+        right_gii = str(out / 'right.gii')
         surface_data = [nb.gifti.GiftiDataArray(np.ones(32492, dtype='i4')) for _ in range(4)]
         vol = nb.Nifti1Image(np.ones((91, 109, 91, 4)), np.eye(4))
         gii = nb.GiftiImage(darrays=surface_data)
@@ -37,7 +37,7 @@ def test_GenerateCifti(tmpdir, cifti_data):
     gen = GenerateCifti(
         bold_file=bold_volume,
         surface_bolds=bold_surfaces,
-        grayordinates="91k",
+        grayordinates='91k',
         TR=1,
     )
     res = gen.run().outputs
@@ -79,7 +79,7 @@ def test__create_cifti_image(tmp_path):
         cifti_file = _create_cifti_image(bold_file, volume_label, dummy_fnames, dummy_fnames, 2.0)
 
     cimg = nb.load(cifti_file)
-    series, bm = [cimg.header.get_axis(i) for i in (0, 1)]
+    series, bm = (cimg.header.get_axis(i) for i in (0, 1))
     assert len(series) == 1  # Time
     assert len(bm) == 8  # Voxel
 

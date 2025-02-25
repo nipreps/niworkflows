@@ -21,22 +21,25 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """KeySelect tests."""
+
 from pathlib import Path
+
 import pytest
+
 from ..utility import KeySelect, _tsv2json
 
 
 def test_KeySelect():
     """Test KeySelect."""
-    with pytest.raises(ValueError):
-        KeySelect(fields="field1", keys=["a", "b", "c", "a"])
+    with pytest.raises(ValueError, match=r'duplicated entries'):
+        KeySelect(fields='field1', keys=['a', 'b', 'c', 'a'])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r'list or .* must be provided'):
         KeySelect(fields=[])
 
 
 def test_tsv2json(tmp_path):
-    Path.write_bytes(tmp_path / 'empty.tsv', bytes())
+    Path.write_bytes(tmp_path / 'empty.tsv', b'')
     res = _tsv2json(tmp_path / 'empty.tsv', None, 'any_column')
     assert res == {}
     res = _tsv2json(tmp_path / 'empty.tsv', None, 'any_column', additional_metadata={'a': 'b'})

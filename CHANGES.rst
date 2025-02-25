@@ -1,3 +1,45 @@
+1.12.2 (January 23, 2025)
+=========================
+Patch release that includes a new keyword argument to `BIDSDataGrabber` to bypass requiring a T1w image.
+
+* ENH: Parse kwargs to allow no T1w (#922)
+* MNT: Bump astral-sh/setup-uv from 4 to 5 (#920)
+* STY: Format + add git blame ignore file (#923)
+* STY: Apply ruff/Pylint rule PLR0402 (#916)
+* STY: Apply ruff/flake8-pie rules (PIE) (#914)
+* STY: Apply ruff/flake8-comprehensions preview rule C409 (#912)
+* STY: Use f-strings where possible (#836)
+
+
+1.12.1 (December 12, 2024)
+==========================
+Patch release that adds a new input to `SpatialNormalization`, but remains backwards compatible.
+
+* ENH: Allow adjusting histogram matching of configuration files (#911)
+
+
+1.12.0 (December 05, 2024)
+==========================
+New minor release in the 1.12.x series.
+
+This release includes support for Python 3.13, Numpy 2.0 and Nipype 1.9.
+
+Note that using Python 3.13 requires building traits from the development branch.
+
+* FIX: Pandas deprecations (#906)
+* FIX: Numpy 2 compatibility (#905)
+* FIX: Check 2D spaces against list from templateflow (#888)
+* ENH: Add boldmap suffix to filename patterns. (#899)
+* ENH: Add dir entity to T2starmap pattern. (#898)
+* TEST: CIFTI2 expected checksum has changed (#895)
+* STY: Replace black+flake8 with ruff, add pre-commit (#904)
+* STY: use f-string within normalization interface (#892)
+  MNT: Enable 3.13 tests (#909)
+* MNT: Switch to tox for testing and CI (#900)
+* MNT: Drop Python 3.8, update dependencies (#896)
+* CI: Fix get_data job on CircleCI (#897)
+
+
 1.11.0 (July 31, 2024)
 ======================
 New minor release to start the 1.11.x series.

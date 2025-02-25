@@ -15,7 +15,7 @@ def _create_dtseries_cifti(timepoints, models):
             series_exponent=0,
             series_start=0,
             series_step=1,
-            series_unit='SECOND'
+            series_unit='SECOND',
         )
 
     def create_geometry_map():
@@ -24,13 +24,13 @@ def _create_dtseries_cifti(timepoints, models):
         timeseries = np.zeros((timepoints, 0))
 
         for name, data in models:
-            if "CORTEX" in name:
-                model_type = "CIFTI_MODEL_TYPE_SURFACE"
-                attr = "vertex_indices"
+            if 'CORTEX' in name:
+                model_type = 'CIFTI_MODEL_TYPE_SURFACE'
+                attr = 'vertex_indices'
                 indices = ci.Cifti2VertexIndices(np.arange(len(data)))
             else:
-                model_type = "CIFTI_MODEL_TYPE_VOXELS"
-                attr = "voxel_indices_ijk"
+                model_type = 'CIFTI_MODEL_TYPE_VOXELS'
+                attr = 'voxel_indices_ijk'
                 indices = ci.Cifti2VoxelIndicesIJK(np.arange(len(data)))
             bm = ci.Cifti2BrainModel(
                 index_offset=index_offset,
@@ -39,9 +39,9 @@ def _create_dtseries_cifti(timepoints, models):
                 brain_structure=name,
             )
             setattr(bm, attr, indices)
-            if model_type == "CIFTI_MODEL_TYPE_SURFACE":
+            if model_type == 'CIFTI_MODEL_TYPE_SURFACE':
                 # define total vertices for surface models
-                setattr(bm, "surface_number_of_vertices", 32492)
+                bm.surface_number_of_vertices = 32492
             index_offset += len(data)
             brain_models.append(bm)
             timeseries = np.column_stack((timeseries, data.T))
@@ -55,7 +55,7 @@ def _create_dtseries_cifti(timepoints, models):
 
         return ci.Cifti2MatrixIndicesMap(
             (1,),
-            "CIFTI_INDEX_TYPE_BRAIN_MODELS",
+            'CIFTI_INDEX_TYPE_BRAIN_MODELS',
             maps=brain_models,
         ), timeseries
 
@@ -66,8 +66,8 @@ def _create_dtseries_cifti(timepoints, models):
     matrix.append(geometry_map)
     hdr = ci.Cifti2Header(matrix)
     img = ci.Cifti2Image(dataobj=ts, header=hdr)
-    img.nifti_header.set_intent("NIFTI_INTENT_CONNECTIVITY_DENSE_SERIES")
+    img.nifti_header.set_intent('NIFTI_INTENT_CONNECTIVITY_DENSE_SERIES')
 
-    out_file = Path("test.dtseries.nii").absolute()
+    out_file = Path('test.dtseries.nii').absolute()
     ci.save(img, out_file)
     return out_file

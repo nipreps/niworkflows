@@ -21,47 +21,43 @@
 #     https://www.nipreps.org/community/licensing/
 #
 """Extracting signals from NIfTI and CIFTI2 files."""
-import numpy as np
+
 import nibabel as nb
+import numpy as np
 
 
 def _cifti_timeseries(dataset):
     """Extract timeseries from CIFTI2 dataset."""
     dataset = nb.load(dataset) if isinstance(dataset, str) else dataset
 
-    if dataset.nifti_header.get_intent()[0] != "ConnDenseSeries":
-        raise ValueError("Not a dense timeseries")
+    if dataset.nifti_header.get_intent()[0] != 'ConnDenseSeries':
+        raise ValueError('Not a dense timeseries')
 
     matrix = dataset.header.matrix
     labels = {
-        "CIFTI_STRUCTURE_CORTEX_LEFT": "CtxL",
-        "CIFTI_STRUCTURE_CORTEX_RIGHT": "CtxR",
-        "CIFTI_STRUCTURE_CEREBELLUM_LEFT": "CbL",
-        "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": "CbR",
+        'CIFTI_STRUCTURE_CORTEX_LEFT': 'CtxL',
+        'CIFTI_STRUCTURE_CORTEX_RIGHT': 'CtxR',
+        'CIFTI_STRUCTURE_CEREBELLUM_LEFT': 'CbL',
+        'CIFTI_STRUCTURE_CEREBELLUM_RIGHT': 'CbR',
     }
-    seg = {label: [] for label in list(labels.values()) + ["Other"]}
+    seg = {label: [] for label in list(labels.values()) + ['Other']}
     for bm in matrix.get_index_map(1).brain_models:
-        label = (
-            "Other" if bm.brain_structure not in labels else
-            labels[bm.brain_structure]
-        )
-        seg[label] += list(range(
-            bm.index_offset, bm.index_offset + bm.index_count
-        ))
+        label = 'Other' if bm.brain_structure not in labels else labels[bm.brain_structure]
+        seg[label] += list(range(bm.index_offset, bm.index_offset + bm.index_count))
 
-    return dataset.get_fdata(dtype="float32").T, seg
+    return dataset.get_fdata(dtype='float32').T, seg
 
 
 def _nifti_timeseries(
     dataset,
     segmentation=None,
-    labels=("Ctx GM", "dGM", "WM+CSF", "Cb", "Crown"),
+    labels=('Ctx GM', 'dGM', 'WM+CSF', 'Cb', 'Crown'),
     remap_rois=False,
     lut=None,
 ):
     """Extract timeseries from NIfTI1/2 datasets."""
     dataset = nb.load(dataset) if isinstance(dataset, str) else dataset
-    data = dataset.get_fdata(dtype="float32").reshape((-1, dataset.shape[-1]))
+    data = dataset.get_fdata(dtype='float32').reshape((-1, dataset.shape[-1]))
 
     if segmentation is None:
         return data, None
@@ -75,11 +71,11 @@ def _nifti_timeseries(
     # Map segmentation
     if remap_rois or lut is not None:
         if lut is None:
-            lut = np.zeros((256,), dtype="uint8")
+            lut = np.zeros((256,), dtype='uint8')
             lut[100:201] = 1  # Ctx GM
-            lut[30:99] = 2    # dGM
-            lut[1:11] = 3     # WM+CSF
-            lut[255] = 4      # Cerebellum
+            lut[30:99] = 2  # dGM
+            lut[1:11] = 3  # WM+CSF
+            lut[255] = 4  # Cerebellum
         # Apply lookup table
         segmentation = lut[segmentation]
 

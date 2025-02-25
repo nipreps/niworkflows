@@ -1,0 +1,169 @@
+name: Tox
+
+on:
+  push:
+    branches: [ '**' ]
+    tags: [ '*' ]
+  pull_request:
+    branches: [ master, 'maint/*' ]
+  schedule:
+    - cron: '0 0 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Force tox and pytest to use color
+  FORCE_COLOR: true
+
+jobs:
+  build:
+    if: github.repository == 'nipreps/niworkflows'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Set up Python 3
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3
+    - name: Display Python version
+      run: python -c "import sys; print(sys.version)"
+    - name: Build niworkflows
+      run: pipx run build
+    - name: Check distributions
+      run: pipx run twine check dist/*
+    - uses: actions/upload-artifact@v4
+      with:
+        name: dist
+        path: dist/
+
+  get_data:
+    if: github.repository == 'nipreps/niworkflows'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+    - name: Create test data directory
+      run: mkdir -p $HOME/.cache/stanford-crn
+    - name: Load test data cache
+      uses: actions/cache@v4
+      id: stanford-crn
+      with:
+        path: ~/.cache/stanford-crn/
+        key: data-v0-${{ github.ref_name }}-${{ github.sha }}
+        restore-keys: |
+          data-v0-${{ github.ref_name }}-
+          data-v0-
+    - name: Setup conda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        auto-activate-base: true
+        activate-environment: ""
+    - name: Verify environment
+      run: |
+        conda info
+        which python
+    - name: Install datalad
+      run: |
+        python -m pip install datalad-installer
+        datalad-installer --sudo ok git-annex
+        python -m pip install datalad datalad-osf
+        datalad wtf
+    - name: Pacify git
+      run: |
+        git config --global user.email "github@niworkflows.ci"
+        git config --global user.name "Niworkflows Action"
+    - name: Fetch test data
+      run: |
+        DS=$HOME/.cache/stanford-crn
+        datalad install -r -s https://github.com/nipreps-data/niworkflows-data.git $DS
+        cd $DS
+        git -C BIDS-examples-1-enh-ds054 checkout enh/ds054
+        datalad update -r --merge -d .
+        datalad get -J 2 -r ds000003 ds000030/sub-10228/func
+
+  test:
+    needs: [get_data]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        dependencies: [latest, pre]
+        include:
+          - python-version: "3.9"
+            dependencies: min
+        exclude:
+          # Do not test pre-releases for versions out of SPEC0
+          - python-version: "3.9"
+            dependencies: pre
+          - python-version: "3.10"
+            dependencies: pre
+
+    env:
+      DEPENDS: ${{ matrix.dependencies }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v5
+      - name: Load test data cache
+        uses: actions/cache@v4
+        id: stanford-crn
+        with:
+          path: ~/.cache/stanford-crn/
+          key: data-v0-${{ github.ref_name }}-${{ github.sha }}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/templateflow
+          key: templateflow-v1
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y --no-install-recommends graphviz
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Install tox
+        run: |
+          uv tool install tox --with=tox-uv --with=tox-gh-actions
+      - name: Show tox config
+        run: tox c
+      - name: Run tox
+        run: tox -v --exit-and-dump-after 1200
+      - uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+        if: ${{ always() }}
+
+  checks:
+    runs-on: 'ubuntu-latest'
+    continue-on-error: true
+    strategy:
+      matrix:
+        check: ['style', 'spellcheck']
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v5
+      - name: Install tox
+        run: uv tool install tox --with=tox-uv
+      - name: Show tox config
+        run: tox c
+      - name: Show tox config (this call)
+        run: tox c -e ${{ matrix.check }}
+      - name: Run check
+        run: tox -e ${{ matrix.check }}
