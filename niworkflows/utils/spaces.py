@@ -238,10 +238,10 @@ class Reference:
                         'specification.' % self.spec['volspace']
                     )
 
-                if str(self.spec["volcohort"]) not in _cohorts:
+                if str(self.spec['volcohort']) not in _cohorts:
                     raise ValueError(
                         'standard space "%s" does not contain any cohort '
-                        'named "%s".' % (self.spec["volspace"], self.spec["volcohort"])
+                        'named "%s".' % (self.spec['volspace'], self.spec['volcohort'])
                     )
             elif _cohorts:
                 _cohorts = ', '.join(['"cohort-%s"' % c for c in _cohorts])
@@ -267,12 +267,12 @@ class Reference:
         name = self.space
 
         if 'cohort' in self.spec:
-            name += f':cohort-{self.spec['cohort']}'
+            name += f':cohort-{self.spec["cohort"]}'
 
         if 'volspace' in self.spec:
-            name += f'::{self.spec['volspace']}'
+            name += f'::{self.spec["volspace"]}'
             if 'volcohort' in self.spec:
-                name += f':cohort-{self.spec['volcohort']}'
+                name += f':cohort-{self.spec["volcohort"]}'
 
         return name
 
@@ -732,7 +732,7 @@ class SpatialReferences:
         if not full_spec:
             return out
 
-        out = [s for s in out if hasspec("res", s.spec) or hasspec("den", s.spec)]
+        out = [s for s in out if hasspec('res', s.spec) or hasspec('den', s.spec)]
         return out
 
     def get_nonstandard(self, full_spec=False, dim=(2, 3), cifti=(True, False)):
