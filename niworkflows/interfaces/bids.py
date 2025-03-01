@@ -1469,7 +1469,7 @@ def _get_tf_resolution(space: str, resolution: str) -> str:
     res_meta = None
 
     # Due to inconsistencies, resolution keys may or may not be zero-padded
-    padded_res = f'{str(resolution):0>2}'
+    padded_res = f'{resolution:0>2}'
     for r in (resolution, padded_res):
         if r in resolutions:
             res_meta = resolutions[r]

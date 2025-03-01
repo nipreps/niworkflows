@@ -22,6 +22,8 @@
 #
 """Nibabel-based interfaces."""
 
+from __future__ import annotations
+
 from pathlib import Path
 from warnings import warn
 
@@ -520,9 +522,9 @@ class ReorientImage(SimpleInterface):
 def reorient_file(
     in_file: str,
     *,
-    target_file: str = None,
-    target_ornt: str = None,
-    newpath: str = None,
+    target_file: str | None = None,
+    target_ornt: str | None = None,
+    newpath: str | None = None,
 ) -> str:
     """
     Reorient an image.
