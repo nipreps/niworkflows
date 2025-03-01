@@ -521,10 +521,7 @@ class SpatialReferences:
         if not self.references:
             return False
         item = self.check_space(item)
-        for s in self.references:
-            if s == item:
-                return True
-        return False
+        return any(s == item for s in self.references)
 
     def __str__(self):
         """
@@ -730,10 +727,7 @@ class OutputReferencesAction(argparse.Action):
 
 def hasspec(value, specs):
     """Check whether any of the keys are in a dict."""
-    for s in specs:
-        if s in value:
-            return True
-    return False
+    return any(s in value for s in specs)
 
 
 def format_reference(in_tuple):
