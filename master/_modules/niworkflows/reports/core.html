@@ -821,8 +821,7 @@
         <span class="p">]</span>
         <span class="c1"># if all values are None for an entity, we do not want to keep that entity</span>
         <span class="n">keep_idx</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="kc">False</span> <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">val_set</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">val_set</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">val_set</span> <span class="k">else</span> <span class="kc">True</span>
-            <span class="k">for</span> <span class="n">val_set</span> <span class="ow">in</span> <span class="n">unique_values</span>
+            <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">val_set</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">val_set</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">val_set</span><span class="p">)</span> <span class="k">for</span> <span class="n">val_set</span> <span class="ow">in</span> <span class="n">unique_values</span>
         <span class="p">]</span>
         <span class="c1"># the &quot;kept&quot; entities</span>
         <span class="n">entities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compress</span><span class="p">(</span><span class="n">orderings</span><span class="p">,</span> <span class="n">keep_idx</span><span class="p">))</span>
