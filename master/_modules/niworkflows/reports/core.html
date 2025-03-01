@@ -741,7 +741,7 @@
 
         <span class="k">if</span> <span class="p">(</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s1">&#39;CITATION.html&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="n">text</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;&lt;body&gt;(.*?)&lt;/body&gt;&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+                <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&lt;body&gt;(.*?)&lt;/body&gt;&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
                 <span class="o">.</span><span class="n">findall</span><span class="p">((</span><span class="n">logs_path</span> <span class="o">/</span> <span class="s1">&#39;CITATION.html&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="p">)</span>
