@@ -602,9 +602,7 @@ class PrepareDerivative(SimpleInterface):
         if custom_entities:
             # Example: f"{key}-{{{key}}}" -> "task-{task}"
             custom_pat = '_'.join(f'{key}-{{{key}}}' for key in sorted(custom_entities))
-            patterns = [
-                pat.replace('_{suffix', '_'.join(('', custom_pat, '{suffix'))) for pat in patterns
-            ]
+            patterns = [pat.replace('_{suffix', f'_{custom_pat}_{{suffix') for pat in patterns]
 
         # Build the output path(s)
         dest_files = build_path(out_entities, path_patterns=patterns)
@@ -1107,9 +1105,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         if custom_entities:
             # Example: f"{key}-{{{key}}}" -> "task-{task}"
             custom_pat = '_'.join(f'{key}-{{{key}}}' for key in sorted(custom_entities))
-            patterns = [
-                pat.replace('_{suffix', '_'.join(('', custom_pat, '{suffix'))) for pat in patterns
-            ]
+            patterns = [pat.replace('_{suffix', f'_{custom_pat}_{{suffix') for pat in patterns]
 
         # Prepare SimpleInterface outputs object
         self._results['out_file'] = []
