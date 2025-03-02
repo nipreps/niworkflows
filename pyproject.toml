@@ -118,9 +118,6 @@ line-length = 99
 
 [tool.ruff.lint]
 extend-select = [
-  "F",
-  "E",
-  "W",
   "I",
   "UP",
   "YTT",
@@ -128,8 +125,8 @@ extend-select = [
   "BLE",
   "B",
   "A",
-  # "CPY",
   "C4",
+  # "CPY",
   "DTZ",
   "T10",
   # "EM",
@@ -137,13 +134,33 @@ extend-select = [
   "FA",
   "ISC",
   "ICN",
+  "LOG",
+  "G",
+  "PIE",
+  "PYI",
   "PT",
   "Q",
+  # "SIM",
+  # "TID",
+  "FLY",
+  # "PD",
+  "PERF",
+  "W",
+  "PGH",
+  "PLC",
+  "PLE",
+  "PLW",
+  "FURB",
+  "RUF",
 ]
 ignore = [
   "S311",  # We are not using random for cryptographic purposes
-  "ISC001",
+  "S404",
   "S603",
+  "PLW1510",
+  "PLW2901",
+  "RUF005",
+  "RUF012",
 ]
 
 [tool.ruff.lint.flake8-quotes]
