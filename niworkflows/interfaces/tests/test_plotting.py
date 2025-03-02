@@ -34,7 +34,7 @@ from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
 
 def test_cifti_carpetplot():
     """Exercise extraction of timeseries from CIFTI2."""
-    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS')
 
     cifti_file = load_test_data(
         'sub-01_task-mixedgamblestask_run-02_space-fsLR_den-91k_bold.dtseries.nii'
@@ -54,7 +54,7 @@ def test_cifti_carpetplot():
 
 def test_nifti_carpetplot():
     """Exercise extraction of timeseries from CIFTI2."""
-    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS')
 
     nifti_file = load_test_data('sub-ds205s03_task-functionallocalizer_run-01_bold_volreg.nii.gz')
     seg_file = load_test_data('sub-ds205s03_task-functionallocalizer_run-01_bold_parc.nii.gz')

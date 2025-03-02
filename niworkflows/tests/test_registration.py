@@ -47,7 +47,7 @@ def _smoke_test_report(report_interface, artifact_name):
         res = pe.Node(report_interface, name='smoke_test', base_dir=tmpdir).run()
         out_report = res.outputs.out_report
 
-        save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+        save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS')
         if save_artifacts:
             copy(out_report, os.path.join(save_artifacts, artifact_name))
         assert os.path.isfile(out_report), 'Report does not exist'
