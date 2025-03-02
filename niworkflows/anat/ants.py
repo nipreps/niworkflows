@@ -334,37 +334,8 @@ def init_brain_extraction_wf(
         name='thr_brainmask',
     )
 
-    # Refine INU correction
-    inu_n4_final = pe.MapNode(
-        N4BiasFieldCorrection(
-            dimension=3,
-            save_bias=True,
-            copy_header=True,
-            n_iterations=[50] * 5,
-            convergence_threshold=1e-7,
-            shrink_factor=4,
-            bspline_fitting_distance=bspline_fitting_distance,
-        ),
-        n_procs=omp_nthreads,
-        name='inu_n4_final',
-        iterfield=['input_image'],
-    )
-    try:
-        inu_n4_final.inputs.rescale_intensities = True
-    except ValueError:
-        warn(
-            "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
-            f'({inu_n4_final.interface.version} found.) Please consider upgrading.',
-            UserWarning,
-            stacklevel=1,
-        )
-
-    # Apply mask
-    apply_mask = pe.MapNode(ApplyMask(), iterfield=['in_file'], name='apply_mask')
-
     wf.connect([
         (inputnode, trunc, [('in_files', 'op1')]),
-        (inputnode, inu_n4_final, [('in_files', 'input_image')]),
         (inputnode, init_aff, [('in_mask', 'fixed_image_mask')]),
         (inputnode, norm, [('in_mask', fixed_mask_trait)]),
         (inputnode, map_brainmask, [(('in_files', _pop), 'reference_image')]),
@@ -378,13 +349,6 @@ def init_brain_extraction_wf(
             ('reverse_invert_flags', 'invert_transform_flags'),
         ]),
         (map_brainmask, thr_brainmask, [('output_image', 'input_image')]),
-        (map_brainmask, inu_n4_final, [('output_image', 'weight_image')]),
-        (inu_n4_final, apply_mask, [('output_image', 'in_file')]),
-        (thr_brainmask, apply_mask, [('output_image', 'in_mask')]),
-        (thr_brainmask, outputnode, [('output_image', 'out_mask')]),
-        (inu_n4_final, outputnode, [('output_image', 'bias_corrected'),
-                                    ('bias_image', 'bias_image')]),
-        (apply_mask, outputnode, [('out_file', 'out_file')]),
     ])  # fmt:skip
 
     wm_tpm = get_template(in_template, label='WM', suffix='probseg', **common_spec) or None
@@ -401,21 +365,16 @@ def init_brain_extraction_wf(
             full_wm = pe.Node(niu.Function(function=_imsum), name='full_wm')
             full_wm.inputs.op1 = str(wm_tpm)
             full_wm.inputs.op2 = str(bstem_tpm)
-            wf.connect([
-                (full_wm, map_wmmask, [('out', 'input_image')])
-            ])  # fmt:skip
+            wf.connect([(full_wm, map_wmmask, [('out', 'input_image')])])
         else:
             map_wmmask.inputs.input_image = str(wm_tpm)
-        wf.disconnect([
-            (map_brainmask, inu_n4_final, [('output_image', 'weight_image')]),
-        ])  # fmt:skip
+
         wf.connect([
             (inputnode, map_wmmask, [(('in_files', _pop), 'reference_image')]),
             (norm, map_wmmask, [
                 ('reverse_transforms', 'transforms'),
                 ('reverse_invert_flags', 'invert_transform_flags'),
             ]),
-            (map_wmmask, inu_n4_final, [('output_image', 'weight_image')]),
         ])  # fmt:skip
 
     if use_laplacian:
@@ -457,12 +416,6 @@ def init_brain_extraction_wf(
             wm_prior=bool(wm_tpm),
         )
 
-        wf.disconnect([
-            (thr_brainmask, outputnode, [('output_image', 'out_mask')]),
-            (inu_n4_final, outputnode, [('output_image', 'bias_corrected'),
-                                        ('bias_image', 'bias_image')]),
-            (apply_mask, outputnode, [('out_file', 'out_file')]),
-        ])  # fmt:skip
         wf.connect([
             (inputnode, atropos_wf, [('in_files', 'inputnode.in_files')]),
             (inu_n4, atropos_wf, [('output_image', 'inputnode.in_corrected')]),
@@ -477,9 +430,51 @@ def init_brain_extraction_wf(
             ]),
         ])  # fmt:skip
         if wm_tpm:
-            wf.connect([
-                (map_wmmask, atropos_wf, [('output_image', 'inputnode.wm_prior')]),
-            ])  # fmt:skip
+            wf.connect([(map_wmmask, atropos_wf, [('output_image', 'inputnode.wm_prior')])])
+    else:
+        # If no Atropos refinement, rerun N4 with the brain or white matter mask
+        inu_n4_final = pe.MapNode(
+            N4BiasFieldCorrection(
+                dimension=3,
+                save_bias=True,
+                copy_header=True,
+                n_iterations=[50] * 5,
+                convergence_threshold=1e-7,
+                shrink_factor=4,
+                bspline_fitting_distance=bspline_fitting_distance,
+            ),
+            n_procs=omp_nthreads,
+            name='inu_n4_final',
+            iterfield=['input_image'],
+        )
+
+        # Check ANTs version
+        try:
+            inu_n4_final.inputs.rescale_intensities = True
+        except ValueError:
+            warn(
+                "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
+                f'({inu_n4.interface.version} found.) Please consider upgrading.',
+                UserWarning,
+                stacklevel=1,
+            )
+
+        # Apply mask
+        apply_mask = pe.MapNode(ApplyMask(), iterfield=['in_file'], name='apply_mask')
+
+        wf.connect([
+            (inputnode, inu_n4_final, [('in_files', 'input_image')]),
+            (map_wmmask if wm_tpm else map_brainmask, inu_n4_final, [
+                ('output_image', 'weight_image'),
+            ]),
+            (inu_n4_final, apply_mask, [('output_image', 'in_file')]),
+            (thr_brainmask, apply_mask, [('output_image', 'in_mask')]),
+            (thr_brainmask, outputnode, [('output_image', 'out_mask')]),
+            (inu_n4_final, outputnode, [('output_image', 'bias_corrected'),
+                                        ('bias_image', 'bias_image')]),
+            (apply_mask, outputnode, [('out_file', 'out_file')]),
+        ])  # fmt:skip
+
     return wf
 
 
