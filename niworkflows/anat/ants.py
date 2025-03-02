@@ -362,7 +362,6 @@ def init_brain_extraction_wf(
     # Apply mask
     apply_mask = pe.MapNode(ApplyMask(), iterfield=['in_file'], name='apply_mask')
 
-    # fmt: off
     wf.connect([
         (inputnode, trunc, [('in_files', 'op1')]),
         (inputnode, inu_n4_final, [('in_files', 'input_image')]),
@@ -386,8 +385,7 @@ def init_brain_extraction_wf(
         (inu_n4_final, outputnode, [('output_image', 'bias_corrected'),
                                     ('bias_image', 'bias_image')]),
         (apply_mask, outputnode, [('out_file', 'out_file')]),
-    ])
-    # fmt: on
+    ])  # fmt:skip
 
     wm_tpm = get_template(in_template, label='WM', suffix='probseg', **common_spec) or None
     if wm_tpm:
@@ -403,17 +401,14 @@ def init_brain_extraction_wf(
             full_wm = pe.Node(niu.Function(function=_imsum), name='full_wm')
             full_wm.inputs.op1 = str(wm_tpm)
             full_wm.inputs.op2 = str(bstem_tpm)
-            # fmt: off
             wf.connect([
                 (full_wm, map_wmmask, [('out', 'input_image')])
-            ])
-            # fmt: on
+            ])  # fmt:skip
         else:
             map_wmmask.inputs.input_image = str(wm_tpm)
-        # fmt: off
         wf.disconnect([
             (map_brainmask, inu_n4_final, [('output_image', 'weight_image')]),
-        ])
+        ])  # fmt:skip
         wf.connect([
             (inputnode, map_wmmask, [(('in_files', _pop), 'reference_image')]),
             (norm, map_wmmask, [
@@ -421,8 +416,7 @@ def init_brain_extraction_wf(
                 ('reverse_invert_flags', 'invert_transform_flags'),
             ]),
             (map_wmmask, inu_n4_final, [('output_image', 'weight_image')]),
-        ])
-        # fmt: on
+        ])  # fmt:skip
 
     if use_laplacian:
         lap_tmpl = pe.Node(
@@ -437,7 +431,6 @@ def init_brain_extraction_wf(
         mrg_tmpl = pe.Node(niu.Merge(2), name='mrg_tmpl')
         mrg_tmpl.inputs.in1 = tpl_target_path
         mrg_target = pe.Node(niu.Merge(2), name='mrg_target')
-        # fmt: off
         wf.connect([
             (inu_n4, lap_target, [(('output_image', _pop), 'op1')]),
             (lap_tmpl, mrg_tmpl, [('output_image', 'in2')]),
@@ -445,16 +438,13 @@ def init_brain_extraction_wf(
             (lap_target, mrg_target, [('output_image', 'in2')]),
             (mrg_tmpl, norm, [('out', 'fixed_image')]),
             (mrg_target, norm, [('out', 'moving_image')]),
-        ])
-        # fmt: on
+        ])  # fmt:skip
 
     else:
         norm.inputs.fixed_image = tpl_target_path
-        # fmt: off
         wf.connect([
             (inu_n4, norm, [(('output_image', _pop), 'moving_image')]),
-        ])
-        # fmt: on
+        ])  # fmt:skip
 
     if atropos_refine:
         atropos_model = atropos_model or list(ATROPOS_MODELS[bids_suffix].values())
@@ -467,13 +457,12 @@ def init_brain_extraction_wf(
             wm_prior=bool(wm_tpm),
         )
 
-        # fmt: off
         wf.disconnect([
             (thr_brainmask, outputnode, [('output_image', 'out_mask')]),
             (inu_n4_final, outputnode, [('output_image', 'bias_corrected'),
                                         ('bias_image', 'bias_image')]),
             (apply_mask, outputnode, [('out_file', 'out_file')]),
-        ])
+        ])  # fmt:skip
         wf.connect([
             (inputnode, atropos_wf, [('in_files', 'inputnode.in_files')]),
             (inu_n4, atropos_wf, [('output_image', 'inputnode.in_corrected')]),
@@ -486,14 +475,11 @@ def init_brain_extraction_wf(
                 ('outputnode.out_segm', 'out_segm'),
                 ('outputnode.out_tpms', 'out_tpms'),
             ]),
-        ])
-        # fmt: on
+        ])  # fmt:skip
         if wm_tpm:
-            # fmt: off
             wf.connect([
                 (map_wmmask, atropos_wf, [('output_image', 'inputnode.wm_prior')]),
-            ])
-            # fmt: on
+            ])  # fmt:skip
     return wf
 
 
@@ -762,7 +748,6 @@ def init_atropos_wf(
     # Apply mask
     apply_mask = pe.MapNode(ApplyMask(), iterfield=['in_file'], name='apply_mask')
 
-    # fmt: off
     wf.connect([
         (inputnode, dil_brainmask, [('in_mask', 'op1')]),
         (inputnode, copy_xform, [(('in_files', _pop), 'hdr_file')]),
@@ -824,8 +809,7 @@ def init_atropos_wf(
             ('out_segm', 'out_segm'),
             ('out_tpms', 'out_tpms'),
         ]),
-    ])
-    # fmt: on
+    ])  # fmt:skip
 
     if wm_prior:
         from nipype.algorithms.metrics import FuzzyOverlap
@@ -844,10 +828,9 @@ def init_atropos_wf(
 
         apply_wm_prior = pe.Node(niu.Function(function=_improd), name='apply_wm_prior')
 
-        # fmt: off
         wf.disconnect([
             (copy_xform_wm, inu_n4_final, [('wm_map', 'weight_image')]),
-        ])
+        ])  # fmt:skip
         wf.connect([
             (inputnode, apply_wm_prior, [('in_mask', 'in_mask'),
                                          ('wm_prior', 'op2')]),
@@ -858,8 +841,7 @@ def init_atropos_wf(
             (overlap, sel_wm, [(('class_fdi', _argmax), 'index')]),
             (copy_xform_wm, apply_wm_prior, [('wm_map', 'op1')]),
             (apply_wm_prior, inu_n4_final, [('out', 'weight_image')]),
-        ])
-        # fmt: on
+        ])  # fmt:skip
     return wf
 
 
@@ -989,7 +971,6 @@ def init_n4_only_wf(
             stacklevel=1,
         )
 
-    # fmt: off
     wf.connect([
         (inputnode, inu_n4_final, [('in_files', 'input_image')]),
         (inputnode, thr_brainmask, [(('in_files', _pop), 'in_file')]),
@@ -997,8 +978,7 @@ def init_n4_only_wf(
         (inu_n4_final, outputnode, [('output_image', 'out_file'),
                                     ('output_image', 'bias_corrected'),
                                     ('bias_image', 'bias_image')]),
-    ])
-    # fmt: on
+    ])  # fmt:skip
 
     # If atropos refine, do in4 twice
     if atropos_refine:
@@ -1010,12 +990,11 @@ def init_n4_only_wf(
             in_segmentation_model=atropos_model,
         )
 
-        # fmt: off
         wf.disconnect([
             (inu_n4_final, outputnode, [('output_image', 'out_file'),
                                         ('output_image', 'bias_corrected'),
                                         ('bias_image', 'bias_image')]),
-        ])
+        ])  # fmt:skip
         wf.connect([
             (inputnode, atropos_wf, [('in_files', 'inputnode.in_files')]),
             (inu_n4_final, atropos_wf, [('output_image', 'inputnode.in_corrected')]),
@@ -1027,8 +1006,7 @@ def init_n4_only_wf(
                 ('outputnode.out_segm', 'out_segm'),
                 ('outputnode.out_tpms', 'out_tpms'),
             ]),
-        ])
-        # fmt: on
+        ])  # fmt:skip
 
     return wf
 
