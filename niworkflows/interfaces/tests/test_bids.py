@@ -571,7 +571,7 @@ def test_DerivativesDataSink_data_dtype_source(
         for s in source_file:
             make_empty_nii_with_dtype(s, source_dtype)
 
-    prep, save = make_prep_and_save(
+    prep, _save = make_prep_and_save(
         interface,
         base_directory=str(tmp_path),
         data_dtype='source',
