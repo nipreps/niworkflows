@@ -261,14 +261,8 @@ def init_brain_extraction_wf(
     )
     res_target = pe.Node(RegridToZooms(zooms=(4, 4, 4), smooth=True), name='res_target')
 
-    lap_tmpl = pe.Node(
-        ImageMath(operation='Laplacian', op2='1.5 1', copy_header=True), name='lap_tmpl'
-    )
-    lap_tmpl.inputs.op1 = tpl_target_path
-    lap_target = pe.Node(
-        ImageMath(operation='Laplacian', op2='1.5 1', copy_header=True),
-        name='lap_target',
-    )
+    # Template and target inputs contain anatomical images
+    # If Laplacians are enabled, they will be concatenated
     mrg_tmpl = pe.Node(niu.Merge(2), name='mrg_tmpl')
     mrg_tmpl.inputs.in1 = tpl_target_path
     mrg_target = pe.Node(niu.Merge(2), name='mrg_target')
@@ -340,6 +334,9 @@ def init_brain_extraction_wf(
         (inputnode, norm, [('in_mask', fixed_mask_trait)]),
         (inputnode, map_brainmask, [(('in_files', _pop), 'reference_image')]),
         (trunc, inu_n4, [('output_image', 'input_image')]),
+        (inu_n4, mrg_target, [('output_image', 'in1')]),
+        (mrg_tmpl, norm, [('out', 'fixed_image')]),
+        (mrg_target, norm, [('out', 'moving_image')]),
         (inu_n4, res_target, [(('output_image', _pop), 'in_file')]),
         (res_tmpl, init_aff, [('out_file', 'fixed_image')]),
         (res_target, init_aff, [('out_file', 'moving_image')]),
@@ -379,30 +376,18 @@ def init_brain_extraction_wf(
 
     if use_laplacian:
         lap_tmpl = pe.Node(
-            ImageMath(operation='Laplacian', op2='1.5 1', copy_header=True),
+            ImageMath(operation='Laplacian', op1=tpl_target_path, op2='1.5 1', copy_header=True),
             name='lap_tmpl',
         )
-        lap_tmpl.inputs.op1 = tpl_target_path
         lap_target = pe.Node(
             ImageMath(operation='Laplacian', op2='1.5 1', copy_header=True),
             name='lap_target',
         )
-        mrg_tmpl = pe.Node(niu.Merge(2), name='mrg_tmpl')
-        mrg_tmpl.inputs.in1 = tpl_target_path
-        mrg_target = pe.Node(niu.Merge(2), name='mrg_target')
+
         wf.connect([
             (inu_n4, lap_target, [(('output_image', _pop), 'op1')]),
             (lap_tmpl, mrg_tmpl, [('output_image', 'in2')]),
-            (inu_n4, mrg_target, [('output_image', 'in1')]),
             (lap_target, mrg_target, [('output_image', 'in2')]),
-            (mrg_tmpl, norm, [('out', 'fixed_image')]),
-            (mrg_target, norm, [('out', 'moving_image')]),
-        ])  # fmt:skip
-
-    else:
-        norm.inputs.fixed_image = tpl_target_path
-        wf.connect([
-            (inu_n4, norm, [(('output_image', _pop), 'moving_image')]),
         ])  # fmt:skip
 
     if atropos_refine:
