@@ -1013,7 +1013,7 @@
                         <span class="n">data_dtype</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">get_data_dtype</span><span class="p">()</span>
                     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: BLE001</span>
                         <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s1">&#39;Could not get data type of file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+                            <span class="s1">&#39;Could not get data type of file </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                         <span class="p">)</span>
                         <span class="n">data_dtype</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -1022,8 +1022,10 @@
                     <span class="n">orig_dtype</span> <span class="o">=</span> <span class="n">nii</span><span class="o">.</span><span class="n">get_data_dtype</span><span class="p">()</span>
                     <span class="k">if</span> <span class="n">orig_dtype</span> <span class="o">!=</span> <span class="n">data_dtype</span><span class="p">:</span>
                         <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s1">&#39;Changing </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">dest_file</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> dtype &#39;</span>
-                            <span class="sa">f</span><span class="s1">&#39;from </span><span class="si">{</span><span class="n">orig_dtype</span><span class="si">}</span><span class="s1"> to </span><span class="si">{</span><span class="n">data_dtype</span><span class="si">}</span><span class="s1">&#39;</span>
+                            <span class="s1">&#39;Changing </span><span class="si">%s</span><span class="s1"> dtype from </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                            <span class="n">Path</span><span class="p">(</span><span class="n">dest_file</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                            <span class="n">orig_dtype</span><span class="p">,</span>
+                            <span class="n">data_dtype</span><span class="p">,</span>
                         <span class="p">)</span>
                         <span class="c1"># coerce dataobj to new data dtype</span>
                         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">data_dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
@@ -1532,7 +1534,7 @@
                         <span class="n">data_dtype</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">get_data_dtype</span><span class="p">()</span>
                     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: BLE001</span>
                         <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s1">&#39;Could not get data type of file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+                            <span class="s1">&#39;Could not get data type of file </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                         <span class="p">)</span>
                         <span class="n">data_dtype</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -1541,7 +1543,7 @@
                     <span class="n">orig_dtype</span> <span class="o">=</span> <span class="n">nii</span><span class="o">.</span><span class="n">get_data_dtype</span><span class="p">()</span>
                     <span class="k">if</span> <span class="n">orig_dtype</span> <span class="o">!=</span> <span class="n">data_dtype</span><span class="p">:</span>
                         <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s1">&#39;Changing </span><span class="si">{</span><span class="n">out_file</span><span class="si">}</span><span class="s1"> dtype from </span><span class="si">{</span><span class="n">orig_dtype</span><span class="si">}</span><span class="s1"> to </span><span class="si">{</span><span class="n">data_dtype</span><span class="si">}</span><span class="s1">&#39;</span>
+                            <span class="s1">&#39;Changing </span><span class="si">%s</span><span class="s1"> dtype from </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">out_file</span><span class="p">,</span> <span class="n">orig_dtype</span><span class="p">,</span> <span class="n">orig_dtype</span>
                         <span class="p">)</span>
                         <span class="c1"># coerce dataobj to new data dtype</span>
                         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">data_dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
