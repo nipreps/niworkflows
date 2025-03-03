@@ -673,7 +673,7 @@ class PrepareDerivative(SimpleInterface):
                         data_dtype = nb.load(self.inputs.source_file[0]).get_data_dtype()
                     except Exception:  # noqa: BLE001
                         LOGGER.warning(
-                            f'Could not get data type of file {self.inputs.source_file[0]}'
+                            'Could not get data type of file %s', self.inputs.source_file[0]
                         )
                         data_dtype = None
 
@@ -682,8 +682,10 @@ class PrepareDerivative(SimpleInterface):
                     orig_dtype = nii.get_data_dtype()
                     if orig_dtype != data_dtype:
                         LOGGER.warning(
-                            f'Changing {Path(dest_file).name} dtype '
-                            f'from {orig_dtype} to {data_dtype}'
+                            'Changing %s dtype from %s to %s',
+                            Path(dest_file).name,
+                            orig_dtype,
+                            data_dtype,
                         )
                         # coerce dataobj to new data dtype
                         if np.issubdtype(data_dtype, np.integer):
@@ -1186,7 +1188,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                         data_dtype = nb.load(self.inputs.source_file[0]).get_data_dtype()
                     except Exception:  # noqa: BLE001
                         LOGGER.warning(
-                            f'Could not get data type of file {self.inputs.source_file[0]}'
+                            'Could not get data type of file %s', self.inputs.source_file[0]
                         )
                         data_dtype = None
 
@@ -1195,7 +1197,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                     orig_dtype = nii.get_data_dtype()
                     if orig_dtype != data_dtype:
                         LOGGER.warning(
-                            f'Changing {out_file} dtype from {orig_dtype} to {data_dtype}'
+                            'Changing %s dtype from %s to %s', out_file, orig_dtype, orig_dtype
                         )
                         # coerce dataobj to new data dtype
                         if np.issubdtype(data_dtype, np.integer):

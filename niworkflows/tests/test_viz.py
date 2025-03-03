@@ -43,7 +43,7 @@ from .generate_data import _create_dtseries_cifti
 @pytest.mark.parametrize('sorting', [None, 'ward', 'linkage'])
 def test_carpetplot(tr, sorting):
     """Write a carpetplot"""
-    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS')
 
     rng = np.random.default_rng(2010)
 
@@ -137,7 +137,7 @@ def test_carpetplot(tr, sorting):
 )
 def test_fmriplot(input_files):
     """Exercise the fMRIPlot class."""
-    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS')
     rng = np.random.default_rng(2010)
 
     in_file = os.path.join(datadir, input_files[0])

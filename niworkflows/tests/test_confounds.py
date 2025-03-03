@@ -37,7 +37,7 @@ from .conftest import datadir
 def _smoke_test_report(report_interface, artifact_name):
     out_report = report_interface.run().outputs.out_file
 
-    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS')
     if save_artifacts:
         copy(out_report, os.path.join(save_artifacts, artifact_name))
     assert os.path.isfile(out_report), f'Report "{out_report}" does not exist'

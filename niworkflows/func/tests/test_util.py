@@ -156,9 +156,7 @@ def test_masking(input_fname, expected_fname):
 
     res = wf.run(plugin='MultiProc')
 
-    combine_masks = [node for node in res.nodes if node.name.endswith('combine_masks')][
-        0
-    ]
+    combine_masks = next(node for node in res.nodes if node.name.endswith('combine_masks'))
     overlap = symmetric_overlap(expected_fname, combine_masks.result.outputs.out_file)
 
     mask_dir = reports_dir / 'fmriprep_bold_mask' / dsname

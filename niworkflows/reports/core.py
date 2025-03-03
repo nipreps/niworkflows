@@ -462,9 +462,7 @@ class Report:
             {value[idx] for value in all_value_combos} for idx in range(len(orderings))
         ]
         # if all values are None for an entity, we do not want to keep that entity
-        keep_idx = [
-            not (len(val_set) == 1 and None in val_set or not val_set) for val_set in unique_values
-        ]
+        keep_idx = [val_set not in (set(), {None}) for val_set in unique_values]
         # the "kept" entities
         entities = list(compress(orderings, keep_idx))
         # the "kept" value combinations
