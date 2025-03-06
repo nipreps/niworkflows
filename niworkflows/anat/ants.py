@@ -776,7 +776,6 @@ def init_atropos_wf(
         (merge_tpms, copy_xform, [('out', 'out_tpms')]),
         (atropos, sel_wm, [('posteriors', 'inlist')]),
         (sel_wm, copy_xform_wm, [('out', 'wm_map')]),
-        (copy_xform_wm, inu_n4_final, [('wm_map', 'weight_image')]),
         (inu_n4_final, copy_xform, [('output_image', 'bias_corrected'),
                                     ('bias_image', 'bias_image')]),
         (copy_xform, apply_mask, [('bias_corrected', 'in_file'),
@@ -808,9 +807,6 @@ def init_atropos_wf(
 
         apply_wm_prior = pe.Node(niu.Function(function=_improd), name='apply_wm_prior')
 
-        wf.disconnect([
-            (copy_xform_wm, inu_n4_final, [('wm_map', 'weight_image')]),
-        ])  # fmt:skip
         wf.connect([
             (inputnode, apply_wm_prior, [('in_mask', 'in_mask'),
                                          ('wm_prior', 'op2')]),
@@ -822,6 +818,8 @@ def init_atropos_wf(
             (copy_xform_wm, apply_wm_prior, [('wm_map', 'op1')]),
             (apply_wm_prior, inu_n4_final, [('out', 'weight_image')]),
         ])  # fmt:skip
+    else:
+        wf.connect([(copy_xform_wm, inu_n4_final, [('wm_map', 'weight_image')])])
     return wf
 
 
@@ -925,7 +923,7 @@ def init_n4_only_wf(
     thr_brainmask = pe.Node(Binarize(thresh_low=2), name='binarize')
 
     # INU correction
-    inu_n4_final = pe.MapNode(
+    inu_n4 = pe.MapNode(
         N4BiasFieldCorrection(
             dimension=3,
             save_bias=True,
@@ -936,31 +934,28 @@ def init_n4_only_wf(
             bspline_fitting_distance=200,
         ),
         n_procs=omp_nthreads,
-        name='inu_n4_final',
+        name='inu_n4',
         iterfield=['input_image'],
     )
 
     # Check ANTs version
     try:
-        inu_n4_final.inputs.rescale_intensities = True
+        inu_n4.inputs.rescale_intensities = True
     except ValueError:
         warn(
             "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
-            f'({inu_n4_final.interface.version} found.) Please consider upgrading.',
+            f'({inu_n4.interface.version} found.) Please consider upgrading.',
             UserWarning,
             stacklevel=1,
         )
 
     wf.connect([
-        (inputnode, inu_n4_final, [('in_files', 'input_image')]),
+        (inputnode, inu_n4, [('in_files', 'input_image')]),
         (inputnode, thr_brainmask, [(('in_files', _pop), 'in_file')]),
         (thr_brainmask, outputnode, [('out_mask', 'out_mask')]),
-        (inu_n4_final, outputnode, [('output_image', 'out_file'),
-                                    ('output_image', 'bias_corrected'),
-                                    ('bias_image', 'bias_image')]),
     ])  # fmt:skip
 
-    # If atropos refine, do in4 twice
+    # If atropos refine, n4 is run a second time
     if atropos_refine:
         atropos_model = atropos_model or list(ATROPOS_MODELS[bids_suffix].values())
         atropos_wf = init_atropos_wf(
@@ -970,14 +965,9 @@ def init_n4_only_wf(
             in_segmentation_model=atropos_model,
         )
 
-        wf.disconnect([
-            (inu_n4_final, outputnode, [('output_image', 'out_file'),
-                                        ('output_image', 'bias_corrected'),
-                                        ('bias_image', 'bias_image')]),
-        ])  # fmt:skip
         wf.connect([
             (inputnode, atropos_wf, [('in_files', 'inputnode.in_files')]),
-            (inu_n4_final, atropos_wf, [('output_image', 'inputnode.in_corrected')]),
+            (inu_n4, atropos_wf, [('output_image', 'inputnode.in_corrected')]),
             (thr_brainmask, atropos_wf, [('out_mask', 'inputnode.in_mask')]),
             (atropos_wf, outputnode, [
                 ('outputnode.out_file', 'out_file'),
@@ -986,6 +976,12 @@ def init_n4_only_wf(
                 ('outputnode.out_segm', 'out_segm'),
                 ('outputnode.out_tpms', 'out_tpms'),
             ]),
+        ])  # fmt:skip
+    else:
+        wf.connect([
+            (inu_n4, outputnode, [('output_image', 'out_file'),
+                                  ('output_image', 'bias_corrected'),
+                                  ('bias_image', 'bias_image')]),
         ])  # fmt:skip
 
     return wf
