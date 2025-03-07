@@ -439,7 +439,7 @@ def init_brain_extraction_wf(
         except ValueError:
             warn(
                 "N4BiasFieldCorrection's --rescale-intensities option was added in ANTS 2.1.0 "
-                f'({inu_n4.interface.version} found.) Please consider upgrading.',
+                f'({inu_n4_final.interface.version} found.) Please consider upgrading.',
                 UserWarning,
                 stacklevel=1,
             )
