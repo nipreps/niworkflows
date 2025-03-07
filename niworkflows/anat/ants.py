@@ -476,7 +476,7 @@ def init_brain_extraction_wf(
         ])
         wf.connect([
             (inputnode, atropos_wf, [("in_files", "inputnode.in_files")]),
-            (inu_n4_final, atropos_wf, [("output_image", "inputnode.in_corrected")]),
+            (inu_n4, atropos_wf, [("output_image", "inputnode.in_corrected")]),
             (thr_brainmask, atropos_wf, [("output_image", "inputnode.in_mask")]),
             (atropos_wf, outputnode, [
                 ("outputnode.out_file", "out_file"),
