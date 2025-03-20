@@ -1,3 +1,16 @@
+1.13.0 (March 20, 2025)
+=======================
+New feature release in the 1.13.x series.
+
+This release restructures the ANTs brain extraction workflow.
+This should be a backwards compatible change, but a minor release is used out of caution.
+
+* FIX: Remove duplicated code, problematic deviation from antsBrainExtraction (#931)
+* FIX: Listify numbers (#925)
+* ENH: Allow + symbol in label entities (#926, #927)
+* STY: Apply various ruff checks (#913, #915, #917, #918, #919, #930)
+
+
 1.12.2 (January 23, 2025)
 =========================
 Patch release that includes a new keyword argument to `BIDSDataGrabber` to bypass requiring a T1w image.
