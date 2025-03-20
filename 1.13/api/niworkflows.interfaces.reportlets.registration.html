@@ -1,0 +1,1339 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.interfaces.reportlets.segmentation module" href="niworkflows.interfaces.reportlets.segmentation.html" /><link rel="prev" title="niworkflows.interfaces.reportlets.masks module" href="niworkflows.interfaces.reportlets.masks.html" />
+
+    <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>niworkflows.interfaces.reportlets.registration module - niworkflows 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/version-switch.css?v=45d66e8a" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">niworkflows 0+unknown documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+    <span class="sidebar-brand-text">niworkflows</span>
+    <span id="version-slug" class="sidebar-brand-text">0 (dev)</span>
+</a>
+
+<!-- Versions dropdown -->
+<div id="version-menu" class="version-tree">
+  <ul>
+  <li class="toctree-l1 has-children">
+  <span class="sidebar-brand-text">0 (dev)</span>
+  <input class="toctree-checkbox" id="toctree-checkbox-v" name="toctree-checkbox-v" role="switch" type="checkbox">
+  <label for="toctree-checkbox-v"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label>
+  <ul id="v-tags"></ul>
+  </ul>
+</div><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../api.html">Library API (application program interface)</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Library API (application program interface)</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.anat.html">niworkflows.anat package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of niworkflows.anat package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.ants.html">niworkflows.anat.ants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.coregistration.html">niworkflows.anat.coregistration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.freesurfer.html">niworkflows.anat.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.anat.skullstrip.html">niworkflows.anat.skullstrip module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.cli.html">niworkflows.cli package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of niworkflows.cli package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.cli.boldref.html">niworkflows.cli.boldref module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.data.html">niworkflows.data package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of niworkflows.engine package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.engine.plugin.html">niworkflows.engine.plugin module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.engine.workflows.html">niworkflows.engine.workflows module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.func.html">niworkflows.func package</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of niworkflows.func package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.func.util.html">niworkflows.func.util module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="niworkflows.interfaces.html">niworkflows.interfaces package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of niworkflows.interfaces package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 current has-children"><a class="reference internal" href="niworkflows.interfaces.reportlets.html">niworkflows.interfaces.reportlets package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of niworkflows.interfaces.reportlets package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.base.html">niworkflows.interfaces.reportlets.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.masks.html">niworkflows.interfaces.reportlets.masks module</a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">niworkflows.interfaces.reportlets.registration module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.interfaces.reportlets.segmentation.html">niworkflows.interfaces.reportlets.segmentation module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.bids.html">niworkflows.interfaces.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.bold.html">niworkflows.interfaces.bold module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.cifti.html">niworkflows.interfaces.cifti module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.confounds.html">niworkflows.interfaces.confounds module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.conftest.html">niworkflows.interfaces.conftest module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.fixes.html">niworkflows.interfaces.fixes module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.freesurfer.html">niworkflows.interfaces.freesurfer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.header.html">niworkflows.interfaces.header module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.images.html">niworkflows.interfaces.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.itk.html">niworkflows.interfaces.itk module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.morphology.html">niworkflows.interfaces.morphology module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.nibabel.html">niworkflows.interfaces.nibabel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.nilearn.html">niworkflows.interfaces.nilearn module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.nitransforms.html">niworkflows.interfaces.nitransforms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.norm.html">niworkflows.interfaces.norm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.patches.html">niworkflows.interfaces.patches module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.plotting.html">niworkflows.interfaces.plotting module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.probmaps.html">niworkflows.interfaces.probmaps module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.space.html">niworkflows.interfaces.space module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.surf.html">niworkflows.interfaces.surf module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.utility.html">niworkflows.interfaces.utility module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.interfaces.workbench.html">niworkflows.interfaces.workbench module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.reports.html">niworkflows.reports package</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of niworkflows.reports package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.reports.core.html">niworkflows.reports.core module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.utils.html">niworkflows.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of niworkflows.utils package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.bids.html">niworkflows.utils.bids module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.connections.html">niworkflows.utils.connections module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.debug.html">niworkflows.utils.debug module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.images.html">niworkflows.utils.images module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.misc.html">niworkflows.utils.misc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.spaces.html">niworkflows.utils.spaces module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.testing.html">niworkflows.utils.testing module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.utils.timeseries.html">niworkflows.utils.timeseries module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.viz.html">niworkflows.viz package</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of niworkflows.viz package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.viz.notebook.html">niworkflows.viz.notebook module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.viz.plots.html">niworkflows.viz.plots module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="niworkflows.viz.utils.html">niworkflows.viz.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.workflows.html">niworkflows.workflows package</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of niworkflows.workflows package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="niworkflows.workflows.epi.html">niworkflows.workflows.epi package</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of niworkflows.workflows.epi package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="niworkflows.workflows.epi.refmap.html">niworkflows.workflows.epi.refmap module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new?</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/api/niworkflows.interfaces.reportlets.registration.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-niworkflows.interfaces.reportlets.registration">
+<span id="niworkflows-interfaces-reportlets-registration-module"></span><h1>niworkflows.interfaces.reportlets.registration module<a class="headerlink" href="#module-niworkflows.interfaces.reportlets.registration" title="Link to this heading">¶</a></h1>
+<p>ReportCapableInterfaces for registration tools.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.registration.ANTSApplyTransformsRPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.registration.</span></span><span class="sig-name descname"><span class="pre">ANTSApplyTransformsRPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/registration.html#ANTSApplyTransformsRPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.registration.ANTSApplyTransformsRPT" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="niworkflows.interfaces.reportlets.base.html#niworkflows.interfaces.reportlets.base.RegistrationRC" title="niworkflows.interfaces.reportlets.base.RegistrationRC"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationRC</span></code></a>, <a class="reference internal" href="niworkflows.interfaces.fixes.html#niworkflows.interfaces.fixes.FixHeaderApplyTransforms" title="niworkflows.interfaces.fixes.FixHeaderApplyTransforms"><code class="xref py py-class docutils literal notranslate"><span class="pre">FixHeaderApplyTransforms</span></code></a></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">antsApplyTransforms</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image</strong> (<em>a pathlike object or string representing an existing file</em>) – Image to apply transformation to (generally a coregistered functional).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--input</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>reference_image</strong> (<em>a pathlike object or string representing an existing file</em>) – Reference image space that you wish to warp INTO.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--reference-image</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>transforms</strong> (<em>a list of items which are a pathlike object or string representing an existing file or ‘identity’</em>) – Transform files: will be applied in reverse order. For example, the last specified transform will be applied first.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>default_value</strong> (<em>a float</em>) – Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--default-value</span> <span class="pre">%g</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">0.0</span></code>)</p></li>
+<li><p><strong>dimension</strong> (<em>2 or 3 or 4</em>) – This option forces the image to be treated as a specified-dimensional image. If not specified, antsWarp tries to infer the dimensionality from the input image.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--dimensionality</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>float</strong> (<em>a boolean</em>) – Use float instead of double for computations.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--float</span> <span class="pre">%d</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
+<li><p><strong>input_image_type</strong> (<em>0 or 1 or 2 or 3</em>) – Option specifying the input image type of scalar (default), vector, tensor, or time series.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--input-image-type</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>interpolation</strong> (<em>‘Linear’ or ‘NearestNeighbor’ or ‘CosineWindowedSinc’ or ‘WelchWindowedSinc’ or ‘HammingWindowedSinc’ or ‘LanczosWindowedSinc’ or ‘MultiLabel’ or ‘Gaussian’ or ‘BSpline’ or ‘GenericLabel’</em>) – Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">Linear</span></code>)</p></li>
+<li><p><strong>interpolation_parameters</strong> (<em>a tuple of the form: (an integer) or a tuple of the form: (a float, a float) or a tuple of the form: (a string)</em>)</p></li>
+<li><p><strong>invert_transform_flags</strong> (<em>a list of items which are a boolean</em>)</p></li>
+<li><p><strong>num_threads</strong> (<em>an integer</em>) – Number of ITK threads to use.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">1</span></code>)</p></li>
+<li><p><strong>out_postfix</strong> (<em>a string</em>) – Postfix that is appended to all output files (default = _trans).
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">_trans</span></code>)</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
+<li><p><strong>output_image</strong> (<em>a string</em>) – Output file name.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--output</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>print_out_composite_warp_file</strong> (<em>a boolean</em>) – Output a composite warp file instead of a transformed image.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">output_image</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p></li>
+<li><p><strong>output_image</strong> (<em>a pathlike object or string representing an existing file</em>) – Warped image.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.registration.ANTSRegistrationRPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.registration.</span></span><span class="sig-name descname"><span class="pre">ANTSRegistrationRPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/registration.html#ANTSRegistrationRPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.registration.ANTSRegistrationRPT" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="niworkflows.interfaces.reportlets.base.html#niworkflows.interfaces.reportlets.base.RegistrationRC" title="niworkflows.interfaces.reportlets.base.RegistrationRC"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationRC</span></code></a>, <a class="reference internal" href="niworkflows.interfaces.fixes.html#niworkflows.interfaces.fixes.FixHeaderRegistration" title="niworkflows.interfaces.fixes.FixHeaderRegistration"><code class="xref py py-class docutils literal notranslate"><span class="pre">FixHeaderRegistration</span></code></a></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">antsRegistration</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fixed_image</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Image to which the moving_image should be transformed(usually a structural image).</p></li>
+<li><p><strong>metric</strong> (<em>a list of items which are ‘CC’ or ‘MeanSquares’ or ‘Demons’ or ‘GC’ or ‘MI’ or ‘Mattes’ or a list of items which are ‘CC’ or ‘MeanSquares’ or ‘Demons’ or ‘GC’ or ‘MI’ or ‘Mattes’</em>) – The metric(s) to use for each stage. Note that multiple metrics per stage are not supported in ANTS 1.9.1 and earlier.</p></li>
+<li><p><strong>metric_weight</strong> (<em>a list of items which are a float or a list of items which are a float</em>) – The metric weight(s) for each stage. The weights must sum to 1 per stage.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">metric</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">[1.0]</span></code>)</p></li>
+<li><p><strong>moving_image</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Image that will be registered to the space of fixed_image. This is theimage on which the transformations will be applied to.</p></li>
+<li><p><strong>shrink_factors</strong> (<em>a list of items which are a list of items which are an integer</em>)</p></li>
+<li><p><strong>smoothing_sigmas</strong> (<em>a list of items which are a list of items which are a float</em>)</p></li>
+<li><p><strong>transforms</strong> (<em>a list of items which are ‘Rigid’ or ‘Affine’ or ‘CompositeAffine’ or ‘Similarity’ or ‘Translation’ or ‘BSpline’ or ‘GaussianDisplacementField’ or ‘TimeVaryingVelocityField’ or ‘TimeVaryingBSplineVelocityField’ or ‘SyN’ or ‘BSplineSyN’ or ‘Exponential’ or ‘BSplineExponential’</em>) – Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>collapse_output_transforms</strong> (<em>a boolean</em>) – Collapse output transforms. Specifically, enabling this option combines all adjacent linear transforms and composes all adjacent displacement field transforms before writing the results to disk.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--collapse-output-transforms</span> <span class="pre">%d</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>convergence_threshold</strong> (<em>a list of at least 1 items which are a float</em>) – <strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">number_of_iterations</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">[1e-06]</span></code>)</p></li>
+<li><p><strong>convergence_window_size</strong> (<em>a list of at least 1 items which are an integer</em>) – <strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">convergence_threshold</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">[10]</span></code>)</p></li>
+<li><p><strong>dimension</strong> (<em>3 or 2</em>) – Image dimension (2 or 3).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--dimensionality</span> <span class="pre">%d</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">3</span></code>)</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>fixed_image_mask</strong> (<em>a pathlike object or string representing an existing file</em>) – Mask used to limit metric sampling region of the fixed imagein all stages.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">fixed_image_masks</span></code>.</p></li>
+<li><p><strong>fixed_image_masks</strong> (<em>a list of items which are a pathlike object or string representing an existing file or ‘NULL’</em>) – Masks used to limit metric sampling region of the fixed image, defined per registration stage(Use “NULL” to omit a mask at a given stage).
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">fixed_image_mask</span></code>.</p></li>
+<li><p><strong>float</strong> (<em>a boolean</em>) – Use float instead of double for computations.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--float</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>initial_moving_transform</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – A transform or a list of transforms that should be applied before the registration begins. Note that, when a list is given, the transformations are applied in reverse order.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">initial_moving_transform_com</span></code>.</p></li>
+<li><p><strong>initial_moving_transform_com</strong> (<em>0 or 1 or 2</em>) – Align the moving_image and fixed_image before registration using the geometric center of the images (=0), the image intensities (=1), or the origin of the images (=2).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">initial_moving_transform</span></code>.</p></li>
+<li><p><strong>initialize_transforms_per_stage</strong> (<em>a boolean</em>) – Initialize linear transforms from the previous stage. By enabling this option, the current linear stage transform is directly initialized from the previous stages linear transform; this allows multiple linear stages to be run where each stage directly updates the estimated linear transform from the previous stage. (e.g. Translation -&gt; Rigid -&gt; Affine). .
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--initialize-transforms-per-stage</span> <span class="pre">%d</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
+<li><p><strong>interpolation</strong> (<em>‘Linear’ or ‘NearestNeighbor’ or ‘CosineWindowedSinc’ or ‘WelchWindowedSinc’ or ‘HammingWindowedSinc’ or ‘LanczosWindowedSinc’ or ‘BSpline’ or ‘MultiLabel’ or ‘Gaussian’ or ‘GenericLabel’</em>) – Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">Linear</span></code>)</p></li>
+<li><p><strong>interpolation_parameters</strong> (<em>a tuple of the form: (an integer) or a tuple of the form: (a float, a float) or a tuple of the form: (a string)</em>)</p></li>
+<li><p><strong>invert_initial_moving_transform</strong> (<em>a list of items which are a boolean</em>) – One boolean or a list of booleans that indicatewhether the inverse(s) of the transform(s) definedin initial_moving_transform should be used.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">initial_moving_transform_com</span></code>.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">initial_moving_transform</span></code>.</p></li>
+<li><p><strong>metric_item_trait</strong> (<em>‘CC’ or ‘MeanSquares’ or ‘Demons’ or ‘GC’ or ‘MI’ or ‘Mattes’</em>)</p></li>
+<li><p><strong>metric_stage_trait</strong> (<em>‘CC’ or ‘MeanSquares’ or ‘Demons’ or ‘GC’ or ‘MI’ or ‘Mattes’ or a list of items which are ‘CC’ or ‘MeanSquares’ or ‘Demons’ or ‘GC’ or ‘MI’ or ‘Mattes’</em>)</p></li>
+<li><p><strong>metric_weight_item_trait</strong> (<em>a float</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">1.0</span></code>)</p></li>
+<li><p><strong>metric_weight_stage_trait</strong> (<em>a float or a list of items which are a float</em>)</p></li>
+<li><p><strong>moving_image_mask</strong> (<em>a pathlike object or string representing an existing file</em>) – Mask used to limit metric sampling region of the moving imagein all stages.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">moving_image_masks</span></code>.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">fixed_image_mask</span></code>.</p></li>
+<li><p><strong>moving_image_masks</strong> (<em>a list of items which are a pathlike object or string representing an existing file or ‘NULL’</em>) – Masks used to limit metric sampling region of the moving image, defined per registration stage(Use “NULL” to omit a mask at a given stage).
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">moving_image_mask</span></code>.</p></li>
+<li><p><strong>num_threads</strong> (<em>an integer</em>) – Number of ITK threads to use.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">1</span></code>)</p></li>
+<li><p><strong>number_of_iterations</strong> (<em>a list of items which are a list of items which are an integer</em>)</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
+<li><p><strong>output_inverse_warped_image</strong> (<em>a boolean or a pathlike object or string representing a file</em>) – <strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">output_warped_image</span></code>.</p></li>
+<li><p><strong>output_transform_prefix</strong> (<em>a string</em>) – Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">transform</span></code>)</p></li>
+<li><p><strong>output_warped_image</strong> (<em>a boolean or a pathlike object or string representing a file</em>)</p></li>
+<li><p><strong>radius_bins_item_trait</strong> (<em>an integer</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">5</span></code>)</p></li>
+<li><p><strong>radius_bins_stage_trait</strong> (<em>an integer or a list of items which are an integer</em>)</p></li>
+<li><p><strong>radius_or_number_of_bins</strong> (<em>a list of items which are an integer or a list of items which are an integer</em>) – The number of bins in each stage for the MI and Mattes metric, the radius for other metrics.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">metric_weight</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">[5]</span></code>)</p></li>
+<li><p><strong>random_seed</strong> (<em>an integer</em>) – Fixed seed for random number generation.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--random-seed</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>restore_state</strong> (<em>a pathlike object or string representing an existing file</em>) – Filename for restoring the internal restorable state of the registration.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--restore-state</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>restrict_deformation</strong> (<em>a list of items which are a list of items which are 0.0 &lt;= a floating point number &lt;= 1.0</em>) – This option allows the user to restrict the optimization of the displacement field, translation, rigid or affine transform on a per-component basis. For example, if one wants to limit the deformation or rotation of 3-D volume to the  first two dimensions, this is possible by specifying a weight vector of ‘1x1x0’ for a deformation field or ‘1x1x0x1x1x0’ for a rigid transformation.  Low-dimensional restriction only works if there are no preceding transformations.</p></li>
+<li><p><strong>sampling_percentage</strong> (<em>a list of items which are 0.0 &lt;= a floating point number &lt;= 1.0 or None or a list of items which are 0.0 &lt;= a floating point number &lt;= 1.0 or None</em>) – The metric sampling percentage(s) to use for each stage.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">sampling_strategy</span></code>.</p></li>
+<li><p><strong>sampling_percentage_item_trait</strong> (<em>0.0 &lt;= a floating point number &lt;= 1.0 or None</em>)</p></li>
+<li><p><strong>sampling_percentage_stage_trait</strong> (<em>0.0 &lt;= a floating point number &lt;= 1.0 or None or a list of items which are 0.0 &lt;= a floating point number &lt;= 1.0 or None</em>)</p></li>
+<li><p><strong>sampling_strategy</strong> (<em>a list of items which are ‘None’ or ‘Regular’ or ‘Random’ or None or a list of items which are ‘None’ or ‘Regular’ or ‘Random’ or None</em>) – The metric sampling strategy (strategies) for each stage.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">metric_weight</span></code>.</p></li>
+<li><p><strong>sampling_strategy_item_trait</strong> (<em>‘None’ or ‘Regular’ or ‘Random’ or None</em>)</p></li>
+<li><p><strong>sampling_strategy_stage_trait</strong> (<em>‘None’ or ‘Regular’ or ‘Random’ or None or a list of items which are ‘None’ or ‘Regular’ or ‘Random’ or None</em>)</p></li>
+<li><p><strong>save_state</strong> (<em>a pathlike object or string representing a file</em>) – Filename for saving the internal restorable state of the registration.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--save-state</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>sigma_units</strong> (<em>a list of items which are ‘mm’ or ‘vox’</em>) – Units for smoothing sigmas.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">smoothing_sigmas</span></code>.</p></li>
+<li><p><strong>transform_parameters</strong> (<em>a list of items which are a tuple of the form: (a float) or a tuple of the form: (a float, a float, a float) or a tuple of the form: (a float, an integer, an integer, an integer) or a tuple of the form: (a float, an integer, a float, a float, a float, a float) or a tuple of the form: (a float, a float, a float, an integer) or a tuple of the form: (a float, an integer, an integer, an integer, an integer)</em>)</p></li>
+<li><p><strong>use_estimate_learning_rate_once</strong> (<em>a list of items which are a boolean</em>)</p></li>
+<li><p><strong>use_histogram_matching</strong> (<em>a boolean or a list of items which are a boolean</em>) – Histogram match the images before registration.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>verbose</strong> (<em>a boolean</em>) – Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-v</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
+<li><p><strong>winsorize_lower_quantile</strong> (<em>0.0 &lt;= a floating point number &lt;= 1.0</em>) – The Lower quantile to clip image ranges.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">0.0</span></code>)</p></li>
+<li><p><strong>winsorize_upper_quantile</strong> (<em>0.0 &lt;= a floating point number &lt;= 1.0</em>) – The Upper quantile to clip image ranges.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">1.0</span></code>)</p></li>
+<li><p><strong>write_composite_transform</strong> (<em>a boolean</em>) – Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--write-composite-transform</span> <span class="pre">%d</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>composite_transform</strong> (<em>a pathlike object or string representing an existing file</em>) – Composite transform file.</p></li>
+<li><p><strong>elapsed_time</strong> (<em>a float</em>) – The total elapsed time as reported by ANTs.</p></li>
+<li><p><strong>forward_invert_flags</strong> (<em>a list of items which are a boolean</em>) – List of flags corresponding to the forward transforms.</p></li>
+<li><p><strong>forward_transforms</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – List of output transforms for forward registration.</p></li>
+<li><p><strong>inverse_composite_transform</strong> (<em>a pathlike object or string representing a file</em>) – Inverse composite transform file.</p></li>
+<li><p><strong>inverse_warped_image</strong> (<em>a pathlike object or string representing a file</em>) – Outputs the inverse of the warped image.</p></li>
+<li><p><strong>metric_value</strong> (<em>a float</em>) – The final value of metric.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p></li>
+<li><p><strong>reverse_forward_invert_flags</strong> (<em>a list of items which are a boolean</em>) – List of flags corresponding to the forward transforms reversed for antsApplyTransform.</p></li>
+<li><p><strong>reverse_forward_transforms</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – List of output transforms for forward registration reversed for antsApplyTransform.</p></li>
+<li><p><strong>reverse_invert_flags</strong> (<em>a list of items which are a boolean</em>) – List of flags corresponding to the reverse transforms.</p></li>
+<li><p><strong>reverse_transforms</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – List of output transforms for reverse registration.</p></li>
+<li><p><strong>save_state</strong> (<em>a pathlike object or string representing a file</em>) – The saved registration state to be restored.</p></li>
+<li><p><strong>warped_image</strong> (<em>a pathlike object or string representing a file</em>) – Outputs warped image.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.registration.ApplyTOPUPRPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.registration.</span></span><span class="sig-name descname"><span class="pre">ApplyTOPUPRPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/registration.html#ApplyTOPUPRPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.registration.ApplyTOPUPRPT" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="niworkflows.interfaces.reportlets.base.html#niworkflows.interfaces.reportlets.base.RegistrationRC" title="niworkflows.interfaces.reportlets.base.RegistrationRC"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationRC</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ApplyTOPUP</span></code></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">applytopup</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoding_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Name of text file with PE directions/times.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--datain=%s</span></code>.</p></li>
+<li><p><strong>in_files</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Name of file with images.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--imain=%s</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>datatype</strong> (<em>‘char’ or ‘short’ or ‘int’ or ‘float’ or ‘double’</em>) – Force output data type.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-d=%s</span></code>.</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>in_index</strong> (<em>a list of items which are an integer</em>) – Comma separated list of indices corresponding to –datain.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--inindex=%s</span></code>.</p></li>
+<li><p><strong>in_topup_fieldcoef</strong> (<em>a pathlike object or string representing an existing file</em>) – Topup file containing the field coefficients.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--topup=%s</span></code>.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">in_topup_movpar</span></code>.</p></li>
+<li><p><strong>in_topup_movpar</strong> (<em>a pathlike object or string representing an existing file</em>) – Topup movpar.txt file.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">in_topup_fieldcoef</span></code>.</p></li>
+<li><p><strong>interp</strong> (<em>‘trilinear’ or ‘spline’</em>) – Interpolation method.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--interp=%s</span></code>.</p></li>
+<li><p><strong>method</strong> (<em>‘jac’ or ‘lsr’</em>) – Use jacobian modulation (jac) or least-squares resampling (lsr).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--method=%s</span></code>.</p></li>
+<li><p><strong>out_corrected</strong> (<em>a pathlike object or string representing a file</em>) – Output (warped) image.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--out=%s</span></code>.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
+<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’ or ‘GIFTI’</em>) – FSL output type.</p></li>
+<li><p><strong>wm_seg</strong> (<em>a pathlike object or string representing a file</em>) – Reference white matter segmentation mask.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-wmseg</span> <span class="pre">%s</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_corrected</strong> (<em>a pathlike object or string representing an existing file</em>) – Name of 4D image file with unwarped images.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.registration.ApplyXFMRPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.registration.</span></span><span class="sig-name descname"><span class="pre">ApplyXFMRPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/registration.html#ApplyXFMRPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.registration.ApplyXFMRPT" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#niworkflows.interfaces.reportlets.registration.FLIRTRPT" title="niworkflows.interfaces.reportlets.registration.FLIRTRPT"><code class="xref py py-class docutils literal notranslate"><span class="pre">FLIRTRPT</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ApplyXFM</span></code></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">flirt</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Input file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-in</span> <span class="pre">%s</span></code> (position: 0).</p></li>
+<li><p><strong>reference</strong> (<em>a pathlike object or string representing an existing file</em>) – Reference file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-ref</span> <span class="pre">%s</span></code> (position: 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>angle_rep</strong> (<em>‘quaternion’ or ‘euler’</em>) – Representation of rotation angles.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-anglerep</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>apply_isoxfm</strong> (<em>a float</em>) – As applyxfm but forces isotropic resampling.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-applyisoxfm</span> <span class="pre">%f</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">apply_xfm</span></code>.</p></li>
+<li><p><strong>apply_xfm</strong> (<em>a boolean</em>) – Apply transformation supplied by in_matrix_file or uses_qform to use the affine matrix stored in the reference header.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-applyxfm</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>bbrslope</strong> (<em>a float</em>) – Value of bbr slope.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-bbrslope</span> <span class="pre">%f</span></code>.</p></li>
+<li><p><strong>bbrtype</strong> (<em>‘signed’ or ‘global_abs’ or ‘local_abs’</em>) – Type of bbr cost function: signed [default], global_abs, local_abs.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-bbrtype</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>bgvalue</strong> (<em>a float</em>) – Use specified background value for points outside FOV.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-setbackground</span> <span class="pre">%f</span></code>.</p></li>
+<li><p><strong>bins</strong> (<em>an integer</em>) – Number of histogram bins.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-bins</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>coarse_search</strong> (<em>an integer</em>) – Coarse search delta angle.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-coarsesearch</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>cost</strong> (<em>‘mutualinfo’ or ‘corratio’ or ‘normcorr’ or ‘normmi’ or ‘leastsq’ or ‘labeldiff’ or ‘bbr’</em>) – Cost function.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-cost</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>cost_func</strong> (<em>‘mutualinfo’ or ‘corratio’ or ‘normcorr’ or ‘normmi’ or ‘leastsq’ or ‘labeldiff’ or ‘bbr’</em>) – Cost function.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-searchcost</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>datatype</strong> (<em>‘char’ or ‘short’ or ‘int’ or ‘float’ or ‘double’</em>) – Force output data type.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-datatype</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>display_init</strong> (<em>a boolean</em>) – Display initial matrix.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-displayinit</span></code>.</p></li>
+<li><p><strong>dof</strong> (<em>an integer</em>) – Number of transform degrees of freedom.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-dof</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>echospacing</strong> (<em>a float</em>) – Value of EPI echo spacing - units of seconds.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-echospacing</span> <span class="pre">%f</span></code>.</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>fieldmap</strong> (<em>a pathlike object or string representing a file</em>) – Fieldmap image in rads/s - must be already registered to the reference image.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-fieldmap</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>fieldmapmask</strong> (<em>a pathlike object or string representing a file</em>) – Mask for fieldmap image.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-fieldmapmask</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>fine_search</strong> (<em>an integer</em>) – Fine search delta angle.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-finesearch</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>force_scaling</strong> (<em>a boolean</em>) – Force rescaling even for low-res images.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-forcescaling</span></code>.</p></li>
+<li><p><strong>in_matrix_file</strong> (<em>a pathlike object or string representing a file</em>) – Input 4x4 affine matrix.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-init</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>in_weight</strong> (<em>a pathlike object or string representing an existing file</em>) – File for input weighting volume.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-inweight</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>interp</strong> (<em>‘trilinear’ or ‘nearestneighbour’ or ‘sinc’ or ‘spline’</em>) – Final interpolation method used in reslicing.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-interp</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>min_sampling</strong> (<em>a float</em>) – Set minimum voxel dimension for sampling.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-minsampling</span> <span class="pre">%f</span></code>.</p></li>
+<li><p><strong>no_clamp</strong> (<em>a boolean</em>) – Do not use intensity clamping.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-noclamp</span></code>.</p></li>
+<li><p><strong>no_resample</strong> (<em>a boolean</em>) – Do not change input sampling.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-noresample</span></code>.</p></li>
+<li><p><strong>no_resample_blur</strong> (<em>a boolean</em>) – Do not use blurring on downsampling.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-noresampblur</span></code>.</p></li>
+<li><p><strong>no_search</strong> (<em>a boolean</em>) – Set all angular searches to ranges 0 to 0.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-nosearch</span></code>.</p></li>
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – Registered output file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-out</span> <span class="pre">%s</span></code> (position: 2).</p></li>
+<li><p><strong>out_log</strong> (<em>a pathlike object or string representing a file</em>) – Output log.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">save_log</span></code>.</p></li>
+<li><p><strong>out_matrix_file</strong> (<em>a pathlike object or string representing a file</em>) – Output affine matrix in 4x4 asciii format.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-omat</span> <span class="pre">%s</span></code> (position: 3).</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
+<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’ or ‘GIFTI’</em>) – FSL output type.</p></li>
+<li><p><strong>padding_size</strong> (<em>an integer</em>) – For applyxfm: interpolates outside image by size.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-paddingsize</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>pedir</strong> (<em>an integer</em>) – Phase encode direction of EPI - 1/2/3=x/y/z &amp; -1/-2/-3=-x/-y/-z.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-pedir</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>ref_weight</strong> (<em>a pathlike object or string representing an existing file</em>) – File for reference weighting volume.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-refweight</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>rigid2D</strong> (<em>a boolean</em>) – Use 2D rigid body mode - ignores dof.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-2D</span></code>.</p></li>
+<li><p><strong>save_log</strong> (<em>a boolean</em>) – Save to log file.</p></li>
+<li><p><strong>schedule</strong> (<em>a pathlike object or string representing an existing file</em>) – Replaces default schedule.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-schedule</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>searchr_x</strong> (<em>a list of from 2 to 2 items which are an integer</em>) – Search angles along x-axis, in degrees.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-searchrx</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>searchr_y</strong> (<em>a list of from 2 to 2 items which are an integer</em>) – Search angles along y-axis, in degrees.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-searchry</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>searchr_z</strong> (<em>a list of from 2 to 2 items which are an integer</em>) – Search angles along z-axis, in degrees.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-searchrz</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>sinc_width</strong> (<em>an integer</em>) – Full-width in voxels.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-sincwidth</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>sinc_window</strong> (<em>‘rectangular’ or ‘hanning’ or ‘blackman’</em>) – Sinc window.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-sincwindow</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>uses_qform</strong> (<em>a boolean</em>) – Initialize using sform or qform.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-usesqform</span></code>.</p></li>
+<li><p><strong>verbose</strong> (<em>an integer</em>) – Verbose mode, 0 is least.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-verbose</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>wm_seg</strong> (<em>a pathlike object or string representing a file</em>) – White matter segmentation volume needed by BBR cost function.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-wmseg</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>wmcoords</strong> (<em>a pathlike object or string representing a file</em>) – White matter boundary coordinates for BBR cost function.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-wmcoords</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>wmnorms</strong> (<em>a pathlike object or string representing a file</em>) – White matter boundary normals for BBR cost function.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-wmnorms</span> <span class="pre">%s</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Path/name of registered file (if generated).</p></li>
+<li><p><strong>out_log</strong> (<em>a pathlike object or string representing a file</em>) – Path/name of output log (if generated).</p></li>
+<li><p><strong>out_matrix_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Path/name of calculated affine transform (if generated).</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.registration.BBRegisterRPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.registration.</span></span><span class="sig-name descname"><span class="pre">BBRegisterRPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/registration.html#BBRegisterRPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.registration.BBRegisterRPT" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="niworkflows.interfaces.reportlets.base.html#niworkflows.interfaces.reportlets.base.RegistrationRC" title="niworkflows.interfaces.reportlets.base.RegistrationRC"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationRC</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">BBRegister</span></code></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">bbregister</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>contrast_type</strong> (<em>‘t1’ or ‘t2’ or ‘bold’ or ‘dti’</em>) – Contrast type of image.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--%s</span></code>.</p></li>
+<li><p><strong>source_file</strong> (<em>a pathlike object or string representing a file</em>) – Source file to be registered.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--mov</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>subject_id</strong> (<em>a string</em>) – Freesurfer subject id.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--s</span> <span class="pre">%s</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>dof</strong> (<em>6 or 9 or 12</em>) – Number of transform degrees of freedom.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--%d</span></code>.</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>epi_mask</strong> (<em>a boolean</em>) – Mask out B0 regions in stages 1 and 2.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--epi-mask</span></code>.</p></li>
+<li><p><strong>fsldof</strong> (<em>an integer</em>) – Degrees of freedom for initial registration (FSL).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--fsl-dof</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>init</strong> (<em>‘coreg’ or ‘rr’ or ‘spm’ or ‘fsl’ or ‘header’ or ‘best’</em>) – Initialize registration with mri_coreg, spm, fsl, or header.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--init-%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">init_reg_file</span></code>.</p></li>
+<li><p><strong>init_cost_file</strong> (<em>a boolean or a pathlike object or string representing a file</em>) – Output initial registration cost file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--initcost</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>init_reg_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Existing registration file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--init-reg</span> <span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">init</span></code>.</p></li>
+<li><p><strong>intermediate_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Intermediate image, e.g. in case of partial FOV.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--int</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>out_fsl_file</strong> (<em>a boolean or a pathlike object or string representing a file</em>) – Write the transformation matrix in FSL FLIRT format.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--fslmat</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>out_lta_file</strong> (<em>a boolean or a pathlike object or string representing a file</em>) – Write the transformation matrix in LTA format.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--lta</span> <span class="pre">%s</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>out_reg_file</strong> (<em>a pathlike object or string representing a file</em>) – Output registration file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--reg</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
+<li><p><strong>reg_frame</strong> (<em>an integer</em>) – 0-based frame index for 4D source file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--frame</span> <span class="pre">%d</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">reg_middle_frame</span></code>.</p></li>
+<li><p><strong>reg_middle_frame</strong> (<em>a boolean</em>) – Register middle frame of 4D source file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--mid-frame</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">reg_frame</span></code>.</p></li>
+<li><p><strong>registered_file</strong> (<em>a boolean or a pathlike object or string representing a file</em>) – Output warped sourcefile either True or filename.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--o</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>spm_nifti</strong> (<em>a boolean</em>) – Force use of nifti rather than analyze with SPM.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--spm-nii</span></code>.</p></li>
+<li><p><strong>subjects_dir</strong> (<em>a pathlike object or string representing an existing directory</em>) – Subjects directory.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init_cost_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Output initial registration cost file.</p></li>
+<li><p><strong>min_cost_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Output registration minimum cost file.</p></li>
+<li><p><strong>out_fsl_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Output FLIRT-style registration file.</p></li>
+<li><p><strong>out_lta_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Output LTA-style registration file.</p></li>
+<li><p><strong>out_reg_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Output registration file.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p></li>
+<li><p><strong>registered_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Registered and resampled source file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.registration.FLIRTRPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.registration.</span></span><span class="sig-name descname"><span class="pre">FLIRTRPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/registration.html#FLIRTRPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.registration.FLIRTRPT" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="niworkflows.interfaces.reportlets.base.html#niworkflows.interfaces.reportlets.base.RegistrationRC" title="niworkflows.interfaces.reportlets.base.RegistrationRC"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationRC</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">FLIRT</span></code></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">flirt</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Input file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-in</span> <span class="pre">%s</span></code> (position: 0).</p></li>
+<li><p><strong>reference</strong> (<em>a pathlike object or string representing an existing file</em>) – Reference file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-ref</span> <span class="pre">%s</span></code> (position: 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>angle_rep</strong> (<em>‘quaternion’ or ‘euler’</em>) – Representation of rotation angles.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-anglerep</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>apply_isoxfm</strong> (<em>a float</em>) – As applyxfm but forces isotropic resampling.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-applyisoxfm</span> <span class="pre">%f</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">apply_xfm</span></code>.</p></li>
+<li><p><strong>apply_xfm</strong> (<em>a boolean</em>) – Apply transformation supplied by in_matrix_file or uses_qform to use the affine matrix stored in the reference header.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-applyxfm</span></code>.</p></li>
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>bbrslope</strong> (<em>a float</em>) – Value of bbr slope.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-bbrslope</span> <span class="pre">%f</span></code>.</p></li>
+<li><p><strong>bbrtype</strong> (<em>‘signed’ or ‘global_abs’ or ‘local_abs’</em>) – Type of bbr cost function: signed [default], global_abs, local_abs.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-bbrtype</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>bgvalue</strong> (<em>a float</em>) – Use specified background value for points outside FOV.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-setbackground</span> <span class="pre">%f</span></code>.</p></li>
+<li><p><strong>bins</strong> (<em>an integer</em>) – Number of histogram bins.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-bins</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>coarse_search</strong> (<em>an integer</em>) – Coarse search delta angle.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-coarsesearch</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>cost</strong> (<em>‘mutualinfo’ or ‘corratio’ or ‘normcorr’ or ‘normmi’ or ‘leastsq’ or ‘labeldiff’ or ‘bbr’</em>) – Cost function.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-cost</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>cost_func</strong> (<em>‘mutualinfo’ or ‘corratio’ or ‘normcorr’ or ‘normmi’ or ‘leastsq’ or ‘labeldiff’ or ‘bbr’</em>) – Cost function.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-searchcost</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>datatype</strong> (<em>‘char’ or ‘short’ or ‘int’ or ‘float’ or ‘double’</em>) – Force output data type.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-datatype</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>display_init</strong> (<em>a boolean</em>) – Display initial matrix.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-displayinit</span></code>.</p></li>
+<li><p><strong>dof</strong> (<em>an integer</em>) – Number of transform degrees of freedom.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-dof</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>echospacing</strong> (<em>a float</em>) – Value of EPI echo spacing - units of seconds.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-echospacing</span> <span class="pre">%f</span></code>.</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>fieldmap</strong> (<em>a pathlike object or string representing a file</em>) – Fieldmap image in rads/s - must be already registered to the reference image.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-fieldmap</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>fieldmapmask</strong> (<em>a pathlike object or string representing a file</em>) – Mask for fieldmap image.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-fieldmapmask</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>fine_search</strong> (<em>an integer</em>) – Fine search delta angle.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-finesearch</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>force_scaling</strong> (<em>a boolean</em>) – Force rescaling even for low-res images.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-forcescaling</span></code>.</p></li>
+<li><p><strong>in_matrix_file</strong> (<em>a pathlike object or string representing a file</em>) – Input 4x4 affine matrix.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-init</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>in_weight</strong> (<em>a pathlike object or string representing an existing file</em>) – File for input weighting volume.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-inweight</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>interp</strong> (<em>‘trilinear’ or ‘nearestneighbour’ or ‘sinc’ or ‘spline’</em>) – Final interpolation method used in reslicing.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-interp</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>min_sampling</strong> (<em>a float</em>) – Set minimum voxel dimension for sampling.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-minsampling</span> <span class="pre">%f</span></code>.</p></li>
+<li><p><strong>no_clamp</strong> (<em>a boolean</em>) – Do not use intensity clamping.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-noclamp</span></code>.</p></li>
+<li><p><strong>no_resample</strong> (<em>a boolean</em>) – Do not change input sampling.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-noresample</span></code>.</p></li>
+<li><p><strong>no_resample_blur</strong> (<em>a boolean</em>) – Do not use blurring on downsampling.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-noresampblur</span></code>.</p></li>
+<li><p><strong>no_search</strong> (<em>a boolean</em>) – Set all angular searches to ranges 0 to 0.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-nosearch</span></code>.</p></li>
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – Registered output file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-out</span> <span class="pre">%s</span></code> (position: 2).</p></li>
+<li><p><strong>out_log</strong> (<em>a pathlike object or string representing a file</em>) – Output log.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">save_log</span></code>.</p></li>
+<li><p><strong>out_matrix_file</strong> (<em>a pathlike object or string representing a file</em>) – Output affine matrix in 4x4 asciii format.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-omat</span> <span class="pre">%s</span></code> (position: 3).</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
+<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’ or ‘GIFTI’</em>) – FSL output type.</p></li>
+<li><p><strong>padding_size</strong> (<em>an integer</em>) – For applyxfm: interpolates outside image by size.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-paddingsize</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>pedir</strong> (<em>an integer</em>) – Phase encode direction of EPI - 1/2/3=x/y/z &amp; -1/-2/-3=-x/-y/-z.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-pedir</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>ref_weight</strong> (<em>a pathlike object or string representing an existing file</em>) – File for reference weighting volume.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-refweight</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>rigid2D</strong> (<em>a boolean</em>) – Use 2D rigid body mode - ignores dof.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-2D</span></code>.</p></li>
+<li><p><strong>save_log</strong> (<em>a boolean</em>) – Save to log file.</p></li>
+<li><p><strong>schedule</strong> (<em>a pathlike object or string representing an existing file</em>) – Replaces default schedule.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-schedule</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>searchr_x</strong> (<em>a list of from 2 to 2 items which are an integer</em>) – Search angles along x-axis, in degrees.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-searchrx</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>searchr_y</strong> (<em>a list of from 2 to 2 items which are an integer</em>) – Search angles along y-axis, in degrees.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-searchry</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>searchr_z</strong> (<em>a list of from 2 to 2 items which are an integer</em>) – Search angles along z-axis, in degrees.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-searchrz</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>sinc_width</strong> (<em>an integer</em>) – Full-width in voxels.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-sincwidth</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>sinc_window</strong> (<em>‘rectangular’ or ‘hanning’ or ‘blackman’</em>) – Sinc window.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-sincwindow</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>uses_qform</strong> (<em>a boolean</em>) – Initialize using sform or qform.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-usesqform</span></code>.</p></li>
+<li><p><strong>verbose</strong> (<em>an integer</em>) – Verbose mode, 0 is least.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-verbose</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>wm_seg</strong> (<em>a pathlike object or string representing a file</em>) – White matter segmentation volume needed by BBR cost function.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-wmseg</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>wmcoords</strong> (<em>a pathlike object or string representing a file</em>) – White matter boundary coordinates for BBR cost function.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-wmcoords</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>wmnorms</strong> (<em>a pathlike object or string representing a file</em>) – White matter boundary normals for BBR cost function.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-wmnorms</span> <span class="pre">%s</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Path/name of registered file (if generated).</p></li>
+<li><p><strong>out_log</strong> (<em>a pathlike object or string representing a file</em>) – Path/name of output log (if generated).</p></li>
+<li><p><strong>out_matrix_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Path/name of calculated affine transform (if generated).</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.registration.FUGUERPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.registration.</span></span><span class="sig-name descname"><span class="pre">FUGUERPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/registration.html#FUGUERPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.registration.FUGUERPT" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="niworkflows.interfaces.reportlets.base.html#niworkflows.interfaces.reportlets.base.RegistrationRC" title="niworkflows.interfaces.reportlets.base.RegistrationRC"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationRC</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">FUGUE</span></code></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">fugue</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>asym_se_time</strong> (<em>a float</em>) – Set the fieldmap asymmetric spin echo time (sec).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--asym=%.10f</span></code>.</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>despike_2dfilter</strong> (<em>a boolean</em>) – Apply a 2D de-spiking filter.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--despike</span></code>.</p></li>
+<li><p><strong>despike_threshold</strong> (<em>a float</em>) – Specify the threshold for de-spiking (default=3.0).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--despikethreshold=%s</span></code>.</p></li>
+<li><p><strong>dwell_time</strong> (<em>a float</em>) – Set the EPI dwell time per phase-encode line - same as echo spacing - (sec).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--dwell=%.10f</span></code>.</p></li>
+<li><p><strong>dwell_to_asym_ratio</strong> (<em>a float</em>) – Set the dwell to asym time ratio.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--dwelltoasym=%.10f</span></code>.</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>fmap_in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Filename for loading fieldmap (rad/s).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--loadfmap=%s</span></code>.</p></li>
+<li><p><strong>fmap_out_file</strong> (<em>a pathlike object or string representing a file</em>) – Filename for saving fieldmap (rad/s).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--savefmap=%s</span></code>.</p></li>
+<li><p><strong>forward_warping</strong> (<em>a boolean</em>) – Apply forward warping instead of unwarping.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
+<li><p><strong>fourier_order</strong> (<em>an integer</em>) – Apply Fourier (sinusoidal) fitting of order N.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--fourier=%d</span></code>.</p></li>
+<li><p><strong>icorr</strong> (<em>a boolean</em>) – Apply intensity correction to unwarping (pixel shift method only).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--icorr</span></code>.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">shift_in_file</span></code>.</p></li>
+<li><p><strong>icorr_only</strong> (<em>a boolean</em>) – Apply intensity correction only.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--icorronly</span></code>.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">unwarped_file</span></code>.</p></li>
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Filename of input volume.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--in=%s</span></code>.</p></li>
+<li><p><strong>mask_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Filename for loading valid mask.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--mask=%s</span></code>.</p></li>
+<li><p><strong>median_2dfilter</strong> (<em>a boolean</em>) – Apply 2D median filtering.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--median</span></code>.</p></li>
+<li><p><strong>no_extend</strong> (<em>a boolean</em>) – Do not apply rigid-body extrapolation to the fieldmap.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--noextend</span></code>.</p></li>
+<li><p><strong>no_gap_fill</strong> (<em>a boolean</em>) – Do not apply gap-filling measure to the fieldmap.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--nofill</span></code>.</p></li>
+<li><p><strong>nokspace</strong> (<em>a boolean</em>) – Do not use k-space forward warping.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--nokspace</span></code>.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
+<li><p><strong>output_type</strong> (<em>‘NIFTI’ or ‘NIFTI_PAIR’ or ‘NIFTI_GZ’ or ‘NIFTI_PAIR_GZ’ or ‘GIFTI’</em>) – FSL output type.</p></li>
+<li><p><strong>pava</strong> (<em>a boolean</em>) – Apply monotonic enforcement via PAVA.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--pava</span></code>.</p></li>
+<li><p><strong>phase_conjugate</strong> (<em>a boolean</em>) – Apply phase conjugate method of unwarping.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--phaseconj</span></code>.</p></li>
+<li><p><strong>phasemap_in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Filename for input phase image.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--phasemap=%s</span></code>.</p></li>
+<li><p><strong>poly_order</strong> (<em>an integer</em>) – Apply polynomial fitting of order N.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--poly=%d</span></code>.</p></li>
+<li><p><strong>save_fmap</strong> (<em>a boolean</em>) – Write field map volume.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">save_unmasked_fmap</span></code>.</p></li>
+<li><p><strong>save_shift</strong> (<em>a boolean</em>) – Write pixel shift volume.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">save_unmasked_shift</span></code>.</p></li>
+<li><p><strong>save_unmasked_fmap</strong> (<em>a boolean</em>) – Saves the unmasked fieldmap when using –savefmap.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--unmaskfmap</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">save_fmap</span></code>.</p></li>
+<li><p><strong>save_unmasked_shift</strong> (<em>a boolean</em>) – Saves the unmasked shiftmap when using –saveshift.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--unmaskshift</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">save_shift</span></code>.</p></li>
+<li><p><strong>shift_in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Filename for reading pixel shift volume.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--loadshift=%s</span></code>.</p></li>
+<li><p><strong>shift_out_file</strong> (<em>a pathlike object or string representing a file</em>) – Filename for saving pixel shift volume.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--saveshift=%s</span></code>.</p></li>
+<li><p><strong>smooth2d</strong> (<em>a float</em>) – Apply 2D Gaussian smoothing of sigma N (in mm).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--smooth2=%.2f</span></code>.</p></li>
+<li><p><strong>smooth3d</strong> (<em>a float</em>) – Apply 3D Gaussian smoothing of sigma N (in mm).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--smooth3=%.2f</span></code>.</p></li>
+<li><p><strong>unwarp_direction</strong> (<em>‘x’ or ‘y’ or ‘z’ or ‘x-’ or ‘y-’ or ‘z-’</em>) – Specifies direction of warping (default y).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--unwarpdir=%s</span></code>.</p></li>
+<li><p><strong>unwarped_file</strong> (<em>a pathlike object or string representing a file</em>) – Apply unwarping and save as filename.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--unwarp=%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">warped_file</span></code>.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">in_file</span></code>.</p></li>
+<li><p><strong>warped_file</strong> (<em>a pathlike object or string representing a file</em>) – Apply forward warping and save as filename.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--warp=%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">unwarped_file</span></code>.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">in_file</span></code>.</p></li>
+<li><p><strong>wm_seg</strong> (<em>a pathlike object or string representing a file</em>) – Reference white matter segmentation mask.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">-wmseg</span> <span class="pre">%s</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Outputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>fmap_out_file</strong> (<em>a pathlike object or string representing a file</em>) – Fieldmap file.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p></li>
+<li><p><strong>shift_out_file</strong> (<em>a pathlike object or string representing a file</em>) – Voxel shift map file.</p></li>
+<li><p><strong>unwarped_file</strong> (<em>a pathlike object or string representing a file</em>) – Unwarped file.</p></li>
+<li><p><strong>warped_file</strong> (<em>a pathlike object or string representing a file</em>) – Forward warped file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.registration.MRICoregRPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.registration.</span></span><span class="sig-name descname"><span class="pre">MRICoregRPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/registration.html#MRICoregRPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.registration.MRICoregRPT" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="niworkflows.interfaces.reportlets.base.html#niworkflows.interfaces.reportlets.base.RegistrationRC" title="niworkflows.interfaces.reportlets.base.RegistrationRC"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationRC</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MRICoreg</span></code></p>
+<p>Wrapped executable: <code class="docutils literal notranslate"><span class="pre">mri_coreg</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_file</strong> (<em>a pathlike object or string representing a file</em>) – Reference (target) file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--ref</span> <span class="pre">%s</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">subject_id</span></code>.</p></li>
+<li><p><strong>source_file</strong> (<em>a pathlike object or string representing a file</em>) – Source file to be registered.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--mov</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>subject_id</strong> (<em>a string</em>) – Freesurfer subject ID (implies <code class="docutils literal notranslate"><span class="pre">reference_mask</span> <span class="pre">==</span> <span class="pre">aparc+aseg.mgz</span></code> unless otherwise specified).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--s</span> <span class="pre">%s</span></code> (position: 1).
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">reference_file</span></code>.
+<strong>Requires</strong> inputs: <code class="docutils literal notranslate"><span class="pre">subjects_dir</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>args</strong> (<em>a string</em>) – Additional parameters to the command.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">%s</span></code>.</p></li>
+<li><p><strong>brute_force_limit</strong> (<em>a float</em>) – Constrain brute force search to +/- lim.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--bf-lim</span> <span class="pre">%g</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">no_brute_force</span></code>.</p></li>
+<li><p><strong>brute_force_samples</strong> (<em>an integer</em>) – Number of samples in brute force search.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--bf-nsamp</span> <span class="pre">%d</span></code>.
+Mutually <strong>exclusive</strong> with inputs: <code class="docutils literal notranslate"><span class="pre">no_brute_force</span></code>.</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>conform_reference</strong> (<em>a boolean</em>) – Conform reference without rescaling.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--conf-ref</span></code>.</p></li>
+<li><p><strong>dof</strong> (<em>6 or 9 or 12</em>) – Number of transform degrees of freedom.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--dof</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>environ</strong> (<em>a dictionary with keys which are a bytes or None or a value of class ‘str’ and with values which are a bytes or None or a value of class ‘str’</em>) – Environment variables.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">{}</span></code>)</p></li>
+<li><p><strong>ftol</strong> (<em>a float</em>) – Floating-point tolerance (default=1e-7).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--ftol</span> <span class="pre">%e</span></code>.</p></li>
+<li><p><strong>initial_rotation</strong> (<em>a tuple of the form: (a float, a float, a float)</em>) – Initial rotation in degrees.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--rot</span> <span class="pre">%g</span> <span class="pre">%g</span> <span class="pre">%g</span></code>.</p></li>
+<li><p><strong>initial_scale</strong> (<em>a tuple of the form: (a float, a float, a float)</em>) – Initial scale.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--scale</span> <span class="pre">%g</span> <span class="pre">%g</span> <span class="pre">%g</span></code>.</p></li>
+<li><p><strong>initial_shear</strong> (<em>a tuple of the form: (a float, a float, a float)</em>) – Initial shear (Hxy, Hxz, Hyz).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--shear</span> <span class="pre">%g</span> <span class="pre">%g</span> <span class="pre">%g</span></code>.</p></li>
+<li><p><strong>initial_translation</strong> (<em>a tuple of the form: (a float, a float, a float)</em>) – Initial translation in mm (implies no_cras0).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--trans</span> <span class="pre">%g</span> <span class="pre">%g</span> <span class="pre">%g</span></code>.</p></li>
+<li><p><strong>linmintol</strong> (<em>a float</em>) – Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--linmintol</span> <span class="pre">%e</span></code>.</p></li>
+<li><p><strong>max_iters</strong> (<em>an integer &gt;= 1</em>) – Maximum iterations (default: 4).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--nitersmax</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>no_brute_force</strong> (<em>a boolean</em>) – Do not brute force search.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--no-bf</span></code>.</p></li>
+<li><p><strong>no_coord_dithering</strong> (<em>a boolean</em>) – Turn off coordinate dithering.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--no-coord-dither</span></code>.</p></li>
+<li><p><strong>no_cras0</strong> (<em>a boolean</em>) – Do not set translation parameters to align centers of source and reference files.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--no-cras0</span></code>.</p></li>
+<li><p><strong>no_intensity_dithering</strong> (<em>a boolean</em>) – Turn off intensity dithering.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--no-intensity-dither</span></code>.</p></li>
+<li><p><strong>no_smooth</strong> (<em>a boolean</em>) – Do not apply smoothing to either reference or source file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--no-smooth</span></code>.</p></li>
+<li><p><strong>num_threads</strong> (<em>an integer</em>) – Number of OpenMP threads.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--threads</span> <span class="pre">%d</span></code>.</p></li>
+<li><p><strong>out_lta_file</strong> (<em>a bool or None or a pathlike object or string representing a file</em>) – Output registration file (LTA format).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--lta</span> <span class="pre">%s</span></code>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>out_params_file</strong> (<em>a bool or None or a pathlike object or string representing a file</em>) – Output parameters file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--params</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>out_reg_file</strong> (<em>a bool or None or a pathlike object or string representing a file</em>) – Output registration file (REG format).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--regdat</span> <span class="pre">%s</span></code>.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
+<li><p><strong>ref_fwhm</strong> (<em>a float</em>) – Apply smoothing to reference file.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--ref-fwhm</span></code>.</p></li>
+<li><p><strong>reference_mask</strong> (<em>a bool or None or a string</em>) – Mask reference volume with given mask, or None if <code class="docutils literal notranslate"><span class="pre">False</span></code>.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--ref-mask</span> <span class="pre">%s</span></code> (position: 2).</p></li>
+<li><p><strong>saturation_threshold</strong> (<em>0.0 &lt;= a floating point number &lt;= 100.0</em>) – Saturation threshold (default=9.999).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--sat</span> <span class="pre">%g</span></code>.</p></li>
+<li><p><strong>sep</strong> (<em>a list of from 1 to 2 items which are any value</em>) – Set spatial scales, in voxels (default [2, 4]).
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--sep</span> <span class="pre">%s...</span></code>.</p></li>
+<li><p><strong>source_mask</strong> (<em>a string</em>) – Mask source file with given mask.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--mov-mask</span></code>.</p></li>
+<li><p><strong>source_oob</strong> (<em>a boolean</em>) – Count source voxels that are out-of-bounds as 0.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--mov-oob</span></code>.</p></li>
+<li><p><strong>subjects_dir</strong> (<em>a pathlike object or string representing an existing directory</em>) – FreeSurfer SUBJECTS_DIR.
+Maps to a command-line argument: <code class="code docutils literal notranslate"><span class="pre">--sd</span> <span class="pre">%s</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_lta_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Output LTA-style registration file.</p></li>
+<li><p><strong>out_params_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Output parameters file.</p></li>
+<li><p><strong>out_reg_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Output registration file.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.registration.ResampleBeforeAfterRPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.registration.</span></span><span class="sig-name descname"><span class="pre">ResampleBeforeAfterRPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/registration.html#ResampleBeforeAfterRPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.registration.ResampleBeforeAfterRPT" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#niworkflows.interfaces.reportlets.registration.SimpleBeforeAfterRPT" title="niworkflows.interfaces.reportlets.registration.SimpleBeforeAfterRPT"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleBeforeAfterRPT</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>after</strong> (<em>a pathlike object or string representing an existing file</em>) – File after.</p></li>
+<li><p><strong>base</strong> (<em>‘before’ or ‘after’</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">before</span></code>)</p></li>
+<li><p><strong>before</strong> (<em>a pathlike object or string representing an existing file</em>) – File before.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>after_label</strong> (<em>a string</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">after</span></code>)</p></li>
+<li><p><strong>before_label</strong> (<em>a string</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">before</span></code>)</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>dismiss_affine</strong> (<em>a boolean</em>) – Rotate image(s) to cardinal axes.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
+<li><p><strong>wm_seg</strong> (<em>a pathlike object or string representing a file</em>) – Reference white matter segmentation mask.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.registration.SimpleBeforeAfterRPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.registration.</span></span><span class="sig-name descname"><span class="pre">SimpleBeforeAfterRPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/registration.html#SimpleBeforeAfterRPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.registration.SimpleBeforeAfterRPT" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="niworkflows.interfaces.reportlets.base.html#niworkflows.interfaces.reportlets.base.RegistrationRC" title="niworkflows.interfaces.reportlets.base.RegistrationRC"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationRC</span></code></a>, <a class="reference internal" href="niworkflows.interfaces.reportlets.base.html#niworkflows.interfaces.reportlets.base.ReportingInterface" title="niworkflows.interfaces.reportlets.base.ReportingInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReportingInterface</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>after</strong> (<em>a pathlike object or string representing an existing file</em>) – File after.</p></li>
+<li><p><strong>before</strong> (<em>a pathlike object or string representing an existing file</em>) – File before.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>after_label</strong> (<em>a string</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">after</span></code>)</p></li>
+<li><p><strong>before_label</strong> (<em>a string</em>) – (Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">before</span></code>)</p></li>
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>dismiss_affine</strong> (<em>a boolean</em>) – Rotate image(s) to cardinal axes.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
+<li><p><strong>wm_seg</strong> (<em>a pathlike object or string representing a file</em>) – Reference white matter segmentation mask.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.reportlets.registration.SpatialNormalizationRPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.reportlets.registration.</span></span><span class="sig-name descname"><span class="pre">SpatialNormalizationRPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generate_report</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/reportlets/registration.html#SpatialNormalizationRPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.reportlets.registration.SpatialNormalizationRPT" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="niworkflows.interfaces.reportlets.base.html#niworkflows.interfaces.reportlets.base.RegistrationRC" title="niworkflows.interfaces.reportlets.base.RegistrationRC"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegistrationRC</span></code></a>, <a class="reference internal" href="niworkflows.interfaces.norm.html#niworkflows.interfaces.norm.SpatialNormalization" title="niworkflows.interfaces.norm.SpatialNormalization"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialNormalization</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>moving</strong> (<em>‘T1w’ or ‘boldref’</em>) – Registration type.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">T1w</span></code>)</p></li>
+<li><p><strong>moving_image</strong> (<em>a pathlike object or string representing an existing file</em>) – Image to apply transformation to.</p></li>
+<li><p><strong>orientation</strong> (<em>‘RAS’ or ‘LAS’</em>) – Modify template orientation (should match input image).
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">RAS</span></code>)</p></li>
+<li><p><strong>reference</strong> (<em>‘T1w’ or ‘T2w’ or ‘boldref’ or ‘PDw’</em>) – Set the reference modality for registration.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">T1w</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>compress_report</strong> (<em>‘auto’ or True or False</em>) – Compress the reportlet using SVGO orWEBP. ‘auto’ - compress if relevant software is installed, True = force,False - don’t attempt to compress.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>explicit_masking</strong> (<em>a boolean</em>) – Set voxels outside the masks to zero thus creating an artificial border
+that can drive the registration. Requires reliable and accurate masks.
+See <a class="reference external" href="https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba">https://sourceforge.net/p/advants/discussion/840261/thread/27216e69/#c7ba</a>.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p><strong>flavor</strong> (<em>‘precise’ or ‘testing’ or ‘fast’</em>) – Registration settings parameter set.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">precise</span></code>)</p></li>
+<li><p><strong>float</strong> (<em>a boolean</em>) – Use single precision calculations.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
+<li><p><strong>initial_moving_transform</strong> (<em>a pathlike object or string representing an existing file</em>) – Transform for initialization.</p></li>
+<li><p><strong>lesion_mask</strong> (<em>a pathlike object or string representing an existing file</em>) – Lesion mask image.</p></li>
+<li><p><strong>moving_mask</strong> (<em>a pathlike object or string representing an existing file</em>) – Moving image mask.</p></li>
+<li><p><strong>num_threads</strong> (<em>an integer</em>) – Number of ITK threads to use.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">4</span></code>)</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">report.svg</span></code>)</p></li>
+<li><p><strong>reference_image</strong> (<em>a pathlike object or string representing an existing file</em>) – Override the reference image.</p></li>
+<li><p><strong>reference_mask</strong> (<em>a pathlike object or string representing an existing file</em>) – Reference image mask.</p></li>
+<li><p><strong>settings</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – Pass on the list of settings files.</p></li>
+<li><p><strong>template</strong> (<em>a string</em>) – Define the template to be used.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">MNI152NLin2009cAsym</span></code>)</p></li>
+<li><p><strong>template_resolution</strong> (<em>1 or 2 or None</em>) – (DEPRECATED) template resolution.</p></li>
+<li><p><strong>template_spec</strong> (<em>a dictionary with keys which are a string and with values which are any value</em>) – Template specifications.</p></li>
+<li><p><strong>use_histogram_matching</strong> (<em>a boolean</em>) – Determine use of histogram matching.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Outputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>composite_transform</strong> (<em>a pathlike object or string representing an existing file</em>) – Composite transform file.</p></li>
+<li><p><strong>elapsed_time</strong> (<em>a float</em>) – The total elapsed time as reported by ANTs.</p></li>
+<li><p><strong>forward_invert_flags</strong> (<em>a list of items which are a boolean</em>) – List of flags corresponding to the forward transforms.</p></li>
+<li><p><strong>forward_transforms</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – List of output transforms for forward registration.</p></li>
+<li><p><strong>inverse_composite_transform</strong> (<em>a pathlike object or string representing a file</em>) – Inverse composite transform file.</p></li>
+<li><p><strong>inverse_warped_image</strong> (<em>a pathlike object or string representing a file</em>) – Outputs the inverse of the warped image.</p></li>
+<li><p><strong>metric_value</strong> (<em>a float</em>) – The final value of metric.</p></li>
+<li><p><strong>out_report</strong> (<em>a pathlike object or string representing a file</em>) – Filename for the visual report.</p></li>
+<li><p><strong>reference_image</strong> (<em>a pathlike object or string representing an existing file</em>) – Reference image used for registration target.</p></li>
+<li><p><strong>reverse_forward_invert_flags</strong> (<em>a list of items which are a boolean</em>) – List of flags corresponding to the forward transforms reversed for antsApplyTransform.</p></li>
+<li><p><strong>reverse_forward_transforms</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – List of output transforms for forward registration reversed for antsApplyTransform.</p></li>
+<li><p><strong>reverse_invert_flags</strong> (<em>a list of items which are a boolean</em>) – List of flags corresponding to the reverse transforms.</p></li>
+<li><p><strong>reverse_transforms</strong> (<em>a list of items which are a pathlike object or string representing an existing file</em>) – List of output transforms for reverse registration.</p></li>
+<li><p><strong>save_state</strong> (<em>a pathlike object or string representing a file</em>) – The saved registration state to be restored.</p></li>
+<li><p><strong>warped_image</strong> (<em>a pathlike object or string representing a file</em>) – Outputs warped image.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="niworkflows.interfaces.reportlets.segmentation.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">niworkflows.interfaces.reportlets.segmentation module</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="niworkflows.interfaces.reportlets.masks.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">niworkflows.interfaces.reportlets.masks module</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Copyright, The NiPreps Developers
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">niworkflows.interfaces.reportlets.registration module</a><ul>
+<li><a class="reference internal" href="#niworkflows.interfaces.reportlets.registration.ANTSApplyTransformsRPT"><code class="docutils literal notranslate"><span class="pre">ANTSApplyTransformsRPT</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.reportlets.registration.ANTSRegistrationRPT"><code class="docutils literal notranslate"><span class="pre">ANTSRegistrationRPT</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.reportlets.registration.ApplyTOPUPRPT"><code class="docutils literal notranslate"><span class="pre">ApplyTOPUPRPT</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.reportlets.registration.ApplyXFMRPT"><code class="docutils literal notranslate"><span class="pre">ApplyXFMRPT</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.reportlets.registration.BBRegisterRPT"><code class="docutils literal notranslate"><span class="pre">BBRegisterRPT</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.reportlets.registration.FLIRTRPT"><code class="docutils literal notranslate"><span class="pre">FLIRTRPT</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.reportlets.registration.FUGUERPT"><code class="docutils literal notranslate"><span class="pre">FUGUERPT</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.reportlets.registration.MRICoregRPT"><code class="docutils literal notranslate"><span class="pre">MRICoregRPT</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.reportlets.registration.ResampleBeforeAfterRPT"><code class="docutils literal notranslate"><span class="pre">ResampleBeforeAfterRPT</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.reportlets.registration.SimpleBeforeAfterRPT"><code class="docutils literal notranslate"><span class="pre">SimpleBeforeAfterRPT</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.reportlets.registration.SpatialNormalizationRPT"><code class="docutils literal notranslate"><span class="pre">SpatialNormalizationRPT</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=27db1736"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="../_static/js/version-switch.js?v=b7149f84"></script>
+    </body>
+</html>
