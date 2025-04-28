@@ -115,7 +115,7 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
       - name: Load test data cache
         uses: actions/cache@v4
         id: stanford-crn
@@ -158,7 +158,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
       - name: Install tox
         run: uv tool install tox --with=tox-uv
       - name: Show tox config
