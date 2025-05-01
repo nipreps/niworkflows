@@ -5,7 +5,7 @@ from nipype import Node, Workflow
 from nipype.interfaces.base import BaseInterfaceInputSpec, SimpleInterface, TraitedSpec, traits
 from nipype.interfaces.utility import IdentityInterface
 
-from ..splicer import splice_workflow
+from ..splicer import splice_workflow, tag
 
 
 class _NullInterfaceInputSpec(BaseInterfaceInputSpec):
@@ -153,3 +153,11 @@ def test_splice(wf0):
     assert wf.get_node('a2_wf')
     assert wf.get_node('b_wf').get_node('nested2_wf')
     assert wf.get_node('c_wf') is None
+
+
+def test_tag():
+    @tag('foo')
+    def init_workflow():
+        return Workflow(name='foo')
+
+    assert init_workflow()._tag == 'foo'
