@@ -1,12 +1,13 @@
 """Workflow splicing operations."""
 
+import logging
 import typing as ty
 
 from nipype.pipeline import Workflow
 from nipype.pipeline.engine.base import EngineBase
 
 
-def tag(tag: str) -> 'EngineBase':
+def tag(tag: str) -> ty.Callable:
     """
     Decorator to set a tag on an `init_...wf` function.
 
@@ -14,7 +15,7 @@ def tag(tag: str) -> 'EngineBase':
     """
 
     def _decorator(func, *args, **kwargs) -> ty.Callable:
-        def _tag() -> 'EngineBase':
+        def _tag() -> EngineBase:
             node = func(*args, **kwargs)
             node._tag = tag
             return node
@@ -26,7 +27,7 @@ def tag(tag: str) -> 'EngineBase':
 
 def splice_workflow(
     root_wf: Workflow,
-    replacements: dict[str, 'EngineBase'],
+    replacements: dict[str, EngineBase],
     *,
     write_graph: bool = False,
     debug: bool = False,
@@ -48,19 +49,19 @@ def splice_workflow(
 
 
 def _get_substitutions(
-    wf: Workflow,
-    replacements: dict[str, 'EngineBase'],
-) -> dict['EngineBase', 'EngineBase']:
+    workflow: Workflow,
+    replacements: dict[str, EngineBase],
+) -> dict[EngineBase, EngineBase]:
     """ "Query tags in workflow, and return a list of substitutions to make"""
     substitutions = {}
-    tagged_wfs = _fetch_tags(wf)
+    tagged_wfs = _fetch_tags(workflow)
     for tag in tagged_wfs:
         if tag in replacements:
             substitutions[tagged_wfs[tag]] = replacements[tag]
     return substitutions
 
 
-def _fetch_tags(wf: Workflow) -> dict[str, 'EngineBase']:
+def _fetch_tags(wf: Workflow) -> dict[str, EngineBase]:
     """Query all nodes in a workflow and return a dictionary of tags and nodes."""
     tagged = {}
     for node in wf._graph.nodes:
@@ -74,7 +75,7 @@ def _fetch_tags(wf: Workflow) -> dict[str, 'EngineBase']:
 
 def _splice_components(
     workflow: Workflow,
-    substitutions: dict['EngineBase', 'EngineBase'],
+    substitutions: dict[EngineBase, EngineBase],
     debug: bool = False,
 ) -> tuple[list, list]:
     """Query all connections and return a list of removals and additions to be made."""
@@ -86,7 +87,7 @@ def _splice_components(
 
     to_replace = [x.fullname for x in substitutions]
 
-    for src, dst in workflow._graph.edges:  # will not expand workflows, but needs to
+    for src, dst in workflow._graph.edges:
         if dst.fullname in to_replace:
             edge_data = workflow._graph.get_edge_data(src, dst)
             alt_dst = substitutions[dst]
@@ -112,10 +113,13 @@ def _splice_components(
             _expanded_workflows.add(src)
             _splice_components(src, substitutions, debug=debug)
 
-    if debug:
-        print(f'Workflow: {workflow}')
-        print(f'- Removing: {edge_removals}')
-        print(f'+ Adding: {edge_connects}')
+    logger = logging.getLogger('nipype.workflow')
+    logger.debug(
+        'Workflow: %s, \n- edge_removals: %s, \n+ edge_connects: %s',
+        workflow,
+        edge_removals,
+        edge_connects,
+    )
 
     workflow._graph.remove_edges_from(edge_removals)
     workflow.remove_nodes(node_removals)
