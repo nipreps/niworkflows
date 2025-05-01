@@ -3,7 +3,7 @@
 import logging
 import typing as ty
 
-from nipype.pipeline import Workflow
+import nipype.pipeline.engine as pe
 from nipype.pipeline.engine.base import EngineBase
 
 
@@ -26,7 +26,7 @@ def tag(tag: str) -> ty.Callable:
 
 
 def splice_workflow(
-    root_wf: Workflow,
+    root_wf: pe.Workflow,
     replacements: dict[str, EngineBase],
     *,
     write_graph: bool = False,
@@ -49,7 +49,7 @@ def splice_workflow(
 
 
 def _get_substitutions(
-    workflow: Workflow,
+    workflow: pe.Workflow,
     replacements: dict[str, EngineBase],
 ) -> dict[EngineBase, EngineBase]:
     """ "Query tags in workflow, and return a list of substitutions to make"""
@@ -61,20 +61,20 @@ def _get_substitutions(
     return substitutions
 
 
-def _fetch_tags(wf: Workflow) -> dict[str, EngineBase]:
+def _fetch_tags(wf: pe.Workflow) -> dict[str, EngineBase]:
     """Query all nodes in a workflow and return a dictionary of tags and nodes."""
     tagged = {}
     for node in wf._graph.nodes:
         if hasattr(node, '_tag'):
             tagged[node._tag] = node
-        if isinstance(node, Workflow):
+        if isinstance(node, pe.Workflow):
             inner_tags = _fetch_tags(node)
             tagged.update(inner_tags)
     return tagged
 
 
 def _splice_components(
-    workflow: Workflow,
+    workflow: pe.Workflow,
     substitutions: dict[EngineBase, EngineBase],
     debug: bool = False,
 ) -> tuple[list, list]:
@@ -106,10 +106,10 @@ def _splice_components(
             node_removals.add(src)
             node_adds.add(alt_src)
             edge_connects.append((alt_src, dst, edge_data))
-        elif isinstance(dst, Workflow) and dst not in _expanded_workflows:
+        elif isinstance(dst, pe.Workflow) and dst not in _expanded_workflows:
             _expanded_workflows.add(dst)
             _splice_components(dst, substitutions, debug=debug)
-        elif isinstance(src, Workflow) and src not in _expanded_workflows:
+        elif isinstance(src, pe.Workflow) and src not in _expanded_workflows:
             _expanded_workflows.add(src)
             _splice_components(src, substitutions, debug=debug)
 
