@@ -40,7 +40,6 @@ def splice_workflow(
         root_wf.write_graph('pre-slice.dot', format='png', graph2use='colored')
 
     substitutions = _get_substitutions(root_wf, replacements)
-    print(f'Substitutions: {substitutions}')
     _splice_components(root_wf, substitutions, debug=debug)
 
     if write_graph:
@@ -64,7 +63,6 @@ def _get_substitutions(
 def _fetch_tags(wf: Workflow) -> dict[str, 'EngineBase']:
     """Query all nodes in a workflow and return a dictionary of tags and nodes."""
     tagged = {}
-    print(f'Querying {wf}')
     for node in wf._graph.nodes:
         if hasattr(node, '_tag'):
             tagged[node._tag] = node

@@ -148,7 +148,7 @@ def test_splice(wf0):
         'nested': _create_null_wf('nested2_wf', tag='nested'),
         'c': _create_null_wf('c_wf', tag='c'),
     }
-    wf = splice_workflow(wf0, replacements, write_graph=True, debug=True)
+    wf = splice_workflow(wf0, replacements)
 
     assert wf.get_node('a2_wf')
     assert wf.get_node('b_wf').get_node('nested2_wf')
