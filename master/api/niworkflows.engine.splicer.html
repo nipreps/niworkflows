@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.engine package" href="niworkflows.engine.html" /><link rel="prev" title="niworkflows.data package" href="niworkflows.data.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="niworkflows.engine.workflows module" href="niworkflows.engine.workflows.html" /><link rel="prev" title="niworkflows.engine.plugin module" href="niworkflows.engine.plugin.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>niworkflows.dwi package - niworkflows 0+unknown documentation</title>
+        <title>niworkflows.engine.splicer module - niworkflows 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -179,7 +179,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -223,10 +223,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="niworkflows.data.html">niworkflows.data package</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">niworkflows.dwi package</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of niworkflows.engine package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="niworkflows.dwi.html">niworkflows.dwi package</a></li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="niworkflows.engine.html">niworkflows.engine package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of niworkflows.engine package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.engine.plugin.html">niworkflows.engine.plugin module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="niworkflows.engine.splicer.html">niworkflows.engine.splicer module</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">niworkflows.engine.splicer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="niworkflows.engine.workflows.html">niworkflows.engine.workflows module</a></li>
 </ul>
 </li>
@@ -317,7 +317,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/api/niworkflows.dwi.rst.txt" title="View this page">
+  <a class="muted-link" href="../_sources/api/niworkflows.engine.splicer.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -331,14 +331,29 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-niworkflows.dwi">
-<span id="niworkflows-dwi-package"></span><h1>niworkflows.dwi package<a class="headerlink" href="#module-niworkflows.dwi" title="Link to this heading">¶</a></h1>
+          <section id="module-niworkflows.engine.splicer">
+<span id="niworkflows-engine-splicer-module"></span><h1>niworkflows.engine.splicer module<a class="headerlink" href="#module-niworkflows.engine.splicer" title="Link to this heading">¶</a></h1>
+<p>Workflow splicing operations.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="niworkflows.engine.splicer.splice_workflow">
+<span class="sig-prename descclassname"><span class="pre">niworkflows.engine.splicer.</span></span><span class="sig-name descname"><span class="pre">splice_workflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_wf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://nipype.readthedocs.io/en/latest/api/generated/nipype.pipeline.engine.workflows.html#nipype.pipeline.engine.workflows.Workflow" title="(in nipype v1.11.0.dev0)"><span class="pre">Workflow</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">replacements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://nipype.readthedocs.io/en/latest/api/generated/nipype.pipeline.engine.base.html#nipype.pipeline.engine.base.EngineBase" title="(in nipype v1.11.0.dev0)"><span class="pre">EngineBase</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/engine/splicer.html#splice_workflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.engine.splicer.splice_workflow" title="Link to this definition">¶</a></dt>
+<dd><p>Splice a workflow’s tagged nodes / workflows and replace connections with alternatives.</p>
+<p>Requires that the workflow has been tagged with a <cite>_tag</cite> attribute.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="niworkflows.engine.splicer.tag">
+<span class="sig-prename descclassname"><span class="pre">niworkflows.engine.splicer.</span></span><span class="sig-name descname"><span class="pre">tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a></span></span><a class="reference internal" href="../_modules/niworkflows/engine/splicer.html#tag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.engine.splicer.tag" title="Link to this definition">¶</a></dt>
+<dd><p>Decorator to set a tag on an <cite>init_…wf</cite> function.</p>
+<p>This is used to mark nodes or workflows for replacement in the splicing process.</p>
+</dd></dl>
+
 </section>
 
         </article>
@@ -346,23 +361,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="niworkflows.engine.html">
+          <a class="next-page" href="niworkflows.engine.workflows.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">niworkflows.engine package</div>
+                <div class="title">niworkflows.engine.workflows module</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="niworkflows.data.html">
+          <a class="prev-page" href="niworkflows.engine.plugin.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">niworkflows.data package</div>
+                <div class="title">niworkflows.engine.plugin module</div>
                 
               </div>
             </a>
@@ -384,8 +399,28 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">niworkflows.engine.splicer module</a><ul>
+<li><a class="reference internal" href="#niworkflows.engine.splicer.splice_workflow"><code class="docutils literal notranslate"><span class="pre">splice_workflow()</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.engine.splicer.tag"><code class="docutils literal notranslate"><span class="pre">tag()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

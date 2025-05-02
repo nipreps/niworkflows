@@ -13,4 +13,5 @@ Submodules
    :maxdepth: 1
 
    niworkflows.engine.plugin
+   niworkflows.engine.splicer
    niworkflows.engine.workflows
