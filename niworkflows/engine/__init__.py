@@ -4,4 +4,5 @@
 The fmriprep reporting engine for visual assessment
 """
 
+from .splicer import splice_workflow, tag
 from .workflows import LiterateWorkflow as Workflow
