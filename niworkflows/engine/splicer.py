@@ -2,6 +2,7 @@
 
 import logging
 import typing as ty
+from functools import wraps
 
 import nipype.pipeline.engine as pe
 from nipype.pipeline.engine.base import EngineBase
@@ -14,8 +15,9 @@ def tag(tag: str) -> ty.Callable:
     This is used to mark nodes or workflows for replacement in the splicing process.
     """
 
-    def _decorator(func, *args, **kwargs) -> ty.Callable:
-        def _tag() -> EngineBase:
+    def _decorator(func) -> ty.Callable:
+        @wraps(func)
+        def _tag(*args, **kwargs) -> EngineBase:
             node = func(*args, **kwargs)
             node._tag = tag
             return node

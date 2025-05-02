@@ -157,7 +157,8 @@ def test_splice(wf0):
 
 def test_tag():
     @tag('foo')
-    def init_workflow():
+    def init_workflow(*, xarg: str):
         return Workflow(name='foo')
 
-    assert init_workflow()._tag == 'foo'
+    wf = init_workflow(xarg='bar')
+    assert wf._tag == 'foo'
