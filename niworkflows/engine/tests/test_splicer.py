@@ -155,10 +155,11 @@ def test_splice(wf0):
     assert wf.get_node('c_wf') is None
 
 
-def test_tag():
-    @tag('foo')
-    def init_workflow(*, xarg: str):
-        return Workflow(name='foo')
+@pytest.mark.parametrize('name', ['foo'])
+def test_tag(name):
+    @tag(name)
+    def init_workflow(name, *, xarg: str):
+        return Workflow(name=name)
 
-    wf = init_workflow(xarg='bar')
-    assert wf._tag == 'foo'
+    wf = init_workflow(name, xarg='bar')
+    assert wf._tag == name
