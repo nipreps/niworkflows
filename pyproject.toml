@@ -98,6 +98,7 @@ exclude = [".git_archival.txt"]  # No longer needed in sdist
 packages = ["niworkflows"]
 exclude = [
     "niworkflows/data/tests/work",  # Large test data directory
+    "niworkflows/tests/data",  # Large test data directory
 ]
 
 ##  The following two sections configure setuptools_scm in the hatch way
