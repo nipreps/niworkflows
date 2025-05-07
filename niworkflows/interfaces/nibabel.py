@@ -22,6 +22,8 @@
 #
 """Nibabel-based interfaces."""
 
+from __future__ import annotations
+
 from pathlib import Path
 from warnings import warn
 
@@ -182,7 +184,7 @@ class SplitSeries(SimpleInterface):
         img = nb.load(in_file)
         extra_dims = tuple(dim for dim in img.shape[3:] if dim > 1) or (1,)
         if len(extra_dims) != 1:
-            raise ValueError(f"Invalid shape {'x'.join(str(s) for s in img.shape)}")
+            raise ValueError(f'Invalid shape {"x".join(str(s) for s in img.shape)}')
         img = img.__class__(
             img.dataobj.reshape(img.shape[:3] + extra_dims), img.affine, img.header
         )
@@ -520,9 +522,9 @@ class ReorientImage(SimpleInterface):
 def reorient_file(
     in_file: str,
     *,
-    target_file: str = None,
-    target_ornt: str = None,
-    newpath: str = None,
+    target_file: str | None = None,
+    target_ornt: str | None = None,
+    newpath: str | None = None,
 ) -> str:
     """
     Reorient an image.

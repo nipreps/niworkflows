@@ -94,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"] #, "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         dependencies: [latest, pre]
         include:
           - python-version: "3.9"
@@ -115,22 +115,13 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v6
       - name: Load test data cache
         uses: actions/cache@v4
         id: stanford-crn
         with:
           path: ~/.cache/stanford-crn/
           key: data-v0-${{ github.ref_name }}-${{ github.sha }}
-      - name: Load TemplateFlow cache
-        uses: actions/cache@v4
-        id: templateflow
-        with:
-          path: ~/.cache/templateflow
-          key: templateflow-v0-${{ github.ref_name }}-${{ strategy.job-index }}-${{ github.sha }}
-          restore-keys: |
-            templateflow-v0-${{ github.ref_name }}-
-            templateflow-v0-
       - uses: actions/cache@v4
         with:
           path: ~/.cache/templateflow
@@ -152,9 +143,8 @@ jobs:
         run: tox c
       - name: Run tox
         run: tox -v --exit-and-dump-after 1200
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
-          file: coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ always() }}
 
@@ -168,10 +158,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v6
+      - name: Install tox
+        run: uv tool install tox --with=tox-uv
       - name: Show tox config
-        run: uvx tox c
+        run: tox c
       - name: Show tox config (this call)
-        run: uvx tox c -e ${{ matrix.check }}
+        run: tox c -e ${{ matrix.check }}
       - name: Run check
-        run: uvx tox -e ${{ matrix.check }}
+        run: tox -e ${{ matrix.check }}

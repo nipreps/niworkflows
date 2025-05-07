@@ -182,7 +182,7 @@ class Path2BIDS(SimpleInterface):
             trait_change_notify=False,
             **{
                 entity: Undefined
-                for entity in self._pattern.groupindex.keys()
+                for entity in self._pattern.groupindex
                 if entity not in self._excluded
             },
         )
@@ -192,7 +192,7 @@ class Path2BIDS(SimpleInterface):
         in_file = Path(self.inputs.in_file)
         extension = ''.join(in_file.suffixes[-((in_file.suffixes[-1] == '.gz') + 1) :])
         info = self._pattern.match(in_file.name[: -len(extension)]).groupdict()
-        self._results['extension'] = f"{info.pop('extprefix', None) or ''}{extension}"
+        self._results['extension'] = f'{info.pop("extprefix", None) or ""}{extension}'
         self._results.update(info)
         if 'hemi' in self._results:
             self._results['hemi'] = self._results['hemi'].upper()

@@ -60,13 +60,13 @@ def test_signal_extraction_equivalence(tmp_path, nvols, nmasks, ext, factor):
     se1 = nl.SignalExtraction(
         in_file=img_fname,
         label_files=masks_fname,
-        class_labels=['a%d' % i for i in range(nmasks)],
+        class_labels=[f'a{i}' for i in range(nmasks)],
         out_file=nlsignals,
     )
     se2 = im.SignalExtraction(
         in_file=img_fname,
         label_files=masks_fname,
-        class_labels=['a%d' % i for i in range(nmasks)],
+        class_labels=[f'a{i}' for i in range(nmasks)],
         out_file=imsignals,
     )
 

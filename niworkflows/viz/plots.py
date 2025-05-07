@@ -22,12 +22,11 @@
 #
 """Plotting tools shared across MRIQC and fMRIPrep."""
 
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import nibabel as nb
 import numpy as np
 import pandas as pd
-from matplotlib import colormaps
+from matplotlib import cm, colormaps
 from matplotlib import gridspec as mgs
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.colors import Normalize
@@ -39,14 +38,14 @@ class fMRIPlot:
     """Generates the fMRI Summary Plot."""
 
     __slots__ = (
-        'timeseries',
-        'segments',
-        'tr',
         'confounds',
-        'spikes',
         'nskip',
-        'sort_carpet',
         'paired_carpet',
+        'segments',
+        'sort_carpet',
+        'spikes',
+        'timeseries',
+        'tr',
     )
 
     def __init__(
@@ -414,7 +413,7 @@ def spikesplot(
     # Handle X axis
     last = ntsteps - 1
     ax.set_xlim(0, last)
-    xticks = list(range(0, last)[::20]) + [last] if not hide_x else []
+    xticks = list(range(last)[::20]) + [last] if not hide_x else []
     ax.set_xticks(xticks)
 
     if not hide_x:
@@ -564,7 +563,7 @@ def confoundplot(
 
     # Set 10 frame markers in X axis
     interval = max((ntsteps // 10, ntsteps // 5, 1))
-    xticks = list(range(0, ntsteps)[::interval])
+    xticks = list(range(ntsteps)[::interval])
     ax_ts.set_xticks(xticks)
 
     if not hide_x:

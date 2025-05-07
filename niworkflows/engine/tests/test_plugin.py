@@ -8,7 +8,7 @@ from nipype.pipeline import engine as pe
 from ..plugin import MultiProcPlugin
 
 
-def add(x, y):
+def add(x, y):  # the Function interface does not support builtin functions
     return x + y
 
 

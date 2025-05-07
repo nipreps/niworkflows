@@ -138,10 +138,10 @@ def extract_svg(display_object, dpi=300, compress='auto'):
     image_svg = svg2str(display_object, dpi)
     if compress is True or compress == 'auto':
         image_svg = svg_compress(image_svg, compress)
-    image_svg = re.sub(' height="[0-9]+[a-z]*"', '', image_svg, count=1)
-    image_svg = re.sub(' width="[0-9]+[a-z]*"', '', image_svg, count=1)
+    image_svg = re.sub(r' height="[0-9]+[a-z]*"', '', image_svg, count=1)
+    image_svg = re.sub(r' width="[0-9]+[a-z]*"', '', image_svg, count=1)
     image_svg = re.sub(
-        ' viewBox', ' preseveAspectRation="xMidYMid meet" viewBox', image_svg, count=1
+        r' viewBox', ' preseveAspectRation="xMidYMid meet" viewBox', image_svg, count=1
     )
     start_tag = '<svg '
     start_idx = image_svg.find(start_tag)

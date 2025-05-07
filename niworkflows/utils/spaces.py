@@ -464,7 +464,7 @@ class SpatialReferences:
 
     """
 
-    __slots__ = ('_refs', '_cached')
+    __slots__ = ('_cached', '_refs')
     standard_spaces = tuple(_tfapi.templates())
     """List of supported standard reference spaces."""
 
@@ -521,10 +521,7 @@ class SpatialReferences:
         if not self.references:
             return False
         item = self.check_space(item)
-        for s in self.references:
-            if s == item:
-                return True
-        return False
+        return any(s == item for s in self.references)
 
     def __str__(self):
         """
@@ -722,7 +719,7 @@ class OutputReferencesAction(argparse.Action):
                 # relevant discussions:
                 # https://github.com/nipreps/niworkflows/pull/457#discussion_r375510227
                 # https://github.com/nipreps/niworkflows/pull/494
-                val = ':'.join((val, 'res-native'))
+                val = f'{val}:res-native'
             for sp in Reference.from_string(val):
                 spaces.add(sp)
         setattr(namespace, self.dest, spaces)
@@ -730,10 +727,7 @@ class OutputReferencesAction(argparse.Action):
 
 def hasspec(value, specs):
     """Check whether any of the keys are in a dict."""
-    for s in specs:
-        if s in value:
-            return True
-    return False
+    return any(s in value for s in specs)
 
 
 def format_reference(in_tuple):

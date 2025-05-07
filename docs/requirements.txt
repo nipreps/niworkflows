@@ -6,7 +6,7 @@ nipype >= 1.5.1
 traits < 6.4
 packaging
 pytest
-sphinx
+sphinx <8.2
 sphinxcontrib-apidoc
 templateflow
 nitransforms

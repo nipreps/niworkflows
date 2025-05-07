@@ -367,7 +367,7 @@ def test_DerivativesDataSink_build_path(
     for out, exp in zip(output, expectation):
         assert Path(out).relative_to(base_directory) == Path(base) / exp
         # Regression - some images were given nan scale factors
-        if out.endswith('.nii') or out.endswith('.nii.gz'):
+        if out.endswith(('.nii', '.nii.gz')):
             img = nb.load(out)
             if isinstance(img, nb.Nifti1Image):
                 with nb.openers.ImageOpener(out) as fobj:
@@ -571,7 +571,7 @@ def test_DerivativesDataSink_data_dtype_source(
         for s in source_file:
             make_empty_nii_with_dtype(s, source_dtype)
 
-    prep, save = make_prep_and_save(
+    prep, _save = make_prep_and_save(
         interface,
         base_directory=str(tmp_path),
         data_dtype='source',
@@ -793,3 +793,16 @@ def test_fsdir_min_version(tmp_path, min_version):
         assert not patched_subject_dir.exists()
     else:
         assert patched_subject_dir.exists()
+
+
+def test_BIDSDataGrabber():
+    x = bintfs.BIDSDataGrabber(anat_only=True)
+    assert x._require_t1w is True
+    assert x._require_funcs is False
+
+    x = bintfs.BIDSDataGrabber(anat_only=False, require_t1w=False)
+    assert x._require_t1w is False
+    assert x._require_funcs is True
+
+    x = bintfs.BIDSDataGrabber(anat_derivatives='derivatives')
+    assert x._require_t1w is False

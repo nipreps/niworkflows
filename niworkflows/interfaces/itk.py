@@ -91,8 +91,7 @@ class _MultiApplyTransformsInputSpec(_FixTraitApplyTransformsInputSpec):
     input_image = InputMultiObject(
         File(exists=True),
         mandatory=True,
-        desc='input time-series as a list of volumes after splitting'
-        ' through the fourth dimension',
+        desc='input time-series as a list of volumes after splitting through the fourth dimension',
     )
     num_threads = traits.Int(1, usedefault=True, nohash=True, desc='number of parallel processes')
     save_cmd = traits.Bool(
@@ -182,7 +181,7 @@ def _applytfms(args):
 
     in_file, in_xform, ifargs, index, newpath = args
     out_file = fname_presuffix(
-        in_file, suffix='_xform-%05d' % index, newpath=newpath, use_ext=True
+        in_file, suffix=f'_xform-{index:05d}', newpath=newpath, use_ext=True
     )
 
     copy_dtype = ifargs.pop('copy_dtype', False)
@@ -244,19 +243,19 @@ def _arrange_xfms(transforms, num_files, tmp_folder):
 
         if nxforms != num_files:
             raise RuntimeError(
-                'Number of transforms (%d) found in the ITK file does not match'
-                ' the number of input image files (%d).' % (nxforms, num_files)
+                f'Number of transforms ({nxforms}) found in the ITK file does not'
+                f' match the number of input image files ({num_files}).'
             )
 
         # At this point splitting transforms will be necessary, generate a base name
         out_base = fname_presuffix(
-            tf_file, suffix='_pos-%03d_xfm-{:05d}' % i, newpath=tmp_folder.name
+            tf_file, suffix=f'_pos-{i:03d}_xfm-{{:05d}}', newpath=tmp_folder.name
         ).format
         # Split combined ITK transforms file
         split_xfms = []
         for xform_i in range(nxforms):
             # Find start token to extract
-            startidx = tfdata.index('#Transform %d' % xform_i)
+            startidx = tfdata.index(f'#Transform {xform_i}')
             next_xform = base_xform + tfdata[startidx + 1 : startidx + 4] + ['']
             xfm_file = out_base(xform_i)
             with open(xfm_file, 'w') as out_xfm:

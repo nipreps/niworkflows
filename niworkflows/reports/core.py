@@ -285,7 +285,7 @@ class Report:
         self.packagename = packagename
         self.subject_id = subject_id
         if subject_id is not None:
-            self.subject_id = subject_id[4:] if subject_id.startswith('sub-') else subject_id
+            self.subject_id = subject_id.removeprefix('sub-')
             self.out_filename = f'sub-{self.subject_id}.html'
 
         # Default template from niworkflows
@@ -384,7 +384,7 @@ class Report:
 
         if (logs_path / 'CITATION.html').exists():
             text = (
-                re.compile('<body>(.*?)</body>', re.DOTALL | re.IGNORECASE)
+                re.compile(r'<body>(.*?)</body>', re.DOTALL | re.IGNORECASE)
                 .findall((logs_path / 'CITATION.html').read_text())[0]
                 .strip()
             )
@@ -454,18 +454,15 @@ class Report:
             for bids_file in layout.get()
         }
         # remove the all None member if it exists
-        none_member = tuple([None for k in orderings])
+        none_member = tuple(None for k in orderings)
         if none_member in all_value_combos:
-            all_value_combos.remove(tuple([None for k in orderings]))
+            all_value_combos.remove(tuple(None for k in orderings))
         # see what values exist for each entity
         unique_values = [
             {value[idx] for value in all_value_combos} for idx in range(len(orderings))
         ]
         # if all values are None for an entity, we do not want to keep that entity
-        keep_idx = [
-            False if (len(val_set) == 1 and None in val_set) or not val_set else True
-            for val_set in unique_values
-        ]
+        keep_idx = [val_set not in (set(), {None}) for val_set in unique_values]
         # the "kept" entities
         entities = list(compress(orderings, keep_idx))
         # the "kept" value combinations
@@ -537,7 +534,7 @@ def generate_reports(
 
         logger = logging.getLogger('cli')
         error_list = ', '.join(
-            '%s (%d)' % (subid, err) for subid, err in zip(subject_list, report_errors) if err
+            f'{subid} ({err})' for subid, err in zip(subject_list, report_errors) if err
         )
         logger.error(
             'Preprocessing did not finish successfully. Errors occurred while processing '

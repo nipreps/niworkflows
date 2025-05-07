@@ -46,7 +46,7 @@ def _smoke_test_report(report_interface, artifact_name):
         res = pe.Node(report_interface, name='smoke_test', base_dir=tmpdir).run()
         out_report = res.outputs.out_report
 
-        save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS', False)
+        save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS')
         if save_artifacts:
             copy(out_report, os.path.join(save_artifacts, artifact_name))
         assert os.path.isfile(out_report), f'Report "{out_report}" does not exist'
@@ -129,7 +129,7 @@ def test_ROIsPlot2(tmp_path):
     for i in range(1, 5):
         seg = np.zeros_like(newdata, dtype='uint8')
         seg[(newdata > 0) & (newdata <= i)] = 1
-        out_file = str(tmp_path / ('segments%02d.nii.gz' % i))
+        out_file = str(tmp_path / f'segments{i:02d}.nii.gz')
         nb.Nifti1Image(seg, im.affine, hdr).to_filename(out_file)
         out_files.append(out_file)
     roi_rpt = ROIsPlot(

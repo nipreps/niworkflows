@@ -176,8 +176,7 @@ class _SpikeRegressorsInputSpec(BaseInterfaceInputSpec):
     concatenate = traits.Bool(
         True,
         usedefault=True,
-        desc='Indicates whether to concatenate spikes to existing confounds '
-        'or return spikes only',
+        desc='Indicates whether to concatenate spikes to existing confounds or return spikes only',
     )
     output_format = traits.Enum(
         'spikes', 'mask', usedefault=True, desc='Format of output (spikes or mask)'
@@ -442,7 +441,7 @@ def _check_and_expand_derivative(expr, variables, data):
     6th only."""
     if re.search(r'^dd[0-9]+', expr):
         order = re.compile(r'^dd([0-9]+)').findall(expr)
-        order = range(0, int(*order) + 1)
+        order = range(int(*order) + 1)
         (variables, data) = temporal_derivatives(order, variables, data)
     elif re.search(r'^d[0-9]+[\-]?[0-9]*', expr):
         order = re.compile(r'^d([0-9]+[\-]?[0-9]*)').findall(expr)
@@ -535,20 +534,20 @@ def _expand_shorthand(model_formula, variables):
     nss = _get_matches_from_data('non_steady_state_outlier[0-9]+', variables)
     spikes = _get_matches_from_data('motion_outlier[0-9]+', variables)
 
-    model_formula = re.sub('wm', wm, model_formula)
-    model_formula = re.sub('gsr', gsr, model_formula)
-    model_formula = re.sub('rps', rps, model_formula)
-    model_formula = re.sub('fd', fd, model_formula)
-    model_formula = re.sub('acc', acc, model_formula)
-    model_formula = re.sub('tcc', tcc, model_formula)
-    model_formula = re.sub('dv', dv, model_formula)
-    model_formula = re.sub('dvall', dvall, model_formula)
-    model_formula = re.sub('nss', nss, model_formula)
-    model_formula = re.sub('spikes', spikes, model_formula)
+    model_formula = model_formula.replace('wm', wm)
+    model_formula = model_formula.replace('gsr', gsr)
+    model_formula = model_formula.replace('rps', rps)
+    model_formula = model_formula.replace('fd', fd)
+    model_formula = model_formula.replace('acc', acc)
+    model_formula = model_formula.replace('tcc', tcc)
+    model_formula = model_formula.replace('dv', dv)
+    model_formula = model_formula.replace('dvall', dvall)
+    model_formula = model_formula.replace('nss', nss)
+    model_formula = model_formula.replace('spikes', spikes)
 
     formula_variables = _get_variables_from_formula(model_formula)
     others = ' + '.join(set(variables) - set(formula_variables))
-    model_formula = re.sub('others', others, model_formula)
+    model_formula = model_formula.replace('others', others)
     return model_formula
 
 

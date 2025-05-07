@@ -50,9 +50,9 @@ def test_applytfms(tmpdir, ext, copy_dtype, in_dtype):
 
     ifargs = {'copy_dtype': copy_dtype, 'reference_image': in_file}
     args = (in_file, in_xform, ifargs, 0, str(tmpdir))
-    out_file, cmdline = _applytfms(args)
+    out_file, _cmdline = _applytfms(args)
 
-    assert out_file == str(tmpdir / ('src_xform-%05d%s' % (0, ext)))
+    assert out_file == str(tmpdir / (f'src_xform-00000{ext}'))
 
     out_nii = nb.load(out_file)
     assert np.allclose(nii.affine, out_nii.affine)

@@ -89,6 +89,5 @@ def test_compression(tmp_path):
     size = int(os.stat(uncompressed).st_size)
     size_compress = int(os.stat(compressed).st_size)
     assert size >= size_compress, (
-        'The uncompressed report is smaller (%d)'
-        'than the compressed report (%d)' % (size, size_compress)
+        f'The uncompressed report is smaller ({size})than the compressed report ({size_compress})'
     )

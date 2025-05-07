@@ -114,8 +114,7 @@ class MetricDilateInputSpec(OpenMPTraitedSpec):
         argstr='-exponent %f ',
         position=9,
         default=6.0,
-        desc='exponent n to use in (area / (distance ^ n)) as the '
-        'weighting function (default 6)',
+        desc='exponent n to use in (area / (distance ^ n)) as the weighting function (default 6)',
     )
 
     corrected_areas = File(
@@ -293,7 +292,7 @@ class MetricResample(WBCommand, OpenMPCommandMixin):
         if opt == 'valid_roi_out' and val:
             # generate a filename and add it to argstr
             roi_out = self._gen_filename(self.inputs.in_file, suffix='_roi')
-            iflogger.info('Setting roi output file as', roi_out)
+            iflogger.info('Setting roi output file as %s', roi_out)
             spec.argstr += ' ' + roi_out
         return super()._format_arg(opt, spec, val)
 

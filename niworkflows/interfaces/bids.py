@@ -216,9 +216,7 @@ sub-01/func/ses-retest/sub-01_ses-retest_task-covertverbgeneration_bold.nii.gz''
             except ValueError:
                 pass
         params = parse_file_entities(in_file)
-        self._results = {
-            key: params.get(key, Undefined) for key in _BIDSInfoOutputSpec().get().keys()
-        }
+        self._results = {key: params.get(key, Undefined) for key in _BIDSInfoOutputSpec().get()}
         return runtime
 
 
@@ -265,12 +263,13 @@ class BIDSDataGrabber(SimpleInterface):
     _require_funcs = True
 
     def __init__(self, *args, **kwargs):
-        anat_only = kwargs.pop('anat_only')
+        anat_only = kwargs.pop('anat_only', None)
         anat_derivatives = kwargs.pop('anat_derivatives', None)
+        require_t1w = kwargs.pop('require_t1w', True)
         super().__init__(*args, **kwargs)
         if anat_only is not None:
             self._require_funcs = not anat_only
-        self._require_t1w = anat_derivatives is None
+        self._require_t1w = require_t1w and anat_derivatives is None
 
     def _run_interface(self, runtime):
         bids_dict = self.inputs.subject_data
@@ -312,7 +311,7 @@ class _PrepareDerivativeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         desc='a list entities that will not be propagated from the source file',
     )
     in_file = InputMultiObject(File(exists=True), mandatory=True, desc='the object to be saved')
-    meta_dict = traits.DictStrAny(desc='an input dictionary containing metadata')
+    meta_dict = traits.Dict(Str, desc='an input dictionary containing metadata')
     source_file = InputMultiObject(
         File(exists=False), mandatory=True, desc='the source file(s) to extract entities from'
     )
@@ -320,7 +319,7 @@ class _PrepareDerivativeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 class _PrepareDerivativeOutputSpec(TraitedSpec):
     out_file = OutputMultiObject(File(exists=True), desc='derivative file path')
-    out_meta = traits.DictStrAny(desc='derivative metadata')
+    out_meta = traits.Dict(Str, desc='derivative metadata')
     out_path = OutputMultiObject(Str, desc='relative path in target directory')
     fixed_hdr = traits.List(traits.Bool, desc='whether derivative header was fixed')
 
@@ -603,9 +602,7 @@ class PrepareDerivative(SimpleInterface):
         if custom_entities:
             # Example: f"{key}-{{{key}}}" -> "task-{task}"
             custom_pat = '_'.join(f'{key}-{{{key}}}' for key in sorted(custom_entities))
-            patterns = [
-                pat.replace('_{suffix', '_'.join(('', custom_pat, '{suffix'))) for pat in patterns
-            ]
+            patterns = [pat.replace('_{suffix', f'_{custom_pat}_{{suffix') for pat in patterns]
 
         # Build the output path(s)
         dest_files = build_path(out_entities, path_patterns=patterns)
@@ -647,9 +644,7 @@ class PrepareDerivative(SimpleInterface):
 
                 if self.inputs.check_hdr:
                     hdr = nii.header
-                    curr_units = tuple(
-                        [None if u == 'unknown' else u for u in hdr.get_xyzt_units()]
-                    )
+                    curr_units = tuple(None if u == 'unknown' else u for u in hdr.get_xyzt_units())
                     curr_codes = (int(hdr['qform_code']), int(hdr['sform_code']))
 
                     # Default to mm, use sec if data type is bold
@@ -678,7 +673,7 @@ class PrepareDerivative(SimpleInterface):
                         data_dtype = nb.load(self.inputs.source_file[0]).get_data_dtype()
                     except Exception:  # noqa: BLE001
                         LOGGER.warning(
-                            f'Could not get data type of file {self.inputs.source_file[0]}'
+                            'Could not get data type of file %s', self.inputs.source_file[0]
                         )
                         data_dtype = None
 
@@ -687,8 +682,10 @@ class PrepareDerivative(SimpleInterface):
                     orig_dtype = nii.get_data_dtype()
                     if orig_dtype != data_dtype:
                         LOGGER.warning(
-                            f'Changing {Path(dest_file).name} dtype '
-                            f'from {orig_dtype} to {data_dtype}'
+                            'Changing %s dtype from %s to %s',
+                            Path(dest_file).name,
+                            orig_dtype,
+                            data_dtype,
                         )
                         # coerce dataobj to new data dtype
                         if np.issubdtype(data_dtype, np.integer):
@@ -733,7 +730,7 @@ class _SaveDerivativeInputSpec(TraitedSpec):
         exists=True, mandatory=True, desc='Path to the base directory for storing data.'
     )
     in_file = InputMultiObject(File(exists=True), mandatory=True, desc='the object to be saved')
-    metadata = traits.DictStrAny(desc='metadata to be saved alongside the file')
+    metadata = traits.Dict(Str, desc='metadata to be saved alongside the file')
     relative_path = InputMultiObject(
         traits.Str, desc='path to the file relative to the base directory'
     )
@@ -775,7 +772,7 @@ class SaveDerivative(SimpleInterface):
                 _copy_any(in_file, out_file)
 
             if self.inputs.metadata:
-                sidecar = out_file.parent / f"{out_file.name.split('.', 1)[0]}.json"
+                sidecar = out_file.parent / f'{out_file.name.split(".", 1)[0]}.json'
                 sidecar.unlink(missing_ok=True)
                 sidecar.write_text(dumps(self.inputs.metadata, indent=2))
                 self._results['out_meta'].append(str(sidecar))
@@ -802,7 +799,7 @@ class _DerivativesDataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         desc='a list entities that will not be propagated from the source file',
     )
     in_file = InputMultiObject(File(exists=True), mandatory=True, desc='the object to be saved')
-    meta_dict = traits.DictStrAny(desc='an input dictionary containing metadata')
+    meta_dict = traits.Dict(Str, desc='an input dictionary containing metadata')
     source_file = InputMultiObject(
         File(exists=False), mandatory=True, desc='the source file(s) to extract entities from'
     )
@@ -1110,9 +1107,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
         if custom_entities:
             # Example: f"{key}-{{{key}}}" -> "task-{task}"
             custom_pat = '_'.join(f'{key}-{{{key}}}' for key in sorted(custom_entities))
-            patterns = [
-                pat.replace('_{suffix', '_'.join(('', custom_pat, '{suffix'))) for pat in patterns
-            ]
+            patterns = [pat.replace('_{suffix', f'_{custom_pat}_{{suffix') for pat in patterns]
 
         # Prepare SimpleInterface outputs object
         self._results['out_file'] = []
@@ -1164,9 +1159,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
 
                 if self.inputs.check_hdr:
                     hdr = nii.header
-                    curr_units = tuple(
-                        [None if u == 'unknown' else u for u in hdr.get_xyzt_units()]
-                    )
+                    curr_units = tuple(None if u == 'unknown' else u for u in hdr.get_xyzt_units())
                     curr_codes = (int(hdr['qform_code']), int(hdr['sform_code']))
 
                     # Default to mm, use sec if data type is bold
@@ -1195,7 +1188,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                         data_dtype = nb.load(self.inputs.source_file[0]).get_data_dtype()
                     except Exception:  # noqa: BLE001
                         LOGGER.warning(
-                            f'Could not get data type of file {self.inputs.source_file[0]}'
+                            'Could not get data type of file %s', self.inputs.source_file[0]
                         )
                         data_dtype = None
 
@@ -1204,7 +1197,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                     orig_dtype = nii.get_data_dtype()
                     if orig_dtype != data_dtype:
                         LOGGER.warning(
-                            f'Changing {out_file} dtype from {orig_dtype} to {data_dtype}'
+                            'Changing %s dtype from %s to %s', out_file, orig_dtype, orig_dtype
                         )
                         # coerce dataobj to new data dtype
                         if np.issubdtype(data_dtype, np.integer):
@@ -1240,7 +1233,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 {k: getattr(self.inputs, k) for k in meta_fields if k not in self._static_traits}
             )
             if self._metadata:
-                sidecar = out_file.parent / f"{out_file.name.split('.', 1)[0]}.json"
+                sidecar = out_file.parent / f'{out_file.name.split(".", 1)[0]}.json'
                 unlink(sidecar, missing_ok=True)
                 sidecar.write_text(dumps(self._metadata, sort_keys=True, indent=2))
                 self._results['out_meta'] = str(sidecar)
@@ -1474,7 +1467,7 @@ def _get_tf_resolution(space: str, resolution: str) -> str:
     res_meta = None
 
     # Due to inconsistencies, resolution keys may or may not be zero-padded
-    padded_res = f'{str(resolution):0>2}'
+    padded_res = f'{resolution:0>2}'
     for r in (resolution, padded_res):
         if r in resolutions:
             res_meta = resolutions[r]
@@ -1486,6 +1479,6 @@ def _get_tf_resolution(space: str, resolution: str) -> str:
         return f'{xyz} mm^3'
 
     return (
-        f"Template {space} ({_fmt_xyz(res_meta['zooms'])}),"
-        f" curated by TemplateFlow {tf.__version__}"
+        f'Template {space} ({_fmt_xyz(res_meta["zooms"])}),'
+        f' curated by TemplateFlow {tf.__version__}'
     )
