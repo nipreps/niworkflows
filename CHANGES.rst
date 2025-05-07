@@ -1,3 +1,17 @@
+1.14.0 (May 07, 2025)
+=====================
+New feature release in the 1.14.x series.
+
+This release introduces a tagging system for workflows,
+which has the goal of allowing portions of workflows to be spliced.
+Splicing removes the existing portion of the workflow and replaces it
+with a workflow that has the same input/output connections.
+
+This is an experimental feature, and is subject to change with no deprecation period.
+
+* FIX: Allow passing arguments through tag decorator (#939)
+* ENH: Workflow splicer module (#938)
+
 1.13.0 (March 20, 2025)
 =======================
 New feature release in the 1.13.x series.
