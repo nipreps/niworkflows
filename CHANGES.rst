@@ -1,13 +1,18 @@
+1.13.2 (May 08, 2025)
+=====================
+Patch release in the 1.13.x series.
+
+This release adjusts the build process to reduce the size of the installed package.
+
 1.13.1 (May 02, 2025)
 =====================
 Patch release in the 1.13.x series.
 
-This release adds the ``niworkflows.engine.splicer`` module, to facilitate sugery on wworkflows.
+This release adds the ``niworkflows.engine.splicer`` module, to facilitate sugery on workflows.
 
 * FIX: Allow passing arguments through tag decorator (#939)
 * ENH: Workflow splicer module (#938)
 * MNT: Bump astral-sh/setup-uv from 5 to 6 (#937)
-
 
 1.13.0 (March 20, 2025)
 =======================
