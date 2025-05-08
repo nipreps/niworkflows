@@ -6,6 +6,8 @@ import pytest
 from nipype.interfaces import afni, fsl
 from nipype.interfaces import freesurfer as fs
 
+from .interfaces import gradunwarp
+
 test_data_env = os.getenv('TEST_DATA_HOME', str(Path.home() / '.cache' / 'stanford-crn'))
 test_output_dir = os.getenv('TEST_OUTPUT_DIR')
 test_workdir = os.getenv('TEST_WORK_DIR')
@@ -44,3 +46,4 @@ data_dir_canary, needs_data_dir = create_canary(
 has_fsl = fsl.Info.version() is not None
 has_freesurfer = fs.Info.version() is not None
 has_afni = afni.Info.version() is not None
+has_gradunwarp = gradunwarp.GradUnwarp.version()
