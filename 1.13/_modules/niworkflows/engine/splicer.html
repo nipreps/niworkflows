@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>niworkflows.interfaces.patches - niworkflows 0+unknown documentation</title>
+        <title>niworkflows.engine.splicer - niworkflows 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=302659d7" />
@@ -330,105 +330,142 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for niworkflows.interfaces.patches</h1><div class="highlight"><pre>
-<span></span><span class="c1"># emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-</span>
-<span class="c1"># vi: set ft=python sts=4 ts=4 sw=4 et:</span>
-<span class="c1">#</span>
-<span class="c1"># Copyright 2021 The NiPreps Developers &lt;nipreps@gmail.com&gt;</span>
-<span class="c1">#</span>
-<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
-<span class="c1"># you may not use this file except in compliance with the License.</span>
-<span class="c1"># You may obtain a copy of the License at</span>
-<span class="c1">#</span>
-<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
-<span class="c1">#</span>
-<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
-<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
-<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
-<span class="c1"># See the License for the specific language governing permissions and</span>
-<span class="c1"># limitations under the License.</span>
-<span class="c1">#</span>
-<span class="c1"># We support and encourage derived works from this project, please read</span>
-<span class="c1"># about our expectations at</span>
-<span class="c1">#</span>
-<span class="c1">#     https://www.nipreps.org/community/licensing/</span>
-<span class="c1">#</span>
-<span class="sd">&quot;&quot;&quot;Temporary patches.&quot;&quot;&quot;</span>
+          <h1>Source code for niworkflows.engine.splicer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Workflow splicing operations.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">ty</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
 
-<span class="kn">from</span> <span class="nn">nipype.algorithms</span> <span class="kn">import</span> <span class="n">confounds</span> <span class="k">as</span> <span class="n">nac</span>
-<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">io</span> <span class="k">as</span> <span class="n">nio</span>
-<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="n">File</span>
-<span class="kn">from</span> <span class="nn">numpy.linalg.linalg</span> <span class="kn">import</span> <span class="n">LinAlgError</span>
+<span class="kn">import</span> <span class="nn">nipype.pipeline.engine</span> <span class="k">as</span> <span class="nn">pe</span>
+<span class="kn">from</span> <span class="nn">nipype.pipeline.engine.base</span> <span class="kn">import</span> <span class="n">EngineBase</span>
 
 
-<div class="viewcode-block" id="RobustACompCor">
-<a class="viewcode-back" href="../../../api/niworkflows.interfaces.patches.html#niworkflows.interfaces.patches.RobustACompCor">[docs]</a>
-<span class="k">class</span> <span class="nc">RobustACompCor</span><span class="p">(</span><span class="n">nac</span><span class="o">.</span><span class="n">ACompCor</span><span class="p">):</span>
+<div class="viewcode-block" id="tag">
+<a class="viewcode-back" href="../../../api/niworkflows.engine.splicer.html#niworkflows.engine.splicer.tag">[docs]</a>
+<span class="k">def</span> <span class="nf">tag</span><span class="p">(</span><span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ty</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Runs aCompCor several times if it suddenly fails with</span>
-<span class="sd">    https://github.com/nipreps/fmriprep/issues/776</span>
+<span class="sd">    Decorator to set a tag on an `init_...wf` function.</span>
 
+<span class="sd">    This is used to mark nodes or workflows for replacement in the splicing process.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-        <span class="n">failures</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">runtime</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
-                <span class="k">break</span>
-            <span class="k">except</span> <span class="n">LinAlgError</span><span class="p">:</span>
-                <span class="n">failures</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">if</span> <span class="n">failures</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
-                    <span class="k">raise</span>
-                <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="n">failures</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span>
-                <span class="n">sleep</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">10</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">_decorator</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ty</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">_tag</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EngineBase</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">_tag</span> <span class="o">=</span> <span class="n">tag</span>
+            <span class="k">return</span> <span class="n">node</span>
 
-        <span class="k">return</span> <span class="n">runtime</span></div>
+        <span class="k">return</span> <span class="n">_tag</span>
+
+    <span class="k">return</span> <span class="n">_decorator</span></div>
 
 
 
-<div class="viewcode-block" id="RobustTCompCor">
-<a class="viewcode-back" href="../../../api/niworkflows.interfaces.patches.html#niworkflows.interfaces.patches.RobustTCompCor">[docs]</a>
-<span class="k">class</span> <span class="nc">RobustTCompCor</span><span class="p">(</span><span class="n">nac</span><span class="o">.</span><span class="n">TCompCor</span><span class="p">):</span>
+<div class="viewcode-block" id="splice_workflow">
+<a class="viewcode-back" href="../../../api/niworkflows.engine.splicer.html#niworkflows.engine.splicer.splice_workflow">[docs]</a>
+<span class="k">def</span> <span class="nf">splice_workflow</span><span class="p">(</span>
+    <span class="n">root_wf</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">,</span>
+    <span class="n">replacements</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EngineBase</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">write_graph</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Runs tCompCor several times if it suddenly fails with</span>
-<span class="sd">    https://github.com/nipreps/fmriprep/issues/940</span>
+<span class="sd">    Splice a workflow&#39;s tagged nodes / workflows and replace connections with alternatives.</span>
 
+<span class="sd">    Requires that the workflow has been tagged with a `_tag` attribute.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">write_graph</span><span class="p">:</span>
+        <span class="n">root_wf</span><span class="o">.</span><span class="n">write_graph</span><span class="p">(</span><span class="s1">&#39;pre-slice.dot&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="n">graph2use</span><span class="o">=</span><span class="s1">&#39;colored&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-        <span class="n">failures</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">runtime</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_run_interface</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
-                <span class="k">break</span>
-            <span class="k">except</span> <span class="n">LinAlgError</span><span class="p">:</span>
-                <span class="n">failures</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">if</span> <span class="n">failures</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
-                    <span class="k">raise</span>
-                <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="n">failures</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span>
-                <span class="n">sleep</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">10</span><span class="p">))</span>
+    <span class="n">substitutions</span> <span class="o">=</span> <span class="n">_get_substitutions</span><span class="p">(</span><span class="n">root_wf</span><span class="p">,</span> <span class="n">replacements</span><span class="p">)</span>
+    <span class="n">_splice_components</span><span class="p">(</span><span class="n">root_wf</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">runtime</span></div>
+    <span class="k">if</span> <span class="n">write_graph</span><span class="p">:</span>
+        <span class="n">root_wf</span><span class="o">.</span><span class="n">write_graph</span><span class="p">(</span><span class="s1">&#39;post-slice.dot&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="n">graph2use</span><span class="o">=</span><span class="s1">&#39;colored&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">root_wf</span></div>
 
 
 
-<span class="k">class</span> <span class="nc">_FSSourceOutputSpec</span><span class="p">(</span><span class="n">nio</span><span class="o">.</span><span class="n">FSSourceOutputSpec</span><span class="p">):</span>
-    <span class="n">T2</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Intensity normalized whole-head volume&#39;</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;mri&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_get_substitutions</span><span class="p">(</span>
+    <span class="n">workflow</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">,</span>
+    <span class="n">replacements</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EngineBase</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">EngineBase</span><span class="p">,</span> <span class="n">EngineBase</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; &quot;Query tags in workflow, and return a list of substitutions to make&quot;&quot;&quot;</span>
+    <span class="n">substitutions</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">tagged_wfs</span> <span class="o">=</span> <span class="n">_fetch_tags</span><span class="p">(</span><span class="n">workflow</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tagged_wfs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">replacements</span><span class="p">:</span>
+            <span class="n">substitutions</span><span class="p">[</span><span class="n">tagged_wfs</span><span class="p">[</span><span class="n">tag</span><span class="p">]]</span> <span class="o">=</span> <span class="n">replacements</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">substitutions</span>
 
 
-<div class="viewcode-block" id="FreeSurferSource">
-<a class="viewcode-back" href="../../../api/niworkflows.interfaces.patches.html#niworkflows.interfaces.patches.FreeSurferSource">[docs]</a>
-<span class="k">class</span> <span class="nc">FreeSurferSource</span><span class="p">(</span><span class="n">nio</span><span class="o">.</span><span class="n">FreeSurferSource</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Patch to allow grabbing the T2 volume, if available</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">_fetch_tags</span><span class="p">(</span><span class="n">wf</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EngineBase</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Query all nodes in a workflow and return a dictionary of tags and nodes.&quot;&quot;&quot;</span>
+    <span class="n">tagged</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">wf</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;_tag&#39;</span><span class="p">):</span>
+            <span class="n">tagged</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">_tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">):</span>
+            <span class="n">inner_tags</span> <span class="o">=</span> <span class="n">_fetch_tags</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="n">tagged</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">inner_tags</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tagged</span>
 
-    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FSSourceOutputSpec</span></div>
 
+<span class="k">def</span> <span class="nf">_splice_components</span><span class="p">(</span>
+    <span class="n">workflow</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">,</span>
+    <span class="n">substitutions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">EngineBase</span><span class="p">,</span> <span class="n">EngineBase</span><span class="p">],</span>
+    <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Query all connections and return a list of removals and additions to be made.&quot;&quot;&quot;</span>
+    <span class="n">edge_removals</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">edge_connects</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">node_removals</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">node_adds</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">_expanded_workflows</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="n">to_replace</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">fullname</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">substitutions</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">src</span><span class="p">,</span> <span class="n">dst</span> <span class="ow">in</span> <span class="n">workflow</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dst</span><span class="o">.</span><span class="n">fullname</span> <span class="ow">in</span> <span class="n">to_replace</span><span class="p">:</span>
+            <span class="n">edge_data</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_edge_data</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
+            <span class="n">alt_dst</span> <span class="o">=</span> <span class="n">substitutions</span><span class="p">[</span><span class="n">dst</span><span class="p">]</span>
+            <span class="n">alt_dst</span><span class="o">.</span><span class="n">_hierarchy</span> <span class="o">=</span> <span class="n">dst</span><span class="o">.</span><span class="n">_hierarchy</span>
+
+            <span class="n">edge_removals</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">))</span>
+            <span class="n">node_removals</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span>
+            <span class="n">node_adds</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">alt_dst</span><span class="p">)</span>
+            <span class="n">edge_connects</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">src</span><span class="p">,</span> <span class="n">alt_dst</span><span class="p">,</span> <span class="n">edge_data</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">src</span><span class="o">.</span><span class="n">fullname</span> <span class="ow">in</span> <span class="n">to_replace</span><span class="p">:</span>
+            <span class="n">edge_data</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_edge_data</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
+            <span class="n">alt_src</span> <span class="o">=</span> <span class="n">substitutions</span><span class="p">[</span><span class="n">src</span><span class="p">]</span>
+            <span class="n">alt_src</span><span class="o">.</span><span class="n">_hierarchy</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">_hierarchy</span>
+
+            <span class="n">edge_removals</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">))</span>
+            <span class="n">node_removals</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+            <span class="n">node_adds</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">alt_src</span><span class="p">)</span>
+            <span class="n">edge_connects</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">alt_src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">edge_data</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">)</span> <span class="ow">and</span> <span class="n">dst</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_expanded_workflows</span><span class="p">:</span>
+            <span class="n">_expanded_workflows</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span>
+            <span class="n">_splice_components</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">)</span> <span class="ow">and</span> <span class="n">src</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_expanded_workflows</span><span class="p">:</span>
+            <span class="n">_expanded_workflows</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+            <span class="n">_splice_components</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;nipype.workflow&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+        <span class="s1">&#39;Workflow: </span><span class="si">%s</span><span class="s1">, </span><span class="se">\n</span><span class="s1">- edge_removals: </span><span class="si">%s</span><span class="s1">, </span><span class="se">\n</span><span class="s1">+ edge_connects: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">workflow</span><span class="p">,</span>
+        <span class="n">edge_removals</span><span class="p">,</span>
+        <span class="n">edge_connects</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">workflow</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">remove_edges_from</span><span class="p">(</span><span class="n">edge_removals</span><span class="p">)</span>
+    <span class="n">workflow</span><span class="o">.</span><span class="n">remove_nodes</span><span class="p">(</span><span class="n">node_removals</span><span class="p">)</span>
+    <span class="n">workflow</span><span class="o">.</span><span class="n">add_nodes</span><span class="p">(</span><span class="n">node_adds</span><span class="p">)</span>
+    <span class="n">workflow</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">(</span><span class="n">edge_connects</span><span class="p">)</span>
 </pre></div>
         </article>
       </div>

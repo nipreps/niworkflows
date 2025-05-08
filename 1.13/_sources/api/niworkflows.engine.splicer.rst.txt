@@ -1,0 +1,7 @@
+niworkflows.engine.splicer module
+=================================
+
+.. automodule:: niworkflows.engine.splicer
+   :members:
+   :undoc-members:
+   :show-inheritance:
