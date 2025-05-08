@@ -120,7 +120,7 @@ jobs:
 
   get_data:
     docker:
-      - image: quay.io/condaforge/miniforge3:24.9.0-0
+      - image: quay.io/condaforge/miniforge3:latest
     working_directory: /tmp/data
     environment:
       - TEMPLATEFLOW_HOME: /tmp/templateflow
