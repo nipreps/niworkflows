@@ -34,7 +34,8 @@ try:
     from niworkflows.tests.data import load_test_data
 except ImportError:
     import pytest
-    pytest.skip('niworkflows installed as wheel, data excluded')
+
+    pytest.skip('niworkflows installed as wheel, data excluded', allow_module_level=True)
 
 
 def test_cifti_carpetplot():
