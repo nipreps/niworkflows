@@ -34,11 +34,6 @@ import pytest
 
 from . import load_resource
 
-try:
-    import importlib_resources
-except ImportError:
-    import importlib.resources as importlib_resources
-
 # disable ET
 os.environ['NO_ET'] = '1'
 
@@ -69,7 +64,6 @@ def _add_np(doctest_namespace):
     doctest_namespace['pd'] = pd
     doctest_namespace['os'] = os
     doctest_namespace['pytest'] = pytest
-    doctest_namespace['importlib_resources'] = importlib_resources
     doctest_namespace['find_resource_or_skip'] = find_resource_or_skip
     doctest_namespace['Path'] = Path
     doctest_namespace['datadir'] = data_dir
