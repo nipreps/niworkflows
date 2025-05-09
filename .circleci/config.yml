@@ -125,22 +125,13 @@ jobs:
     environment:
       - TEMPLATEFLOW_HOME: /tmp/templateflow
     steps:
-      - restore_cache:
-          keys:
-            - env-v1-{{ .Branch }}-
-            - env-v1-master-
-            - env-v1-
       - run:
-          name: Setup git-annex, DataLad & TemplateFlow
+          name: Setup git-annex and DataLad
           command: |
-            mamba install -y python=*=*cpython git-annex=*=alldep* unzip
-            python -m pip install --no-cache-dir -U datalad datalad-osf templateflow
+            mamba install -y git-annex=*=alldep* unzip uv
+            uv tool install --with=datalad-next --with=datalad-osf datalad
             git config --global user.name 'NiPreps Bot'
             git config --global user.email 'nipreps@gmail.com'
-      - save_cache:
-          key: env-v1-{{ .Branch }}-{{ .BuildNum }}
-          paths:
-            - /opt/conda
 
       - restore_cache:
           keys:
