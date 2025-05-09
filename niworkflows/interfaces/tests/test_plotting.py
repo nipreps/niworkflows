@@ -28,8 +28,14 @@ import nibabel as nb
 
 from niworkflows import viz
 from niworkflows.interfaces.plotting import _get_tr
-from niworkflows.tests.data import load_test_data
 from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
+
+try:
+    from niworkflows.tests.data import load_test_data
+except ImportError:
+    import pytest
+
+    pytest.skip('niworkflows installed as wheel, data excluded', allow_module_level=True)
 
 
 def test_cifti_carpetplot():

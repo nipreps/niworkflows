@@ -30,9 +30,16 @@ import pytest
 from templateflow.api import get as get_template
 
 from niworkflows.testing import data_env_canary, test_data_env
-from niworkflows.tests.data import load_test_data
 
-datadir = load_test_data()
+
+@pytest.fixture
+def datadir():
+    try:
+        from niworkflows.tests.data import load_test_data
+    except ImportError:
+        pytest.skip('niworkflows installed as wheel, data excluded')
+
+    return load_test_data()
 
 
 def _run_interface_mock(objekt, runtime):

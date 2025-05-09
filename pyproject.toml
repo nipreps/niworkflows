@@ -20,12 +20,12 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 dependencies = [
     "acres",
     "attrs >=20.1",
-    "importlib_resources >= 5.7; python_version < '3.11'",
     "jinja2 >=3",
     "looseversion",
     "matplotlib >= 3.5",
@@ -98,6 +98,7 @@ exclude = [".git_archival.txt"]  # No longer needed in sdist
 packages = ["niworkflows"]
 exclude = [
     "niworkflows/data/tests/work",  # Large test data directory
+    "niworkflows/tests/data",  # Large test data directory
 ]
 
 ##  The following two sections configure setuptools_scm in the hatch way
