@@ -126,6 +126,10 @@ jobs:
       - TEMPLATEFLOW_HOME: /tmp/templateflow
     steps:
       - run:
+          name: Add ~/.local/bin to path
+          command: |
+            echo export PATH=$HOME/.local/bin:$PATH >> $BASH_ENV
+      - run:
           name: Setup git-annex and DataLad
           command: |
             mamba install -y git-annex=*=alldep* unzip uv
