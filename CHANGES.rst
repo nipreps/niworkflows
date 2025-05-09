@@ -1,3 +1,12 @@
+1.13.3 (May 09, 2025)
+=====================
+Patch release in the 1.13.x series.
+
+This release resolves import errors introduced by excluding excess files in
+the previous release. Only test modules were affected.
+
+* ENH: Add PET info to nipreps.json (#942)
+
 1.13.2 (May 08, 2025)
 =====================
 Patch release in the 1.13.x series.
