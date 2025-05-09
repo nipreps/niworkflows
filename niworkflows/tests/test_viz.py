@@ -35,7 +35,6 @@ from niworkflows.utils.timeseries import _cifti_timeseries, _nifti_timeseries
 from niworkflows.viz.plots import fMRIPlot
 
 from .. import viz
-from .conftest import datadir
 from .generate_data import _create_dtseries_cifti
 
 
@@ -135,7 +134,7 @@ def test_carpetplot(tr, sorting):
         ),
     ],
 )
-def test_fmriplot(input_files):
+def test_fmriplot(input_files, datadir):
     """Exercise the fMRIPlot class."""
     save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS')
     rng = np.random.default_rng(2010)
@@ -249,7 +248,7 @@ def test_plot_melodic_components(tmp_path):
     )
 
 
-def test_compcor_variance_plot(tmp_path):
+def test_compcor_variance_plot(tmp_path, datadir):
     """Test plotting CompCor variance"""
     out_dir = Path(os.getenv('SAVE_CIRCLE_ARTIFACTS', str(tmp_path)))
     out_file = str(out_dir / 'variance_plot_short.svg')

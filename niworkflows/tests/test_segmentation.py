@@ -38,7 +38,7 @@ from ..interfaces.reportlets.masks import (
 )
 from ..interfaces.reportlets.segmentation import FASTRPT, ReconAllRPT
 from ..testing import has_freesurfer, has_fsl
-from .conftest import _run_interface_mock, datadir
+from .conftest import _run_interface_mock
 
 
 def _smoke_test_report(report_interface, artifact_name):
@@ -160,7 +160,7 @@ def test_SimpleShowMaskRPT():
     _smoke_test_report(msk_rpt, 'testSimpleMask.svg')
 
 
-def test_BrainExtractionRPT(monkeypatch, moving, nthreads):
+def test_BrainExtractionRPT(monkeypatch, moving, nthreads, datadir):
     """test antsBrainExtraction with reports"""
 
     def _agg(objekt, runtime):
@@ -201,7 +201,7 @@ def test_BrainExtractionRPT(monkeypatch, moving, nthreads):
 
 @pytest.mark.skipif(not has_fsl, reason='No FSL')
 @pytest.mark.parametrize('segments', [True, False])
-def test_FASTRPT(monkeypatch, segments, reference, reference_mask):
+def test_FASTRPT(monkeypatch, segments, reference, reference_mask, datadir):
     """test FAST with the two options for segments"""
     from nipype.interfaces.fsl.maths import ApplyMask
 

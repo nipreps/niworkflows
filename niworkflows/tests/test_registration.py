@@ -39,7 +39,7 @@ from ..interfaces.reportlets.registration import (
     SpatialNormalizationRPT,
 )
 from ..testing import has_freesurfer, has_fsl
-from .conftest import _run_interface_mock, datadir
+from .conftest import _run_interface_mock
 
 
 def _smoke_test_report(report_interface, artifact_name):
@@ -61,7 +61,7 @@ def test_FLIRTRPT(reference, moving):
 
 
 @pytest.mark.skipif(not has_freesurfer, reason='No FreeSurfer')
-def test_MRICoregRPT(monkeypatch, reference, moving, nthreads):
+def test_MRICoregRPT(monkeypatch, reference, moving, nthreads, datadir):
     """the MRICoreg report capable test"""
 
     def _agg(objekt, runtime):
@@ -120,7 +120,7 @@ def test_FLIRTRPT_w_BBR(reference, reference_mask, moving):
 
 
 @pytest.mark.skipif(not has_freesurfer, reason='No FreeSurfer')
-def test_BBRegisterRPT(monkeypatch, moving):
+def test_BBRegisterRPT(monkeypatch, moving, datadir):
     """the BBRegister report capable test"""
 
     def _agg(objekt, runtime):
@@ -145,7 +145,7 @@ def test_BBRegisterRPT(monkeypatch, moving):
     _smoke_test_report(bbregister_rpt, 'testBBRegister.svg')
 
 
-def test_SpatialNormalizationRPT(monkeypatch, moving):
+def test_SpatialNormalizationRPT(monkeypatch, moving, datadir):
     """the SpatialNormalizationRPT report capable test"""
 
     def _agg(objekt, runtime):
@@ -164,7 +164,7 @@ def test_SpatialNormalizationRPT(monkeypatch, moving):
     _smoke_test_report(ants_rpt, 'testSpatialNormalizationRPT.svg')
 
 
-def test_SpatialNormalizationRPT_masked(monkeypatch, moving, reference_mask):
+def test_SpatialNormalizationRPT_masked(monkeypatch, moving, reference_mask, datadir):
     """the SpatialNormalizationRPT report capable test with masking"""
 
     def _agg(objekt, runtime):
@@ -188,7 +188,7 @@ def test_SpatialNormalizationRPT_masked(monkeypatch, moving, reference_mask):
     _smoke_test_report(ants_rpt, 'testSpatialNormalizationRPT_masked.svg')
 
 
-def test_ANTSRegistrationRPT(monkeypatch, reference, moving):
+def test_ANTSRegistrationRPT(monkeypatch, reference, moving, datadir):
     """the SpatialNormalizationRPT report capable test"""
     from niworkflows import data
 
