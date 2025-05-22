@@ -3,7 +3,7 @@ name: Build & update docs
 
 on:
   push:
-    branches: [ 'doc/*', 'docs/*', master, "maint/*" ]
+    branches: [ 'doc/*', 'docs/*', master, main, "maint/*" ]
     tags: [ '*' ]
 
 jobs:
@@ -67,18 +67,18 @@ jobs:
         git commit -m "rel(${CURBRANCH}): Update docs of ${MAJOR_MINOR} series" || true
         git push
 
-    - name: Push "master" docs to gh-pages after a PR is merged
-      if: github.ref == 'refs/heads/master'
+    - name: Push "main" docs to gh-pages after a PR is merged
+      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
       run: |
-        if [[ "${CURBRANCH}" != "master" ]]; then
+        if [[ "${CURBRANCH}" != "master" -a "${CURBRANCH}" != "main" ]]; then
             echo "$CURBRANCH is not the default development branch"
             exit 1
         fi
         git checkout -b gh-pages origin/gh-pages
-        git rm -r master/ || true
+        git rm -r ${CURBRANCH}/ || true
         # It is fundamental that the directory does not exist at all.
-        rm -rf master
-        cp -r $HOME/docs/$CURBRANCH $PWD/master
-        git add master
-        git commit -am "docs(master): Update docs of development line" || true
+        rm -rf ${CURBRANCH}
+        cp -r $HOME/docs/$CURBRANCH $PWD/${CURBRANCH}
+        git add ${CURBRANCH}
+        git commit -am "docs(${CURBRANCH}): Update docs of development line" || true
         git push
