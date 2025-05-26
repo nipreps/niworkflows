@@ -41,7 +41,7 @@ DEFAULT_BIDS_QUERIES = {
     'pet': {'suffix': 'pet'},
     'roi': {'datatype': 'anat', 'suffix': 'roi'},
     'sbref': {'datatype': 'func', 'suffix': 'sbref', 'part': ['mag', None]},
-    't1w': {'datatype': 'anat', 'suffix': 'T1w', 'part': ['mag', None]},
+    't1w': {'suffix': 'T1w'},
     't2w': {'datatype': 'anat', 'suffix': 'T2w', 'part': ['mag', None]},
     'asl': {'datatype': 'perf', 'suffix': 'asl'},
 }
@@ -251,8 +251,9 @@ def collect_data(
         'return_type': 'file',
         'subject': participant_label,
         'extension': ['.nii', '.nii.gz'],
-        'session': session_id or Query.OPTIONAL,
     }
+    if session_id is not None:
+        layout_get_kwargs['session'] = session_id
 
     reserved_entities = [('subject', participant_label), ('session', session_id)]
 
@@ -271,19 +272,9 @@ def collect_data(
                 # avoid clobbering layout.get
                 del layout_get_kwargs[entity]
 
-    if task:
-        queries['bold']['task'] = task
-
-    if echo:
-        queries['bold']['echo'] = echo
-
     subj_data = {
         dtype: sorted(layout.get(**layout_get_kwargs, **query)) for dtype, query in queries.items()
     }
-
-    # Special case: multi-echo BOLD, grouping echos
-    if group_echos and 'bold' in subj_data and any('_echo-' in bold for bold in subj_data['bold']):
-        subj_data['bold'] = group_multiecho(subj_data['bold'])
 
     return subj_data, layout
 

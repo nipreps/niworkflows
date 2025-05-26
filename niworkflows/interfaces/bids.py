@@ -260,7 +260,7 @@ class BIDSDataGrabber(SimpleInterface):
 
     input_spec = _BIDSDataGrabberInputSpec
     output_spec = _BIDSDataGrabberOutputSpec
-    _require_funcs = True
+    _require_funcs = False
 
     def __init__(self, *args, **kwargs):
         anat_only = kwargs.pop('anat_only', None)
@@ -282,12 +282,7 @@ class BIDSDataGrabber(SimpleInterface):
                 f'No T1w images found for subject sub-{self.inputs.subject_id}'
             )
 
-        if self._require_funcs and not bids_dict['bold']:
-            raise FileNotFoundError(
-                f'No functional images found for subject sub-{self.inputs.subject_id}'
-            )
-
-        for imtype in ['bold', 't2w', 'flair', 'fmap', 'sbref', 'roi', 'pet', 'asl']:
+        for imtype in ['t2w', 'flair', 'fmap', 'sbref', 'roi', 'pet', 'asl']:
             if not bids_dict[imtype]:
                 LOGGER.info('No "%s" images found for sub-%s', imtype, self.inputs.subject_id)
 
