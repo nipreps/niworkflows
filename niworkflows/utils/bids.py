@@ -22,6 +22,7 @@
 #
 """Helpers for handling BIDS-like neuroimaging structures."""
 
+import copy
 import json
 import re
 import warnings
@@ -243,6 +244,9 @@ def collect_data(
     else:
         layout = BIDSLayout(str(bids_dir), validate=bids_validate)
 
+    if not queries:
+        queries = copy.deepcopy(DEFAULT_BIDS_QUERIES)
+
     layout_get_kwargs = {
         'return_type': 'file',
         'subject': participant_label,
@@ -252,7 +256,6 @@ def collect_data(
 
     reserved_entities = [('subject', participant_label), ('session', session_id)]
 
-    queries = queries or DEFAULT_BIDS_QUERIES
     bids_filters = bids_filters or {}
     for acq, entities in bids_filters.items():
         # BIDS filters will not be able to override subject / session entities
