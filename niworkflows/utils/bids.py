@@ -29,6 +29,7 @@ from pathlib import Path
 
 from bids import BIDSLayout
 from bids.layout import Query
+from bids.utils import listify
 from packaging.version import Version
 
 DEFAULT_BIDS_QUERIES = {
@@ -256,7 +257,7 @@ def collect_data(
     for acq, entities in bids_filters.items():
         # BIDS filters will not be able to override subject / session entities
         for entity, param in reserved_entities:
-            if entity in entities and param != entities[entity]:
+            if entity in entities and listify(param) != listify(entities[entity]):
                 raise ValueError(
                     f'Conflicting entities for "{entity}" found: {entities[entity]} // {param}'
                 )
