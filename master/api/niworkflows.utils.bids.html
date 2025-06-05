@@ -419,6 +419,17 @@
 <span class="go">[&#39;.../ds051/sub-01/anat/sub-01_run-01_T1w.nii.gz&#39;]</span>
 </pre></div>
 </div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bids_root</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">collect_data</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="nb">str</span><span class="p">(</span><span class="n">datadir</span> <span class="o">/</span> <span class="s1">&#39;ds114&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="s1">&#39;01&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">bids_validate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">session_id</span><span class="o">=</span><span class="s1">&#39;retest&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">bids_filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;bold&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;session&#39;</span><span class="p">:</span> <span class="s1">&#39;madeup&#39;</span><span class="p">}})</span>  
+<span class="gt">Traceback (most recent call last):</span>
+<span class="w">  </span><span class="c">...</span>
+<span class="gr">ValueError</span>: <span class="n">Conflicting entities for &quot;session&quot; found: madeup // retest</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -662,6 +673,6 @@ Requesting all subjects in a BIDS directory root:</p>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
-    <script src="../_static/js/version-switch.js?v=b7149f84"></script>
+    <script src="../_static/js/version-switch.js?v=84132a83"></script>
     </body>
 </html>
