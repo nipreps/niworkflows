@@ -1,3 +1,18 @@
+1.13.4 (June 05, 2025)
+======================
+Patch release in the 1.13.x series.
+
+This release includes:
+- A fix to avoid filters overwriting BIDS subject and session entities when collecting data
+- Additional PET paths for the default BIDS configuration
+- New file with PET-specific registration options
+
+* ENH: Update nipreps.json (#950)
+* ENH: Add petref-mni_registration_precise_000.json (#949)
+* FIX: Do not allow filters to overwrite participant / session (#952)
+* MNT: Fix coverage config for parallel runners (#945)
+* MNT: Accept main where master is used (#943)
+
 1.13.3 (May 09, 2025)
 =====================
 Patch release in the 1.13.x series.
