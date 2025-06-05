@@ -339,6 +339,21 @@
         <article role="main" id="furo-main-content">
           <section id="what-s-new">
 <h1>What’s new?<a class="headerlink" href="#what-s-new" title="Link to this heading">¶</a></h1>
+<section id="june-05-2025">
+<h2>1.13.4 (June 05, 2025)<a class="headerlink" href="#june-05-2025" title="Link to this heading">¶</a></h2>
+<p>Patch release in the 1.13.x series.</p>
+<p>This release includes:
+- A fix to avoid filters overwriting BIDS subject and session entities when collecting data
+- Additional PET paths for the default BIDS configuration
+- New file with PET-specific registration options</p>
+<ul class="simple">
+<li><p>ENH: Update nipreps.json (#950)</p></li>
+<li><p>ENH: Add petref-mni_registration_precise_000.json (#949)</p></li>
+<li><p>FIX: Do not allow filters to overwrite participant / session (#952)</p></li>
+<li><p>MNT: Fix coverage config for parallel runners (#945)</p></li>
+<li><p>MNT: Accept main where master is used (#943)</p></li>
+</ul>
+</section>
 <section id="may-09-2025">
 <h2>1.13.3 (May 09, 2025)<a class="headerlink" href="#may-09-2025" title="Link to this heading">¶</a></h2>
 <p>Patch release in the 1.13.x series.</p>
@@ -2051,6 +2066,7 @@ used with the nonlinear-asym-09c template for the carpetplot</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">What’s new?</a><ul>
+<li><a class="reference internal" href="#june-05-2025">1.13.4 (June 05, 2025)</a></li>
 <li><a class="reference internal" href="#may-09-2025">1.13.3 (May 09, 2025)</a></li>
 <li><a class="reference internal" href="#may-08-2025">1.13.2 (May 08, 2025)</a></li>
 <li><a class="reference internal" href="#may-02-2025">1.13.1 (May 02, 2025)</a></li>
@@ -2244,6 +2260,6 @@ used with the nonlinear-asym-09c template for the carpetplot</p></li>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
-    <script src="_static/js/version-switch.js?v=b7149f84"></script>
+    <script src="_static/js/version-switch.js?v=84132a83"></script>
     </body>
 </html>
