@@ -812,8 +812,29 @@ def test_require_func_pet_behavior():
     from niworkflows.interfaces.bids import BIDSDataGrabber
     import pytest
 
-    subject_data_pet = {'t1w': ['t1.nii'], 'bold': [], 'pet': ['pet.nii']}
-    subject_data_bold = {'t1w': ['t1.nii'], 'bold': ['bold.nii'], 'pet': []}
+    subject_data_pet = {
+        't1w': ['t1.nii'],
+        'bold': [],
+        'pet': ['pet.nii'],
+        't2w': [],
+        'flair': [],
+        'fmap': [],
+        'sbref': [],
+        'roi': [],
+        'asl': [],
+    }
+
+    subject_data_bold = {
+        't1w': ['t1.nii'],
+        'bold': ['bold.nii'],
+        'pet': [],
+        't2w': [],
+        'flair': [],
+        'fmap': [],
+        'sbref': [],
+        'roi': [],
+        'asl': [],
+    }
 
     # PET present, functional not required
     grabber_pet = BIDSDataGrabber(subject_data=subject_data_pet, subject_id='01', require_pet=True)
