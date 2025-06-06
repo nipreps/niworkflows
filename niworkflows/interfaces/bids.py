@@ -280,6 +280,11 @@ class BIDSDataGrabber(SimpleInterface):
             raise FileNotFoundError(
                 f'No T1w images found for subject sub-{self.inputs.subject_id}'
             )
+        
+        if self._require_funcs and not bids_dict['bold']:
+            raise FileNotFoundError(
+                f'No functional images found for subject sub-{self.inputs.subject_id}'
+            )
 
         for imtype in ['t2w', 'flair', 'fmap', 'sbref', 'roi', 'pet', 'asl']:
             if not bids_dict[imtype]:
