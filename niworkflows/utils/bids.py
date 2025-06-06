@@ -35,11 +35,9 @@ from packaging.version import Version
 
 DEFAULT_BIDS_QUERIES = {
     'bold': {
-        'datatype': 'func', 
-        'suffix': 'bold', 
+        'datatype': 'func',
+        'suffix': 'bold',
         'part': ['mag', None],
-        'task': Query.OPTIONAL,
-        'echo': Query.OPTIONAL,
     },
     'dwi': {'suffix': 'dwi'},
     'flair': {'datatype': 'anat', 'suffix': 'FLAIR', 'part': ['mag', None]},
@@ -257,6 +255,7 @@ def collect_data(
         'return_type': 'file',
         'subject': participant_label,
         'extension': ['.nii', '.nii.gz'],
+        'session': session_id or Query.OPTIONAL,
     }
 
     reserved_entities = [('subject', participant_label), ('session', session_id)]
@@ -277,7 +276,7 @@ def collect_data(
                 del layout_get_kwargs[entity]
 
     if task:
-        queries['bold']['task'] = task
+        queries['bold']['task'] = queries['pet']['task'] = task
 
     if echo:
         queries['bold']['echo'] = echo
