@@ -798,19 +798,20 @@ def test_fsdir_min_version(tmp_path, min_version):
 def test_BIDSDataGrabber():
     x = bintfs.BIDSDataGrabber(anat_only=True)
     assert x._require_t1w is True
-    assert x._require_funcs is False
+    assert x._require_bold is False
 
     x = bintfs.BIDSDataGrabber(anat_only=False, require_t1w=False)
     assert x._require_t1w is False
-    assert x._require_funcs is True
+    assert x._require_bold is True
 
     x = bintfs.BIDSDataGrabber(anat_derivatives='derivatives')
     assert x._require_t1w is False
 
 
-def test_require_func_pet_behavior():
-    from niworkflows.interfaces.bids import BIDSDataGrabber
+def test_require_bold_pet_behavior():
     import pytest
+
+    from niworkflows.interfaces.bids import BIDSDataGrabber
 
     subject_data_pet = {
         't1w': ['t1.nii'],
@@ -822,6 +823,7 @@ def test_require_func_pet_behavior():
         'sbref': [],
         'roi': [],
         'asl': [],
+        'dwi': [],
     }
 
     subject_data_bold = {
@@ -834,20 +836,23 @@ def test_require_func_pet_behavior():
         'sbref': [],
         'roi': [],
         'asl': [],
+        'dwi': [],
     }
 
     # PET present, functional not required
-    grabber_pet = BIDSDataGrabber(subject_data=subject_data_pet, subject_id='01', require_pet=True)
-    assert grabber_pet._require_funcs is False
+    grabber_pet = BIDSDataGrabber(
+        subject_data=subject_data_pet, subject_id='01', require_pet=True, require_bold=False
+    )
+    assert grabber_pet._require_bold is False
     assert grabber_pet._require_pet is True
     grabber_pet.run()  # Should succeed without bold data
 
     # PET absent, functional required by default
     grabber_func = BIDSDataGrabber(subject_data=subject_data_bold, subject_id='01')
-    assert grabber_func._require_funcs is True
-    grabber_func.run()  # Should succeed with bold data
+    assert grabber_func._require_bold is True
+    assert grabber_func.run().outputs.bold == 'bold.nii'
 
     # Fail when bold is required but missing
     grabber_fail = BIDSDataGrabber(subject_data=subject_data_pet, subject_id='01')
-    with pytest.raises(FileNotFoundError, match='No functional images found'):
+    with pytest.raises(FileNotFoundError, match='No "bold" images found'):
         grabber_fail.run()
