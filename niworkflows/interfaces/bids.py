@@ -269,17 +269,12 @@ class BIDSDataGrabber(SimpleInterface):
         require_pet = kwargs.pop('require_pet', False)
         super().__init__(*args, **kwargs)
 
-        if anat_only is not None:
-            self._require_funcs = not anat_only
+        if anat_only:
+            self._require_funcs = False
             self._require_pet = False
         else:
-            # Automatically set require_funcs=False if PET data is present
-            if require_pet:
-                self._require_funcs = False
-                self._require_pet = True
-            else:
-                self._require_funcs = require_funcs
-                self._require_pet = False
+            self._require_funcs = False if require_pet else require_funcs
+            self._require_pet = require_pet
 
         self._require_t1w = require_t1w and anat_derivatives is None
 
