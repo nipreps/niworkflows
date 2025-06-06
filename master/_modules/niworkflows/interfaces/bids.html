@@ -598,16 +598,29 @@
 
     <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_BIDSDataGrabberInputSpec</span>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_BIDSDataGrabberOutputSpec</span>
-    <span class="n">_require_funcs</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">anat_only</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;anat_only&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">anat_derivatives</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;anat_derivatives&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">require_t1w</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;require_t1w&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">_image_types</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;asl&#39;</span><span class="p">,</span> <span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="s1">&#39;dwi&#39;</span><span class="p">,</span> <span class="s1">&#39;flair&#39;</span><span class="p">,</span> <span class="s1">&#39;fmap&#39;</span><span class="p">,</span> <span class="s1">&#39;pet&#39;</span><span class="p">,</span> <span class="s1">&#39;roi&#39;</span><span class="p">,</span> <span class="s1">&#39;sbref&#39;</span><span class="p">,</span> <span class="s1">&#39;t1w&#39;</span><span class="p">,</span> <span class="s1">&#39;t2w&#39;</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">anat_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">anat_derivatives</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">default_required</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;t1w&#39;</span><span class="p">,</span> <span class="s1">&#39;bold&#39;</span><span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">imtype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image_types</span><span class="p">:</span>
+            <span class="n">kwarg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;require_</span><span class="si">{</span><span class="n">imtype</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">kwarg</span><span class="p">,</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">imtype</span> <span class="ow">in</span> <span class="n">default_required</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_</span><span class="si">{</span><span class="n">kwarg</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_require_t1w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_require_t1w</span> <span class="ow">and</span> <span class="n">anat_derivatives</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">anat_only</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_require_bold</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_require_pet</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">anat_only</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_require_funcs</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">anat_only</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_require_t1w</span> <span class="o">=</span> <span class="n">require_t1w</span> <span class="ow">and</span> <span class="n">anat_derivatives</span> <span class="ow">is</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
         <span class="n">bids_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_data</span>
@@ -615,19 +628,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bids_dict</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">bids_dict</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_require_t1w</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">bids_dict</span><span class="p">[</span><span class="s1">&#39;t1w&#39;</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;No T1w images found for subject sub-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_require_funcs</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">bids_dict</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;No functional images found for subject sub-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">imtype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="s1">&#39;t2w&#39;</span><span class="p">,</span> <span class="s1">&#39;flair&#39;</span><span class="p">,</span> <span class="s1">&#39;fmap&#39;</span><span class="p">,</span> <span class="s1">&#39;sbref&#39;</span><span class="p">,</span> <span class="s1">&#39;roi&#39;</span><span class="p">,</span> <span class="s1">&#39;pet&#39;</span><span class="p">,</span> <span class="s1">&#39;asl&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">imtype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image_types</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">bids_dict</span><span class="p">[</span><span class="n">imtype</span><span class="p">]:</span>
-                <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No &quot;</span><span class="si">%s</span><span class="s1">&quot; images found for sub-</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">imtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;No &quot;</span><span class="si">{</span><span class="n">imtype</span><span class="si">}</span><span class="s1">&quot; images found for sub-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_require_</span><span class="si">{</span><span class="n">imtype</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>  <span class="c1"># only raise if image is required</span>
+                    <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">runtime</span></div>
 

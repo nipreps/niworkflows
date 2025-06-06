@@ -367,7 +367,11 @@
 <span class="kn">from</span> <span class="nn">packaging.version</span> <span class="kn">import</span> <span class="n">Version</span>
 
 <span class="n">DEFAULT_BIDS_QUERIES</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;bold&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;func&#39;</span><span class="p">,</span> <span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="s1">&#39;part&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
+    <span class="s1">&#39;bold&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;func&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;bold&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;part&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="p">},</span>
     <span class="s1">&#39;dwi&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;dwi&#39;</span><span class="p">},</span>
     <span class="s1">&#39;flair&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;anat&#39;</span><span class="p">,</span> <span class="s1">&#39;suffix&#39;</span><span class="p">:</span> <span class="s1">&#39;FLAIR&#39;</span><span class="p">,</span> <span class="s1">&#39;part&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]},</span>
     <span class="s1">&#39;fmap&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="s1">&#39;fmap&#39;</span><span class="p">},</span>
@@ -616,7 +620,7 @@
                 <span class="k">del</span> <span class="n">layout_get_kwargs</span><span class="p">[</span><span class="n">entity</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">task</span><span class="p">:</span>
-        <span class="n">queries</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">][</span><span class="s1">&#39;task&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task</span>
+        <span class="n">queries</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">][</span><span class="s1">&#39;task&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">queries</span><span class="p">[</span><span class="s1">&#39;pet&#39;</span><span class="p">][</span><span class="s1">&#39;task&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task</span>
 
     <span class="k">if</span> <span class="n">echo</span><span class="p">:</span>
         <span class="n">queries</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">][</span><span class="s1">&#39;echo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">echo</span>
