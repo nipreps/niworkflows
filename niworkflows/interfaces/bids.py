@@ -260,16 +260,29 @@ class BIDSDataGrabber(SimpleInterface):
 
     input_spec = _BIDSDataGrabberInputSpec
     output_spec = _BIDSDataGrabberOutputSpec
-    _require_funcs = True
 
-    def __init__(self, *args, **kwargs):
-        anat_only = kwargs.pop('anat_only', None)
-        anat_derivatives = kwargs.pop('anat_derivatives', None)
-        require_t1w = kwargs.pop('require_t1w', True)
+    _image_types = {'asl', 'bold', 'dwi', 'flair', 'fmap', 'pet', 'roi', 'sbref', 't1w', 't2w'}
+
+    def __init__(
+        self,
+        anat_only=False,
+        anat_derivatives=None,
+        *args,
+        **kwargs,
+    ):
+        default_required = {'t1w', 'bold'}
+
+        for imtype in self._image_types:
+            kwarg = f'require_{imtype}'
+            val = kwargs.pop(kwarg, True if imtype in default_required else False)
+            setattr(self, f'_{kwarg}', val)
+
+        self._require_t1w = self._require_t1w and anat_derivatives is None
+        if anat_only:
+            self._require_bold = False
+            self._require_pet = False
+
         super().__init__(*args, **kwargs)
-        if anat_only is not None:
-            self._require_funcs = not anat_only
-        self._require_t1w = require_t1w and anat_derivatives is None
 
     def _run_interface(self, runtime):
         bids_dict = self.inputs.subject_data
@@ -277,19 +290,12 @@ class BIDSDataGrabber(SimpleInterface):
         self._results['out_dict'] = bids_dict
         self._results.update(bids_dict)
 
-        if self._require_t1w and not bids_dict['t1w']:
-            raise FileNotFoundError(
-                f'No T1w images found for subject sub-{self.inputs.subject_id}'
-            )
-
-        if self._require_funcs and not bids_dict['bold']:
-            raise FileNotFoundError(
-                f'No functional images found for subject sub-{self.inputs.subject_id}'
-            )
-
-        for imtype in ['bold', 't2w', 'flair', 'fmap', 'sbref', 'roi', 'pet', 'asl']:
+        for imtype in self._image_types:
             if not bids_dict[imtype]:
-                LOGGER.info('No "%s" images found for sub-%s', imtype, self.inputs.subject_id)
+                msg = f'No "{imtype}" images found for sub-{self.inputs.subject_id}'
+                if getattr(self, f'_require_{imtype}', False):  # only raise if image is required
+                    raise FileNotFoundError(msg)
+                LOGGER.info(msg)
 
         return runtime
 
