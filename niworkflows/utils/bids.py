@@ -274,6 +274,10 @@ def collect_data(
         dtype: sorted(layout.get(**layout_get_kwargs, **query)) for dtype, query in queries.items()
     }
 
+    # Special case: multi-echo BOLD, grouping echos
+    if group_echos and 'bold' in subj_data and any('_echo-' in bold for bold in subj_data['bold']):
+        subj_data['bold'] = group_multiecho(subj_data['bold'])
+
     return subj_data, layout
 
 
