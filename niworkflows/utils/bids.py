@@ -34,7 +34,13 @@ from bids.utils import listify
 from packaging.version import Version
 
 DEFAULT_BIDS_QUERIES = {
-    'bold': {'datatype': 'func', 'suffix': 'bold', 'part': ['mag', None]},
+    'bold': {
+        'datatype': 'func', 
+        'suffix': 'bold', 
+        'part': ['mag', None],
+        'task': Query.OPTIONAL,
+        'echo': Query.OPTIONAL,
+    },
     'dwi': {'suffix': 'dwi'},
     'flair': {'datatype': 'anat', 'suffix': 'FLAIR', 'part': ['mag', None]},
     'fmap': {'datatype': 'fmap'},
@@ -269,6 +275,12 @@ def collect_data(
             if entity in entities:
                 # avoid clobbering layout.get
                 del layout_get_kwargs[entity]
+
+    if task:
+        queries['bold']['task'] = task
+
+    if echo:
+        queries['bold']['echo'] = echo
 
     subj_data = {
         dtype: sorted(layout.get(**layout_get_kwargs, **query)) for dtype, query in queries.items()
