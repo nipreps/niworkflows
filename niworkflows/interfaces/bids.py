@@ -261,14 +261,26 @@ class BIDSDataGrabber(SimpleInterface):
     input_spec = _BIDSDataGrabberInputSpec
     output_spec = _BIDSDataGrabberOutputSpec
 
-    def __init__(self, *args, require_funcs=False, **kwargs):
+    def __init__(self, *args, **kwargs):
         anat_only = kwargs.pop('anat_only', None)
         anat_derivatives = kwargs.pop('anat_derivatives', None)
         require_t1w = kwargs.pop('require_t1w', True)
+        require_funcs = kwargs.pop('require_funcs', True)
+        require_pet = kwargs.pop('require_pet', False)
         super().__init__(*args, **kwargs)
-        self._require_funcs = require_funcs
+
         if anat_only is not None:
             self._require_funcs = not anat_only
+            self._require_pet = False
+        else:
+            # Automatically set require_funcs=False if PET data is present
+            if require_pet:
+                self._require_funcs = False
+                self._require_pet = True
+            else:
+                self._require_funcs = require_funcs
+                self._require_pet = False
+
         self._require_t1w = require_t1w and anat_derivatives is None
 
     def _run_interface(self, runtime):
@@ -285,6 +297,11 @@ class BIDSDataGrabber(SimpleInterface):
         if self._require_funcs and not bids_dict['bold']:
             raise FileNotFoundError(
                 f'No functional images found for subject sub-{self.inputs.subject_id}'
+            )
+        
+        if self._require_pet and not bids_dict.get('pet'):
+            raise FileNotFoundError(
+                f'No PET images found for subject sub-{self.inputs.subject_id}'
             )
 
         for imtype in ['t2w', 'flair', 'fmap', 'sbref', 'roi', 'pet', 'asl']:
