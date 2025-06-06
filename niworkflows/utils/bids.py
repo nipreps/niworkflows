@@ -252,8 +252,6 @@ def collect_data(
         'subject': participant_label,
         'extension': ['.nii', '.nii.gz'],
     }
-    if session_id is not None:
-        layout_get_kwargs['session'] = session_id
 
     reserved_entities = [('subject', participant_label), ('session', session_id)]
 
