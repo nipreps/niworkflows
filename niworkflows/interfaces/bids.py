@@ -261,11 +261,12 @@ class BIDSDataGrabber(SimpleInterface):
     input_spec = _BIDSDataGrabberInputSpec
     output_spec = _BIDSDataGrabberOutputSpec
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, require_funcs=False, **kwargs):
         anat_only = kwargs.pop('anat_only', None)
         anat_derivatives = kwargs.pop('anat_derivatives', None)
         require_t1w = kwargs.pop('require_t1w', True)
         super().__init__(*args, **kwargs)
+        self._require_funcs = require_funcs
         if anat_only is not None:
             self._require_funcs = not anat_only
         self._require_t1w = require_t1w and anat_derivatives is None
