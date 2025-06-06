@@ -41,7 +41,7 @@ DEFAULT_BIDS_QUERIES = {
     'pet': {'suffix': 'pet'},
     'roi': {'datatype': 'anat', 'suffix': 'roi'},
     'sbref': {'datatype': 'func', 'suffix': 'sbref', 'part': ['mag', None]},
-    't1w': {'suffix': 'T1w'},
+    't1w': {'datatype': 'anat', 'suffix': 'T1w', 'part': ['mag', None]},
     't2w': {'datatype': 'anat', 'suffix': 'T2w', 'part': ['mag', None]},
     'asl': {'datatype': 'perf', 'suffix': 'asl'},
 }
