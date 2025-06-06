@@ -260,7 +260,6 @@ class BIDSDataGrabber(SimpleInterface):
 
     input_spec = _BIDSDataGrabberInputSpec
     output_spec = _BIDSDataGrabberOutputSpec
-    _require_funcs = False
 
     def __init__(self, *args, **kwargs):
         anat_only = kwargs.pop('anat_only', None)
