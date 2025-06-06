@@ -806,3 +806,27 @@ def test_BIDSDataGrabber():
 
     x = bintfs.BIDSDataGrabber(anat_derivatives='derivatives')
     assert x._require_t1w is False
+
+
+def test_require_func_pet_behavior():
+    from niworkflows.interfaces.bids import BIDSDataGrabber
+    import pytest
+
+    subject_data_pet = {'t1w': ['t1.nii'], 'bold': [], 'pet': ['pet.nii']}
+    subject_data_bold = {'t1w': ['t1.nii'], 'bold': ['bold.nii'], 'pet': []}
+
+    # PET present, functional not required
+    grabber_pet = BIDSDataGrabber(subject_data=subject_data_pet, subject_id='01', require_pet=True)
+    assert grabber_pet._require_funcs is False
+    assert grabber_pet._require_pet is True
+    grabber_pet.run()  # Should succeed without bold data
+
+    # PET absent, functional required by default
+    grabber_func = BIDSDataGrabber(subject_data=subject_data_bold, subject_id='01')
+    assert grabber_func._require_funcs is True
+    grabber_func.run()  # Should succeed with bold data
+
+    # Fail when bold is required but missing
+    grabber_fail = BIDSDataGrabber(subject_data=subject_data_pet, subject_id='01')
+    with pytest.raises(FileNotFoundError, match='No functional images found'):
+        grabber_fail.run()
