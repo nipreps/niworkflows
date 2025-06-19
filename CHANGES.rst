@@ -1,3 +1,9 @@
+1.13.5 (June 19, 2025)
+======================
+Patch release in the 1.13.x series.
+
+* FIX: Allow optional/None filters to be overridden (#956)
+
 1.13.4 (June 05, 2025)
 ======================
 Patch release in the 1.13.x series.
