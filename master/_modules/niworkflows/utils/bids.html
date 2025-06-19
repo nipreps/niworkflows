@@ -586,6 +586,14 @@
 <span class="sd">      ...</span>
 <span class="sd">    ValueError: Conflicting entities for &quot;session&quot; found: madeup // retest</span>
 
+<span class="sd">    &gt;&gt;&gt; bids_root, _ = collect_data(</span>
+<span class="sd">    ...     str(datadir / &#39;ds114&#39;),</span>
+<span class="sd">    ...     &#39;01&#39;,</span>
+<span class="sd">    ...     bids_validate=False,</span>
+<span class="sd">    ...     session_id=None,</span>
+<span class="sd">    ...     bids_filters={&#39;t1w&#39;: {&#39;session&#39;: &#39;retest&#39;}})</span>
+<span class="sd">    &gt;&gt;&gt; bids_root[&#39;t1w&#39;]  # doctest: +ELLIPSIS</span>
+<span class="sd">    [&#39;.../ds114/sub-01/ses-retest/anat/sub-01_ses-retest_T1w.nii.gz&#39;]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bids_dir</span><span class="p">,</span> <span class="n">BIDSLayout</span><span class="p">):</span>
         <span class="n">layout</span> <span class="o">=</span> <span class="n">bids_dir</span>
@@ -595,11 +603,12 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">queries</span><span class="p">:</span>
         <span class="n">queries</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">DEFAULT_BIDS_QUERIES</span><span class="p">)</span>
 
+    <span class="n">session_id</span> <span class="o">=</span> <span class="n">session_id</span> <span class="ow">or</span> <span class="n">Query</span><span class="o">.</span><span class="n">OPTIONAL</span>
     <span class="n">layout_get_kwargs</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;return_type&#39;</span><span class="p">:</span> <span class="s1">&#39;file&#39;</span><span class="p">,</span>
         <span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="n">participant_label</span><span class="p">,</span>
         <span class="s1">&#39;extension&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;.nii&#39;</span><span class="p">,</span> <span class="s1">&#39;.nii.gz&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;session&#39;</span><span class="p">:</span> <span class="n">session_id</span> <span class="ow">or</span> <span class="n">Query</span><span class="o">.</span><span class="n">OPTIONAL</span><span class="p">,</span>
+        <span class="s1">&#39;session&#39;</span><span class="p">:</span> <span class="n">session_id</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="n">reserved_entities</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">participant_label</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="n">session_id</span><span class="p">)]</span>
@@ -608,6 +617,8 @@
     <span class="k">for</span> <span class="n">acq</span><span class="p">,</span> <span class="n">entities</span> <span class="ow">in</span> <span class="n">bids_filters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="c1"># BIDS filters will not be able to override subject / session entities</span>
         <span class="k">for</span> <span class="n">entity</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">reserved_entities</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">param</span> <span class="o">==</span> <span class="n">Query</span><span class="o">.</span><span class="n">OPTIONAL</span><span class="p">:</span>
+                <span class="k">continue</span>
             <span class="k">if</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities</span> <span class="ow">and</span> <span class="n">listify</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">!=</span> <span class="n">listify</span><span class="p">(</span><span class="n">entities</span><span class="p">[</span><span class="n">entity</span><span class="p">]):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Conflicting entities for &quot;</span><span class="si">{</span><span class="n">entity</span><span class="si">}</span><span class="s1">&quot; found: </span><span class="si">{</span><span class="n">entities</span><span class="p">[</span><span class="n">entity</span><span class="p">]</span><span class="si">}</span><span class="s1"> // </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">&#39;</span>
