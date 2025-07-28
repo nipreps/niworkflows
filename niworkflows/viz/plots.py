@@ -1092,6 +1092,7 @@ def cifti_surfaces_plot(
                 vmin=mn,
                 vmax=mx,
                 axes=ax,
+                colorbar=False,
                 **hemi_kwargs,
                 **kwargs,
             )
