@@ -206,6 +206,8 @@ def plot_carpet(
     if detrend:
         from nilearn.signal import clean
 
+        if tr is not None:
+            tr = float(tr)
         data = clean(data.T, t_r=tr, filter=False).T
 
     # We want all subplots to have the same dynamic range
