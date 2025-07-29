@@ -19,6 +19,3 @@ repos:
         args: [ --fix ]
       - name: ruff format
         id: ruff-format
-      - name: fix implicit string concatenation
-        id: ruff-check
-        args: [ --select, ISC001, --fix ]
