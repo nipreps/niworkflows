@@ -41,6 +41,7 @@ NONSTANDARD_REFERENCES = [
     'individual',
     'dwi',
     'asl',
+    'petref',
 ]
 """List of supported nonstandard reference spaces."""
 
