@@ -133,8 +133,10 @@ jobs:
       - run:
           name: Setup git-annex and DataLad
           command: |
-            mamba install -y git-annex=*=alldep* unzip uv
+            mamba install -y unzip uv
+            uv tool install git-annex
             uv tool install --with=datalad-next --with=datalad-osf datalad
+            uv tool install --with=datalad-next datalad-osf
             git config --global user.name 'NiPreps Bot'
             git config --global user.email 'nipreps@gmail.com'
 

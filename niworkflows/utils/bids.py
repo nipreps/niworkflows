@@ -242,6 +242,14 @@ def collect_data(
       ...
     ValueError: Conflicting entities for "session" found: madeup // retest
 
+    >>> bids_root, _ = collect_data(
+    ...     str(datadir / 'ds114'),
+    ...     '01',
+    ...     bids_validate=False,
+    ...     session_id=None,
+    ...     bids_filters={'t1w': {'session': 'retest'}})
+    >>> bids_root['t1w']  # doctest: +ELLIPSIS
+    ['.../ds114/sub-01/ses-retest/anat/sub-01_ses-retest_T1w.nii.gz']
     """
     if isinstance(bids_dir, BIDSLayout):
         layout = bids_dir
@@ -251,11 +259,12 @@ def collect_data(
     if not queries:
         queries = copy.deepcopy(DEFAULT_BIDS_QUERIES)
 
+    session_id = session_id or Query.OPTIONAL
     layout_get_kwargs = {
         'return_type': 'file',
         'subject': participant_label,
         'extension': ['.nii', '.nii.gz'],
-        'session': session_id or Query.OPTIONAL,
+        'session': session_id,
     }
 
     reserved_entities = [('subject', participant_label), ('session', session_id)]
@@ -264,6 +273,8 @@ def collect_data(
     for acq, entities in bids_filters.items():
         # BIDS filters will not be able to override subject / session entities
         for entity, param in reserved_entities:
+            if param == Query.OPTIONAL:
+                continue
             if entity in entities and listify(param) != listify(entities[entity]):
                 raise ValueError(
                     f'Conflicting entities for "{entity}" found: {entities[entity]} // {param}'
