@@ -1,3 +1,14 @@
+1.14.0 (August 19, 2025)
+========================
+New feature release in the 1.13.x series.
+
+* FIX: Address failures from nilearn/matplotlib (#960)
+* FIX: Loosen session error on mismatch (#956)
+* ENH: Sync PETPrep requirements (#965)
+* ENH: Add filename pattern for label.gii masks (#962)
+* ENH: Toggle requirement for any image type BIDSDataGrabber, add task filtering when collecting PET data (#951)
+* MNT: Install datalad-osf, git-annex from PyPI (#961)
+
 1.13.5 (June 19, 2025)
 ======================
 Patch release in the 1.13.x series.
