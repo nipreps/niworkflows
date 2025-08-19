@@ -51,7 +51,7 @@
     },
     {
       "name": "ref",
-      "pattern": "[_/\\\\]+pvc-([a-zA-Z0-9+]+)"
+      "pattern": "[_/\\\\]+ref-([a-zA-Z0-9+]+)"
     },
     {
       "name": "modality",
