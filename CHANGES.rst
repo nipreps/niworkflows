@@ -1,3 +1,10 @@
+1.14.1 (September 16, 2025)
+===========================
+Patch release in the 1.14.x series.
+
+* FIX: Add task entity to PET path patterns (#970)
+* ENH: Add optional hash entity to path patterns (#966)
+
 1.14.0 (August 19, 2025)
 ========================
 New feature release in the 1.13.x series.
