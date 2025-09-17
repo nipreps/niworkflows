@@ -34,7 +34,7 @@ def init_epi_reference_wf(
     omp_nthreads,
     auto_bold_nss=False,
     name='epi_reference_wf',
-    n4_iterations=(50,)*5,
+    n4_iterations=(50,) * 5,
     n4_shrink_factor=4,
     calculate_bspline_grid=False,
 ):
@@ -269,13 +269,14 @@ def _post_merge(in_file, in_xfms):
 
 
 def _bspline_grid(in_file):
+    import math
+
     import nibabel as nb
     import numpy as np
-    import math
 
     img = nb.load(in_file)
     zooms = img.header.get_zooms()[:3]
     extent = (np.array(img.shape[:3]) - 1) * zooms
     # get mesh resolution ratio
     retval = [f'{math.ceil(i / extent[np.argmin(extent)])}' for i in extent]
-    return f"-b [{'x'.join(retval)}]"
+    return f'-b [{"x".join(retval)}]'
