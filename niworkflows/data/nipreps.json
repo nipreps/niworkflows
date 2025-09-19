@@ -209,6 +209,6 @@
     "sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_fmapid-{fmapid}][_desc-{desc}]_{suffix<fieldmap>}{extension<.html|.svg>|.svg}",
     "sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<dwi|epi|epiref>}{extension<.html|.svg>|.svg}",
     "sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<bold|boldmap>}{extension<.html|.svg>|.svg}",
-    "sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_ref-{ref}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<pet>}{extension<.html|.svg>|.svg}"
+    "sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_ref-{ref}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_label-{label}][_desc-{desc}]_{suffix<pet>}{extension<.html|.svg>|.svg}"
   ]
 }
