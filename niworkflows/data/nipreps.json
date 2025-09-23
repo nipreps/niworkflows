@@ -50,10 +50,6 @@
       "pattern": "[_/\\\\]+pvc-([a-zA-Z0-9+]+)"
     },
     {
-      "name": "ref",
-      "pattern": "[_/\\\\]+ref-([a-zA-Z0-9+]+)"
-    },
-    {
       "name": "modality",
       "pattern": "[_/\\\\]+mod-([a-zA-Z0-9+]+)"
     },
