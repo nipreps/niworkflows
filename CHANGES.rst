@@ -1,3 +1,13 @@
+1.14.2 (September 26, 2025)
+===========================
+Patch release in the 1.14.x series.
+
+This release updates the config file used for generating derivative filenames.
+
+* FIX: Replace 'ref' entity with 'label' entity according to BIDS specification (#976)
+* ENH: Add fmap mask path to path patterns (#977)
+* ENH: Add 'label' entity to anatomical masks in nipreps.json (#973)
+
 1.14.1 (September 16, 2025)
 ===========================
 Patch release in the 1.14.x series.
