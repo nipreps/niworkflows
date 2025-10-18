@@ -758,7 +758,7 @@ def compcor_variance_plot(
             metadata_sources = ['CompCor']
         else:
             metadata_sources = [f'Decomposition {i:d}' for i in range(len(metadata_files))]
-    for file, source in zip(metadata_files, metadata_sources):
+    for file, source in zip(metadata_files, metadata_sources, strict=False):
         metadata[source] = pd.read_csv(str(file), sep=r'\s+')
         metadata[source]['source'] = source
     metadata = pd.concat(list(metadata.values()))

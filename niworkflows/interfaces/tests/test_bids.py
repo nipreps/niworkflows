@@ -361,10 +361,10 @@ def test_DerivativesDataSink_build_path(
             ]
 
     base = (out_path_base or 'niworkflows') if interface == bintfs.DerivativesDataSink else ''
-    for out, exp in zip(output, expectation):
+    for out, exp in zip(output, expectation, strict=False):
         assert Path(out).relative_to(base_directory) == Path(base) / exp
 
-    for out, exp in zip(output, expectation):
+    for out, exp in zip(output, expectation, strict=False):
         assert Path(out).relative_to(base_directory) == Path(base) / exp
         # Regression - some images were given nan scale factors
         if out.endswith(('.nii', '.nii.gz')):
@@ -374,7 +374,7 @@ def test_DerivativesDataSink_build_path(
                     hdr = img.header.from_fileobj(fobj)
                 assert not np.isnan(hdr['scl_slope'])
                 assert not np.isnan(hdr['scl_inter'])
-    for out, chksum in zip(output, checksum):
+    for out, chksum in zip(output, checksum, strict=False):
         if chksum == '335f1394ce90b58bbf27026b6eeec4d2124c11da':
             if Version(nb.__version__) < Version('5.3'):
                 # Nibabel 5.3 avoids unnecessary roundtrips for Cifti2Headers

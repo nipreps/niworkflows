@@ -185,7 +185,7 @@ def cuts_from_bbox(mask_nii, cuts=3):
 
     vox_coords = np.zeros((4, cuts), dtype=np.float32)
     vox_coords[-1, :] = 1.0
-    for ax, (c, th) in enumerate(zip(ijk_counts, ijk_th)):
+    for ax, (c, th) in enumerate(zip(ijk_counts, ijk_th, strict=False)):
         # Start with full plane if mask is seemingly empty
         smin, smax = (0, mask_data.shape[ax] - 1)
 
@@ -198,7 +198,7 @@ def cuts_from_bbox(mask_nii, cuts=3):
         vox_coords[ax, :] = np.linspace(smin, smax, num=cuts + 2)[1:-1]
 
     ras_coords = mask_nii.affine.dot(vox_coords)[:3, ...]
-    return {k: list(v) for k, v in zip(['x', 'y', 'z'], np.around(ras_coords, 3))}
+    return {k: list(v) for k, v in zip(['x', 'y', 'z'], np.around(ras_coords, 3), strict=False)}
 
 
 def _3d_in_file(in_file):

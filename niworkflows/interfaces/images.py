@@ -284,7 +284,9 @@ class RobustAverage(SimpleInterface):
         self._results['out_file'] = fname(suffix='_average')
         self._results['out_volumes'] = fname(suffix='_sliced')
 
-        sliced = nb.concat_images(i for i, t in zip(nb.four_to_three(img), t_mask) if t)
+        sliced = nb.concat_images(
+            i for i, t in zip(nb.four_to_three(img), t_mask, strict=False) if t
+        )
 
         data = sliced.get_fdata(dtype='float32')
         # Data can come with outliers showing very high numbers - preemptively prune

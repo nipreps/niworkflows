@@ -195,7 +195,7 @@ def test_TemplateDimensions(tmp_path):
         (0.9, 0.9, 0.9),
     ]
 
-    for i, (shape, zoom) in enumerate(zip(shapes, zooms)):
+    for i, (shape, zoom) in enumerate(zip(shapes, zooms, strict=False)):
         img = nb.Nifti1Image(np.ones(shape, dtype='float32'), np.eye(4))
         img.header.set_zooms(zoom)
         img.to_filename(tmp_path / f'test{i}.nii')

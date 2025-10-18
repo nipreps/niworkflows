@@ -141,7 +141,7 @@ class MultiApplyTransforms(SimpleInterface):
         if num_threads == 1:
             out_files = [
                 _applytfms((in_file, in_xfm, ifargs, i, runtime.cwd))
-                for i, (in_file, in_xfm) in enumerate(zip(in_files, xfms_list))
+                for i, (in_file, in_xfm) in enumerate(zip(in_files, xfms_list, strict=False))
             ]
         else:
             from concurrent.futures import ThreadPoolExecutor
@@ -152,7 +152,9 @@ class MultiApplyTransforms(SimpleInterface):
                         _applytfms,
                         [
                             (in_file, in_xfm, ifargs, i, runtime.cwd)
-                            for i, (in_file, in_xfm) in enumerate(zip(in_files, xfms_list))
+                            for i, (in_file, in_xfm) in enumerate(
+                                zip(in_files, xfms_list, strict=False)
+                            )
                         ],
                     )
                 )
@@ -264,4 +266,4 @@ def _arrange_xfms(transforms, num_files, tmp_folder):
         xfms_T.append(split_xfms)
 
     # Transpose back (only Python 3)
-    return list(map(list, zip(*xfms_T)))
+    return list(map(list, zip(*xfms_T, strict=False)))
