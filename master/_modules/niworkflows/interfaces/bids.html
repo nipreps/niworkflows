@@ -349,7 +349,6 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">suppress</span>
 <span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">dumps</span><span class="p">,</span> <span class="n">loads</span>
@@ -388,15 +387,6 @@
 
 <span class="n">STANDARD_SPACES</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">templates</span><span class="p">()</span>
 <span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;nipype.interface&#39;</span><span class="p">)</span>
-
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>  <span class="c1"># PY39</span>
-    <span class="n">builtin_zip</span> <span class="o">=</span> <span class="nb">zip</span>
-
-    <span class="k">def</span> <span class="nf">zip</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>  <span class="c1"># noqa: A001</span>
-        <span class="k">if</span> <span class="n">strict</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;strict_zip() requires all arguments to have the same length&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">builtin_zip</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_none</span><span class="p">():</span>
@@ -961,7 +951,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dest_files</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_meta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
 
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">orig_file</span><span class="p">,</span> <span class="n">dest_file</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">dest_files</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">orig_file</span><span class="p">,</span> <span class="n">dest_file</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">dest_files</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)):</span>
             <span class="c1"># Set data and header iff changes need to be made. If these are</span>
             <span class="c1"># still None when it&#39;s time to write, just copy.</span>
             <span class="n">new_data</span><span class="p">,</span> <span class="n">new_header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
@@ -1470,7 +1460,7 @@
                 <span class="sa">f</span><span class="s1">&#39;by interpolated patterns (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dest_files</span><span class="p">)</span><span class="si">}</span><span class="s1">).&#39;</span>
             <span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">orig_file</span><span class="p">,</span> <span class="n">dest_file</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">dest_files</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">orig_file</span><span class="p">,</span> <span class="n">dest_file</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="n">dest_files</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)):</span>
             <span class="n">out_file</span> <span class="o">=</span> <span class="n">out_path</span> <span class="o">/</span> <span class="n">dest_file</span>
             <span class="n">out_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">out_file</span><span class="p">))</span>
