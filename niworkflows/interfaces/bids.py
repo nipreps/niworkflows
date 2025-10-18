@@ -25,7 +25,6 @@
 import os
 import re
 import shutil
-import sys
 from collections import defaultdict
 from contextlib import suppress
 from json import dumps, loads
@@ -64,15 +63,6 @@ BIDS_DERIV_PATTERNS = tuple(_pybids_spec['default_path_patterns'])
 
 STANDARD_SPACES = tf.api.templates()
 LOGGER = logging.getLogger('nipype.interface')
-
-
-if sys.version_info < (3, 10):  # PY39
-    builtin_zip = zip
-
-    def zip(*args, strict=False):  # noqa: A001
-        if strict and any(len(args[0]) != len(arg) for arg in args):
-            raise ValueError('strict_zip() requires all arguments to have the same length')
-        return builtin_zip(*args)
 
 
 def _none():
@@ -629,7 +619,7 @@ class PrepareDerivative(SimpleInterface):
         self._results['out_path'] = dest_files
         self._results['out_meta'] = metadata
 
-        for i, (orig_file, dest_file) in enumerate(zip(in_file, dest_files)):
+        for i, (orig_file, dest_file) in enumerate(zip(in_file, dest_files, strict=False)):
             # Set data and header iff changes need to be made. If these are
             # still None when it's time to write, just copy.
             new_data, new_header = None, None
@@ -1132,7 +1122,7 @@ space-MNI152NLin6Asym_desc-preproc_bold.json'
                 f'by interpolated patterns ({len(dest_files)}).'
             )
 
-        for i, (orig_file, dest_file) in enumerate(zip(in_file, dest_files)):
+        for i, (orig_file, dest_file) in enumerate(zip(in_file, dest_files, strict=False)):
             out_file = out_path / dest_file
             out_file.parent.mkdir(exist_ok=True, parents=True)
             self._results['out_file'].append(str(out_file))

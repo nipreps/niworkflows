@@ -371,7 +371,7 @@ class JoinTSVColumns(SimpleInterface):
             raise ValueError('Number of columns in datasets do not match')
 
         merged = []
-        for d, j in zip(data, join):
+        for d, j in zip(data, join, strict=False):
             line = '%s\t%s' % ((j, d) if self.inputs.side == 'left' else (d, j))
             merged.append(line)
 

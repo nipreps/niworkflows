@@ -743,6 +743,7 @@ def ply2gii(in_file, metadata, out_file=None):
         zip(
             ('SurfaceCenterX', 'SurfaceCenterY', 'SurfaceCenterZ'),
             [f'{c:.4f}' for c in surf.centroid],
+            strict=False,
         )
     )
 

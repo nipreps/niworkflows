@@ -303,7 +303,7 @@ def spike_regressors(
         post_final = data.shape[0] + 1
         epoch_length = np.diff(sorted(mask | {-1, post_final})) - 1
         epoch_end = sorted(mask | {post_final})
-        for end, length in zip(epoch_end, epoch_length):
+        for end, length in zip(epoch_end, epoch_length, strict=False):
             if length < minimum_contiguous:
                 mask = mask | set(range(end - length, end))
         mask = mask.intersection(indices)

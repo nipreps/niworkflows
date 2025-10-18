@@ -95,7 +95,7 @@ def test_space_action(parser, spaces, expected):
         'Every element must be a `Reference`'
     )
     assert len(parsed_spaces.references) == len(expected)
-    for ref, expected_ref in zip(parsed_spaces.references, expected):
+    for ref, expected_ref in zip(parsed_spaces.references, expected, strict=False):
         assert str(ref) == expected_ref
 
 

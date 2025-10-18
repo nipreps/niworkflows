@@ -72,7 +72,7 @@ def test_carpetplot(tr, sorting):
     rng.shuffle(indexes)
     segments = {}
     start = 0
-    for group, size in zip(labels, sizes):
+    for group, size in zip(labels, sizes, strict=False):
         segments[group] = indexes[start : start + size]
         data[indexes[start : start + size]] = rng.normal(
             rng.standard_normal(1) * 100, rng.normal(20, 5, size=1), size=(size, 300)
@@ -100,7 +100,7 @@ def test_carpetplot(tr, sorting):
     rng.shuffle(indexes)
     segments = {}
     start = 0
-    for i, (group, size) in enumerate(zip(labels, sizes)):
+    for i, (group, size) in enumerate(zip(labels, sizes, strict=False)):
         segments[group] = indexes[start : start + size]
         data[indexes[start : start + size]] = i
         start += size

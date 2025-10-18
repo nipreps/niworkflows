@@ -74,7 +74,7 @@ if datapath:
 
     bold_datasets = [[str((datapath / p).absolute()) for p in ds] for ds in bold_datasets]
 
-    parameters = zip(bold_datasets, exp_masks)
+    parameters = zip(bold_datasets, exp_masks, strict=False)
 
     if not bold_datasets:
         raise RuntimeError(
