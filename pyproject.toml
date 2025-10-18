@@ -9,14 +9,13 @@ description = "NeuroImaging Workflows provides processing tools for magnetic res
 readme = "README.rst"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 authors = [
     { name = "The NiPreps Developers", email = "nipreps@gmail.com" },
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -226,3 +225,45 @@ source = [
 [tool.codespell]
 skip = "*/data/*,*/docs/_build/*,./examples/viz-report.*"
 ignore-words-list = "objekt,nd"
+
+[tool.pixi.workspace]
+channels = ["https://fsl.fmrib.ox.ac.uk/fsldownloads/fslconda/public", "conda-forge"]
+platforms = ["linux-64"]
+
+[tool.pixi.feature.niworkflows.activation.env]
+FSLDIR = "$CONDA_PREFIX"
+
+[tool.pixi.pypi-dependencies]
+niworkflows = { path = ".", editable = true }
+
+[tool.pixi.environments]
+default = { features = ["editable"], solve-group = "default" }
+test = { features = ["editable", "tests"], solve-group = "default" }
+niworkflows = { features = ["production"], solve-group = "production" }
+
+[tool.pixi.feature.editable.pypi-dependencies]
+niworkflows = { path = ".", editable = true }
+[tool.pixi.feature.production.pypi-dependencies]
+niworkflows = { path = ".", editable = false }
+
+[tool.pixi.tasks]
+
+[tool.pixi.dependencies]
+python = "3.12.*"
+mkl = "2024.2.2.*"
+mkl-service = "2.4.2.*"
+numpy = "1.26.*"
+scipy = "1.15.*"
+matplotlib = "3.9.*"
+pandas = "2.2.*"
+h5py = "3.13.*"
+scikit-image = "0.25.*"
+scikit-learn = "1.6.*"
+graphviz = "11.0.*"
+ants = "2.5.*"
+libitk = "5.4.0.*"
+fsl-bet2 = "2111.8.*"
+fsl-flirt = "2111.2.*"
+fsl-fast4 = "2111.3.*"
+fsl-mcflirt = "2111.0.*"
+fsl-miscmaths = "2203.2.*"
