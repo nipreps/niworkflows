@@ -28,7 +28,7 @@ from time import sleep
 from nipype.algorithms import confounds as nac
 from nipype.interfaces import io as nio
 from nipype.interfaces.base import File
-from numpy.linalg.linalg import LinAlgError
+from numpy.linalg import LinAlgError
 
 
 class RobustACompCor(nac.ACompCor):
