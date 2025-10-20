@@ -3793,10 +3793,9 @@ packages:
   - pytest-xvfb>=2 ; extra == 'tests'
   - pytest>=8 ; extra == 'tests'
   requires_python: '>=3.10'
-  editable: true
 - pypi: ./
   name: niworkflows
-  version: 1.15.0.dev23+g03d056ce7.d20251020
+  version: 1.15.0.dev24+g4d8d5fb78.d20251020
   sha256: 9593c2ec550e6f007cd810b25eaa947783f9430e8f8dfe094172473aa3671448
   requires_dist:
   - acres>=0.5
@@ -3854,6 +3853,7 @@ packages:
   - pytest-xvfb>=2 ; extra == 'tests'
   - pytest>=8 ; extra == 'tests'
   requires_python: '>=3.10'
+  editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/nspr-4.37-h29cc59b_0.conda
   sha256: 472306630dcd49a221863b91bd89f5b8b81daf1b99adf1968c9f12021176d873
   md5: d73ccc379297a67ed921bd55b38a6c6a
