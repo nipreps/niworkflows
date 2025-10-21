@@ -12,7 +12,3 @@ fmriprep.egg-info/**/*
 fmriprep.egg-info
 .eggs/**/*
 .eggs
-
-.venv
-.pixi
-.tox
