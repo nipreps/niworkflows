@@ -104,3 +104,15 @@ def test_space_action_edgecases(parser, flag, expected):
     pargs = parser.parse_known_args(flag)[0]
     spaces = pargs.spaces
     assert spaces.is_cached() is expected
+
+
+@pytest.mark.parametrize(
+    ('spaces', 'expected'),
+    [
+        (('func:res-01',), 'Resolutions are not allowed for nonstandard spaces.'),
+        (('shouldraise',), 'space identifier "shouldraise" is invalid.')
+    ],
+)
+def test_space_action_invalid_spaces(parser, spaces, expected):
+    with pytest.raises(ValueError, match=expected):
+        parser.parse_known_args(args=('--spaces',) + spaces)[0]
