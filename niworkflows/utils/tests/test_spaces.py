@@ -110,7 +110,7 @@ def test_space_action_edgecases(parser, flag, expected):
     ('spaces', 'expected'),
     [
         (('func:res-01',), 'Resolutions are not allowed for nonstandard spaces.'),
-        (('shouldraise',), 'space identifier "shouldraise" is invalid.')
+        (('shouldraise',), 'space identifier "shouldraise" is invalid.'),
     ],
 )
 def test_space_action_invalid_spaces(parser, spaces, expected):
