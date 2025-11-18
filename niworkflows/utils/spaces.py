@@ -708,11 +708,17 @@ class OutputReferencesAction(argparse.Action):
         if not values:
             # option was called without any output spaces, so user does not want outputs
             spaces.checkpoint()
+
+        invalid_spaces = []
         for val in values:
             val = val.rstrip(':')
+            space = val.split(':', 1)[0]
+            if space in NONSTANDARD_REFERENCES and ':' in val:
+                invalid_spaces.append(val)
+
             if (
-                val not in NONSTANDARD_REFERENCES
-                and not val.split(':')[0].startswith('fs')
+                space not in NONSTANDARD_REFERENCES
+                and not space.startswith('fs')
                 and ':res-' not in val
                 and ':resolution-' not in val
             ):
@@ -721,8 +727,16 @@ class OutputReferencesAction(argparse.Action):
                 # https://github.com/nipreps/niworkflows/pull/457#discussion_r375510227
                 # https://github.com/nipreps/niworkflows/pull/494
                 val = f'{val}:res-native'
+
             for sp in Reference.from_string(val):
                 spaces.add(sp)
+
+        if invalid_spaces:
+            raise ValueError(
+                'Modifiers are not allowed for nonstandard spaces. '
+                f'Invalid space(s): {", ".join(invalid_spaces)}'
+            )
+
         setattr(namespace, self.dest, spaces)
 
 
