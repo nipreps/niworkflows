@@ -109,7 +109,8 @@ def test_space_action_edgecases(parser, flag, expected):
 @pytest.mark.parametrize(
     ('spaces', 'expected'),
     [
-        (('func:res-01',), 'Resolutions are not allowed for nonstandard spaces.'),
+        (('func:res-01',), 'Modifiers are not allowed for nonstandard spaces.'),
+        (('anat:den-91k',), 'Modifiers are not allowed for nonstandard spaces.'),
         (('shouldraise',), 'space identifier "shouldraise" is invalid.'),
     ],
 )

@@ -713,7 +713,7 @@ class OutputReferencesAction(argparse.Action):
         for val in values:
             val = val.rstrip(':')
             space = val.split(':')[0]
-            if space in NONSTANDARD_REFERENCES and (':res-' in val or ':resolution-' in val):
+            if space in NONSTANDARD_REFERENCES and ':' in val:
                 invalid_spaces.append(val)
 
             if (
@@ -733,7 +733,7 @@ class OutputReferencesAction(argparse.Action):
 
         if invalid_spaces:
             raise ValueError(
-                'Resolutions are not allowed for nonstandard spaces. '
+                'Modifiers are not allowed for nonstandard spaces. '
                 f'Invalid space(s): {", ".join(invalid_spaces)}'
             )
 
