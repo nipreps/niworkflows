@@ -1073,11 +1073,17 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">values</span><span class="p">:</span>
             <span class="c1"># option was called without any output spaces, so user does not want outputs</span>
             <span class="n">spaces</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">()</span>
+
+        <span class="n">invalid_spaces</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+            <span class="n">space</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">space</span> <span class="ow">in</span> <span class="n">NONSTANDARD_REFERENCES</span> <span class="ow">and</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+                <span class="n">invalid_spaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="p">(</span>
-                <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">NONSTANDARD_REFERENCES</span>
-                <span class="ow">and</span> <span class="ow">not</span> <span class="n">val</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">)</span>
+                <span class="n">space</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">NONSTANDARD_REFERENCES</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">space</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">)</span>
                 <span class="ow">and</span> <span class="s1">&#39;:res-&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">val</span>
                 <span class="ow">and</span> <span class="s1">&#39;:resolution-&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">val</span>
             <span class="p">):</span>
@@ -1086,8 +1092,16 @@
                 <span class="c1"># https://github.com/nipreps/niworkflows/pull/457#discussion_r375510227</span>
                 <span class="c1"># https://github.com/nipreps/niworkflows/pull/494</span>
                 <span class="n">val</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s1">:res-native&#39;</span>
+
             <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">Reference</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
                 <span class="n">spaces</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">invalid_spaces</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Modifiers are not allowed for nonstandard spaces. &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;Invalid space(s): </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">invalid_spaces</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+
         <span class="nb">setattr</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="p">,</span> <span class="n">spaces</span><span class="p">)</span></div>
 
 
