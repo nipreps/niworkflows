@@ -712,7 +712,7 @@ class OutputReferencesAction(argparse.Action):
         invalid_spaces = []
         for val in values:
             val = val.rstrip(':')
-            space = val.split(':')[0]
+            space = val.split(':', 1)[0]
             if space in NONSTANDARD_REFERENCES and ':' in val:
                 invalid_spaces.append(val)
 
