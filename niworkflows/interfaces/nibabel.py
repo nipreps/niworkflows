@@ -430,6 +430,7 @@ class GenerateSamplingReference(SimpleInterface):
             force_xform_code=self.inputs.xform_code,
             message=f'{self.__class__.__name__} (niworkflows v{__version__})',
             newpath=runtime.cwd,
+            target_resolution=self.inputs.target_resolution,
         )
         return runtime
 
