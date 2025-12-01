@@ -34,7 +34,7 @@ etelemetry==0.3.1
     # via nipype
 filelock==3.17.0
     # via nipype
-fonttools==4.56.0
+fonttools==4.61.0
     # via matplotlib
 formulaic==1.1.1
     # via pybids
