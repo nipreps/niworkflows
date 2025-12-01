@@ -394,6 +394,7 @@ class _GenerateSamplingReferenceInputSpec(BaseInterfaceInputSpec):
         usedefault=True,
     )
 
+
 class _GenerateSamplingReferenceOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='one file with all inputs flattened')
 
