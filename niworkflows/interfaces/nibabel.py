@@ -385,12 +385,10 @@ class _GenerateSamplingReferenceInputSpec(BaseInterfaceInputSpec):
         'the volume extent given by fixed_image, fast forward '
         'fixed_image otherwise.',
     )
-    target_resolution = traits.Tuple(
-        traits.Float,
-        traits.Float,
-        traits.Float,
+    target_resolution = traits.Either(
+        None,
+        traits.Tuple(traits.Float, traits.Float, traits.Float),
         desc='target resolution (mm)',
-        default=None,
         usedefault=True,
     )
 
