@@ -379,6 +379,61 @@ in the confounds file.</p></li>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.confounds.FSLMotionParams">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.confounds.</span></span><span class="sig-name descname"><span class="pre">FSLMotionParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/confounds.html#FSLMotionParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.confounds.FSLMotionParams" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
+<p>Reconstruct FSL motion parameters from affine transforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>boldref_file</strong> (<em>a pathlike object or string representing an existing file</em>) – BOLD reference file.</p></li>
+<li><p><strong>xfm_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Head motion transform file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Outputs<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – Output motion parameters file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.confounds.FSLRMSDeviation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.confounds.</span></span><span class="sig-name descname"><span class="pre">FSLRMSDeviation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/confounds.html#FSLRMSDeviation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.confounds.FSLRMSDeviation" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
+<p>Reconstruct FSL root mean square deviation from affine transforms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>boldref_file</strong> (<em>a pathlike object or string representing an existing file</em>) – BOLD reference file.</p></li>
+<li><p><strong>xfm_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Head motion transform file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Outputs<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – Output motion parameters file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.confounds.FramewiseDisplacement">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.confounds.</span></span><span class="sig-name descname"><span class="pre">FramewiseDisplacement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/confounds.html#FramewiseDisplacement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.confounds.FramewiseDisplacement" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
+<p>Calculate framewise displacement estimates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_file</strong> (<em>a pathlike object or string representing an existing file</em>) – Head motion transform file.</p></li>
+<li><p><strong>radius</strong> (<em>a float</em>) – Radius of the head in mm.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">50</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Outputs<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out_file</strong> (<em>a pathlike object or string representing a file</em>) – Output framewise displacement file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="niworkflows.interfaces.confounds.NormalizeMotionParams">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.confounds.</span></span><span class="sig-name descname"><span class="pre">NormalizeMotionParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/confounds.html#NormalizeMotionParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.confounds.NormalizeMotionParams" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
@@ -442,14 +497,14 @@ in the confounds file.</p></li>
 indicates that the first and second exponential terms should be added.
 To retain the original terms, <code class="docutils literal notranslate"><span class="pre">1</span></code> <em>must</em> be included in the list.</p></li>
 <li><p><strong>variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – List of variables for which exponential terms should be computed.</p></li>
-<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+21.g499c5d4dd5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables.</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+33.g1fd184de2a)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>variables_exp</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>) – A list of variables to include in the final data frame after adding
 the specified exponential terms.</p></li>
-<li><p><strong>data_exp</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+21.g499c5d4dd5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables, including any
+<li><p><strong>data_exp</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+33.g1fd184de2a)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables, including any
 specified exponential terms.</p></li>
 </ul>
 </p>
@@ -466,13 +521,13 @@ specified exponential terms.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expression</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – Formula expression: either a single variable or a variable group
 paired with an operation (exponentiation or differentiation).</p></li>
-<li><p><strong>parent_data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+21.g499c5d4dd5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – The source data for the model expansion.</p></li>
+<li><p><strong>parent_data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+33.g1fd184de2a)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – The source data for the model expansion.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>) – A list of variables in the provided formula expression.</p></li>
-<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+21.g499c5d4dd5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – A tabulation of all terms in the provided formula expression.</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+33.g1fd184de2a)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – A tabulation of all terms in the provided formula expression.</p></li>
 </ul>
 </p>
 </dd>
@@ -516,7 +571,7 @@ returned when exponential terms are computed.</p></li>
 <p>Temporal derivatives and exponential terms are computed for all terms
 in the grouping symbols that they adjoin.</p>
 </li>
-<li><p><strong>parent_data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+21.g499c5d4dd5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – A tabulation of all values usable in the model formula. Each additive
+<li><p><strong>parent_data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+33.g1fd184de2a)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – A tabulation of all values usable in the model formula. Each additive
 term in <cite>model_formula</cite> should correspond either to a variable in this
 data frame or to instructions for operating on a variable (for
 instance, computing temporal derivatives or exponential terms).</p></li>
@@ -526,7 +581,7 @@ instance, computing temporal derivatives or exponential terms).</p></li>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – A list of variables included in the model parsed from the provided
 formula.</p></li>
-<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+21.g499c5d4dd5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – All values in the complete model.</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+33.g1fd184de2a)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – All values in the complete model.</p></li>
 </ul>
 </p>
 </dd>
@@ -540,7 +595,7 @@ formula.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+21.g499c5d4dd5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – A tabulation of observations from which spike regressors should be
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+33.g1fd184de2a)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – A tabulation of observations from which spike regressors should be
 estimated.</p></li>
 <li><p><strong>criteria</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> of (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="docutils literal notranslate"><span class="pre">'&gt;'</span></code> or <code class="docutils literal notranslate"><span class="pre">'&lt;'</span></code> or <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>)) – Criteria for generating a spike regressor. If, for a given frame, the
 value of the variable corresponding to the key exceeds the threshold
@@ -567,7 +622,7 @@ additionally have spike regressors implemented.</p></li>
 <dd class="field-even"><p><strong>data</strong> – The input DataFrame with a column for each spike regressor.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+21.g499c5d4dd5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+33.g1fd184de2a)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a></p>
 </dd>
 </dl>
 <p class="rubric">References</p>
@@ -593,14 +648,14 @@ indicates that the first and second derivative terms should be added.
 To retain the original terms, <code class="docutils literal notranslate"><span class="pre">0</span></code> <em>must</em> be included in the list.</p></li>
 <li><p><strong>variables</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – List of variables for which temporal derivative terms should be
 computed.</p></li>
-<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+21.g499c5d4dd5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables.</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+33.g1fd184de2a)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>variables_deriv</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a>) – A list of variables to include in the final data frame after adding
 the specified derivative terms.</p></li>
-<li><p><strong>data_deriv</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+21.g499c5d4dd5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables, including any
+<li><p><strong>data_deriv</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.0rc0+33.g1fd184de2a)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrame</span></code></a>) – Table of values of all observations of all variables, including any
 specified derivative terms.</p></li>
 </ul>
 </p>
@@ -667,6 +722,9 @@ specified derivative terms.</p></li>
             <ul>
 <li><a class="reference internal" href="#">niworkflows.interfaces.confounds module</a><ul>
 <li><a class="reference internal" href="#niworkflows.interfaces.confounds.ExpandModel"><code class="docutils literal notranslate"><span class="pre">ExpandModel</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.confounds.FSLMotionParams"><code class="docutils literal notranslate"><span class="pre">FSLMotionParams</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.confounds.FSLRMSDeviation"><code class="docutils literal notranslate"><span class="pre">FSLRMSDeviation</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.confounds.FramewiseDisplacement"><code class="docutils literal notranslate"><span class="pre">FramewiseDisplacement</span></code></a></li>
 <li><a class="reference internal" href="#niworkflows.interfaces.confounds.NormalizeMotionParams"><code class="docutils literal notranslate"><span class="pre">NormalizeMotionParams</span></code></a></li>
 <li><a class="reference internal" href="#niworkflows.interfaces.confounds.SpikeRegressors"><code class="docutils literal notranslate"><span class="pre">SpikeRegressors</span></code></a></li>
 <li><a class="reference internal" href="#niworkflows.interfaces.confounds.exponential_terms"><code class="docutils literal notranslate"><span class="pre">exponential_terms()</span></code></a></li>

@@ -352,6 +352,8 @@
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">deque</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
 
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">import</span> <span class="nn">nitransforms</span> <span class="k">as</span> <span class="nn">nt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
@@ -364,6 +366,157 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
 <span class="kn">from</span> <span class="nn">nipype.utils.misc</span> <span class="kn">import</span> <span class="n">normalize_mc_params</span>
+
+
+<span class="k">class</span> <span class="nc">_FSLMotionParamsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">xfm_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Head motion transform file&#39;</span><span class="p">)</span>
+    <span class="n">boldref_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;BOLD reference file&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_FSLMotionParamsOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Output motion parameters file&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="FSLMotionParams">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.FSLMotionParams">[docs]</a>
+<span class="k">class</span> <span class="nc">FSLMotionParams</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reconstruct FSL motion parameters from affine transforms.&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_FSLMotionParamsInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FSLMotionParamsOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">ndimage</span> <span class="k">as</span> <span class="n">ndi</span>
+        <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">transform</span> <span class="k">as</span> <span class="n">sst</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">boldref_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_motion.tsv&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
+        <span class="p">)</span>
+
+        <span class="n">boldref</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">boldref_file</span><span class="p">)</span>
+        <span class="n">hmc</span> <span class="o">=</span> <span class="n">nt</span><span class="o">.</span><span class="n">linear</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">xfm_file</span><span class="p">)</span>
+
+        <span class="c1"># FSL&#39;s &quot;center of gravity&quot; is the center of mass scaled by zooms</span>
+        <span class="c1"># No rotation is applied.</span>
+        <span class="n">center_of_gravity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">boldref</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">()),</span>
+            <span class="n">ndi</span><span class="o">.</span><span class="n">center_of_mass</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">boldref</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Revert to vox2vox transforms</span>
+        <span class="n">fsl_hmc</span> <span class="o">=</span> <span class="n">nt</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">fsl</span><span class="o">.</span><span class="n">FSLLinearTransformArray</span><span class="o">.</span><span class="n">from_ras</span><span class="p">(</span>
+            <span class="n">hmc</span><span class="o">.</span><span class="n">matrix</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="n">boldref</span><span class="p">,</span> <span class="n">moving</span><span class="o">=</span><span class="n">boldref</span>
+        <span class="p">)</span>
+        <span class="n">fsl_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">xfm</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">xfm</span> <span class="ow">in</span> <span class="n">fsl_hmc</span><span class="o">.</span><span class="n">xforms</span><span class="p">])</span>
+
+        <span class="c1"># FSL uses left-handed rotation conventions, so transpose</span>
+        <span class="n">mats</span> <span class="o">=</span> <span class="n">fsl_matrix</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Rotations are recovered directly</span>
+        <span class="n">rot_xyz</span> <span class="o">=</span> <span class="n">sst</span><span class="o">.</span><span class="n">Rotation</span><span class="o">.</span><span class="n">from_matrix</span><span class="p">(</span><span class="n">mats</span><span class="p">)</span><span class="o">.</span><span class="n">as_euler</span><span class="p">(</span><span class="s1">&#39;XYZ&#39;</span><span class="p">)</span>
+        <span class="c1"># Translations are recovered by applying the rotation to the center of gravity</span>
+        <span class="n">trans_xyz</span> <span class="o">=</span> <span class="n">fsl_matrix</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">mats</span> <span class="o">@</span> <span class="n">center_of_gravity</span> <span class="o">+</span> <span class="n">center_of_gravity</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">trans_xyz</span><span class="p">,</span> <span class="n">rot_xyz</span><span class="p">)),</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;trans_x&#39;</span><span class="p">,</span> <span class="s1">&#39;trans_y&#39;</span><span class="p">,</span> <span class="s1">&#39;trans_z&#39;</span><span class="p">,</span> <span class="s1">&#39;rot_x&#39;</span><span class="p">,</span> <span class="s1">&#39;rot_y&#39;</span><span class="p">,</span> <span class="s1">&#39;rot_z&#39;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="n">params</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">],</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">na_rep</span><span class="o">=</span><span class="s1">&#39;n/a&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+
+<span class="k">class</span> <span class="nc">_FSLRMSDeviationInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">xfm_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Head motion transform file&#39;</span><span class="p">)</span>
+    <span class="n">boldref_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;BOLD reference file&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_FSLRMSDeviationOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Output motion parameters file&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="FSLRMSDeviation">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.FSLRMSDeviation">[docs]</a>
+<span class="k">class</span> <span class="nc">FSLRMSDeviation</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reconstruct FSL root mean square deviation from affine transforms.&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_FSLRMSDeviationInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FSLRMSDeviationOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">boldref_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_motion.tsv&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
+        <span class="p">)</span>
+
+        <span class="n">boldref</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">boldref_file</span><span class="p">)</span>
+        <span class="n">hmc</span> <span class="o">=</span> <span class="n">nt</span><span class="o">.</span><span class="n">linear</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">xfm_file</span><span class="p">)</span>
+
+        <span class="n">center</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">boldref</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">boldref</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">()[:</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="c1"># Revert to vox2vox transforms</span>
+        <span class="n">fsl_hmc</span> <span class="o">=</span> <span class="n">nt</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">fsl</span><span class="o">.</span><span class="n">FSLLinearTransformArray</span><span class="o">.</span><span class="n">from_ras</span><span class="p">(</span>
+            <span class="n">hmc</span><span class="o">.</span><span class="n">matrix</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="n">boldref</span><span class="p">,</span> <span class="n">moving</span><span class="o">=</span><span class="n">boldref</span>
+        <span class="p">)</span>
+        <span class="n">fsl_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">xfm</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">xfm</span> <span class="ow">in</span> <span class="n">fsl_hmc</span><span class="o">.</span><span class="n">xforms</span><span class="p">])</span>
+
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">fsl_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">fsl_matrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">diff</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">diff</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">M</span> <span class="o">@</span> <span class="n">center</span>
+        <span class="n">Rmax</span> <span class="o">=</span> <span class="mf">80.0</span>
+
+        <span class="n">rmsd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">t</span> <span class="o">@</span> <span class="n">t</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">@</span> <span class="n">M</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis2</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">Rmax</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">5</span>
+                <span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">rmsd</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;rmsd&#39;</span><span class="p">])</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">],</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">na_rep</span><span class="o">=</span><span class="s1">&#39;n/a&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
+
+
+<span class="k">class</span> <span class="nc">_FramewiseDisplacementInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Head motion transform file&#39;</span><span class="p">)</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="n">usedefault</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Radius of the head in mm&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_FramewiseDisplacementOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Output framewise displacement file&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="FramewiseDisplacement">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.confounds.html#niworkflows.interfaces.confounds.FramewiseDisplacement">[docs]</a>
+<span class="k">class</span> <span class="nc">FramewiseDisplacement</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate framewise displacement estimates.&quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_FramewiseDisplacementInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_FramewiseDisplacementOutputSpec</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fname_presuffix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;_fd.tsv&#39;</span><span class="p">,</span> <span class="n">newpath</span><span class="o">=</span><span class="n">runtime</span><span class="o">.</span><span class="n">cwd</span>
+        <span class="p">)</span>
+
+        <span class="n">motion</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Filter and ensure we have all parameters</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">motion</span><span class="p">[[</span><span class="s1">&#39;trans_x&#39;</span><span class="p">,</span> <span class="s1">&#39;trans_y&#39;</span><span class="p">,</span> <span class="s1">&#39;trans_z&#39;</span><span class="p">,</span> <span class="s1">&#39;rot_x&#39;</span><span class="p">,</span> <span class="s1">&#39;rot_y&#39;</span><span class="p">,</span> <span class="s1">&#39;rot_z&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span>
+        <span class="n">diff</span><span class="p">[[</span><span class="s1">&#39;rot_x&#39;</span><span class="p">,</span> <span class="s1">&#39;rot_y&#39;</span><span class="p">,</span> <span class="s1">&#39;rot_z&#39;</span><span class="p">]]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">radius</span>
+
+        <span class="n">fd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">diff</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;FramewiseDisplacement&#39;</span><span class="p">])</span>
+
+        <span class="n">fd</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out_file&#39;</span><span class="p">],</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">na_rep</span><span class="o">=</span><span class="s1">&#39;n/a&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
 
 
 <span class="k">class</span> <span class="nc">_NormalizeMotionParamsInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
