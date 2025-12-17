@@ -576,6 +576,52 @@ def reorient_image(img: nb.spatialimages.SpatialImage, target_ornt: str):
     return r_img
 
 
+def rescale_affine(affine, shape, zooms, new_shape=None):
+    """Return a new affine matrix with updated voxel sizes (zooms)
+
+    This function preserves the rotations and shears of the original
+    affine, as well as the RAS location of the central voxel of the
+    image.
+
+    This is a modified version of the function in nibabel.affines.rescale_affine.
+    The difference is that it preserves the RAS location of the central point of
+    the image, rather than the location of the central voxel.
+
+    Parameters
+    ----------
+    affine : (N, N) array-like
+        NxN transform matrix in homogeneous coordinates representing an affine
+        transformation from an (N-1)-dimensional space to an (N-1)-dimensional
+        space. An example is a 4x4 transform representing rotations and
+        translations in 3 dimensions.
+    shape : (N-1,) array-like
+        The extent of the (N-1) dimensions of the original space
+    zooms : (N-1,) array-like
+        The size of voxels of the output affine
+    new_shape : (N-1,) array-like, optional
+        The extent of the (N-1) dimensions of the space described by the
+        new affine. If ``None``, use ``shape``.
+
+    Returns
+    -------
+    affine : (N, N) array
+        A new affine transform with the specified voxel sizes
+    """
+    import numpy as np
+    from nibabel.affines import apply_affine, from_matvec, voxel_sizes
+
+    shape = np.asarray(shape)
+    new_shape = np.array(new_shape if new_shape is not None else shape)
+
+    s = voxel_sizes(affine)
+    rzs_out = affine[:3, :3] * zooms / s
+
+    # Using xyz = A @ ijk, determine translation
+    centroid = apply_affine(affine, (shape - 1) / 2)
+    t_out = centroid - rzs_out @ ((new_shape - 1) / 2)
+    return from_matvec(rzs_out, t_out)
+
+
 def _calculate_target_affine(base_img, target_resolution):
     """Calculate the target affine and shape for a given base image and target resolution.
 
@@ -593,7 +639,6 @@ def _calculate_target_affine(base_img, target_resolution):
     new_shape : tuple of 3 ints
         The target shape.
     """
-    import nibabel as nb
     import numpy as np
 
     if len(target_resolution) != 3:
@@ -606,7 +651,7 @@ def _calculate_target_affine(base_img, target_resolution):
     new_shape = tuple(np.round(new_shape).astype(int))
 
     # patch in voxel sizes to affine
-    new_affine = nb.affines.rescale_affine(
+    new_affine = rescale_affine(
         affine=base_img.affine,
         shape=base_img.shape,
         new_zooms=target_resolution,
