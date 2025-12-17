@@ -33,6 +33,7 @@ from nipype.interfaces.base import (
     isdefined,
     traits,
 )
+from nipype.utils.filemanip import fname_presuffix
 
 XFM_FMT = {
     '.lta': 'fs',
@@ -40,6 +41,73 @@ XFM_FMT = {
     '.mat': 'itk',
     '.tfm': 'itk',
 }
+
+
+class _ConvertAffineInputSpec(BaseInterfaceInputSpec):
+    in_xfm = File(exists=True, desc='input transform piles')
+    inverse = traits.Bool(False, usedefault=True, desc='generate inverse')
+    in_fmt = traits.Enum('auto', 'itk', 'fs', 'fsl', usedefault=True, desc='input format')
+    out_fmt = traits.Enum('itk', 'fs', 'fsl', usedefault=True, desc='output format')
+    reference = File(exists=True, desc='reference file')
+    moving = File(exists=True, desc='moving file')
+
+
+class _ConvertAffineOutputSpec(TraitedSpec):
+    out_xfm = File(exists=True, desc='output, combined transform')
+    out_inv = File(desc='output, combined transform')
+
+
+class ConvertAffine(SimpleInterface):
+    """Write a single, flattened transform file."""
+
+    input_spec = _ConvertAffineInputSpec
+    output_spec = _ConvertAffineOutputSpec
+
+    def _run_interface(self, runtime):
+        from nitransforms.linear import load as load_affine
+
+        ext = {
+            'fs': 'lta',
+            'itk': 'txt',
+            'fsl': 'mat',
+        }[self.inputs.out_fmt]
+
+        in_fmt = self.inputs.in_fmt
+        if in_fmt == 'auto':
+            in_fmt = {
+                '.lta': 'fs',
+                '.mat': 'fsl',
+                '.txt': 'itk',
+            }[Path(self.inputs.in_xfm).suffix]
+
+        reference = self.inputs.reference or None
+        moving = self.inputs.moving or None
+        affine = load_affine(self.inputs.in_xfm, fmt=in_fmt, reference=reference, moving=moving)
+
+        out_file = fname_presuffix(
+            self.inputs.in_xfm,
+            suffix=f'_fwd.{ext}',
+            newpath=runtime.cwd,
+            use_ext=False,
+        )
+        self._results['out_xfm'] = out_file
+        affine.to_filename(out_file, moving=moving, fmt=self.inputs.out_fmt)
+
+        if self.inputs.inverse:
+            inv_affine = ~affine
+            if moving is not None:
+                inv_affine.reference = moving
+
+            out_inv = fname_presuffix(
+                self.inputs.in_xfm,
+                suffix=f'_inv.{ext}',
+                newpath=runtime.cwd,
+                use_ext=False,
+            )
+            self._results['out_inv'] = out_inv
+            inv_affine.to_filename(out_inv, moving=reference, fmt=self.inputs.out_fmt)
+
+        return runtime
 
 
 class _ConcatenateXFMsInputSpec(BaseInterfaceInputSpec):
