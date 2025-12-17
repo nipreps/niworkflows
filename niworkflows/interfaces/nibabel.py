@@ -593,6 +593,7 @@ def _calculate_target_affine(base_img, target_resolution):
     new_shape : tuple of 3 ints
         The target shape.
     """
+    import nibabel as nb
     import numpy as np
 
     if len(target_resolution) != 3:
@@ -605,9 +606,12 @@ def _calculate_target_affine(base_img, target_resolution):
     new_shape = tuple(np.round(new_shape).astype(int))
 
     # patch in voxel sizes to affine
-    new_affine = base_img.affine.copy()
-    for i in range(3):
-        new_affine[i, i] = target_resolution[i]
+    new_affine = nb.affines.rescale_affine(
+        affine=base_img.affine,
+        shape=base_img.shape,
+        new_zooms=target_resolution,
+        new_shape=new_shape,
+    )
 
     return new_affine, new_shape
 
