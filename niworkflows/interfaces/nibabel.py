@@ -576,91 +576,6 @@ def reorient_image(img: nb.spatialimages.SpatialImage, target_ornt: str):
     return r_img
 
 
-def rescale_affine(affine, shape, zooms, new_shape=None):
-    """Return a new affine matrix with updated voxel sizes (zooms)
-
-    This function preserves the rotations and shears of the original
-    affine, as well as the RAS location of the central voxel of the
-    image.
-
-    This is a modified version of the function in nibabel.affines.rescale_affine.
-    The difference is that it preserves the RAS location of the central point of
-    the image, rather than the location of the central voxel.
-
-    Parameters
-    ----------
-    affine : (N, N) array-like
-        NxN transform matrix in homogeneous coordinates representing an affine
-        transformation from an (N-1)-dimensional space to an (N-1)-dimensional
-        space. An example is a 4x4 transform representing rotations and
-        translations in 3 dimensions.
-    shape : (N-1,) array-like
-        The extent of the (N-1) dimensions of the original space
-    zooms : (N-1,) array-like
-        The size of voxels of the output affine
-    new_shape : (N-1,) array-like, optional
-        The extent of the (N-1) dimensions of the space described by the
-        new affine. If ``None``, use ``shape``.
-
-    Returns
-    -------
-    affine : (N, N) array
-        A new affine transform with the specified voxel sizes
-    """
-    import numpy as np
-    from nibabel.affines import apply_affine, from_matvec, voxel_sizes
-
-    shape = np.asarray(shape)
-    new_shape = np.array(new_shape if new_shape is not None else shape)
-
-    s = voxel_sizes(affine)
-    rzs_out = affine[:3, :3] * zooms / s
-
-    # Using xyz = A @ ijk, determine translation
-    centroid = apply_affine(affine, (shape - 1) / 2)
-    t_out = centroid - rzs_out @ ((new_shape - 1) / 2)
-    return from_matvec(rzs_out, t_out)
-
-
-def _calculate_target_affine(base_img, target_resolution):
-    """Calculate the target affine and shape for a given base image and target resolution.
-
-    Parameters
-    ----------
-    base_img : nibabel.SpatialImage
-        The base image to calculate the target affine and shape for.
-    target_resolution : tuple of 3 floats
-        The target resolution to calculate the target affine and shape for.
-
-    Returns
-    -------
-    new_affine : 4x4 numpy.ndarray
-        The target affine.
-    new_shape : tuple of 3 ints
-        The target shape.
-    """
-    import numpy as np
-
-    if len(target_resolution) != 3:
-        raise ValueError('target_resolution must be a tuple of 3 floats')
-
-    # determine appropriate shape
-    zooms = np.array(base_img.header.get_zooms())[:3]
-    ratios = zooms / np.array(target_resolution)
-    new_shape = np.array(base_img.shape) * ratios
-    new_shape = tuple(np.round(new_shape).astype(int))
-
-    # patch in voxel sizes to affine
-    new_affine = rescale_affine(
-        affine=base_img.affine,
-        shape=base_img.shape,
-        new_zooms=target_resolution,
-        new_shape=new_shape,
-    )
-
-    return new_affine, new_shape
-
-
 def _gen_reference(
     fixed_image,
     moving_image,
@@ -692,13 +607,6 @@ def _gen_reference(
     new_affine = np.diag(np.round(new_zooms, 3))
 
     resampled = nli.resample_img(fixed_image, target_affine=new_affine, interpolation='nearest')
-
-    resampled = nli.resample_img(
-        fixed_image,
-        target_affine=new_affine,
-        target_shape=new_shape,
-        interpolation='nearest',
-    )
 
     if fov_mask is not None:
         # If we have a mask, resample again dropping (empty) samples
