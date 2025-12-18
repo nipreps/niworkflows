@@ -680,7 +680,11 @@ def _gen_reference(
     # Moving images may not be RAS/LPS (more generally, transverse-longitudinal-axial)
     reoriented_moving_img = nb.as_closest_canonical(nb.load(moving_image))
 
-    new_zooms = target_resolution if target_resolution is not None else reoriented_moving_img.header.get_zooms()[:3]
+    new_zooms = (
+        target_resolution
+        if target_resolution is not None
+        else reoriented_moving_img.header.get_zooms()[:3]
+    )
 
     # Avoid small differences in reported resolution to cause changes to
     # FOV. See https://github.com/nipreps/fmriprep/issues/512
