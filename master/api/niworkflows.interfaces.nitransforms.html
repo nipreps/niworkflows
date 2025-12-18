@@ -357,6 +357,34 @@
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.nitransforms.ConvertAffine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.nitransforms.</span></span><span class="sig-name descname"><span class="pre">ConvertAffine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/nitransforms.html#ConvertAffine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.nitransforms.ConvertAffine" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
+<p>Write a single, flattened transform file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Optional Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_fmt</strong> (<em>‘auto’ or ‘itk’ or ‘fs’ or ‘fsl’</em>) – Input format.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">auto</span></code>)</p></li>
+<li><p><strong>in_xfm</strong> (<em>a pathlike object or string representing an existing file</em>) – Input transform piles.</p></li>
+<li><p><strong>inverse</strong> (<em>a boolean</em>) – Generate inverse.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
+<li><p><strong>moving</strong> (<em>a pathlike object or string representing an existing file</em>) – Moving file.</p></li>
+<li><p><strong>out_fmt</strong> (<em>‘itk’ or ‘fs’ or ‘fsl’</em>) – Output format.
+(Nipype <strong>default</strong> value: <code class="docutils literal notranslate"><span class="pre">itk</span></code>)</p></li>
+<li><p><strong>reference</strong> (<em>a pathlike object or string representing an existing file</em>) – Reference file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Outputs<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>out_inv</strong> (<em>a pathlike object or string representing a file</em>) – Output, combined transform.</p></li>
+<li><p><strong>out_xfm</strong> (<em>a pathlike object or string representing an existing file</em>) – Output, combined transform.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="niworkflows.interfaces.nitransforms.concatenate_xfms">
 <span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.nitransforms.</span></span><span class="sig-name descname"><span class="pre">concatenate_xfms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_inv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moving</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'itk'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/nitransforms.html#concatenate_xfms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.nitransforms.concatenate_xfms" title="Link to this definition">¶</a></dt>
@@ -422,6 +450,7 @@
             <ul>
 <li><a class="reference internal" href="#">niworkflows.interfaces.nitransforms module</a><ul>
 <li><a class="reference internal" href="#niworkflows.interfaces.nitransforms.ConcatenateXFMs"><code class="docutils literal notranslate"><span class="pre">ConcatenateXFMs</span></code></a></li>
+<li><a class="reference internal" href="#niworkflows.interfaces.nitransforms.ConvertAffine"><code class="docutils literal notranslate"><span class="pre">ConvertAffine</span></code></a></li>
 <li><a class="reference internal" href="#niworkflows.interfaces.nitransforms.concatenate_xfms"><code class="docutils literal notranslate"><span class="pre">concatenate_xfms()</span></code></a></li>
 </ul>
 </li>
