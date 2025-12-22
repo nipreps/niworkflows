@@ -12,7 +12,7 @@ repos:
       - id: check-toml
       - id: check-added-large-files
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.9
+    rev: v0.14.10
     hooks:
       - name: ruff check --fix
         id: ruff-check
