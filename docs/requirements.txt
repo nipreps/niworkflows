@@ -10,3 +10,4 @@ sphinx <8.2
 sphinxcontrib-apidoc
 templateflow
 nitransforms
+bidsschematools!=1.1.4
