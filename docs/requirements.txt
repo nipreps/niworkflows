@@ -3,7 +3,7 @@ attrs
 furo
 importlib_resources
 nipype >= 1.5.1
-traits < 6.4
+traits
 packaging
 pytest
 sphinx <8.2
