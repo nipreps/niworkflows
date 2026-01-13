@@ -1,3 +1,9 @@
+1.14.4 (January 13, 2026)
+=========================
+Patch release in the 1.14.x series.
+
+* FIX: Raise exception on nonstandard spaces with res entity (#996)
+
 1.14.3 (October 20, 2025)
 =========================
 Patch release in the 1.14.x series.
