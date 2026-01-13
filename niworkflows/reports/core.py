@@ -83,6 +83,9 @@ class Smallest:
     def __eq__(self, other):
         return isinstance(other, Smallest)
 
+    def __hash__(self):
+        return hash('<Smallest>')
+
     def __gt__(self, other):
         return False
 

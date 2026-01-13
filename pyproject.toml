@@ -164,6 +164,7 @@ ignore = [
   "PLW2901",
   "RUF005",
   "RUF012",
+  "PLC0415",
 ]
 
 [tool.ruff.lint.flake8-quotes]
