@@ -23,6 +23,6 @@ repos:
     hooks:
       - name: ruff check --fix
         id: ruff-check
-        args: [ --fix ]
+        args: [ --fix, --show-fixes ]
       - name: ruff format
         id: ruff-format
