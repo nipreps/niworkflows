@@ -185,7 +185,7 @@ quote-style = "single"
 [tool.pytest.ini_options]
 minversion = "6"
 testpaths = ["niworkflows"]
-log_cli_level = "INFO"
+log_level = "INFO"
 xfail_strict = true
 norecursedirs = [".git"]
 addopts = [
