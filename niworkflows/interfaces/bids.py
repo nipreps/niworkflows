@@ -93,32 +93,10 @@ _PERF_EXTRA_ENTITIES = {
     'label': 'optional',
 }
 _NIPREPS_EXTRA_RULES = [
-    # --- anat ---
-    # Non-schema suffixes + schema suffixes that need .json in a single pattern
-    # (DerivativesDataSink may output .nii + .json together as multi-file;
-    #  the schema splits .json into a sidecar pattern which breaks that).
+    # --- anat: non-schema suffixes ---
     {
         'datatypes': ['anat'],
-        'suffixes': [
-            'T1w',
-            'T2w',
-            'T1rho',
-            'T1map',
-            'T2map',
-            'T2starmap',
-            'FLAIR',
-            'FLASH',
-            'PDmap',
-            'PD',
-            'PDT2',
-            'dseg',
-            'inplaneT1',
-            'inplaneT2',
-            'angio',
-            'T2starw',
-            'MTw',
-            'TSE',
-        ],
+        'suffixes': ['MTw', 'TSE'],
         'extensions': ['.nii', '.nii.gz', '.json'],
     },
     {
@@ -157,10 +135,10 @@ _NIPREPS_EXTRA_RULES = [
         'extensions': ['.label.gii', '.json'],
         'entities': {'hemisphere': 'required', 'description': 'required'},
     },
-    # --- func ---
+    # --- func: non-schema suffixes ---
     {
         'datatypes': ['func'],
-        'suffixes': ['bold', 'cbv', 'sbref', 'boldref', 'boldmap', 'dseg'],
+        'suffixes': ['boldref', 'boldmap'],
         'extensions': ['.nii', '.nii.gz', '.json'],
     },
     {
@@ -188,10 +166,10 @@ _NIPREPS_EXTRA_RULES = [
         'extensions': ['.dtseries.nii', '.dtseries.json', '.func.gii', '.func.json'],
         'entities': {'hemisphere': 'optional', 'density': 'optional'},
     },
-    # --- dwi ---
+    # --- dwi: non-schema suffixes ---
     {
         'datatypes': ['dwi'],
-        'suffixes': ['dwi', 'dwiref', 'epiref', 'lowb', 'dseg'],
+        'suffixes': ['dwiref', 'epiref', 'lowb'],
         'extensions': ['.json', '.nii.gz', '.nii'],
     },
     {
@@ -359,6 +337,7 @@ _pybids_spec = generate_extended_config(
     name='nipreps',
     extensions=[_nipreps_extension],
     rule_groups=['deriv'],
+    sidecar_split=False,
 )
 
 BIDS_DERIV_ENTITIES = _pybids_spec['entities']
