@@ -64,47 +64,125 @@ regz = re.compile(r'\.gz$')
 # explicitly below.
 from bids.layout.config_gen import ConfigExtension, generate_extended_config
 
-# NiPreps-specific path patterns that cannot be generated from the BIDS schema.
+# NiPreps-specific extra rules for path pattern generation.  Each rule dict
+# specifies datatypes, suffixes, and extensions; entities are inherited from the
+# schema's derivative rules for the given datatypes and only *additions* (like
+# the non-schema entities fmapid, pvc, from/to/mode) or *overrides* (like
+# hemisphere=required for surface files) need to be listed explicitly.
+#
 # Schema-covered patterns (mask, probseg, dseg, phase, fieldmap, T2starmap, dwi
-# sidecars) come from rule_groups=["deriv"] with hash injection; only patterns
-# with non-schema suffixes, figures datatype, fmapid/pvc entities, or
-# from/to/mode transforms need to be listed here.
-_NIPREPS_PATH_PATTERNS = [
-    # --- anat: non-schema suffixes ---
-    "sub-{subject}[/ses-{session}]/{datatype<anat>|anat}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_res-{resolution}][_desc-{desc}]_{suffix<T1w|T2w|T1rho|T1map|T2map|T2starmap|FLAIR|FLASH|PDmap|PD|PDT2|dseg|inplaneT[12]|angio|T2starw|MTw|TSE>}{extension<.nii|.nii.gz|.json>|.nii.gz}",
-    "sub-{subject}[/ses-{session}]/{datatype<anat>|anat}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_run-{run}][_hemi-{hemi<L|R>}]_from-{from}_to-{to}_mode-{mode<image|points>|image}_{suffix<xfm>|xfm}{extension<.txt|.h5>}",
-    "sub-{subject}[/ses-{session}]/{datatype<anat>|anat}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_run-{run}]_hemi-{hemi<L|R>}[_space-{space}][_cohort-{cohort}][_den-{density}][_desc-{desc}]_{suffix<white|smoothwm|pial|midthickness|inflated|vinflated|sphere|flat|sulc|curv|thickness>}{extension<.surf.gii|.shape.gii>}",
-    "sub-{subject}[/ses-{session}]/{datatype<anat>|anat}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_den-{density}][_desc-{desc}]_{suffix<sulc|curv|thickness>}{extension<.dscalar.nii|.json>}",
-    "sub-{subject}[/ses-{session}]/{datatype<anat>|anat}/sub-{subject}[_ses-{session}][_hash-{hash}][_label-{label}][_desc-{desc}]_{suffix<morph>}{extension<.tsv|.json>|.tsv}",
-    "sub-{subject}[/ses-{session}]/{datatype<anat>|anat}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_run-{run}]_hemi-{hemi<L|R>}[_space-{space}][_cohort-{cohort}][_den-{density}]_desc-{desc}_{suffix<mask>|mask}{extension<.label.gii|.json>|.label.gii}",
-    # --- func: non-schema suffixes ---
-    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_res-{resolution}][_desc-{desc}]_{suffix<bold|cbv|sbref|boldref|boldmap|dseg>}{extension<.nii|.nii.gz|.json>|.nii.gz}",
-    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_hemi-{hemi<L|R>}]_from-{from}_to-{to}_mode-{mode<image|points>|image}[_desc-{desc}]_{suffix<xfm>|xfm}{extension<.txt|.h5>}",
-    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<AROMAnoiseICs>|AROMAnoiseICs}{extension<.csv|.tsv>|.csv}",
-    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<timeseries|regressors>|timeseries}{extension<.json|.tsv>|.tsv}",
-    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<components|mixing>|components}{extension<.json|.tsv|.nii|.nii.gz>|.tsv}",
-    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<decomposition>|decomposition}{extension<.json>|.json}",
-    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_hemi-{hemi<L|R>}][_space-{space}][_cohort-{cohort}][_den-{density}][_desc-{desc}]_{suffix<bold|boldmap>}{extension<.dtseries.nii|.dtseries.json|.func.gii|.func.json>}",
-    # --- dwi: non-schema suffixes ---
-    "sub-{subject}[/ses-{session}]/{datatype<dwi>|dwi}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_space-{space}][_cohort-{cohort}][_res-{resolution}][_desc-{desc}]_{suffix<dwi|dwiref|epiref|lowb|dseg>}{extension<.json|.nii.gz|.nii>|.nii.gz}",
-    "sub-{subject}[/ses-{session}]/{datatype<dwi>|dwi}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_rec-{reconstruction}][_dir-{direction}][_run-{run}]_from-{from}_to-{to}_mode-{mode<image|points>|image}[_desc-{desc}]_{suffix<xfm>|xfm}{extension<.txt|.h5>}",
-    # --- perf: non-schema suffixes ---
-    "sub-{subject}[/ses-{session}]/{datatype<perf>|perf}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_rec-{reconstruction}][_dir-{direction}][_run-{run}]_{suffix<aslcontext>}{extension<.tsv|.json>|.tsv}",
-    "sub-{subject}[/ses-{session}]/{datatype<perf>|perf}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}]_from-{from}_to-{to}_mode-{mode<image|points>|image}_{suffix<xfm>|xfm}{extension<.txt|.h5>}",
-    "sub-{subject}[/ses-{session}]/{datatype<perf>|perf}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_space-{space}][_atlas-{atlas}][_cohort-{cohort}][_desc-{desc}]_{suffix<timeseries>}{extension<.json|.tsv>|.tsv}",
-    "sub-{subject}[/ses-{session}]/{datatype<perf>|perf}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_space-{space}][_atlas-{atlas}][_cohort-{cohort}][_desc-{desc}]_{suffix<asl|aslref|att|cbf|coverage|mask>}{extension<.nii|.nii.gz|.json|.tsv>|.tsv}",
+# sidecars) come from rule_groups=["deriv"] with hash injection.
+_XFM_ENTITIES = {
+    "from": "required",
+    "to": "required",
+    "mode": {"level": "required", "enum": ["image", "points"], "default": "image"},
+}
+_PET_EXTRA_ENTITIES = {
+    "acquisition": "optional",
+    "ceagent": "optional",
+    "cohort": "optional",
+    "density": "optional",
+    "direction": "optional",
+    "hemisphere": "optional",
+    "label": "optional",
+    "part": "optional",
+}
+_PERF_EXTRA_ENTITIES = {
+    "task": "optional",
+    "ceagent": "optional",
+    "atlas": "optional",
+    "label": "optional",
+}
+_NIPREPS_EXTRA_RULES = [
+    # --- anat ---
+    {"datatypes": ["anat"],
+     "suffixes": ["T1w", "T2w", "T1rho", "T1map", "T2map", "T2starmap",
+                   "FLAIR", "FLASH", "PDmap", "PD", "PDT2", "dseg",
+                   "inplaneT1", "inplaneT2", "angio", "T2starw", "MTw", "TSE"],
+     "extensions": [".nii", ".nii.gz", ".json"]},
+    {"datatypes": ["anat"], "suffixes": ["xfm"], "extensions": [".txt", ".h5"],
+     "entities": _XFM_ENTITIES},
+    {"datatypes": ["anat"],
+     "suffixes": ["white", "smoothwm", "pial", "midthickness", "inflated",
+                   "vinflated", "sphere", "flat", "sulc", "curv", "thickness"],
+     "extensions": [".surf.gii", ".shape.gii"],
+     "entities": {"hemisphere": "required"}},
+    {"datatypes": ["anat"], "suffixes": ["sulc", "curv", "thickness"],
+     "extensions": [".dscalar.nii", ".json"]},
+    {"datatypes": ["anat"], "suffixes": ["morph"], "extensions": [".tsv", ".json"]},
+    {"datatypes": ["anat"], "suffixes": ["mask"],
+     "extensions": [".label.gii", ".json"],
+     "entities": {"hemisphere": "required", "description": "required"}},
+    # --- func ---
+    {"datatypes": ["func"],
+     "suffixes": ["bold", "cbv", "sbref", "boldref", "boldmap", "dseg"],
+     "extensions": [".nii", ".nii.gz", ".json"]},
+    {"datatypes": ["func"], "suffixes": ["xfm"], "extensions": [".txt", ".h5"],
+     "entities": _XFM_ENTITIES},
+    {"datatypes": ["func"], "suffixes": ["AROMAnoiseICs"],
+     "extensions": [".csv", ".tsv"]},
+    {"datatypes": ["func"], "suffixes": ["timeseries", "regressors"],
+     "extensions": [".json", ".tsv"]},
+    {"datatypes": ["func"], "suffixes": ["components", "mixing"],
+     "extensions": [".json", ".tsv", ".nii", ".nii.gz"]},
+    {"datatypes": ["func"], "suffixes": ["decomposition"],
+     "extensions": [".json"]},
+    {"datatypes": ["func"], "suffixes": ["bold", "boldmap"],
+     "extensions": [".dtseries.nii", ".dtseries.json", ".func.gii", ".func.json"],
+     "entities": {"hemisphere": "optional", "density": "optional"}},
+    # --- dwi ---
+    {"datatypes": ["dwi"],
+     "suffixes": ["dwi", "dwiref", "epiref", "lowb", "dseg"],
+     "extensions": [".json", ".nii.gz", ".nii"]},
+    {"datatypes": ["dwi"], "suffixes": ["xfm"], "extensions": [".txt", ".h5"],
+     "entities": _XFM_ENTITIES},
+    # --- perf ---
+    {"datatypes": ["perf"], "suffixes": ["aslcontext"],
+     "extensions": [".tsv", ".json"],
+     "entities": {"task": "optional"}},
+    {"datatypes": ["perf"], "suffixes": ["xfm"], "extensions": [".txt", ".h5"],
+     "entities": {**_PERF_EXTRA_ENTITIES, **_XFM_ENTITIES}},
+    {"datatypes": ["perf"], "suffixes": ["timeseries"],
+     "extensions": [".json", ".tsv"],
+     "entities": _PERF_EXTRA_ENTITIES},
+    {"datatypes": ["perf"],
+     "suffixes": ["asl", "aslref", "att", "cbf", "coverage", "mask"],
+     "extensions": [".nii", ".nii.gz", ".json", ".tsv"],
+     "entities": _PERF_EXTRA_ENTITIES},
     # --- fmap: fmapid entity ---
-    "sub-{subject}[/ses-{session}]/{datatype<fmap>|fmap}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_dir-{direction}][_run-{run}][_part-{part}][_space-{space}][_cohort-{cohort}][_res-{resolution}][_fmapid-{fmapid}][_desc-{desc}]_{suffix<fieldmap>}{extension<.nii|.nii.gz|.json>|.nii.gz}",
-    "sub-{subject}[/ses-{session}]/{datatype<fmap>|fmap}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_dir-{direction}][_run-{run}][_part-{part}][_space-{space}][_cohort-{cohort}][_res-{resolution}][_fmapid-{fmapid}][_label-{label}][_desc-{desc}]_{suffix<mask>}{extension<.nii|.nii.gz|.json>|.nii.gz}",
-    # --- pet: pvc entity and non-schema suffixes ---
-    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_res-{resolution}][_pvc-{pvc}][_desc-{desc}]_{suffix<pet|petref>}{extension<.nii|.nii.gz|.json>|.nii.gz}",
-    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_hemi-{hemi<L|R>}]_from-{from}_to-{to}_mode-{mode<image|points>|image}_{suffix<xfm>|xfm}{extension<.txt|.h5>}",
-    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}]_hemi-{hemi<L|R>}[_space-{space}][_cohort-{cohort}][_den-{density}][_desc-{desc}]_{suffix<white|smoothwm|pial|midthickness|inflated|vinflated|sphere|flat|sulc|curv|thickness>}{extension<.surf.gii|.shape.gii>}",
-    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_den-{density}][_desc-{desc}]_{suffix<sulc|curv|thickness>}{extension<.dscalar.nii|.json>}",
-    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_part-{part}][_space-{space}][_cohort-{cohort}][_label-{label}][_pvc-{pvc}][_desc-{desc}]_{suffix<timeseries|regressors|tacs>|timeseries}{extension<.json|.tsv>|.tsv}",
-    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_hemi-{hemi<L|R>}][_pvc-{pvc}][_space-{space}][_cohort-{cohort}][_den-{density}][_desc-{desc}]_{suffix<pet>}{extension<.dtseries.nii|.dtseries.json|.func.gii|.func.json>}",
-    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_label-{label}][_res-{resolution}]_desc-{desc}_{suffix<morph>}{extension<.tsv|.json>|.tsv}",
-    # --- figures ---
+    {"datatypes": ["fmap"], "suffixes": ["fieldmap"],
+     "extensions": [".nii", ".nii.gz", ".json"],
+     "entities": {"fmapid": "optional"}},
+    {"datatypes": ["fmap"], "suffixes": ["mask"],
+     "extensions": [".nii", ".nii.gz", ".json"],
+     "entities": {"fmapid": "optional"}},
+    # --- pet: extra entities not in schema ---
+    {"datatypes": ["pet"], "suffixes": ["pet", "petref"],
+     "extensions": [".nii", ".nii.gz", ".json"],
+     "entities": {**_PET_EXTRA_ENTITIES, "pvc": "optional"}},
+    {"datatypes": ["pet"], "suffixes": ["xfm"], "extensions": [".txt", ".h5"],
+     "entities": {**_PET_EXTRA_ENTITIES, **_XFM_ENTITIES}},
+    {"datatypes": ["pet"],
+     "suffixes": ["white", "smoothwm", "pial", "midthickness", "inflated",
+                   "vinflated", "sphere", "flat", "sulc", "curv", "thickness"],
+     "extensions": [".surf.gii", ".shape.gii"],
+     "entities": {**_PET_EXTRA_ENTITIES, "hemisphere": "required"}},
+    {"datatypes": ["pet"], "suffixes": ["sulc", "curv", "thickness"],
+     "extensions": [".dscalar.nii", ".json"],
+     "entities": _PET_EXTRA_ENTITIES},
+    {"datatypes": ["pet"], "suffixes": ["timeseries", "regressors", "tacs"],
+     "extensions": [".json", ".tsv"],
+     "entities": {**_PET_EXTRA_ENTITIES, "pvc": "optional"}},
+    {"datatypes": ["pet"], "suffixes": ["pet"],
+     "extensions": [".dtseries.nii", ".dtseries.json", ".func.gii", ".func.json"],
+     "entities": {**_PET_EXTRA_ENTITIES, "pvc": "optional"}},
+    {"datatypes": ["pet"], "suffixes": ["morph"], "extensions": [".tsv", ".json"],
+     "entities": {**_PET_EXTRA_ENTITIES, "description": "required"}},
+]
+
+# Figure patterns use a non-standard directory layout (no session directory),
+# so they cannot be generated from rules and are kept as literal patterns.
+_NIPREPS_FIGURE_PATTERNS = [
     "sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<T1w|T2w|T1rho|T1map|T2map|T2star|FLAIR|FLASH|PDmap|PD|PDT2|inplaneT[12]|angio|dseg|mask|T2starw|MTw|TSE>}{extension<.html|.svg>|.svg}",
     "sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_fmapid-{fmapid}][_desc-{desc}]_{suffix<fieldmap>}{extension<.html|.svg>|.svg}",
     "sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<dwi|epi|epiref>}{extension<.html|.svg>|.svg}",
@@ -133,14 +211,17 @@ _nipreps_extension = ConfigExtension(
         {
             "name": "from",
             "pattern": "(?:^|_)from-([a-zA-Z0-9+]+).*xfm",
+            "position": "after:hemi",
         },
         {
             "name": "to",
             "pattern": "(?:^|_)to-([a-zA-Z0-9+]+).*xfm",
+            "position": "after:from",
         },
         {
             "name": "mode",
             "pattern": "(?:^|_)mode-(image|points).*xfm",
+            "position": "after:to",
         },
     ],
     # Rename schema-key entity names to match the short names used in
@@ -153,7 +234,8 @@ _nipreps_extension = ConfigExtension(
         "mtransfer": {"name": "mt"},
     },
     extra_datatypes=["figures"],
-    extra_path_patterns=_NIPREPS_PATH_PATTERNS,
+    extra_rules=_NIPREPS_EXTRA_RULES,
+    extra_path_patterns=_NIPREPS_FIGURE_PATTERNS,
     inject_entity_segments=[
         {"segment": "[_hash-{hash}]", "after": "[_ses-{session}]"},
     ],
