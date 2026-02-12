@@ -94,6 +94,9 @@ _PERF_EXTRA_ENTITIES = {
 }
 _NIPREPS_EXTRA_RULES = [
     # --- anat ---
+    # Non-schema suffixes + schema suffixes that need .json in a single pattern
+    # (DerivativesDataSink may output .nii + .json together as multi-file;
+    #  the schema splits .json into a sidecar pattern which breaks that).
     {
         'datatypes': ['anat'],
         'suffixes': [
@@ -178,6 +181,7 @@ _NIPREPS_EXTRA_RULES = [
         'extensions': ['.json', '.tsv', '.nii', '.nii.gz'],
     },
     {'datatypes': ['func'], 'suffixes': ['decomposition'], 'extensions': ['.json']},
+    # Non-schema CIFTI/surface extensions for bold
     {
         'datatypes': ['func'],
         'suffixes': ['bold', 'boldmap'],
@@ -196,7 +200,7 @@ _NIPREPS_EXTRA_RULES = [
         'extensions': ['.txt', '.h5'],
         'entities': _XFM_ENTITIES,
     },
-    # --- perf ---
+    # --- perf: non-schema suffixes and extra entities ---
     {
         'datatypes': ['perf'],
         'suffixes': ['aslcontext'],
@@ -221,7 +225,7 @@ _NIPREPS_EXTRA_RULES = [
         'extensions': ['.nii', '.nii.gz', '.json', '.tsv'],
         'entities': _PERF_EXTRA_ENTITIES,
     },
-    # --- fmap: fmapid entity ---
+    # --- fmap: fmapid entity (schema has fieldmap/mask but without fmapid) ---
     {
         'datatypes': ['fmap'],
         'suffixes': ['fieldmap'],
@@ -234,7 +238,7 @@ _NIPREPS_EXTRA_RULES = [
         'extensions': ['.nii', '.nii.gz', '.json'],
         'entities': {'fmapid': 'optional'},
     },
-    # --- pet: extra entities not in schema ---
+    # --- pet: extra entities not in schema (pvc, acq, ce, hemi, etc.) ---
     {
         'datatypes': ['pet'],
         'suffixes': ['pet', 'petref'],
