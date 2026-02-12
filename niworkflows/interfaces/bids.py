@@ -57,7 +57,113 @@ from ..utils.images import set_consumables, unsafe_write_nifti_header_and_data
 from ..utils.misc import _copy_any, unlink
 
 regz = re.compile(r'\.gz$')
-_pybids_spec = loads(data.load.readable('nipreps.json').read_text())
+
+# Generate the pybids config from the BIDS schema with NiPreps extensions.
+# Standard derivative patterns come from the schema (with hash entity injected);
+# only patterns with non-schema suffixes or NiPreps-specific entities are listed
+# explicitly below.
+from bids.layout.config_gen import ConfigExtension, generate_extended_config
+
+# NiPreps-specific path patterns that cannot be generated from the BIDS schema.
+# Schema-covered patterns (mask, probseg, dseg, phase, fieldmap, T2starmap, dwi
+# sidecars) come from rule_groups=["deriv"] with hash injection; only patterns
+# with non-schema suffixes, figures datatype, fmapid/pvc entities, or
+# from/to/mode transforms need to be listed here.
+_NIPREPS_PATH_PATTERNS = [
+    # --- anat: non-schema suffixes ---
+    "sub-{subject}[/ses-{session}]/{datatype<anat>|anat}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_res-{resolution}][_desc-{desc}]_{suffix<T1w|T2w|T1rho|T1map|T2map|T2starmap|FLAIR|FLASH|PDmap|PD|PDT2|dseg|inplaneT[12]|angio|T2starw|MTw|TSE>}{extension<.nii|.nii.gz|.json>|.nii.gz}",
+    "sub-{subject}[/ses-{session}]/{datatype<anat>|anat}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_run-{run}][_hemi-{hemi<L|R>}]_from-{from}_to-{to}_mode-{mode<image|points>|image}_{suffix<xfm>|xfm}{extension<.txt|.h5>}",
+    "sub-{subject}[/ses-{session}]/{datatype<anat>|anat}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_run-{run}]_hemi-{hemi<L|R>}[_space-{space}][_cohort-{cohort}][_den-{density}][_desc-{desc}]_{suffix<white|smoothwm|pial|midthickness|inflated|vinflated|sphere|flat|sulc|curv|thickness>}{extension<.surf.gii|.shape.gii>}",
+    "sub-{subject}[/ses-{session}]/{datatype<anat>|anat}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_den-{density}][_desc-{desc}]_{suffix<sulc|curv|thickness>}{extension<.dscalar.nii|.json>}",
+    "sub-{subject}[/ses-{session}]/{datatype<anat>|anat}/sub-{subject}[_ses-{session}][_hash-{hash}][_label-{label}][_desc-{desc}]_{suffix<morph>}{extension<.tsv|.json>|.tsv}",
+    "sub-{subject}[/ses-{session}]/{datatype<anat>|anat}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_run-{run}]_hemi-{hemi<L|R>}[_space-{space}][_cohort-{cohort}][_den-{density}]_desc-{desc}_{suffix<mask>|mask}{extension<.label.gii|.json>|.label.gii}",
+    # --- func: non-schema suffixes ---
+    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_res-{resolution}][_desc-{desc}]_{suffix<bold|cbv|sbref|boldref|boldmap|dseg>}{extension<.nii|.nii.gz|.json>|.nii.gz}",
+    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_hemi-{hemi<L|R>}]_from-{from}_to-{to}_mode-{mode<image|points>|image}[_desc-{desc}]_{suffix<xfm>|xfm}{extension<.txt|.h5>}",
+    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<AROMAnoiseICs>|AROMAnoiseICs}{extension<.csv|.tsv>|.csv}",
+    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<timeseries|regressors>|timeseries}{extension<.json|.tsv>|.tsv}",
+    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<components|mixing>|components}{extension<.json|.tsv|.nii|.nii.gz>|.tsv}",
+    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<decomposition>|decomposition}{extension<.json>|.json}",
+    "sub-{subject}[/ses-{session}]/{datatype<func>|func}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_hemi-{hemi<L|R>}][_space-{space}][_cohort-{cohort}][_den-{density}][_desc-{desc}]_{suffix<bold|boldmap>}{extension<.dtseries.nii|.dtseries.json|.func.gii|.func.json>}",
+    # --- dwi: non-schema suffixes ---
+    "sub-{subject}[/ses-{session}]/{datatype<dwi>|dwi}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_space-{space}][_cohort-{cohort}][_res-{resolution}][_desc-{desc}]_{suffix<dwi|dwiref|epiref|lowb|dseg>}{extension<.json|.nii.gz|.nii>|.nii.gz}",
+    "sub-{subject}[/ses-{session}]/{datatype<dwi>|dwi}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_rec-{reconstruction}][_dir-{direction}][_run-{run}]_from-{from}_to-{to}_mode-{mode<image|points>|image}[_desc-{desc}]_{suffix<xfm>|xfm}{extension<.txt|.h5>}",
+    # --- perf: non-schema suffixes ---
+    "sub-{subject}[/ses-{session}]/{datatype<perf>|perf}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_rec-{reconstruction}][_dir-{direction}][_run-{run}]_{suffix<aslcontext>}{extension<.tsv|.json>|.tsv}",
+    "sub-{subject}[/ses-{session}]/{datatype<perf>|perf}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}]_from-{from}_to-{to}_mode-{mode<image|points>|image}_{suffix<xfm>|xfm}{extension<.txt|.h5>}",
+    "sub-{subject}[/ses-{session}]/{datatype<perf>|perf}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_space-{space}][_atlas-{atlas}][_cohort-{cohort}][_desc-{desc}]_{suffix<timeseries>}{extension<.json|.tsv>|.tsv}",
+    "sub-{subject}[/ses-{session}]/{datatype<perf>|perf}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_space-{space}][_atlas-{atlas}][_cohort-{cohort}][_desc-{desc}]_{suffix<asl|aslref|att|cbf|coverage|mask>}{extension<.nii|.nii.gz|.json|.tsv>|.tsv}",
+    # --- fmap: fmapid entity ---
+    "sub-{subject}[/ses-{session}]/{datatype<fmap>|fmap}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_dir-{direction}][_run-{run}][_part-{part}][_space-{space}][_cohort-{cohort}][_res-{resolution}][_fmapid-{fmapid}][_desc-{desc}]_{suffix<fieldmap>}{extension<.nii|.nii.gz|.json>|.nii.gz}",
+    "sub-{subject}[/ses-{session}]/{datatype<fmap>|fmap}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_dir-{direction}][_run-{run}][_part-{part}][_space-{space}][_cohort-{cohort}][_res-{resolution}][_fmapid-{fmapid}][_label-{label}][_desc-{desc}]_{suffix<mask>}{extension<.nii|.nii.gz|.json>|.nii.gz}",
+    # --- pet: pvc entity and non-schema suffixes ---
+    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_res-{resolution}][_pvc-{pvc}][_desc-{desc}]_{suffix<pet|petref>}{extension<.nii|.nii.gz|.json>|.nii.gz}",
+    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_hemi-{hemi<L|R>}]_from-{from}_to-{to}_mode-{mode<image|points>|image}_{suffix<xfm>|xfm}{extension<.txt|.h5>}",
+    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}]_hemi-{hemi<L|R>}[_space-{space}][_cohort-{cohort}][_den-{density}][_desc-{desc}]_{suffix<white|smoothwm|pial|midthickness|inflated|vinflated|sphere|flat|sulc|curv|thickness>}{extension<.surf.gii|.shape.gii>}",
+    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_den-{density}][_desc-{desc}]_{suffix<sulc|curv|thickness>}{extension<.dscalar.nii|.json>}",
+    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_part-{part}][_space-{space}][_cohort-{cohort}][_label-{label}][_pvc-{pvc}][_desc-{desc}]_{suffix<timeseries|regressors|tacs>|timeseries}{extension<.json|.tsv>|.tsv}",
+    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_hemi-{hemi<L|R>}][_pvc-{pvc}][_space-{space}][_cohort-{cohort}][_den-{density}][_desc-{desc}]_{suffix<pet>}{extension<.dtseries.nii|.dtseries.json|.func.gii|.func.json>}",
+    "sub-{subject}[/ses-{session}]/{datatype<pet>|pet}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_label-{label}][_res-{resolution}]_desc-{desc}_{suffix<morph>}{extension<.tsv|.json>|.tsv}",
+    # --- figures ---
+    "sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<T1w|T2w|T1rho|T1map|T2map|T2star|FLAIR|FLASH|PDmap|PD|PDT2|inplaneT[12]|angio|dseg|mask|T2starw|MTw|TSE>}{extension<.html|.svg>|.svg}",
+    "sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_fmapid-{fmapid}][_desc-{desc}]_{suffix<fieldmap>}{extension<.html|.svg>|.svg}",
+    "sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<dwi|epi|epiref>}{extension<.html|.svg>|.svg}",
+    "sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<bold|boldmap>}{extension<.html|.svg>|.svg}",
+    "sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_label-{label}][_desc-{desc}]_{suffix<pet>}{extension<.html|.svg>|.svg}",
+]
+
+_nipreps_extension = ConfigExtension(
+    name="nipreps",
+    extra_entities=[
+        {
+            "name": "hash",
+            "pattern": "hash-([a-zA-Z0-9+]+)",
+            "position": "after:session",
+        },
+        {
+            "name": "fmapid",
+            "pattern": "[_/\\\\]+fmapid-([a-zA-Z0-9+]+)",
+            "position": "after:label",
+        },
+        {
+            "name": "pvc",
+            "pattern": "[_/\\\\]+pvc-([a-zA-Z0-9+]+)",
+            "position": "after:tracer",
+        },
+        {
+            "name": "from",
+            "pattern": "(?:^|_)from-([a-zA-Z0-9+]+).*xfm",
+        },
+        {
+            "name": "to",
+            "pattern": "(?:^|_)to-([a-zA-Z0-9+]+).*xfm",
+        },
+        {
+            "name": "mode",
+            "pattern": "(?:^|_)mode-(image|points).*xfm",
+        },
+    ],
+    # Rename schema-key entity names to match the short names used in
+    # pybids conventions and the old nipreps.json config.
+    entity_overrides={
+        "description": {"name": "desc"},
+        "hemisphere": {"name": "hemi"},
+        "processing": {"name": "proc"},
+        "inversion": {"name": "inv"},
+        "mtransfer": {"name": "mt"},
+    },
+    extra_datatypes=["figures"],
+    extra_path_patterns=_NIPREPS_PATH_PATTERNS,
+    inject_entity_segments=[
+        {"segment": "[_hash-{hash}]", "after": "[_ses-{session}]"},
+    ],
+)
+_pybids_spec = generate_extended_config(
+    name="nipreps",
+    extensions=[_nipreps_extension],
+    rule_groups=["deriv"],
+)
+
 BIDS_DERIV_ENTITIES = _pybids_spec['entities']
 BIDS_DERIV_PATTERNS = tuple(_pybids_spec['default_path_patterns'])
 

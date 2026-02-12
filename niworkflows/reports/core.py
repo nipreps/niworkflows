@@ -40,7 +40,8 @@ from .. import data, load_resource
 
 # Add a new figures spec
 try:
-    add_config_paths(figures=data.load('nipreps.json'))
+    from niworkflows.interfaces.bids import _pybids_spec
+    add_config_paths(figures=_pybids_spec)
 except ValueError as e:
     if "Configuration 'figures' already exists" != str(e):
         raise
