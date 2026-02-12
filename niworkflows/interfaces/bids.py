@@ -71,12 +71,13 @@ from bids.layout.config_gen import ConfigExtension, generate_extended_config
 #
 # Schema-covered patterns (mask, probseg, dseg, phase, fieldmap, T2starmap, dwi
 # sidecars) come from rule_groups=["deriv"] with hash injection.
+# Shared entity sets
 _XFM_ENTITIES = {
     'from': 'required',
     'to': 'required',
     'mode': {'level': 'required', 'enum': ['image', 'points'], 'default': 'image'},
 }
-_PET_EXTRA_ENTITIES = {
+_PET_ENTITIES = {
     'acquisition': 'optional',
     'ceagent': 'optional',
     'cohort': 'optional',
@@ -86,191 +87,95 @@ _PET_EXTRA_ENTITIES = {
     'label': 'optional',
     'part': 'optional',
 }
-_PERF_EXTRA_ENTITIES = {
+_PERF_ENTITIES = {
     'task': 'optional',
     'ceagent': 'optional',
     'atlas': 'optional',
     'label': 'optional',
 }
+
+# Shared suffix/extension lists
+_SURFACE_SUFFIXES = [
+    'white', 'smoothwm', 'pial', 'midthickness',
+    'inflated', 'vinflated', 'sphere', 'flat',
+    'sulc', 'curv', 'thickness',
+]
+_SCALAR_SUFFIXES = ['sulc', 'curv', 'thickness']
+_CIFTI_EXTENSIONS = ['.dtseries.nii', '.dtseries.json', '.func.gii', '.func.json']
+
 _NIPREPS_EXTRA_RULES = [
-    # --- anat: non-schema suffixes ---
-    {
-        'datatypes': ['anat'],
-        'suffixes': ['MTw', 'TSE'],
-        'extensions': ['.nii', '.nii.gz', '.json'],
-    },
-    {
-        'datatypes': ['anat'],
-        'suffixes': ['xfm'],
-        'extensions': ['.txt', '.h5'],
-        'entities': _XFM_ENTITIES,
-    },
-    {
-        'datatypes': ['anat'],
-        'suffixes': [
-            'white',
-            'smoothwm',
-            'pial',
-            'midthickness',
-            'inflated',
-            'vinflated',
-            'sphere',
-            'flat',
-            'sulc',
-            'curv',
-            'thickness',
-        ],
-        'extensions': ['.surf.gii', '.shape.gii'],
-        'entities': {'hemisphere': 'required'},
-    },
-    {
-        'datatypes': ['anat'],
-        'suffixes': ['sulc', 'curv', 'thickness'],
-        'extensions': ['.dscalar.nii', '.json'],
-    },
+    # --- Transforms (all datatypes) ---
+    {'datatypes': ['anat', 'func', 'dwi'],
+     'suffixes': ['xfm'], 'extensions': ['.txt', '.h5'],
+     'entities': _XFM_ENTITIES},
+    {'datatypes': ['perf'], 'suffixes': ['xfm'], 'extensions': ['.txt', '.h5'],
+     'entities': {**_PERF_ENTITIES, **_XFM_ENTITIES}},
+    {'datatypes': ['pet'], 'suffixes': ['xfm'], 'extensions': ['.txt', '.h5'],
+     'entities': {**_PET_ENTITIES, **_XFM_ENTITIES}},
+    # --- Surface anatomy (anat + pet) ---
+    {'datatypes': ['anat'], 'suffixes': _SURFACE_SUFFIXES,
+     'extensions': ['.surf.gii', '.shape.gii'],
+     'entities': {'hemisphere': 'required'}},
+    {'datatypes': ['anat'], 'suffixes': _SCALAR_SUFFIXES,
+     'extensions': ['.dscalar.nii', '.json']},
     {'datatypes': ['anat'], 'suffixes': ['morph'], 'extensions': ['.tsv', '.json']},
-    {
-        'datatypes': ['anat'],
-        'suffixes': ['mask'],
-        'extensions': ['.label.gii', '.json'],
-        'entities': {'hemisphere': 'required', 'description': 'required'},
-    },
-    # --- func: non-schema suffixes ---
-    {
-        'datatypes': ['func'],
-        'suffixes': ['boldref', 'boldmap'],
-        'extensions': ['.nii', '.nii.gz', '.json'],
-    },
-    {
-        'datatypes': ['func'],
-        'suffixes': ['xfm'],
-        'extensions': ['.txt', '.h5'],
-        'entities': _XFM_ENTITIES,
-    },
-    {'datatypes': ['func'], 'suffixes': ['AROMAnoiseICs'], 'extensions': ['.csv', '.tsv']},
-    {
-        'datatypes': ['func'],
-        'suffixes': ['timeseries', 'regressors'],
-        'extensions': ['.json', '.tsv'],
-    },
-    {
-        'datatypes': ['func'],
-        'suffixes': ['components', 'mixing'],
-        'extensions': ['.json', '.tsv', '.nii', '.nii.gz'],
-    },
-    {'datatypes': ['func'], 'suffixes': ['decomposition'], 'extensions': ['.json']},
-    # Non-schema CIFTI/surface extensions for bold
-    {
-        'datatypes': ['func'],
-        'suffixes': ['bold', 'boldmap'],
-        'extensions': ['.dtseries.nii', '.dtseries.json', '.func.gii', '.func.json'],
-        'entities': {'hemisphere': 'optional', 'density': 'optional'},
-    },
-    # --- dwi: non-schema suffixes ---
-    {
-        'datatypes': ['dwi'],
-        'suffixes': ['dwiref', 'epiref', 'lowb'],
-        'extensions': ['.json', '.nii.gz', '.nii'],
-    },
-    {
-        'datatypes': ['dwi'],
-        'suffixes': ['xfm'],
-        'extensions': ['.txt', '.h5'],
-        'entities': _XFM_ENTITIES,
-    },
-    # --- perf: non-schema suffixes and extra entities ---
-    {
-        'datatypes': ['perf'],
-        'suffixes': ['aslcontext'],
-        'extensions': ['.tsv', '.json'],
-        'entities': {'task': 'optional'},
-    },
-    {
-        'datatypes': ['perf'],
-        'suffixes': ['xfm'],
-        'extensions': ['.txt', '.h5'],
-        'entities': {**_PERF_EXTRA_ENTITIES, **_XFM_ENTITIES},
-    },
-    {
-        'datatypes': ['perf'],
-        'suffixes': ['timeseries'],
-        'extensions': ['.json', '.tsv'],
-        'entities': _PERF_EXTRA_ENTITIES,
-    },
-    {
-        'datatypes': ['perf'],
-        'suffixes': ['asl', 'aslref', 'att', 'cbf', 'coverage', 'mask'],
-        'extensions': ['.nii', '.nii.gz', '.json', '.tsv'],
-        'entities': _PERF_EXTRA_ENTITIES,
-    },
-    # --- fmap: fmapid entity (schema has fieldmap/mask but without fmapid) ---
-    {
-        'datatypes': ['fmap'],
-        'suffixes': ['fieldmap'],
-        'extensions': ['.nii', '.nii.gz', '.json'],
-        'entities': {'fmapid': 'optional'},
-    },
-    {
-        'datatypes': ['fmap'],
-        'suffixes': ['mask'],
-        'extensions': ['.nii', '.nii.gz', '.json'],
-        'entities': {'fmapid': 'optional'},
-    },
-    # --- pet: extra entities not in schema (pvc, acq, ce, hemi, etc.) ---
-    {
-        'datatypes': ['pet'],
-        'suffixes': ['pet', 'petref'],
-        'extensions': ['.nii', '.nii.gz', '.json'],
-        'entities': {**_PET_EXTRA_ENTITIES, 'pvc': 'optional'},
-    },
-    {
-        'datatypes': ['pet'],
-        'suffixes': ['xfm'],
-        'extensions': ['.txt', '.h5'],
-        'entities': {**_PET_EXTRA_ENTITIES, **_XFM_ENTITIES},
-    },
-    {
-        'datatypes': ['pet'],
-        'suffixes': [
-            'white',
-            'smoothwm',
-            'pial',
-            'midthickness',
-            'inflated',
-            'vinflated',
-            'sphere',
-            'flat',
-            'sulc',
-            'curv',
-            'thickness',
-        ],
-        'extensions': ['.surf.gii', '.shape.gii'],
-        'entities': {**_PET_EXTRA_ENTITIES, 'hemisphere': 'required'},
-    },
-    {
-        'datatypes': ['pet'],
-        'suffixes': ['sulc', 'curv', 'thickness'],
-        'extensions': ['.dscalar.nii', '.json'],
-        'entities': _PET_EXTRA_ENTITIES,
-    },
-    {
-        'datatypes': ['pet'],
-        'suffixes': ['timeseries', 'regressors', 'tacs'],
-        'extensions': ['.json', '.tsv'],
-        'entities': {**_PET_EXTRA_ENTITIES, 'pvc': 'optional'},
-    },
-    {
-        'datatypes': ['pet'],
-        'suffixes': ['pet'],
-        'extensions': ['.dtseries.nii', '.dtseries.json', '.func.gii', '.func.json'],
-        'entities': {**_PET_EXTRA_ENTITIES, 'pvc': 'optional'},
-    },
-    {
-        'datatypes': ['pet'],
-        'suffixes': ['morph'],
-        'extensions': ['.tsv', '.json'],
-        'entities': {**_PET_EXTRA_ENTITIES, 'description': 'required'},
-    },
+    {'datatypes': ['anat'], 'suffixes': ['mask'],
+     'extensions': ['.label.gii', '.json'],
+     'entities': {'hemisphere': 'required', 'description': 'required'}},
+    {'datatypes': ['pet'], 'suffixes': _SURFACE_SUFFIXES,
+     'extensions': ['.surf.gii', '.shape.gii'],
+     'entities': {**_PET_ENTITIES, 'hemisphere': 'required'}},
+    {'datatypes': ['pet'], 'suffixes': _SCALAR_SUFFIXES,
+     'extensions': ['.dscalar.nii', '.json'],
+     'entities': _PET_ENTITIES},
+    {'datatypes': ['pet'], 'suffixes': ['morph'], 'extensions': ['.tsv', '.json'],
+     'entities': {**_PET_ENTITIES, 'description': 'required'}},
+    # --- CIFTI/surface extensions for schema suffixes ---
+    {'datatypes': ['func'], 'suffixes': ['bold', 'boldmap'],
+     'extensions': _CIFTI_EXTENSIONS,
+     'entities': {'hemisphere': 'optional', 'density': 'optional'}},
+    {'datatypes': ['pet'], 'suffixes': ['pet'],
+     'extensions': _CIFTI_EXTENSIONS,
+     'entities': {**_PET_ENTITIES, 'pvc': 'optional'}},
+    # --- anat ---
+    {'datatypes': ['anat'], 'suffixes': ['MTw', 'TSE'],
+     'extensions': ['.nii', '.nii.gz', '.json']},
+    # --- func ---
+    {'datatypes': ['func'], 'suffixes': ['boldref', 'boldmap'],
+     'extensions': ['.nii', '.nii.gz', '.json']},
+    {'datatypes': ['func'], 'suffixes': ['AROMAnoiseICs'],
+     'extensions': ['.csv', '.tsv']},
+    {'datatypes': ['func'], 'suffixes': ['timeseries', 'regressors'],
+     'extensions': ['.json', '.tsv']},
+    {'datatypes': ['func'], 'suffixes': ['components', 'mixing'],
+     'extensions': ['.json', '.tsv', '.nii', '.nii.gz']},
+    {'datatypes': ['func'], 'suffixes': ['decomposition'],
+     'extensions': ['.json']},
+    # --- dwi ---
+    {'datatypes': ['dwi'], 'suffixes': ['dwiref', 'epiref', 'lowb'],
+     'extensions': ['.nii', '.nii.gz', '.json']},
+    # --- perf ---
+    {'datatypes': ['perf'], 'suffixes': ['aslcontext'],
+     'extensions': ['.tsv', '.json'],
+     'entities': {'task': 'optional'}},
+    {'datatypes': ['perf'], 'suffixes': ['timeseries'],
+     'extensions': ['.json', '.tsv'],
+     'entities': _PERF_ENTITIES},
+    {'datatypes': ['perf'],
+     'suffixes': ['asl', 'aslref', 'att', 'cbf', 'coverage', 'mask'],
+     'extensions': ['.nii', '.nii.gz', '.json', '.tsv'],
+     'entities': _PERF_ENTITIES},
+    # --- fmap ---
+    {'datatypes': ['fmap'], 'suffixes': ['fieldmap', 'mask'],
+     'extensions': ['.nii', '.nii.gz', '.json'],
+     'entities': {'fmapid': 'optional'}},
+    # --- pet ---
+    {'datatypes': ['pet'], 'suffixes': ['pet', 'petref'],
+     'extensions': ['.nii', '.nii.gz', '.json'],
+     'entities': {**_PET_ENTITIES, 'pvc': 'optional'}},
+    {'datatypes': ['pet'], 'suffixes': ['timeseries', 'regressors', 'tacs'],
+     'extensions': ['.json', '.tsv'],
+     'entities': {**_PET_ENTITIES, 'pvc': 'optional'}},
 ]
 
 # Figure patterns use a non-standard directory layout (no session directory),
