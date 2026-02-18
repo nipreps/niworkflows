@@ -27,7 +27,7 @@ import re
 import shutil
 from collections import defaultdict
 from contextlib import suppress
-from json import dumps, loads
+from json import dumps
 from pathlib import Path
 
 import nibabel as nb
@@ -51,13 +51,270 @@ from nipype.interfaces.base import (
 from nipype.interfaces.io import add_traits
 from nipype.utils.filemanip import hash_infile
 
-from .. import data
 from ..utils.bids import _init_layout, relative_to_root
 from ..utils.images import set_consumables, unsafe_write_nifti_header_and_data
 from ..utils.misc import _copy_any, unlink
 
 regz = re.compile(r'\.gz$')
-_pybids_spec = loads(data.load.readable('nipreps.json').read_text())
+
+# Generate the pybids config from the BIDS schema with NiPreps extensions.
+# Standard derivative patterns come from the schema (with hash entity injected);
+# only patterns with non-schema suffixes or NiPreps-specific entities are listed
+# explicitly below.
+from bids.layout.config_gen import ConfigExtension, generate_extended_config
+
+# NiPreps-specific extra rules for path pattern generation.  Each rule dict
+# specifies datatypes, suffixes, and extensions; entities are inherited from the
+# schema's derivative rules for the given datatypes and only *additions* (like
+# the non-schema entities fmapid, pvc, from/to/mode) or *overrides* (like
+# hemisphere=required for surface files) need to be listed explicitly.
+#
+# Schema-covered patterns (mask, probseg, dseg, phase, fieldmap, T2starmap, dwi
+# sidecars) come from rule_groups=["deriv"] with hash injection.
+# Shared entity sets
+_XFM_ENTITIES = {
+    'from': 'required',
+    'to': 'required',
+    'mode': {'level': 'required', 'enum': ['image', 'points'], 'default': 'image'},
+}
+_PET_ENTITIES = {
+    'acquisition': 'optional',
+    'ceagent': 'optional',
+    'cohort': 'optional',
+    'density': 'optional',
+    'direction': 'optional',
+    'hemisphere': 'optional',
+    'label': 'optional',
+    'part': 'optional',
+}
+_PERF_ENTITIES = {
+    'task': 'optional',
+    'ceagent': 'optional',
+    'atlas': 'optional',
+    'label': 'optional',
+}
+
+# Shared suffix/extension lists
+_SURFACE_SUFFIXES = [
+    'white',
+    'smoothwm',
+    'pial',
+    'midthickness',
+    'inflated',
+    'vinflated',
+    'sphere',
+    'flat',
+    'sulc',
+    'curv',
+    'thickness',
+]
+_SCALAR_SUFFIXES = ['sulc', 'curv', 'thickness']
+_CIFTI_EXTENSIONS = ['.dtseries.nii', '.dtseries.json', '.func.gii', '.func.json']
+
+_NIPREPS_EXTRA_RULES = [
+    # --- Transforms (all datatypes) ---
+    {
+        'datatypes': ['anat', 'func', 'dwi'],
+        'suffixes': ['xfm'],
+        'extensions': ['.txt', '.h5'],
+        'entities': _XFM_ENTITIES,
+    },
+    {
+        'datatypes': ['perf'],
+        'suffixes': ['xfm'],
+        'extensions': ['.txt', '.h5'],
+        'entities': {**_PERF_ENTITIES, **_XFM_ENTITIES},
+    },
+    {
+        'datatypes': ['pet'],
+        'suffixes': ['xfm'],
+        'extensions': ['.txt', '.h5'],
+        'entities': {**_PET_ENTITIES, **_XFM_ENTITIES},
+    },
+    # --- Surface anatomy (anat + pet) ---
+    {
+        'datatypes': ['anat'],
+        'suffixes': _SURFACE_SUFFIXES,
+        'extensions': ['.surf.gii', '.shape.gii'],
+        'entities': {'hemisphere': 'required'},
+    },
+    {'datatypes': ['anat'], 'suffixes': _SCALAR_SUFFIXES, 'extensions': ['.dscalar.nii', '.json']},
+    {'datatypes': ['anat'], 'suffixes': ['morph'], 'extensions': ['.tsv', '.json']},
+    {
+        'datatypes': ['anat'],
+        'suffixes': ['mask'],
+        'extensions': ['.label.gii', '.json'],
+        'entities': {'hemisphere': 'required', 'description': 'required'},
+    },
+    {
+        'datatypes': ['pet'],
+        'suffixes': _SURFACE_SUFFIXES,
+        'extensions': ['.surf.gii', '.shape.gii'],
+        'entities': {**_PET_ENTITIES, 'hemisphere': 'required'},
+    },
+    {
+        'datatypes': ['pet'],
+        'suffixes': _SCALAR_SUFFIXES,
+        'extensions': ['.dscalar.nii', '.json'],
+        'entities': _PET_ENTITIES,
+    },
+    {
+        'datatypes': ['pet'],
+        'suffixes': ['morph'],
+        'extensions': ['.tsv', '.json'],
+        'entities': {**_PET_ENTITIES, 'description': 'required'},
+    },
+    # --- CIFTI/surface extensions for schema suffixes ---
+    {
+        'datatypes': ['func'],
+        'suffixes': ['bold', 'boldmap'],
+        'extensions': _CIFTI_EXTENSIONS,
+        'entities': {'hemisphere': 'optional', 'density': 'optional'},
+    },
+    {
+        'datatypes': ['pet'],
+        'suffixes': ['pet'],
+        'extensions': _CIFTI_EXTENSIONS,
+        'entities': {**_PET_ENTITIES, 'pvc': 'optional'},
+    },
+    # --- anat ---
+    {
+        'datatypes': ['anat'],
+        'suffixes': ['MTw', 'TSE'],
+        'extensions': ['.nii', '.nii.gz', '.json'],
+    },
+    # --- func ---
+    {
+        'datatypes': ['func'],
+        'suffixes': ['boldref', 'boldmap'],
+        'extensions': ['.nii', '.nii.gz', '.json'],
+    },
+    {'datatypes': ['func'], 'suffixes': ['AROMAnoiseICs'], 'extensions': ['.csv', '.tsv']},
+    {
+        'datatypes': ['func'],
+        'suffixes': ['timeseries', 'regressors'],
+        'extensions': ['.json', '.tsv'],
+    },
+    {
+        'datatypes': ['func'],
+        'suffixes': ['components', 'mixing'],
+        'extensions': ['.json', '.tsv', '.nii', '.nii.gz'],
+    },
+    {'datatypes': ['func'], 'suffixes': ['decomposition'], 'extensions': ['.json']},
+    # --- dwi ---
+    {
+        'datatypes': ['dwi'],
+        'suffixes': ['dwiref', 'epiref', 'lowb'],
+        'extensions': ['.nii', '.nii.gz', '.json'],
+    },
+    # --- perf ---
+    {
+        'datatypes': ['perf'],
+        'suffixes': ['aslcontext'],
+        'extensions': ['.tsv', '.json'],
+        'entities': {'task': 'optional'},
+    },
+    {
+        'datatypes': ['perf'],
+        'suffixes': ['timeseries'],
+        'extensions': ['.json', '.tsv'],
+        'entities': _PERF_ENTITIES,
+    },
+    {
+        'datatypes': ['perf'],
+        'suffixes': ['asl', 'aslref', 'att', 'cbf', 'coverage', 'mask'],
+        'extensions': ['.nii', '.nii.gz', '.json', '.tsv'],
+        'entities': _PERF_ENTITIES,
+    },
+    # --- fmap ---
+    {
+        'datatypes': ['fmap'],
+        'suffixes': ['fieldmap', 'mask'],
+        'extensions': ['.nii', '.nii.gz', '.json'],
+        'entities': {'fmapid': 'optional'},
+    },
+    # --- pet ---
+    {
+        'datatypes': ['pet'],
+        'suffixes': ['pet', 'petref'],
+        'extensions': ['.nii', '.nii.gz', '.json'],
+        'entities': {**_PET_ENTITIES, 'pvc': 'optional'},
+    },
+    {
+        'datatypes': ['pet'],
+        'suffixes': ['timeseries', 'regressors', 'tacs'],
+        'extensions': ['.json', '.tsv'],
+        'entities': {**_PET_ENTITIES, 'pvc': 'optional'},
+    },
+]
+
+# Figure patterns use a non-standard directory layout (no session directory),
+# so they cannot be generated from rules and are kept as literal patterns.
+_NIPREPS_FIGURE_PATTERNS = [
+    'sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<T1w|T2w|T1rho|T1map|T2map|T2star|FLAIR|FLASH|PDmap|PD|PDT2|inplaneT[12]|angio|dseg|mask|T2starw|MTw|TSE>}{extension<.html|.svg>|.svg}',
+    'sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_fmapid-{fmapid}][_desc-{desc}]_{suffix<fieldmap>}{extension<.html|.svg>|.svg}',
+    'sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<dwi|epi|epiref>}{extension<.html|.svg>|.svg}',
+    'sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}]_task-{task}[_acq-{acquisition}][_ce-{ceagent}][_rec-{reconstruction}][_dir-{direction}][_run-{run}][_echo-{echo}][_part-{part}][_space-{space}][_cohort-{cohort}][_desc-{desc}]_{suffix<bold|boldmap>}{extension<.html|.svg>|.svg}',
+    'sub-{subject}/{datatype<figures>}/sub-{subject}[_ses-{session}][_hash-{hash}][_task-{task}][_acq-{acquisition}][_ce-{ceagent}][_trc-{tracer}][_rec-{reconstruction}][_run-{run}][_space-{space}][_cohort-{cohort}][_label-{label}][_desc-{desc}]_{suffix<pet>}{extension<.html|.svg>|.svg}',
+]
+
+_nipreps_extension = ConfigExtension(
+    name='nipreps',
+    extra_entities=[
+        {
+            'name': 'hash',
+            'pattern': 'hash-([a-zA-Z0-9+]+)',
+            'position': 'after:session',
+        },
+        {
+            'name': 'fmapid',
+            'pattern': '[_/\\\\]+fmapid-([a-zA-Z0-9+]+)',
+            'position': 'after:label',
+        },
+        {
+            'name': 'pvc',
+            'pattern': '[_/\\\\]+pvc-([a-zA-Z0-9+]+)',
+            'position': 'after:tracer',
+        },
+        {
+            'name': 'from',
+            'pattern': '(?:^|_)from-([a-zA-Z0-9+]+).*xfm',
+            'position': 'after:hemi',
+        },
+        {
+            'name': 'to',
+            'pattern': '(?:^|_)to-([a-zA-Z0-9+]+).*xfm',
+            'position': 'after:from',
+        },
+        {
+            'name': 'mode',
+            'pattern': '(?:^|_)mode-(image|points).*xfm',
+            'position': 'after:to',
+        },
+    ],
+    # Rename schema-key entity names to match the short names used in
+    # pybids conventions and the old nipreps.json config.
+    entity_overrides={
+        'description': {'name': 'desc'},
+        'hemisphere': {'name': 'hemi'},
+        'processing': {'name': 'proc'},
+        'inversion': {'name': 'inv'},
+        'mtransfer': {'name': 'mt'},
+    },
+    extra_datatypes=['figures'],
+    extra_rules=_NIPREPS_EXTRA_RULES,
+    extra_path_patterns=_NIPREPS_FIGURE_PATTERNS,
+    inject_entity_segments=[
+        {'segment': '[_hash-{hash}]', 'after': '[_ses-{session}]'},
+    ],
+)
+_pybids_spec = generate_extended_config(
+    name='nipreps',
+    extensions=[_nipreps_extension],
+    rule_groups=['deriv'],
+    sidecar_split=False,
+)
+
 BIDS_DERIV_ENTITIES = _pybids_spec['entities']
 BIDS_DERIV_PATTERNS = tuple(_pybids_spec['default_path_patterns'])
 
