@@ -357,6 +357,7 @@
 <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">templateflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">bids.utils</span> <span class="kn">import</span> <span class="n">listify</span>
 <span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
@@ -373,10 +374,11 @@
     <span class="n">traits</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">import</span> <span class="n">add_traits</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.utility.base</span> <span class="kn">import</span> <span class="n">_ravel</span>
 <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">hash_infile</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">data</span>
-<span class="kn">from</span> <span class="nn">..utils.bids</span> <span class="kn">import</span> <span class="n">_init_layout</span><span class="p">,</span> <span class="n">relative_to_root</span>
+<span class="kn">from</span> <span class="nn">..utils.bids</span> <span class="kn">import</span> <span class="n">_find_nearest_path</span><span class="p">,</span> <span class="n">_init_layout</span><span class="p">,</span> <span class="n">relative_to_root</span>
 <span class="kn">from</span> <span class="nn">..utils.images</span> <span class="kn">import</span> <span class="n">set_consumables</span><span class="p">,</span> <span class="n">unsafe_write_nifti_header_and_data</span>
 <span class="kn">from</span> <span class="nn">..utils.misc</span> <span class="kn">import</span> <span class="n">_copy_any</span><span class="p">,</span> <span class="n">unlink</span>
 
@@ -1823,6 +1825,52 @@
         <span class="sa">f</span><span class="s1">&#39;Template </span><span class="si">{</span><span class="n">space</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">_fmt_xyz</span><span class="p">(</span><span class="n">res_meta</span><span class="p">[</span><span class="s2">&quot;zooms&quot;</span><span class="p">])</span><span class="si">}</span><span class="s1">),&#39;</span>
         <span class="sa">f</span><span class="s1">&#39; curated by TemplateFlow </span><span class="si">{</span><span class="n">tf</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s1">&#39;</span>
     <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_BIDSURIInputSpec</span><span class="p">(</span><span class="n">DynamicTraitedSpec</span><span class="p">):</span>
+    <span class="n">dataset_links</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Dict</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Dataset links&#39;</span><span class="p">)</span>
+    <span class="n">out_dir</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Output directory&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_BIDSURIOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">List</span><span class="p">(</span>
+        <span class="n">traits</span><span class="o">.</span><span class="n">Str</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;BIDS URI(s) for file&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="BIDSURI">
+<a class="viewcode-back" href="../../../api/niworkflows.interfaces.bids.html#niworkflows.interfaces.bids.BIDSURI">[docs]</a>
+<span class="k">class</span> <span class="nc">BIDSURI</span><span class="p">(</span><span class="n">SimpleInterface</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert input filenames to BIDS URIs, based on links in the dataset.</span>
+
+<span class="sd">    This interface can combine multiple lists of inputs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">_BIDSURIInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_BIDSURIOutputSpec</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numinputs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">inputs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_numinputs</span> <span class="o">=</span> <span class="n">numinputs</span>
+        <span class="n">input_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;in</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numinputs</span><span class="p">)]</span>
+        <span class="n">add_traits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="n">input_names</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;in</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_numinputs</span><span class="p">)]</span>
+        <span class="n">in_files</span> <span class="o">=</span> <span class="n">listify</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">in_files</span> <span class="o">=</span> <span class="n">_ravel</span><span class="p">(</span><span class="n">in_files</span><span class="p">)</span>
+        <span class="c1"># Remove undefined inputs</span>
+        <span class="n">in_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">in_files</span> <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="n">f</span><span class="p">)]</span>
+        <span class="c1"># Convert the dataset links to BIDS URI prefixes</span>
+        <span class="n">updated_keys</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;bids:</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">:&#39;</span><span class="p">:</span> <span class="n">Path</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dataset_links</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">updated_keys</span><span class="p">[</span><span class="s1">&#39;bids::&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_dir</span><span class="p">)</span>
+        <span class="c1"># Convert the paths to BIDS URIs</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">_find_nearest_path</span><span class="p">(</span><span class="n">updated_keys</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">in_files</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="s1">&#39;out&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span>
+
+        <span class="k">return</span> <span class="n">runtime</span></div>
+
 </pre></div>
         </article>
       </div>

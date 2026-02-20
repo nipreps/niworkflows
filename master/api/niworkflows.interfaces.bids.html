@@ -523,6 +523,31 @@ subject, session, task, run, acquisition or reconstruction.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="niworkflows.interfaces.bids.BIDSURI">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">BIDSURI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numinputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#BIDSURI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.BIDSURI" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
+<p>Convert input filenames to BIDS URIs, based on links in the dataset.</p>
+<p>This interface can combine multiple lists of inputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Mandatory Inputs<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_links</strong> (<em>a dictionary with keys which are any value and with values which are any value</em>) – Dataset links.</p></li>
+<li><p><strong>out_dir</strong> (<em>a string</em>) – Output directory.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Outputs<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> (<em>a list of items which are a string</em>) – BIDS URI(s) for file.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="niworkflows.interfaces.bids.BIDSURI.input_spec">
+<span class="sig-name descname"><span class="pre">input_spec</span></span><a class="headerlink" href="#niworkflows.interfaces.bids.BIDSURI.input_spec" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">_BIDSURIInputSpec</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="niworkflows.interfaces.bids.DerivativesDataSink">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.bids.</span></span><span class="sig-name descname"><span class="pre">DerivativesDataSink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allowed_entities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_path_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/bids.html#DerivativesDataSink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.bids.DerivativesDataSink" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></p>
@@ -1103,6 +1128,10 @@ trigger unnecessary recomputations in the workflow.</p>
 <li><a class="reference internal" href="#niworkflows.interfaces.bids.BIDSFreeSurferDir"><code class="docutils literal notranslate"><span class="pre">BIDSFreeSurferDir</span></code></a></li>
 <li><a class="reference internal" href="#niworkflows.interfaces.bids.BIDSInfo"><code class="docutils literal notranslate"><span class="pre">BIDSInfo</span></code></a><ul>
 <li><a class="reference internal" href="#niworkflows.interfaces.bids.BIDSInfo.output_spec"><code class="docutils literal notranslate"><span class="pre">BIDSInfo.output_spec</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#niworkflows.interfaces.bids.BIDSURI"><code class="docutils literal notranslate"><span class="pre">BIDSURI</span></code></a><ul>
+<li><a class="reference internal" href="#niworkflows.interfaces.bids.BIDSURI.input_spec"><code class="docutils literal notranslate"><span class="pre">BIDSURI.input_spec</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#niworkflows.interfaces.bids.DerivativesDataSink"><code class="docutils literal notranslate"><span class="pre">DerivativesDataSink</span></code></a><ul>
