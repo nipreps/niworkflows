@@ -33,6 +33,7 @@ from pathlib import Path
 import nibabel as nb
 import numpy as np
 import templateflow as tf
+from bids.utils import listify
 from nipype import logging
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
@@ -49,10 +50,11 @@ from nipype.interfaces.base import (
     traits,
 )
 from nipype.interfaces.io import add_traits
+from nipype.interfaces.utility.base import _ravel
 from nipype.utils.filemanip import hash_infile
 
 from .. import data
-from ..utils.bids import _init_layout, relative_to_root
+from ..utils.bids import _find_nearest_path, _init_layout, relative_to_root
 from ..utils.images import set_consumables, unsafe_write_nifti_header_and_data
 from ..utils.misc import _copy_any, unlink
 
@@ -1478,3 +1480,46 @@ def _get_tf_resolution(space: str, resolution: str) -> str:
         f'Template {space} ({_fmt_xyz(res_meta["zooms"])}),'
         f' curated by TemplateFlow {tf.__version__}'
     )
+
+
+class _BIDSURIInputSpec(DynamicTraitedSpec):
+    dataset_links = traits.Dict(mandatory=True, desc='Dataset links')
+    out_dir = traits.Str(mandatory=True, desc='Output directory')
+
+
+class _BIDSURIOutputSpec(TraitedSpec):
+    out = traits.List(
+        traits.Str,
+        desc='BIDS URI(s) for file',
+    )
+
+
+class BIDSURI(SimpleInterface):
+    """Convert input filenames to BIDS URIs, based on links in the dataset.
+
+    This interface can combine multiple lists of inputs.
+    """
+
+    input_spec = _BIDSURIInputSpec
+    output_spec = _BIDSURIOutputSpec
+
+    def __init__(self, numinputs=0, **inputs):
+        super().__init__(**inputs)
+        self._numinputs = numinputs
+        input_names = [f'in{i + 1}' for i in range(numinputs)]
+        add_traits(self.inputs, input_names)
+
+    def _run_interface(self, runtime):
+        inputs = [getattr(self.inputs, f'in{i + 1}') for i in range(self._numinputs)]
+        in_files = listify(inputs)
+        in_files = _ravel(in_files)
+        # Remove undefined inputs
+        in_files = [f for f in in_files if isdefined(f)]
+        # Convert the dataset links to BIDS URI prefixes
+        updated_keys = {f'bids:{k}:': Path(v) for k, v in self.inputs.dataset_links.items()}
+        updated_keys['bids::'] = Path(self.inputs.out_dir)
+        # Convert the paths to BIDS URIs
+        out = [_find_nearest_path(updated_keys, f) for f in in_files]
+        self._results['out'] = out
+
+        return runtime

@@ -2,10 +2,10 @@ name: Tox
 
 on:
   push:
-    branches: [ '**' ]
+    branches: [ master, main, 'maint/*' ]
     tags: [ '*' ]
   pull_request:
-    branches: [ master, main, 'maint/*' ]
+
   schedule:
     - cron: '0 0 * * *'
 
@@ -94,17 +94,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.12", "3.13", "3.14"]
         dependencies: [latest, pre]
         include:
-          - python-version: "3.10"
+          - python-version: "3.12"
             dependencies: min
-        exclude:
-          # Do not test pre-releases for versions out of SPEC0
-          - python-version: "3.10"
-            dependencies: pre
-          - python-version: "3.11"
-            dependencies: pre
 
     env:
       DEPENDS: ${{ matrix.dependencies }}
