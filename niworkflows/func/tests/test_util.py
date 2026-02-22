@@ -26,9 +26,9 @@ import os
 from pathlib import Path
 from shutil import which
 
+import nibabel as nb
 import numpy as np
 import pytest
-from nilearn.image import load_img
 from nipype.pipeline import engine as pe
 from nipype.utils.filemanip import copyfile, fname_presuffix
 
@@ -86,8 +86,8 @@ if datapath:
 
 
 def symmetric_overlap(img1, img2):
-    mask1 = load_img(img1).get_fdata() > 0
-    mask2 = load_img(img2).get_fdata() > 0
+    mask1 = nb.load(img1).get_fdata() > 0
+    mask2 = nb.load(img2).get_fdata() > 0
 
     total1 = np.sum(mask1)
     total2 = np.sum(mask2)
