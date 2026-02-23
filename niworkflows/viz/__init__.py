@@ -2,7 +2,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from .._deprecated import raise_moved_to_nireports
 
-
 raise_moved_to_nireports(
     'niworkflows.viz',
     (

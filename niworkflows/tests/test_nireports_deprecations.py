@@ -31,7 +31,7 @@ def test_registration_migrated_classes_raise():
     registration = importlib.import_module('niworkflows.interfaces.reportlets.registration')
 
     with pytest.raises(DeprecationError, match='nireports.interfaces.reporting.registration'):
-        getattr(registration, 'BBRegisterRPT')
+        registration.BBRegisterRPT
 
 
 @pytest.mark.parametrize(

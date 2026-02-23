@@ -25,9 +25,9 @@
 from nipype.interfaces import afni, fsl
 from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
+from nireports.interfaces.reporting.masks import SimpleShowMaskRPT
 from packaging.version import Version
 from packaging.version import parse as parseversion
-from nireports.interfaces.reporting.masks import SimpleShowMaskRPT
 from templateflow.api import get as get_template
 
 from .. import data

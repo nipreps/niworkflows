@@ -26,7 +26,6 @@ import os
 from shutil import copy
 from tempfile import TemporaryDirectory
 
-import pytest
 from nipype.pipeline import engine as pe
 
 from ..interfaces.reportlets.registration import (
