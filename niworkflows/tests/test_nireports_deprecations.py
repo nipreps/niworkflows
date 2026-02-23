@@ -3,6 +3,7 @@
 """Hard deprecation coverage for NiReports-migrated APIs."""
 
 import importlib
+import re
 
 import pytest
 
@@ -30,8 +31,11 @@ def test_deprecated_modules_raise(module_name, replacement_hint):
 def test_registration_migrated_classes_raise():
     registration = importlib.import_module('niworkflows.interfaces.reportlets.registration')
 
-    with pytest.raises(DeprecationError, match='nireports.interfaces.reporting.registration'):
-        registration.BBRegisterRPT
+    with pytest.raises(
+        DeprecationError,
+        match=re.escape('nireports.interfaces.reporting.registration'),
+    ):
+        getattr(registration, 'BBRegisterRPT')
 
 
 @pytest.mark.parametrize(
