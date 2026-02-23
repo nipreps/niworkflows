@@ -41,8 +41,7 @@ from nipype.interfaces.base import (
 from nipype.interfaces.freesurfer.preprocess import ConcatenateLTA, RobustRegister
 from nipype.interfaces.freesurfer.utils import LTAConvert
 from nipype.utils.filemanip import copyfile, filename_to_list, fname_presuffix
-
-from .reportlets.registration import BBRegisterRPT, MRICoregRPT
+from nireports.interfaces.reporting.registration import BBRegisterRPT, MRICoregRPT
 
 
 class StructuralReference(fs.RobustTemplate):

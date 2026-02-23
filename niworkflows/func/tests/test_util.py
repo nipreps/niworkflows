@@ -31,8 +31,8 @@ import numpy as np
 import pytest
 from nipype.pipeline import engine as pe
 from nipype.utils.filemanip import copyfile, fname_presuffix
+from nireports.interfaces.reporting.masks import ROIsPlot
 
-from ...interfaces.reportlets.masks import ROIsPlot
 from ...workflows.epi.refmap import init_epi_reference_wf
 from ..util import init_enhance_and_skullstrip_bold_wf
 

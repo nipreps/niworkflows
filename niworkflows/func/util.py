@@ -27,6 +27,7 @@ from nipype.interfaces import utility as niu
 from nipype.pipeline import engine as pe
 from packaging.version import Version
 from packaging.version import parse as parseversion
+from nireports.interfaces.reporting.masks import SimpleShowMaskRPT
 from templateflow.api import get as get_template
 
 from .. import data
@@ -41,7 +42,6 @@ from ..interfaces.fixes import (
     FixN4BiasFieldCorrection as N4BiasFieldCorrection,
 )
 from ..interfaces.header import CopyHeader, CopyXForm, ValidateImage
-from ..interfaces.reportlets.masks import SimpleShowMaskRPT
 from ..utils.connections import listify
 from ..utils.misc import pass_dummy_scans as _pass_dummy_scans
 

@@ -12,7 +12,5 @@ Information on specific functions, classes, and methods.
    api/niworkflows.engine
    api/niworkflows.func
    api/niworkflows.interfaces
-   api/niworkflows.reports
    api/niworkflows.utils
-   api/niworkflows.viz
    api/niworkflows.workflows

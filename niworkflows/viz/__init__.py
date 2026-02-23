@@ -1,14 +1,13 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-import warnings
+from .._deprecated import raise_moved_to_nireports
 
-from .plots import plot_carpet
-from .utils import SVGNS
 
-msg = (
-    'Niworkflows will be deprecating visualizations in favor of a standalone library "nireports".'
+raise_moved_to_nireports(
+    'niworkflows.viz',
+    (
+        'nireports.reportlets.modality.func.plot_carpet',
+        'nireports.reportlets.utils.SVGNS',
+        'nireports.reportlets',
+    ),
 )
-
-warnings.warn(msg, PendingDeprecationWarning, stacklevel=2)
-
-__all__ = ['SVGNS', 'plot_carpet']

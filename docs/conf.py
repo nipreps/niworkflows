@@ -245,7 +245,17 @@ epub_exclude_files = ['search.html']
 
 apidoc_module_dir = '../niworkflows'
 apidoc_output_dir = 'api'
-apidoc_excluded_paths = ['conftest.py', '*/tests/*', 'tests/*', 'testing.py']
+apidoc_excluded_paths = [
+    'conftest.py',
+    '*/tests/*',
+    'interfaces/plotting.py',
+    'interfaces/reportlets/masks.py',
+    'interfaces/reportlets/segmentation.py',
+    'reports/*',
+    'tests/*',
+    'testing.py',
+    'viz/*',
+]
 apidoc_separate_modules = True
 apidoc_extra_args = ['--module-first', '-d 1', '-T']
 
