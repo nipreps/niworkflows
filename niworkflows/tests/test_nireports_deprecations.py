@@ -35,7 +35,7 @@ def test_registration_migrated_classes_raise():
         DeprecationError,
         match=re.escape('nireports.interfaces.reporting.registration'),
     ):
-        registration.BBRegisterRPT
+        getattr(registration, 'BBRegisterRPT')
 
 
 @pytest.mark.parametrize(
