@@ -37,6 +37,15 @@ from . import load_resource
 # disable ET
 os.environ['NO_ET'] = '1'
 
+# Modules intentionally raising DeprecationError are excluded from doctest collection.
+collect_ignore_glob = [
+    'interfaces/plotting.py',
+    'interfaces/reportlets/masks.py',
+    'interfaces/reportlets/segmentation.py',
+    'reports/*.py',
+    'viz/*.py',
+]
+
 
 def find_resource_or_skip(resource):
     pathlike = load_resource(resource)

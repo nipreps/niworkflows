@@ -23,23 +23,12 @@
 """Utilities tests"""
 
 import os
-from shutil import copy
 
 import numpy as np
 import pandas as pd
 from nipype.pipeline import engine as pe
 
 from ..interfaces.confounds import ExpandModel, SpikeRegressors
-from ..interfaces.plotting import CompCorVariancePlot, ConfoundsCorrelationPlot
-
-
-def _smoke_test_report(report_interface, artifact_name):
-    out_report = report_interface.run().outputs.out_file
-
-    save_artifacts = os.getenv('SAVE_CIRCLE_ARTIFACTS')
-    if save_artifacts:
-        copy(out_report, os.path.join(save_artifacts, artifact_name))
-    assert os.path.isfile(out_report), f'Report "{out_report}" does not exist'
 
 
 def _expand_test(model_formula, datadir):
@@ -161,33 +150,3 @@ def test_spikes(datadir):
     outliers_mc = [1, 1, 1, 1, 1]
     spk_data = _spikes_test(lags=lags, mincontig=mincontig, datadir=datadir)
     assert np.all(np.isclose(outliers_mc, spk_data['motion_outlier']))
-
-
-def test_CompCorVariancePlot(datadir):
-    """CompCor variance report test"""
-    metadata_file = os.path.join(datadir, 'confounds_metadata_test.tsv')
-    cc_rpt = CompCorVariancePlot(metadata_files=[metadata_file], metadata_sources=['aCompCor'])
-    _smoke_test_report(cc_rpt, 'compcor_variance.svg')
-
-
-def test_ConfoundsCorrelationPlot(datadir):
-    """confounds correlation report test"""
-    confounds_file = os.path.join(datadir, 'confounds_test.tsv')
-    cc_rpt = ConfoundsCorrelationPlot(
-        confounds_file=confounds_file,
-        reference_column='a',
-        ignore_initial_volumes=1,
-    )
-    _smoke_test_report(cc_rpt, 'confounds_correlation.svg')
-
-
-def test_ConfoundsCorrelationPlotColumns(datadir):
-    """confounds correlation report test"""
-    confounds_file = os.path.join(datadir, 'confounds_test.tsv')
-    cc_rpt = ConfoundsCorrelationPlot(
-        confounds_file=confounds_file,
-        reference_column='a',
-        columns=['b', 'd', 'f'],
-        ignore_initial_volumes=0,
-    )
-    _smoke_test_report(cc_rpt, 'confounds_correlation_cols.svg')
