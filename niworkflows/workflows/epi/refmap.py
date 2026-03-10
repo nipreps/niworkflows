@@ -227,7 +227,7 @@ def _post_merge(in_file, in_xfms):
     """
     Massage output from ``SpatialReference``.
 
-    If the previous ``SpatialReference`` node by-passed the execution of
+    If the previous ``SpatialReference`` node bypassed the execution of
     ``mri_robust_template`` (hence, there was only one input file), the
     single-file is forwarded to the output.
 
