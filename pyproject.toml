@@ -30,6 +30,7 @@ dependencies = [
     "nibabel >= 5.2",
     "nilearn >= 0.11.1",
     "nipype >= 1.9.2",
+    "nireports >= 25.3.0",
     "nitransforms >= 24.1.1",
     "numpy >= 1.26",
     "packaging >= 23",

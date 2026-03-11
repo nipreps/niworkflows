@@ -97,6 +97,8 @@ nilearn==0.11.1
     # via niworkflows (pyproject.toml)
 nipype==1.9.2
     # via niworkflows (pyproject.toml)
+nireports>=25.3.0
+    # via niworkflows (pyproject.toml)
 nitransforms==24.1.1
     # via niworkflows (pyproject.toml)
 num2words==0.5.14

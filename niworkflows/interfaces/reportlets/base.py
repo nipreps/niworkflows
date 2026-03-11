@@ -24,9 +24,10 @@
 
 from nipype.interfaces.base import File, traits
 from nipype.interfaces.mixins import reporting
+from nireports.reportlets.mosaic import plot_registration, plot_segs
+from nireports.reportlets.utils import compose_view, cuts_from_bbox
 
 from ... import NIWORKFLOWS_LOG
-from ...viz.utils import compose_view, cuts_from_bbox
 
 
 class _SVGReportCapableInputSpec(reporting.ReportCapableInputSpec):
@@ -58,8 +59,6 @@ class RegistrationRC(reporting.ReportCapableInterface):
         """Generate the visual report."""
         from nilearn.image import load_img, threshold_img
         from nilearn.masking import apply_mask, unmask
-
-        from niworkflows.viz.utils import plot_registration
 
         NIWORKFLOWS_LOG.info('Generating visual report')
 
@@ -118,8 +117,6 @@ class SegmentationRC(reporting.ReportCapableInterface):
     """An abstract mixin to segmentation nipype interfaces."""
 
     def _generate_report(self):
-        from niworkflows.viz.utils import plot_segs
-
         compose_view(
             plot_segs(
                 image_nii=self._anat_file,
@@ -145,8 +142,6 @@ class SurfaceSegmentationRC(reporting.ReportCapableInterface):
         """Generate the visual report."""
         from nilearn.image import load_img, threshold_img
         from nilearn.masking import apply_mask, unmask
-
-        from niworkflows.viz.utils import plot_registration
 
         NIWORKFLOWS_LOG.info('Generating visual report')
 
