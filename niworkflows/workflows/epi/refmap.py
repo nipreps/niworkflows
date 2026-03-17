@@ -34,6 +34,9 @@ def init_epi_reference_wf(
     omp_nthreads,
     auto_bold_nss=False,
     name='epi_reference_wf',
+    n4_iterations=(50,) * 5,
+    n4_shrink_factor=4,
+    calculate_bspline_grid=False,
 ):
     """
     Build a workflow that generates a reference map from a set of EPI images.
@@ -121,7 +124,7 @@ def init_epi_reference_wf(
     from ...interfaces.header import ValidateImage
     from ...interfaces.images import RobustAverage
     from ...interfaces.nibabel import IntensityClip
-    from ...utils.connections import listify
+    from ...utils.connections import listify, pop_file
 
     wf = Workflow(name=name)
 
@@ -153,9 +156,9 @@ def init_epi_reference_wf(
         N4BiasFieldCorrection(
             dimension=3,
             copy_header=True,
-            n_iterations=[50] * 5,
+            n_iterations=list(n4_iterations),
             convergence_threshold=1e-7,
-            shrink_factor=4,
+            shrink_factor=n4_shrink_factor,
         ),
         n_procs=omp_nthreads,
         name='n4_avgs',
@@ -220,6 +223,13 @@ def init_epi_reference_wf(
     else:
         wf.connect(inputnode, 't_masks', per_run_avgs, 't_mask')
 
+    if calculate_bspline_grid:
+        bspline_grid = pe.Node(niu.Function(function=_bspline_grid), name='bspline_grid')
+        wf.connect([
+            (inputnode, bspline_grid, [(('in_files', pop_file), 'in_file')]),
+            (bspline_grid, n4_avgs, [('out', 'args')]),
+        ])  # fmt:skip
+
     return wf
 
 
@@ -256,3 +266,17 @@ def _post_merge(in_file, in_xfms):
     img = nb.load(in_file)
     nb.Nifti1Image(img.dataobj, img.affine, None).to_filename(out_file)
     return _advanced_clip(out_file, p_min=0.0, p_max=100.0)
+
+
+def _bspline_grid(in_file):
+    import math
+
+    import nibabel as nb
+    import numpy as np
+
+    img = nb.load(in_file)
+    zooms = img.header.get_zooms()[:3]
+    extent = (np.array(img.shape[:3]) - 1) * zooms
+    # get mesh resolution ratio
+    retval = [f'{math.ceil(i / extent[np.argmin(extent)])}' for i in extent]
+    return f'-b [{"x".join(retval)}]'
