@@ -134,6 +134,30 @@ def test_expansion_na_robustness(datadir):
         pd.testing.assert_series_equal(expected_data[col], exp_data[col], check_dtype=False)
 
 
+def test_expansion_column_order_deterministic(datadir):
+    """Column order is deterministic across runs (regression for nipreps/fmriprep#3501)."""
+    model_formula = '(dd1(a + b + c))^^2 + others'
+    expected_columns = [
+        'a',
+        'a_derivative1',
+        'a_power2',
+        'a_derivative1_power2',
+        'b',
+        'b_derivative1',
+        'b_power2',
+        'b_derivative1_power2',
+        'c',
+        'c_derivative1',
+        'c_power2',
+        'c_derivative1_power2',
+        'd',
+        'e',
+        'f',
+    ]
+    exp_data = _expand_test(model_formula, datadir)
+    assert list(exp_data.columns) == expected_columns
+
+
 def test_spikes(datadir):
     """Test outlier flagging"""
     outliers = [1, 1, 0, 0, 1]
