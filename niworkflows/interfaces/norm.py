@@ -554,9 +554,7 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
         # Resample the lesion into in_file's voxel grid so the subtraction is
         # spatially correct regardless of the lesion's stored orientation or
         # grid. Nearest-neighbor (order=0) keeps the mask binary.
-        lm_img = resample_from_to(
-            nb.load(lesion_mask), (data.shape, in_img.affine), order=0
-        )
+        lm_img = resample_from_to(nb.load(lesion_mask), (data.shape, in_img.affine), order=0)
 
         # Subtract lesion mask from secondary mask, set negatives to 0
         data = np.fmax(data - np.asanyarray(lm_img.dataobj), 0)
