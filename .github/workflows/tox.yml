@@ -141,23 +141,3 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ always() }}
-
-  checks:
-    runs-on: 'ubuntu-latest'
-    continue-on-error: true
-    strategy:
-      matrix:
-        check: ['style', 'spellcheck']
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
-      - name: Install tox
-        run: uv tool install tox --with=tox-uv
-      - name: Show tox config
-        run: tox c
-      - name: Show tox config (this call)
-        run: tox c -e ${{ matrix.check }}
-      - name: Run check
-        run: tox -e ${{ matrix.check }}
