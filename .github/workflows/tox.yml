@@ -25,11 +25,11 @@ jobs:
     if: github.repository == 'nipreps/niworkflows'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
     - name: Set up Python 3
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: 3
     - name: Display Python version
@@ -38,7 +38,7 @@ jobs:
       run: pipx run build
     - name: Check distributions
       run: pipx run twine check dist/*
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: dist
         path: dist/
@@ -53,7 +53,7 @@ jobs:
     - name: Create test data directory
       run: mkdir -p $HOME/.cache/stanford-crn
     - name: Load test data cache
-      uses: actions/cache@v5
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       id: stanford-crn
       with:
         path: ~/.cache/stanford-crn/
@@ -62,7 +62,7 @@ jobs:
           data-v0-${{ github.ref_name }}-
           data-v0-
     - name: Setup conda
-      uses: conda-incubator/setup-miniconda@v3
+      uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
       with:
         auto-activate-base: true
         activate-environment: ""
@@ -104,19 +104,19 @@ jobs:
       DEPENDS: ${{ matrix.dependencies }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
           fetch-depth: 0
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       - name: Load test data cache
-        uses: actions/cache@v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: stanford-crn
         with:
           path: ~/.cache/stanford-crn/
           key: data-v0-${{ github.ref_name }}-${{ github.sha }}
-      - uses: actions/cache@v5
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/templateflow
           key: templateflow-v1
@@ -125,7 +125,7 @@ jobs:
           sudo apt update
           sudo apt install -y --no-install-recommends graphviz
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
@@ -137,7 +137,7 @@ jobs:
         run: tox c
       - name: Run tox
         run: tox -v --exit-and-dump-after 1200
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ always() }}
@@ -150,9 +150,9 @@ jobs:
         check: ['style', 'spellcheck']
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       - name: Install tox
         run: uv tool install tox --with=tox-uv
       - name: Show tox config
