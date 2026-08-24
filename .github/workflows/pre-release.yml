@@ -1,13 +1,9 @@
-name: Tox
+name: Pre-release dependencies
 
 on:
-  push:
-    branches: [ master, main, 'maint/*' ]
-    tags: [ '*' ]
-  pull_request:
-
+  workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * 1'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,28 +17,6 @@ env:
   FORCE_COLOR: true
 
 jobs:
-  build:
-    if: github.repository == 'nipreps/niworkflows'
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        fetch-depth: 0
-    - name: Set up Python 3
-      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-      with:
-        python-version: 3
-    - name: Display Python version
-      run: python -c "import sys; print(sys.version)"
-    - name: Build niworkflows
-      run: pipx run build
-    - name: Check distributions
-      run: pipx run twine check dist/*
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-      with:
-        name: dist
-        path: dist/
-
   get_data:
     if: github.repository == 'nipreps/niworkflows'
     runs-on: ubuntu-latest
@@ -93,15 +67,12 @@ jobs:
     needs: [get_data]
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.12", "3.13", "3.14"]
-        dependencies: [latest]
-        include:
-          - python-version: "3.12"
-            dependencies: min
 
     env:
-      DEPENDS: ${{ matrix.dependencies }}
+      DEPENDS: pre
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -141,3 +112,50 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ always() }}
+
+  create-issue-on-failure:
+    name: Open issue on failure
+    needs: [test]
+    if: failure() && github.repository == 'nipreps/niworkflows' && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const title = '[PRE] Upcoming dependency causing test failures';
+            const body = [
+              'The weekly pre-release dependency test run failed.',
+              '',
+              `Failing run: ${runUrl}`,
+              '',
+              'This job installs pre-release versions of dependencies. A failure here usually means',
+              'an upcoming release of a dependency will break niworkflows.',
+            ].join('\n');
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'pre-release-failure',
+            });
+
+            if (issues.length > 0) {
+              const issue = issues[0];
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `Another scheduled run failed: ${runUrl}`,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['pre-release-failure'],
+              });
+            }

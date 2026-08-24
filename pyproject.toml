@@ -233,7 +233,7 @@ source = [
 ]
 
 [tool.codespell]
-skip = "*/data/*,*/docs/_build/*,./examples/viz-report.*"
+skip = "*/data/*,*/docs/_build/*,*examples/viz-report.*"
 ignore-words-list = "objekt,nd"
 
 [tool.pixi.workspace]
