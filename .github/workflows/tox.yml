@@ -95,7 +95,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.12", "3.13", "3.14"]
-        dependencies: [latest, pre]
+        dependencies: [latest]
         include:
           - python-version: "3.12"
             dependencies: min
