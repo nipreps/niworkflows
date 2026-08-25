@@ -1,3 +1,16 @@
+1.15.0 (August 25, 2026)
+========================
+New feature release in the 1.15.x series.
+
+This release adopts SPEC 0, subsequently dropping support for Python 3.11 and earlier.
+
+* ENH: Allow hierarchical boldref/mask/xfm (#1055)
+* ENH: Upstream BIDSURI interface and ``_find_nearest_path`` from fMRIPrep (#1031)
+* ENH: Upstream fMRIPrep confound interfaces (#1007)
+* ENH: Port affine conversion interface (``ConvertAffine``) from fMRIPrep (#1011)
+* ENH: Add target resolution to ``GenerateSamplingReference`` (#1003)
+* FIX: Require pybids 0.18.1+ for packaged configs (#1033)
+
 1.14.4 (January 13, 2026)
 =========================
 Patch release in the 1.14.x series.
