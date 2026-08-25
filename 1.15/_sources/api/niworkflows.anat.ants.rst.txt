@@ -1,0 +1,7 @@
+niworkflows.anat.ants module
+============================
+
+.. automodule:: niworkflows.anat.ants
+   :members:
+   :undoc-members:
+   :show-inheritance:

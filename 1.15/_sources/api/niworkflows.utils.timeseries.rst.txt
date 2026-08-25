@@ -1,0 +1,7 @@
+niworkflows.utils.timeseries module
+===================================
+
+.. automodule:: niworkflows.utils.timeseries
+   :members:
+   :undoc-members:
+   :show-inheritance:

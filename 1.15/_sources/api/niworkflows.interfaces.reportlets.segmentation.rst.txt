@@ -1,0 +1,7 @@
+niworkflows.interfaces.reportlets.segmentation module
+=====================================================
+
+.. automodule:: niworkflows.interfaces.reportlets.segmentation
+   :members:
+   :undoc-members:
+   :show-inheritance:

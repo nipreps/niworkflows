@@ -1,0 +1,7 @@
+niworkflows.cli.boldref module
+==============================
+
+.. automodule:: niworkflows.cli.boldref
+   :members:
+   :undoc-members:
+   :show-inheritance:

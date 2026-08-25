@@ -1,0 +1,7 @@
+niworkflows.engine.plugin module
+================================
+
+.. automodule:: niworkflows.engine.plugin
+   :members:
+   :undoc-members:
+   :show-inheritance:

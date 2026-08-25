@@ -1,0 +1,7 @@
+niworkflows.interfaces.plotting module
+======================================
+
+.. automodule:: niworkflows.interfaces.plotting
+   :members:
+   :undoc-members:
+   :show-inheritance:
