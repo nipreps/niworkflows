@@ -634,12 +634,16 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">levels</span><span class="p">:</span>
         <span class="n">levels</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">]]</span> <span class="o">*</span> <span class="n">nsegs</span>
 
+    <span class="c1"># nilearn 0.12.0 changed the colorbar default to True</span>
+    <span class="n">plot_params</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;colorbar&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
     <span class="c1"># anatomical</span>
     <span class="n">display</span> <span class="o">=</span> <span class="n">plot_anat</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_params</span><span class="p">)</span>
 
     <span class="c1"># remove plot_anat -specific parameters</span>
     <span class="n">plot_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;display_mode&#39;</span><span class="p">)</span>
     <span class="n">plot_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;cut_coords&#39;</span><span class="p">)</span>
+    <span class="n">plot_params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;colorbar&#39;</span><span class="p">)</span>
 
     <span class="n">plot_params</span><span class="p">[</span><span class="s1">&#39;linewidths&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nsegs</span><span class="p">)):</span>
@@ -685,6 +689,9 @@
     <span class="n">out_files</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">estimate_brightness</span><span class="p">:</span>
         <span class="n">plot_params</span> <span class="o">=</span> <span class="n">robust_set_limits</span><span class="p">(</span><span class="n">anat_nii</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">plot_params</span><span class="p">)</span>
+
+    <span class="c1"># nilearn 0.12.0 changed the colorbar default to True</span>
+    <span class="n">plot_params</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;colorbar&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
     <span class="c1"># FreeSurfer ribbon.mgz</span>
     <span class="k">if</span> <span class="n">contour</span><span class="p">:</span>
