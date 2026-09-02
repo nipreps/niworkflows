@@ -292,12 +292,16 @@ def _plot_anat_with_contours(image, segs=None, compress='auto', **plot_params):
     if not levels:
         levels = [[0.5]] * nsegs
 
+    # nilearn 0.12.0 changed the colorbar default to True
+    plot_params.setdefault('colorbar', False)
+
     # anatomical
     display = plot_anat(image, **plot_params)
 
     # remove plot_anat -specific parameters
     plot_params.pop('display_mode')
     plot_params.pop('cut_coords')
+    plot_params.pop('colorbar')
 
     plot_params['linewidths'] = 0.5
     for i in reversed(range(nsegs)):
@@ -341,6 +345,9 @@ def plot_registration(
     out_files = []
     if estimate_brightness:
         plot_params = robust_set_limits(anat_nii.get_fdata().reshape(-1), plot_params)
+
+    # nilearn 0.12.0 changed the colorbar default to True
+    plot_params.setdefault('colorbar', False)
 
     # FreeSurfer ribbon.mgz
     if contour:
