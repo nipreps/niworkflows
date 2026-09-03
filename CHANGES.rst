@@ -1,3 +1,9 @@
+1.15.1 (September 03, 2026)
+===========================
+Patch release in the 1.15.x series.
+
+* FIX: Disable colorbar after nilearn default switch (#1057)
+
 1.15.0 (August 25, 2026)
 ========================
 New feature release in the 1.15.x series.
