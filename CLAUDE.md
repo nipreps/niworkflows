@@ -293,9 +293,11 @@ Defined in `pyproject.toml` under `[tool.pytest.ini_options]`:
 class _MyInterfaceInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='input image')
 
+
 # Output spec: _<InterfaceName>OutputSpec
 class _MyInterfaceOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='output image')
+
 
 # Interface class
 class MyInterface(SimpleInterface):
@@ -454,9 +456,11 @@ with template names, cohort/resolution/density specs. Distinguishes standard
 Uses `acres.Loader` for package data access:
 ```python
 from niworkflows import load_resource
+
 path = load_resource('data/nipreps.json')
 
 from niworkflows.data import load
+
 content = load.readable('nipreps.json').read_text()
 ```
 
