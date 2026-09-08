@@ -271,6 +271,8 @@ def collect_data(
 
     bids_filters = bids_filters or {}
     for acq, entities in bids_filters.items():
+        if acq not in queries:  # filter with no matching query
+            continue
         # BIDS filters will not be able to override subject / session entities
         for entity, param in reserved_entities:
             if param == Query.OPTIONAL:
