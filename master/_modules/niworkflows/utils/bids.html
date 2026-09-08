@@ -606,6 +606,8 @@
 
     <span class="n">bids_filters</span> <span class="o">=</span> <span class="n">bids_filters</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">acq</span><span class="p">,</span> <span class="n">entities</span> <span class="ow">in</span> <span class="n">bids_filters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">acq</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>  <span class="c1"># filter with no matching query</span>
+            <span class="k">continue</span>
         <span class="c1"># BIDS filters will not be able to override subject / session entities</span>
         <span class="k">for</span> <span class="n">entity</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">reserved_entities</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">param</span> <span class="o">==</span> <span class="n">Query</span><span class="o">.</span><span class="n">OPTIONAL</span><span class="p">:</span>
