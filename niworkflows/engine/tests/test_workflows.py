@@ -75,8 +75,10 @@ def test_boilerplate_without_trailing_spaces():
     inner = _reorient_wf()
     inner.__desc__ = 'Inner workflow.'
 
-    workflow.connect([
-        (inputnode, inner, [('in_file', 'inputnode.in_file')]),
-    ])
+    workflow.connect(
+        [
+            (inputnode, inner, [('in_file', 'inputnode.in_file')]),
+        ]
+    )
 
     assert workflow.visit_desc() == 'Outer workflow. Inner workflow. Outer workflow (postdesc).'
