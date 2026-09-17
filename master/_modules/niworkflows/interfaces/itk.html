@@ -353,7 +353,6 @@
 <span class="kn">import</span> <span class="nn">nibabel</span> <span class="k">as</span> <span class="nn">nb</span>
 <span class="kn">import</span> <span class="nn">nitransforms</span> <span class="k">as</span> <span class="nn">nt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
 <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BaseInterfaceInputSpec</span><span class="p">,</span>
     <span class="n">File</span><span class="p">,</span>
@@ -361,14 +360,11 @@
     <span class="n">OutputMultiObject</span><span class="p">,</span>
     <span class="n">SimpleInterface</span><span class="p">,</span>
     <span class="n">TraitedSpec</span><span class="p">,</span>
-    <span class="n">isdefined</span><span class="p">,</span>
     <span class="n">traits</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">fname_presuffix</span>
 
 <span class="kn">from</span> <span class="nn">.fixes</span> <span class="kn">import</span> <span class="n">_FixTraitApplyTransformsInputSpec</span>
-
-<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;nipype.interface&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_MCFLIRT2ITKInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
@@ -377,7 +373,6 @@
     <span class="p">)</span>
     <span class="n">in_reference</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input image for spatial reference&#39;</span><span class="p">)</span>
     <span class="n">in_source</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;input image for spatial source&#39;</span><span class="p">)</span>
-    <span class="n">num_threads</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="n">nohash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;number of parallel processes&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">_MCFLIRT2ITKOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
@@ -393,9 +388,6 @@
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">_MCFLIRT2ITKOutputSpec</span>
 
     <span class="k">def</span> <span class="nf">_run_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runtime</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">isdefined</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span><span class="p">):</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Multithreading is deprecated. Remove the num_threads input.&#39;</span><span class="p">)</span>
-
         <span class="n">source</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_source</span><span class="p">)</span>
         <span class="n">reference</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_reference</span><span class="p">)</span>
         <span class="n">affines</span> <span class="o">=</span> <span class="p">[</span>
