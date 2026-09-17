@@ -29,7 +29,6 @@ from tempfile import TemporaryDirectory
 import nibabel as nb
 import nitransforms as nt
 import numpy as np
-from nipype import logging
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
     File,
@@ -37,14 +36,11 @@ from nipype.interfaces.base import (
     OutputMultiObject,
     SimpleInterface,
     TraitedSpec,
-    isdefined,
     traits,
 )
 from nipype.utils.filemanip import fname_presuffix
 
 from .fixes import _FixTraitApplyTransformsInputSpec
-
-LOGGER = logging.getLogger('nipype.interface')
 
 
 class _MCFLIRT2ITKInputSpec(BaseInterfaceInputSpec):
@@ -53,7 +49,6 @@ class _MCFLIRT2ITKInputSpec(BaseInterfaceInputSpec):
     )
     in_reference = File(exists=True, mandatory=True, desc='input image for spatial reference')
     in_source = File(exists=True, mandatory=True, desc='input image for spatial source')
-    num_threads = traits.Int(nohash=True, desc='number of parallel processes')
 
 
 class _MCFLIRT2ITKOutputSpec(TraitedSpec):
@@ -67,9 +62,6 @@ class MCFLIRT2ITK(SimpleInterface):
     output_spec = _MCFLIRT2ITKOutputSpec
 
     def _run_interface(self, runtime):
-        if isdefined(self.inputs.num_threads):
-            LOGGER.warning('Multithreading is deprecated. Remove the num_threads input.')
-
         source = nb.load(self.inputs.in_source)
         reference = nb.load(self.inputs.in_reference)
         affines = [
