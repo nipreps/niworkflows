@@ -64,8 +64,11 @@ def unsafe_write_nifti_header_and_data(fname, header, data):
             fobj = GzipFile('', 'wb', 9, fobj, 0.0)
         header.write_to(fobj)
         # This function serializes one block at a time to reduce memory usage a bit
-        # It assumes Fortran-ordered data.
-        nb.volumeutils.array_to_file(data, fobj, offset=header.get_data_offset())
+        # It assumes Fortran-ordered data. Pass the header's dtype so the data is
+        # written in the byte order the header advertises.
+        nb.volumeutils.array_to_file(
+            data, fobj, header.get_data_dtype(), offset=header.get_data_offset()
+        )
         if str(fname).endswith('.gz'):
             fobj.close()
 
