@@ -396,8 +396,11 @@
             <span class="n">fobj</span> <span class="o">=</span> <span class="n">GzipFile</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="n">fobj</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
         <span class="n">header</span><span class="o">.</span><span class="n">write_to</span><span class="p">(</span><span class="n">fobj</span><span class="p">)</span>
         <span class="c1"># This function serializes one block at a time to reduce memory usage a bit</span>
-        <span class="c1"># It assumes Fortran-ordered data.</span>
-        <span class="n">nb</span><span class="o">.</span><span class="n">volumeutils</span><span class="o">.</span><span class="n">array_to_file</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fobj</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">get_data_offset</span><span class="p">())</span>
+        <span class="c1"># It assumes Fortran-ordered data. Pass the header&#39;s dtype so the data is</span>
+        <span class="c1"># written in the byte order the header advertises.</span>
+        <span class="n">nb</span><span class="o">.</span><span class="n">volumeutils</span><span class="o">.</span><span class="n">array_to_file</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="n">fobj</span><span class="p">,</span> <span class="n">header</span><span class="o">.</span><span class="n">get_data_dtype</span><span class="p">(),</span> <span class="n">offset</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">get_data_offset</span><span class="p">()</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.gz&#39;</span><span class="p">):</span>
             <span class="n">fobj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
