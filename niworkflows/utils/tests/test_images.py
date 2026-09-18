@@ -28,6 +28,7 @@ from ..images import (
     dseg_label,
     overwrite_header,
     resample_by_spacing,
+    unsafe_write_nifti_header_and_data,
     update_header_fields,
 )
 
@@ -134,3 +135,17 @@ def test_resample_by_spacing():
     resampled = resample_by_spacing(nii, (2.0, 2.0, 2.0), order=1, clip=False)
     assert resampled.header.get_zooms()[:3] == (2.0, 2.0, 2.0)
     assert np.allclose(resampled.affine, rot.dot(new_affine))
+
+
+@pytest.mark.parametrize('endianness', ['<', '>'])
+def test_unsafe_write_nifti_header_and_data_endianness(tmp_path, endianness):
+    """The data is written in the byte order the header advertises."""
+    data = np.arange(24, dtype='<f4').reshape(2, 3, 4)
+    header = nb.Nifti1Header(endianness=endianness)
+    header.set_data_shape(data.shape)
+    header.set_data_dtype(f'{endianness}f4')
+
+    fname = tmp_path / 'test.nii'
+    unsafe_write_nifti_header_and_data(fname, header, data)
+
+    assert np.array_equal(np.asanyarray(nb.load(fname).dataobj), data)
