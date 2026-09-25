@@ -189,8 +189,9 @@ def collect_data(
         The BIDS directory
     participant_label : :obj:`str`
         The participant identifier
-    session_id : :obj:`str`, None, or :obj:`bids.layout.Query`
-        The session identifier. By default, all sessions will be used.
+    session_id : :obj:`str`, :obj:`list`, None, or :obj:`bids.layout.Query`
+        The session identifier(s). By default, all sessions will be used.
+        If specified, BIDS filters may only select sessions among these.
     task : :obj:`str` or None
         The task identifier (for BOLD queries)
     echo : :obj:`int` or None
@@ -273,20 +274,16 @@ def collect_data(
     for acq, entities in bids_filters.items():
         if acq not in queries:  # filter with no matching query
             continue
-        # BIDS filters will not be able to override subject / session entities
+        # BIDS filters may narrow down, but not override, subject / session entities
         for entity, param in reserved_entities:
             if param == Query.OPTIONAL:
                 continue
-            if entity in entities and listify(param) != listify(entities[entity]):
+            if entity in entities and not set(listify(entities[entity])) <= set(listify(param)):
                 raise ValueError(
                     f'Conflicting entities for "{entity}" found: {entities[entity]} // {param}'
                 )
 
         queries[acq].update(entities)
-        for entity in list(layout_get_kwargs.keys()):
-            if entity in entities:
-                # avoid clobbering layout.get
-                del layout_get_kwargs[entity]
 
     if task:
         queries['bold']['task'] = queries['pet']['task'] = task
@@ -294,8 +291,10 @@ def collect_data(
     if echo:
         queries['bold']['echo'] = echo
 
+    # Query entities take precedence over the defaults, for that query only
     subj_data = {
-        dtype: sorted(layout.get(**layout_get_kwargs, **query)) for dtype, query in queries.items()
+        dtype: sorted(layout.get(**{**layout_get_kwargs, **query}))
+        for dtype, query in queries.items()
     }
 
     # Special case: multi-echo BOLD, grouping echos
