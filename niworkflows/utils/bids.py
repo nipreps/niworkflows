@@ -579,4 +579,4 @@ def _find_nearest_path(path_dict, input_path):
             relative_path = input_path.relative_to(path)
             matching_path.append((len(relative_path.parts), f'{key}{relative_path}'))
 
-    return str(input_path.absolute()) if not matching_path else sorted(matching_path)[0][1]
+    return str(input_path.absolute()) if not matching_path else min(matching_path)[1]

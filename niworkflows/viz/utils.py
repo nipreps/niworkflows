@@ -73,7 +73,7 @@ def svg_compress(image, compress='auto'):
             from errno import ENOENT
 
             if compress is True and e.errno == ENOENT:
-                raise e
+                raise
         else:
             image = pout.decode('utf-8')
 

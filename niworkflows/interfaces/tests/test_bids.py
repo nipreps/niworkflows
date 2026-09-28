@@ -200,16 +200,20 @@ def connect_and_run_save(prep_result, save):
             BOLD_PATH,
             ['lh.func.gii'],
             {'space': 'fsaverage', 'density': '10k', 'hemi': 'L'},
-            'sub-100185/func/sub-100185_task-machinegame_run-01_'
-            'hemi-L_space-fsaverage_den-10k_bold.func.gii',
+            (
+                'sub-100185/func/sub-100185_task-machinegame_run-01_'
+                'hemi-L_space-fsaverage_den-10k_bold.func.gii'
+            ),
             'da39a3ee5e6b4b0d3255bfef95601890afd80709',
         ),
         (
             BOLD_PATH,
             ['hcp.dtseries.nii'],
             {'space': 'fsLR', 'density': '91k'},
-            'sub-100185/func/sub-100185_task-machinegame_run-01_'
-            'space-fsLR_den-91k_bold.dtseries.nii',
+            (
+                'sub-100185/func/sub-100185_task-machinegame_run-01_'
+                'space-fsLR_den-91k_bold.dtseries.nii'
+            ),
             '335f1394ce90b58bbf27026b6eeec4d2124c11da',
         ),
         (

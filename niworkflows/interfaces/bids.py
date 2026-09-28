@@ -266,7 +266,7 @@ class BIDSDataGrabber(SimpleInterface):
 
         for imtype in self._image_types:
             kwarg = f'require_{imtype}'
-            val = kwargs.pop(kwarg, True if imtype in default_required else False)
+            val = kwargs.pop(kwarg, imtype in default_required)
             setattr(self, f'_{kwarg}', val)
 
         self._require_t1w = self._require_t1w and anat_derivatives is None
