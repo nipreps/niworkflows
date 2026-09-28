@@ -635,15 +635,14 @@
         <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">dst</span><span class="p">)</span>
 
     <span class="n">src_open</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span> <span class="k">if</span> <span class="n">src_isgz</span> <span class="k">else</span> <span class="nb">open</span>
-    <span class="k">with</span> <span class="n">src_open</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_in</span><span class="p">:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_out</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">dst_isgz</span><span class="p">:</span>
-                <span class="c1"># Remove FNAME header from gzip (nipreps/fmriprep#1480)</span>
-                <span class="n">gz_out</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">GzipFile</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="n">f_out</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-                <span class="n">copyfileobj</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">gz_out</span><span class="p">)</span>
-                <span class="n">gz_out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">copyfileobj</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">f_out</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">src_open</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_in</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_out</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dst_isgz</span><span class="p">:</span>
+            <span class="c1"># Remove FNAME header from gzip (nipreps/fmriprep#1480)</span>
+            <span class="n">gz_out</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">GzipFile</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="n">f_out</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">copyfileobj</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">gz_out</span><span class="p">)</span>
+            <span class="n">gz_out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">copyfileobj</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">f_out</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="kc">True</span>
 
