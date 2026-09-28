@@ -1,3 +1,14 @@
+1.15.2 (September 28, 2026)
+===========================
+Patch release in the 1.15.x series.
+
+NOTICE: The 1.15.x series has been determined to be compatible with the
+fMRIPrep 25.2.x LTS series, initially pinned to 1.14.x.
+
+* FIX: Collect data interactions with sessions and bids filters (#1063)
+* FIX: Write NIfTI data in the byte order the header declares (#1061)
+* ENH: Drop bids_filters entries with no matching query (#1058)
+
 1.15.1 (September 03, 2026)
 ===========================
 Patch release in the 1.15.x series.
