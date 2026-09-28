@@ -163,6 +163,7 @@ ignore = [
   "RUF005",
   "RUF012",
   "PLC0415",
+  "TRY004",  # We'll pick our own exception types
 ]
 
 [tool.ruff.lint.flake8-quotes]
@@ -170,7 +171,10 @@ inline-quotes = "single"
 
 [tool.ruff.lint.extend-per-file-ignores]
 "*/__init__.py" = ["F401"]
-"*/test_*.py" = ["S101"]
+"*/test_*.py" = [
+  "S101",
+  "SIM102",  # Tests need to be clear, nested if is fine
+]
 "docs/conf.py" = ["A001"]
 "niworkflows/engine/plugin.py" = [
   "BLE001",  # except Exception is intentional
