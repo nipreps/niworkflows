@@ -64,4 +64,10 @@ class LiterateWorkflow(pe.Workflow):
         if self.__postdesc__:
             desc += [self.__postdesc__]
 
-        return ' '.join(d.strip() for d in desc if d.strip())
+        # add a space only where neither side already has whitespace
+        text = ''
+        for d in desc:
+            if text and d and not text[-1].isspace() and not d[0].isspace():
+                text += ' '
+            text += d
+        return text

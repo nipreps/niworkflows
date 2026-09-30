@@ -82,3 +82,11 @@ def test_boilerplate_without_trailing_spaces():
     )
 
     assert workflow.visit_desc() == 'Outer workflow. Inner workflow. Outer workflow (postdesc).'
+
+
+def test_boilerplate_keeps_blank_line_separators():
+    """Separators a developer wrote into a description are kept as-is."""
+    workflow = Workflow(name='test')
+    workflow.__desc__ = 'Functional processing.\n\n'
+    workflow.__postdesc__ = 'Outer workflow (postdesc).'
+    assert workflow.visit_desc() == 'Functional processing.\n\nOuter workflow (postdesc).'
