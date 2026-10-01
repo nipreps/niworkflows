@@ -63,3 +63,30 @@ def test_boilerplate():
     # fmt: on
 
     assert workflow.visit_desc() == 'Outer workflow. Inner workflow. Outer workflow (postdesc).'
+
+
+def test_boilerplate_without_trailing_spaces():
+    """Descriptions need no trailing space to stay separated."""
+    workflow = Workflow(name='test')
+    workflow.__desc__ = 'Outer workflow.'
+    workflow.__postdesc__ = 'Outer workflow (postdesc).'
+
+    inputnode = Node(niu.IdentityInterface(fields=['in_file']), name='inputnode')
+    inner = _reorient_wf()
+    inner.__desc__ = 'Inner workflow.'
+
+    workflow.connect(
+        [
+            (inputnode, inner, [('in_file', 'inputnode.in_file')]),
+        ]
+    )
+
+    assert workflow.visit_desc() == 'Outer workflow. Inner workflow. Outer workflow (postdesc).'
+
+
+def test_boilerplate_keeps_blank_line_separators():
+    """Separators a developer wrote into a description are kept as-is."""
+    workflow = Workflow(name='test')
+    workflow.__desc__ = 'Functional processing.\n\n'
+    workflow.__postdesc__ = 'Outer workflow (postdesc).'
+    assert workflow.visit_desc() == 'Functional processing.\n\nOuter workflow (postdesc).'
