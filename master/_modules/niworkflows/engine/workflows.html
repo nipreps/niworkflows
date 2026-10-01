@@ -392,7 +392,13 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__postdesc__</span><span class="p">:</span>
             <span class="n">desc</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__postdesc__</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span></div>
+        <span class="c1"># add a space only where neither side already has whitespace</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">desc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">text</span> <span class="ow">and</span> <span class="n">d</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">text</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isspace</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+                <span class="n">text</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
+            <span class="n">text</span> <span class="o">+=</span> <span class="n">d</span>
+        <span class="k">return</span> <span class="n">text</span></div>
 </div>
 
 </pre></div>
