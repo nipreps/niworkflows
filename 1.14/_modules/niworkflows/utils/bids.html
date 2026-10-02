@@ -524,8 +524,9 @@
 <span class="sd">        The BIDS directory</span>
 <span class="sd">    participant_label : :obj:`str`</span>
 <span class="sd">        The participant identifier</span>
-<span class="sd">    session_id : :obj:`str`, None, or :obj:`bids.layout.Query`</span>
-<span class="sd">        The session identifier. By default, all sessions will be used.</span>
+<span class="sd">    session_id : :obj:`str`, :obj:`list`, None, or :obj:`bids.layout.Query`</span>
+<span class="sd">        The session identifier(s). By default, all sessions will be used.</span>
+<span class="sd">        If specified, BIDS filters may only select sessions among these.</span>
 <span class="sd">    task : :obj:`str` or None</span>
 <span class="sd">        The task identifier (for BOLD queries)</span>
 <span class="sd">    echo : :obj:`int` or None</span>
@@ -606,20 +607,18 @@
 
     <span class="n">bids_filters</span> <span class="o">=</span> <span class="n">bids_filters</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">acq</span><span class="p">,</span> <span class="n">entities</span> <span class="ow">in</span> <span class="n">bids_filters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="c1"># BIDS filters will not be able to override subject / session entities</span>
+        <span class="k">if</span> <span class="n">acq</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">queries</span><span class="p">:</span>  <span class="c1"># filter with no matching query</span>
+            <span class="k">continue</span>
+        <span class="c1"># BIDS filters may narrow down, but not override, subject / session entities</span>
         <span class="k">for</span> <span class="n">entity</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">reserved_entities</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">param</span> <span class="o">==</span> <span class="n">Query</span><span class="o">.</span><span class="n">OPTIONAL</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities</span> <span class="ow">and</span> <span class="n">listify</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">!=</span> <span class="n">listify</span><span class="p">(</span><span class="n">entities</span><span class="p">[</span><span class="n">entity</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">listify</span><span class="p">(</span><span class="n">entities</span><span class="p">[</span><span class="n">entity</span><span class="p">]))</span> <span class="o">&lt;=</span> <span class="nb">set</span><span class="p">(</span><span class="n">listify</span><span class="p">(</span><span class="n">param</span><span class="p">)):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Conflicting entities for &quot;</span><span class="si">{</span><span class="n">entity</span><span class="si">}</span><span class="s1">&quot; found: </span><span class="si">{</span><span class="n">entities</span><span class="p">[</span><span class="n">entity</span><span class="p">]</span><span class="si">}</span><span class="s1"> // </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">&#39;</span>
                 <span class="p">)</span>
 
         <span class="n">queries</span><span class="p">[</span><span class="n">acq</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">entities</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">layout_get_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-            <span class="k">if</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities</span><span class="p">:</span>
-                <span class="c1"># avoid clobbering layout.get</span>
-                <span class="k">del</span> <span class="n">layout_get_kwargs</span><span class="p">[</span><span class="n">entity</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">task</span><span class="p">:</span>
         <span class="n">queries</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">][</span><span class="s1">&#39;task&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">queries</span><span class="p">[</span><span class="s1">&#39;pet&#39;</span><span class="p">][</span><span class="s1">&#39;task&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task</span>
@@ -627,8 +626,10 @@
     <span class="k">if</span> <span class="n">echo</span><span class="p">:</span>
         <span class="n">queries</span><span class="p">[</span><span class="s1">&#39;bold&#39;</span><span class="p">][</span><span class="s1">&#39;echo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">echo</span>
 
+    <span class="c1"># Query entities take precedence over the defaults, for that query only</span>
     <span class="n">subj_data</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">dtype</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">layout_get_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">query</span><span class="p">))</span> <span class="k">for</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">queries</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">dtype</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="o">**</span><span class="n">layout_get_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">query</span><span class="p">}))</span>
+        <span class="k">for</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">queries</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">}</span>
 
     <span class="c1"># Special case: multi-echo BOLD, grouping echos</span>
