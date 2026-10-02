@@ -303,7 +303,7 @@ def init_bold_premask_wf(
     Parameters
     ----------
     name : str
-        Name of workflow (default: ``enhance_and_skullstrip_bold_wf``)
+        Name of workflow (default: ``bold_premask_wf``)
     omp_nthreads : int
         number of threads available to parallel nodes
 
