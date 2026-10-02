@@ -22,7 +22,6 @@
 #
 """Test images module."""
 
-import time
 from pathlib import Path
 
 import nibabel as nb
