@@ -1,3 +1,9 @@
+1.15.3 (October 02, 2026)
+=========================
+Patch release in the 1.15.x series.
+
+* FIX: Use rigid affine initialization for BOLD mask (#1064)
+
 1.15.2 (September 28, 2026)
 ===========================
 Patch release in the 1.15.x series.
