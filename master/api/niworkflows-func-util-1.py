@@ -1,2 +1,2 @@
-from niworkflows.func.util import init_bold_reference_wf
-wf = init_bold_reference_wf(omp_nthreads=1)
+from niworkflows.func.util import init_bold_premask_wf
+wf = init_bold_premask_wf(omp_nthreads=1)

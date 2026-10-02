@@ -606,6 +606,122 @@
 
 
 
+<div class="viewcode-block" id="init_bold_premask_wf">
+<a class="viewcode-back" href="../../../api/niworkflows.func.util.html#niworkflows.func.util.init_bold_premask_wf">[docs]</a>
+<span class="k">def</span> <span class="nf">init_bold_premask_wf</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;bold_premask_wf&#39;</span><span class="p">,</span>
+    <span class="n">omp_nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate a preliminary brain mask for BOLD images.</span>
+
+<span class="sd">    This workflow calculates a tentative mask by registering (9-parameters) to</span>
+<span class="sd">    *fMRIPrep*&#39;s :abbr:`EPI (echo-planar imaging)` -*boldref* template, which</span>
+<span class="sd">    is in MNI space.</span>
+<span class="sd">    The tentative mask is obtained by resampling the MNI template&#39;s brainmask</span>
+<span class="sd">    into *boldref*-space.</span>
+
+<span class="sd">    Workflow graph</span>
+<span class="sd">        .. workflow ::</span>
+<span class="sd">            :graph2use: orig</span>
+<span class="sd">            :simple_form: yes</span>
+
+<span class="sd">            from niworkflows.func.util import init_bold_premask_wf</span>
+<span class="sd">            wf = init_bold_premask_wf(omp_nthreads=1)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of workflow (default: ``bold_premask_wf``)</span>
+<span class="sd">    omp_nthreads : int</span>
+<span class="sd">        number of threads available to parallel nodes</span>
+
+<span class="sd">    Inputs</span>
+<span class="sd">    ------</span>
+<span class="sd">    in_file : str</span>
+<span class="sd">        BOLD image (single volume)</span>
+
+
+<span class="sd">    Outputs</span>
+<span class="sd">    -------</span>
+<span class="sd">    mask_file : str</span>
+<span class="sd">        mask of the skull-stripped input file</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">nipype.interfaces.ants.utils</span> <span class="kn">import</span> <span class="n">AI</span>
+
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">inputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;in_file&#39;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;inputnode&#39;</span><span class="p">)</span>
+    <span class="n">outputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mask_file&#39;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;outputnode&#39;</span><span class="p">)</span>
+
+    <span class="n">bold_template</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span>
+        <span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;fMRIPrep&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;boldref&#39;</span>
+    <span class="p">)</span>
+    <span class="n">brain_mask</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;brain&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;mask&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Initialize transforms with antsAI</span>
+    <span class="n">init_aff</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">AI</span><span class="p">(</span>
+            <span class="n">fixed_image</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">bold_template</span><span class="p">),</span>
+            <span class="n">fixed_image_mask</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">brain_mask</span><span class="p">),</span>
+            <span class="n">metric</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Mattes&#39;</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="s1">&#39;Regular&#39;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">),</span>
+            <span class="n">transform</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Rigid&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span>
+            <span class="n">search_factor</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">),</span>
+            <span class="n">principal_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">convergence</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;init_aff&#39;</span><span class="p">,</span>
+        <span class="n">n_procs</span><span class="o">=</span><span class="n">omp_nthreads</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Registration().version may be None</span>
+    <span class="k">if</span> <span class="n">parseversion</span><span class="p">(</span><span class="n">Registration</span><span class="p">()</span><span class="o">.</span><span class="n">version</span> <span class="ow">or</span> <span class="s1">&#39;0.0.0&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">Version</span><span class="p">(</span><span class="s1">&#39;2.2.0&#39;</span><span class="p">):</span>
+        <span class="n">init_aff</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">search_grid</span> <span class="o">=</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">40</span><span class="p">))</span>
+
+    <span class="c1"># Set up spatial normalization</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">Registration</span><span class="p">(</span><span class="n">from_file</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;epi_atlasbased_brainmask.json&#39;</span><span class="p">)),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;norm&#39;</span><span class="p">,</span>
+        <span class="n">n_procs</span><span class="o">=</span><span class="n">omp_nthreads</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">norm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fixed_image</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">bold_template</span><span class="p">)</span>
+    <span class="n">map_brainmask</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+        <span class="n">ApplyTransforms</span><span class="p">(</span>
+            <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;Linear&#39;</span><span class="p">,</span>
+            <span class="c1"># Use the higher resolution and probseg for numerical stability in rounding</span>
+            <span class="n">input_image</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span>
+                <span class="n">get_template</span><span class="p">(</span>
+                    <span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span>
+                    <span class="n">resolution</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="s1">&#39;brain&#39;</span><span class="p">,</span>
+                    <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;probseg&#39;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;map_brainmask&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># Ensure mask&#39;s header matches reference&#39;s</span>
+    <span class="n">fix_header</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">CopyHeader</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;fix_header&#39;</span><span class="p">,</span> <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">fix_header</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;hdr_file&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">init_aff</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;moving_image&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">map_brainmask</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;reference_image&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;moving_image&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">init_aff</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;output_transform&#39;</span><span class="p">,</span> <span class="s1">&#39;initial_moving_transform&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">map_brainmask</span><span class="p">,</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;reverse_invert_flags&#39;</span><span class="p">,</span> <span class="s1">&#39;invert_transform_flags&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;reverse_transforms&#39;</span><span class="p">,</span> <span class="s1">&#39;transforms&#39;</span><span class="p">),</span>
+        <span class="p">]),</span>
+        <span class="p">(</span><span class="n">map_brainmask</span><span class="p">,</span> <span class="n">fix_header</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;output_image&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
+        <span class="p">(</span><span class="n">fix_header</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;mask_file&#39;</span><span class="p">)]),</span>
+    <span class="p">])</span>  <span class="c1"># fmt: skip</span>
+
+    <span class="k">return</span> <span class="n">workflow</span></div>
+
+
+
 <div class="viewcode-block" id="init_enhance_and_skullstrip_bold_wf">
 <a class="viewcode-back" href="../../../api/niworkflows.func.util.html#niworkflows.func.util.init_enhance_and_skullstrip_bold_wf">[docs]</a>
 <span class="k">def</span> <span class="nf">init_enhance_and_skullstrip_bold_wf</span><span class="p">(</span>
@@ -626,17 +742,14 @@
 
 <span class="sd">    Steps of this workflow are:</span>
 
-<span class="sd">      1. Calculate a tentative mask by registering (9-parameters) to *fMRIPrep*&#39;s</span>
-<span class="sd">         :abbr:`EPI (echo-planar imaging)` -*boldref* template, which</span>
-<span class="sd">         is in MNI space.</span>
-<span class="sd">         The tentative mask is obtained by resampling the MNI template&#39;s</span>
-<span class="sd">         brainmask into *boldref*-space.</span>
-<span class="sd">      2. Binary dilation of the tentative mask with a sphere of 3mm diameter.</span>
-<span class="sd">      3. Run ANTs&#39; ``N4BiasFieldCorrection`` on the input</span>
+<span class="sd">      1. Calculate a tentative mask via</span>
+<span class="sd">         :func:`~niworkflows.func.util.init_bold_premask_wf`.</span>
+<span class="sd">      2. Run ANTs&#39; ``N4BiasFieldCorrection`` on the input</span>
 <span class="sd">         :abbr:`BOLD (blood-oxygen level-dependant)` average, using the</span>
 <span class="sd">         mask generated in 1) instead of the internal Otsu thresholding.</span>
-<span class="sd">      4. Calculate a loose mask using FSL&#39;s ``bet``, with one mathematical morphology</span>
+<span class="sd">      3. Calculate a loose mask using FSL&#39;s ``bet``, with one mathematical morphology</span>
 <span class="sd">         dilation of one iteration and a sphere of 6mm as structuring element.</span>
+<span class="sd">      4. Binary dilation of the loose mask with a sphere of 3mm diameter.</span>
 <span class="sd">      5. Mask the :abbr:`INU (intensity non-uniformity)`-corrected image</span>
 <span class="sd">         with the latest mask calculated in 3), then use AFNI&#39;s ``3dUnifize``</span>
 <span class="sd">         to *standardize* the T2* contrast distribution.</span>
@@ -648,7 +761,6 @@
 <span class="sd">    Step 1 can be skipped if the ``pre_mask`` argument is set to ``True`` and</span>
 <span class="sd">    a tentative mask is passed in to the workflow through the ``pre_mask``</span>
 <span class="sd">    Nipype input.</span>
-
 
 <span class="sd">    Workflow graph</span>
 <span class="sd">        .. workflow ::</span>
@@ -744,81 +856,17 @@
     <span class="n">apply_mask</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">ApplyMask</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;apply_mask&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">pre_mask</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">nipype.interfaces.ants.utils</span> <span class="kn">import</span> <span class="n">AI</span>
+        <span class="n">bold_premask_wf</span> <span class="o">=</span> <span class="n">init_bold_premask_wf</span><span class="p">(</span><span class="n">omp_nthreads</span><span class="o">=</span><span class="n">omp_nthreads</span><span class="p">)</span>
 
-        <span class="n">bold_template</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span>
-            <span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;fMRIPrep&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;boldref&#39;</span>
-        <span class="p">)</span>
-        <span class="n">brain_mask</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;brain&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;mask&#39;</span><span class="p">)</span>
-
-        <span class="c1"># Initialize transforms with antsAI</span>
-        <span class="n">init_aff</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
-            <span class="n">AI</span><span class="p">(</span>
-                <span class="n">fixed_image</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">bold_template</span><span class="p">),</span>
-                <span class="n">fixed_image_mask</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">brain_mask</span><span class="p">),</span>
-                <span class="n">metric</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Mattes&#39;</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="s1">&#39;Regular&#39;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">),</span>
-                <span class="n">transform</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Rigid&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span>
-                <span class="n">search_factor</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">),</span>
-                <span class="n">principal_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">convergence</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
-                <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="p">),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;init_aff&#39;</span><span class="p">,</span>
-            <span class="n">n_procs</span><span class="o">=</span><span class="n">omp_nthreads</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Registration().version may be None</span>
-        <span class="k">if</span> <span class="n">parseversion</span><span class="p">(</span><span class="n">Registration</span><span class="p">()</span><span class="o">.</span><span class="n">version</span> <span class="ow">or</span> <span class="s1">&#39;0.0.0&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">Version</span><span class="p">(</span><span class="s1">&#39;2.2.0&#39;</span><span class="p">):</span>
-            <span class="n">init_aff</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">search_grid</span> <span class="o">=</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">40</span><span class="p">))</span>
-
-        <span class="c1"># Set up spatial normalization</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
-            <span class="n">Registration</span><span class="p">(</span><span class="n">from_file</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;epi_atlasbased_brainmask.json&#39;</span><span class="p">)),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;norm&#39;</span><span class="p">,</span>
-            <span class="n">n_procs</span><span class="o">=</span><span class="n">omp_nthreads</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">norm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fixed_image</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">bold_template</span><span class="p">)</span>
-        <span class="n">map_brainmask</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
-            <span class="n">ApplyTransforms</span><span class="p">(</span>
-                <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;Linear&#39;</span><span class="p">,</span>
-                <span class="c1"># Use the higher resolution and probseg for numerical stability in rounding</span>
-                <span class="n">input_image</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span>
-                    <span class="n">get_template</span><span class="p">(</span>
-                        <span class="s1">&#39;MNI152NLin2009cAsym&#39;</span><span class="p">,</span>
-                        <span class="n">resolution</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                        <span class="n">label</span><span class="o">=</span><span class="s1">&#39;brain&#39;</span><span class="p">,</span>
-                        <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;probseg&#39;</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="p">),</span>
-            <span class="p">),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;map_brainmask&#39;</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="c1"># Ensure mask&#39;s header matches reference&#39;s</span>
-        <span class="n">fix_header</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">CopyHeader</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;fix_header&#39;</span><span class="p">,</span> <span class="n">run_without_submitting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="c1"># fmt: off</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
-            <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">fix_header</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;hdr_file&#39;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">init_aff</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;moving_image&#39;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">map_brainmask</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;reference_image&#39;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;moving_image&#39;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">init_aff</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;output_transform&#39;</span><span class="p">,</span> <span class="s1">&#39;initial_moving_transform&#39;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">map_brainmask</span><span class="p">,</span> <span class="p">[</span>
-                <span class="p">(</span><span class="s1">&#39;reverse_invert_flags&#39;</span><span class="p">,</span> <span class="s1">&#39;invert_transform_flags&#39;</span><span class="p">),</span>
-                <span class="p">(</span><span class="s1">&#39;reverse_transforms&#39;</span><span class="p">,</span> <span class="s1">&#39;transforms&#39;</span><span class="p">),</span>
-            <span class="p">]),</span>
-            <span class="p">(</span><span class="n">map_brainmask</span><span class="p">,</span> <span class="n">fix_header</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;output_image&#39;</span><span class="p">,</span> <span class="s1">&#39;in_file&#39;</span><span class="p">)]),</span>
-            <span class="p">(</span><span class="n">fix_header</span><span class="p">,</span> <span class="n">n4_correct</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;weight_image&#39;</span><span class="p">)]),</span>
-        <span class="p">])</span>
-        <span class="c1"># fmt: on</span>
+            <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">bold_premask_wf</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;inputnode.in_file&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">bold_premask_wf</span><span class="p">,</span> <span class="n">n4_correct</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;outputnode.mask_file&#39;</span><span class="p">,</span> <span class="s1">&#39;weight_image&#39;</span><span class="p">)]),</span>
+        <span class="p">])</span>  <span class="c1"># fmt: skip</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># fmt: off</span>
         <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
             <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">n4_correct</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;pre_mask&#39;</span><span class="p">,</span> <span class="s1">&#39;weight_image&#39;</span><span class="p">)]),</span>
-        <span class="p">])</span>
-        <span class="c1"># fmt: on</span>
+        <span class="p">])</span>  <span class="c1"># fmt: skip</span>
 
-    <span class="c1"># fmt: off</span>
     <span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
         <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">n4_correct</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;input_image&#39;</span><span class="p">)]),</span>
         <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">fixhdr_unifize</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;in_file&#39;</span><span class="p">,</span> <span class="s1">&#39;hdr_file&#39;</span><span class="p">)]),</span>
@@ -838,8 +886,7 @@
         <span class="p">(</span><span class="n">combine_masks</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;mask_file&#39;</span><span class="p">)]),</span>
         <span class="p">(</span><span class="n">apply_mask</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;out_file&#39;</span><span class="p">,</span> <span class="s1">&#39;skull_stripped_file&#39;</span><span class="p">)]),</span>
         <span class="p">(</span><span class="n">n4_correct</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;output_image&#39;</span><span class="p">,</span> <span class="s1">&#39;bias_corrected_file&#39;</span><span class="p">)]),</span>
-    <span class="p">])</span>
-    <span class="c1"># fmt: on</span>
+    <span class="p">])</span>  <span class="c1"># fmt: skip</span>
 
     <span class="k">return</span> <span class="n">workflow</span></div>
 
