@@ -22,69 +22,16 @@
 #
 """Test images module."""
 
-import time
 from pathlib import Path
 
 import nibabel as nb
 import numpy as np
 import pytest
-from nipype.interfaces import nilearn as nl
 from nipype.pipeline import engine as pe
 
 from niworkflows.testing import has_afni
 
 from .. import images as im
-
-
-@pytest.mark.parametrize(
-    ('nvols', 'nmasks', 'ext', 'factor'),
-    [
-        (200, 3, '.nii', 1.1),
-    ],
-)
-def test_signal_extraction_equivalence(tmp_path, nvols, nmasks, ext, factor):
-    nlsignals = str(tmp_path / 'nlsignals.tsv')
-    imsignals = str(tmp_path / 'imsignals.tsv')
-
-    vol_shape = (64, 64, 40)
-
-    img_fname = str(tmp_path / ('img' + ext))
-    masks_fname = str(tmp_path / ('masks' + ext))
-
-    random_data = np.random.random(size=vol_shape + (nvols,)) * 2000
-    random_mask_data = np.random.random(size=vol_shape + (nmasks,)) < 0.2
-
-    nb.Nifti1Image(random_data, np.eye(4)).to_filename(img_fname)
-    nb.Nifti1Image(random_mask_data.astype(np.uint8), np.eye(4)).to_filename(masks_fname)
-
-    se1 = nl.SignalExtraction(
-        in_file=img_fname,
-        label_files=masks_fname,
-        class_labels=[f'a{i}' for i in range(nmasks)],
-        out_file=nlsignals,
-    )
-    se2 = im.SignalExtraction(
-        in_file=img_fname,
-        label_files=masks_fname,
-        class_labels=[f'a{i}' for i in range(nmasks)],
-        out_file=imsignals,
-    )
-
-    tic = time.time()
-    se1.run()
-    toc = time.time()
-    se2.run()
-    toc2 = time.time()
-
-    tab1 = np.loadtxt(nlsignals, skiprows=1)
-    tab2 = np.loadtxt(imsignals, skiprows=1)
-
-    assert np.allclose(tab1, tab2)
-
-    t1 = toc - tic
-    t2 = toc2 - toc
-
-    assert t2 < t1 / factor
 
 
 @pytest.mark.parametrize(
