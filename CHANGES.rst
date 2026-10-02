@@ -28,6 +28,16 @@ This release adopts SPEC 0, subsequently dropping support for Python 3.11 and ea
 * ENH: Add target resolution to ``GenerateSamplingReference`` (#1003)
 * FIX: Require pybids 0.18.1+ for packaged configs (#1033)
 
+1.14.5 (October 02, 2026)
+=========================
+Patch release in the 1.14.x series.
+
+* FIX: Collect data interactions with sessions and bids filters (#1063)
+* FIX: Write NIfTI data in the byte order the header declares (#1061)
+* FIX: Drop bids_filters entries with no matching query (#1058)
+* FIX: Disable colorbar after default switch (#1057)
+* FIX: Use rigid affine initialization for BOLD mask (#1064)
+
 1.14.4 (January 13, 2026)
 =========================
 Patch release in the 1.14.x series.
