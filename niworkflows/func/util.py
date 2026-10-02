@@ -428,7 +428,7 @@ def init_enhance_and_skullstrip_bold_wf(
                 fixed_image=str(bold_template),
                 fixed_image_mask=str(brain_mask),
                 metric=('Mattes', 32, 'Regular', 0.2),
-                transform=('Affine', 0.1),
+                transform=('Rigid', 0.1),
                 search_factor=(20, 0.12),
                 principal_axes=False,
                 convergence=(10, 1e-6, 10),
