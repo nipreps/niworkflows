@@ -7,6 +7,7 @@ from niworkflows.anat.coregistration import compare_xforms
 
 test_data = pytest.importorskip('niworkflows.tests.data')
 
+
 def test_compare_xforms_returns_a_builtin_bool():
     bbr = str(test_data.load_test_data('testBBRegisterRPT-out_lta_file.lta'))
     mri = str(test_data.load_test_data('testMRICoregRPT-out_lta_file.lta'))
