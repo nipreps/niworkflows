@@ -662,7 +662,8 @@
 
     <span class="n">norm</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_calc_norm_affine</span><span class="p">([</span><span class="n">fallback_affine</span><span class="p">,</span> <span class="n">bbr_affine</span><span class="p">],</span> <span class="n">use_differences</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">norm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">norm_threshold</span></div>
+    <span class="c1"># numpy&#39;s bool is not accepted by nipype&#39;s Int traits, e.g. Select.index</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">norm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">norm_threshold</span><span class="p">)</span></div>
 
 </pre></div>
         </article>
