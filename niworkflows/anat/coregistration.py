@@ -333,4 +333,5 @@ def compare_xforms(lta_list, norm_threshold=15):
 
     norm, _ = _calc_norm_affine([fallback_affine, bbr_affine], use_differences=True)
 
-    return norm[1] > norm_threshold
+    # numpy's bool is not accepted by nipype's Int traits, e.g. Select.index
+    return bool(norm[1] > norm_threshold)
