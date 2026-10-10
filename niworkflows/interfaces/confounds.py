@@ -499,7 +499,7 @@ def temporal_derivatives(order, variables, data):
     if 0 in order:
         data_deriv[0] = data[variables]
         variables_deriv[0] = variables
-        order = set(order) - {0}
+        order = sorted(set(order) - {0})
     for o in order:
         variables_deriv[o] = [f'{v}_derivative{o}' for v in variables]
         data_deriv[o] = np.tile(np.nan, data[variables].shape)
@@ -542,7 +542,7 @@ def exponential_terms(order, variables, data):
     if 1 in order:
         data_exp[1] = data[variables]
         variables_exp[1] = variables
-        order = set(order) - {1}
+        order = sorted(set(order) - {1})
     for o in order:
         variables_exp[o] = [f'{v}_power{o}' for v in variables]
         data_exp[o] = data[variables] ** o
@@ -690,7 +690,8 @@ def _expand_shorthand(model_formula, variables):
     model_formula = model_formula.replace('spikes', spikes)
 
     formula_variables = _get_variables_from_formula(model_formula)
-    others = ' + '.join(set(variables) - set(formula_variables))
+    formula_set = set(formula_variables)
+    others = ' + '.join(v for v in variables if v not in formula_set)
     model_formula = model_formula.replace('others', others)
     return model_formula
 
@@ -787,7 +788,7 @@ def parse_formula(model_formula, parent_data, unscramble=False):
             )
         else:
             (variables[expression], data[expression]) = parse_expression(expression, parent_data)
-    variables = list(set(reduce(operator.add, variables.values())))
+    variables = list(dict.fromkeys(reduce(operator.add, variables.values())))
     data = pd.concat((data.values()), axis=1)
 
     if unscramble:
