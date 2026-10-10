@@ -947,10 +947,12 @@ def confounds_correlation_plot(
         data=gscorr,
         x='index',
         y=reference,
+        hue='index',
         ax=ax1,
         order=gs_descending,
         palette='Reds_d',
         saturation=0.5,
+        legend=False,
     )
 
     ax1.set_xlabel('Confound time series')
