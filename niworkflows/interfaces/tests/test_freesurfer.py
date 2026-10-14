@@ -25,7 +25,7 @@ from pathlib import Path
 import nibabel as nb
 import numpy as np
 
-from ..freesurfer import FSInjectBrainExtracted
+from ..freesurfer import FSInjectBrainExtracted, mri_info
 
 
 def test_inject_skullstrip(tmp_path):
@@ -50,3 +50,19 @@ def test_inject_skullstrip(tmp_path):
     FSInjectBrainExtracted(
         subjects_dir=str(tmp_path), subject_id='sub-01', in_brain=str(mask_nii)
     ).run()
+
+
+def test_mri_info_literal_filename():
+    """Pass a filename with spaces and shell syntax literally to FreeSurfer."""
+    from io import BytesIO
+    from unittest.mock import Mock, patch
+
+    filename = '/synthetic images/scan;literal.mgz'
+    output = b'1 0 0 0\n0 1 0 0\n0 0 1 0\n0 0 0 1\n'
+    with patch('subprocess.Popen', return_value=Mock(stdout=BytesIO(output))) as popen:
+        result = mri_info(filename, 'vox2ras')
+
+    args, kwargs = popen.call_args
+    assert args[0] == ['mri_info', '--vox2ras', filename]
+    assert not kwargs.get('shell', False)
+    np.testing.assert_array_equal(result, np.eye(4))
