@@ -396,11 +396,13 @@
         <span class="n">boldref</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">boldref_file</span><span class="p">)</span>
         <span class="n">hmc</span> <span class="o">=</span> <span class="n">nt</span><span class="o">.</span><span class="n">linear</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">xfm_file</span><span class="p">)</span>
 
-        <span class="c1"># FSL&#39;s &quot;center of gravity&quot; is the center of mass scaled by zooms</span>
-        <span class="c1"># No rotation is applied.</span>
-        <span class="n">center_of_gravity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">boldref</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">()),</span>
-            <span class="n">ndi</span><span class="o">.</span><span class="n">center_of_mass</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">boldref</span><span class="o">.</span><span class="n">dataobj</span><span class="p">)),</span>
+        <span class="c1"># FSL&#39;s cog(&quot;scaled_mm&quot;): on load, newimage reverses the first voxel axis of</span>
+        <span class="c1"># images with a positive determinant, and calc_cog weights voxels by value - min</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">boldref</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">boldref</span><span class="o">.</span><span class="n">affine</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">center_of_gravity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">boldref</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">()[:</span><span class="mi">3</span><span class="p">])</span> <span class="o">@</span> <span class="n">ndi</span><span class="o">.</span><span class="n">center_of_mass</span><span class="p">(</span>
+            <span class="n">data</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
         <span class="p">)</span>
 
         <span class="c1"># Revert to vox2vox transforms</span>
@@ -409,13 +411,14 @@
         <span class="p">)</span>
         <span class="n">fsl_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">xfm</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">xfm</span> <span class="ow">in</span> <span class="n">fsl_hmc</span><span class="o">.</span><span class="n">xforms</span><span class="p">])</span>
 
-        <span class="c1"># FSL uses left-handed rotation conventions, so transpose</span>
-        <span class="n">mats</span> <span class="o">=</span> <span class="n">fsl_matrix</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Ax = Mx + b</span>
+        <span class="n">M</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">fsl_matrix</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">fsl_matrix</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="c1"># Translation is the displacement of CoG: (Ac - c) = Mc + b - c</span>
+        <span class="n">trans_xyz</span> <span class="o">=</span> <span class="n">M</span> <span class="o">@</span> <span class="n">center_of_gravity</span> <span class="o">+</span> <span class="n">b</span> <span class="o">-</span> <span class="n">center_of_gravity</span>
 
-        <span class="c1"># Rotations are recovered directly</span>
-        <span class="n">rot_xyz</span> <span class="o">=</span> <span class="n">sst</span><span class="o">.</span><span class="n">Rotation</span><span class="o">.</span><span class="n">from_matrix</span><span class="p">(</span><span class="n">mats</span><span class="p">)</span><span class="o">.</span><span class="n">as_euler</span><span class="p">(</span><span class="s1">&#39;XYZ&#39;</span><span class="p">)</span>
-        <span class="c1"># Translations are recovered by applying the rotation to the center of gravity</span>
-        <span class="n">trans_xyz</span> <span class="o">=</span> <span class="n">fsl_matrix</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">mats</span> <span class="o">@</span> <span class="n">center_of_gravity</span> <span class="o">+</span> <span class="n">center_of_gravity</span>
+        <span class="c1"># FSL composes M = Rx(-rot_x) @ Ry(-rot_y) @ Rz(-rot_z)</span>
+        <span class="c1"># Extracting XYZ retrieves negative rotations, so negate</span>
+        <span class="n">rot_xyz</span> <span class="o">=</span> <span class="o">-</span><span class="n">sst</span><span class="o">.</span><span class="n">Rotation</span><span class="o">.</span><span class="n">from_matrix</span><span class="p">(</span><span class="n">M</span><span class="p">)</span><span class="o">.</span><span class="n">as_euler</span><span class="p">(</span><span class="s1">&#39;XYZ&#39;</span><span class="p">)</span>
 
         <span class="n">params</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">trans_xyz</span><span class="p">,</span> <span class="n">rot_xyz</span><span class="p">)),</span>
