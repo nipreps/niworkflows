@@ -1,3 +1,9 @@
+1.15.4 (October 26, 2026)
+=========================
+Patch release in the 1.15.x series.
+
+* FIX: Improve ``FSLMotionParams`` confound reconstruction for large motion (#1068)
+
 1.15.3 (October 02, 2026)
 =========================
 Patch release in the 1.15.x series.
