@@ -528,11 +528,17 @@ def init_enhance_and_skullstrip_bold_wf(
 
         workflow.connect([
             (inputnode, bold_premask_wf, [('in_file', 'inputnode.in_file')]),
-            (bold_premask_wf, n4_correct, [('outputnode.mask_file', 'weight_image')]),
+            (bold_premask_wf, n4_correct, [
+                ('outputnode.mask_file', 'weight_image'),
+                ('outputnode.mask_file', 'mask_image'),
+            ]),
         ])  # fmt: skip
     else:
         workflow.connect([
-            (inputnode, n4_correct, [('pre_mask', 'weight_image')]),
+            (inputnode, n4_correct, [
+                ('pre_mask', 'weight_image'),
+                ('pre_mask', 'mask_image'),
+            ]),
         ])  # fmt: skip
 
     workflow.connect([
