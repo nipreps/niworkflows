@@ -86,7 +86,6 @@ def afni_wf(name='AFNISkullStripWorkflow', unifize=False, n4_nthreads=1):
             dimension=3,
             save_bias=True,
             num_threads=n4_nthreads,
-            rescale_intensities=True,
             copy_header=True,
         ),
         n_procs=n4_nthreads,

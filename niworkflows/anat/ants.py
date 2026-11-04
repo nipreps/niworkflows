@@ -103,7 +103,8 @@ def init_brain_extraction_wf(
          prior from the template. Combine that posterior with the refined brain
          mask and pass it on to the next step.
       9. Apply a final N4 using the refined brain mask (or the map calculated in
-         step 8 if priors were found) as weights map for the algorithm.
+         step 8 if priors were found) as weights map for the algorithm, and the
+         refined brain mask as the mask image required for intensity rescaling.
 
     Workflow Graph
         .. workflow::
@@ -452,6 +453,7 @@ def init_brain_extraction_wf(
             (map_wmmask if wm_tpm else map_brainmask, inu_n4_final, [
                 ('output_image', 'weight_image'),
             ]),
+            (thr_brainmask, inu_n4_final, [('output_image', 'mask_image')]),
             (inu_n4_final, apply_mask, [('output_image', 'in_file')]),
             (thr_brainmask, apply_mask, [('output_image', 'in_mask')]),
             (thr_brainmask, outputnode, [('output_image', 'out_mask')]),
@@ -771,6 +773,7 @@ def init_atropos_wf(
         (depad_gm, merge_tpms, [('output_image', 'in2')]),
         (depad_wm, merge_tpms, [('output_image', 'in3')]),
         (depad_mask, msk_conform, [('output_image', 'in_mask')]),
+        (msk_conform, inu_n4_final, [('out', 'mask_image')]),
         (msk_conform, copy_xform, [('out', 'out_mask')]),
         (depad_segm, copy_xform, [('output_image', 'out_segm')]),
         (merge_tpms, copy_xform, [('out', 'out_tpms')]),
@@ -952,6 +955,7 @@ def init_n4_only_wf(
     wf.connect([
         (inputnode, inu_n4, [('in_files', 'input_image')]),
         (inputnode, thr_brainmask, [(('in_files', _pop), 'in_file')]),
+        (thr_brainmask, inu_n4, [('out_mask', 'mask_image')]),
         (thr_brainmask, outputnode, [('out_mask', 'out_mask')]),
     ])  # fmt:skip
 

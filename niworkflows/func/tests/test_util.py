@@ -168,3 +168,25 @@ def test_masking(input_fname, expected_fname):
     )
 
     assert overlap > 0.95, input_fname
+
+
+def _input_sources(wf, node_name, input_name):
+    """Return the names of nodes feeding ``input_name`` of ``node_name``."""
+    node = wf.get_node(node_name)
+    return {
+        src.name
+        for src, _, data in wf._graph.in_edges(node, data=True)
+        for _, target in data['connect']
+        if target == input_name
+    }
+
+
+@pytest.mark.parametrize('pre_mask', [True, False])
+def test_n4_correct_rescale_masked(pre_mask):
+    """N4 ignores ``--rescale-intensities`` unless a mask is passed."""
+    wf = init_enhance_and_skullstrip_bold_wf(pre_mask=pre_mask)
+    n4 = wf.get_node('n4_correct')
+    assert n4.inputs.rescale_intensities is True
+    assert _input_sources(wf, 'n4_correct', 'mask_image') == {
+        'inputnode' if pre_mask else 'bold_premask_wf'
+    }
