@@ -558,16 +558,3 @@ def medial_wall_to_nan(in_file, subjects_dir, den=None, newpath=None):
     out_file = os.path.join(newpath or os.getcwd(), fn)
     func.to_filename(out_file)
     return out_file
-
-
-def mri_info(fname, argument):
-    import subprocess as sp
-
-    import numpy as np
-
-    cmd_info = f'mri_info --{argument} {fname}'
-    proc = sp.Popen(cmd_info, stdout=sp.PIPE, shell=True)  # noqa: S602
-    data = bytearray(proc.stdout.read())
-    mstring = np.fromstring(data.decode('utf-8'), sep='\n')
-    result = np.reshape(mstring, (4, -1))
-    return result
