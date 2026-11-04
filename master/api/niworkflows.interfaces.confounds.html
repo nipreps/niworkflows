@@ -383,6 +383,11 @@ in the confounds file.</p></li>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">niworkflows.interfaces.confounds.</span></span><span class="sig-name descname"><span class="pre">FSLMotionParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_monitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/niworkflows/interfaces/confounds.html#FSLMotionParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#niworkflows.interfaces.confounds.FSLMotionParams" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://nipype.readthedocs.io/en/latest/api/generated/nipype.interfaces.base.core.html#nipype.interfaces.base.core.SimpleInterface" title="(in nipype v1.12.1.dev11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleInterface</span></code></a></p>
 <p>Reconstruct FSL motion parameters from affine transforms.</p>
+<p>The parameters are MCFLIRT’s, on the RAS+ axes closest to the boldref grid:
+<code class="docutils literal notranslate"><span class="pre">trans_*</span></code> (mm) and <code class="docutils literal notranslate"><span class="pre">rot_*</span></code> (rad, right-handed) describe the correction
+that maps each volume onto the reference.
+Rotations are composed in MCFLIRT’s order, and translations are relative to
+the reference’s center of gravity, as MCFLIRT computes it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Optional Inputs<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
