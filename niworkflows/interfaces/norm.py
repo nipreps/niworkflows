@@ -518,14 +518,16 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
 
     Notes
     -----
-    in_file and lesion_mask must be in the same
-    image space and have the same dimensions
+    The lesion mask is resampled into in_file's voxel grid before being
+    combined, so the two only need to overlap in world (scanner) space; they
+    do not need to share the same orientation or dimensions.
 
     """
     import os
 
     import nibabel as nb
     import numpy as np
+    from nibabel.processing import resample_from_to
     from nipype.utils.filemanip import fname_presuffix
 
     if out_path is None:
@@ -549,11 +551,13 @@ def create_cfm(in_file, lesion_mask=None, global_mask=True, out_path=None):
 
     # If a lesion mask was provided, combine it with the secondary mask.
     if lesion_mask is not None:
-        # Reorient the lesion mask and get the data.
-        lm_img = nb.as_closest_canonical(nb.load(lesion_mask))
+        # Resample the lesion into in_file's voxel grid so the subtraction is
+        # spatially correct regardless of the lesion's stored orientation or
+        # grid. Nearest-neighbor (order=0) keeps the mask binary.
+        lm_img = resample_from_to(nb.load(lesion_mask), (data.shape, in_img.affine), order=0)
 
         # Subtract lesion mask from secondary mask, set negatives to 0
-        data = np.fmax(data - lm_img.dataobj, 0)
+        data = np.fmax(data - np.asanyarray(lm_img.dataobj), 0)
         # Cost function mask will be created from subtraction
     # Otherwise, CFM will be created from global mask
 
