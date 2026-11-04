@@ -32,6 +32,7 @@ import nibabel as nb
 import nitransforms as nt
 import numpy as np
 import pandas as pd
+from nibabel.orientations import inv_ornt_aff, io_orientation
 from nipype.interfaces.base import (
     BaseInterfaceInputSpec,
     File,
@@ -54,7 +55,14 @@ class _FSLMotionParamsOutputSpec(TraitedSpec):
 
 
 class FSLMotionParams(SimpleInterface):
-    """Reconstruct FSL motion parameters from affine transforms."""
+    """Reconstruct FSL motion parameters from affine transforms.
+
+    The parameters are MCFLIRT's, on the RAS+ axes closest to the boldref grid:
+    ``trans_*`` (mm) and ``rot_*`` (rad, right-handed) describe the correction
+    that maps each volume onto the reference.
+    Rotations are composed in MCFLIRT's order, and translations are relative to
+    the reference's center of gravity, as MCFLIRT computes it.
+    """
 
     input_spec = _FSLMotionParamsInputSpec
     output_spec = _FSLMotionParamsOutputSpec
@@ -68,16 +76,20 @@ class FSLMotionParams(SimpleInterface):
         )
 
         boldref = nb.load(self.inputs.boldref_file)
-        hmc = nt.linear.load(self.inputs.xfm_file)
+        ornt = io_orientation(boldref.affine)
 
         # FSL's cog("scaled_mm"): on load, newimage reverses the first voxel axis of
         # images with a positive determinant, and calc_cog weights voxels by value - min
         data = boldref.get_fdata()
         if np.linalg.det(boldref.affine) > 0:
             data = data[::-1]
+            ornt[0, 1] *= -1
+
         center_of_gravity = np.diag(boldref.header.get_zooms()[:3]) @ ndi.center_of_mass(
             data - data.min()
         )
+
+        hmc = nt.linear.load(self.inputs.xfm_file)
 
         # Revert to vox2vox transforms
         fsl_hmc = nt.io.fsl.FSLLinearTransformArray.from_ras(
@@ -93,6 +105,13 @@ class FSLMotionParams(SimpleInterface):
         # FSL composes M = Rx(-rot_x) @ Ry(-rot_y) @ Rz(-rot_z)
         # Extracting XYZ retrieves negative rotations, so negate
         rot_xyz = -sst.Rotation.from_matrix(M).as_euler('XYZ')
+
+        # inv_ornt_aff provides an affine that permutes and flips from RAS+ to the image
+        # orientation. We updated ornt above to account for the left-handed constraint.
+        ras2fsl = inv_ornt_aff(ornt, boldref.shape[:3])[:3, :3]
+        # Here we convert translations and rotations to the RAS+ frame of the boldref
+        trans_xyz = trans_xyz @ ras2fsl
+        rot_xyz = rot_xyz @ ras2fsl
 
         params = pd.DataFrame(
             data=np.hstack((trans_xyz, rot_xyz)),
