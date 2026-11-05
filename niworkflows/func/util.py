@@ -422,14 +422,15 @@ def init_enhance_and_skullstrip_bold_wf(
         )
         brain_mask = get_template('MNI152NLin2009cAsym', resolution=2, desc='brain', suffix='mask')
 
-        # Initialize transforms with antsAI
+        # Initialize transforms with antsAI, refining from the center-of-mass alignment only.
+        # A rotation/translation search can select poses far outside the field of view (#1000).
         init_aff = pe.Node(
             AI(
                 fixed_image=str(bold_template),
                 fixed_image_mask=str(brain_mask),
                 metric=('Mattes', 32, 'Regular', 0.2),
                 transform=('Rigid', 0.1),
-                search_factor=(20, 0.12),
+                search_factor=(20, 0),
                 principal_axes=False,
                 convergence=(10, 1e-6, 10),
                 verbose=True,
@@ -440,7 +441,7 @@ def init_enhance_and_skullstrip_bold_wf(
 
         # Registration().version may be None
         if parseversion(Registration().version or '0.0.0') > Version('2.2.0'):
-            init_aff.inputs.search_grid = (40, (0, 40, 40))
+            init_aff.inputs.search_grid = (40, (0, 0, 0))
 
         # Set up spatial normalization
         norm = pe.Node(
