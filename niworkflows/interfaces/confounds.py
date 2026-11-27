@@ -461,12 +461,11 @@ def spike_regressors(
             mask[metric] = set(np.where(data[metric] > threshold)[0])
     mask = reduce(operator.or_, mask.values())
 
-    for lag in lags:
-        mask = {m + lag for m in mask} | mask
+    mask = {m + lag for m in mask for lag in lags}
 
     mask = mask.intersection(indices)
     if minimum_contiguous is not None:
-        post_final = data.shape[0] + 1
+        post_final = data.shape[0]
         epoch_length = np.diff(sorted(mask | {-1, post_final})) - 1
         epoch_end = sorted(mask | {post_final})
         for end, length in zip(epoch_end, epoch_length, strict=False):
