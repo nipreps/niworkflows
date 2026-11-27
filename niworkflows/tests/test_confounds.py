@@ -29,7 +29,7 @@ import numpy as np
 import pandas as pd
 from nipype.pipeline import engine as pe
 
-from ..interfaces.confounds import ExpandModel, SpikeRegressors
+from ..interfaces.confounds import ExpandModel, SpikeRegressors, spike_regressors
 from ..interfaces.plotting import CompCorVariancePlot, ConfoundsCorrelationPlot
 
 
@@ -161,6 +161,44 @@ def test_spikes(datadir):
     outliers_mc = [1, 1, 1, 1, 1]
     spk_data = _spikes_test(lags=lags, mincontig=mincontig, datadir=datadir)
     assert np.all(np.isclose(outliers_mc, spk_data['motion_outlier']))
+
+
+def test_spike_regressors_multi_lag():
+    """Lags are applied relative to the original flagged frames without compounding."""
+    data = pd.DataFrame({'framewise_displacement': np.zeros(10), 'std_dvars': np.zeros(10)})
+    data.loc[5, 'framewise_displacement'] = 1.0
+
+    out = spike_regressors(data, lags=[0, 1, 2], concatenate=False, output='mask')
+    assert out['motion_outlier'].tolist() == [0, 0, 0, 0, 0, 1, 1, 1, 0, 0]
+
+    out_power = spike_regressors(data, lags=[-1, 0, 1, 2], concatenate=False, output='mask')
+    assert out_power['motion_outlier'].tolist() == [0, 0, 0, 0, 1, 1, 1, 1, 0, 0]
+
+    out_shifted = spike_regressors(data, lags=[1], concatenate=False, output='mask')
+    assert out_shifted['motion_outlier'].tolist() == [0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+
+
+def test_spike_regressors_minimum_contiguous_trailing_epoch():
+    """Trailing unflagged segments shorter than minimum_contiguous are flagged."""
+    data = pd.DataFrame({'framewise_displacement': np.zeros(10), 'std_dvars': np.zeros(10)})
+    data.loc[6, 'framewise_displacement'] = 1.0
+
+    # Trailing unflagged frames are [7, 8, 9] (length 3 < 4)
+    out = spike_regressors(data, lags=[0], minimum_contiguous=4, concatenate=False, output='mask')
+    assert out['motion_outlier'].tolist() == [0, 0, 0, 0, 0, 0, 1, 1, 1, 1]
+
+    # Exact threshold (length 3 >= 3) keeps [7, 8, 9] unflagged
+    out_exact = spike_regressors(
+        data, lags=[0], minimum_contiguous=3, concatenate=False, output='mask'
+    )
+    assert out_exact['motion_outlier'].tolist() == [0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+
+    # Short time series with no initial flags still flags when total length < minimum_contiguous
+    short = pd.DataFrame({'framewise_displacement': np.zeros(3), 'std_dvars': np.zeros(3)})
+    out_short = spike_regressors(
+        short, lags=[0], minimum_contiguous=4, concatenate=False, output='mask'
+    )
+    assert out_short['motion_outlier'].tolist() == [1, 1, 1]
 
 
 def test_CompCorVariancePlot(datadir):
